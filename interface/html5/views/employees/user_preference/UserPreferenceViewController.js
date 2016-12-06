@@ -10,6 +10,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 	flex_time_format_array: null,
 	date_time_format_array: null,
 	time_unit_format_array: null,
+	distance_format_array: null,
 	time_zone_array: null,
 	location_timezone_array: null,
 	area_code_timezone_array: null,
@@ -28,9 +29,9 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 	api_date: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserPreferenceEditView.html';
 		this.permission_id = 'user_preference';
 		this.viewId = 'UserPreference';
@@ -73,6 +74,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'date_format' );
 		this.initDropDownOption( 'time_format' );
 		this.initDropDownOption( 'time_unit_format' );
+		this.initDropDownOption( 'distance_format' );
 		this.initDropDownOption( 'time_zone' );
 		this.initDropDownOption( 'start_week_day' );
 		this.initDropDownOption( 'schedule_icalendar_type' );
@@ -396,6 +398,13 @@ UserPreferenceViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( {field: 'time_unit_format', set_empty: true} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_unit_format_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Time Units' ), form_item_input, tab_preference_column1 );
+
+
+		// Distance Units
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'distance_format', set_empty: true} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.distance_format_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Distance Units' ), form_item_input, tab_preference_column1 );
 
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -775,7 +784,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 UserPreferenceViewController.loadView = function() {
 	Global.loadViewSource( 'UserPreference', 'UserPreferenceView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		//var template = _.template( result, args );
 
 		Global.contentContainer().html( result );
 	} );

@@ -297,10 +297,51 @@ class DemoData {
 								'Business Administration',
 							);
 
+	protected $coordinates = array(
+								array(40.7331043902,-74.01754796505), // new york
+								array(40.7314133588,-73.970341086388),
+								array(40.727014849905,-74.017800092697),
+								array(40.704895945126,-73.981407880783),
+								array(40.722071261881,-74.012993574142),
+								array(40.718688595346,-73.935745954514),
+								array(40.763478722865,-73.930070400238),
+								array(40.656778234208,-73.972642421722),
+								array(40.723112047769,-74.028443098068),
+								array(40.693963891348,-74.057968854904),
+
+								array(47.773829,-122.38306), // seattle
+								array(47.473010966814,-122.51257896423),
+								array(47.785653130062,-122.12741374969),
+								array(47.708086640739,-121.9173002243),
+								array(47.759983573294,-122.75153160095),
+								array(47.765522347356,-121.58972740173),
+								array(47.721397737032,-122.30561971664),
+								array(47.578552237571,-122.27298259735),
+								array(47.503460631986,-122.25512981415),
+								array(47.755367,-122.715569),
+								array(47.337310405077,-122.8613948822),
+								array(47.783635,-122.652912),
+
+								array(34.256081384717,-100.73295593262), // outside new york,seattle
+								array(34.037866684604,-90.603561401367),
+								array(31.825065081209,-92.471237182617),
+								array(30.679258712559,-95.679244995117),
+								array(29.634352258877,-101.50199890137),
+								array(30.186683090608,-104.55619812012),
+								array(30.754818309502,-107.96195983887),
+								array(32.938386363885,-108.75297546387),
+								array(34.019656697326,-107.30278015137),
+								array(34.509951580711,-105.25932312012),
+								array(33.141000944017,-104.00688171387),
+								array(31.338389926759,-104.09477233887),
+								array(31.30084828737,-99.436569213867),
+								array(33.067376841084,-100.22758483887),
+								array(33.910314751383,-103.76518249512)
+							);
+
 	function __construct() {
 		$this->Validator = new Validator();
 	}
-
 
 	function getEnableQuickPunch() {
 		if ( isset($this->enable_quick_punch) ) {
@@ -728,9 +769,10 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createBranch( $company_id, $type) {
+	function createBranch( $company_id, $type, $geo_fence_ids = NULL) {
 		$bf = TTnew( 'BranchFactory' );
 		$bf->setCompany( $company_id );
+		$bf->setGEOFenceIds( $geo_fence_ids );
 		$bf->setStatus( 10 );
 		switch ( $type ) {
 			case 10: //Branch 1
@@ -763,7 +805,10 @@ class DemoData {
 		}
 
 		if ( $bf->isValid() ) {
-			$insert_id = $bf->Save();
+			$insert_id = $bf->Save( FALSE );
+			if ( $geo_fence_ids != NULL ) {
+				$bf->setGEOFenceIDs( $geo_fence_ids );
+			}
 			Debug::Text('Branch ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
@@ -774,9 +819,10 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createDepartment( $company_id, $type, $branch_ids = NULL) {
+	function createDepartment( $company_id, $type, $branch_ids = NULL, $geo_fence_ids = NULL ) {
 		$df = TTnew( 'DepartmentFactory' );
 		$df->setCompany( $company_id );
+		$df->setGEOFenceIds( $geo_fence_ids );
 		$df->setStatus( 10 );
 
 		switch ( $type ) {
@@ -799,7 +845,10 @@ class DemoData {
 		}
 
 		if ( $df->isValid() ) {
-			$insert_id = $df->Save();
+			$insert_id = $df->Save( FALSE );
+			if ( $geo_fence_ids != NULL ) {
+				$df->setGEOFenceIDs( $geo_fence_ids );
+			}
 			Debug::Text('Department ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
@@ -1611,42 +1660,22 @@ class DemoData {
 
 				$cspf->setIncludeHolidayType(10); //Have no effect
 				break;
-			case 100:
-				$cspf->setName('Holiday (Midnight to Midnight)');
+
+			case 90:
+				$cspf->setName('Absences');
 				$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_id );
 
-				$cspf->setFilterStartTime( strtotime('12:00AM') );
-				$cspf->setFilterEndTime( strtotime('11:59:59PM') );
+				$cspf->setMon( TRUE );
+				$cspf->setTue( TRUE );
+				$cspf->setWed( TRUE );
+				$cspf->setThu( TRUE );
+				$cspf->setFri( TRUE );
+				$cspf->setSat( TRUE );
+				$cspf->setSun( TRUE );
 
-				$cspf->setMon( FALSE );
-				$cspf->setTue( FALSE );
-				$cspf->setWed( FALSE );
-				$cspf->setThu( FALSE );
-				$cspf->setFri( FALSE );
-				$cspf->setSat( FALSE );
-				$cspf->setSun( FALSE );
-
-				$cspf->setIncludeHolidayType(20); //Always on Holidays (eligible or not)
-				$cspf->setIncludePartialShift( TRUE );
+				$cspf->setIncludeHolidayType(10); //Have no effect
 				break;
-			case 110:
-				$cspf->setName('Holiday (1PM to 5PM)');
-				$cspf->setContributingPayCodePolicy( $contributing_pay_code_policy_id );
 
-				$cspf->setFilterStartTime( strtotime('1:00PM') );
-				$cspf->setFilterEndTime( strtotime('5:00PM') );
-
-				$cspf->setMon( FALSE );
-				$cspf->setTue( FALSE );
-				$cspf->setWed( FALSE );
-				$cspf->setThu( FALSE );
-				$cspf->setFri( FALSE );
-				$cspf->setSat( FALSE );
-				$cspf->setSun( FALSE );
-
-				$cspf->setIncludeHolidayType(20); //Always on Holidays (eligible or not)
-				$cspf->setIncludePartialShift( TRUE );
-				break;
 		}
 
 		if ( $cspf->isValid() ) {
@@ -4459,11 +4488,11 @@ class DemoData {
 		return TRUE;
 	}
 
-	function createRequest( $type, $user_id, $date_stamp ) {
-
+	function createRequest( $type, $user_id, $date_stamp, $absence_policy_id = 0 ) {
 		$date_stamp = TTDate::parseDateTime($date_stamp); //Make sure date_stamp is always an integer.
 
 		$rf = TTnew( 'RequestFactory' );
+		$rf->setId( $rf->getNextInsertId() );
 		$rf->setUser( $user_id );
 		$rf->setDateStamp( $date_stamp );
 
@@ -4481,6 +4510,32 @@ class DemoData {
 				$rf->setMessage( 'I would like to request 1 week vacation starting this friday.' );
 				$rf->setCreatedBy( $user_id );
 
+				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+					$rsf = TTnew( 'RequestScheduleFactory' );
+					$rsf->setRequest( $rf->getId() );
+					$rsf->setUser( $rf->getUser() );
+					$rsf->setStatus( 20 ); //Absent
+					$rsf->setStartDate( TTDate::getBeginWeekEpoch( $date_stamp ) );
+					$rsf->setEndDate( TTDate::getEndWeekEpoch( $date_stamp ) );
+					$rsf->setStartTime( strtotime( '8:00AM' ) );
+					$rsf->setEndTime( strtotime( '5:00PM' ) );
+					$rsf->setSun( FALSE );
+					$rsf->setMon( TRUE );
+					$rsf->setTue( TRUE );
+					$rsf->setWed( TRUE );
+					$rsf->setThu( TRUE );
+					$rsf->setFri( TRUE );
+					$rsf->setSat( FALSE );
+					$rsf->setAbsencePolicy( $absence_policy_id );
+					if ( $rsf->isValid() ) {
+						$rsf_insert_id = $rsf->Save();
+						Debug::Text( 'RequestSchedule ID: ' . $rsf_insert_id, __FILE__, __LINE__, __METHOD__, 10 );
+					} else {
+						Debug::Text( 'Failed Creating Request Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+					unset($rsf);
+				}
+
 				break;
 			case 40: //Try to match setType()
 				$rf->setType( 40 ); //Schedule Request
@@ -4488,11 +4543,37 @@ class DemoData {
 				$rf->setMessage( 'I would like to leave at 1pm this friday.' );
 				$rf->setCreatedBy( $user_id );
 
+				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+					$rsf = TTnew( 'RequestScheduleFactory' );
+					$rsf->setRequest( $rf->getId() );
+					$rsf->setUser( $rf->getUser() );
+					$rsf->setStatus( 10 ); //Working
+					$rsf->setStartDate( $date_stamp );
+					$rsf->setEndDate( $date_stamp );
+					$rsf->setStartTime( strtotime( '8:00AM' ) );
+					$rsf->setEndTime( strtotime( '1:00PM' ) );
+					$rsf->setSun( TRUE );
+					$rsf->setMon( TRUE );
+					$rsf->setTue( TRUE );
+					$rsf->setWed( TRUE );
+					$rsf->setThu( TRUE );
+					$rsf->setFri( TRUE );
+					$rsf->setSat( TRUE );
+					if ( $rsf->isValid() ) {
+						$rsf_insert_id = $rsf->Save();
+						Debug::Text( 'RequestSchedule ID: ' . $rsf_insert_id, __FILE__, __LINE__, __METHOD__, 10 );
+					} else {
+						Debug::Text( 'Failed Creating Request Schedule!', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+					unset($rsf);
+				}
+
 				break;
 		}
 
+
 		if ( $rf->isValid() ) {
-			$insert_id = $rf->Save();
+			$insert_id = $rf->Save( TRUE, TRUE );
 			Debug::Text('Request ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
@@ -5448,7 +5529,133 @@ class DemoData {
 	}
 
 
-	function createJob( $company_id, $type, $item_id, $job_group_id = 0, $branch_id = 0, $department_id = 0, $client_id = NULL ) {
+	public function createGEOFence( $company_id, $type ) {
+		$gf = TTnew( 'GEOFenceFactory' );
+		$gf->setCompany( $company_id );
+		switch( $type ) {
+			case 10:
+				$gf->setName('Yonkers');
+				$gf->setDescription('');
+				$gf->setGEOCircle( array(
+					'center' => array('40.939452352446', '-73.82194519043'),
+					'radius' => '6500'
+				) );
+				$gf->setGEOType( 20 );
+				$gf->setMapLevel( 12 );
+				$gf->setGEOColor('0902C8');
+				break;
+			case 20:
+				$gf->setName('New York (Polygon) Staten Island/Brooklyn');
+				$gf->setDescription('');
+				$gf->setGEOPolygon(
+					array(
+						array('40.953325951597','-73.887090682983'),
+						array('40.732884883744','-74.023776054382'),
+						array('40.649582816057','-74.077334403992'),
+						array('40.637078524605','-74.152865409851'),
+						array('40.642288930731','-74.195437431335'),
+						array('40.606850149638','-74.202303886414'),
+						array('40.552613294287','-74.214663505554'),
+						array('40.551569846909','-74.248995780945'),
+						array('40.49311084579','-74.247622489929'),
+						array('40.543221682538','-74.104800224304'),
+						array('40.598508880309','-74.053988456726'),
+						array('40.564090142273','-74.003176689148'),
+						array('40.574521933048','-73.882327079773'),
+						array('40.644372979307','-73.830142021179'),
+						array('40.641246882041','-73.743624687195'),
+						array('40.764096306846','-73.753237724304'),
+						array('40.80776768595','-73.819155693054'),
+						array('40.911631546484','-73.783450126648'),
+						array('40.953325951597','-73.887090682983')
+					)
+				);
+				$gf->setGEOType( 10 );
+				$gf->setMapLevel( 12 );
+				$gf->setGEOColor('FF7C04');
+				break;
+			case 30:
+				$gf->setName('Jersey City (Polygon)');
+				$gf->setDescription('');
+				$gf->setGEOPolygon(
+						array(
+								array('40.717078515798','-74.107933044434'),
+								array('40.792498966133','-74.050254821777'),
+								array('40.778461640904','-74.009056091309'),
+								array('40.70484714530','-74.031372070313'),
+								array('40.64886648762','-74.07154083252'),
+								array('40.644698606019','-74.155654907227'),
+								array('40.717078515798','-74.107933044434'),
+						)
+				);
+				$gf->setGEOType( 10 );
+				$gf->setMapLevel( 12 );
+				$gf->setGEOColor('C61B11');
+				break;
+
+			case 40:
+				$gf->setName('West Seattle (Circle)');
+				$gf->setDescription('');
+				$gf->setGEOCircle( array(
+					'center' => array('47.631156', '-122.883453'),
+					'radius' => '50000'
+				) );
+				$gf->setGEOType( 20 );
+				$gf->setMapLevel( 10 );
+				$gf->setGEOColor('316400');
+				break;
+			case 50:
+				$gf->setName('Greater Seattle (Polygon)');
+				$gf->setDescription('');
+				$gf->setGEOPolygon(
+					array(
+						array('47.941187', '-122.111664'),
+						array('47.931066', '-121.740875'),
+						array('47.102849', '-121.831512'),
+						array('47.096305', '-122.512665'),
+						array('47.294134','-122.530518'),
+						array('47.282024','-122.100677'),
+						array('47.941187','-122.111664'),
+					)
+				);
+				$gf->setGEOType( 10 );
+				$gf->setMapLevel( 9 );
+				$gf->setGEOColor('FF0CF9');
+				break;
+			case 60:
+				$gf->setName('Seattle Proper (Polygon)');
+				$gf->setDescription('');
+				$gf->setGEOPolygon(
+					array(
+						array('47.734792','-122.374971'),
+						array('47.733868','-122.278154'),
+						array('47.689515','-122.261674'),
+						array('47.48876','-122.220476'),
+						array('47.485338','-122.393253'),
+						array('47.556111','-122.414968'),
+						array('47.654837','-122.436426'),
+						array('47.734792','-122.374971'),
+					)
+				);
+				$gf->setGEOType( 10 );
+				$gf->setMapLevel( 12 );
+				$gf->setGEOColor('BE0000');
+				break;
+		}
+
+		if ( $gf->isValid() ) {
+			$insert_id = $gf->Save();
+			Debug::Text('GEO Fence ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+			return $insert_id;
+		}
+
+		Debug::Text('Failed Creating GEO Fence!', __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function createJob( $company_id, $type, $item_id, $job_group_id = 0, $branch_id = 0, $department_id = 0, $client_id = NULL, $geo_fence_ids = NULL ) {
 		$jf = TTnew( 'JobFactory' );
 
 		$jf->setCompany( $company_id );
@@ -5480,6 +5687,12 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( '123 Main St' );
+				$jf->setAddress2( 'Unit #123' );
+				$jf->setCity( 'New York' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'NY' );
+				$jf->setPostalCode( '12345' );
 
 				//$jf->setNote( $data['note'] );
 
@@ -5503,6 +5716,12 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( '789 Main St' );
+				$jf->setAddress2( 'Unit #789' );
+				$jf->setCity( 'Seattle' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'WA' );
+				$jf->setPostalCode( '98105' );
 				break;
 			case 12:
 				$jf->setManualID( 12 );
@@ -5523,6 +5742,12 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( rand(100, 9999). ' Springfield St' );
+				$jf->setAddress2( 'Unit #'. rand(10, 999) );
+				$jf->setCity( 'New York' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'NY' );
+				$jf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
 				break;
 			case 13:
 				$jf->setManualID( 13 );
@@ -5543,6 +5768,13 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+
+				$jf->setAddress1( rand(100, 9999). ' Ethel St' );
+				$jf->setAddress2( 'Unit #'. rand(10, 999) );
+				$jf->setCity( 'New York' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'NY' );
+				$jf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
 				break;
 			case 14:
 				$jf->setManualID( 14 );
@@ -5563,6 +5795,14 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( rand(100, 9999). ' Spall St' );
+				$jf->setAddress2( 'Unit #123' );
+				$jf->setCity( 'Seattle' );
+
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'WA' );
+
+				$jf->setPostalCode( rand(98000, 99499) );
 				break;
 			case 15:
 				$jf->setManualID( 15 );
@@ -5582,6 +5822,12 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( rand(100, 9999). ' Dobbin St' );
+				$jf->setAddress2( 'Unit #'. rand(10, 999) );
+				$jf->setCity( 'Seattle' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'WA' );
+				$jf->setPostalCode( rand(98000, 99499) );
 				break;
 			case 16:
 				$jf->setManualID( 16 );
@@ -5602,6 +5848,12 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( rand(100, 9999). ' Lakeshore St' );
+				$jf->setAddress2( 'Unit #'. rand(10, 999) );
+				$jf->setCity( 'Seattle' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'WA' );
+				$jf->setPostalCode( rand(98000, 99499) );
 				break;
 			case 17:
 				$jf->setManualID( 17 );
@@ -5622,6 +5874,12 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( rand(100, 9999). ' Pandosy St' );
+				$jf->setAddress2( 'Unit #'. rand(10, 999) );
+				$jf->setCity( 'Seattle' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'WA' );
+				$jf->setPostalCode( rand(98000, 99499) );
 				break;
 			case 18:
 				$jf->setManualID( 18 );
@@ -5642,6 +5900,12 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( rand(100, 9999). ' Ontario St' );
+				$jf->setAddress2( 'Unit #'. rand(10, 999) );
+				$jf->setCity( 'Seattle' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'WA' );
+				$jf->setPostalCode( rand(98000, 99499) );
 				break;
 			case 19:
 				$jf->setManualID( 19 );
@@ -5662,6 +5926,12 @@ class DemoData {
 				$jf->setDepartment( $department_id );
 
 				$jf->setClient( $client_id );
+				$jf->setAddress1( rand(100, 9999). ' Georgia St' );
+				$jf->setAddress2( 'Unit #'. rand(10, 999) );
+				$jf->setCity( 'New York' );
+				$jf->setCountry( 'US' );
+				$jf->setProvince( 'NY' );
+				$jf->setPostalCode( str_pad( rand(400, 599), 5, 0, STR_PAD_LEFT) );
 				break;
 			case 20:
 				$jf->setManualID( 20 );
@@ -5792,10 +6062,22 @@ class DemoData {
 		}
 
 		if ( $jf->isValid() ) {
-			$insert_id = $jf->Save();
+			$insert_id = $jf->Save( FALSE );
 			Debug::Text('Job ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
-			return $insert_id;
+			if ( is_array($geo_fence_ids) ) {
+				$jf->setGEOFenceIds( $geo_fence_ids );
+			} else {
+				$jf->setGEOFenceIds( array() );
+			}
+
+			if ( $jf->isValid() ) {
+				$jf->Save();
+
+				Debug::Text('Job ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+
+				return $insert_id;
+			}
 		}
 
 		Debug::Text('Failed Creating Job!', __FILE__, __LINE__, __METHOD__, 10);
@@ -6233,6 +6515,7 @@ class DemoData {
 
 		//Edit out punch so its on the next day.
 		$plf = TTnew( 'PunchListFactory' );
+		$plf->StartTransaction();
 		$plf->getById( $id );
 		if ( $plf->getRecordCount() == 1 ) {
 			//var_dump($data);
@@ -6267,15 +6550,18 @@ class DemoData {
 				if ( $p_obj->getPunchControlObject()->isValid() == TRUE ) {
 					$p_obj->getPunchControlObject()->Save();
 
+					$plf->CommitTransaction();
 					return TRUE;
 				}
 			}
 		}
 
+		$plf->FailTransaction();
+		$plf->CommitTransaction();
 		return FALSE;
 	}
 
-	function createPunch( $user_id, $type_id, $status_id, $time_stamp, $data, $calc_total_time = TRUE ) {
+	function createPunch( $user_id, $type_id, $status_id, $time_stamp, $data, $coordinate = NULL, $calc_total_time = TRUE ) {
 		$fail_transaction = FALSE;
 
 		Debug::Text('User ID: '. $user_id .' Time Stamp: '. TTDate::getDate('DATE+TIME', $time_stamp), __FILE__, __LINE__, __METHOD__, 10);
@@ -6286,6 +6572,9 @@ class DemoData {
 		$pf->setType( $type_id );
 		$pf->setStatus( $status_id );
 		$pf->setTimeStamp( $time_stamp );
+
+		$pf->setLatitude( $coordinate[0] );
+		$pf->setLongitude( $coordinate[1] );
 
 		if ( $pf->isNew() ) {
 			$pf->setActualTimeStamp( $time_stamp );
@@ -6355,6 +6644,53 @@ class DemoData {
 		}
 
 		return $retval;
+	}
+
+	function createUserDateTotal( $user_id, $date_stamp, $total_time, $branch_id = 0, $department_id = 0 ) {
+		$udtf = TTnew( 'UserDateTotalFactory' );
+
+		$udtf->StartTransaction();
+
+		$udtf->setUser( $user_id );
+		$udtf->setDateStamp( $date_stamp );
+		$udtf->setObjectType( 10 ); //Regular time
+		//$udtf->setSourceObject( (int)$policy_id );
+		//$udtf->setPayCode( $pay_code_id );
+
+		$udtf->setBranch( (int)$branch_id );
+		$udtf->setDepartment( (int)$department_id );
+		$udtf->setJob( (int)0 );
+		$udtf->setJobItem( (int)0 );
+
+		$udtf->setQuantity( 0 );
+		$udtf->setBadQuantity( 0 );
+		$udtf->setTotalTime( $total_time );
+
+		$udtf->setOverride( TRUE );
+
+		$udtf->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
+		$udtf->setEnableCalcSystemTotalTime( TRUE );
+		$udtf->setEnableCalcWeeklySystemTotalTime( TRUE );
+		$udtf->setEnableCalcException( TRUE );
+
+		if ( $udtf->isValid() ) {
+			if ( $udtf->isNew() ) {
+				$retval = $udtf->Save();
+			} else {
+				$retval = $udtf->getID();
+				$udtf->Save();
+			}
+
+			$udtf->CommitTransaction();
+
+			return $retval;
+		}
+
+		Debug::Text(' Failed creating Absence...', __FILE__, __LINE__, __METHOD__, 10);
+		$udtf->FailTransaction();
+		$udtf->CommitTransaction();
+
+		return FALSE;
 	}
 
 	function createAbsence( $user_id, $date_stamp, $total_time, $absence_policy_id, $override = FALSE ) {
@@ -6462,7 +6798,7 @@ class DemoData {
 		return FALSE;
 	}
 
-	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE ) {
+	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE, $coordinate = NULL ) {
 		$fail_transaction = FALSE;
 
 		Debug::Text('Punch Full In Time Stamp: ('.$in_time_stamp.') '. TTDate::getDate('DATE+TIME', $in_time_stamp) .' Out: ('.$out_time_stamp.') '. TTDate::getDate('DATE+TIME', $out_time_stamp), __FILE__, __LINE__, __METHOD__, 10);
@@ -6478,10 +6814,14 @@ class DemoData {
 			$pf_in->setType( $data['out_type_id'] );
 			$pf_in->setStatus( 20 );
 			$pf_in->setTimeStamp( $out_time_stamp );
-
-			$pf_in->setLongitude( $this->getRandomCoordinates('longitude' ) );
-			$pf_in->setLatitude( $this->getRandomCoordinates('latitude' ) );
-
+			$pf_in->setPositionAccuracy( mt_rand(10, 100) );
+			if ( isset( $coordinate ) AND is_array($coordinate) ) {
+				$pf_in->setLatitude( $coordinate[0] );
+				$pf_in->setLongitude( $coordinate[1] );
+			} else {
+				$pf_in->setLongitude( $this->getRandomCoordinates('longitude' ) );
+				$pf_in->setLatitude( $this->getRandomCoordinates('latitude' ) );
+			}
 			if ( $pf_in->isNew() ) {
 				$pf_in->setActualTimeStamp( $out_time_stamp );
 				$pf_in->setOriginalTimeStamp( $pf_in->getTimeStamp() );
@@ -6506,10 +6846,14 @@ class DemoData {
 			$pf_out->setType( $data['in_type_id'] );
 			$pf_out->setStatus( 10 );
 			$pf_out->setTimeStamp( $in_time_stamp );
-
-			$pf_out->setLongitude( $this->getRandomCoordinates('longitude' ) );
-			$pf_out->setLatitude( $this->getRandomCoordinates('latitude' ) );
-
+			$pf_out->setPositionAccuracy( mt_rand(10, 100) );
+			if ( isset( $coordinate ) AND is_array($coordinate) ) {
+				$pf_out->setLatitude( $coordinate[0] );
+				$pf_out->setLongitude( $coordinate[1] );
+			} else {
+				$pf_out->setLongitude( $this->getRandomCoordinates('longitude' ) );
+				$pf_out->setLatitude( $this->getRandomCoordinates('latitude' ) );
+			}
 			if ( $pf_out->isNew() ) {
 				$pf_out->setActualTimeStamp( $in_time_stamp );
 				$pf_out->setOriginalTimeStamp( $pf_out->getTimeStamp() );
@@ -6718,6 +7062,7 @@ class DemoData {
 		global $current_company, $current_user;
 
 		TTDate::setTimeZone('PST8PDT');
+		TTi18n::setLocale('en_US');
 
 		$current_epoch = time();
 
@@ -6794,28 +7139,28 @@ class DemoData {
 			$this->createUserDefaults( $company_id );
 
 			//Users
-			$user_ids[] = $this->createUser( $company_id, 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 11, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 12, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 13, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 14, 0, $branch_ids[0], $department_ids[1], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 15, 0, $branch_ids[0], $department_ids[0], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 16, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 17, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 18, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 19, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 20, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 21, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 22, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 23, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 24, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 25, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 26, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 27, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 28, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 29, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 30, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
-			$user_ids[] = $this->createUser( $company_id, 40, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids );
+			$user_ids[] = $this->createUser( $company_id, 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 11, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 12, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 13, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 14, 0, $branch_ids[0], $department_ids[1], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 15, 0, $branch_ids[0], $department_ids[0], $currency_ids[1], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 16, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 17, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 18, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 19, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 20, 0, $branch_ids[0], $department_ids[1], $currency_ids[2], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 21, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 22, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 23, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 24, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 25, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 26, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 27, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 28, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 29, 0, $branch_ids[1], $department_ids[3], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 30, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
+			$user_ids[] = $this->createUser( $company_id, 40, 0, $branch_ids[1], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids  );
 
 			//Create random users.
 			Debug::Text('Creating random users: '. $this->getMaxRandomUsers(), __FILE__, __LINE__, __METHOD__, 10);
@@ -6953,6 +7298,7 @@ class DemoData {
 										$policy_ids['absence'],
 										$policy_ids['regular']
 										);
+			Debug::Text(' a.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 				//Client Groups
@@ -7072,24 +7418,33 @@ class DemoData {
 				$job_group_ids[] = $this->createJobGroup( $company_id, 50, $job_group_ids[3] );
 				$job_group_ids[] = $this->createJobGroup( $company_id, 60, $job_group_ids[3] );
 
-				//Jobs
-				$job_ids[] = $this->createJob( $company_id, 10, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 11, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[1] );
-				$job_ids[] = $this->createJob( $company_id, 12, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[2] );
-				$job_ids[] = $this->createJob( $company_id, 13, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[3] );
-				$job_ids[] = $this->createJob( $company_id, 14, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[4] );
-				$job_ids[] = $this->createJob( $company_id, 15, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[5] );
-				$job_ids[] = $this->createJob( $company_id, 16, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[6] );
-				$job_ids[] = $this->createJob( $company_id, 17, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[7] );
-				$job_ids[] = $this->createJob( $company_id, 18, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[0] );
-				$job_ids[] = $this->createJob( $company_id, 19, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[1] );
+				// GEO FENCE
+				$geo_fence_ids[] = $this->createGEOFence( $company_id, 10 ); // New York
+				$geo_fence_ids[] = $this->createGEOFence( $company_id, 20 );
+				$geo_fence_ids[] = $this->createGEOFence( $company_id, 30 );
 
-				$job_ids[] = $this->createJob( $company_id, 20, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[2] );
-				$job_ids[] = $this->createJob( $company_id, 21, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[3] );
-				$job_ids[] = $this->createJob( $company_id, 22, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[4] );
-				$job_ids[] = $this->createJob( $company_id, 23, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[5] );
-				$job_ids[] = $this->createJob( $company_id, 24, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[6] );
-				$job_ids[] = $this->createJob( $company_id, 25, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[7] );
+				$geo_fence_ids[] = $this->createGEOFence( $company_id, 40 ); // Seattle
+				$geo_fence_ids[] = $this->createGEOFence( $company_id, 50 );
+				$geo_fence_ids[] = $this->createGEOFence( $company_id, 60 );
+
+				//Jobs
+				$job_ids[] = $this->createJob( $company_id, 10, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[0], array( $geo_fence_ids[0], $geo_fence_ids[1], $geo_fence_ids[2] ) ); // new york
+				$job_ids[] = $this->createJob( $company_id, 11, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[1], array( $geo_fence_ids[0], $geo_fence_ids[1], $geo_fence_ids[2] ) );
+				$job_ids[] = $this->createJob( $company_id, 12, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[2], array( $geo_fence_ids[0], $geo_fence_ids[1], $geo_fence_ids[2] ) );
+				$job_ids[] = $this->createJob( $company_id, 13, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[3], array( $geo_fence_ids[0], $geo_fence_ids[1], $geo_fence_ids[2] ) );
+				$job_ids[] = $this->createJob( $company_id, 14, $default_task_id, $job_group_ids[1], $branch_ids[0], $department_ids[0], $client_ids[4], array( $geo_fence_ids[0], $geo_fence_ids[1], $geo_fence_ids[2] ) );
+				$job_ids[] = $this->createJob( $company_id, 20, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[2], array( $geo_fence_ids[0], $geo_fence_ids[1], $geo_fence_ids[2] ) );
+				$job_ids[] = $this->createJob( $company_id, 21, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[3], array( $geo_fence_ids[0], $geo_fence_ids[1], $geo_fence_ids[2] ) );
+				$job_ids[] = $this->createJob( $company_id, 22, $default_task_id, $job_group_ids[4], $branch_ids[0], $department_ids[0], $client_ids[4], array( $geo_fence_ids[0], $geo_fence_ids[1], $geo_fence_ids[2] ) );
+
+				$job_ids[] = $this->createJob( $company_id, 15, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[5], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) ); // seattle
+				$job_ids[] = $this->createJob( $company_id, 16, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[6], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) );
+				$job_ids[] = $this->createJob( $company_id, 17, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[7], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) );
+				$job_ids[] = $this->createJob( $company_id, 18, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[0], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) );
+				$job_ids[] = $this->createJob( $company_id, 19, $default_task_id, $job_group_ids[2], $branch_ids[1], $department_ids[1], $client_ids[1], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) );
+				$job_ids[] = $this->createJob( $company_id, 23, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[5], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) );
+				$job_ids[] = $this->createJob( $company_id, 24, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[6], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) );
+				$job_ids[] = $this->createJob( $company_id, 25, $default_task_id, $job_group_ids[5], $branch_ids[1], $department_ids[1], $client_ids[7], array( $geo_fence_ids[3], $geo_fence_ids[4], $geo_fence_ids[5] ) );
 
 			} else {
 				$task_ids[] = 0;
@@ -7393,6 +7748,7 @@ class DemoData {
 					}
 				}
 			}
+			Debug::Text(' b.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
 
 			//Create recurring schedule templates
@@ -7477,9 +7833,8 @@ class DemoData {
 				//Pick random jobs/tasks that are used for the entire date range.
 				//So one employee isn't punching into 15 jobs.
 				srand( ( (float)microtime() * 10000000 ) );
-				$user_random_job_ids = (array)array_flip( (array)array_rand($job_ids, 2 ) );
 				$user_random_task_ids = (array)array_flip( (array)array_rand($task_ids, 3 ) );
-
+				$user_random_job_ids = (array)array_flip( (array)array_rand($job_ids, 2 ) );
 				//Create punches starting 6 weeks ago, up to the end of the week.
 				$start_date = $punch_date = ($current_epoch - (86400 * 14));
 				$end_date = TTDate::getEndWeekEpoch( $current_epoch );
@@ -7488,7 +7843,18 @@ class DemoData {
 					$date_stamp = TTDate::getDate('DATE', $punch_date );
 					//$punch_full_time_stamp = strtotime($pc_data['date_stamp'].' '.$pc_data['time_stamp']);
 					$exception_cutoff_date = ( $current_epoch - (86400 * 14) );
-
+					if ( ($i % 25) == 0 ) {
+						$user_random_coordinates = (array)array_slice( $this->coordinates, 22 );// outside new york, seattle
+						$user_random_job_ids = $job_ids;
+					} else {
+						if ( ($i % 2) == 0 ) {
+							$user_random_job_ids = (array)array_slice($job_ids, 0, 7); // new york
+							$user_random_coordinates = (array)array_slice( $this->coordinates, 0, 10 ); // inside new york
+						} else {
+							$user_random_job_ids = (array)array_slice($job_ids, 8); // seattle
+							$user_random_coordinates = (array)array_slice( $this->coordinates, 10, 12 ); // inside seattle
+						}
+					}
 					if ( date('w', $punch_date) != 0 AND date('w', $punch_date) != 6 ) {
 						if ( $punch_date >= $exception_cutoff_date
 								AND ($i % 4) == 0 ) {
@@ -7510,7 +7876,7 @@ class DemoData {
 									AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
 									AND ( $i % 16 ) == 0 ) {
 								//Create request
-								$request_id = $this->createRequest( 30, $user_id, $date_stamp );
+								$request_id = $this->createRequest( 30, $user_id, $date_stamp, $policy_ids['absence'][0]  );
 								if ( rand( 0, 99 ) < 50 ) { //50% chance
 									$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
 									$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
@@ -7543,11 +7909,12 @@ class DemoData {
 															'out_type_id' => 10,
 															'branch_id' => $branch_ids[array_rand($branch_ids)],
 															'department_id' => $department_ids[array_rand($department_ids)],
-															'job_id' => $job_ids[array_rand($user_random_job_ids)],
+															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
 															//'job_item_id' => $task_ids[array_rand($task_ids)],
 														),
-													TRUE
+													TRUE,
+													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
 												);
 						$this->createPunchPair(		$user_id,
 													strtotime($date_stamp.' 11:00AM'),
@@ -7557,10 +7924,11 @@ class DemoData {
 															'out_type_id' => 20,
 															'branch_id' => $branch_ids[array_rand($branch_ids)],
 															'department_id' => $department_ids[array_rand($department_ids)],
-															'job_id' => $job_ids[array_rand($user_random_job_ids)],
+															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
 														),
-													TRUE
+													TRUE,
+													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
 												);
 						//Calc total time on last punch pair only.
 						$this->createPunchPair(		$user_id,
@@ -7571,10 +7939,11 @@ class DemoData {
 															'out_type_id' => 10,
 															'branch_id' => $branch_ids[array_rand($branch_ids)],
 															'department_id' => $department_ids[array_rand($department_ids)],
-															'job_id' => $job_ids[array_rand($user_random_job_ids)],
+															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
 														),
-													TRUE
+													TRUE,
+													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
 												);
 					} elseif ( $punch_date > $exception_cutoff_date
 								AND date('w', $punch_date) == 6 AND ($i % 10) == 0) {
@@ -7587,10 +7956,11 @@ class DemoData {
 															'out_type_id' => 10,
 															'branch_id' => $branch_ids[array_rand($branch_ids)],
 															'department_id' => $department_ids[array_rand($department_ids)],
-															'job_id' => $job_ids[array_rand($user_random_job_ids)],
+															'job_id' => $user_random_job_ids[mt_rand(0, (count($user_random_job_ids) - 1))],
 															'job_item_id' => $task_ids[array_rand($user_random_task_ids)],
 														),
-													TRUE
+													TRUE,
+													$user_random_coordinates[mt_rand(0, (count($user_random_coordinates) - 1))]
 												);
 					}
 
@@ -7602,7 +7972,7 @@ class DemoData {
 				}
 				unset($punch_options_arr, $punch_date, $user_id);
 			}
-
+			Debug::Text(' c.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
 			//Generate pay stubs for each pay period
 			$pplf = TTnew( 'PayPeriodListFactory' );
@@ -7636,9 +8006,31 @@ class DemoData {
 			unset($pplf, $pp_obj, $user_id);
 		}
 
+		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+			//
+			//Government Documents for W2s.
+			//
+			$report_obj = TTnew( 'FormW2Report' );
+			$report_obj->setUserObject( $current_user );
+			$report_obj->setPermissionObject( new Permission() );
+
+			$report_data['config'] = $report_obj->getTemplate( 'by_employee' );
+			$report_data['config']['filter']['time_period']['time_period'] = 'this_year'; //Change time period to this year.
+			$report_data['config']['form'] = Misc::convertObjectToArray( $report_obj->getCompanyFormConfig() ); //This is included in the rest of the config set below.
+			$report_obj->setConfig( (array)$report_data['config'] );
+
+			$output_format = 'pdf_form_publish_employee';
+			$validation_obj = $report_obj->validateConfig( $output_format );
+			if ( $validation_obj->isValid() == TRUE ) {
+				$report_obj->getOutput( $output_format );
+			}
+		}
+
 		////$cf->FailTransaction();
 		$cf->CommitTransaction();
 		$cf->CommitTransaction(); //FIXME: Transaction are mismatched, just not sure where yet.
+
+		Debug::Text(' z.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
 	}

@@ -41,6 +41,10 @@ var APIRegularTimePolicy = ServiceCaller.extend( {
 
 	copyRegularTimePolicy: function() {
 		return this.argumentsHandler( this.className, 'copyRegularTimePolicy', arguments );
+	},
+
+	exportRegularTimePolicy: function() {
+		return this.argumentsHandler( this.className, 'exportRegularTimePolicy', arguments );
 	}
 
 

@@ -102,6 +102,7 @@ class APIPayCode extends APIFactory {
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -110,6 +111,17 @@ class APIPayCode extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportPayCode( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getPayCode( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_pay_code', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

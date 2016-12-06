@@ -232,38 +232,6 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getByIdAndCompanyIdAndDayTotalTime($id, $company_id, $day_total_time, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		$ph = array(
-					'id' => (int)$id,
-					'company_id' => (int)$company_id,
-					'day_total_time' => $day_total_time,
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	id = ?
-						AND company_id = ?
-						AND trigger_time <= ?
-						AND deleted = 0
-						ORDER BY trigger_time DESC
-						LIMIT 1';
-		//$query .= $this->getWhereSQL( $where );
-		//$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -304,50 +272,6 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 		return $this;
 	}
 
-	function getByPolicyGroupUserIdAndDayTotalTime($user_id, $day_total_time, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
-		}
-
-		if ( $order == NULL ) {
-			$order = array( 'd.trigger_time' => 'desc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
-		}
-
-		$pgf = new PolicyGroupFactory();
-		$pguf = new PolicyGroupUserFactory();
-		$cgmf = new CompanyGenericMapFactory();
-
-		$ph = array(
-					'user_id' => (int)$user_id,
-					'day_total_time' => $day_total_time,
-					);
-
-		$query = '
-					select	d.*
-					from	'. $pguf->getTable() .' as a,
-							'. $pgf->getTable() .' as b,
-							'. $cgmf->getTable() .' as c,
-							'. $this->getTable() .' as d
-					where	a.policy_group_id = b.id
-						AND ( b.id = c.object_id AND c.company_id = b.company_id AND c.object_type_id = 150)
-						AND c.map_id = d.id
-						AND a.user_id = ?
-						AND d.trigger_time <= ?
-						AND ( b.deleted = 0 AND d.deleted = 0 )
-					ORDER BY d.trigger_time DESC
-					LIMIT 1
-						';
-		//$query .= $this->getWhereSQL( $where );
-		//$query .= $this->getSortSQL( $order, $strict );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
 	function getByCompanyId($id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -360,7 +284,6 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 			$strict = TRUE;
 		}
 
-		$pgf = new PolicyGroupFactory();
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
@@ -481,6 +404,7 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 		$mplf = new MealPolicyListFactory();
 		$mplf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -489,7 +413,7 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 			$list[$mp_obj->getID()] = $mp_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

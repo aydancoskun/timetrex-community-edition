@@ -3,8 +3,8 @@ PayCodeViewController = BaseViewController.extend( {
 	type_array: null,
 	//pay_type_array: null,
 	//wage_source_type_array: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PayCodeEditView.html';
 		this.permission_id = 'pay_code';
 		this.viewId = 'PayCode';
@@ -187,6 +187,16 @@ PayCodeViewController = BaseViewController.extend( {
 			icon: Icons.wizard,
 			permission_result: true,
 			permission: null
+		} );
+
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
 		} );
 
 		return [menu];
@@ -427,15 +437,3 @@ PayCodeViewController = BaseViewController.extend( {
 
 
 } );
-
-PayCodeViewController.loadView = function() {
-
-	Global.loadViewSource( 'PayCode', 'PayCodeView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

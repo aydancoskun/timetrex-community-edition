@@ -47,18 +47,21 @@ class APIAuthentication extends APIFactory {
 		return TRUE;
 	}
 
-	function Login($user_name = NULL, $password = NULL, $type = 'USER_NAME') { //Default username=NULL to prevent argument warnings messages if its not passed from the API.
+	//Default username=NULL to prevent argument warnings messages if its not passed from the API.
+	function Login($user_name = NULL, $password = NULL, $type = 'USER_NAME') {
 		global $config_vars;
 		$authentication = new Authentication();
 
 		Debug::text('User Name: '. $user_name .' Password Length: '. strlen($password) .' Type: '. $type, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == 1 ) ) {
+			Debug::text('WARNING: Installer is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
 			//When installer is enabled, just display down for maintenance message to user if they try to login.
 			$error_message = TTi18n::gettext('%1 is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later.', array(APPLICATION_NAME) );
 			$validator_obj = new Validator();
 			$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
 			$validator_obj->isTrue( 'user_name', FALSE, $error_message );
+			$validator = array();
 			$validator[0] = $validator_obj->getErrorsArray();
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
 		}
@@ -118,7 +121,7 @@ class APIAuthentication extends APIFactory {
 							}
 						}
 					}
-					unset($ulf, $u_obj);					
+					unset($ulf, $u_obj);
 				}
 			}
 
@@ -163,10 +166,10 @@ class APIAuthentication extends APIFactory {
 
 					//Add entry in source *AND* destination user log describing who logged in.
 					//Source user log, showing that the source user logged in as someone else.
-					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 'Login', TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('To Employee').': '. $new_session_user_obj->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
+					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('To Employee').': '. $new_session_user_obj->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
 
 					//Destination user log, showing the destination user was logged in *by* someone else.
-					TTLog::addEntry( $user_id, 'Login', TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
+					TTLog::addEntry( $user_id, 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
 
 					return $this->returnHandler( $retarr );
 				}
@@ -201,10 +204,10 @@ class APIAuthentication extends APIFactory {
 
 					//Add entry in source *AND* destination user log describing who logged in.
 					//Source user log, showing that the source user logged in as someone else.
-					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 'Login', TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('To Employee').': '. $authentication->getObject()->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
+					TTLog::addEntry( $this->getCurrentUserObject()->getId(), 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.	TTi18n::getText('To Employee').': '. $authentication->getObject()->getFullName() .'('.$user_id.')', $this->getCurrentUserObject()->getId(), 'authentication');
 
 					//Destination user log, showing the destination user was logged in *by* someone else.
-					TTLog::addEntry( $user_id, 'Login', TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
+					TTLog::addEntry( $user_id, 100, TTi18n::getText('Override Login').': '. TTi18n::getText('SourceIP').': '. $authentication->getIPAddress() .' '. TTi18n::getText('SessionID') .': '.$authentication->getSessionID() .' '.  TTi18n::getText('By Employee').': '. $this->getCurrentUserObject()->getFullName() .'('.$user_id.')', $user_id, 'authentication');
 
 					return TRUE;
 				} else {
@@ -407,9 +410,10 @@ class APIAuthentication extends APIFactory {
 
 	//Returns all login data required in a single call for optimization purposes.
 	function getPreLoginData( $api = NULL ) {
-		global $config_vars, $authentication;
+		global $config_vars;
 
 		if ( isset($_GET['disable_db']) OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) ) {
+			Debug::text('WARNING: Installer is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
 			return array(
 				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
 				'primary_company_name' => 'N/A',
@@ -420,12 +424,13 @@ class APIAuthentication extends APIFactory {
 				'product_edition' => $this->getTTProductEdition( FALSE ),
 				'production' => $this->getProduction(),
 				'demo_mode' => DEMO_MODE,
-				'locale' => TTi18n::getNormalizedLocale(),
 				'base_url' => Environment::getBaseURL(),
+				'cookie_base_url' => Environment::getCookieBaseURL(),
 				'api_base_url' => Environment::getAPIBaseURL(),
 				'language_options' => Misc::addSortPrefix( TTi18n::getLanguageArray() ),
 				//Make sure locale is set properly before this function is called, either in api.php or APIGlobal.js.php for example.
 				'enable_default_language_translation' => ( isset($config_vars['other']['enable_default_language_translation']) ) ? $config_vars['other']['enable_default_language_translation'] : FALSE,
+
 				'language' => TTi18n::getLanguage(),
 				'locale' => TTi18n::getNormalizedLocale(), //Needed for HTML5 interface to load proper translation file.
 			);
@@ -440,6 +445,7 @@ class APIAuthentication extends APIFactory {
 				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
 				'primary_company_name' => $company_name,
 				'base_url' => Environment::getBaseURL(),
+				'cookie_base_url' => Environment::getCookieBaseURL(),
 				'api_url' => Environment::getAPIURL( $api ),
 				'api_base_url' => Environment::getAPIBaseURL( $api ),
 				'api_json_url' => Environment::getAPIURL( 'json' ),
@@ -472,8 +478,15 @@ class APIAuthentication extends APIFactory {
 				'enable_default_language_translation' => ( isset($config_vars['other']['enable_default_language_translation']) ) ? $config_vars['other']['enable_default_language_translation'] : FALSE,
 				'language' => TTi18n::getLanguage(),
 				'locale' => TTi18n::getNormalizedLocale(), //Needed for HTML5 interface to load proper translation file.
-			);
+
+				'map_api_key' => ( isset($config_vars['map']['api_key']) AND $config_vars['map']['api_key'] != '' ) ? $config_vars['other']['map_api_key'] : '',
+				'map_provider' => isset($config_vars['map']['provider'] ) ? $config_vars['map']['provider'] : 'timetrex',
+				'map_tile_url' => isset( $config_vars['map']['tile_url'] ) ? rtrim($config_vars['map']['tile_url'], '/') : '//map-tiles.timetrex.com',
+				'map_routing_url' => isset( $config_vars['map']['routing_url'] ) ? rtrim($config_vars['map']['routing_url'], '/') : '//map-routing.timetrex.com',
+				'map_geocode_url' => isset( $config_vars['map']['geocode_url'] ) ? rtrim($config_vars['map']['geocode_url'], '/') : '//map-geocode.timetrex.com',
+		);
 	}
+
 
 	//Function that HTML5 interface can call when an irrecoverable error or uncaught exception is triggered.
 	function sendErrorReport( $data = NULL, $screenshot = NULL ) {
@@ -565,12 +578,12 @@ class APIAuthentication extends APIFactory {
 							//  so we know now to ask the user to change their password again, since they were the last ones to do so.
 							global $current_user;
 							$current_user = $u_obj;
-							
+
 							TTLog::addEntry( $u_obj->getID(), 20, TTi18n::getText('Password - Web (Password Policy)'), NULL, $u_obj->getTable() );
 							$retval = $u_obj->Save();
 
 							unset($current_user);
-							
+
 							return $this->returnHandler( $retval ); //Single valid record
 						}
 					} else {

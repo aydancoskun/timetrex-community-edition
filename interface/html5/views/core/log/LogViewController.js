@@ -102,19 +102,15 @@ LogViewController = BaseViewController.extend( {
 		'accrual_policy_user_modifier': ['accrual_policy_user_modifier'],
 		'job_item_amendment': ['job_item_amendment'],
 		'user_date_total': ['user_date_total'],
-		'pay_stub': ['pay_stub', 'pay_stub_entry']
+		'pay_stub': ['pay_stub', 'pay_stub_entry'],
+		'geo_fence': ['geo_fence']
 	},
 	log_detail_grid: null,
 	log_detail_script_name: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'LogEditView.html';
 		this.context_menu_name = $.i18n._( 'Audit' );
 		this.navigation_label = $.i18n._( 'Audit' ) + ':';
@@ -398,8 +394,8 @@ LogViewController = BaseViewController.extend( {
 	},
 
 	setAuditInfo: function() {
-		var updated_info = (this.parent_edit_record['updated_date'] || $.i18n._('N/A')) + ' ' + $.i18n._( 'by' ) + ' ' + (this.parent_edit_record['updated_by'] || $.i18n._('N/A')) + ' ';
-		var created_info = (this.parent_edit_record['created_date'] || $.i18n._('N/A')) + ' ' + $.i18n._( 'by' ) + ' ' + (this.parent_edit_record['created_by'] || $.i18n._('N/A')) + ' ';
+		var updated_info = (this.parent_edit_record['updated_date'] || $.i18n._( 'N/A' )) + ' ' + $.i18n._( 'by' ) + ' ' + (this.parent_edit_record['updated_by'] || $.i18n._( 'N/A' )) + ' ';
+		var created_info = (this.parent_edit_record['created_date'] || $.i18n._( 'N/A' )) + ' ' + $.i18n._( 'by' ) + ' ' + (this.parent_edit_record['created_by'] || $.i18n._( 'N/A' )) + ' ';
 		this.noticeDiv.find( '.left > .info' ).text( updated_info );
 		this.noticeDiv.find( '.right > .info' ).text( created_info );
 	},
@@ -806,13 +802,13 @@ LogViewController.loadSubView = function( container, beforeViewLoadedFun, afterV
 			created: $.i18n._( 'Created' )
 		};
 
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_log_view_controller );
 			}

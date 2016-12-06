@@ -11,8 +11,8 @@ RecurringHolidayViewController = BaseViewController.extend( {
 	week_interval_array: null,
 	pivot_day_direction_array: null,
 	date_api: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'RecurringHolidayEditView.html';
 		this.permission_id = 'holiday_policy';
 		this.viewId = 'RecurringHoliday';
@@ -274,15 +274,3 @@ RecurringHolidayViewController = BaseViewController.extend( {
 
 
 } );
-
-RecurringHolidayViewController.loadView = function() {
-
-	Global.loadViewSource( 'RecurringHoliday', 'RecurringHolidayView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

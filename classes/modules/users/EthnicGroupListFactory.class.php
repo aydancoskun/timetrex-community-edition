@@ -99,7 +99,7 @@ class EthnicGroupListFactory extends EthnicGroupFactory implements IteratorAggre
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -138,6 +138,7 @@ class EthnicGroupListFactory extends EthnicGroupFactory implements IteratorAggre
 		$eglf = new EthnicGroupListFactory();
 		$eglf->getByCompanyId($company_id);
 
+		$ethnic_group_list = array();
 		$ethnic_group_list[0] = '--';
 
 		foreach ($eglf as $ethnic_group_obj) {
@@ -152,6 +153,7 @@ class EthnicGroupListFactory extends EthnicGroupFactory implements IteratorAggre
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -160,7 +162,7 @@ class EthnicGroupListFactory extends EthnicGroupFactory implements IteratorAggre
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

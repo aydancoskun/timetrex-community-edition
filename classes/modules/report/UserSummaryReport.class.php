@@ -1051,7 +1051,7 @@ class UserSummaryReport extends Report {
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 				$key++;
 			}
-			unset($this->tmp_data, $row, $date_columns, $user_id, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );
+			unset($this->tmp_data, $row, $user_id, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

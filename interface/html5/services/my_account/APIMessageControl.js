@@ -51,6 +51,10 @@ var APIMessageControl = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'copyMessageControl', arguments );
 	},
 
+	exportMessageControl: function() {
+		return this.argumentsHandler( this.className, 'exportMessageControl', arguments );
+	},
+
 	getUser: function() {
 		return this.argumentsHandler( this.className, 'getUser', arguments );
 	},

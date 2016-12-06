@@ -245,10 +245,18 @@ class APIAuthorization extends APIFactory {
 							Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
 							if ( $validate_only == TRUE ) {
 								$save_result[$key] = TRUE;
+								$validator_stats['valid_records']++;
 							} else {
-								$save_result[$key] = $lf->Save();
+								$save_result[$key] = $lf->Save( FALSE );
+
+								//Make sure we test for validation failures after Save() is called, especially in cases of advanced requests, as the addRelatedSchedules() could fail.
+								if ( $lf->isValid( $ignore_warning ) == FALSE ) {
+									Debug::Arr($lf->Validator->getErrors(), 'PostSave() returned a validation error!', __FILE__, __LINE__, __METHOD__, 10);
+									$is_valid = FALSE;
+								} else {
+									$validator_stats['valid_records']++;
+								}
 							}
-							$validator_stats['valid_records']++;
 						}
 					}
 				}

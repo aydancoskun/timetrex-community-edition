@@ -156,7 +156,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 						AND script = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -195,7 +195,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 						AND is_default = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -207,6 +207,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		$ugdlf = new UserGenericDataListFactory();
 		$ugdlf->getByUserIdAndScript($user_id, $script);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -220,7 +221,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 			$list[$ugd_obj->getID()] = $ugd_obj->getName().$default;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -316,7 +317,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 						AND script = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -356,7 +357,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 						AND is_default = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -448,6 +449,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 			return FALSE;
 		}
 
+		$list = array(); 
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -456,7 +458,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -468,6 +470,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		$ugdlf = new UserGenericDataListFactory();
 		$ugdlf->getByUserIdAndScript($company_id, $script);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -481,7 +484,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 			$list[$ugd_obj->getID()] = $ugd_obj->getName().$default;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

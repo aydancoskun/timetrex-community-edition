@@ -1,7 +1,7 @@
 UserSummaryReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'UserSummaryReport';
 		this.viewId = 'UserSummaryReport';
 		this.context_menu_name = $.i18n._( 'Employee Information' );

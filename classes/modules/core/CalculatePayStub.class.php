@@ -287,6 +287,7 @@ class CalculatePayStub extends PayStubFactory {
 			return FALSE;
 		}
 
+		$arr = array();
 		if ( get_class($obj) == 'UserDeductionListFactory' ) {
 			if ( !is_object( $obj->getCompanyDeductionObject() ) ) {
 				return FALSE;
@@ -384,7 +385,6 @@ class CalculatePayStub extends PayStubFactory {
 		$dependency_tree = new DependencyTree();
 
 		$deduction_order_arr = array();
-		$look_back_deduction_ids = array();
 		if ( is_object($udlf) ) {
 			//Loop over all User Deductions getting Include/Exclude and PS accounts.
 			if ( $udlf->getRecordCount() > 0 ) {
@@ -435,22 +435,23 @@ class CalculatePayStub extends PayStubFactory {
 				}
 			}
 		}
-		unset($uef, $ue_obj);
+		unset($ue_obj);
 
 		$profiler->startTimer( 'Calculate Dependency Tree');
 		$sorted_deduction_ids = $dependency_tree->getAllNodesInOrder();
 		$profiler->stopTimer( 'Calculate Dependency Tree');
 		
+		$retarr = array();
 		//Debug::Arr($sorted_deduction_ids , 'Sorted Deduction IDs Array: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($sorted_deduction_ids) ) {
-			foreach( $sorted_deduction_ids as $tmp => $deduction_id ) {
+			foreach( $sorted_deduction_ids as $deduction_id ) {
 				$retarr[$deduction_id] = $deduction_order_arr[$deduction_id];
 			}
 		}
 
 		//Debug::Arr($retarr, 'AFTER - Deduction Order Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 
@@ -582,6 +583,13 @@ class CalculatePayStub extends PayStubFactory {
 
 		if ( $this->getTransactionDate() != FALSE AND $this->getType() != 10 ) {
 			Debug::text('Overriding Transaction Date To: '. $this->getTransactionDate(), __FILE__, __LINE__, __METHOD__, 10);
+
+			//If transaction date is earlier than the pay period end date, back date it also, otherwise the transaction date will be moved forward to the end date in PayStubFactory->setTransactionDate().
+			//  This allows users to create out-of-cycle pay stubs that are paid before the pay period end date more easily.
+			if ( $this->getTransactionDate() < $pay_stub->getEndDate() AND $this->getTransactionDate() >= $pay_stub->getStartDate() ) {
+				Debug::text('  Back dating End Date to: '. $this->getTransactionDate(), __FILE__, __LINE__, __METHOD__, 10);
+				$pay_stub->setEndDate( $this->getTransactionDate() );
+			}
 			$pay_stub->setTransactionDate( $this->getTransactionDate() );
 		}
 
@@ -754,7 +762,7 @@ class CalculatePayStub extends PayStubFactory {
 				} elseif ( $psalf->getRecordCount() > 0 ) {
 					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 20, TTi18n::gettext('Employee has %1 active pay stub amendments before this pay period that have not been paid', array($psalf->getRecordCount()) ), NULL );
 				} else {				
-					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 30, NULL, NULL );
+					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 30, TTi18n::gettext('Total Gross') .': '. Misc::MoneyFormat( $pay_stub->getGrossPay() ) .' '. TTi18n::gettext('Net Pay') .': '. Misc::MoneyFormat( $pay_stub->getNetPay() ), NULL );
 				}
 
 				return TRUE;

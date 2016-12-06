@@ -136,7 +136,7 @@ class PermissionControlFactory extends Factory {
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
-	
+
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
 			return (int)$this->data['company_id'];
@@ -163,12 +163,17 @@ class PermissionControlFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
 					'company_id' => (int)$this->getCompany(),
-					'name' => $name,
+					'name' => TTi18n::strtolower($name),
 					);
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND name = ? AND deleted=0';
+		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$permission_control_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($permission_control_id, 'Unique Permission Control ID: '. $permission_control_id, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -253,11 +258,13 @@ class PermissionControlFactory extends Factory {
 	function getUser() {
 		$pulf = TTnew( 'PermissionUserListFactory' );
 		$pulf->getByPermissionControlId( $this->getId() );
+
+		$list = array();
 		foreach ($pulf as $obj) {
 			$list[] = $obj->getUser();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -284,7 +291,6 @@ class PermissionControlFactory extends Factory {
 
 			$tmp_ids = array();
 
-			$pf = TTnew( 'PermissionFactory' );
 			if ( !$this->isNew() ) {
 				//If needed, delete mappings first.
 				$pulf = TTnew( 'PermissionUserListFactory' );
@@ -362,6 +368,7 @@ class PermissionControlFactory extends Factory {
 							}
 						}
 					}
+					unset($display_name); //code standards
 				}
 			}
 		}
@@ -373,6 +380,7 @@ class PermissionControlFactory extends Factory {
 		$plf = TTnew( 'PermissionListFactory' );
 		$plf->getByCompanyIdAndPermissionControlId( $this->getCompany(), $this->getId() );
 		if ( $plf->getRecordCount() > 0 ) {
+			$current_permissions = array();
 			Debug::Text('Found Permissions: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			foreach($plf as $p_obj) {
 				$current_permissions[$p_obj->getSection()][$p_obj->getName()] = $p_obj->getValue();
@@ -399,7 +407,7 @@ class PermissionControlFactory extends Factory {
 		if ( defined('TIMETREX_API') AND TIMETREX_API == TRUE
 				AND ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 0 ) ) {
 			//When creating a new permission group this causes it to be really slow as it creates a record for every permission that is set to DENY.
-			
+
 			//If we do the permission diff it messes up the HTML interface.
 			if ( !is_array($old_permission_arr) OR ( is_array($old_permission_arr) AND count($old_permission_arr) == 0 ) ) {
 				$old_permission_arr = $this->getPermission();
@@ -523,6 +531,7 @@ class PermissionControlFactory extends Factory {
 
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

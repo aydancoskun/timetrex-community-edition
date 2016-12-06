@@ -62,7 +62,11 @@ class InstallSchema_1054A extends InstallSchema_Base {
 					if	( $pseallf->getRecordCount() > 0 ) {
 						$psea_obj = $pseallf->getCurrent();
 					} else {
+						
+						// @codingStandardsIgnoreStart
 						Debug::text('Failed getting PayStubEntryLink for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+						//leaving debugs alone.
+						// @codingStandardsIgnoreEnd
 						continue;
 					}
 
@@ -87,6 +91,8 @@ class InstallSchema_1054A extends InstallSchema_Base {
 									$tmp_cd_obj = $cdlf->getCurrent();
 								}
 							}
+							
+							$filing_status = array();
 							if ( is_object($tmp_cd_obj) ) {
 								$udlf = TTnew( 'UserDeductionListFactory' );
 								$udlf->getByCompanyIdAndCompanyDeductionId( $c_obj->getID(), $tmp_cd_obj->getID() );
@@ -97,10 +103,8 @@ class InstallSchema_1054A extends InstallSchema_Base {
 								}
 
 							}
-							unset($udlf, $udf, $ud_obj, $valid_user_ids);
+							unset($udlf, $ud_obj);
 
-
-							$original_deduction_id = $cd_obj->getID();
 							$cd_obj->setCalculation(82);
 							$cd_obj->setUserValue1( 10 ); //Single
 							$cd_obj->setUserValue2( '' );

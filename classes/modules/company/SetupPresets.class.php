@@ -3781,6 +3781,59 @@ class SetupPresets extends Factory {
 																								),
 													)
 												);
+
+					if ( !defined( 'UNIT_TEST_MODE' ) OR UNIT_TEST_MODE === FALSE ) { //When in unit test mode don't create NY city income taxes, as we will have to update all of our unit tests.
+						//NY City Income Tax
+						$this->createCompanyDeduction(
+								array(
+										'company_id'                     => $this->getCompany(),
+										'status_id'                      => 10, //Enabled
+										'type_id'                        => 10, //Tax
+										'name'                           => strtoupper( $province ) . ' - New York City Income Tax',
+										'calculation_id'                 => 300,
+										'calculation_order'              => 300,
+										'country'                        => strtoupper( $country ),
+										'province'                       => strtoupper( $province ),
+										'district'                       => 'NYC',
+										'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - District Income Tax' ),
+										'user_value1'                    => 10, //Single
+										'user_value2'                    => 0, //0 Allowances
+										'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+										'exclude_pay_stub_entry_account' => array(
+												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
+												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
+												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+										),
+								)
+						);
+
+						//Yonkers Income Tax
+						$this->createCompanyDeduction(
+								array(
+										'company_id'                     => $this->getCompany(),
+										'status_id'                      => 10, //Enabled
+										'type_id'                        => 10, //Tax
+										'name'                           => strtoupper( $province ) . ' - Yonkers Income Tax',
+										'calculation_id'                 => 300,
+										'calculation_order'              => 300,
+										'country'                        => strtoupper( $country ),
+										'province'                       => strtoupper( $province ),
+										'district'                       => 'Yonkers',
+										'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - District Income Tax' ),
+										'user_value1'                    => 10, //Single
+										'user_value2'                    => 0, //0 Allowances
+										'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+										'exclude_pay_stub_entry_account' => array(
+												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
+												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
+												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+												$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+										),
+								)
+						);
+					}
+
 					break;
 				case 'nc': //north carolina
 					//Unemployment Insurance - Employee
@@ -5900,7 +5953,7 @@ class SetupPresets extends Factory {
 
 					$data = $epf->getExceptionTypeDefaultValues( NULL, $this->getCompanyObject()->getProductEdition() );
 					if ( is_array($data) ) {
-						foreach($data as $exception_policy_type_id => $exception_policy_data ) {
+						foreach($data as $exception_policy_data ) {
 							$exception_policy_data['exception_policy_control_id'] = $control_id;
 							unset($exception_policy_data['id']);
 
@@ -6309,7 +6362,7 @@ class SetupPresets extends Factory {
 													)
 												);
 					}
-					unset($accrual_policy_account_id, $accrual_policy_id);
+					unset($accrual_policy_id);
 
 					//Sick
 					$this->createAccrualPolicyAccount(
@@ -6353,7 +6406,7 @@ class SetupPresets extends Factory {
 													)
 												);
 					}
-					unset($accrual_policy_account_id, $accrual_policy_id);
+					unset($accrual_policy_id);
 					
 					break;
 				default:
@@ -6400,7 +6453,7 @@ class SetupPresets extends Factory {
 													)
 												);
 					}
-					unset($accrual_policy_account_id, $accrual_policy_id);
+					unset($accrual_policy_id);
 
 					//Sick
 					$this->createAccrualPolicyAccount(
@@ -6444,7 +6497,7 @@ class SetupPresets extends Factory {
 													)
 												);
 					}
-					unset($accrual_policy_account_id, $accrual_policy_id);
+					unset($accrual_policy_id);
 
 					break;
 			}
@@ -6585,9 +6638,8 @@ class SetupPresets extends Factory {
 											);
 
 				}
-				unset($accrual_policy_account_id, $accrual_policy_id);
+				unset($accrual_policy_id);
 			}
-			unset($accrual_policy_account_id);
 
 			$accrual_policy_id = $this->createAccrualPolicy(
 										array(
@@ -6622,7 +6674,7 @@ class SetupPresets extends Factory {
 											)
 										);
 			}
-			unset($accrual_policy_account_id, $accrual_policy_id);
+			unset($accrual_policy_id);
 		}
 		
 		return TRUE;

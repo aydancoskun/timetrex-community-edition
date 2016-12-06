@@ -45,9 +45,9 @@ class ADOdbLoadBalancer {
 	protected $enable_sticky_sessions = TRUE; //Once a master or slave connection is made, stick to that connection for the entire request.
 	protected $pinned_connection_id = FALSE; //When in transactions, always use this connection.
 	protected $last_connection_id = array( 'master' => FALSE, 'slave' => FALSE, 'all' => FALSE );
-	
+
 	protected $session_variables = FALSE; //Session variables that must be maintained across all connections, ie: SET TIME ZONE.
-	
+
 	protected $blacklist_functions = FALSE; //List of functions to blacklist as write-only (must run on master) **NOT YET IMPLEMENTED**
 
 	protected $user_defined_session_init_sql = FALSE; //Called immediately after connecting to any DB.
@@ -56,7 +56,7 @@ class ADOdbLoadBalancer {
 		$this->blacklist_functions = (array)$arr;
 		return TRUE;
 	}
-	
+
 	function setSessionInitSQL( $sql ) {
 		$this->user_defined_session_init_sql[] = $sql;
 		return TRUE;
@@ -73,13 +73,13 @@ class ADOdbLoadBalancer {
 
 			$this->total_connection_weights[$obj->type] += abs( $obj->weight );
 			$this->total_connection_weights['all'] += abs( $obj->weight );
-			
+
 			if ( $obj->type == 'master' ) {
 				$this->connections_master[] = $i;
 			} else {
 				$this->connections_slave[] = $i;
 			}
-			
+
 			return TRUE;
 		}
 
@@ -91,30 +91,34 @@ class ADOdbLoadBalancer {
 	function removeConnection( $i ) {
 		Debug::Text('Removing Connection: '. $i, __FILE__, __LINE__, __METHOD__, 10);
 
-		$obj = $this->connections[$i];
+		if ( isset($this->connections[$i]) ) {
+			$obj = $this->connections[ $i ];
 
-		$this->total_connections[$obj->type]--;
-		$this->total_connections['all']--;
+			$this->total_connections[ $obj->type ]--;
+			$this->total_connections['all']--;
 
-		$this->total_connection_weights[$obj->type] -= abs( $obj->weight );
-		$this->total_connection_weights['all'] -= abs( $obj->weight );
+			$this->total_connection_weights[ $obj->type ] -= abs( $obj->weight );
+			$this->total_connection_weights['all'] -= abs( $obj->weight );
 
-		if ( $obj->type == 'master' ) {
-			unset($this->connections_master[array_search( $i, $this->connections_master )]);
-			$this->connections_master = array_values($this->connections_master); //Reindex array.
-		} else {
-			unset($this->connections_slave[array_search( $i, $this->connections_slave )]);
-			$this->connections_slave = array_values($this->connections_slave); //Reindex array.
+			if ( $obj->type == 'master' ) {
+				unset( $this->connections_master[ array_search( $i, $this->connections_master ) ] );
+				$this->connections_master = array_values( $this->connections_master ); //Reindex array.
+			} else {
+				unset( $this->connections_slave[ array_search( $i, $this->connections_slave ) ] );
+				$this->connections_slave = array_values( $this->connections_slave ); //Reindex array.
+			}
+
+			//Remove any sticky connections as well.
+			if ( $this->last_connection_id[ $obj->type ] == $i ) {
+				$this->last_connection_id[ $obj->type ] = FALSE;
+			}
+
+			unset( $this->connections[ $i ] );
+
+			return TRUE;
 		}
 
-		//Remove any sticky connections as well.
-		if ( $this->last_connection_id[$obj->type] == $i ) {
-			$this->last_connection_id[$obj->type] = FALSE;
-		}
-		
-		unset($this->connections[$i]);
-
-		return TRUE;
+		return FALSE;
 	}
 
 	function getConnectionByWeight( $type ) {
@@ -177,15 +181,13 @@ class ADOdbLoadBalancer {
 				} catch ( Exception $e ) {
 					//Connection error, see if there are other connections to try still.
 					Debug::Text('ADOdb connection FAILED! Total Connections: '. count($this->connections), __FILE__, __LINE__, __METHOD__, 10);
-
 					throw $e; //No connections left, reThrow exception so application can catch it.
-					return FALSE;
 				}
 
 				if ( is_array( $this->user_defined_session_init_sql ) ) {
 					foreach( $this->user_defined_session_init_sql as $session_init_sql ) {
 						$adodb_obj->Execute( $session_init_sql );
-					}					
+					}
 				}
 				$this->executeSessionVariables( $adodb_obj );
 			}
@@ -195,29 +197,33 @@ class ADOdbLoadBalancer {
 		} else {
 			throw new Exception('Unable to return Connection object...');
 		}
+
+		return FALSE;
 	}
 
 	function getConnection( $type = 'master', $pin_connection = NULL, $force_connection_id = FALSE ) {
-		if ( $this->pinned_connection_id !== FALSE ) {
-			//Debug::Text('Returning pinned connection ID: '. $this->pinned_connection_id, __FILE__, __LINE__, __METHOD__, 10);
-			$connection_id = $this->pinned_connection_id;
-		} else {
-			$connection_id = $this->getLoadBalancedConnection( $type );			
-		}
-
-		try {
-			$adodb_obj = $this->_getConnection( $connection_id );
-			$connection_obj = $this->connections[$connection_id];
-		} catch ( Exception $e ) {
-			//Connection error, see if there are other connections to try still.
-			Debug::Text('ADOdb connection FAILED! Total Connections: '. count($this->connections), __FILE__, __LINE__, __METHOD__, 10);
-			if ( ($type == 'master' AND $this->total_connections['master'] > 0 ) OR ( $type == 'slave' AND $this->total_connections['all'] > 0 ) ) {
-				$this->removeConnection( $connection_id );
-				return $this->getConnection( $type, $pin_connection );
+		while ( ($type == 'master' AND $this->total_connections['master'] > 0 ) OR ( $type == 'slave' AND $this->total_connections['all'] > 0 ) ) {
+			if ( $this->pinned_connection_id !== FALSE ) {
+				$connection_id = $this->pinned_connection_id;
 			} else {
-				Debug::Text('ADOdb connection FAILED! Rethrowing exception...', __FILE__, __LINE__, __METHOD__, 10);
-				throw $e; //No connections left, reThrow exception so application can catch it.
-				return FALSE;
+				$connection_id = $this->getLoadBalancedConnection( $type );
+			}
+
+			if ( $connection_id !== FALSE ) {
+				try {
+					$adodb_obj = $this->_getConnection( $connection_id );
+					//$connection_obj = $this->connections[$connection_id];
+					break;
+				} catch ( Exception $e ) {
+					//Connection error, see if there are other connections to try still.
+					Debug::Text( 'ADOdb connection FAILED! Total Connections: ' . count( $this->connections ), __FILE__, __LINE__, __METHOD__, 10 );
+					$this->removeConnection( $connection_id );
+					if ( ( $type == 'master' AND $this->total_connections['master'] == 0 ) OR ( $type == 'slave' AND $this->total_connections['all'] == 0 ) ) {
+						throw $e;
+					}
+				}
+			} else {
+				throw Exception('Connection ID is invalid!');
 			}
 		}
 
@@ -250,7 +256,7 @@ class ADOdbLoadBalancer {
 
 		return $refs;
 	}
-	
+
 	//Allow setting session variables that are maintained across connections.
 	public function setSessionVariable( $name, $value, $execute_immediately = TRUE ) {
 		$this->session_variables[$name] = $value;
@@ -314,6 +320,11 @@ class ADOdbLoadBalancer {
 
 					//Debug::Text( '  Results all match, returning first result...', __FILE__, __LINE__, __METHOD__, 10);
 					return $result_arr[0];
+				} else {
+					//When using lazy connections, there are cases where setSessionVariable() is called early on, but there are no connections to execute the queries on yet.
+					//This captures that case and forces a RETURN TRUE to occur. As likely the queries will be exectued as soon as a connection is established. 
+					Debug::Text( 'No active connections execute query on yet...', __FILE__, __LINE__, __METHOD__, 10);
+					return TRUE;
 				}
 			}
 		}
@@ -329,11 +340,13 @@ class ADOdbLoadBalancer {
 
 		return FALSE;
 	}
-	
+
 	//Use this instead of __call() as it significantly reduces the overhead of call_user_func_array().
 	public function Execute( $sql, $inputarr = FALSE ) {
 		$type = 'master';
 		$pin_connection = NULL;
+
+		$sql = trim($sql); //Prevent leading spaces from causing isReadOnlyQuery/stripos from failing.
 
 		//SELECT queries that can write and therefore must be run on MASTER.
 		//SELECT ... FOR UPDATE;
@@ -352,7 +365,7 @@ class ADOdbLoadBalancer {
 			return $adodb_obj->Execute( $sql, $inputarr );
 		}
 
-		return FALSE;		
+		return FALSE;
 	}
 
 	public function __call( $method, $args ) { //Intercept ADOdb functions
@@ -360,7 +373,7 @@ class ADOdbLoadBalancer {
 		$pin_connection = NULL;
 
 		//Debug::Arr( $args, 'ADOdb Call: Method: '. $method , __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		//Intercept specific methods to determine if they are read-only or not.
 		$method = strtolower($method);
 		switch ( $method ) {
@@ -371,7 +384,7 @@ class ADOdbLoadBalancer {
 			case 'getcol':
 			case 'getassoc':
 			case 'selectlimit':
-				if ( $this->isReadOnlyQuery( $args[0] ) == TRUE ) {
+				if ( $this->isReadOnlyQuery( trim( $args[0] ) ) == TRUE ) {
 					$type = 'slave';
 				}
 				break;
@@ -397,6 +410,7 @@ class ADOdbLoadBalancer {
 
 			//Manual transactions
 			case 'begintrans':
+			case 'settransactionmode':
 				$pin_connection = TRUE;
 				break;
 			case 'rollbacktrans':
@@ -412,29 +426,65 @@ class ADOdbLoadBalancer {
 				//getConnection() will only unpin the transaction if we're exiting the last nested transaction
 				$pin_connection = FALSE;
 				break;
+
+			//Functions that don't require any connection and therefore shouldn't force a connection be established before they run.
+			case 'qstr':
+			case 'escape':
+			case 'binddate':
+			case 'bindtimestamp':
+			case 'setfetchmode':
+				$type = FALSE; //No connection necessary.
+				break;
+
+			//Default to assuming master connection is required to be on the safe side.
 			default:
 				//Debug::Text( 'Method not Slave, assuming master...', __FILE__, __LINE__, __METHOD__, 10);
 				break;
 		}
-		
+
 		//Debug::Text( 'ADOdb Intercepted... Method: '. $method .' Type: '. $type .' Arg: ', __FILE__, __LINE__, __METHOD__, 10);
-		$adodb_obj = $this->getConnection( $type, $pin_connection );
-		if ( is_object( $adodb_obj ) ) {
-			$result = call_user_func_array( array( $adodb_obj, $method ), $this->makeValuesReferenced( $args ) );
-			return $result;
+		if ( $type === FALSE ) {
+			if ( is_array($this->connections) AND count($this->connections) > 0 ) {
+				foreach( $this->connections as $key => $connection_obj ) {
+					$adodb_obj = $connection_obj->getADOdbObject();
+					return call_user_func_array( array($adodb_obj, $method), $this->makeValuesReferenced( $args ) ); //Just makes the function call on the first object.
+				}
+			}
+		} else {
+			$adodb_obj = $this->getConnection( $type, $pin_connection );
+			if ( is_object( $adodb_obj ) ) {
+				$result = call_user_func_array( array($adodb_obj, $method), $this->makeValuesReferenced( $args ) );
+
+				return $result;
+			}
+
+			return FALSE;
+		}
+	}
+
+	function __get( $property ) {
+		//return $this->getConnection()->$property;
+		if ( is_array($this->connections) AND count($this->connections) > 0 ) {
+			foreach( $this->connections as $key => $connection_obj ) {
+				return $connection_obj->getADOdbObject()->$property; //Just returns the property from the first object.
+			}
 		}
 
 		return FALSE;
 	}
 
-	function __get( $property ) {
-		return $this->getConnection()->$property;
-	}
-	
 	function __set( $property, $value ) {
-		return $this->getConnection()->$property = $value;
+		//return $this->getConnection()->$property = $value;
+		//Special function to set object properties on all objects without initiating a connection to the database.
+		if ( is_array($this->connections) AND count($this->connections) > 0 ) {
+			foreach( $this->connections as $key => $connection_obj ) {
+				$connection_obj->getADOdbObject()->$property = $value;
+			}
+		}
+
+		return TRUE;
 	}
-	
+
 	private function __clone() { }
 }
 
@@ -464,14 +514,14 @@ class ADOdbLoadBalancerConnection {
 		$this->type = $type;
 		$this->weight = $weight;
 		$this->persistent_connection = $persistent_connection;
-		
+
 		$this->host = $argHostname;
 		$this->user = $argUsername;
 		$this->password = $argPassword;
 		$this->database = $argDatabaseName;
 
 		return TRUE;
-	}	
+	}
 
 	function getADOdbObject() {
 		return $this->adodb_obj;

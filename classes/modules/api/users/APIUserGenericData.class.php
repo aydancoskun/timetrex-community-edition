@@ -49,11 +49,11 @@ class APIUserGenericData extends APIFactory {
 
 	/**
 	 * Get user data for one or more users.
+	 *   Default to disable paging as it would rarely be used for this.
 	 * @param array $data filter data
 	 * @return array
 	 */
-	function getUserGenericData( $data = NULL, $disable_paging = TRUE ) { //Default to disable paging as it would rarely be used for this.
-
+	function getUserGenericData( $data = NULL, $disable_paging = TRUE ) {
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Only allow getting generic data for currently logged in user unless user_id = 0, then get company wide data.
@@ -74,6 +74,7 @@ class APIUserGenericData extends APIFactory {
 		if ( $ugdlf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $ugdlf );
 
+			$retarr = array();
 			foreach( $ugdlf as $ugd_obj ) {
 				$retarr[] = $ugd_obj->getObjectAsArray( $data['filter_columns'] );
 			}

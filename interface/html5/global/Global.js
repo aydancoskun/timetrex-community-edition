@@ -102,7 +102,7 @@ Global.sendErrorReport = function() {
 	//Don't send error report if exception not happens in our codes.
 	//from_file should always contains the root url
 	if ( from_file.indexOf( ServiceCaller.rootURL ) < 0 ) {
-		Global.log( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.rootURL + '" Script: ' + from_file );
+        Debug.Text( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.rootURL + '" Script: ' + from_file, 'Global.js', '', 'sendErrorReport', 1 );
 		return;
 	}
 
@@ -118,7 +118,7 @@ Global.sendErrorReport = function() {
 		error = error + '\n\n\n' + 'Function called stacks: ' + trace;
 	}
 
-	Global.log( 'ERROR: '+ error );
+    Debug.Text( 'ERROR: '+ error, 'Global.js', '', 'sendErrorReport', 1 );
 
 	if ( Global.isCanvasSupported() && ie > 9 ) {
 		html2canvas( [document.body], {
@@ -155,6 +155,8 @@ Global.sendErrorReport = function() {
 
 Global.initStaticStrings = function() {
 
+	Global.network_lost_msg = $.i18n._( 'The network connection was lost. Please check your network connection then try again.' );
+
 	Global.any_item = '-- ' + $.i18n._( 'Any' ) + ' --';
 
 	Global.all_item = '-- ' + $.i18n._( 'All' ) + ' --';
@@ -183,6 +185,8 @@ Global.initStaticStrings = function() {
 
 	Global.modify_alert_message = $.i18n._( 'You have modified data without saving, are you sure you want to continue and lose your changes' );
 
+	Global.confirm_on_exit_message = $.i18n._( 'Are you sure you want to continue without saving?' );
+
 	Global.delete_confirm_message = $.i18n._( 'You are about to delete data, once data is deleted it can not be recovered.<br>Are you sure you wish to continue?' );
 
 	Global.delete_dashlet_confirm_message = $.i18n._( 'You are about to delete this dashlet, once a dashlet is deleted it can not be recovered.<br>Are you sure you wish to continue?' );
@@ -208,7 +212,7 @@ Global.doPingIfNecessary = function() {
 		return;
 	}
 
-	Global.log( 'User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', ' ' );
+    Debug.Text( 'User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', 'Global.js', '', 'doPingIfNecessary', 1 );
 	Global.idle_time = 0;
 
 	if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
@@ -248,7 +252,7 @@ Global.setupPing = function() {
 	function timerIncrement() {
 		Global.idle_time = Global.idle_time + 1;
 		if ( Global.idle_time >= 15 ) {
-			Global.log( 'User is idle: ' + Global.idle_time, ' ' );
+            Debug.Text( 'User is idle: ' + Global.idle_time, 'Global.js', '', 'setupPing', 1 );
 		}
 	}
 };
@@ -497,10 +501,17 @@ Global.updateUserPreference = function( callBack, message ) {
 Global.secondToHHMMSS = function( sec_num, force_time_unit ) {
 	var add_minus = false;
 	var time;
-	if ( typeof sec_num === 'undefined' || sec_num === null || sec_num === false ) {
-		return null;
+	// if ( parseFloat(sec_num) != sec_num || typeof sec_num === 'undefined' || sec_num === null || sec_num === false ) {
+	// 	Debug.Text('Invalid input: '+ sec_num, 'Global.js', 'Global', 'secondToHHMMSS', 10);
+	// 	return null;
+	// }
+
+	//always return hh:ss. if we can't parse to float, then work with 0 seconds
+	var sec_num = parseFloat(sec_num)
+	if ( isNaN(sec_num) ) {
+		sec_num = 0;
 	}
-	
+
 	if ( sec_num < 0 ) {
 		sec_num = (-sec_num);
 		add_minus = true;
@@ -1002,7 +1013,7 @@ Global.getParentIdByTreeRecord = function( array, selectId ) {
 };
 
 Global.addFirstItemToArray = function( array, firstItemType, customLabel ) {
-	//Error: Unable to get property 'unshift' of undefined or null reference in /interface/html5/global/Global.js?v=8.0.0-20141230-153942 line 903 
+	//Error: Unable to get property 'unshift' of undefined or null reference in /interface/html5/global/Global.js?v=8.0.0-20141230-153942 line 903
 	var label;
 	if ( array ) {
 		if ( firstItemType === 'any' ) {
@@ -1184,7 +1195,7 @@ Global.setSignalStrength = function() {
 				total_time = checking_array[i] + total_time;
 			}
 			average_time = total_time / checking_array.length;
-			Global.log( 'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + (new Date).toISOString().replace( /z|t/gi, ' ' ) );
+            Debug.Text(  'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + (new Date).toISOString().replace( /z|t/gi, ' ' ), 'Global.js', '', 'doPing', 1 );
 
 			status = 'Good';
 			if ( average_time > 400 ) {
@@ -1327,6 +1338,9 @@ Global.loadScript = function( scriptPath, onResult ) {
 				LocalCacheData.loadedScriptNames[scriptPath] = true;
 				onResult();
 			}
+		},
+		error: function(error){
+			TAlertManager.showNetworkErrorAlert( error );
 		},
 		dataType: 'script'
 	} );
@@ -1615,6 +1629,10 @@ Global.convertColumnsTojGridFormat = function( columns, layout_name, setWidthCal
 Global.loadWidgetByName = function( widgetName ) {
 	var input;
 	switch ( widgetName ) {
+		case FormItemType.COLOR_PICKER:
+			input = Global.loadWidget( 'global/widgets/color-picker/TColorPicker.html' );
+			input = $( input );
+			break;
 		case WidgetNamesDic.NOTIFICATION_BAR:
 			input = Global.loadWidget( 'global/widgets/top_alert/NotificationBox.html' );
 			input = $( input );
@@ -1774,6 +1792,9 @@ Global.loadWidget = function( url ) {
 		cache: true,
 		success: function() {
 			successflag = true;
+		},
+		error: function(error){
+			TAlertManager.showNetworkErrorAlert( error );
 		}
 	} );
 
@@ -1803,6 +1824,12 @@ Global.removeCss = function( path ) {
 Global.getViewPathByViewId = function( viewId ) {
 	var path;
 	switch ( viewId ) {
+		case 'Map':
+			path = 'views/attendance/map/';
+			break;
+		case 'ManualTimeSheet':
+			path = 'views/attendance/manual_timesheet/';
+			break;
 		case 'Home':
 			path = 'views/home/dashboard/';
 			break;
@@ -1930,6 +1957,9 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'Branch':
 			path = 'views/company/branch/';
 			break;
+		case 'GEOFence':
+			path = 'views/company/geo_fence/';
+			break;
 		case 'Department':
 			path = 'views/company/department/';
 			break;
@@ -1960,6 +1990,9 @@ Global.getViewPathByViewId = function( viewId ) {
 			break;
 		case 'PayStub':
 			path = 'views/payroll/pay_stub/';
+			break;
+		case 'GovernmentDocument':
+			path = 'views/payroll/government_document/';
 			break;
 		case 'Request':
 			path = 'views/my_account/request/';
@@ -2282,8 +2315,25 @@ Global.getViewPathByViewId = function( viewId ) {
 
 	return path;
 };
-
 /* jshint ignore:end */
+
+//returns exact filepaths for class dependencies
+Global.getViewPreloadPathByViewId = function (viewId){
+    var preloads = [];
+    switch ( viewId ) {
+        case 'Request':
+        case 'RequestAuthorization':
+            preloads = ['views/common/AuthorizationHistoryCommon.js', 'views/common/RequestViewCommonController.js', 'views/common/EmbeddedMessageCommon.js'];
+            break;
+		case 'ExpenseAuthorization':
+		case 'UserExpense':
+		case 'LoginUserExpense':
+		case 'TimeSheetAuthorization':
+			preloads = ['views/common/AuthorizationHistoryCommon.js'];
+			break;
+    }
+    return preloads;
+};
 
 Global.removeViewCss = function( viewId, fileName ) {
 	Global.removeCss( Global.getViewPathByViewId( viewId ) + fileName );
@@ -2291,6 +2341,13 @@ Global.removeViewCss = function( viewId, fileName ) {
 
 Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
 	if ( fileName.indexOf( '.js' ) > 0 ) {
+        var preloads = Global.getViewPreloadPathByViewId(viewId)
+        if ( preloads.length > 0 ) {
+            for ( var p in preloads ) {
+                Global.loadScript( preloads[p] );
+            }
+        }
+
 		if ( sync ) {
 			return Global.loadScript( Global.getViewPathByViewId( viewId ) + fileName );
 		} else {
@@ -2327,6 +2384,9 @@ Global.loadPageSync = function( url ) {
 		cache: true,
 		success: function() {
 			successflag = true;
+		},
+		error: function(error){
+			TAlertManager.showNetworkErrorAlert( error );
 		}
 	} );
 
@@ -2355,6 +2415,9 @@ Global.loadPage = function( url, onResult ) {
 			ProgressBar.removeProgressBar();
 			onResult( result );
 
+		},
+		error: function(error){
+			TAlertManager.showNetworkErrorAlert( error );
 		}
 	} );
 
@@ -2414,10 +2477,10 @@ Global.isValidInputCodes = function( keyCode ) {
 		case 20:
 		case 33:
 		case 34:
-		case 37:
-		case 38:
-		case 39:
-		case 40:
+		// case 37:
+		// case 38:
+		// case 39:
+		// case 40:
 		case 45:
 		case 91:
 		case 92:
@@ -2714,7 +2777,6 @@ Backbone.Model.prototype._super = function( funcName ) {
 
 //make backone support a simple super function
 Backbone.View.prototype._super = function( funcName ) {
-
 	if ( this.real_this ) {
 		return this.real_this.constructor.__super__[funcName].apply( this, _.rest( arguments ) );
 	} else {
@@ -2725,7 +2787,6 @@ Backbone.View.prototype._super = function( funcName ) {
 
 //make backone support a simple super funciton for second level class
 Backbone.View.prototype.__super = function( funcName ) {
-
 	if ( !this.real_this ) {
 		this.real_this = this.constructor.__super__;
 	}
@@ -3028,12 +3089,6 @@ Global.trackView = function( name, action ) {
 	}
 };
 
-Global.log = function( val ) {
-	if ( typeof console !== "undefined" && typeof (console.log) !== "undefined" ) {
-		console.log( val );
-	}
-};
-
 Global.setAnalyticDimensions = function( user_name, company_name ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
 		ga( 'set', 'dimension1', APIGlobal.pre_login_data.application_version );
@@ -3044,14 +3099,14 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 
 		if ( user_name !== 'undefined' && user_name !== null ) {
 			if ( APIGlobal.pre_login_data.production !== true ) {
-				Global.log( 'Analytics User: ' + user_name );
+                Debug.Text('Analytics User: ' + user_name , 'Global.js', '', 'doPing', 1 );
 			}
 			ga( 'set', 'dimension6', user_name );
 		}
 
 		if ( company_name !== 'undefined' && company_name !== null ) {
 			if ( APIGlobal.pre_login_data.production !== true ) {
-				Global.log( 'Analytics Company: ' + company_name );
+                Debug.Text('Analytics Company: ' + company_name , 'Global.js', '', 'setAnalyticDimensions', 1 );
 			}
 			ga( 'set', 'dimension7', company_name );
 		}
@@ -3066,6 +3121,21 @@ Global.sendAnalytics = function( track_address ) {
 		}, 500 )
 
 	}
+};
+
+//don't let the user leave without clicking OK.
+//uses localcachedata so that it will work in the ribbon
+Global.checkBeforeExit = function( functionToExecute ) {
+	var alert_message = Global.modify_alert_message;
+	if ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.confirm_on_exit && LocalCacheData.current_open_edit_only_controller.is_changed === false ) {
+		alert_message = Global.confirm_on_exit_message;
+	}
+
+	TAlertManager.showConfirmAlert( alert_message, null, function (flag) {
+		if ( flag === true ) {
+			functionToExecute();
+		}
+	});
 };
 
 Global.detectMobileBrowser = function() {
@@ -3090,4 +3160,149 @@ Global.setDeepLink = function() {
 	if(newDeepLink != 'Login' && newDeepLink != undefined) {
 		Global.deeplink = newDeepLink;
 	}
+};
+
+
+/**
+ sorts items for the ribbon menu
+ **/
+Global.compareMenuItems = function(a,b) {
+	if ( a.attributes.sort_order == undefined ) {
+		a.attributes.sort_order = 1000;
+	}
+	if ( b.attributes.sort_order == undefined ) {
+		b.attributes.sort_order = 1000;
+	}
+
+	if ( a.attributes.sort_order < b.attributes.sort_order ) {
+		return -1;
+	}
+
+	if ( a.attributes.sort_order > b.attributes.sort_order ) {
+		return 1;
+	}
+
+	if ( a.attributes.sort_order == b.attributes.sort_order ) {
+		if ( a.attributes.add_order < b.attributes.add_order ) {
+			return -1;
+		}
+		if ( a.attributes.add_order > b.attributes.add_order ) {
+			return 1;
+		}
+	}
+
+	return 0;
+};
+
+
+Global.getDaysInSpan = function (start_date, end_date, sun, mon, tue, wed, thu, fri, sat) {
+	var start_date_obj = new Date(start_date);
+	var end_date_obj = new Date(end_date);
+	var days = Math.round(Math.abs((start_date_obj.getTime() - end_date_obj.getTime())/(86400*1000)))+1;
+
+	//Need to loop over the whole range to ensure proper counting of effective days on ranges that span multiple weeks.
+	while ( start_date_obj < end_date_obj ) {
+
+		var newDate = start_date_obj.setDate(start_date_obj.getDate() + 1);
+		start_Date = new Date(newDate);
+
+		switch(start_date_obj.getDay()) {
+			case 0:
+				if (!sun) {
+					days -= 1;
+				}
+				break;
+			case 1:
+				if (!mon) {
+					days -= 1;
+				}
+				break;
+			case 2:
+				if (!tue) {
+					days -= 1;
+				}
+				break;
+			case 3:
+				if (!wed) {
+					days -= 1;
+				}
+				break;
+			case 4:
+				if (!thu) {
+					days -= 1;
+				}
+				break;
+			case 5:
+				if (!fri) {
+					days -= 1;
+				}
+				break;
+			case 6:
+				if (!sat) {
+					days -= 1;
+				}
+				break;
+		}
+	}
+
+	return days;
+};
+
+/**
+ * Sets the language cookie to root cookie url
+ * @param lang
+ */
+Global.setLanguageCookie = function (lang) {
+	$.cookie( 'language', lang, {
+		expires: 10000,
+		path: APIGlobal.pre_login_data.cookie_base_url
+	} );
+};
+
+/**
+ * Removes cookies from all paths. Put in specifically to move the language cookies to root.
+ * @param name
+ */
+Global.eraseCookieFromAllPaths = function (name) {
+    var value = $.cookie(name);
+
+    // This function will attempt to remove a cookie from all paths
+    var path_bits = location.pathname.split('/');
+    var path_current = ' path=';
+
+    // Do a simple pathless delete first
+    document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT;';
+    for (var i = 0; i < path_bits.length; i++) {
+        path_current += ((path_current.substr(-1) != '/') ? '/' : '') + path_bits[i];
+        Debug.Text('---'+ i +'. Deleting cookie: '+ name +' with value: '+ value +' and path: '+ path_current, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
+        document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' + path_current + '/;';
+        document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' + path_current + ';';
+    }
+
+    Debug.Text('Deleting cookie: '+name+' with value:'+value+' and path:'+path_current, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
+    return value;
+};
+
+/**
+ * Moves specific app cookies from all over to the root cookie path so that they will be accessible from everywhere
+ */
+Global.moveCookiesToNewPath = function() {
+    Debug.Arr(document.cookie,'COOKIE BEFORE CONTENT: ', 'Global.js', 'Global', 'moveCookiesToNewPath', 10);
+    var cookies =['language', 'StationID', 'SessionID'];
+    var year = new Date().getFullYear();
+    for (var i =0; i < cookies.length; i++ ) {
+        var val = Global.eraseCookieFromAllPaths(cookies[i]);
+        if (val && val.length > 0) {
+           Debug.Text('Setting cookie:'+cookies[i]+' with value:'+val+' and path:'+APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
+            document.cookie = cookies[i] + '='+ val +'; expires=Thu, 01-Jan-'+ (year + 10) +' 00:00:01 GMT; path=' + APIGlobal.pre_login_data.cookie_base_url + ';';
+        } else{
+           Debug.Text('NOT Setting cookie:'+cookies[i]+' with value:'+val+' and path:'+APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
+        }
+    }
+	Debug.Arr(document.cookie,'COOKIE AFTER CONTENT: ', 'Global.js', 'Global', 'moveCookiesToNewPath', 10);
+};
+
+Global.clearSessionCookie = function() {
+	Global.moveCookiesToNewPath();
+	$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
 };

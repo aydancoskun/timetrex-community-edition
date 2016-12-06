@@ -402,7 +402,7 @@ class Authentication {
 			}
 
 			//Set cookie in root directory so other interfaces can access it.
-			setcookie( $this->getName(), $this->getSessionID(), $cookie_expires, '/', NULL, Misc::isSSL( TRUE ) );
+			setcookie( $this->getName(), $this->getSessionID(), $cookie_expires, Environment::getCookieBaseURL(), NULL, Misc::isSSL( TRUE ) );
 
 			return TRUE;
 		}
@@ -411,7 +411,7 @@ class Authentication {
 	}
 
 	private function destroyCookie() {
-		setcookie( $this->getName(), NULL, ( time() + 9999999 ), '/', NULL, Misc::isSSL( TRUE ) );
+		setcookie( $this->getName(), NULL, ( time() + 9999999 ), Environment::getCookieBaseURL(), NULL, Misc::isSSL( TRUE ) );
 
 		return TRUE;
 	}
@@ -442,9 +442,11 @@ class Authentication {
 		$query = 'UPDATE authentication SET updated_date = ? WHERE session_id = ?';
 
 		try {
-			$this->db->Execute($query, $ph);
+			$this->db->Execute($query, $ph); //This can cause SQL error: "could not serialize access due to concurrent update" when in READ COMMITTED mode.
 		} catch (Exception $e) {
-			throw new DBError($e);
+			//Ignore any serialization errors, as its not a big deal anyways.
+			Debug::text('WARNING: SQL query failed, likely due to transaction isolotion: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+			//throw new DBError($e);
 		}
 
 		return TRUE;
@@ -748,7 +750,7 @@ class Authentication {
 					if ( $touch_updated_date !== FALSE ) {
 						//Reduce contention and traffic on the session table by only touching the updated_date every 60 +/- rand() seconds.
 						//Especially helpful for things like the dashboard that trigger many async calls.
-						if ( ( time() - $this->getUpdatedDate() ) > ( 60 + ( rand( 0, 30 ) - 15 ) ) ) {
+						if ( ( time() - $this->getUpdatedDate() ) > ( 60 + rand( 0, 60 ) ) ) {
 							Debug::text('  Touching updated date due to more than 60s...', __FILE__, __LINE__, __METHOD__, 10);
 							$this->Update();
 						}

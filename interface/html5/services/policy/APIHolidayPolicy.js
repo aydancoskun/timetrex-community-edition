@@ -41,6 +41,10 @@ var APIHolidayPolicy = ServiceCaller.extend( {
 
 	copyHolidayPolicy: function() {
 		return this.argumentsHandler( this.className, 'copyHolidayPolicy', arguments );
+	},
+
+	exportHolidayPolicy: function() {
+		return this.argumentsHandler( this.className, 'exportHolidayPolicy', arguments );
 	}
 
 

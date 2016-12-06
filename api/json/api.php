@@ -269,7 +269,7 @@ if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other
 	$authentication = new Authentication();
 
 	Debug::text('Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
-	if ( $authentication->Check( $session_id ) === TRUE ) {
+	if ( $class_name != 'APIProgressBar' AND $authentication->Check( $session_id ) === TRUE ) { //Always treat APIProgressBar as unauthenticated as an optimization to avoid causing uncessary SQL queries.
 		if ( Misc::checkValidReferer() == TRUE ) { //Help prevent CSRF attacks with this, but this is only needed when the user is already logged in.
 			authenticatedInvokeService( $class_name, $method, $arguments, $message_id, $authentication, $api_auth );
 		} else {

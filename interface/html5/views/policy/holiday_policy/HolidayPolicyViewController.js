@@ -2,11 +2,12 @@ HolidayPolicyViewController = BaseViewController.extend( {
 	el: '#holiday_policy_view_container',
 	type_array: null,
 	default_schedule_status_array: null,
+	shift_on_holiday_type_array: null,
 	worked_scheduled_days_array: null,
 	date_api: null,
 	sub_holiday_view_controller: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'HolidayPolicyEditView.html';
 		this.permission_id = 'holiday_policy';
 		this.viewId = 'HolidayPolicy';
@@ -28,11 +29,13 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'default_schedule_status' );
+		this.initDropDownOption( 'shift_on_holiday_type' );
 		this.initDropDownOption( 'scheduled_day', 'worked_scheduled_days', null, function( res ) {
 			res = res.getResult();
 			$this.worked_scheduled_days_array = $.extend( {}, res ); //	 Convert Array to Object
 		} );
 	},
+
 	/* jshint ignore:end */
 	buildEditViewUI: function() {
 
@@ -128,7 +131,6 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Employed Days' ), form_item_input, tab_eligibility_column1, '' );
 
 		// Employee Must Work at Least
-
 		var form_item_minimum_worked_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_minimum_worked_days_input.TTextInput( {field: 'minimum_worked_days', width: 30} );
 
@@ -154,8 +156,15 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Employee Must Work at Least' ), [form_item_minimum_worked_days_input, form_item_minimum_worked_period_days_input, form_item_worked_scheduled_days_combobox], tab_eligibility_column1, '', widgetContainer, true );
 
-		// Employee Must Work at Least
 
+		// Default Schedules Status
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'shift_on_holiday_type_id'} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.shift_on_holiday_type_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'On the Holiday, the Employee' ), form_item_input, tab_eligibility_column1, '', null, true );
+
+
+		// Employee Must Work at Least
 		form_item_minimum_worked_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_minimum_worked_days_input.TTextInput( {field: 'minimum_worked_after_days', width: 30} );
 
@@ -358,10 +367,9 @@ HolidayPolicyViewController = BaseViewController.extend( {
 	},
 
 	onTypeChange: function() {
-
 		if ( this.current_edit_record['type_id'] === 10 ) {
-
 			this.detachElement( 'minimum_worked_days' );
+			this.detachElement( 'shift_on_holiday_type_id' );
 			this.detachElement( 'minimum_worked_after_days' );
 
 			this.detachElement( 'average_time_days' );
@@ -376,6 +384,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		} else if ( this.current_edit_record['type_id'] === 20 ) {
 			this.attachElement( 'minimum_worked_days' );
+			this.attachElement( 'shift_on_holiday_type_id' );
 			this.attachElement( 'minimum_worked_after_days' );
 
 			this.detachElement( 'average_time_days' );
@@ -389,8 +398,8 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			this.detachElement( 'contributing_shift_policy_id' );
 
 		} else if ( this.current_edit_record['type_id'] === 30 ) {
-
 			this.attachElement( 'minimum_worked_days' );
+			this.attachElement( 'shift_on_holiday_type_id' );
 			this.attachElement( 'minimum_worked_after_days' );
 
 			this.attachElement( 'average_time_days' );
@@ -402,11 +411,9 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			this.attachElement( 'round_interval_policy_id' );
 			this.attachElement( 'eligible_contributing_shift_policy_id' );
 			this.attachElement( 'contributing_shift_policy_id' );
-
 		}
 
 		this.editFieldResize();
-
 	},
 
 	buildSearchFields: function() {
@@ -552,15 +559,3 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-HolidayPolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'HolidayPolicy', 'HolidayPolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

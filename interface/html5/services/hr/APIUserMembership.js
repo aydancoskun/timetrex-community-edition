@@ -45,6 +45,10 @@ var APIUserMembership = ServiceCaller.extend( {
 
 	},
 
+	exportUserMembership: function() {
+		return this.argumentsHandler( this.className, 'exportUserMembership', arguments );
+	},
+
 	generateInvoices: function() {
 
 		return this.argumentsHandler( this.className, 'generateInvoices', arguments );

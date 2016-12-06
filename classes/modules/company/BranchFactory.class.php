@@ -131,6 +131,7 @@ class BranchFactory extends Factory {
 										'other_id5' => 'OtherID5',
 										'longitude' => 'Longitude',
 										'latitude' => 'Latitude',
+										'geo_fence_ids' => 'GEOFenceIds',
 										'tag' => 'Tag',
 										'deleted' => 'Deleted',
 										);
@@ -278,13 +279,13 @@ class BranchFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => $name,
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .'
 					where company_id = ?
-						AND name = ?
+						AND lower(name) = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
@@ -546,7 +547,7 @@ class BranchFactory extends Factory {
 		return FALSE;
 	}
 	function setLongitude($value) {
-		$value = trim((float)$value);
+		$value = TTi18n::parseFloat( $value );
 
 		if (	$value == 0
 				OR
@@ -554,7 +555,7 @@ class BranchFactory extends Factory {
 											$value,
 											TTi18n::gettext('Longitude is invalid')
 											) ) {
-			$this->data['longitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['longitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -570,7 +571,7 @@ class BranchFactory extends Factory {
 		return FALSE;
 	}
 	function setLatitude($value) {
-		$value = trim((float)$value);
+		$value = TTi18n::parseFloat( $value );
 
 		if (	$value == 0
 				OR
@@ -578,7 +579,7 @@ class BranchFactory extends Factory {
 											$value,
 											TTi18n::gettext('Latitude is invalid')
 											) ) {
-			$this->data['latitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['latitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -757,6 +758,15 @@ class BranchFactory extends Factory {
 		return FALSE;
 	}
 
+	function getGEOFenceIds() {
+		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 4000, $this->getID() );
+	}
+
+	function setGEOFenceIds($ids) {
+		Debug::text('Setting GEO Fence IDs : ', __FILE__, __LINE__, __METHOD__, 10);
+		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 4000, $this->getID(), (array)$ids );
+	}
+
 	function getTag() {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
@@ -837,13 +847,19 @@ class BranchFactory extends Factory {
 			$query = 'update '. $rstf->getTable() .' set branch_id = 0 where branch_id = '. (int)$this->getId();
 			$this->db->Execute($query);
 
-			//Job employee criteria
-			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
-			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 1010, $this->getID() );
-			if ( $cgmlf->getRecordCount() > 0 ) {
-				foreach( $cgmlf as $cgm_obj ) {
-					Debug::text('Deleting from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-					$cgm_obj->Delete();
+			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+				$jf = TTNew( 'JobFactory' );
+				$query = 'update '. $jf->getTable() .' set branch_id = 0 where branch_id = '. (int)$this->getId();
+				$this->db->Execute($query);
+
+				//Job employee criteria
+				$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
+				$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 1010, $this->getID() );
+				if ( $cgmlf->getRecordCount() > 0 ) {
+					foreach ( $cgmlf as $cgm_obj ) {
+						Debug::text( 'Deleting from Company Generic Map: ' . $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10 );
+						$cgm_obj->Delete();
+					}
 				}
 			}
 
@@ -882,6 +898,7 @@ class BranchFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

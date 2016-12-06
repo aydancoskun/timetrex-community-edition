@@ -69,8 +69,6 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	function setHolidayPolicy($id) {
 		$id = trim($id);
 
-		$hplf = TTnew( 'HolidayPolicyListFactory' );
-
 		if (
 			$this->Validator->isNumeric(	'holiday_policy',
 											$id,

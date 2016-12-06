@@ -61,6 +61,34 @@ class ContributingShiftPolicyFactory extends Factory {
 										30 => TTi18n::gettext('Never Scheduled Shifts'),
 									);
 				break;
+
+			//alter table contributing_shift_policy  add column include_shift_type_id integer DEFAULT 100;
+			case 'include_shift_type':
+				$retval = array(
+										//If shift meets below criteria, only the part that meets it is included.
+										100 => TTi18n::gettext('Split Shift (Partial)'), //Splits the worked time to the filter Start/End time.
+										//110 => TTi18n::gettext('Partial Shift (Shift Must Start)'), //Normal Punch In between Start/End Time
+										//120 => TTi18n::gettext('Partial Shift (Shift Must End)'), //Normal Punch Out between Start/End Time
+										//130 => TTi18n::gettext('Partial Shift (Majority of Shift)'), //Majority of shift falls between Start/End time
+
+
+										//If shift meets below criteria, the entire shift is included.
+										200 => TTi18n::gettext('Full Shift (Must Start & End)'), //Does not split worked time to the Start/End time. Full shift must fall within filter times.
+										210 => TTi18n::gettext('Full Shift (Must Start)'), //Normal Punch In between filter Start/End Time
+										220 => TTi18n::gettext('Full Shift (Must End)'), //Normal Punch Out between filter Start/End Time
+										230 => TTi18n::gettext('Full Shift (Majority of Shift)'), //Majority of shift falls between filter Start/End time. Tie breaker (50/50%) goes to start time.
+										//232 => TTi18n::gettext('Full Shift (Majority of Shift [Start])'), //Majority of shift falls between Start/End time. Using Start time as tie breaker.
+										//234 => TTi18n::gettext('Full Shift (Majority of Shift [End])'), //Majority of shift falls between Start/End time. Using End time as tie breaker.
+
+
+										//FIXME: In future, perhaps add types to be based on the schedule time, not the worked time.
+										//Differential is paid on what they work, but determined (rate of pay) by what they were supposed to work (schedule).
+				);
+
+				if ( Misc::getCurrentCompanyProductEdition() == 10 ) {
+					unset( $retval[210], $retval[220], $retval[230]);
+				}
+				break;
 			case 'include_holiday_type':
 				$retval = array(
 										10 => TTi18n::gettext('Have no effect'),
@@ -165,7 +193,7 @@ class ContributingShiftPolicyFactory extends Factory {
 										'filter_end_time' => 'FilterEndTime',
 										'filter_minimum_time' => 'FilterMinimumTime',
 										'filter_maximum_time' => 'FilterMaximumTime',
-										'include_partial_shift' => 'IncludePartialShift',
+										'include_shift_type_id' => 'IncludeShiftType',
 
 										'branch' => 'Branch',
 										'branch_selection_type_id' => 'BranchSelectionType',
@@ -242,9 +270,14 @@ class ContributingShiftPolicyFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
 					'company_id' => (int)$this->getCompany(),
-					'name' => strtolower($name),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
@@ -513,19 +546,28 @@ class ContributingShiftPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function getIncludePartialShift() {
-		if ( isset($this->data['include_partial_shift']) ) {
-			return $this->fromBool( $this->data['include_partial_shift'] );
+	function getIncludeShiftType() {
+		if ( isset($this->data['include_shift_type_id']) ) {
+			return (int)$this->data['include_shift_type_id'];
 		}
 
 		return FALSE;
 	}
-	function setIncludePartialShift($bool) {
-		$this->data['include_partial_shift'] = $this->toBool($bool);
+	function setIncludeShiftType($value) {
+		$value = trim($value);
+
+		if ( $this->Validator->inArrayKey(	  'include_shift_type_id',
+											  $value,
+											  TTi18n::gettext('Incorrect Shift Type'),
+											  $this->getOptions('include_shift_type')) ) {
+
+			$this->data['include_shift_type_id'] = $value;
 
 		return TRUE;
 	}
 
+		return FALSE;
+	}
 
 	/*
 
@@ -943,7 +985,6 @@ class ContributingShiftPolicyFactory extends Factory {
 					}
 				}
 			}
-			unset($holiday_policy_objs);
 		}
 
 		Debug::text(' Not Holiday: User ID: '. $calculate_policy_obj->getUserObject()->getID() .' Date: '. TTDate::getDate('DATE', $epoch), __FILE__, __LINE__, __METHOD__, 10);
@@ -954,58 +995,6 @@ class ContributingShiftPolicyFactory extends Factory {
 		if ( $this->getIncludeHolidayType() == 20 OR $this->getIncludeHolidayType() == 25 OR $this->getIncludeHolidayType() == 30 ) {
 			return TRUE;
 		}
-
-		return FALSE;
-	}
-
-	function isActive( $date_epoch, $in_epoch = NULL, $out_epoch = NULL, $calculate_policy_obj = NULL ) {
-		//Debug::text(' Date Epoch: '. $date_epoch .' In: '. $in_epoch .' Out: '. $out_epoch, __FILE__, __LINE__, __METHOD__, 10);
-		//Make sure date_epoch is always specified so we can still determine isActive even if in_epoch/out_epoch are not specified themselves.
-		if ( $date_epoch == '' AND $in_epoch == '' ) {
-			Debug::text(' ERROR: Date/In epoch not specified...', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
-
-		if ( $date_epoch != '' AND $in_epoch == '' ) {
-			$in_epoch = $date_epoch;
-		}
-
-		if ( $out_epoch == '' ) {
-			$out_epoch = $in_epoch;
-		}
-
-		//Debug::text(' In: '. TTDate::getDate('DATE+TIME', $in_epoch) .' Out: '. TTDate::getDate('DATE+TIME', $out_epoch), __FILE__, __LINE__, __METHOD__, 10);
-		$i = $in_epoch;
-		$last_iteration = 0;
-		//Make sure we loop on the in_epoch, out_epoch and every day inbetween. $last_iteration allows us to always hit the out_epoch.
-		while( $i <= $out_epoch AND $last_iteration <= 1 ) {
-			//Debug::text(' I: '. TTDate::getDate('DATE+TIME', $i) .' Include Holiday Type: '. $this->getIncludeHolidayType(), __FILE__, __LINE__, __METHOD__, 10);
-			if ( $this->getIncludeHolidayType() > 10 AND is_object( $calculate_policy_obj ) ) {
-				$is_holiday = $this->isHoliday( TTDate::getMiddleDayEpoch( $i ), $calculate_policy_obj );
-			} else {
-				$is_holiday = FALSE;
-			}
-
-			if ( ( $this->getIncludeHolidayType() == 10 AND $this->isActiveFilterDate($i) == TRUE AND $this->isActiveFilterDayOfWeek($i) == TRUE )
-					OR ( ( $this->getIncludeHolidayType() == 20 OR $this->getIncludeHolidayType() == 25 ) AND ( ( $this->isActiveFilterDate($i) == TRUE AND $this->isActiveFilterDayOfWeek($i) == TRUE ) OR $is_holiday == TRUE ) )
-					OR ( $this->getIncludeHolidayType() == 30 AND ( ( $this->isActiveFilterDate($i) == TRUE AND $this->isActiveFilterDayOfWeek($i) == TRUE ) AND $is_holiday == FALSE ) )
-				) {
-				//Debug::text('Active Date/DayOfWeek: '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__, 10);
-
-				return TRUE;
-			}
-
-			//If there is more than one day between $i and $out_epoch, add one day to $i.
-			if ( $i < ( $out_epoch - 86400 ) ) {
-				$i += 86400;
-			} else {
-				//When less than one day untl $out_epoch, skip to $out_epoch and loop once more.
-				$i = $out_epoch;
-				$last_iteration++;
-			}
-		}
-
-		//Debug::text('NOT Active Date/DayOfWeek: '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -1025,8 +1014,107 @@ class ContributingShiftPolicyFactory extends Factory {
 		return FALSE;
 	}
 
+	function isActiveDayOfWeekOrHoliday( $date_epoch, $calculate_policy_obj = NULL ) {
+		Debug::text(' Date: '. TTDate::getDate('DATE+TIME', $date_epoch) .' Include Holiday Type: '. $this->getIncludeHolidayType(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $this->getIncludeHolidayType() > 10 AND is_object( $calculate_policy_obj ) ) {
+			$is_holiday = $this->isHoliday( TTDate::getMiddleDayEpoch( $date_epoch ), $calculate_policy_obj );
+		} else {
+			$is_holiday = FALSE;
+		}
+
+		if ( ( $this->getIncludeHolidayType() == 10 AND $this->isActiveFilterDate($date_epoch) == TRUE AND $this->isActiveFilterDayOfWeek($date_epoch) == TRUE )
+				OR ( ( $this->getIncludeHolidayType() == 20 OR $this->getIncludeHolidayType() == 25 ) AND ( ( $this->isActiveFilterDate($date_epoch) == TRUE AND $this->isActiveFilterDayOfWeek($date_epoch) == TRUE ) OR $is_holiday == TRUE ) )
+				OR ( $this->getIncludeHolidayType() == 30 AND ( ( $this->isActiveFilterDate($date_epoch) == TRUE AND $this->isActiveFilterDayOfWeek($date_epoch) == TRUE ) AND $is_holiday == FALSE ) )
+		) {
+			Debug::text('Active Date/DayOfWeek: '. TTDate::getDate('DATE+TIME', $date_epoch), __FILE__, __LINE__, __METHOD__, 10);
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function isActive( $date_epoch, $in_epoch = NULL, $out_epoch = NULL, $udt_key = NULL, $shift_data = NULL, $calculate_policy_obj = NULL ) {
+		//Debug::text(' Date Epoch: '. $date_epoch .' In: '. $in_epoch .' Out: '. $out_epoch, __FILE__, __LINE__, __METHOD__, 10);
+		//Make sure date_epoch is always specified so we can still determine isActive even if in_epoch/out_epoch are not specified themselves.
+		if ( $date_epoch == '' AND $in_epoch == '' ) {
+			Debug::text(' ERROR: Date/In epoch not specified...', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		//If we're including Full Shift types, try to use the shift start/end time rather than just the start/end time of the UDT record.
+		//Otherwise a shift that spans midnight with daily overtime (being in the next day only) and evening premium set to only include the first day, the premium won't be calculated as it won't match the date.
+		if ( $udt_key != '' AND $this->getIncludeShiftType() >= 200 AND isset($shift_data['user_date_total_key_map'][$udt_key]) ) {
+			$udt_shift_data = ( isset($shift_data['user_date_total_key_map'][$udt_key]) ) ? $shift_data[$shift_data['user_date_total_key_map'][$udt_key]] : FALSE;
+			if ( is_array( $udt_shift_data ) AND isset($udt_shift_data['first_in']) AND isset($udt_shift_data['last_out']) ) {
+				$date_epoch = $calculate_policy_obj->user_date_total[$udt_shift_data['first_in']]->getDateStamp();
+				$in_epoch = $calculate_policy_obj->user_date_total[$udt_shift_data['first_in']]->getStartTimeStamp();
+				$out_epoch = $calculate_policy_obj->user_date_total[$udt_shift_data['last_out']]->getEndTimeStamp();
+			}
+		}
+
+		if ( $date_epoch != '' AND $in_epoch == '' ) {
+			$in_epoch = $date_epoch;
+		}
+
+		if ( $out_epoch == '' ) {
+			$out_epoch = $in_epoch;
+		}
+
+		//Debug::text(' In: '. TTDate::getDate('DATE+TIME', $in_epoch) .' Out: '. TTDate::getDate('DATE+TIME', $out_epoch), __FILE__, __LINE__, __METHOD__, 10);
+		$i = $in_epoch;
+		$last_iteration = 0;
+		//Make sure we loop on the in_epoch, out_epoch and every day inbetween. $last_iteration allows us to always hit the out_epoch.
+		while( $i <= $out_epoch AND $last_iteration <= 1 ) {
+			//Debug::text(' I: '. TTDate::getDate('DATE+TIME', $i) .' Include Holiday Type: '. $this->getIncludeHolidayType(), __FILE__, __LINE__, __METHOD__, 10);
+			$tmp_retval = $this->isActiveDayOfWeekOrHoliday( $i, $calculate_policy_obj );
+			if ( $tmp_retval == TRUE ) {
+				return TRUE;
+			}
+
+			//If there is more than one day between $i and $out_epoch, add one day to $i.
+			if ( $i < ( $out_epoch - 86400 ) ) {
+				$i += 86400;
+			} else {
+				//When less than one day until $out_epoch, skip to $out_epoch and loop once more.
+				$i = $out_epoch;
+				$last_iteration++;
+			}
+		}
+
+		//Debug::text('NOT Active Date/DayOfWeek: '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__, 10);
+
+		return FALSE;
+	}
+
+	function calculateShiftDataOverlapFilterTime( $filter_start_time_stamp, $filter_end_time_stamp, $shift_data, $calculate_policy_obj = NULL ) {
+		if ( is_array($shift_data) ) {
+			if ( isset($shift_data['user_date_total_keys']) ) {
+				foreach( $shift_data['user_date_total_keys'] as $udt_key ) {
+					if ( isset($calculate_policy_obj->user_date_total[$udt_key]) AND is_object($calculate_policy_obj->user_date_total[$udt_key])) {
+						$udt_obj = $calculate_policy_obj->user_date_total[$udt_key];
+
+						//Debug::Text(' UDT Start: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ) .' End: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ) .' Filter: Start: '. TTDate::getDate('DATE+TIME', $filter_start_time_stamp ) .' End: '. TTDate::getDate('DATE+TIME', $filter_end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+						$time_overlap_arr = TTDate::getTimeOverLap($udt_obj->getStartTimeStamp(), $udt_obj->getEndTimeStamp(), $filter_start_time_stamp, $filter_end_time_stamp );
+						if ( is_array($time_overlap_arr) ) {
+							$time_overlap = ( $time_overlap_arr['end_date'] - $time_overlap_arr['start_date'] );
+							if ( !isset($shift_data['total_time_filter_overlap'] ) ) {
+								$shift_data['total_time_filter_overlap'] = 0;
+							}
+							$shift_data['total_time_filter_overlap'] += $time_overlap;
+						}
+					}
+				}
+			}
+
+			return $shift_data;
+		}
+
+		return FALSE;
+	}
+
 	//Check if this time is within the start/end time.
-	function isActiveFilterTime( $in_epoch, $out_epoch, $calculate_policy_obj = NULL ) {
+	function isActiveFilterTime( $in_epoch, $out_epoch, $udt_key = NULL, $shift_data = NULL, $calculate_policy_obj = NULL ) {
 		//Debug::text(' Checking for Active Time with: In: '. TTDate::getDate('DATE+TIME', $in_epoch) .' Out: '. TTDate::getDate('DATE+TIME', $out_epoch), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $in_epoch == '' OR $out_epoch == '' ) {
 			//Debug::text(' Empty time stamps, returning TRUE.', __FILE__, __LINE__, __METHOD__, 10);
@@ -1053,27 +1141,83 @@ class ContributingShiftPolicyFactory extends Factory {
 			//If the premium policy start/end time spans midnight, there could be multiple windows to check
 			//where the premium policy applies, make sure we check all windows.
 			for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
-				//$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getFilterStartTime(), $i);
-				//$tmp_end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), ( $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp ) ) );
-
 				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getFilterStartTime(), $i);
 				$next_i = ( $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp) ); //Get next date to base the end_time_stamp on, and to calculate if we need to adjust for DST.
 				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, ( $next_i + ( TTDate::getDSTOffset( $tmp_start_time_stamp, $next_i ) * -1 ) ) ); //Use $end_time_stamp as it can be modified above due to being near midnight. Also adjust for DST by reversing it.
-				if ( $this->isActive( $tmp_start_time_stamp, $tmp_start_time_stamp, $tmp_end_time_stamp, $calculate_policy_obj ) == TRUE ) {
+				if ( $this->isActive( $tmp_start_time_stamp, $tmp_start_time_stamp, $tmp_end_time_stamp, $udt_key, $shift_data, $calculate_policy_obj ) == TRUE ) {
 					Debug::text(' Checking against Start TimeStamp: '. TTDate::getDate('DATE+TIME', $tmp_start_time_stamp) .'('.$tmp_start_time_stamp.') End TimeStamp: '. TTDate::getDate('DATE+TIME', $tmp_end_time_stamp) .'('.$tmp_end_time_stamp.')', __FILE__, __LINE__, __METHOD__, 10);
-					if ( $this->getIncludePartialShift() == TRUE AND TTDate::isTimeOverLap( $in_epoch, $out_epoch, $tmp_start_time_stamp, $tmp_end_time_stamp) == TRUE ) {
+					if ( $this->getIncludeShiftType() == 100 AND TTDate::isTimeOverLap( $in_epoch, $out_epoch, $tmp_start_time_stamp, $tmp_end_time_stamp) == TRUE ) { //100=Partial Shift
 						//When dealing with partial punches, any overlap whatsoever activates the policy.
 						Debug::text(' Partial Punch Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
-					} elseif ( $this->getIncludePartialShift() == FALSE AND $in_epoch >= $tmp_start_time_stamp AND $in_epoch <= $tmp_end_time_stamp ) {
-						//Non partial punches, they must punch in within the time window.
+					} elseif ( $this->getIncludeShiftType() == 200 AND $in_epoch >= $tmp_start_time_stamp AND $out_epoch <= $tmp_end_time_stamp
+							AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp ) AND $this->isActiveDayOfWeekOrHoliday( $tmp_end_time_stamp ) ) { //200=Full Shift (Must Start & End)
+						//Non partial punches, they must punch in AND out (entire shift) within the time window.
 						Debug::text(' Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
+					} elseif (  getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL
+								AND ( $this->getIncludeShiftType() == 210 OR $this->getIncludeShiftType() == 220 OR $this->getIncludeShiftType() == 230 )
+								AND ( isset($calculate_policy_obj->user_date_total[$udt_key]) AND is_object($calculate_policy_obj->user_date_total[$udt_key]) )
+								AND isset($shift_data['user_date_total_key_map'][$udt_key])
+								AND isset($shift_data[$shift_data['user_date_total_key_map'][$udt_key]]) ) {
+						$tmp_shift_data = $this->calculateShiftDataOverlapFilterTime( $tmp_start_time_stamp, $tmp_end_time_stamp, $shift_data[$shift_data['user_date_total_key_map'][$udt_key]], $calculate_policy_obj );
+						//Debug::Arr($tmp_shift_data, ' Majority Shift Data: UDT Key: '. $udt_key, __FILE__, __LINE__, __METHOD__, 10);
+
+						if ( $this->getIncludeShiftType() == 210 ) { //210=Full Shift (Shift Must Start)
+							if ( isset( $tmp_shift_data['first_in'] )
+									AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']] )
+									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() >= $tmp_start_time_stamp
+									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() <= $tmp_end_time_stamp
+									AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp ) ) {
+								Debug::text( ' Matched within Shift Start Time: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+								return TRUE;
+							}
+//							else {
+//								Debug::text( ' NOT Matched within Shift Start Time: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+//							}
+						} elseif ( $this->getIncludeShiftType() == 220 ) { //220=Full Shift (Shift Must End)
+							if ( isset( $tmp_shift_data['last_out'] )
+									AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']] )
+									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']]->getEndTimeStamp() >= $tmp_start_time_stamp
+									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']]->getEndTimeStamp() <= $tmp_end_time_stamp
+									AND $this->isActiveDayOfWeekOrHoliday( $tmp_end_time_stamp ) ) {
+								Debug::text( ' Matched within Shift End Time: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+								return TRUE;
+							}
+//							else {
+//								Debug::text( ' NOT Matched within Shift End Time: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+//							}
+						} elseif( $this->getIncludeShiftType() == 230 ) { //230=Full Shift (Majority of Shift)
+							//$this->isActiveDayOfWeekOrHoliday( $i );
+							if ( isset( $tmp_shift_data['total_time_filter_overlap'] ) AND $tmp_shift_data['total_time_filter_overlap'] > ( $tmp_shift_data['total_time'] / 2 )
+									AND ( isset( $tmp_shift_data['day_with_most_time'] ) AND $this->isActiveDayOfWeekOrHoliday( $tmp_shift_data['day_with_most_time'] ) ) ) {
+								Debug::text( ' Matched within Majority Shift: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+								return TRUE;
+							} elseif ( isset( $tmp_shift_data['total_time_filter_overlap'] ) AND $tmp_shift_data['total_time_filter_overlap'] == ( $tmp_shift_data['total_time'] / 2 ) ) {
+								Debug::text( ' Shift has 50/50 split: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+								if ( isset( $tmp_shift_data['first_in'] )
+										AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']] )
+										AND $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() >= $tmp_start_time_stamp
+										AND $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() <= $tmp_end_time_stamp
+										AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp ) ) {
+									Debug::text( ' Matched within Majority Shift, 50/50 split: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+									return TRUE;
+								} else {
+									Debug::text( ' NOT Matched within Majority Shift, 50/50 split: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+								}
+							}
+//							else {
+//								Debug::text( ' NOT Matched within Majority Shift: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+//							}
+						}
 					} elseif ( ( $start_time_stamp == '' OR $end_time_stamp == '' OR $start_time_stamp == $end_time_stamp ) ) { //Must go AFTER the above IF statements.
 						//When IncludeHolidayType != 10 this trigger here.
 						Debug::text(' No Start/End Date/Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
-					} //else { //Debug::text(' No match...', __FILE__, __LINE__, __METHOD__, 10);
+					}
+//					else {
+//						Debug::text( ' No match...', __FILE__, __LINE__, __METHOD__, 10 );
+//					}
 				} else {
 					Debug::text(' Not Active on this day: Start: '. TTDate::getDate('DATE+TIME', $tmp_start_time_stamp) .' End: '. TTDate::getDate('DATE+TIME', $tmp_end_time_stamp), __FILE__, __LINE__, __METHOD__, 10);
 				}
@@ -1164,37 +1308,39 @@ class ContributingShiftPolicyFactory extends Factory {
 		$filter_end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), $udt_obj->getStartTimeStamp() ); //Base the end time on day of the in_epoch.
 		//Debug::text(' bChecking for Active Time with: In: '. TTDate::getDate('DATE+TIME', $filter_start_time_stamp ) .' Out: '. TTDate::getDate('DATE+TIME', $filter_end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 
-		//Check if end timestamp is before start, if it is, move end timestamp to next day.
+			//Check if end timestamp is before start, if it is, move end timestamp to next day.
 		if ( $filter_end_time_stamp < $filter_start_time_stamp ) {
-			Debug::text(' Moving End TimeStamp to next day.', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text(' Moving End TimeStamp to next day.', __FILE__, __LINE__, __METHOD__, 10);
 			$filter_end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), ( TTDate::getMiddleDayEpoch($filter_end_time_stamp) + 86400 ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
-		}
+			}
 
-		//Handle the last second of the day, so punches that span midnight like 11:00PM to 6:00AM get a full 1 hour for the time before midnight, rather than 59mins and 59secs.
+			//Handle the last second of the day, so punches that span midnight like 11:00PM to 6:00AM get a full 1 hour for the time before midnight, rather than 59mins and 59secs.
 		if ( TTDate::getHour( $filter_end_time_stamp ) == 23 AND TTDate::getMinute( $filter_end_time_stamp ) == 59 ) {
 			$filter_end_time_stamp = ( TTDate::getEndDayEpoch( $filter_end_time_stamp ) + 1 );
-			Debug::text(' End time stamp is within the last minute of day, make sure we include the last second of the day as well.', __FILE__, __LINE__, __METHOD__, 10);
-		}
+				Debug::text(' End time stamp is within the last minute of day, make sure we include the last second of the day as well.', __FILE__, __LINE__, __METHOD__, 10);
+			}
 
 		if ( $filter_start_time_stamp == $filter_end_time_stamp ) {
-			Debug::text(' Start/End time filters match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text(' Start/End time filters match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
 			return array( $udt_key => $udt_obj );
-		}
+			}
 
 		if ( $udt_obj->getStartTimeStamp() == $udt_obj->getEndTimeStamp() ) {
 			Debug::text(' Start/End time match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
 			return array( $udt_key => $udt_obj );
-		}
+				}
 
 		$split_udt_time_stamps = TTDate::splitDateRangeAtMidnight( $udt_obj->getStartTimeStamp(), $udt_obj->getEndTimeStamp(), $filter_start_time_stamp, $filter_end_time_stamp );
 		if ( is_array($split_udt_time_stamps) AND count($split_udt_time_stamps) > 0 ) {
 			$i = 0;
 			foreach ( $split_udt_time_stamps as $split_udt_time_stamp ) {
+				$tmp_udt_obj = clone $udt_obj; //Make sure we clone the object so we don't modify the original record for all subsequent accesses.
+
 				if ( $i > 0 ) {
 					$udt_key = $calculate_policy_obj->user_date_total_insert_id;
+					$tmp_udt_obj->setId( 0 ); //Reset the object ID to 0 for all but the first record, so it can be inserted as new rather than update/overwrite existing records.
 				}
 
-				$tmp_udt_obj = clone $udt_obj; //Make sure we clone the object so we don't modify the original record for all subsequent accesses.
 				$tmp_udt_obj->setStartTimeStamp( $split_udt_time_stamp['start_time_stamp'] );
 				$tmp_udt_obj->setEndTimeStamp( $split_udt_time_stamp['end_time_stamp'] );
 
@@ -1213,7 +1359,6 @@ class ContributingShiftPolicyFactory extends Factory {
 				}
 
 				$retarr[$udt_key] = $tmp_udt_obj;
-
 				$calculate_policy_obj->user_date_total_insert_id--;
 
 				$i++;
@@ -1332,6 +1477,30 @@ class ContributingShiftPolicyFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by premium policies') );
 			}
+
+			$hplf = TTNew('HolidayPolicyListFactory');
+			$hplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
+			if ( $hplf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE(	'in_use',
+											 FALSE,
+											 TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by holiday policies') );
+			}
+
+			$aplf = TTNew('AccrualPolicyListFactory');
+			$aplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
+			if ( $aplf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE(	'in_use',
+											 FALSE,
+											 TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by accrual policies') );
+			}
+
+			$pfplf = TTNew('PayFormulaPolicyListFactory');
+			$pfplf->getByCompanyIdAndContributingShiftPolicyId( $this->getCompany(), $this->getId() );
+			if ( $pfplf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE(	'in_use',
+											 FALSE,
+											 TTi18n::gettext('This contributing shift policy is currently in use') .' '. TTi18n::gettext('by pay formula policies') );
+			}
 		}
 
 		return TRUE;
@@ -1400,6 +1569,7 @@ class ContributingShiftPolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

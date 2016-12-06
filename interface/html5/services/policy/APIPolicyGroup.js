@@ -43,6 +43,10 @@ var APIPolicyGroup = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'copyPolicyGroup', arguments );
 
+	},
+
+	exportPolicyGroup: function() {
+		return this.argumentsHandler( this.className, 'exportPolicyGroup', arguments );
 	}
 
 } );

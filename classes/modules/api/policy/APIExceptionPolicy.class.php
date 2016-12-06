@@ -81,6 +81,7 @@ class APIExceptionPolicy extends APIFactory {
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}

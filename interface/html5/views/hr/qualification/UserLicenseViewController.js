@@ -7,8 +7,8 @@ UserLicenseViewController = BaseViewController.extend( {
 	qualification_group_array: null,
 
 	qualification_array: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserLicenseEditView.html';
 		this.permission_id = 'user_license';
 		this.viewId = 'UserLicense';
@@ -62,7 +62,6 @@ UserLicenseViewController = BaseViewController.extend( {
 		this.setDefaultMenu();
 	},
 
-
 	onGridSelectAll: function() {
 		if ( this.sub_view_mode ) {
 			this.buildContextMenu( true );
@@ -72,7 +71,7 @@ UserLicenseViewController = BaseViewController.extend( {
 	},
 
 	cancelOtherSubViewSelectedStatus: function() {
-		switch( true ) {
+		switch ( true ) {
 			case typeof( this.parent_view_controller.sub_user_skill_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_skill_view_controller.unSelectAll();
 			case typeof( this.parent_view_controller.sub_user_membership_view_controller ) !== 'undefined':
@@ -119,55 +118,61 @@ UserLicenseViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
-		this.api['getCommon' + this.api.key_name + 'Data']( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			$this.unique_columns = {};
+				$this.unique_columns = {};
 
-			$this.linked_columns = {};
+				$this.linked_columns = {};
 
-			if ( !result_data ) {
-				result_data = [];
+				if ( !result_data ) {
+					result_data = [];
+				}
+
+				if ( $this.sub_view_mode && $this.parent_key ) {
+					result_data[$this.parent_key] = $this.parent_value;
+				}
+
+				$this.current_edit_record = result_data;
+				$this.initEditView();
+
 			}
-
-			if ( $this.sub_view_mode && $this.parent_key ) {
-				result_data[$this.parent_key] = $this.parent_value;
-			}
-
-			$this.current_edit_record = result_data;
-			$this.initEditView();
-
-		}} );
+		} );
 
 	},
 
 	initOptions: function() {
 		var $this = this;
 
-		this.qualification_group_api.getQualificationGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.qualification_group_api.getQualificationGroup( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			res = Global.buildTreeRecord( res );
-			$this.qualification_group_array = res;
+				res = Global.buildTreeRecord( res );
+				$this.qualification_group_array = res;
 
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+				}
+
 			}
-
-		}} );
+		} );
 
 		var args = {};
 		var filter_data = {};
 		filter_data.type_id = [30];
 		args.filter_data = filter_data;
-		this.qualification_api.getQualification( args, {onResult: function( res ) {
-			res = res.getResult();
+		this.qualification_api.getQualification( args, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			$this.qualification_array = res;
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['qualification_id'] ) {
-				$this.basic_search_field_ui_dic['qualification_id'].setSourceData( res );
+				$this.qualification_array = res;
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['qualification_id'] ) {
+					$this.basic_search_field_ui_dic['qualification_id'].setSourceData( res );
+				}
 			}
-		}} );
+		} );
 
 	},
 
@@ -209,8 +214,6 @@ UserLicenseViewController = BaseViewController.extend( {
 			'tab_attachment': $.i18n._( 'Attachments' ),
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
-
-
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserLicense' )),
@@ -301,7 +304,8 @@ UserLicenseViewController = BaseViewController.extend( {
 		default_args.permission_section = 'user_license';
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
@@ -310,9 +314,11 @@ UserLicenseViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'License Type' ),
+			new SearchField( {
+				label: $.i18n._( 'License Type' ),
 				in_column: 1,
 				field: 'qualification_id',
 				layout_name: ALayoutIDs.QUALIFICATION,
@@ -320,9 +326,11 @@ UserLicenseViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
@@ -330,41 +338,51 @@ UserLicenseViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Tags' ),
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
 				adv_search: false,
 				in_column: 1,
 				object_type_id: 253,
-				form_item_type: FormItemType.TAG_INPUT} ),
+				form_item_type: FormItemType.TAG_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'License Number' ),
+			new SearchField( {
+				label: $.i18n._( 'License Number' ),
 				in_column: 2,
 				field: 'license_number',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'License Issued Date' ),
+			new SearchField( {
+				label: $.i18n._( 'License Issued Date' ),
 				in_column: 2,
 				field: 'license_issued_date',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'License Expiry Date' ),
+			new SearchField( {
+				label: $.i18n._( 'License Expiry Date' ),
 				in_column: 2,
 				field: 'license_expiry_date',
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -372,9 +390,11 @@ UserLicenseViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -382,7 +402,8 @@ UserLicenseViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -482,32 +503,18 @@ UserLicenseViewController = BaseViewController.extend( {
 
 	}
 
-
-
 } );
-
-UserLicenseViewController.loadView = function() {
-
-	Global.loadViewSource( 'UserLicense', 'UserLicenseView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};
 
 UserLicenseViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserLicense', 'SubUserLicenseView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_user_license_view_controller );
 			}

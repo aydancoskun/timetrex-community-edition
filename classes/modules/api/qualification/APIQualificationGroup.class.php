@@ -107,6 +107,7 @@ class APIQualificationGroup extends APIFactory {
 
 				$this->setPagerObject( $qglf );
 
+				$retarr = array();
 				foreach( $qglf as $ug_obj ) {
 					$retarr[] = $ug_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']	 );
 
@@ -412,6 +413,7 @@ class APIQualificationGroup extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				$src_rows[$key]['parent_id'] = $dst_id;
 			}
+			unset($row); //code standards
 			Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setQualificationGroup( $src_rows ); //Save copied rows

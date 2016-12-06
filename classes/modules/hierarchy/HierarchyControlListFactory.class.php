@@ -139,7 +139,8 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-
+		
+		$list = array();
 		if ( $object_sorted_array == FALSE AND $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -149,23 +150,23 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 
 		foreach ($lf as $obj) {
 			if ( isset($valid_object_type_ids[$obj->getColumn('object_type_id')])) {
-				if ( $object_sorted_array == TRUE ) {
+			if ( $object_sorted_array == TRUE ) {
 					if ( $include_blank == TRUE AND !isset( $list[$obj->getColumn( 'object_type_id' )][0] ) ) {
 						$list[$obj->getColumn( 'object_type_id' )][0] = '--';
-					}
-
-					if ( $include_name == TRUE ) {
-						$list[$obj->getColumn( 'object_type_id' )][$obj->getID()] = $obj->getName();
-					} else {
-						$list[$obj->getColumn( 'object_type_id' )] = $obj->getID();
-					}
-				} else {
-					$list[$obj->getID()] = $obj->getName();
 				}
+
+				if ( $include_name == TRUE ) {
+						$list[$obj->getColumn( 'object_type_id' )][$obj->getID()] = $obj->getName();
+				} else {
+						$list[$obj->getColumn( 'object_type_id' )] = $obj->getID();
+				}
+			} else {
+				$list[$obj->getID()] = $obj->getName();
 			}
 		}
+		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -203,7 +204,7 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 							AND a.deleted = 0
 				';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 

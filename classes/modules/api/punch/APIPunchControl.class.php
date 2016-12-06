@@ -53,7 +53,6 @@ class APIPunchControl extends APIFactory {
 	 * @return array
 	 */
 	function getPunchControlDefaultData() {
-		$company_obj = $this->getCurrentCompanyObject();
 
 		Debug::Text('Getting punch_control default data...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -90,6 +89,7 @@ class APIPunchControl extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 

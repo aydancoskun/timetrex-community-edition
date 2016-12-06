@@ -105,6 +105,7 @@ class APIUserEducation extends APIFactory {
 
 			$this->setPagerObject( $uelf );
 
+			$retarr = array();
 			foreach( $uelf as $s_obj ) {
 			
 				$retarr[] = $s_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']	);
@@ -120,6 +121,10 @@ class APIUserEducation extends APIFactory {
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
+	function exportUserEducation( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getUserEducation( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_education', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
 	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.
 	 * @param array $data filter data
@@ -376,6 +381,7 @@ class APIUserEducation extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id']); //Clear fields that can't be copied				
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setUserEducation( $src_rows ); //Save copied rows

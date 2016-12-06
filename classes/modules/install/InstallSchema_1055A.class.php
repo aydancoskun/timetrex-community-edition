@@ -62,7 +62,10 @@ class InstallSchema_1055A extends InstallSchema_Base {
 					if	( $pseallf->getRecordCount() > 0 ) {
 						$psea_obj = $pseallf->getCurrent();
 					} else {
+						// @codingStandardsIgnoreStart
 						Debug::text('Failed getting PayStubEntryLink for Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
+						//leaving  debugging in place.
+						// @codingStandardsIgnoreEnd
 						continue;
 					}
 

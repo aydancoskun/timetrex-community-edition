@@ -155,7 +155,7 @@ class AccrualPolicyMilestoneListFactory extends AccrualPolicyMilestoneFactory im
 					where	accrual_policy_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 

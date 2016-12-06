@@ -104,6 +104,7 @@ class APIQualification extends APIFactory {
 
 			$this->setPagerObject( $qlf );
 
+			$retarr = array();
 			foreach( $qlf as $q_obj ) {
 			
 				$retarr[] = $q_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']	);
@@ -117,6 +118,17 @@ class APIQualification extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportQualification( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getQualification( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_qualification', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

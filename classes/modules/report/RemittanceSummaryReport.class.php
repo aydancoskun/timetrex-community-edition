@@ -192,7 +192,7 @@ class RemittanceSummaryReport extends Report {
 										'-2081-cpp_total' => TTi18n::gettext('CPP'),
 										'-2082-expected_cpp_total' => TTi18n::gettext('Expected CPP'),
 										'-2083-expected_cpp_total_diff' => TTi18n::gettext('Expected CPP Difference'),
-										
+
 										'-2090-tax_total' => TTi18n::gettext('Tax'),
 										'-2100-gross_payroll' => TTi18n::gettext('Gross Pay'),
 										'-2200-expected_total_diff' => TTi18n::gettext('Expected Difference'),
@@ -253,7 +253,7 @@ class RemittanceSummaryReport extends Report {
 				$template = strtolower( Misc::trimSortPrefix( $params['template'] ) );
 
 				$retval['columns'] = array();
-				
+
 				if ( isset($template) AND $template != '' ) {
 					switch( $template ) {
 						case 'default':
@@ -288,7 +288,7 @@ class RemittanceSummaryReport extends Report {
 										//Sort
 										case 'pier':
 											$retval['-1010-time_period']['time_period'] = 'this_year';
-											
+
 											$retval['columns'][] = 'first_name';
 											$retval['columns'][] = 'last_name';
 											$retval['columns'][] = 'ei_total_earnings';
@@ -508,7 +508,6 @@ class RemittanceSummaryReport extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'user' => array(), 'pay_stub_entry' => array(), 'pay_period' => array() );
 
-		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 
@@ -519,7 +518,7 @@ class RemittanceSummaryReport extends Report {
 		}
 
 		$this->user_ids = array();
-
+		$gross_payroll_psea_ids = array();
 		if ( isset($form_data['gross_payroll']['include_pay_stub_entry_account']) AND is_array($form_data['gross_payroll']['include_pay_stub_entry_account']) ) {
 			$gross_payroll_psea_ids['include'] = $form_data['gross_payroll']['include_pay_stub_entry_account'];
 			$gross_payroll_psea_ids['exclude'] = $form_data['gross_payroll']['exclude_pay_stub_entry_account'];
@@ -530,13 +529,16 @@ class RemittanceSummaryReport extends Report {
 
 		$cdlf = TTnew( 'CompanyDeductionListFactory' );
 		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
+		$tax_deductions = array();
+		$tax_deduction_users = array();
+		$user_deduction_data = array();
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $cd_obj ) {
 				//Debug::Text('Company Deduction: ID: '. $cd_obj->getID() .' Name: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( in_array( $cd_obj->getCalculation(), array(90, 91) ) ) { //Only consider EI/CPP Formulas
 					$tax_deductions[$cd_obj->getId()] = $cd_obj;
 					$tax_deduction_users[$cd_obj->getId()] = $cd_obj->getUser(); //Optimization so we don't have to get assigned users more than once per obj, as its used lower down in a tighter loop.
-					
+
 					//Need to determine start/end dates for each CompanyDeduction/User pair, so we can break down total wages earned in the date ranges.
 					$udlf = TTnew( 'UserDeductionListFactory' );
 					$udlf->getByCompanyIdAndCompanyDeductionId( $cd_obj->getCompany(), $cd_obj->getId() );
@@ -606,7 +608,7 @@ class RemittanceSummaryReport extends Report {
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings'] = 0;
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_total_earnings'] = 0;
-						
+
 						//If we exclude earnings when no CPP/EI deductions are calculated, this improves accuracy for employees who
 						//  opt in/out of EI/CPP throughout the year (ie: not eligible due to age), however it doesn't catch
 						//  cases when the employee should have had something deducted but didnt.
@@ -614,7 +616,7 @@ class RemittanceSummaryReport extends Report {
 						//  but does on other amounts.
 						//  There is no way to be accurate for both cases at this stage, so we will ignore age eligiblity for now.
 						//  Taking into account the user deduction start/end dates will be the best way to handle CPP/EI start/end calculations.
-						if ( is_array($data_b['psen_ids']) AND isset($tax_deductions) AND isset($user_deduction_data) ) {
+						if ( is_array($data_b['psen_ids']) AND empty($tax_deductions) == FALSE AND isset($user_deduction_data) ) {
 							//Support multiple tax/deductions that deposit to the same pay stub account.
 							//Also make sure we handle tax/deductions that may not have anything deducted/withheld, but do have wages to be displayed.
 							//  For example an employee not earning enough to have tax taken off yet.
@@ -632,7 +634,7 @@ class RemittanceSummaryReport extends Report {
 
 										if ( $tax_deduction_obj->getCalculation() == 90 AND in_array( $tax_deduction_obj->getPayStubEntryAccount(), (array)$form_data['cpp']['include_pay_stub_entry_account'] ) AND ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings']) OR ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings']) AND $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings'] == 0 ) ))  {
 											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_total_earnings'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $tax_deduction_obj->getIncludePayStubEntryAccount(), $tax_deduction_obj->getExcludePayStubEntryAccount() );
-											
+
 											$this->tmp_data['pay_period_ids']['cpp'][$user_id][] = $data_b['pay_period_id']; //Only count pay periods with CPP earnings.
 										}
 
@@ -666,18 +668,20 @@ class RemittanceSummaryReport extends Report {
 					$this->tmp_data['pay_period_schedule'][(int)$pps_obj->getColumn('user_id')] = $pps_obj->getAnnualPayPeriods();
 				}
 			}
-			
+
 			require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
 			$pd_obj = new PayrollDeduction( 'CA', 'BC' ); //Province doesn't matter as its just for federal calculations.
 			$pd_obj->setDate( $final_date_stamp );
 			Debug::Text(' Payroll Deduction Date: '. TTDate::getDate('DATE+TIME', $final_date_stamp ) .' EI Max Earnings: '. $pd_obj->getEIMaximumEarnings(), __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			//Calculate expected EI/CPP values only for the very last pay period.
 			if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
 				foreach($this->tmp_data['pay_stub_entry'] as $user_id => $data_a) {
 					ksort($data_a);
-					$first_date_stamp = array_shift( array_keys( $data_a ) );
-					$last_date_stamp = array_pop( array_keys( $data_a ) );
+					//$first_date_stamp = array_shift( array_keys( $data_a ) ); //These cause: "Only variables should be passed by reference" warnings in PHP v7
+					//$last_date_stamp = array_pop( array_keys( $data_a ) ); //These cause: "Only variables should be passed by reference" warnings in PHP v7
+					$first_date_stamp = key( array_slice( $data_a, 0, 1, TRUE ) );
+					$last_date_stamp = key( array_slice( $data_a, -1, 1, TRUE ) );
 
 					$tmp_total_cpp_pay_periods = count( array_unique( $this->tmp_data['pay_period_ids']['cpp'][$user_id] ) );
 					if ( $tmp_total_cpp_pay_periods < 1 ) {
@@ -718,7 +722,7 @@ class RemittanceSummaryReport extends Report {
 
 					$this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_total_diff'] = ( $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_cpp_total_diff'] + $this->tmp_data['pay_stub_entry'][$user_id][$last_date_stamp]['expected_ei_total_diff'] );
 				}
-				unset($first_date_stamp, $last_date_stamp, $tmp_total_pay_periods, $tmp_cpp_pro_rate, $tmp_gross_payroll, $tmp_cpp_total_earnings, $tmp_ei_total_earnings, $tmp_cpp_total, $tmp_ei_total, $tmp_cpp_total_deducted, $tmp_ei_total_deducted, $user_id, $data_a);
+				unset($first_date_stamp, $last_date_stamp, $tmp_cpp_pro_rate, $tmp_gross_payroll, $tmp_cpp_total_earnings, $tmp_ei_total_earnings, $tmp_cpp_total, $tmp_ei_total, $tmp_cpp_total_deducted, $tmp_ei_total_deducted, $user_id, $data_a);
 			}
 		}
 		//Debug::Arr($this->tmp_data['pay_stub_entry'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -759,7 +763,7 @@ class RemittanceSummaryReport extends Report {
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3);
+			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1);
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -807,7 +811,6 @@ class RemittanceSummaryReport extends Report {
 				$this->pdf->setFillColor(240); //Grayscale only.
 
 				$column_widths = $this->_pdf_getTableColumnWidths( $this->getLargestColumnData( array_intersect_key($column_options, (array)$columns) ), $this->config['other']['layout']['header'] ); //Table largest column data;
-				$cell_height = $this->_pdf_getMaximumHeightFromArray( $columns, $column_options, $column_widths, $this->config['other']['table_header_word_wrap'], $this->_pdf_fontSize( $header_layout['height'] ) );
 				$column_widths['due_date'] -= 1; //Fix bug with column header extending too far.
 				foreach( $columns as $column => $tmp ) {
 					if ( isset($column_options[$column]) AND isset($column_widths[$column]) ) {
@@ -823,6 +826,7 @@ class RemittanceSummaryReport extends Report {
 						Debug::Text(' Invalid Column: '. $column, __FILE__, __LINE__, __METHOD__, 10);
 					}
 				}
+				unset($tmp); //code standards
 				$this->pdf->Ln();
 
 				$this->_pdf_drawLine( 0.75 ); //Slightly smaller than first/last lines.
@@ -885,7 +889,7 @@ class RemittanceSummaryReport extends Report {
 				$this->pdf->setLineWidth( 1 );
 
 				$this->pdf->writeHTMLcell( 100, 5, ( ( $this->pdf->getPageWidth() - 100 ) / 2 ), $this->pdf->getY(), '<a href="http://www.timetrex.com/r.php?id=10100">PAY ONLINE NOW</>', 1, 0, FALSE, TRUE, 'C');
-								
+
 				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
 				$this->pdf->SetTextColor(0);
 				$this->pdf->SetDrawColor(0);
@@ -942,6 +946,7 @@ class RemittanceSummaryReport extends Report {
 					Debug::Text(' Invalid Column: '. $column, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
+			unset($tmp); //code standards
 			$this->html .= '</tr>';
 			$this->form_data['pay_period'] = array_unique( (array)$this->form_data['pay_period'] );
 			ksort( $this->form_data['pay_period'] );

@@ -46,9 +46,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-    public function setUp() {
+	public function setUp() {
 		global $dd;
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
@@ -56,7 +56,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -96,16 +96,16 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//$this->deleteAllSchedules();
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
 	function getPayStubAccountLinkArray() {
 		$this->pay_stub_account_link_arr = array(
@@ -193,7 +193,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setStartWeekDay( 0 );
 
 
-		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) ); //Start 6 weeks ago
+		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) ); //Start 6 weeks ago
 
 		$ppsf->setAnchorDate( $anchor_date );
 
@@ -204,14 +204,14 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTimeZone('PST8PDT');
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4*3600) );
-		$ppsf->setMaximumShiftTime( (16*3600) );
+		$ppsf->setNewDayTriggerTime( (4 * 3600) );
+		$ppsf->setMaximumShiftTime( (16 * 3600) );
 		$ppsf->setShiftAssignedDay( $shift_assigned_day );
 
 		$ppsf->setEnableInitialPayPeriods( FALSE );
 		if ( $ppsf->isValid() ) {
 			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$ppsf->setUser( array($this->user_id) );
 			$ppsf->Save();
@@ -221,7 +221,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 
@@ -241,22 +241,22 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 						$end_date = $initial_date;
 					} else {
 						//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-						$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+						$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) );
 					}
 				} else {
-					$end_date = $end_date + ( (86400*14) );
+					$end_date = ($end_date + ( (86400 * 14) ));
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
 
 		return TRUE;
 	}
-	
+
 	function createMealPolicy( $type_id ) {
 		$mpf = TTnew( 'MealPolicyFactory' );
 
@@ -266,23 +266,23 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			case 10: //60min auto-deduct.
 				$mpf->setName( '60min (AutoDeduct)' );
 				$mpf->setType( 10 ); //AutoDeduct
-				$mpf->setTriggerTime( (3600*5) );
+				$mpf->setTriggerTime( (3600 * 5) );
 				$mpf->setAmount( 3600 );
-				$mpf->setStartWindow( (3600*4) );
-				$mpf->setWindowLength( (3600*2) );
+				$mpf->setStartWindow( (3600 * 4) );
+				$mpf->setWindowLength( (3600 * 2) );
 				break;
 		}
 
 		$mpf->setPayCode( $this->policy_ids['pay_code'][100] );
-		
+
 		if ( $mpf->isValid() ) {
 			$insert_id = $mpf->Save();
-			Debug::Text('Meal Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Meal Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Meal Policy!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Meal Policy!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -294,18 +294,18 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$spf->setName( 'Schedule Policy' );
 		$spf->setFullShiftAbsencePolicyID( $full_shift_absence_policy_id );
 		$spf->setPartialShiftAbsencePolicyID( $partial_shift_absence_policy_id );
-		$spf->setStartStopWindow( (3600*2) );
+		$spf->setStartStopWindow( (3600 * 2) );
 
 		if ( $spf->isValid() ) {
 			$insert_id = $spf->Save(FALSE);
 
 			$spf->setMealPolicy( $meal_policy_id );
-			Debug::Text('Schedule Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Schedule Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Schedule Policy!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Schedule Policy!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -348,9 +348,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			$start_time = strtotime( $data['start_time'], $date_stamp ) ;
 		}
 		if ( $data['end_time'] != '') {
-			Debug::Text('End Time: '. $data['end_time'] .' Date Stamp: '. $date_stamp , __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('End Time: '. $data['end_time'] .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
 			$end_time = strtotime( $data['end_time'], $date_stamp ) ;
-			Debug::Text('bEnd Time: '. $data['end_time'] .' - '. TTDate::getDate('DATE+TIME',$data['end_time']) , __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('bEnd Time: '. $data['end_time'] .' - '. TTDate::getDate('DATE+TIME', $data['end_time']), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$sf->setStartTime( $start_time );
@@ -359,12 +359,12 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		if ( $sf->isValid() ) {
 			$sf->setEnableReCalculateDay(TRUE);
 			$insert_id = $sf->Save();
-			Debug::Text('Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Schedule!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Schedule!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -428,7 +428,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 
 		return $date_totals;
 	}
-	
+
 	function getPunchDataArray( $start_date, $end_date ) {
 		$plf = new PunchListFactory();
 
@@ -483,11 +483,11 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			$accrual_balance = 0;
 		}
 
-		Debug::Text('&nbsp;&nbsp; Current Accrual Balance: '. $accrual_balance, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('&nbsp;&nbsp; Current Accrual Balance: '. $accrual_balance, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $accrual_balance;
 	}
-	
+
 	/*
 	 Tests:
 		- Spanning midnight
@@ -518,9 +518,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
-			$this->assertEquals( (8*3600),  $s_obj->getTotalTime() );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -538,7 +538,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getBeginWeekEpoch( time() ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginWeekEpoch( time() )+(86400*1.5); //Use current year, handle DST.
+		$date_epoch2 = (TTDate::getBeginWeekEpoch( time() ) + (86400 * 1.5)); //Use current year, handle DST.
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -554,9 +554,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
-			$this->assertEquals( $date_stamp2,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
-			$this->assertEquals( (8*3600),  $s_obj->getTotalTime() );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp2, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -588,9 +588,47 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
-			$this->assertEquals( $date_stamp2,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
-			$this->assertEquals( (9*3600),  $s_obj->getTotalTime() );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp2, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (9 * 3600), $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		return TRUE;
+	}
+
+	//DST time should be recorded based on the time the employee actually works, therefore one hour more on this day.
+	function testScheduleDSTFallB() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods( strtotime('01-Jan-2013') );
+		$this->getAllPayPeriods();
+
+		$date_epoch = strtotime('05-Nov-2016'); //Use current year
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$date_epoch2 = strtotime('05-Nov-2016'); //Use current year
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
+		TTDate::setTimeFormat('g:i A T');
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => 0,
+				//'start_time' => '6:00PM PDT', //These will fail due to parsing PDT/PST -- ALSO SEE: test_DST() regarding the "quirk" about PST date parsing.
+				//'end_time' => '6:00AM PST', //These will fail due to parsing PDT/PST -- ALSO SEE: test_DST() regarding the "quirk" about PST date parsing.
+				'start_time' => '6:00PM America/Vancouver',
+				'end_time' => '6:00AM America/Vancouver',
+		) );
+		TTDate::setTimeFormat('g:i A');
+
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $schedule_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( '05-Nov-16',  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( '06-Nov-16',  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (13*3600),  $s_obj->getTotalTime() ); //6PM -> 6AM = 12hrs, plus 1hr DST.
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -622,9 +660,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
-			$this->assertEquals( $date_stamp2,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
-			$this->assertEquals( (7*3600),  $s_obj->getTotalTime() );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp2, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (7 * 3600), $s_obj->getTotalTime() );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -672,9 +710,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
-			$this->assertEquals( (8*3600),  $s_obj->getTotalTime() );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -706,19 +744,19 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (7*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (7 * 3600) );
 		//Absence Time
 		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 25 ); //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (1*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (1 * 3600) );
 		//Absence Time
 		$this->assertEquals( $udt_arr[$date_epoch][3]['object_type_id'], 50 ); //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (1 * 3600) );
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 4 );
@@ -812,9 +850,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
-			$this->assertEquals( (8*3600),  $s_obj->getTotalTime() );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -846,11 +884,11 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (7*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (7 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 20 ); //Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //Regular Time
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (7*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (7 * 3600) );
 		//Absence Time
 		//$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 25 ); //Absence
 		//$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
@@ -898,7 +936,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
-		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10] , 0 ); //Full Shift Undertime
+		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
 		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
 																	'schedule_policy_id' => $schedule_policy_id,
 																	'start_time' => ' 8:00AM',
@@ -909,9 +947,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
-			$this->assertEquals( $date_stamp,  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
-			$this->assertEquals( (8*3600),  $s_obj->getTotalTime() );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -923,15 +961,15 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
 		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		//Absence Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 25 ); //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
 		//Absence Time
 		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 50 ); //Absence
 		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $this->policy_ids['pay_code'][900] ); //Absence
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (8 * 3600) );
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );

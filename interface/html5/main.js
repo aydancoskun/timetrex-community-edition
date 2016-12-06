@@ -4,6 +4,7 @@ require.config( {
 	urlArgs: 'v=' + APIGlobal.pre_login_data.application_build,
 
 	paths: {
+		'async': 'framework/require_async_plugin',
 		'jquery_cookie': 'framework/jquery.cookie',
 		'jquery_json': 'framework/jquery.json',
 		'jquery_tablednd': 'framework/jquery.tablednd',
@@ -49,6 +50,7 @@ require.config( {
 		'TImageAdvBrowser': 'global/widgets/filebrowser/TImageAdvBrowser',
 		'TImage': 'global/widgets/filebrowser/TImage',
 		'TImageCutArea': 'global/widgets/filebrowser/TImageCutArea',
+		'TColorPicker': 'global/widgets/color-picker/TColorPicker',
 		'CameraBrowser': 'global/widgets/filebrowser/CameraBrowser',
 		'InsideEditor': 'global/widgets/inside_editor/InsideEditor',
 		'ErrorTipBox': 'global/widgets/error_tip/ErrorTipBox',
@@ -96,8 +98,16 @@ require.config( {
 		'interact': 'framework/interact.min',
 		'jquery.sortable': 'framework/jquery.sortable',
 		'Global': 'global/Global',
-		'LocalCacheData': 'global/LocalCacheData'
+		'LocalCacheData': 'global/LocalCacheData',
+		'nanobar': 'framework/nanobar.min',
 
+		'leaflet': 'framework/leaflet/leaflet',
+		'leaflet-timetrex': 'framework/leaflet/leaflet-timetrex',
+		'leaflet-providers': 'framework/leaflet/leaflet-providers/leaflet-providers',
+		'leaflet-routing': 'framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.min',
+		'leaflet-draw': 'framework/leaflet/leaflet-draw/leaflet.draw',
+
+		'measurement': 'framework/measurement',
 	},
 
 	shim: {
@@ -126,11 +136,24 @@ require.config( {
 		},
 		'IndexController': {
 			deps: ['BaseWizardController']
-		}
+		},
+		'leaflet-providers': {
+			deps: ['leaflet']
+		},
+		'leaflet-routing': {
+			deps: ['leaflet']
+		},
+		'leaflet-draw': {
+			deps: ['leaflet']
+		},
+		'leaflet-timetrex': {
+			deps: ['leaflet','leaflet-draw','leaflet-routing','leaflet-providers']
+		},
 	}
 } );
 
 require( [
+	'async',
 	'jquery-ui.custom.min',
 	'jquery.i18n',
 	'jquery_ba_resize',
@@ -147,7 +170,7 @@ require( [
 	'TComboBox',
 	'ProgressBarManager',
 	'TAlertManager',
-	'sonic'
+	'sonic',
 ], function() {
 	if ( window.sessionStorage ) {
 		LocalCacheData.isSupportHTML5LocalCache = true;
@@ -209,8 +232,9 @@ require( [
 
 		$( 'body' ).unbind( 'keydown' ).bind( 'keydown', function( e ) {
 
-			if ( e.keyCode === 27 || e.keyCode === 13 ) {
-				//Mouse down to collect data so for some actions like search can read select data in its click event
+			//Tab key must go to next search text field if a search text field is selected, otherwise, tab closes awesomebox.
+			//This allows consistent ui experience between awesomebox and default form input controls.
+			if ( e.keyCode === 27 || e.keyCode === 13 || ( e.keyCode === 9 && e.target.type != 'text' ) ) {
 				if ( LocalCacheData.openAwesomeBox ) {
 					LocalCacheData.openAwesomeBox.onClose();
 				}
@@ -284,9 +308,16 @@ require( [
 		$( 'body' ).unbind( 'mousedown' ).bind( 'mousedown', function( e ) {
 
 
-			// MUST COLLLECT DATA WHEN MOUSE down, otherwise when do save in edit view when awesomebox open, the data can't be saved.
-			//Mouse down to collect data so for some actions like search can read select data in its click event
+			// MUST COLLECT DATA WHEN MOUSE down, otherwise when do save in edit view when awesomebox open, the data can't be saved.
+			// Mouse down to collect data so for some actions like search can read select data in its click event
 			if ( LocalCacheData.openAwesomeBox && LocalCacheData.openAwesomeBox.getADropDown().has( e.target ).length < 1 ) {
+				if ( $( e.target ).hasClass( 'a-combobox' ) ) {
+					var target = LocalCacheData.openAwesomeBox;
+					$( e.target ).unbind( 'mouseup' ).bind( 'mouseup', function( e ) {
+						target.find( '.focus-input' ).focus();
+						$( e.target ).unbind( 'mouseup' );
+					} );
+				}
 				LocalCacheData.openAwesomeBox.onClose();
 			}
 
@@ -377,7 +408,7 @@ require( [
 			//Optimization: Only change locale if its *not* en_US or enable_default_language_translation = TRUE
 			if ( loginData.locale !== 'en_US' || loginData.enable_default_language_translation == true ) {
 				Global.loadLanguage( loginData.locale );
-				Global.log( 'Using Locale: ' + loginData.locale );
+				Debug.Text( 'Using Locale: ' + loginData.locale, 'main.js', '', 'initApps', 1 );
 			} else {
 				LocalCacheData.setI18nDic( {} );
 			}
@@ -477,9 +508,11 @@ require( [
 
 	} );
 
+
 	function loadViewRequiredJS() {
 		LocalCacheData.loadViewRequiredJSReady = false;
 		require( [
+			'nanobar',
 			'jquery_json',
 			'stacktrace',
 			'html2canvas',
@@ -538,8 +571,10 @@ require( [
 			'BaseWizardController',
 			'UserGenericStatusWindowController',
 			'ReportBaseViewController',
-			'Paging2'
-		], function() {
+			'Paging2',
+            'TColorPicker',
+		], function( Nanobar ) {
+			window.Nanobar = Nanobar;
 			LocalCacheData.loadViewRequiredJSReady = true;
 		} )
 	}
@@ -616,4 +651,4 @@ require.onError = function( err ) {
 		//Stop error from bubbling up.
 		delete err;
 	}
-}
+};

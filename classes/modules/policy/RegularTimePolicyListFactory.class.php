@@ -388,7 +388,6 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		$uf = new UserFactory();
 		$pgf = new PolicyGroupFactory();
 		$cgmf = new CompanyGenericMapFactory();
-		$spf = new SchedulePolicyFactory();
 
 		$ph = array(
 					'company_id' => (int)$company_id,

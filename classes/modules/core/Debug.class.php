@@ -300,6 +300,7 @@ class Debug {
 			$method = '[Function]';
 		}
 
+		$text_arr = array();
 		$text_arr[] = 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms] Array: '. $method .'(): '. $text ."\n";
 		$text_arr = array_merge( $text_arr, self::splitInput( self::varDump($array), NULL, "\n" ) );
 		$text_arr[] = "\n";
@@ -450,7 +451,7 @@ class Debug {
 						$output .= $arr[1];
 					}
 				}
-
+				
 				$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '.getmypid().') ]---------------'.$eol;
 
 				if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {

@@ -143,7 +143,7 @@ class DependencyTree {
 
 	private function deleteOrphanRequireIDs() {
 		if ( is_array( $this->raw_data ) ) {
-			foreach( $this->raw_data as $id => $obj ) {
+			foreach( $this->raw_data as $obj ) {
 				if ( is_array( $obj->getRequires() ) ) {
 					$valid_require_ids = array();
 					foreach( $obj->getRequires() as $require_id ) {
@@ -374,7 +374,8 @@ class DependencyTree {
 		//Debug::Arr($this->provide_id_raw_data, 'provides, raw', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this, 'After - Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		foreach( $this->raw_data as $id => $obj ) {
+		$retarr = array();
+		foreach( $this->raw_data as $obj ) {
 			$retarr[] = $obj->getId();
 		}
 

@@ -103,7 +103,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 					where	company_id = ?
 					AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -227,7 +227,6 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 			$ph[] = $date;
 			$ph[] = $date;
 			$query	.=	' AND ( a.created_date >= ? OR a.updated_date >= ? )';
-			unset($date_filter);
 		}
 
 		$query .= ' AND ( a.deleted = 0 )';
@@ -344,6 +343,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -360,7 +360,7 @@ class DepartmentListFactory extends DepartmentFactory implements IteratorAggrega
 			}
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

@@ -6,9 +6,9 @@ EmployeeBankAccountViewController = BaseViewController.extend( {
 
 	bank_account_img_dic: {},
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'EmployeeBankAccountEditView.html';
 		this.permission_id = 'user';
 		this.viewId = 'EmployeeBankAccount';
@@ -176,6 +176,16 @@ EmployeeBankAccountViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
@@ -323,6 +333,9 @@ EmployeeBankAccountViewController = BaseViewController.extend( {
 			case ContextMenuIconName.import_icon:
 				ProgressBar.showOverlay();
 				this.onImportClick();
+				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('export' + this.api.key_name )
 				break;
 
 		}
@@ -604,7 +617,7 @@ EmployeeBankAccountViewController = BaseViewController.extend( {
 EmployeeBankAccountViewController.loadView = function() {
 	Global.loadViewSource( 'EmployeeBankAccount', 'BankAccountView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		//var template = _.template( result, args );
 
 		Global.contentContainer().html( result );
 	} );

@@ -492,6 +492,7 @@ class UserSkillFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 
 		if ( is_array( $variable_function_map ) ) {

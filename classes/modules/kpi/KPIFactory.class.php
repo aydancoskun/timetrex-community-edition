@@ -122,7 +122,7 @@ class KPIFactory extends Factory
 
 	function setStatus( $status ) {
 		$status = trim( $status );
-		
+
 		if ( $this->Validator->inArrayKey( 'status', $status, TTi18n::gettext( 'Incorrect Status' ), $this->getOptions( 'status' ) ) ) {
 			$this->data['status_id'] = $status;
 			Debug::Text( 'Setting status_id data...	  ' . $this->data['status_id'], __FILE__, __LINE__, __METHOD__, 10 );
@@ -154,11 +154,19 @@ class KPIFactory extends Factory
 	}
 
 	function isUniqueName( $name ) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
 
-		$ph = array( 'company_id' => $this->getCompany(), 'name' => trim( strtolower( $name ) ), );
+		$ph = array(
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name)
+					);
+		
 		$query = 'select id from ' . $this->table . '
 					where company_id = ?
-						AND name = ?
+						AND lower(name) = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne( $query, $ph );
 		Debug::Arr( $name_id, 'Unique Name: ' . $name, __FILE__, __LINE__, __METHOD__, 10 );
@@ -237,7 +245,7 @@ class KPIFactory extends Factory
 	function getMinimumRate() {
 
 		if ( isset( $this->data['minimum_rate'] ) ) {
-			return Misc::removeTrailingZeros( $this->data['minimum_rate'], 2 );
+			return Misc::removeTrailingZeros( (float)$this->data['minimum_rate'], 2 );
 		}
 
 		return FALSE;
@@ -264,7 +272,7 @@ class KPIFactory extends Factory
 
 	function getMaximumRate() {
 		if ( isset( $this->data['maximum_rate'] ) ) {
-			return Misc::removeTrailingZeros( $this->data['maximum_rate'], 2 );
+			return Misc::removeTrailingZeros( (float)$this->data['maximum_rate'], 2 );
 		}
 
 		return FALSE;
@@ -375,6 +383,7 @@ class KPIFactory extends Factory
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
+		$data = array();
 
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {

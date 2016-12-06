@@ -40,8 +40,8 @@ if ( isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 ) {
 
 require_once('../../includes/global.inc.php');
 if ( isset( $_SERVER['REQUEST_URI'] ) AND strpos( $_SERVER['REQUEST_URI'], '//' ) !== FALSE ) { //Always strip duplicate a slashes from URL whenever possible.
-	Debug::text('Stripping duplicate slashes from URL: '. $_SERVER['REQUEST_URI'] , __FILE__, __LINE__, __METHOD__, 10);
-	Redirect::Page( Environment::stripDuplicateSlashes( $_SERVER['REQUEST_URI'] ) ); 
+	Debug::text('Stripping duplicate slashes from URL: '. $_SERVER['REQUEST_URI'], __FILE__, __LINE__, __METHOD__, 10);
+	Redirect::Page( Environment::stripDuplicateSlashes( $_SERVER['REQUEST_URI'] ) );
 }
 
 forceNoCacheHeaders(); //Send headers to disable caching.
@@ -116,6 +116,7 @@ unset($authentication);
 		<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily." />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<link rel="shortcut icon" type="image/ico" href="<?php echo Environment::getBaseURL();?>../favicon.ico">
+		<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
 		<?php if ( file_exists('theme/default/css/login.composite.css') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
 			<link rel="stylesheet" type="text/css" href="theme/default/css/login.composite.css?v=<?php echo APPLICATION_BUILD?>">
 			<script>
@@ -134,13 +135,19 @@ unset($authentication);
 			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/datepicker/TDatePicker.css?v=<?php echo APPLICATION_BUILD?>">
             <link rel="stylesheet" type="text/css" href="theme/default/css/right_click_menu/rightclickmenu.css?v=<?php echo APPLICATION_BUILD?>">
             <link rel="stylesheet" type="text/css" href="theme/default/css/views/wizard/Wizard.css?v=<?php echo APPLICATION_BUILD?>">
-            <link rel="stylesheet" type="text/css" href="theme/default/css/image_area_select/imgareaselect-default.css?v=<?php echo APPLICATION_BUILD?>">
+			<link rel="stylesheet" type="text/css" href="theme/default/css/image_area_select/imgareaselect-default.css?v=<?php echo APPLICATION_BUILD?>">
+			<?php if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) { ?>
+				<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-draw/leaflet.draw.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.css?v=<?php echo APPLICATION_BUILD?>">
+			<?php } ?>
 			<script>
 				use_composite_css_files = false;
 			</script>
 		<?php } ?>
 
 		<?php if ( file_exists('login.composite.js') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
+			<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
 			<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
 			<script src="login.composite.js?v=<?php echo APPLICATION_BUILD?>"></script>
 			<!-- <script async src="base.composite.js?v=<?php echo APPLICATION_BUILD?>"></script> -->
@@ -149,6 +156,7 @@ unset($authentication);
 				//Global.addCss( "universe.composite.css" );
 			</script>
 		<?php } else { ?>
+			<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
 			<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
 			<script src="framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
 			<script src="framework/jquery.form.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
@@ -158,6 +166,7 @@ unset($authentication);
 			<script src="framework/interact.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
 			<script src="global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
 			<script src="global/LocalCacheData.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<script src="framework/widgets/color-picker/color-picker.js?v=<?php echo APPLICATION_BUILD?>"></script>
 			<script>
 				use_composite_js_files = false;
 			</script>
@@ -173,6 +182,7 @@ unset($authentication);
 	ribbon sub menu: 100
 	right click menu: 100
 	validation: 6000 set by plugin
+	color-picker: 999
 
 	Wizard: 50
 	camera shooter in wizard 51
@@ -252,7 +262,7 @@ unset($authentication);
 		function cleanProgress() {
 			if ( $( ".loading-view" ).is( ":visible" ) ) {
 
-				var progress_bar = $( ".progress-bar" )
+				var progress_bar = $( ".progress-bar" );
 				progress_bar.attr( "value", 100 );
 				clearInterval( loading_bar_time );
 

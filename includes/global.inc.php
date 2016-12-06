@@ -56,8 +56,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '9.1.3' );
-define('APPLICATION_VERSION_DATE', @strtotime('12-Aug-2016') ); // Release date of version.
+define('APPLICATION_VERSION', '10.0.0' );
+define('APPLICATION_VERSION_DATE', @strtotime('22-Oct-2016') ); // Release date of version.
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
@@ -303,7 +303,7 @@ function forceNoCacheHeaders() {
 
 	//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
 	//Header('Content-Security-Policy: default-src *; script-src \'self\' *.google-analytics.com *.google.com');
-	header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.google.com; img-src \'self\' *.timetrex.com *.google-analytics.com *.google.com data:');
+	header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.googleapis.com *.gstatic.com *.google.com; img-src \'self\' map.timetrex.com:3128 *.timetrex.com *.google-analytics.com *.googleapis.com *.gstatic.com *.google.com data:');
 
 	//Help prevent XSS or frame clickjacking.
 	header('X-XSS-Protection: 1; mode=block');
@@ -311,7 +311,7 @@ function forceNoCacheHeaders() {
 
 	//Reduce MIME-TYPE security risks.
 	header('X-Content-Type-Options: nosniff');
-	
+
 	//Turn caching off.
 	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 	header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');
@@ -321,7 +321,7 @@ function forceNoCacheHeaders() {
 	header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0');
 	if ( isset($_SERVER['HTTP_USER_AGENT']) AND stripos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE ) {
 		header('Pragma: token'); //If set to no-cache it breaks IE downloading reports, with error that the site is not available.
-		//20-Jan-16: Re-enable keepalive requests on IE to see if the issue persists after we have (mostly) fixed the duplicate request issue when users double-click icons. 
+		//20-Jan-16: Re-enable keepalive requests on IE to see if the issue persists after we have (mostly) fixed the duplicate request issue when users double-click icons.
 		//if ( preg_match('/(?i)MSIE [5-9]/i', $_SERVER['HTTP_USER_AGENT'] ) ) {
 		//	header('Connection: close'); //ie6-9 may send empty POST requests causing API errors due to poor keepalive handling, so force all connections to close instead.
 		//}

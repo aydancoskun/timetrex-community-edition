@@ -108,11 +108,13 @@ class PolicyGroupAccrualPolicyListFactory extends PolicyGroupAccrualPolicyFactor
 
 		$pgaplf->getByPolicyGroupId($id);
 
+		
+		$list = array();
 		foreach ($pgaplf as $obj) {
 			$list[$obj->getAccrualPolicy()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE) {
 			return $list;
 		}
 

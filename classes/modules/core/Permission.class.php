@@ -264,6 +264,7 @@ class Permission {
 		return $query;
 	}
 	static function getPermissionIsChildIsOwnerFilterSQL( $filter_data, $outer_column_name ) {
+		$query = array();
 		if ( isset($filter_data['permission_is_own']) AND $filter_data['permission_is_own'] == TRUE AND isset($filter_data['permission_current_user_id']) ) {
 			$query[] = $outer_column_name .' = '. (int)$filter_data['permission_current_user_id'];
 		}
@@ -271,7 +272,7 @@ class Permission {
 			$query[] = 'phc.is_child = 1';
 		}
 
-		if ( isset($query) AND is_array($query) ) {
+		if ( empty($query) == FALSE ) {
 			return ' AND ( '. implode(' OR ', $query ) .') ';
 		}
 
@@ -300,7 +301,7 @@ class Permission {
 			permission_is_child = 1
 			permission_is_own = 1
 		*/
-
+		$retarr = array();
 		$retarr['permission_current_user_id'] = $user_id;
 		if ( $this->Check( $section, $name ) == FALSE ) {
 			if ( $this->Check( $section, $name.'_child') ) {
@@ -311,7 +312,7 @@ class Permission {
 			}
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 

@@ -21,7 +21,8 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 
 	},
 
-	initialize: function() {
+	initialize: function( options ) {
+		this.options = options;
 		this.content_div = $( this.el ).find( '.content' );
 		this.batch_id = this.options.batch_id;
 		this.user_id = this.options.user_id;
@@ -58,15 +59,17 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 	getAllColumns: function( callBack ) {
 
 		var $this = this;
-		this.api.getOptions( 'columns', {onResult: function( columns_result ) {
-			var columns_result_data = columns_result.getResult();
-			$this.all_columns = Global.buildColumnArray( columns_result_data );
+		this.api.getOptions( 'columns', {
+			onResult: function( columns_result ) {
+				var columns_result_data = columns_result.getResult();
+				$this.all_columns = Global.buildColumnArray( columns_result_data );
 
-			if ( callBack ) {
-				callBack();
+				if ( callBack ) {
+					callBack();
+				}
+
 			}
-
-		}} );
+		} );
 
 	},
 
@@ -83,38 +86,42 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		filter.filter_data.batch_id = this.batch_id;
 		filter.filter_items_per_page = 0; // Default to 0 to load user preference defined
 
-		this.api['getUserGenericStatus']( filter, true, {onResult: function( result ) {
+		this.api['getUserGenericStatus']( filter, true, {
+			onResult: function( result ) {
 
-			var result_data = result.getResult();
-			result_data = Global.formatGridData( result_data, $this.api.key_name );
+				var result_data = result.getResult();
+				result_data = Global.formatGridData( result_data, $this.api.key_name );
 
-			$this.grid.clearGridData();
-			$this.grid.setGridParam( {data: result_data} );
-			$this.grid.trigger( 'reloadGrid' );
+				$this.grid.clearGridData();
+				$this.grid.setGridParam( {data: result_data} );
+				$this.grid.trigger( 'reloadGrid' );
 
-			$this.setGridSize();
+				$this.setGridSize();
 
-			ProgressBar.closeOverlay(); //Add this in initData
+				ProgressBar.closeOverlay(); //Add this in initData
 
-			if ( set_default_menu ) {
-				$this.setDefaultMenu( true );
+				if ( set_default_menu ) {
+					$this.setDefaultMenu( true );
+				}
+
 			}
+		} );
 
-		}} );
+		this.api['getUserGenericStatusCountArray']( this.user_id, this.batch_id, {
+			onResult: function( result ) {
 
-		this.api['getUserGenericStatusCountArray']( this.user_id, this.batch_id, {onResult: function( result ) {
+				var result_data = result.getResult();
 
-			var result_data = result.getResult();
+				var failed = $( $this.el ).find( '.failed' );
+				var warning = $( $this.el ).find( '.warning' );
+				var success = $( $this.el ).find( '.success' );
 
-			var failed = $( $this.el ).find( '.failed' );
-			var warning = $( $this.el ).find( '.warning' );
-			var success = $( $this.el ).find( '.success' );
+				failed.text( result_data.status[10].total + '/' + result_data.total + '( ' + result_data.status[10].percent + '% )' );
+				warning.text( result_data.status[20].total + '/' + result_data.total + '( ' + result_data.status[20].percent + '% )' );
+				success.text( result_data.status[30].total + '/' + result_data.total + '( ' + result_data.status[30].percent + '% )' )
 
-			failed.text( result_data.status[10].total + '/' + result_data.total + '( ' + result_data.status[10].percent + '% )' );
-			warning.text( result_data.status[20].total + '/' + result_data.total + '( ' + result_data.status[20].percent + '% )' );
-			success.text( result_data.status[30].total + '/' + result_data.total + '( ' + result_data.status[30].percent + '% )' )
-
-		}} );
+			}
+		} );
 
 	},
 
@@ -155,10 +162,18 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 			var view_column_data = display_columns[i];
 
 			if ( view_column_data.value === 'description' ) {
-				var column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 400, sortable: false, title: false};
+				var column_info = {
+					name: view_column_data.value,
+					index: view_column_data.value,
+					label: view_column_data.label,
+					width: 400,
+					sortable: false,
+					title: false
+				};
 
 			} else if ( view_column_data.value === 'status' ) {
-				column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label,
+				column_info = {
+					name: view_column_data.value, index: view_column_data.value, label: view_column_data.label,
 					width: 100, sortable: false, title: false, formatter: function( cell_value, related_data, row ) {
 
 						var span = $( "<span></span>" )
@@ -173,10 +188,18 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 
 						span.text( cell_value )
 						return span.get( 0 ).outerHTML;
-					}};
+					}
+				};
 
 			} else {
-				column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
+				column_info = {
+					name: view_column_data.value,
+					index: view_column_data.value,
+					label: view_column_data.label,
+					width: 100,
+					sortable: false,
+					title: false
+				};
 			}
 
 			column_info_array.push( column_info );
@@ -239,22 +262,23 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 UserGenericStatusWindowController.instance = null;
 
 UserGenericStatusWindowController.open = function( batch_id, user_id, call_back ) {
-
 	Global.loadViewSource( 'UserGenericStatus', 'UserGenericStatusWindow.css' );
-
 	Global.loadViewSource( 'UserGenericStatus', 'UserGenericStatusWindow.html', function( result ) {
-		var args = {failed: $.i18n._( 'Failed' ),
+		var args = {
+			failed: $.i18n._( 'Failed' ),
 			warning: $.i18n._( 'Warning' ),
 			success: $.i18n._( 'Success' )
 		};
-		var template = _.template( result, args );
-
-		$( 'body' ).append( template );
+		var template = _.template( result );
+		$( 'body' ).append( template( args ) );
 
 		//Make it global variable
-		UserGenericStatusWindowController.instance = new UserGenericStatusWindowController( {batch_id: batch_id, user_id: user_id, can_cache_controller: false} );
+		UserGenericStatusWindowController.instance = new UserGenericStatusWindowController( {
+			batch_id: batch_id,
+			user_id: user_id,
+			can_cache_controller: false
+		} );
 		UserGenericStatusWindowController.instance.call_back = call_back;
-
 	} );
 }
 

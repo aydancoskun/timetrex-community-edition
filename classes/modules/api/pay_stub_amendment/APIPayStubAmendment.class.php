@@ -127,6 +127,7 @@ class APIPayStubAmendment extends APIFactory {
 
 				$this->setPagerObject( $blf );
 
+				$retarr = array();
 				foreach( $blf as $b_obj ) {
 					$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -140,6 +141,17 @@ class APIPayStubAmendment extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportPayStubAmendment( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getPayStubAmendment( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_pay_stub_amendment', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -386,6 +398,7 @@ class APIPayStubAmendment extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id'] ); //Clear fields that can't be copied
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setPayStubAmendment( $src_rows ); //Save copied rows

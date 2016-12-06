@@ -53,9 +53,7 @@ class RecurringScheduleUserFactory extends Factory {
 	}
 	function setRecurringScheduleControl($id) {
 		$id = trim($id);
-
-		$rsclf = TTnew( 'RecurringScheduleControlListFactory' );
-
+		
 		if (
 			$this->Validator->isNumeric(	'recurring_schedule_control_id',
 											$id,

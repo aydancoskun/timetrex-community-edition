@@ -319,7 +319,7 @@ class ActiveShiftReport extends Report {
 
 				break;
 			case 'template_config':
-				$retval['-1010-time_period']['time_period'] = 'today'; //Default to just the last day to speed up the query.
+				$retval['-1010-time_period']['time_period'] = 'last_24_hours'; //Default to last 24hrs to speed up query as well as handle shifts that span midnight. This used to be 'today', but that would fail for shifts spanning midnight.
 				$retval['filter']['user_status_id'] = array(10); //Only show active employees.
 
 				$template = strtolower( Misc::trimSortPrefix( $params['template'] ) );
@@ -581,7 +581,7 @@ class ActiveShiftReport extends Report {
 		$filter_data = $this->getFilterConfig();
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
-		
+
 		//
 		//FIXME: Figure out way to only show users with punches if they specify that. Perhaps some sort of array intersect?
 		//
@@ -622,6 +622,7 @@ class ActiveShiftReport extends Report {
 		foreach ( $plf as $key => $p_obj ) {
 			$this->tmp_data['punch'][$p_obj->getUser()] = (array)$p_obj->getObjectAsArray( $this->getColumnDataConfig() );
 			$this->tmp_data['punch'][$p_obj->getUser()]['time_stamp'] = $p_obj->getTimeStamp();
+			$this->tmp_data['punch'][$p_obj->getUser()]['_status_id'] = $p_obj->getStatus(); //Always pass status_id so we can base BG color on that, for example in the Whos In/Out dashlet.
 			if ( $p_obj->getStatus() == 10 ) {
 				$this->tmp_data['punch'][$p_obj->getUser()]['_bgcolor'] = array(225, 255, 225);
 				//$this->tmp_data['punch'][$p_obj->getUser()]['_fontcolor'] = array(25, 225, 25); //Green
@@ -661,7 +662,7 @@ class ActiveShiftReport extends Report {
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 				$key++;
 			}
-			unset($this->tmp_data, $row, $date_columns, $user_id, $processed_data );
+			unset($this->tmp_data, $row, $user_id, $processed_data );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

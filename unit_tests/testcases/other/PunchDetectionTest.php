@@ -43,9 +43,9 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-    public function setUp() {
+	public function setUp() {
 		global $dd;
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
@@ -53,7 +53,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -83,16 +83,16 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//$this->deleteAllSchedules();
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
 	function getPayStubAccountLinkArray() {
 		$this->pay_stub_account_link_arr = array(
@@ -192,13 +192,13 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 
 		$ppsf->setDayStartTime( 0 );
 		$ppsf->setNewDayTriggerTime( $new_shift_trigger_time );
-		$ppsf->setMaximumShiftTime( (16*3600) );
+		$ppsf->setMaximumShiftTime( (16 * 3600) );
 		$ppsf->setShiftAssignedDay( $shift_assigned_day );
 
 		$ppsf->setEnableInitialPayPeriods( FALSE );
 		if ( $ppsf->isValid() ) {
 			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$ppsf->setUser( array($this->user_id) );
 			$ppsf->Save();
@@ -208,7 +208,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 
@@ -226,14 +226,14 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) );
 				} else {
-					$end_date = $end_date + ( (86400*14) );
+					$end_date = ($end_date + ( (86400 * 14) ));
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -305,7 +305,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$plf->getByCompanyIDAndUserIdAndStartDateAndEndDate( $this->company_id, $this->user_id, $start_date, $end_date );
 		if ( $plf->getRecordCount() > 0 ) {
 			//Only return punch_control data for now
-			$i=0;
+			$i = 0;
 			$prev_punch_control_id = NULL;
 			foreach( $plf as $p_obj ) {
 				if ( $prev_punch_control_id == NULL OR $prev_punch_control_id != $p_obj->getPunchControlID() ) {
@@ -341,23 +341,23 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 			case 100: //Normal 1hr lunch: Detect by Time Window
 				$mpf->setName( 'Normal - Time Window' );
 				$mpf->setType( 20 );
-				$mpf->setTriggerTime( (3600*6) );
+				$mpf->setTriggerTime( (3600 * 6) );
 				$mpf->setAmount( 3600 );
 				$mpf->setAutoDetectType( 10 );
 
-				$mpf->setStartWindow( (3*3600) );
-				$mpf->setWindowLength( (2*3600) );
+				$mpf->setStartWindow( (3 * 3600) );
+				$mpf->setWindowLength( (2 * 3600) );
 				$mpf->setIncludeLunchPunchTime( FALSE );
 				break;
 			case 110: //Normal 1hr lunch: Detect by Punch Time
 				$mpf->setName( 'Normal - Punch Time' );
 				$mpf->setType( 20 );
-				$mpf->setTriggerTime( (3600*6) );
+				$mpf->setTriggerTime( (3600 * 6) );
 				$mpf->setAmount( 3600 );
 				$mpf->setAutoDetectType( 20 );
 
-				$mpf->setMinimumPunchTime( (60*30) ); ///0.5hr
-				$mpf->setMaximumPunchTime( (60*75) ); //1.25hr
+				$mpf->setMinimumPunchTime( (60 * 30) ); ///0.5hr
+				$mpf->setMaximumPunchTime( (60 * 75) ); //1.25hr
 				$mpf->setIncludeLunchPunchTime( FALSE );
 				break;
 		}
@@ -366,12 +366,12 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 
 		if ( $mpf->isValid() ) {
 			$insert_id = $mpf->Save();
-			Debug::Text('Meal Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Meal Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Meal Policy!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Meal Policy!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -384,12 +384,12 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 			case 100: //Normal 15min break: Detect by Time Window
 				$bpf->setName( 'Normal' );
 				$bpf->setType( 20 );
-				$bpf->setTriggerTime( (3600*0.5) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 0.5) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setAutoDetectType( 10 );
 
-				$bpf->setStartWindow( (1*3600) );
-				$bpf->setWindowLength( (1*3600) );
+				$bpf->setStartWindow( (1 * 3600) );
+				$bpf->setWindowLength( (1 * 3600) );
 
 				$bpf->setIncludeBreakPunchTime( FALSE );
 				$bpf->setIncludeMultipleBreaks( FALSE );
@@ -397,12 +397,12 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 			case 110: //Normal 15min break: Detect by Punch Time
 				$bpf->setName( 'Normal' );
 				$bpf->setType( 20 );
-				$bpf->setTriggerTime( (3600*0.5) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 0.5) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setAutoDetectType( 20 );
 
-				$bpf->setMinimumPunchTime( (60*5) ); ///5min
-				$bpf->setMaximumPunchTime( (60*25) ); //25min
+				$bpf->setMinimumPunchTime( (60 * 5) ); ///5min
+				$bpf->setMaximumPunchTime( (60 * 25) ); //25min
 
 				$bpf->setIncludeBreakPunchTime( FALSE );
 				$bpf->setIncludeMultipleBreaks( FALSE );
@@ -413,12 +413,12 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 
 		if ( $bpf->isValid() ) {
 			$insert_id = $bpf->Save();
-			Debug::Text('Break Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Break Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Break Policy!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Break Policy!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -427,13 +427,13 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$plf = TTnew( 'PunchListFactory' );
 		$plf->getPreviousPunchByUserIDAndEpoch( $this->user_id, $epoch );
 		if ( $plf->getRecordCount() > 0 ) {
-			Debug::Text(' Found Previous Punch within Continuous Time from now...', __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text(' Found Previous Punch within Continuous Time from now...', __FILE__, __LINE__, __METHOD__, 10);
 			$prev_punch_obj = $plf->getCurrent();
 			$prev_punch_obj->setUser( $this->user_id );
 
 			return $prev_punch_obj;
 		}
-		Debug::Text(' Previous Punch NOT found!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text(' Previous Punch NOT found!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
@@ -549,7 +549,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+86400+3600 );
+		$date_epoch2 = TTDate::getBeginDayEpoch( (TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunch( $this->user_id, 10, 10, strtotime($date_stamp.' 8:00PM'), array('branch_id' => 0,'department_id' => 0, 'job_id' => 0, 'job_item_id' => 0 ), TRUE );

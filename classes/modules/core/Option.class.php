@@ -123,13 +123,14 @@ class Option {
 
 		$needles = array_unique($needles);
 
+		$retval = array();
 		foreach($needles as $needle) {
 			if ( isset($haystack[$needle]) ) {
 				$retval[$needle] = $haystack[$needle];
 			}
 		}
 
-		if ( isset($retval) ) {
+		if ( empty($retval) == FALSE ) {
 			return $retval;
 		}
 
@@ -139,6 +140,7 @@ class Option {
 	static function getArrayByBitMask( $bitmask, $options ) {
 		$bitmask = (int)$bitmask;
 
+		$retarr = array();
 		if ( is_numeric($bitmask) AND is_array($options) ) {
 			foreach( $options as $key => $value ) {
 				//Debug::Text('Checking Bitmask: '. $bitmask .' mod '. $key .' != 0', __FILE__, __LINE__, __METHOD__, 10);
@@ -147,9 +149,10 @@ class Option {
 					$retarr[] = $key;
 				}
 			}
+			unset($value); //code standards
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 

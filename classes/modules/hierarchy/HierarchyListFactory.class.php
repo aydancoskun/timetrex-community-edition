@@ -76,8 +76,6 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 			return FALSE;
 		}
 
-		$hslf = new HierarchyShareListFactory();
-
 		$retarr = array();
 		foreach ( $ids as $id ) {
 			//Debug::Text(' Getting Children of ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
@@ -218,17 +216,17 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		}
 
 		if ( $children !== FALSE ) {
+			
+			$nodes = array();
 			foreach ($children as $object_id => $level ) {
 
 				if ( $object_id !== 0 ) {
 					$user_obj = $ulf->getById ( $object_id )->getCurrent();
 
-					unset($shared);
+					$shared = FALSE;
 					if ( in_array( $object_id, $shared_user_ids) === TRUE ) {
 						$shared = TRUE;
-					} else {
-						$shared = FALSE;
-					}
+					} 
 
 					$nodes[] = array(
 									'id' => $object_id,
@@ -240,7 +238,7 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 
 			}
 
-			if ( isset($nodes) ) {
+			if ( empty($nodes) == FALSE ) {
 				return $nodes;
 			}
 		}
@@ -257,8 +255,6 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		if ( $id == '' ) {
 			return FALSE;
 		}
-
-		$tree_id = $id;
 
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -791,7 +787,8 @@ class HierarchyListFactory extends HierarchyFactory implements IteratorAggregate
 		//all other shared users in the tree.
 		$root_user_id_shared = $hslf->getByHierarchyControlIdAndUserId( $tree_id, $user_id )->getRecordCount();
 		Debug::Text('Root User ID: '. $user_id .' Shared: '. (int)$root_user_id_shared, __FILE__, __LINE__, __METHOD__, 10);
-
+		
+		$retarr = array();
 		$retarr[] = (int)$user_id;
 		foreach ( $ids as $id ) {
 

@@ -133,6 +133,7 @@ class APICompanyDeduction extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'], $include_user_id );
 
@@ -144,6 +145,17 @@ class APICompanyDeduction extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportCompanyDeduction( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getCompanyDeduction( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_company_deduction', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

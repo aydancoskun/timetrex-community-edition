@@ -46,8 +46,8 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	form_setup_changed: false,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.permission_id = 'report';
 		this.api_user_report = new (APIFactory.getAPIClass( 'APIUserReportData' ))();
 
@@ -74,6 +74,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		return item;
 	},
+
+	//this prevents the function of the same name in base class from hiding all of the export to excel buttons on all reports due to their lack of a grid.
+	setDefaultMenuExportIcon: function( context_btn, grid_selected_length, pId ) {},
 
 	openEditView: function() {
 		var $this = this;
@@ -1140,14 +1143,14 @@ ReportBaseViewController = BaseViewController.extend( {
 			label = $.i18n._( 'Form Setup' );
 		}
 
-		if ( last_index === 3 && this.form_setup_changed ) {
+			if ( last_index === 3 && this.form_setup_changed ) {
 			$this.form_setup_changed = false;
 			TAlertManager.showConfirmAlert( $.i18n._( 'You have modified') + ' ' + label + ' ' + $.i18n._('data without saving, would you like to save your data now?' ), '', function ( flag ) {
-				if ( flag ) {
+					if ( flag ) {
 					$this.onSaveSetup( label );
-				}
-			} );
-		}
+					}
+				} );
+			}
 	},
 
 	/* jshint ignore:end */
@@ -2943,7 +2946,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			refresh_request += '			type: "POST",';
 			refresh_request += "            url: '" + url + "',";
 			refresh_request += '			success: function(result) {';
-			refresh_request += '			   console.log("refresh"); var newDoc = result.api_retval + $(\'body\').children(\':last\')[0].outerHTML; document.open("text/html"); document.write(newDoc); document.close(); ';
+			refresh_request += '			   Debug.Text("refresh","ReportBaseViewController.js", "", "onViewClick", 10 ); var newDoc = result.api_retval + $(\'body\').children(\':last\')[0].outerHTML; document.open("text/html"); document.write(newDoc); document.close(); ';
 			refresh_request += '			}';
 			refresh_request += '		})';
 			refresh_request += '	}  catch(e) {}';
@@ -2968,6 +2971,15 @@ ReportBaseViewController = BaseViewController.extend( {
 						}
 					}
 
+				}
+			} );
+		} else if ( key === 'pdf_form_publish_employee' ) {
+			this.api['get' + this.api.key_name]( config, key, {
+				onResult: function( result ) {
+					var retval = result.getResult();
+					if ( typeof retval === 'number' && retval > 0 ) {
+						UserGenericStatusWindowController.open( retval, LocalCacheData.getLoginUser().id, function() {} );
+					}
 				}
 			} );
 		} else {

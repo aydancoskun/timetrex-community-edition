@@ -33,6 +33,10 @@ var APIOtherField = ServiceCaller.extend( {
 
 	},
 
+	exportOtherField: function() {
+		return this.argumentsHandler( this.className, 'exportOtherField', arguments );
+	},
+
 	deleteOtherField: function() {
 
 		return this.argumentsHandler( this.className, 'deleteOtherField', arguments );

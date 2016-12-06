@@ -604,7 +604,8 @@ progress::-moz-progress-bar {
 
 }
 
-.t-text-input {
+.t-text-input,
+.t-color-picker, .cp-HEX{
     width: 156px;
     line-height: 20px;
     outline: none;
@@ -620,6 +621,20 @@ progress::-moz-progress-bar {
 
 .t-text-input-readonly-bg {
     background: #ddd;
+}
+
+.link-widget-box {
+    cursor: pointer;
+}
+
+.widget-h-box-mapIcon {
+    height: 20px;
+    vertical-align: middle;
+    margin-right:0.7em;
+}
+
+.widget-h-box-mapLocationWrapper{
+    display: inline-block;
 }
 
 .widget-h-box .mass-edit-checkbox-wrapper {
@@ -885,7 +900,7 @@ progress::-moz-progress-bar {
     -o-filter: grayscale(100%);
 
     filter: grayscale(100%);
-    filter: url(gray.svg#grayscale);
+    /*filter: url(gray.svg#grayscale);*/
 
     filter: gray;
 
@@ -1043,7 +1058,7 @@ progress::-moz-progress-bar {
 .edit-view .edit-view-tab-bar .edit-view-tab-outside .edit-view-tab .second-column {
     border: 1px solid #C7C7C7;
     border-radius: 5px 5px 5px 5px;
-    float: left;
+    float: right;
     width: 50%;
     margin-left: 10px;
     margin-bottom: 5px;
@@ -1302,7 +1317,7 @@ progress::-moz-progress-bar {
     -o-filter: grayscale(100%);
 
     filter: grayscale(100%);
-    filter: url(gray.svg#grayscale);
+    /*filter: url(gray.svg#grayscale);*/
 
     filter: gray;
     cursor: default !important;
@@ -1389,7 +1404,7 @@ progress::-moz-progress-bar {
     -o-filter: grayscale(100%);
 
     filter: grayscale(100%);
-    filter: url(gray.svg#grayscale);
+    /*filter: url(gray.svg#grayscale);*/
 
     filter: gray;
     opacity: 0.5;
@@ -1413,7 +1428,7 @@ progress::-moz-progress-bar {
 }
 
 .group-column-tr {
-
+    background: #375979;
 }
 
 .group-column-th {
@@ -1626,7 +1641,7 @@ progress::-moz-progress-bar {
     -o-filter: grayscale(100%);
 
     filter: grayscale(100%);
-    filter: url(gray.svg#grayscale);
+    /*filter: url(gray.svg#grayscale);*/
 
     filter: gray;
 }
@@ -1704,9 +1719,33 @@ progress::-moz-progress-bar {
 
 }
 
+.manual-timesheet-inside-editor-div.inside-editor-div {
+    float: none;
+}
+
+.manual-timesheet-inside-editor-div .inside-editor .render-div {
+    margin-top: 0;
+}
+
+.manual-timesheet-inside-editor-div {
+    width: 100%;
+}
+
+.manual-timesheet-inside-editor-div .inside-editor {
+    height: 100%
+}
+
+.manual-timesheet-inside-editor-div .inside-editor .render-div {
+    overflow: hidden;
+    height: 100%;
+}
+
+.manual-timesheet-inside-editor-div .grid-inside-editor-render td:first-child {
+    border-right: none;
+}
+
 .wizard-inside-editor-div {
     float: left;
-
 }
 
 .plus-icon {
@@ -2584,4 +2623,95 @@ progress::-moz-progress-bar {
     position: absolute;
     top: 3px;
     right: 186px;
+}
+
+#nano-bar {
+    top: 166px !important;
+}
+.google-map {
+    height: calc(100% - 20px);
+    width: 100% !important;
+}
+
+.google-map-full {
+    height: 100%;
+    width: 100% !important;
+}
+
+.controls {
+    margin-top: 10px;
+    border: 1px solid transparent;
+    border-radius: 2px 0 0 2px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    height: 32px;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#pac-input {
+    background-color: #fff;
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 300;
+    margin-left: 12px;
+    padding: 0 11px 0 13px;
+    text-overflow: ellipsis;
+    width: 300px;
+}
+
+#pac-input:focus {
+    border-color: #4d90fe;
+}
+
+.pac-container {
+    font-family: Roboto;
+}
+
+.t-color-picker, .cp-HEX {
+    max-width: 50%;
+}
+.flashBackground{
+    animation-name: flashBackground;
+    animation-duration: 2.5s;
+    -webkit-animation-name: flashBackground; /* Chrome, Safari, Opera */
+    -webkit-animation-duration: 2.5s; /* Chrome, Safari, Opera */
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes flashBackground {
+    0% {
+        background: none;
+    }
+    20% {
+        background: green;
+    }
+    40% {
+        background: none;
+    }
+    80% {
+        background: green;
+    }
+    100% {
+        background: none;
+    }
+}
+
+/* Standard syntax */
+@keyframes flashBackground {
+    0% {
+        background: none;
+    }
+    20% {
+        background: green;
+    }
+    40% {
+        background: none;
+    }
+    80% {
+        background: green;
+    }
+    100% {
+        background: none;
+    }
 }

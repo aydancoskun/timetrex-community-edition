@@ -48,8 +48,10 @@ class InstallSchema_1000A extends InstallSchema_Base {
 
 
 	function postInstall() {
+		
+		// @codingStandardsIgnoreStart
 		global $config_vars;
-
+		// @codingStandardsIgnoreEnd
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR .'maint'. DIRECTORY_SEPARATOR;

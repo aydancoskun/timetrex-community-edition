@@ -192,6 +192,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$pclf = TTnew( 'PayCodeListFactory' );
 		$pclf->getByCompanyId( $company_id );
 		if ( $pclf->getRecordCount() > 0 ) {
+			$pay_codes = array();
 			foreach( $pclf as $pc_obj ) {
 				//Collect PAID pay codes so we can create PAID TIME columns.
 				if ( $pc_obj->isPaid() == TRUE ) {
@@ -199,7 +200,7 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 				}
 			}
 
-			if ( isset($pay_codes) ) {
+			if ( empty($pay_codes) == FALSE ) {
 				return $pay_codes;
 			}
 		}
@@ -246,6 +247,8 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		$apf = new AbsencePolicyFactory();
 		$mpf = new MealPolicyFactory();
 		$bpf = new BreakPolicyFactory();
+		$cgmf = new CompanyGenericMapFactory();
+		$cppf = new ContributingPayCodePolicyFactory();
 
 		$ph = array(
 					'company_id' => (int)$company_id,
@@ -272,13 +275,18 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 											THEN 1
 											ELSE
 												CASE WHEN EXISTS
-													( select 1 from '. $mpf->getTable() .' as x where x.pay_code_id = a.id and x.deleted = 0)
+													( select 1 from '. $cgmf->getTable() .' as w, '. $cppf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 90 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
 												THEN 1
 												ELSE
 													CASE WHEN EXISTS
-														( select 1 from '. $bpf->getTable() .' as x where x.pay_code_id = a.id and x.deleted = 0)
+														( select 1 from '. $mpf->getTable() .' as x where x.pay_code_id = a.id and x.deleted = 0)
 													THEN 1
-													ELSE 0
+													ELSE
+														CASE WHEN EXISTS
+															( select 1 from '. $bpf->getTable() .' as x where x.pay_code_id = a.id and x.deleted = 0)
+														THEN 1
+														ELSE 0
+														END
 													END
 												END
 											END

@@ -34,6 +34,9 @@ var APIPayPeriod = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'deletePayPeriod', arguments );
 
 	},
+	exportPayPeriod: function() {
+		return this.argumentsHandler( this.className, 'exportPayPeriod', arguments );
+	},
 	importData: function() {
 
 		return this.argumentsHandler( this.className, 'importData', arguments );

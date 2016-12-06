@@ -110,7 +110,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 						AND deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -313,6 +313,34 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyIdAndContributingPayCodePolicyId($company_id, $pay_code_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_code_id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+				'company_id' => (int)$company_id,
+		);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where	company_id = ?
+						AND length_of_service_contributing_pay_code_policy_id in ('. $this->getListSQL( $pay_code_id, $ph, 'int' ) .')
+						AND deleted = 0
+					ORDER BY calculation_order ASC';
+		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
@@ -374,6 +402,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$psenlf = new PayStubEntryNameListFactory();
 		$psenlf->getById($id);
 
+		$entry_name_list = array();
 		if ( $include_blank == TRUE ) {
 			$entry_name_list[0] = '--';
 		}
@@ -413,17 +442,16 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
-
-		$use_names = FALSE;
 
 		foreach ($lf as $obj) {
 			$list[$obj->getId()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

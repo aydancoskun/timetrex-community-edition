@@ -26,7 +26,7 @@
 		};
 
 		this.setValue = function( val ) {
-			if ( !val ) {
+			if ( !val && val !== 0 ) {
 				val = $.i18n._( 'N/A' );
 			}
 

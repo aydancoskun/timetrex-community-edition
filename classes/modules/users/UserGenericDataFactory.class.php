@@ -147,9 +147,9 @@ class UserGenericDataFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => $this->getCompany(),
+					'company_id' => (int)$this->getCompany(),
 					'script' => $this->getScript(),
-					'name' => strtolower( $name ),
+					'name' => TTi18n::strtolower( $name ),
 					);
 
 		$query = 'select id from '. $this->getTable() .'
@@ -162,8 +162,8 @@ class UserGenericDataFactory extends Factory {
 		} else {
 			$query .= ' AND ( user_id = 0 OR user_id is NULL )';
 		}
-
 		$query .= ' AND deleted = 0';
+
 		$name_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -186,7 +186,7 @@ class UserGenericDataFactory extends Factory {
 		return FALSE;
 	}
 	function setName($name) {
-		$name = trim( $this->Validator->escapeHTML($name) );
+		$name = trim( $name );
 
 		if (	$this->Validator->isLength(	'name',
 											$name,
@@ -289,7 +289,7 @@ class UserGenericDataFactory extends Factory {
 	}
 
 	static function getSearchFormData( $saved_search_id, $sort_column ) {
-		global $current_company, $current_user;
+		global $current_user;
 
 		$retarr = array();
 
@@ -401,7 +401,7 @@ class UserGenericDataFactory extends Factory {
 	}
 
 	static function getReportFormData( $saved_search_id ) {
-		global $current_company, $current_user;
+		global $current_user;
 
 		$retarr = array();
 
@@ -518,6 +518,7 @@ class UserGenericDataFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

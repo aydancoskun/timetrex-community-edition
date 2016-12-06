@@ -170,6 +170,8 @@ class InstallSchema_1064A extends InstallSchema_Base {
 				$cpcpf->setCompany( $company_obj->getId() );
 				$cpcpf->setName( 'Regular Time' );
 				$cpcpf->setPayCode( $dummy_pay_code_id );
+				$contributing_pay_code_policy_insert_id = array();
+				$contributing_shift_policy_insert_id = array();
 				if ( $cpcpf->isValid() ) {
 					$contributing_pay_code_policy_insert_id['regular_time'] = $cpcpf->Save( FALSE, TRUE );
 					Debug::Text('Contributing Pay Code Policy ID: '. $contributing_pay_code_policy_insert_id['regular_time'], __FILE__, __LINE__, __METHOD__, 10);

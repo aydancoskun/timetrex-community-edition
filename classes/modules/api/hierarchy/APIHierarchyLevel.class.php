@@ -52,8 +52,6 @@ class APIHierarchyLevel extends APIFactory {
 	 * @return array
 	 */
 	function getHierarchyLevelDefaultData() {
-		$company_obj = $this->getCurrentCompanyObject();
-
 		Debug::Text('Getting hierarchy_level default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
@@ -76,9 +74,12 @@ class APIHierarchyLevel extends APIFactory {
 			//Debug::Arr( $object_type_id, 'Object Type ID: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( is_array($hierarchy_level_arr) ) {
+
+				$retarr = array();
 				foreach( $hierarchy_level_arr as $key => $hierarchy_control_data ) {
 					$retarr[$key] = $key;
 				}
+				unset($hierarchy_control_data); //code standards
 
 				if ( is_array($retarr) ) {
 					return $this->returnHandler( $retarr );
@@ -116,6 +117,7 @@ class APIHierarchyLevel extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 

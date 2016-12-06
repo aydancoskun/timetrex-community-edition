@@ -95,7 +95,7 @@ class HolidayFactory extends Factory {
 	function getHolidayPolicyObject() {
 		return $this->getGenericObject( 'HolidayPolicyListFactory', $this->getHolidayPolicyID(), 'holiday_policy_obj' );
 	}
-	
+
 	function getHolidayPolicyID() {
 		if ( isset($this->data['holiday_policy_id']) ) {
 			return (int)$this->data['holiday_policy_id'];
@@ -201,12 +201,17 @@ class HolidayFactory extends Factory {
 
 		return TRUE;
 	}
-	
+
 	function isUniqueName($name) {
 		//BindDate() causes a deprecated error if date_stamp is not set, so just return TRUE so we can throw a invalid date error elsewhere instead.
 		//This also causes it so we can never have a invalid date and invalid name validation errors at the same time.
 		if ( $this->getDateStamp() == '' ) {
 			return TRUE;
+		}
+
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
 		}
 
 		//When a holiday gets moved back/forward due to falling on weekend, it can throw off the check to see if the holiday
@@ -217,7 +222,7 @@ class HolidayFactory extends Factory {
 		//So exclude the first three days of the year to allow for weekend adjustments.
 		$ph = array(
 					'policy_id' => $this->getHolidayPolicyID(),
-					'name' => $name,
+					'name' => TTi18n::strtolower($name),
 					'start_date1' => $this->db->BindDate( ( TTDate::getBeginYearEpoch( $this->getDateStamp() ) + (86400 * 3) ) ),
 					'end_date1' => $this->db->BindDate( TTDate::getEndYearEpoch( $this->getDateStamp() ) ),
 					'start_date2' => $this->db->BindDate( ( $this->getDateStamp() - ( 86400 * 15 ) ) ),
@@ -226,7 +231,7 @@ class HolidayFactory extends Factory {
 
 		$query = 'select id from '. $this->getTable() .'
 					where holiday_policy_id = ?
-						AND name = ?
+						AND lower(name) = ?
 						AND
 							(
 								(
@@ -327,7 +332,7 @@ class HolidayFactory extends Factory {
 			$retval = $cp->isEligibleForHoliday( $this->getDateStamp(), $this->getHolidayPolicyObject(), $ignore_after_eligibility );
 
 			TTDate::setTimeZone( $original_time_zone ); //Store current timezone so we can return to it after.
-			
+
 			return $retval;
 		}
 
@@ -355,15 +360,16 @@ class HolidayFactory extends Factory {
 		if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) >= TTDate::getMiddleDayEpoch( time() ) ) {
 			Debug::text('Holiday is today or in the future, try to recalculate recurring schedules on this date: '. TTDate::getDate('DATE', $this->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
+			$date_ranges = array();
 			if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) ) {
 				$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getOldDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getOldDateStamp() ) );
 			}
 			$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getDateStamp() ) );
-			
+
 			foreach( $date_ranges as $date_range ) {
 				$start_date = $date_range['start_date'];
 				$end_date = $date_range['end_date'];
-				
+
 				//Get existing recurring_schedule rows on the holiday day, so we can figure out which recurring_schedule_control records to recalculate.
 				$recurring_schedule_control_ids = array();
 
@@ -394,7 +400,7 @@ class HolidayFactory extends Factory {
 		} else {
 			Debug::text('Holiday is not in the future...', __FILE__, __LINE__, __METHOD__, 10);
 		}
-		
+
 		return TRUE;
 	}
 
@@ -429,7 +435,9 @@ class HolidayFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
+
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

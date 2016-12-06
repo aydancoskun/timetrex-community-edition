@@ -6,8 +6,8 @@ Form941ReportViewController = ReportBaseViewController.extend( {
 	state_array: null,
 	province_array: null,
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'Form941Report';
 		this.viewId = 'Form941Report';
 		this.context_menu_name = $.i18n._( 'Form 941' );

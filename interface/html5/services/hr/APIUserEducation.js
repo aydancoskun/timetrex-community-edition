@@ -41,6 +41,10 @@ var APIUserEducation = ServiceCaller.extend( {
 
 	copyUserEducation: function() {
 		return this.argumentsHandler( this.className, 'copyUserEducation', arguments );
+	},
+
+	exportUserEducation: function() {
+		return this.argumentsHandler( this.className, 'exportUserEducation', arguments );
 	}
 
 

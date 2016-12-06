@@ -52,8 +52,6 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 	 * @return array
 	 */
 	function getPayPeriodTimeSheetVerifyDefaultData() {
-		$company_obj = $this->getCurrentCompanyObject();
-
 		Debug::Text('Getting pay_period_timesheet_verify default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
@@ -126,6 +124,7 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 
@@ -138,6 +137,17 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportPayPeriodTimeSheetVerify( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getPayPeriodTimeSheetVerify( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_timesheet_verify', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

@@ -101,7 +101,7 @@ class GeneralLedgerSummaryReport extends Report {
 										'-2210-pay_stub_run_id' => TTi18n::gettext('Payroll Run'),
 
 										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
-
+										
 										'-5000-columns' => TTi18n::gettext('Display Columns'), //No Columns for this report.
 										'-5010-group' => TTi18n::gettext('Group By'),
 										'-5020-sub_total' => TTi18n::gettext('SubTotal By'),
@@ -414,6 +414,8 @@ class GeneralLedgerSummaryReport extends Report {
 
 		//Flatten array to one dimension and calculate percents.
 		if ( is_array($pay_period_total_arr) ) {
+			
+			$retarr = array();
 			foreach($pay_period_total_arr as $user_id => $level_1 ) {
 				foreach( $level_1 as $pay_period_id => $pay_period_total_time ) {
 					if ( isset($user_date_total_arr[$user_id][$pay_period_id]) ) {
@@ -434,7 +436,7 @@ class GeneralLedgerSummaryReport extends Report {
 				ksort($retarr[$user_id][$pay_period_id]);
 			}
 
-			if ( isset($retarr) ) {
+			if ( empty($retarr) == FALSE ) {
 				//Debug::Arr($retarr, 'RetArr: ', __FILE__, __LINE__, __METHOD__, 10);
 				return $retarr;
 			} else {
@@ -461,10 +463,11 @@ class GeneralLedgerSummaryReport extends Report {
 		$filter_data = $this->getFilterConfig();
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
-
+		
 		$this->enable_time_based_distribution = FALSE;
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 		$psealf->getByCompanyId( $this->getUserObject()->getCompany() );
+		$psea_arr = array();
 		if ( $psealf->getRecordCount() > 0 ) {
 			foreach($psealf as $psea_obj) {
 				if ( $this->enable_time_based_distribution == FALSE AND ( strpos( $psea_obj->getDebitAccount(), 'punch' ) !== FALSE OR strpos( $psea_obj->getCreditAccount(), 'punch' ) !== FALSE ) ) {
@@ -481,7 +484,6 @@ class GeneralLedgerSummaryReport extends Report {
 
 		$crlf = TTnew( 'CurrencyListFactory' );
 		$crlf->getByCompanyId( $this->getUserObject()->getCompany() );
-		$currency_options = $crlf->getArrayByListFactory( $crlf, FALSE, TRUE );
 
 		//Get Base Currency
 		$crlf->getByCompanyIdAndBase( $this->getUserObject()->getCompany(), TRUE );
@@ -500,6 +502,7 @@ class GeneralLedgerSummaryReport extends Report {
 			$udtlf->getGeneralLedgerReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			Debug::Text(' User Date Total Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $udtlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Punch Data...') );
+			$pay_period_ids = array();
 			if ( $udtlf->getRecordCount() > 0 ) {
 				foreach ( $udtlf as $key => $udt_obj ) {
 					$pay_period_ids[$udt_obj->getColumn('pay_period_id')] = TRUE;
@@ -546,10 +549,7 @@ class GeneralLedgerSummaryReport extends Report {
 				$user_id = $pse_obj->getColumn('user_id');
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_period_transaction_date') );
 				$run_id = $pse_obj->getColumn('pay_stub_run_id');
-				$branch = $pse_obj->getColumn('default_branch');
-				$department = $pse_obj->getColumn('default_department');
-				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
-
+				
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id]) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp][$run_id] = array(
 																'pay_stub_status' => Option::getByKey( $pse_obj->getColumn('pay_stub_status_id'), $psf->getOptions('status') ),
@@ -573,7 +573,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 				if ( isset($psea_arr[$pse_obj->getPayStubEntryNameId()]) ) {
 					//Debug::Text('Pay Stub ID: '. $pse_obj->getPayStub() .' PSE ID: '. $pse_obj->getPayStubEntryNameId() .' Amount: '. $pse_obj->getAmount(), __FILE__, __LINE__, __METHOD__, 10);
-
+					
 					if ( isset($psea_arr[$pse_obj->getPayStubEntryNameId()]['debit_account'])
 							AND $psea_arr[$pse_obj->getPayStubEntryNameId()]['debit_account'] != '' ) {
 
@@ -696,10 +696,9 @@ class GeneralLedgerSummaryReport extends Report {
 		}
 
 		$job_code_map = array( 0 => 0 ); //Make sure this always exists to prevent PHP warnings.
-		$job_item_code_map = array( 0 => 0 ); //Make sure this always exists to prevent PHP warnings.
+		$job_item_code_map = array( 0 => 0 ); //Make sure this always exists to prevent PHP warnings.		  
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jlf = TTnew( 'JobListFactory' );
-			$job_options = $jlf->getByCompanyIdArray( $this->getUserObject()->getCompany() );
 			//Get Job ID to Job Code mapping
 			$jlf->getByCompanyId( $this->getUserObject()->getCompany() );
 			if ( $jlf->getRecordCount() > 0 ) {
@@ -709,7 +708,6 @@ class GeneralLedgerSummaryReport extends Report {
 			}
 
 			$jilf = TTnew( 'JobItemListFactory' );
-			$job_item_options = $jlf->getByCompanyIdArray( $this->getUserObject()->getCompany() );
 			//Get Job ID to Job Code mapping
 			$jilf->getByCompanyId( $this->getUserObject()->getCompany() );
 			if ( $jilf->getRecordCount() > 0 ) {
@@ -723,9 +721,9 @@ class GeneralLedgerSummaryReport extends Report {
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) ) {
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
-				if ( isset($this->tmp_data['user'][$user_id]) ) {
+				if ( isset($this->tmp_data['user'][$user_id]) ) {					
 					foreach( $level_1 as $date_stamp => $level_2 ) {
-						foreach( $level_2 as $run_id => $row ) {
+						foreach( $level_2 as $row ) {
 							$replace_arr = array(
 													//*NOTE*: If this changes you must change numeric indexes in calcPercentDistribution().
 													( is_object($branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]) ) ? $branch_code_map[(int)$this->tmp_data['user'][$user_id]['default_branch_id']]->getManualID() : NULL,
@@ -837,7 +835,7 @@ class GeneralLedgerSummaryReport extends Report {
 									}
 
 								}
-								unset($psen_ids, $psen_id, $psen_amount);
+								unset($psen_ids);
 							}
 
 							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
@@ -1079,6 +1077,7 @@ class GeneralLedgerSummaryReport extends Report {
 
 			$prev_group_key = NULL;
 			$i = 0;
+			$je = FALSE; //code standards
 			foreach( $this->form_data as $row ) {
 				if ( !isset($row['account']) ) { //If the user didn't include the Account column, skip that row completely.
 					continue;
@@ -1111,6 +1110,7 @@ class GeneralLedgerSummaryReport extends Report {
 					}
 
 					Debug::Text('Starting new JE: Group Key: '. $group_key, __FILE__, __LINE__, __METHOD__, 10);
+					
 					$je = new GeneralLedgerExport_JournalEntry( $ignore_balance_check );
 					if ( isset($row['pay_stub_transaction_date']) ) {
 						$je->setDate( $row['pay_stub_transaction_date'] );

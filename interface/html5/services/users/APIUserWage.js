@@ -48,6 +48,10 @@ var APIUserWage = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'validateUserWage', arguments );
 
+	},
+
+	exportUserWage: function() {
+		return this.argumentsHandler( this.className, 'exportUserWage', arguments );
 	}
 
 

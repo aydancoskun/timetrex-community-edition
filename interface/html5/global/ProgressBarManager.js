@@ -36,6 +36,12 @@ var ProgressBar = (function() {
 
 	var time_offset;
 
+	var nanoBar;
+
+	var loading_bar_time;
+
+	var no_progress_for_next_call = false;
+
 	var showOverlay = function() {
 		Global.overlay().addClass( 'overlay' );
 	};
@@ -56,7 +62,10 @@ var ProgressBar = (function() {
 	};
 
 	var showProgressBar = function( message_id, auto_clear ) {
-
+		if ( no_progress_for_next_call ) {
+			no_progress_for_next_call = false;
+			return;
+		}
 		if ( !timer ) {
 //			clearTimeout( timer );
 			//Display progress bar after 1 sec
@@ -238,6 +247,10 @@ var ProgressBar = (function() {
 
 	};
 
+	var noProgressForNextCall = function() {
+		no_progress_for_next_call = true;
+	};
+
 	var secondDown = function() {
 
 		//calculate down time every one second
@@ -376,6 +389,34 @@ var ProgressBar = (function() {
 
 	};
 
+	var showNanobar = function() {
+		if ( !nanoBar ) {
+			var options = {
+				bg: 'red',
+				id: 'nano-bar'
+			};
+			nanoBar = new Nanobar(options);
+		}
+		var percentage = 0;
+		loading_bar_time && clearInterval( loading_bar_time );
+		loading_bar_time = setInterval( function() {
+			if ( percentage < 80 ) {
+				percentage = percentage + 20;
+				nanoBar.go( percentage );
+			}else if ( percentage === 80 ) {
+				percentage = percentage + 10;
+				nanoBar.go( percentage );
+			}
+
+		}, 1000 );
+	};
+
+	var removeNanobar = function() {
+		loading_bar_time && clearInterval( loading_bar_time );
+		nanoBar && nanoBar.go( 100 );
+		closeOverlay();
+	};
+
 	return {
 		showProgressBar: showProgressBar,
 		removeProgressBar: removeProgressBar,
@@ -383,7 +424,10 @@ var ProgressBar = (function() {
 		closeOverlay: closeOverlay,
 		message_id_dic: message_id_dic,
 		changeProgressBarMessage: changeProgressBarMessage,
-		cancelProgressBar: cancelProgressBar
+		cancelProgressBar: cancelProgressBar,
+		showNanobar: showNanobar,
+		removeNanobar: removeNanobar,
+		noProgressForNextCall: noProgressForNextCall
 	};
 
 })();

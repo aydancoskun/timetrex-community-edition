@@ -12,8 +12,8 @@ PermissionControlViewController = BaseViewController.extend( {
 	//use to juedge if need to clear quick_search_this.quick_search_typed_keyss
 	quick_search_timer: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PermissionControlEditView.html';
 		this.permission_id = 'permission';
 		this.viewId = 'PermissionControl';
@@ -339,6 +339,16 @@ PermissionControlViewController = BaseViewController.extend( {
 			icon: Icons.permission_wizard,
 			permission_result: true,
 			permission: null
+		} );
+
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
 		} );
 
 		return [menu];
@@ -689,15 +699,3 @@ PermissionControlViewController = BaseViewController.extend( {
 	}
 
 } );
-
-PermissionControlViewController.loadView = function() {
-
-	Global.loadViewSource( 'PermissionControl', 'PermissionControlView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

@@ -146,6 +146,7 @@ class APIAbsencePolicy extends APIFactory {
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -154,6 +155,17 @@ class APIAbsencePolicy extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportAbsencePolicy( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getAbsencePolicy( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_absence_policy', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -442,7 +454,7 @@ class APIAbsencePolicy extends APIFactory {
 		if ( $user_id == '' ) {
 			return $this->returnHandler( FALSE );
 		}
-
+		
 		$user_id = (int)$user_id;
 		
 		$epoch = TTDate::parseDateTime( $epoch );
@@ -452,7 +464,6 @@ class APIAbsencePolicy extends APIFactory {
 		if ( $aplf->getRecordCount() > 0 ) {
 			$ap_obj = $aplf->getCurrent();
 			$pfp_obj = $ap_obj->getPayFormulaPolicyObject();
-			$pc_obj = $ap_obj->getPayCodeObject();
 			
 			$accrual_rate = ( is_object( $pfp_obj ) ) ? $pfp_obj->getAccrualRate() : (-1);
 
@@ -469,7 +480,7 @@ class APIAbsencePolicy extends APIFactory {
 				if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
 					$wage_permission_children_ids = array();
 				}
-				if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
+				if ( $this->getPermissionObject()->Check('wage', 'view_own') OR $this->getPermissionObject()->Check('pay_stub', 'view_own') ) { //Check wage/pay stub, as by default users don't have wage, view_own permissions. This is important for Advanced Requests.
 					$wage_permission_children_ids[] = $this->getCurrentUserObject()->getID();
 				}
 			}

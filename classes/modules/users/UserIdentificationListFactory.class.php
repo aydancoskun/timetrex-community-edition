@@ -359,7 +359,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 					where	user_id = ?
 						AND type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
 						AND deleted = 0';
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -399,7 +399,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND type_id = ?
 						AND number = ?
 						AND deleted = 0';
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -449,7 +449,7 @@ class UserIdentificationListFactory extends UserIdentificationFactory implements
 						AND a.type_id = ?
 						AND a.number = ?
 						AND a.deleted = 0';
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 

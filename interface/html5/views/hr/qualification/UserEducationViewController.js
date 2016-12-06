@@ -5,8 +5,8 @@ UserEducationViewController = BaseViewController.extend( {
 	qualification_api: null,
 
 	document_object_type_id: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserEducationEditView.html';
 		this.permission_id = 'user_education';
 		this.viewId = 'UserEducation';
@@ -27,39 +27,41 @@ UserEducationViewController = BaseViewController.extend( {
 			this.setSelectRibbonMenuIfNecessary( 'UserEducation' );
 		}
 
-
 	},
 
 	initOptions: function() {
 		var $this = this;
 
-		this.qualification_group_api.getQualificationGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.qualification_group_api.getQualificationGroup( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			res = Global.buildTreeRecord( res );
-			$this.qualification_group_array = res;
+				res = Global.buildTreeRecord( res );
+				$this.qualification_group_array = res;
 
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-				$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+					$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				}
+
 			}
-
-		}} );
+		} );
 
 		var args = {};
 		var filter_data = {};
 		filter_data.type_id = [20];
 		args.filter_data = filter_data;
-		this.qualification_api.getQualification( args, {onResult: function( res ) {
-			res = res.getResult();
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['qualification_id'] ) {
-				$this.basic_search_field_ui_dic['qualification_id'].setSourceData( res );
-				$this.adv_search_field_ui_dic['qualification_id'].setSourceData( res );
+		this.qualification_api.getQualification( args, {
+			onResult: function( res ) {
+				res = res.getResult();
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['qualification_id'] ) {
+					$this.basic_search_field_ui_dic['qualification_id'].setSourceData( res );
+					$this.adv_search_field_ui_dic['qualification_id'].setSourceData( res );
+				}
+
 			}
-
-		}} );
+		} );
 	},
-
 
 	showNoResultCover: function( show_new_btn ) {
 
@@ -101,7 +103,7 @@ UserEducationViewController = BaseViewController.extend( {
 	},
 
 	cancelOtherSubViewSelectedStatus: function() {
-		switch( true ) {
+		switch ( true ) {
 			case typeof( this.parent_view_controller.sub_user_skill_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_skill_view_controller.unSelectAll();
 			case typeof( this.parent_view_controller.sub_user_license_view_controller ) !== 'undefined':
@@ -123,7 +125,6 @@ UserEducationViewController = BaseViewController.extend( {
 		this._super( 'onAddClick' );
 	},
 
-
 	onMassEditClick: function() {
 
 		var $this = this;
@@ -144,25 +145,27 @@ UserEducationViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
-		this.api['getCommon' + this.api.key_name + 'Data']( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			$this.unique_columns = {};
+				$this.unique_columns = {};
 
-			$this.linked_columns = {};
+				$this.linked_columns = {};
 
-			if ( !result_data ) {
-				result_data = [];
+				if ( !result_data ) {
+					result_data = [];
+				}
+
+				if ( $this.sub_view_mode && $this.parent_key ) {
+					result_data[$this.parent_key] = $this.parent_value;
+				}
+
+				$this.current_edit_record = result_data;
+				$this.initEditView();
+
 			}
-
-			if ( $this.sub_view_mode && $this.parent_key ) {
-				result_data[$this.parent_key] = $this.parent_value;
-			}
-
-			$this.current_edit_record = result_data;
-			$this.initEditView();
-
-		}} );
+		} );
 
 	},
 
@@ -209,7 +212,6 @@ UserEducationViewController = BaseViewController.extend( {
 			'tab_attachment': $.i18n._( 'Attachments' ),
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
-
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserEducation' )),
@@ -327,7 +329,8 @@ UserEducationViewController = BaseViewController.extend( {
 
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
@@ -336,9 +339,11 @@ UserEducationViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Course' ),
+			new SearchField( {
+				label: $.i18n._( 'Course' ),
 				in_column: 1,
 				field: 'qualification_id',
 				layout_name: ALayoutIDs.QUALIFICATION,
@@ -346,25 +351,31 @@ UserEducationViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Institute' ),
+			new SearchField( {
+				label: $.i18n._( 'Institute' ),
 				in_column: 1,
 				field: 'institute',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Tags' ),
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
 				adv_search: true,
 				in_column: 1,
 				object_type_id: 252,
-				form_item_type: FormItemType.TAG_INPUT} ),
+				form_item_type: FormItemType.TAG_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
@@ -372,25 +383,31 @@ UserEducationViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Major/Specialization' ),
+			new SearchField( {
+				label: $.i18n._( 'Major/Specialization' ),
 				in_column: 2,
 				field: 'major',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Minor' ),
+			new SearchField( {
+				label: $.i18n._( 'Minor' ),
 				in_column: 2,
 				field: 'minor',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -398,9 +415,11 @@ UserEducationViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -408,31 +427,38 @@ UserEducationViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Graduation Date' ),
+			new SearchField( {
+				label: $.i18n._( 'Graduation Date' ),
 				in_column: 3,
 				field: 'graduate_date',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Start Date' ),
+			new SearchField( {
+				label: $.i18n._( 'Start Date' ),
 				in_column: 3,
 				field: 'start_date',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'End Date' ),
+			new SearchField( {
+				label: $.i18n._( 'End Date' ),
 				in_column: 3,
 				field: 'end_date',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} )
+				form_item_type: FormItemType.DATE_PICKER
+			} )
 		];
 	},
 
@@ -532,32 +558,18 @@ UserEducationViewController = BaseViewController.extend( {
 
 	}
 
-
 } );
-
-UserEducationViewController.loadView = function() {
-
-	Global.loadViewSource( 'UserEducation', 'UserEducationView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};
-
 
 UserEducationViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserEducation', 'SubUserEducationView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_user_education_view_controller );
 			}

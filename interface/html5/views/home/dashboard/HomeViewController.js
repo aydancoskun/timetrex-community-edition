@@ -10,7 +10,7 @@ HomeViewController = Backbone.View.extend( {
 	order_data: false,
 	current_scroll_position: false,
 
-	initialize: function() {
+	initialize: function( options ) {
 		this.viewId = 'Home';
 		LocalCacheData.current_open_primary_controller = this;
 		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();

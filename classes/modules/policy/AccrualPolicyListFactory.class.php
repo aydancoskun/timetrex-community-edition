@@ -100,7 +100,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph );
-		
+
 		return $this;
 	}
 
@@ -228,7 +228,6 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$pgf = new PolicyGroupFactory();
 		$pguf = new PolicyGroupUserFactory();
 		$cgmf = new CompanyGenericMapFactory();
-		$apf = new AccrualPolicyFactory();
 
 		$ph = array(
 					'user_id' => (int)$user_id,
@@ -255,7 +254,42 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 
 		return $this;
 	}
-	
+
+	function getByCompanyIdAndContributingShiftPolicyId($id, $contributing_shift_policy_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $contributing_shift_policy_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'id' => (int)$id,
+		);
+
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .' as a
+					where	company_id = ?
+						AND contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'int' ) .')
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -271,7 +305,6 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$pgf = new PolicyGroupFactory();
 		$pguf = new PolicyGroupUserFactory();
 		$cgmf = new CompanyGenericMapFactory();
-		$apf = new AccrualPolicyFactory();
 
 		$ph = array(
 					'user_id' => (int)$user_id,
@@ -316,7 +349,6 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$pgf = new PolicyGroupFactory();
 		$pguf = new PolicyGroupUserFactory();
 		$cgmf = new CompanyGenericMapFactory();
-		$apf = new AccrualPolicyFactory();
 
 		$ph = array(
 					'user_id' => (int)$user_id,
@@ -349,15 +381,17 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
 
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -369,6 +403,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$aplf = new AccrualPolicyListFactory();
 		$aplf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = TTi18n::gettext('-- None --');
 		}
@@ -377,7 +412,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 			$list[$ap_obj->getID()] = $ap_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -432,7 +467,7 @@ class AccrualPolicyListFactory extends AccrualPolicyFactory implements IteratorA
 		$otpf = new OverTimePolicyFactory();
 		$ppf = new PremiumPolicyFactory();
 		$apf = new AbsencePolicyFactory();
-		
+
 		$ph = array(
 					'company_id' => (int)$company_id,
 					);

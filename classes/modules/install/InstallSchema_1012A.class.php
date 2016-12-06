@@ -47,7 +47,10 @@ class InstallSchema_1012A extends InstallSchema_Base {
 	}
 
 	function postInstall() {
+		
+		// @codingStandardsIgnoreStart
 		global $cache;
+		// @codingStandardsIgnoreEnd
 		
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 		
@@ -77,6 +80,7 @@ class InstallSchema_1012A extends InstallSchema_Base {
 					foreach( $time_zone_arr as $time_zone => $count ) {				
 						break;
 					}
+					unset($count); //code standards
 					
 					if ( $time_zone != '' ) {
 						//Set pay period timezone to the timezone of the majority of the users are in.

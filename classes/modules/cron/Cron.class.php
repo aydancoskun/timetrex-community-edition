@@ -117,11 +117,17 @@ class Cron {
 			$arr = array($arr);
 		}
 
-		if ( is_array($arr) ) {
-			sort($arr);
-			$retval = implode( ',', array_unique($arr) );
+		//If any of the array entries is '*', just return that as the string and ignore everything else.
+		if ( is_array($arr) AND in_array('*', $arr) === TRUE ) {
+			return '*';
+		} else {
+			if ( is_array( $arr ) ) {
+				sort( $arr );
+				$retval = implode( ',', array_unique( $arr ) );
 
-			return $retval;
+				//Debug::Arr( $retval, 'Final String: ', __FILE__, __LINE__, __METHOD__, 10 );
+				return $retval;
+			}
 		}
 
 		return FALSE;
@@ -177,9 +183,10 @@ class Cron {
 		}
 
 		rsort($retarr);
+		$retarr = array_values( array_unique($retarr) ); //Unique and rekey array so index is consecutive. This prevents problems with the dropdown box.
 
 		//Debug::Arr($retarr, 'Final Array: ', __FILE__, __LINE__, __METHOD__, 10);
-		return array_unique($retarr);
+		return $retarr;
 	}
 
 	static function getNextScheduleDate( $min_col, $hour_col, $dom_col, $month_col, $dow_col, $epoch = NULL ) {

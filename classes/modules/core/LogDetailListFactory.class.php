@@ -167,7 +167,7 @@ class LogDetailListFactory extends LogDetailFactory implements IteratorAggregate
 					where	a.system_log_id = ?
 						AND uf.company_id = ?';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 

@@ -128,11 +128,88 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 	$help_output = "Usage: unattended_upgrade.php\n";
 	$help_output .= " [--config] = Config file to use.\n";
 	$help_output .= " [--schema_only] = Run a schema upgrade only.\n";
+	$help_output .= " [--pre_requirements_update] = Run a pre system requirements update.\n";
 	$help_output .= " [--requirements_only] = Run a system requirements check only.\n";
 	$help_output .= " [-f] = Force upgrade even if INSTALL mode is disabled.\n";
 	echo $help_output;
 } else {
 	$last_arg = ( count($argv) - 1 );
+
+	if ( in_array('-f', $argv) ) {
+		$force = TRUE;
+	} else {
+		$force = FALSE;
+	}
+
+	//Full force mode, forces upgrade even if the file downloaded is the same version.
+	//Primarily should be used when UPGRADE.ZIP already exists.
+	if ( in_array('-ff', $argv) ) {
+		$force = TRUE;
+		$full_force = TRUE;
+	} else {
+		$full_force = FALSE;
+	}
+
+	if ( in_array('--pre_requirements_update', $argv) ) {
+		Debug::Text('Running pre-requirements update only...', __FILE__, __LINE__, __METHOD__, 10);
+		if ( $force == TRUE OR version_compare( APPLICATION_VERSION, '10.0.0', '>=') == TRUE ) {
+			//Cant enable INTL/ZIP extensions, as they won't load on some stack installs...
+//			Debug::Text('  Running: v10.0.0 Pre-Requirements Update...', __FILE__, __LINE__, __METHOD__, 10);
+//
+//			//Check if stack installer was used, if so, attempt to enable INTL extension.
+//			if ( PHP_OS == 'WINNT' ) {
+//				$full_stack_file = dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'start.bat';
+//				Debug::Text('    Checking if this is a full stack install or not: '. $full_stack_file, __FILE__, __LINE__, __METHOD__, 10);
+//				if ( !file_exists( $full_stack_file ) ) {
+//					$full_stack_file = dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'start.bat';
+//					Debug::Text('    bChecking if this is a full stack install or not: '. $full_stack_file, __FILE__, __LINE__, __METHOD__, 10);
+//					if ( !file_exists( $full_stack_file ) ) {
+//						Debug::Text('    This is NOT a full stack install... Exiting...', __FILE__, __LINE__, __METHOD__, 10);
+//						CLIExit(0); //Exit success as it may not be a stack install.
+//					}
+//				}
+//
+//				$stack_install_dir = realpath( dirname( $full_stack_file ) );
+//				Debug::Text('    Checking full stack install directory: '. $stack_install_dir, __FILE__, __LINE__, __METHOD__, 10);
+//				if ( file_exists( $stack_install_dir ) ) {
+//					Debug::Text('    Found full stack install directory: '. $stack_install_dir, __FILE__, __LINE__, __METHOD__, 10);
+//					$php_ini_file = $stack_install_dir. DIRECTORY_SEPARATOR .'php'. DIRECTORY_SEPARATOR .'php.ini';
+//					if ( file_exists( $php_ini_file ) ) {
+//						Debug::Text( '      PHP INI file found: '. $php_ini_file, __FILE__, __LINE__, __METHOD__, 10 );
+//						$php_ini_contents = file_get_contents( $php_ini_file );
+//
+//						//Enable PHP MCRYPT extension. Seems like it was compiled under a wrong version of PHP though, so don't do this.
+//						//$php_ini_contents = preg_replace('/^;extension=php_mcrypt\.dll/mi', 'extension=php_mcrypt.dll', $php_ini_contents, -1, $replacement_count );
+//						//Debug::Text( '      PHP.INI replacements: MCRYPT: '. $replacement_count, __FILE__, __LINE__, __METHOD__, 10 );
+//
+//						//Enable PHP OPENSSL extension.
+//						$php_ini_contents = preg_replace('/^;extension=php_openssl\.dll/mi', 'extension=php_openssl.dll', $php_ini_contents, -1, $replacement_count );
+//						Debug::Text( '      PHP.INI replacements: OPENSSL: '. $replacement_count, __FILE__, __LINE__, __METHOD__, 10 );
+//
+//						//Enable PHP ZIP and INTL extensions. Seems like ZIP was compiled under a different version of PHP, so don't enable it.
+//						//$php_ini_contents = preg_replace('/^;extension=php_zip\.dll/mi', 'extension=php_zip.dll'. PHP_EOL .'extension=php_intl.dll', $php_ini_contents, -1, $replacement_count );
+//						if ( preg_match( '/^extension=php_intl\.dll/mi', $php_ini_contents ) === 0 ) { //Don't replace it if it already is enabled.
+//							$php_ini_contents = preg_replace( '/^;extension=php_zip\.dll/mi', ';extension=php_zip.dll' . PHP_EOL . 'extension=php_intl.dll', $php_ini_contents, -1, $replacement_count );
+//							Debug::Text( '      PHP.INI replacements: ZIP/INTL: ' . $replacement_count, __FILE__, __LINE__, __METHOD__, 10 );
+//						}
+//
+//						if ( $php_ini_contents !== NULL ) {
+//							Debug::Arr( $php_ini_contents, '      Writing out new PHP.INI contents: ', __FILE__, __LINE__, __METHOD__, 10 );
+//							file_put_contents( $php_ini_file, $php_ini_contents );
+//
+//							system( $stack_install_dir . DIRECTORY_SEPARATOR .'restart.bat', $exit_code );
+//							Debug::Text( '      Restarting TimeTrex services... Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10 );
+//							CLIExit(0);
+//						} else {
+//							Debug::Text( '      PHP INI modification failed, or none to make!', __FILE__, __LINE__, __METHOD__, 10 );
+//							CLIExit(0);
+//						}
+//					}
+//				}
+//			}
+		}
+		CLIExit(0);
+	}
 
 	if ( in_array('--requirements_only', $argv) ) {
 		Debug::Text('Checking requirements only...', __FILE__, __LINE__, __METHOD__, 10);
@@ -158,21 +235,6 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 		unset($exclude_requirements);
 	}
 
-	if ( in_array('-f', $argv) ) {
-		$force = TRUE;
-	} else {
-		$force = FALSE;
-	}
-
-	//Full force mode, forces upgrade even if the file downloaded is the same version.
-	//Primarily should be used when UPGRADE.ZIP already exists.
-	if ( in_array('-ff', $argv) ) {
-		$force = TRUE;
-		$full_force = TRUE;
-	} else {
-		$full_force = FALSE;
-	}
-
 	if ( $force == TRUE ) {
 		echo "Force Mode enabled...\n";
 		//Force installer_enabled to TRUE so we don't have to manually modify the config file with scripts.
@@ -180,7 +242,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 	}
 	$install_obj = new Install(); //Re-initialize install object with new config options set above. (force)
 
-	
+
 	if ( in_array('--schema_only', $argv) ) {
 		if ( $install_obj->isInstallMode() == FALSE ) {
 			echo "ERROR: Install mode is not enabled in the timetrex.ini.php file!\n";
@@ -381,9 +443,8 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 
 			$install_obj->cleanCacheDirectory();
 			if ( $install_obj->checkAllRequirements( FALSE, array('file_checksums', 'php_cli_requirements', 'base_url', 'clean_cache') ) == 0 ) {
-				Debug::Text('New version available, attempting to download...', __FILE__, __LINE__, __METHOD__, 10);
-				echo "New version available, attempting to download...\n";
-				sleep(5); //Sleep for 5 seconds so it can be cancelled easy if needed.
+				Debug::Text('New version available, collecting data to download...', __FILE__, __LINE__, __METHOD__, 10);
+				echo "New version available, collecting data to download...\n";
 
 				//Send version data before and after upgrade.
 				$ttsc->sendCompanyData( $company_id, TRUE );
@@ -394,6 +455,11 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 				for( $i = 0; $i < 3; $i++ ) {
 					$file_url = $ttsc->getUpgradeFileURL( $force );
 					Debug::Arr($file_url, 'File Upgrade URL: ', __FILE__, __LINE__, __METHOD__, 10);
+					if ( !is_soap_fault($file_url) AND $file_url === FALSE ) {
+						//Skip retries in case the .ZIP file is already downloaded for testing.
+						Debug::Text('Upgrade URL not available from server, either already running latest version or not ready to upgrade yet, skip retries: '. $i, __FILE__, __LINE__, __METHOD__, 10);
+						break;
+					}
 
 					if ( !is_soap_fault($file_url) AND $file_url !== FALSE AND $file_url != '' ) {
 						$file_url_size = Misc::getRemoteHTTPFileSize( $file_url );
@@ -414,8 +480,13 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 					$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_download' ), 'pre_install.php'), 'r');
 					@fclose($handle);
 
-					if ( file_exists( $upgrade_file_name ) == FALSE OR filesize( $upgrade_file_name ) != $file_url_size ) {
-						$bytes_downloaded = @file_put_contents( $upgrade_file_name, fopen( $file_url, 'r') );
+					if ( file_exists( $upgrade_file_name ) == FALSE OR ( isset($file_url_size) AND filesize( $upgrade_file_name ) != $file_url_size ) ) {
+						Debug::Text('Attempting to download latest version...', __FILE__, __LINE__, __METHOD__, 10);
+						echo "Attempting to download latest version...\n";
+						sleep(5); //Sleep for 5 seconds so it can be cancelled easy if needed.
+
+						//$bytes_downloaded = @file_put_contents( $upgrade_file_name, fopen( $file_url, 'r') );
+						$bytes_downloaded = Misc::downloadHTTPFile( $file_url, $upgrade_file_name );
 						Debug::Text('Downloaded file: '. $upgrade_file_name .' Size: '. @filesize( $upgrade_file_name ) .' Bytes downloaded: '. $bytes_downloaded .' Remote Size: '. $file_url_size, __FILE__, __LINE__, __METHOD__, 10);
 						if ( $bytes_downloaded != $file_url_size OR @filesize( $upgrade_file_name ) <= 0 ) {
 							Debug::Text('ERROR: File did not download correctly...', __FILE__, __LINE__, __METHOD__, 10);
@@ -424,7 +495,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 							echo 'Downloaded file: '. $upgrade_file_name .' Size: '. filesize( $upgrade_file_name ) ."\n";
 						}
 					} else {
-						Debug::Text('Upgrade file already exists... Current Size: '. filesize( $upgrade_file_name ) .' Remote Size: '. $file_url_size, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::Text('Upgrade file already exists... Current Size: '. filesize( $upgrade_file_name ) .' Remote Size: '. ( isset($file_url_size) ? $file_url_size : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
 						echo "Upgrade file already exists...\n";
 					}
 
@@ -489,39 +560,52 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 							$latest_unattended_upgrade_tool = $upgrade_staging_latest_dir . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'unattended_upgrade.php';
 							if ( file_exists( $latest_unattended_upgrade_tool ) ) {
 								if ( is_executable( $php_cli ) ) {
-									$command = '"'.$php_cli .'" "'. $latest_unattended_upgrade_tool .'" --config "'. CONFIG_FILE .'" --requirements_only'; //Make each part is quoted in case there are spaces in the paths.
+									$command = '"'.$php_cli .'" "'. $latest_unattended_upgrade_tool .'" --config "'. CONFIG_FILE .'" --pre_requirements_update'; //Make each part is quoted in case there are spaces in the paths.
 									system( $command, $exit_code );
-									Debug::Text('Checking new version system requirements... Command: '. $command .' Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
+									Debug::Text('Running pre-requirements update... Command: '. $command .' Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
 									if ( $exit_code == 0 ) {
 										Debug::Text('New version system requirements met...', __FILE__, __LINE__, __METHOD__, 10);
-										$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_new_requirements' ), 'pre_install.php'), 'r');
+										$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_pre_requirements' ), 'pre_install.php'), 'r');
 										@fclose($handle);
 
-										moveUpgradeFiles( $upgrade_staging_latest_dir );
-
-										$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_launch_stage2' ), 'pre_install.php'), 'r');
-										@fclose($handle);
-
-										//Run separate process to finish stage2 of installer so it can be run with the new scripts.
-										//This allows us more flexibility if an error occurs to finish the install or have the latest version correct problems.
-										echo "Launching Stage 2...\n";
-										sleep(5);
-										$command = $php_cli .' '. __FILE__ .' --config '. CONFIG_FILE .' --stage2';
+										$command = '"'.$php_cli .'" "'. $latest_unattended_upgrade_tool .'" --config "'. CONFIG_FILE .'" --requirements_only'; //Make each part is quoted in case there are spaces in the paths.
 										system( $command, $exit_code );
+										Debug::Text('Checking new version system requirements... Command: '. $command .' Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
 										if ( $exit_code == 0 ) {
-											Debug::Text('Stage2 success!', __FILE__, __LINE__, __METHOD__, 10);
+											Debug::Text('New version system requirements met...', __FILE__, __LINE__, __METHOD__, 10);
+											$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_new_requirements' ), 'pre_install.php'), 'r');
+											@fclose($handle);
 
-											echo "Upgrade successfull!\n";
-											
-											setAutoUpgradeFailed( 0 ); //Clear auto_upgrade_failed setting if it isn't already.
-											CLIExit(0);
+											moveUpgradeFiles( $upgrade_staging_latest_dir );
+
+											$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion() , 'page' => 'unattended_upgrade_launch_stage2' ), 'pre_install.php'), 'r');
+											@fclose($handle);
+
+											//Run separate process to finish stage2 of installer so it can be run with the new scripts.
+											//This allows us more flexibility if an error occurs to finish the install or have the latest version correct problems.
+											echo "Launching Stage 2...\n";
+											sleep(5);
+											$command = $php_cli .' '. __FILE__ .' --config '. CONFIG_FILE .' --stage2';
+											system( $command, $exit_code );
+											if ( $exit_code == 0 ) {
+												Debug::Text('Stage2 success!', __FILE__, __LINE__, __METHOD__, 10);
+
+												echo "Upgrade successfull!\n";
+
+												setAutoUpgradeFailed( 0 ); //Clear auto_upgrade_failed setting if it isn't already.
+												CLIExit(0);
+											} else {
+												Debug::Text('Stage2 failed... Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
+												setAutoUpgradeFailed();
+											}
 										} else {
-											Debug::Text('Stage2 failed... Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
-											setAutoUpgradeFailed();	
+											Debug::Text('ERROR: New version system requirements not met...', __FILE__, __LINE__, __METHOD__, 10);
+											echo "ERROR: New version system requirements not met...\n";
+											setAutoUpgradeFailed();
 										}
 									} else {
-										Debug::Text('ERROR: New version system requirements not met...', __FILE__, __LINE__, __METHOD__, 10);
-										echo "ERROR: New version system requirements not met...\n";
+										Debug::Text('ERROR: Pre-Requirements Update failed...', __FILE__, __LINE__, __METHOD__, 10);
+										echo "ERROR: Pre-Requirements Update failed...\n";
 										setAutoUpgradeFailed();
 									}
 								} else {

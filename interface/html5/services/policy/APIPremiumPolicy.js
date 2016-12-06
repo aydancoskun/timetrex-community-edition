@@ -41,6 +41,10 @@ var APIPremiumPolicy = ServiceCaller.extend( {
 
 	copyPremiumPolicy: function() {
 		return this.argumentsHandler( this.className, 'copyPremiumPolicy', arguments );
+	},
+
+	exportPremiumPolicy: function() {
+		return this.argumentsHandler( this.className, 'exportPremiumPolicy', arguments );
 	}
 
 

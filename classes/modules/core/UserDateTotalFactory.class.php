@@ -82,14 +82,14 @@ class UserDateTotalFactory extends Factory {
 										25 => TTi18n::gettext('Absence'),
 										30 => TTi18n::gettext('Overtime'),
 										40 => TTi18n::gettext('Premium'),
-										
+
 										//We need to treat Absence time like Worked Time, and calculate policies (ie: Overtime) based on it, without affecting the original entry.
 										//As it can be split between regular,overtime policies just like worked time can.
 										50 => TTi18n::gettext('Absence (Taken)'),
-										
+
 										100 => TTi18n::gettext('Lunch'), //Lunch Policy (auto-add/deduct)
 										101 => TTi18n::gettext('Lunch (Taken)'), //Time punched out for lunch.
-										
+
 										110 => TTi18n::gettext('Break'), //Break Policy (auto-add/deduct)
 										111 => TTi18n::gettext('Break (Taken)'), //Time punched out for break.
 									);
@@ -124,9 +124,9 @@ class UserDateTotalFactory extends Factory {
 										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
 							);
 
-				if ( $product_edition_id >= 15 ) {
-					$retarr['-1180-job'] = TTi18n::gettext('Job');
-					$retarr['-1190-job_item'] = TTi18n::gettext('Task');
+				if ( $product_edition_id >= 20 ) {
+					$retval['-1180-job'] = TTi18n::gettext('Job');
+					$retval['-1190-job_item'] = TTi18n::gettext('Task');
 				}
 				ksort($retval);
 				break;
@@ -183,13 +183,13 @@ class UserDateTotalFactory extends Factory {
 						//Legacy status/type functions.
 						'status_id' => 'Status',
 						'type_id' => 'Type',
-						
+
 						'object_type_id' => 'ObjectType',
 						'object_type' => FALSE,
 						'pay_code_id' => 'PayCode',
 						'src_object_id' => 'SourceObject', //This must go after PayCodeID, so if the user is saving an absence we overwrite any previously selected PayCode
 						'policy_name' => FALSE,
-						
+
 						'punch_control_id' => 'PunchControlID',
 						'branch_id' => 'Branch',
 						'branch' => FALSE,
@@ -215,7 +215,7 @@ class UserDateTotalFactory extends Factory {
 						'total_time_amount' => 'TotalTimeAmount',
 						'hourly_rate_with_burden' => 'HourlyRateWithBurden',
 						'total_time_amount_with_burden' => 'TotalTimeAmountWithBurden',
-						
+
 						'name' => FALSE,
 						'override' => 'Override',
 						'note' => 'Note',
@@ -265,7 +265,7 @@ class UserDateTotalFactory extends Factory {
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			return $this->getGenericObject( 'JobItemListFactory', $this->getJobItem(), 'job_item_obj' );
 		}
-		
+
 		return FALSE;
 	}
 
@@ -494,7 +494,7 @@ class UserDateTotalFactory extends Factory {
 
 		//Debug::Text('Object Type: '. $this->getObjectType() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		$lf = $this->getSourceObjectListFactory( $this->getObjectType() );
-		
+
 		if ( $id == 0
 				OR
 				$this->Validator->isResultSetWithRows(	'src_object_id',
@@ -560,10 +560,10 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	//Returns an array of time categories that the object_type fits in.
 	function getTimeCategory( $include_total = TRUE, $report_columns = FALSE ) {
-		
+
 		$retarr = array();
 		switch ( $this->getObjectType() ) {
 			case 5: //System Time
@@ -765,7 +765,7 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function setQuantity($val) {
-		$val = (float)$val;
+		$val = TTi18n::parseFloat( $val );
 
 		if ( $val == FALSE OR $val == 0 OR $val == '' ) {
 			$val = 0;
@@ -792,13 +792,12 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function setBadQuantity($val) {
-		$val = (float)$val;
+		$val = TTi18n::parseFloat( $val );
 
 		if ( $val == FALSE OR $val == 0 OR $val == '' ) {
 			$val = 0;
 		}
-
-
+		
 		if	(	$val == 0
 				OR
 				$this->Validator->isFloat(			'bad_quantity',
@@ -913,7 +912,7 @@ class UserDateTotalFactory extends Factory {
 				if ( !is_numeric( $this->data['end_time_stamp'] ) ) { //Optmization to avoid converting it when run in CalculatePolicy's loops
 					$this->data['end_time_stamp'] = TTDate::strtotime( $this->data['end_time_stamp'] );
 				}
-				return $this->data['end_time_stamp'];				
+				return $this->data['end_time_stamp'];
 			}
 		}
 
@@ -1033,8 +1032,6 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function setCurrencyRate( $value ) {
-		$value = trim($value);
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
 
@@ -1063,8 +1060,6 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function setBaseHourlyRate( $value ) {
-		$value = trim($value);
-
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
@@ -1092,8 +1087,6 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function setHourlyRate( $value ) {
-		$value = trim($value);
-
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
@@ -1121,8 +1114,6 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function setTotalTimeAmount( $value ) {
-		$value = trim($value);
-
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
@@ -1133,7 +1124,6 @@ class UserDateTotalFactory extends Factory {
 		if (	$this->Validator->isFloat(	'total_time_amount',
 											$value,
 											TTi18n::gettext('Incorrect Total Time Amount')) ) {
-
 			$this->data['total_time_amount'] = $value;
 
 			return TRUE;
@@ -1142,7 +1132,9 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function calcTotalTimeAmount() {
+		//Before switching to *not* setting setLocale() LC_NUMERIC, calculating in es_ES locale, it returns float value using comma decimal symbol which causes a SQL error on insert.
 		$retval = ( TTDate::getHours( $this->getTotalTime() ) * $this->getHourlyRate() );
+		//$retval = bcmul( TTDate::getHours( $this->getTotalTime() ), $this->getHourlyRate() );
 		return $retval;
 	}
 
@@ -1154,8 +1146,6 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function setHourlyRateWithBurden( $value ) {
-		$value = trim($value);
-
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
@@ -1183,8 +1173,6 @@ class UserDateTotalFactory extends Factory {
 		return FALSE;
 	}
 	function setTotalTimeAmountWithBurden( $value ) {
-		$value = trim($value);
-
 		if ( $value === FALSE OR $value === '' OR $value === NULL ) {
 			$value = 0;
 		}
@@ -1245,7 +1233,7 @@ class UserDateTotalFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getName() {
 		switch ( $this->getObjectType() ) {
 			case 5:
@@ -1427,10 +1415,6 @@ class UserDateTotalFactory extends Factory {
 		$cp->calculate(); //This sets timezone itself.
 		$cp->Save();
 
-		if ( isset($original_time_zone) ) {
-			TTDate::setTimeZone( $original_time_zone );
-		}
-
 		return TRUE;
 	}
 
@@ -1447,7 +1431,7 @@ class UserDateTotalFactory extends Factory {
 		if ( !is_object( $user_obj ) ) {
 			return FALSE;
 		}
-		
+
 		Debug::text('Re-calculating User ID: '. $user_obj->getId() .' Enable Exception: '. (int)$enable_exception, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( !is_array($date_stamps) ) {
@@ -1460,7 +1444,7 @@ class UserDateTotalFactory extends Factory {
 		$cp->setFlag( 'exception', $enable_exception );
 		$cp->setFlag( 'exception_premature', $enable_premature_exceptions );
 		$cp->setFlag( 'exception_future', $enable_future_exceptions );
-		
+
 		$cp->setUserObject( $user_obj );
 		$cp->addPendingCalculationDate( $date_stamps );
 		$cp->calculate(); //This sets timezone itself.
@@ -1716,7 +1700,7 @@ class UserDateTotalFactory extends Factory {
 		} else {
 			Debug::text('Calc System Total Time Disabled: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
-		
+
 		return TRUE;
 	}
 
@@ -1731,6 +1715,7 @@ class UserDateTotalFactory extends Factory {
 	//Takes UserDateTotal rows, and calculate the accumlated time sections
 	static function calcAccumulatedTime( $data, $include_daily_totals = TRUE ) {
 		if ( is_array($data) AND count($data) > 0 ) {
+			$retval = array();
 			//Keep track of item ids for each section type so we can decide later on if we can eliminate unneeded data.
 			$section_ids = array( 'branch' => array(), 'department' => array(), 'job' => array(), 'job_item' => array() );
 
@@ -1738,7 +1723,7 @@ class UserDateTotalFactory extends Factory {
 			//Keep a running total of all days, mainly for 'weekly total" purposes.
 			//
 			//The 'order' array element is used by JS to sort the rows displayed to the user.
-			foreach ( $data as $key => $row ) {
+			foreach ( $data as $row ) {
 				//Skip rows with a 0 total_time.
 				if ( $row['total_time'] == 0 AND ( ( isset($row['override']) AND $row['override'] == FALSE ) OR !isset($row['override']) ) ) {
 					continue;
@@ -1835,7 +1820,7 @@ class UserDateTotalFactory extends Factory {
 							if ( !isset($retval[$row['date_stamp']]['accumulated_time']['total']['order']) ) {
 								$retval[$row['date_stamp']]['accumulated_time']['total']['order'] = 999; //Always goes at the end.
 							}
-							
+
 							if ( !isset($retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount']) ) {
 								$retval[$row['date_stamp']]['accumulated_time']['total']['total_time_amount'] = 0;
 							}
@@ -1926,38 +1911,38 @@ class UserDateTotalFactory extends Factory {
 					$section_ids['department'][] = (int)$row['department_id'];
 
 					if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-						//Job
-						$job_name = $row['job'];
-						if ( $job_name == '' ) {
-							$job_name = TTi18n::gettext('No Job');
-						}
-						if ( !isset($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]) ) {
-							$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']] = array('label' => $job_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
-						}
-						$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] += $row['total_time'];
-						$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-						//$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] ) : 1 ) );
-						$section_ids['job'][] = (int)$row['job_id'];
+					//Job
+					$job_name = $row['job'];
+					if ( $job_name == '' ) {
+						$job_name = TTi18n::gettext('No Job');
+					}
+					if ( !isset($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]) ) {
+						$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']] = array('label' => $job_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
+					}
+					$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] += $row['total_time'];
+					$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
+					//$retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_time']['job_'.$row['job_id']]['total_time'] ) : 1 ) );
+					$section_ids['job'][] = (int)$row['job_id'];
 
-						//Job Item/Task
-						$job_item_name = $row['job_item'];
-						if ( $job_item_name == '' ) {
-							$job_item_name = TTi18n::gettext('No Task');
-						}
-						if ( !isset($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]) ) {
-							$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']] = array('label' => $job_item_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
-						}
-						$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] += $row['total_time'];
-						$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
-						//$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] ) : 1 ) );
-						$section_ids['job_item'][] = (int)$row['job_item_id'];
+					//Job Item/Task
+					$job_item_name = $row['job_item'];
+					if ( $job_item_name == '' ) {
+						$job_item_name = TTi18n::gettext('No Task');
+					}
+					if ( !isset($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]) ) {
+						$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']] = array('label' => $job_item_name, 'total_time' => 0, 'total_time_amount' => 0, 'hourly_rate' => 0, 'order' => $order );
+					}
+					$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] += $row['total_time'];
+					$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] += ( isset($row['total_time_amount']) ) ? $row['total_time_amount'] : 0;
+					//$retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['hourly_rate'] = ( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time_amount'] / ( ($retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] > 0 ) ? TTDate::getHours( $retval[$row['date_stamp']]['job_item_time']['job_item_'.$row['job_item_id']]['total_time'] ) : 1 ) );
+					$section_ids['job_item'][] = (int)$row['job_item_id'];
 					}
 
 					//Debug::text('ID: '. $row['id'] .' User Date ID: '. $row['date_stamp'] .' Total Time: '. $row['total_time'] .' Branch: '. $branch_name .' Job: '. $job_name, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 
-			if ( isset($retval) ) {
+			if ( empty($retval) == FALSE ) {
 				//Remove any unneeded data, such as "No Branch" for all dates in the range
 				foreach( $section_ids as $section => $ids ) {
 					$ids = array_unique($ids);
@@ -1972,6 +1957,7 @@ class UserDateTotalFactory extends Factory {
 								uasort($retval[$date_stamp]['accumulated_time'], array( 'self', 'sortAccumulatedTimeByOrder' ) ); //Sort by Order then label.
 							}
 						}
+						unset($day_data);
 					}
 				}
 
@@ -2026,6 +2012,7 @@ class UserDateTotalFactory extends Factory {
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$uf = TTnew( 'UserFactory' );
 
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

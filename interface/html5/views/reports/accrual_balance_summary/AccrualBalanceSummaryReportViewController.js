@@ -1,7 +1,7 @@
 AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'AccrualBalanceSummaryReport';
 		this.viewId = 'AccrualBalanceSummaryReport';
 		this.context_menu_name = $.i18n._( 'Accrual Balance Summary' );

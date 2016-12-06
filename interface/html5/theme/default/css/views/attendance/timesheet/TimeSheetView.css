@@ -3,12 +3,11 @@
 }
 
 .time-sheet-view .control-bar {
-    float: left;
     left: 50%;
-    margin-left: -450px;
     position: relative;
-    width: 900px;
     text-align: center;
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
 }
 
 .time-sheet-view .control-bar .control-bar-center {
@@ -274,6 +273,16 @@
     cursor: pointer;
 }
 
+.time-sheet-view .timesheet-mode-div {
+    float: left;
+    margin-top: 3px;
+    margin-right: 20px;
+}
+
+.timesheet-mode-div .toggle-button-div {
+    margin-top: 1px;
+}
+
 .time-sheet-view .action-chooser-div {
     float: left;
     margin-right: 10px;
@@ -343,4 +352,24 @@
 .time-sheet-view .accumulated-time-grid .jqgrow > td:last-child .time-sheet-view-wage-amount,
 .time-sheet-view .premium-grid .jqgrow > td:last-child .time-sheet-view-wage-amount {
     padding-right: 14px;
+}
+
+.timesheet-manual-mode .sub-grid td:nth-child(-n + 4) {
+    border-right: none !important;
+}
+
+.manual-timesheet-size-tr > td {
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.is-saving-manual-grid {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.grid-inside-editor-render .group-column-tr {
+    border-top: 1px solid rgb(221, 221, 221);
+    height: 22px;
 }

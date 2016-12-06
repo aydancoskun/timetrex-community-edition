@@ -170,10 +170,13 @@ class Import {
 	function getRawDataColumns() {
 		$raw_data = $this->getRawData();
 		if ( is_array( $raw_data ) ) {
+			
+			$retarr = array();
 			foreach( $raw_data as $raw_data_row ) {
 				foreach( $raw_data_row as $raw_data_column => $raw_data_column_data ) {
 					$retarr[] = $raw_data_column;
 				}
+				unset($raw_data_column_data); //code standards
 				break;
 			}
 			Debug::Arr($retarr, 'Raw Data Columns: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -224,6 +227,7 @@ class Import {
 			unset($raw_data_column, $raw_data_key, $matched_column_key);
 			$matched_columns = array_flip( $matched_columns );
 
+			$retval = array();
 			foreach( $columns as $column => $column_name ) {
 				$retval[$column] = array(
 										'import_column' => $column,
@@ -232,6 +236,7 @@ class Import {
 										'parse_hint' => NULL,
 										);
 			}
+			unset($column_name); //code standards
 
 			if ( isset($retval) ) {
 				Debug::Arr($retval, 'Generate Column Map:', __FILE__, __LINE__, __METHOD__, 10);
@@ -263,6 +268,7 @@ class Import {
 		//		)
 		//
 		// This must support columns that may not exist in the actual system, so they can be converted to ones that do.
+		$filtered_import_map = array();
 		foreach( $import_map_arr as $import_column => $map_cols ) {
 			if ( ( isset( $map_cols['map_column_name'] ) AND isset( $map_cols['default_value'] ) )
 					AND ( $map_cols['map_column_name'] != '' OR $map_cols['default_value'] != '' ) ) {
@@ -280,7 +286,7 @@ class Import {
 			}
 		}
 
-		if ( isset($filtered_import_map) ) {
+		if ( empty($filtered_import_map) == FALSE ) {
 			//Debug::Arr($filtered_import_map, 'Filtered Import Map:', __FILE__, __LINE__, __METHOD__, 10);
 			$this->data['column_map'] = $filtered_import_map;
 			return TRUE;

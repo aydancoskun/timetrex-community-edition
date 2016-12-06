@@ -83,3 +83,38 @@
     padding: 5px;
     text-align: center;
 }
+
+.grid-inside-editor-render {
+
+}
+
+.grid-inside-editor-render .title {
+    background: #375979 !important;
+
+}
+
+.grid-inside-editor-render .title td {
+    color: #fff;
+    font-size: 11px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    cursor: default;
+}
+
+.grid-inside-editor-render tbody {
+    background: #fff;
+}
+
+.grid-inside-editor-render td {
+    border-right: 1px solid rgb(221, 221, 221);
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.grid-inside-editor-render td:first-child {
+    /*border-left: 1px solid rgb(221, 221, 221);*/
+}
+
+.grid-inside-editor-render tr:nth-child(odd) {
+    background: rgba(221, 221, 221, 0.3);
+}

@@ -49,8 +49,10 @@ class InstallSchema_1018A extends InstallSchema_Base {
 	}
 
 	function postInstall() {
+		// @codingStandardsIgnoreStart
 		global $cache;
-
+		//assuming this is needed elsewhere?
+		// @codingStandardsIgnoreEnd
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);

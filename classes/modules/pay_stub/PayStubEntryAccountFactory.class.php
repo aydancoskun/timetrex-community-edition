@@ -73,7 +73,7 @@ class PayStubEntryAccountFactory extends Factory {
 									);
 				break;
 			case 'type_calculation_order':
-				//If any of these exceed 3 digits, need to update CalculatePayStub->getDeductionObjectSortValue() to handle more digits. 
+				//If any of these exceed 3 digits, need to update CalculatePayStub->getDeductionObjectSortValue() to handle more digits.
 				$retval = array(
 										10 => 40,
 										20 => 50,
@@ -287,13 +287,18 @@ class PayStubEntryAccountFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'type_id' => $this->getType(),
-					'name' => $name,
+					'company_id' => (int)$this->getCompany(),
+					'type_id' => (int)$this->getType(),
+					'name' => TTi18n::strtolower($name),
 					);
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND type_id = ? AND name = ? AND deleted=0';
+		$query = 'select id from '. $this->getTable() .' where company_id = ? AND type_id = ? AND lower(name) = ? AND deleted=0';
 		$id = $this->db->GetOne($query, $ph);
 		Debug::Arr($id, 'Unique Pay Stub Account: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -497,6 +502,7 @@ class PayStubEntryAccountFactory extends Factory {
 		if ( $pseallf->getRecordCount() > 0 ) {
 			$pseal_obj = $pseallf->getCurrent();
 
+			$psea_map = array();
 			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 			$psealf->getByCompanyIdAndTypeId( $this->getCompany(), 40 );
 			if ( $psealf->getRecordCount() > 0 ) {
@@ -683,6 +689,7 @@ class PayStubEntryAccountFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
+		$data = array();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

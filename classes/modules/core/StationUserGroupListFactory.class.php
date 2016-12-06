@@ -135,11 +135,12 @@ class StationUserGroupListFactory extends StationUserGroupFactory implements Ite
 
 		$suglf->getByStationId($id);
 
+		$list = array();
 		foreach ($suglf as $obj) {
 			$list[$obj->getStation()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

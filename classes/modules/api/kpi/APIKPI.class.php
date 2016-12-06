@@ -100,6 +100,7 @@ class APIKPI extends APIFactory {
 		if ( $klf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $klf );
 			Debug::Arr($data, 'Searching Data: ', __FILE__, __LINE__, __METHOD__, 10);
+			$retarr = array();
 			foreach( $klf as $kpi_obj ) {
 				$retarr[] = $kpi_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']  ); 
 			}
@@ -108,6 +109,17 @@ class APIKPI extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportKPI( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getKPI( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_kpi', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

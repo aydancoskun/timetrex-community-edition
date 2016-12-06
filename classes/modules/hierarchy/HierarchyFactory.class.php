@@ -200,29 +200,6 @@ class HierarchyFactory extends Factory {
 												);
 				}
 			}
-
-/*
-			//Make sure we're not re-parenting to a child.
-			$uhlf = TTnew( 'UserHierarchyListFactory' );
-			$hierarchy = $uhlf->getByCompanyIdArray( $parent_company_id );
-
-			Debug::Text(' User ID: '. $this->getUser() .' Parent ID: '. $this->getParent(), __FILE__, __LINE__, __METHOD__, 10);
-			if ( is_array( $hierarchy ) ) {
-				if ( in_array( $this->getParent(), array_keys( $hierarchy[$this->getUser()] ) ) ) {
-					Debug::Text(' Trying to re-parent to a child! ', __FILE__, __LINE__, __METHOD__, 10);
-
-					$this->Validator->isTrue(	'parent',
-												FALSE,
-												TTi18n::gettext('Unable to change parent to a child of itself')
-												);
-
-				} else {
-					Debug::Text(' NOT Trying to re-parent to a child! ', __FILE__, __LINE__, __METHOD__, 10);
-				}
-			} else {
-				Debug::Text(' NOT Trying to re-parent to a child! 22', __FILE__, __LINE__, __METHOD__, 10);
-			}
-*/
 		}
 
 		return TRUE;
@@ -263,33 +240,6 @@ class HierarchyFactory extends Factory {
 			}
 		}
 
-		/*
-		if ( $retval === TRUE ) {
-			Debug::Text(' Retval true, Setting Shared flag ', __FILE__, __LINE__, __METHOD__, 10);
-
-			$hslf = TTnew( 'HierarchyShareListFactory' );
-			$hslf->getByHierarchyControlIdAndUserId( $this->getHierarchyControl(), $this->getUser() );
-			if ( $hslf->getRecordCount() > 0 ) {
-				Debug::Text(' Deleting already set shared flag ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$shared_obj = $hslf->getCurrent();
-				$shared_obj->Delete();
-			}
-
-			if ( $this->getShared() === TRUE ) {
-				Debug::Text(' Setting Shared flag ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$hsf = TTnew( 'HierarchyShareFactory' );
-				$hsf->setHierarchyControl( $this->getHierarchyControl() );
-				$hsf->setUser( $this->getUser() );
-				$hsf->Save();
-
-			}
-		} else {
-			Debug::Text(' Retval NOT true, Setting Shared flag ', __FILE__, __LINE__, __METHOD__, 10);
-		}
-		*/
-
 		TTLog::addEntry( $this->getUser(), $log_action, TTi18n::getText('Hierarchy Tree - Control ID').': '.$this->getHierarchyControl(), NULL, $this->getTable() );
 
 		$this->CommitTransaction();
@@ -303,31 +253,6 @@ class HierarchyFactory extends Factory {
 
 	function Delete() {
 		if ( $this->getUser() !== FALSE ) {
-			/*
-			$this->StartTransaction();
-
-			$this->getFastTreeObject()->setTree( $this->getHierarchyControl() );
-
-			$this->getFastTreeObject()->delete( $this->getUser(), 'RECURSE');
-
-			//FIXME: When deleting recursively, we don't clear out the hierarhcy share table for all the children.
-			$hslf = TTnew( 'HierarchyShareListFactory' );
-			Debug::Text(' Hierarchy Control ID: '. $this->getHierarchyControl(), __FILE__, __LINE__, __METHOD__, 10);
-			$hslf->getByHierarchyControlIdAndUserId( $this->getHierarchyControl(), $this->getUser() );
-			if ( $hslf->getRecordCount() > 0 ) {
-				Debug::Text(' Deleting already set shared flag ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$shared_obj = $hslf->getCurrent();
-				$shared_obj->Delete();
-			} else {
-				Debug::Text(' NOT Deleting already set shared flag ', __FILE__, __LINE__, __METHOD__, 10);
-			}
-
-			TTLog::addEntry( $this->getUser(), 30, TTi18n::getText('Hierarchy Tree - Control ID: ').$this->getHierarchyControl(), NULL, $this->getTable() );
-
-			$this->CommitTransaction();
-			*/
-
 			return TRUE;
 		}
 

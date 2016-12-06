@@ -133,7 +133,7 @@ class TTDate {
 	public static function getTimeZone() {
 		return self::$time_zone;
 	}
-	public static function setTimeZone($time_zone = NULL, $force = FALSE ) {
+	public static function setTimeZone($time_zone = NULL, $force = FALSE, $execute_sql_now = TRUE ) {
 		global $config_vars, $current_user_prefs;
 
 		$time_zone = Misc::trimSortPrefix( trim($time_zone) );
@@ -167,14 +167,16 @@ class TTDate {
 				if ( strncmp($db->databaseType, 'postgres', 8) == 0 ) {
 					//PostgreSQL 9.2+ defaults to GMT in many cases, which causes problems with strtotime() and parsing date column types.
 					//Since date columns return times like: 2014-01-01 00:00:00+00, if the timezone in PHP is PST8PDT it parses to 31-Dec-13 4:00 PM
+
+					//$execute_sql_now is used in database.inc.php to help delay making a SQL query if not needed. Specifically when calling into APIProgress.
 					if ( $db instanceOf ADOdbLoadBalancer ) {
-						$result = $db->setSessionVariable( 'TIME ZONE', $db->qstr($time_zone) );
+						$result = $db->setSessionVariable( 'TIME ZONE', $db->qstr($time_zone), $execute_sql_now );
 					} else {
 						$result = @$db->Execute('SET SESSION TIME ZONE '. $db->qstr($time_zone) );
 					}
 				} elseif ( strncmp($db->databaseType, 'mysql', 5) == 0 ) {
 					if ( $db instanceOf ADOdbLoadBalancer ) {
-						$result = $db->setSessionVariable( 'time_zone', '='.$db->qstr($time_zone) );
+						$result = $db->setSessionVariable( 'time_zone', '='.$db->qstr($time_zone), $execute_sql_now );
 					} else {
 						$result = @$db->Execute('SET SESSION time_zone='. $db->qstr($time_zone) );
 					}
@@ -270,6 +272,7 @@ class TTDate {
 
 			return ( $epoch - ( $old_timezone_offset - $new_timezone_offset ) );
 		} catch (Exception $e) {
+			unset($e); //code standards
 			return $epoch;
 		}
 
@@ -306,7 +309,7 @@ class TTDate {
 			if ( strpos($seconds, '.') !== FALSE ) {
 				$seconds = bcadd( $seconds, 0, 0); //Using scale(0), drop everything after the decimal, as that is fractions of a second. Could try rounding this instead, but its difficult with large values.
 			}
-
+			
 			if ( $include_seconds == TRUE ) {
 				$retval = sprintf( '%02d:%02d:%02d', bcdiv( $seconds, 3600 ), bcmod( bcdiv( $seconds, 60 ), 60 ), bcmod( $seconds, 60 ) );
 			} else {
@@ -512,7 +515,7 @@ class TTDate {
 			Debug::Arr($str, 'Date is array or object, unable to parse...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
-
+		
 		//List of all formats that require custom parsing.
 		$custom_parse_formats = array(
 									'd-M-y',
@@ -534,7 +537,6 @@ class TTDate {
 		//This causes dates between about 1970 to 1973 to fail to parse properly.
 
 		$str = trim($str);
-		$orig_str = $str;
 
 		if ( $str == '' ) {
 			//Debug::text('No date to parse! String: '. $str .' Date Format: '. self::$date_format, __FILE__, __LINE__, __METHOD__, 10);
@@ -708,7 +710,7 @@ class TTDate {
 				break;
 		}
 		//Debug::text('Format Name: '. $format .' Epoch: '. $epoch .' Format: '. $php_format, __FILE__, __LINE__, __METHOD__, 10);
-
+		
 
 		if ($epoch == '' OR $epoch == '-1') {
 			//$epoch = TTDate::getTime();
@@ -726,10 +728,10 @@ class TTDate {
 	}
 
 	public static function getDayOfMonthArray() {
+		$retarr = array();
 		for( $i = 1; $i <= 31; $i++ ) {
 			$retarr[$i] = $i;
 		}
-
 		return $retarr;
 	}
 
@@ -806,6 +808,7 @@ class TTDate {
 	}
 
 	public static function getDayOfWeekArrayByStartWeekDay( $start_week_day = 0 ) {
+		$retarr = array();
 		$arr = self::getDayOfWeekArray();
 		foreach( $arr as $dow => $name ) {
 			if ( $dow >= $start_week_day ) {
@@ -991,10 +994,25 @@ class TTDate {
 				$epoch = ( $epoch - ( $epoch % $round_value ) );
 				break;
 			case 20: //Average
+			case 25: //Average (round split seconds up)
+			case 27: //Average (round split seconds down)
+				//Only do special rounding if its for more than 1min.
+				if ( $round_type == 20 OR $round_value <= 60 ) {
+					$tmp_round_value = ( $round_value / 2 );
+				} elseif ( $round_type == 25 ) { //Average (Partial Min. Down)
+					$tmp_round_value = self::roundTime( ( $round_value / 2 ), 60, 10 ); //This is opposite rounding
+				} elseif ( $round_type == 27 ) { //Average (Partial Min. Up)
+					$tmp_round_value = self::roundTime( ( $round_value / 2 ), 60, 30 );
+				}
+
 				if ( $epoch > 0 ) {
-					$epoch = ( (int)( ($epoch + ($round_value / 2) ) / $round_value ) * $round_value );
+					//$epoch = ( (int)( ($epoch + ($round_value / 2) ) / $round_value ) * $round_value );
+					//When doing a 15min average rounding, US law states 7mins and 59 seconds can be rounded down in favor of the employer, and 8mins and 0 seconds must be rounded up.
+					//So if the round interval is not an even number, round it up to the nearest minute before doing the calculations to avoid issues with seconds.
+					$epoch = ( (int)( ($epoch + $tmp_round_value ) / $round_value ) * $round_value );
 				} else {
-					$epoch = ( (int)( ($epoch - ($round_value / 2) ) / $round_value ) * $round_value );
+					//$epoch = ( (int)( ($epoch - ($round_value / 2) ) / $round_value ) * $round_value );
+					$epoch = ( (int)( ($epoch - $tmp_round_value ) / $round_value ) * $round_value );
 				}
 				break;
 			case 30: //Up
@@ -1108,16 +1126,19 @@ class TTDate {
 
 		return $day_with_most_time;
 	}
-
-	public static function getDayDifference($start_epoch, $end_epoch) {
+	
+	public static function getDayDifference($start_epoch, $end_epoch, $round = TRUE) {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
 		}
 
 		//This already matches PHPs DateTime class.
 		$days = ( ($end_epoch - $start_epoch) / 86400 );
+		if ( $round == TRUE ) {
+			$days = round($days);
+		}
 
-		Debug::text('Days Difference: '. $days, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::text('Days Difference: '. $days, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $days;
 	}
@@ -1159,7 +1180,7 @@ class TTDate {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
 		}
-
+		
 		if ( function_exists('date_diff') ) {
 			//If available, try to be as accurate as possible.
 			$diff = date_diff( new DateTime( '@'.$start_epoch ), new DateTime( '@'.$end_epoch ), FALSE );
@@ -1202,7 +1223,8 @@ class TTDate {
 	}
 
 	public static function getMiddleDayEpoch($epoch = NULL) {
-		if ( $epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
+		if ( $epoch == '' OR !is_numeric($epoch) ) { //Optimize out the $epoch == NULL check as its done by == ''.
+		//if ( $epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
 		}
 
@@ -1292,12 +1314,12 @@ class TTDate {
 		}
 		$adjusted_epoch = strtotime( $offset_str, $epoch );
 
-		$retval = date('Y', $adjusted_epoch);
+		$retval = date('Y', $adjusted_epoch);		
 		//Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Adjusted Epoch: '. TTDate::getDate('DATE+TIME', $adjusted_epoch)  .' Retval: '. $retval .' Offset: '. $offset_str, __FILE__, __LINE__, __METHOD__, 10);
 
-		return $retval;
+		return $retval;		
 	}
-
+	
 	public static function getBeginYearEpoch($epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
@@ -1774,7 +1796,7 @@ class TTDate {
 	public static function getDateArray( $start_date, $end_date, $day_of_week = FALSE ) {
 		$start_date = TTDate::getMiddleDayEpoch( $start_date );
 		$end_date = TTDate::getMiddleDayEpoch( $end_date );
-
+		
 		$retarr = array();
 		for( $x = $start_date; $x <= $end_date; $x += 93600 ) {
 			$x = TTDate::getBeginDayEpoch($x);
@@ -1785,7 +1807,7 @@ class TTDate {
 
 		return $retarr;
 	}
-
+	
 	//Loop from filter start date to end date. Creating an array entry for each day.
 	public static function getCalendarArray($start_date, $end_date, $start_day_of_week = 0, $force_weeks = TRUE) {
 		if ( $start_date == '' OR $end_date == '' ) {
@@ -1880,7 +1902,7 @@ class TTDate {
 	}
 
 	//Date pair1
-	public static function getTimeOverLapDifference($start_date1, $end_date1, $start_date2, $end_date2) {
+	public static function getTimeOverLapDifference($start_date1, $end_date1, $start_date2, $end_date2) {		
 		$overlap_result = self::getTimeOverlap( $start_date1, $end_date1, $start_date2, $end_date2 );
 		if ( is_array($overlap_result) ) {
 			$retval = ( $overlap_result['end_date'] - $overlap_result['start_date'] );
@@ -1910,7 +1932,7 @@ class TTDate {
 		3. |-----------------------|
 		4. |------------------------------------------|
 		*/
-
+		
 		if	( ($start_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #1
 			//Debug::text(' Overlap on Case #1: ', __FILE__, __LINE__, __METHOD__, 10);
 			//$retval = ( $end_date2 - $start_date2 );
@@ -1998,6 +2020,7 @@ class TTDate {
 	}
 
 	public static function calculateTimeOnEachDayBetweenRange( $start_epoch, $end_epoch ) {
+	    $retval = array();
 		if ( TTDate::doesRangeSpanMidnight( $start_epoch, $end_epoch ) == TRUE ) {
 			$total_before_first_midnight = ( ( TTDate::getEndDayEpoch( $start_epoch ) + 1 ) - $start_epoch );
 			if ( $total_before_first_midnight > 0 ) {
@@ -2115,10 +2138,11 @@ class TTDate {
 
 	public static function isConsecutiveDays( $date_array ) {
 		if ( is_array($date_array) AND count($date_array) > 1 ) {
+			$retval = array();
 			sort($date_array);
 
 			$retval = FALSE;
-
+			
 			$prev_date = FALSE;
 			foreach( $date_array as $date ) {
 				if ( $prev_date != FALSE ) {
@@ -2148,13 +2172,13 @@ class TTDate {
 
 		return strtotime( $age.' years', $birth_date );
 	}
-
+	
 	public static function getTimeLockedDate($time_epoch, $date_epoch) {
 		//This causes unit tests to fail.
 		//if ( $time_epoch == '' OR $date_epoch == '' ) {
 			//return FALSE;
 		//}
-
+		
 		$time_arr = getdate($time_epoch);
 		$date_arr = getdate($date_epoch);
 
@@ -2397,7 +2421,7 @@ class TTDate {
 									'-1210-last_pay_period' => TTi18n::getText('Last Pay Period'), //Select one or more pay period schedules
 									'-1212-no_pay_period' => TTi18n::getText('No Pay Period'), //Data assigned to no pay periods or pay_period_id = 0
 									);
-
+			
 			$retarr = array_merge( $retarr, $pay_period_arr );
 			ksort($retarr);
 		}
@@ -3096,7 +3120,7 @@ class TTDate {
 		if ( $epoch === NULL ) {
 			return array();
 		}
-
+		
 		$column = Misc::trimSortPrefix( $column );
 
 		//Trim off a column_name_prefix, or everything before the "-"

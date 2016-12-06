@@ -102,7 +102,7 @@ LocalCacheData.view_min_map = {};
 
 LocalCacheData.view_min_tab_bar = null;
 
-LocalCacheData.cookie_path = '/';
+LocalCacheData.cookie_path = APIGlobal.pre_login_data.cookie_base_url;
 
 LocalCacheData.domain_name = '';
 
@@ -338,4 +338,21 @@ LocalCacheData.getCurrentSelectSubMenuId = function() {
 LocalCacheData.setCurrentSelectSubMenuId = function( val ) {
 
 	LocalCacheData.setLocalCache( 'currentSelectSubMenuId', val );
+};
+
+LocalCacheData.cleanNecessaryCache =  function() {
+	Debug.Text('Clearing Cache', 'LoginViewController.js', 'LoginViewController', 'cleanNecessaryCache', 10)
+	LocalCacheData.last_timesheet_selected_user = null;
+	LocalCacheData.last_timesheet_selected_date = null;
+	//JS load Optimize
+	if ( LocalCacheData.loadViewRequiredJSReady ) {
+		ALayoutCache.layout_dic = {};
+	}
+	LocalCacheData.view_layout_cache = {};
+	LocalCacheData.result_cache = {};
+	if ( LocalCacheData.current_open_wizard_controller ) {
+		LocalCacheData.current_open_wizard_controller.onCloseClick();
+		LocalCacheData.current_open_wizard_controller = null;
+	}
+	Global.cleanViewTab();
 };

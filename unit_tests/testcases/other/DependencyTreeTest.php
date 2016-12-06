@@ -40,21 +40,21 @@ require_once('PHPUnit/Framework/TestCase.php');
  * @group DependencyTree
  */
 class DependencyTreeTest extends PHPUnit_Framework_TestCase {
-    public function setUp() {
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function setUp() {
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 		require_once( Environment::getBasePath().'/classes/modules/core/DependencyTree.class.php');
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
-        return TRUE;
-    }
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		return TRUE;
+	}
 
 	function indexOf($tofind,$arr) {
-		   foreach($arr as $k=>$v) {
-				   if($tofind==$v) { return $k; }
+		   foreach($arr as $k => $v) {
+				   if($tofind == $v) { return $k; }
 		   }
 
 		   return -1;

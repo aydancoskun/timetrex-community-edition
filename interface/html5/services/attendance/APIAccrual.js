@@ -49,8 +49,10 @@ var APIAccrual = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'generateInvoices', arguments );
 
+	},
+
+	exportAccrual: function(){
+		return this.argumentsHandler( this.className, 'exportAccrual', arguments );
 	}
-
-
 
 } );

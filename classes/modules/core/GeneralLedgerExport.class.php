@@ -254,6 +254,8 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 		$records = $this->getRecords();
 
 		$i = 0;
+		$account_list = array();
+		$new_records = array();
 		foreach( $records as $record ) {
 			if ( isset($account_list[$record->getType()][$record->getAccount()]) ) {
 				$original_id = $account_list[$record->getType()][$record->getAccount()];
@@ -441,7 +443,10 @@ class GeneralLedgerExport_File_Format_Simply Extends GeneralLedgerExport {
 			return FALSE;
 		}
 
-		foreach ( $this->data as $key => $journal_entry ) {
+		$line1 = array();
+		$line = array();
+		$retval = array();
+		foreach ( $this->data as $journal_entry ) {
 			//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
 
 			$line1[] = $this->toDate( $journal_entry->getDate() );
@@ -471,7 +476,7 @@ class GeneralLedgerExport_File_Format_Simply Extends GeneralLedgerExport {
 			unset($line1);
 		}
 
-		if ( isset($retval) ) {
+		if ( empty($retval) == FALSE ) {
 			Debug::Text('Returning Compiled Records: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $retval;
 		}
@@ -524,10 +529,13 @@ class GeneralLedgerExport_File_Format_CSV Extends GeneralLedgerExport {
 			return FALSE;
 		}
 
+		$retval = array();
+		$line1 = array();
+		$line = array();
 		//Column headers
 		$retval[] = 'Date, Source, Comment, Account, Debit, Credit';
 
-		foreach ( $this->data as $key => $journal_entry ) {
+		foreach ( $this->data as $journal_entry ) {
 			//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
 
 			$line1[] = $this->toDate( $journal_entry->getDate() );
@@ -565,7 +573,7 @@ class GeneralLedgerExport_File_Format_CSV Extends GeneralLedgerExport {
 			unset($line1);
 		}
 
-		if ( isset($retval) ) {
+		if ( empty($retval) == FALSE ) {
 			Debug::Text('Returning Compiled Records: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $retval;
 		}
@@ -627,11 +635,13 @@ class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 		ENDTRNS
 		*/
 		//Column headers
+		$retval = array();
 		$retval[] = "!TRNS\tTRNSID\tTRNSTYPE\tDATE\tACCNT\tCLASS\tAMOUNT\tDOCNUM\tMEMO";
 		$retval[] = "!SPL\tSPLID\tTRNSTYPE\tDATE\tACCNT\tCLASS\tAMOUNT\tDOCNUM\tMEMO";
 		$retval[] = '!ENDTRNS';
 
-		foreach ( $this->data as $key => $journal_entry ) {
+		$line = array();
+		foreach ( $this->data as $journal_entry ) {
 			//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
 
 			$records = $journal_entry->getRecords();
@@ -736,12 +746,15 @@ class GeneralLedgerExport_File_Format_Sage300 Extends GeneralLedgerExport {
 		*/
 
 		//Column headers
+		$retval = array();
 		$retval[] = '"RECTYPE","BATCHID","BTCHENTRY","SRCELEDGER","SRCETYPE","DATEENTRY"';
 		$retval[] = '"RECTYPE","BATCHNBR","JOURNALID","TRANSNBR","ACCTID","TRANSAMT"';
 		$retval[] = '"RECTYPE","BATCHNBR","JOURNALID","TRANSNBR","OPTFIELD"';
 
+		$line = array();
+		$line1 = array();
 		$entry_number = 1;
-		foreach ( $this->data as $key => $journal_entry ) {
+		foreach ( $this->data as $journal_entry ) {
 			Debug::Arr($journal_entry, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
 
 			$line1[] = 1; //RecType: Header

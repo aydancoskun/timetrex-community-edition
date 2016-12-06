@@ -17,8 +17,8 @@ MessageControlViewController = BaseViewController.extend( {
 
 	current_select_message_control_data: null, //current select message control data, set in onViewClick
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'MessageControlEditView.html';
 		this.permission_id = 'message';
 		this.viewId = 'MessageControl';
@@ -163,6 +163,14 @@ MessageControlViewController = BaseViewController.extend( {
 			sub_menus: []
 		} );
 
+		//menu group
+		var other_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Other' ),
+			id: this.script_name + 'other',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+
 		var add = new RibbonSubMenu( {
 			label: $.i18n._( 'New' ),
 			id: ContextMenuIconName.add,
@@ -254,6 +262,16 @@ MessageControlViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
@@ -315,6 +333,9 @@ MessageControlViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.sent:
 					this.setDefaultMenuSentIcon( context_btn, grid_selected_length );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
 
 			}
@@ -406,6 +427,9 @@ MessageControlViewController = BaseViewController.extend( {
 			case ContextMenuIconName.sent:
 				this.setCurrentSelectedIcon( context_btn );
 				this.onSentClick();
+				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('export' + this.api.key_name )
 				break;
 
 		}
@@ -535,6 +559,9 @@ MessageControlViewController = BaseViewController.extend( {
 				case ContextMenuIconName.sent:
 //					this.setCurrentSelectedIcon( context_btn, pId );
 					this.setEditMenuSentIcon( context_btn, pId );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
 					break;
 			}
 			/* jshint ignore:end */
@@ -1775,15 +1802,3 @@ MessageControlViewController = BaseViewController.extend( {
 	/* jshint ignore:end */
 
 } );
-
-MessageControlViewController.loadView = function() {
-
-	Global.loadViewSource( 'MessageControl', 'MessageControlView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

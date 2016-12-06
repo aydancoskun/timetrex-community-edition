@@ -68,7 +68,6 @@ class APIAccrualPolicyMilestone extends APIFactory {
 	 * @return array
 	 */
 	function getAccrualPolicyMilestoneDefaultData() {
-		$company_obj = $this->getCurrentCompanyObject();
 
 		Debug::Text('Getting accrual_policy default data...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -102,6 +101,7 @@ class APIAccrualPolicyMilestone extends APIFactory {
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}

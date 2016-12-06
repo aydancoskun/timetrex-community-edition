@@ -34,16 +34,9 @@ find $DEPTH/templates -name "*.tpl" | grep -v "\.git" | xargs -i php tsmarty2c.p
 echo "Parsing PHP Files..."
 find $DEPTH/ -name "*.php" | grep -v templates_c | grep -v "\.git" | xargs cat | xgettext --from-code=UTF-8 --no-wrap --keyword=getText --join-existing --language=PHP --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
 
-#FLEX_LOCALE_ROOT=$DEPTH/flex/src
-#if [ -d $FLEX_LOCALE_ROOT ]; then
-#    echo "Parsing FLEX files from: $FLEX_LOCALE_ROOT"
-#    find $FLEX_LOCALE_ROOT/ -regextype posix-egrep -regex ".*/.*.as" | grep -v "\.git" | xargs cat | xgettext --from-code=UTF-8 --no-wrap --keyword=getText --join-existing --language=PHP --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
-#    find $FLEX_LOCALE_ROOT/ -regextype posix-egrep -regex ".*/.*.mxml" -exec $LOCALE_ROOT/../../tools/i18n/parse_mxml.sh {} \; | xgettext --from-code=UTF-8 --no-wrap --keyword=getText --join-existing --language=PHP --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
-#fi
-
 echo "Parsing JS Files..."
 #find $DEPTH/ -name "*.js" | grep -v "\.git" | xargs cat | sed 's/<br>/ /g' | sed 's/\n/ /g' | xgettext --from-code=UTF-8 --no-wrap --keyword=_ --join-existing --language=Javascript --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
-find $DEPTH/ -name "*.js" | grep -v "\.git" | xargs cat | xgettext --from-code=UTF-8 --no-wrap --keyword=_ --join-existing --language=Javascript --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
+find $DEPTH/ -name "*.js" | egrep -v "\.git|/tools/compile" | xargs cat | xgettext --from-code=UTF-8 --no-wrap --keyword=_ --join-existing --language=Javascript --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
 
 #---- Extract strings from DB Tables with static strings ----
 ###  Not necessary for TimeTrex at this time ###

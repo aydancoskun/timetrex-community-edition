@@ -50,6 +50,11 @@ var APIPayPeriodSchedule = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'detectPayPeriodScheduleSettings', arguments );
 
 	},
+	exportPayPeriodSchedule: function() {
+
+		return this.argumentsHandler( this.className, 'exportPayPeriodSchedule', arguments );
+
+	},
 
 
 

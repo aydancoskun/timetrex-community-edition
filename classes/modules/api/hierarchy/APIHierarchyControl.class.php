@@ -111,6 +111,7 @@ class APIHierarchyControl extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 
@@ -123,6 +124,17 @@ class APIHierarchyControl extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportHierarchyControl( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getHierarchyControl( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_hierarchy', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -387,6 +399,7 @@ class APIHierarchyControl extends APIFactory {
 		$hclf->getObjectTypeAppendedListByCompanyID( $this->getCurrentCompanyObject()->getId() );
 		$hierarchy_control_options = $hclf->getArrayByListFactory( $hclf, TRUE, TRUE );
 		if ( is_array($hierarchy_control_options) ) {
+			$retarr = array();
 			foreach( $hierarchy_control_options as $hierarchy_control_object_type_id => $hierarchy_control_options ) {
 				$retarr[$hierarchy_control_object_type_id] = Misc::addSortPrefix( $hierarchy_control_options );
 			}

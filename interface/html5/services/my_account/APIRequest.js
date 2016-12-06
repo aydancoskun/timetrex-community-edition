@@ -45,6 +45,10 @@ var APIRequest = ServiceCaller.extend( {
 
 	copyRequest: function() {
 		return this.argumentsHandler( this.className, 'copyRequest', arguments );
+	},
+
+	exportRequest: function() {
+		return this.argumentsHandler( this.className, 'exportRequest', arguments );
 	}
 
 

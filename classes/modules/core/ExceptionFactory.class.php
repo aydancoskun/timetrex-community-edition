@@ -181,7 +181,7 @@ class ExceptionFactory extends Factory {
 	function getExceptionPolicyObject() {
 		return $this->getGenericObject( 'ExceptionPolicyListFactory', $this->getExceptionPolicyID(), 'exception_policy_obj' );
 	}
-	
+
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
 			return (int)$this->data['user_id'];
@@ -467,6 +467,7 @@ class ExceptionFactory extends Factory {
 
 			//Make sure exception policy email notifications are enabled.
 			if ( $ep_obj->getEmailNotification() > 0 ) {
+				$retarr = array();
 				if ( !is_object($u_obj) ) {
 					$u_obj = $this->getUserObject();
 				}
@@ -520,7 +521,7 @@ class ExceptionFactory extends Factory {
 					}
 				}
 
-				if ( isset($retarr) AND is_array($retarr) ) {
+				if ( empty($retarr) == FALSE ) {
 					return array_unique($retarr);
 				} else {
 					Debug::text(' No user objects to email too...', __FILE__, __LINE__, __METHOD__, 10);
@@ -614,7 +615,8 @@ class ExceptionFactory extends Factory {
 							);
 
 		$exception_email_subject = '#exception_name# (#exception_code#) '. TTi18n::gettext('exception for') .' #employee_first_name# #employee_last_name# '. TTi18n::gettext('on') .' #date#';
-		$exception_email_body  = TTi18n::gettext('Employee').': #employee_first_name# #employee_last_name#'."\n";
+		$exception_email_body = TTi18n::gettext('*DO NOT REPLY TO THIS EMAIL - PLEASE USE THE LINK BELOW INSTEAD*')."\n\n";
+		$exception_email_body .= TTi18n::gettext('Employee').': #employee_first_name# #employee_last_name#'."\n";
 		$exception_email_body .= TTi18n::gettext('Date').': #date#'."\n";
 		$exception_email_body .= TTi18n::gettext('Exception').': #exception_name# (#exception_code#)'."\n";
 		$exception_email_body .= TTi18n::gettext('Severity').': #exception_severity#'."\n";
@@ -648,9 +650,7 @@ class ExceptionFactory extends Factory {
 		$headers = array(
 							'From'	  => $from,
 							'Subject' => $subject,
-							//'Reply-To' => $reply_to,
-							//'Return-Path' => $reply_to,
-							//'Errors-To' => $reply_to,
+							//Reply-To/Return-Path are handled in TTMail.
 						);
 
 		$body = '<html><body><pre>'.str_replace( $search_arr, $replace_arr, $exception_email_body ).'</pre></body></html>';
@@ -732,6 +732,7 @@ class ExceptionFactory extends Factory {
 		$exception_policy_type_options = $epf->getOptions('type');
 		$exception_policy_severity_options = $epf->getOptions('severity');
 
+		$data = array();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

@@ -209,7 +209,6 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		}
 
 		$hpf = new HolidayPolicyFactory();
-		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
 					'start_date' => $this->db->BindDate( $start_date ),
@@ -483,6 +482,7 @@ class HolidayListFactory extends HolidayFactory implements IteratorAggregate {
 		$hlf = new HolidayListFactory();
 		$hlf->getByPolicyGroupUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date);
 
+		$list = array();
 		if ( $hlf->getRecordCount() > 0 ) {
 			foreach($hlf as $h_obj) {
 				$list[$h_obj->getDateStamp()] = $h_obj->getName();

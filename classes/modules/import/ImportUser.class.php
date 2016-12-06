@@ -180,15 +180,16 @@ class ImportUser extends Import {
 	function _preParseRow( $row_number, $raw_row ) {
 		//Only set defaults for columns already specified, or absolutely necessary ones.
 		//That way if the user wants to just update one or two columns for existing employees, the default values aren't all used too.
-		$retval = array();
 		$column_map = $this->getColumnMap(); //Include columns that should always be there.
 		$default_data = $this->getObject()->getUserDefaultData();
 
+		$retval = array();
 		foreach( $column_map as $key => $map_data ) {
 			if ( isset($default_data[$key]) )  {
 				$retval[$key] = $default_data[$key];
 			}
 		}
+		unset($map_data); //code standards
 
 		//Debug::Arr($retval, 'preParse Row: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
@@ -627,7 +628,7 @@ class ImportUser extends Import {
 		$hclf = TTNew('HierarchyControlListFactory');
 		$hclf->getObjectTypeAppendedListByCompanyID( $this->company_id );
 		$this->hierarchy_control_options = (array)$hclf->getArrayByListFactory( $hclf, TRUE, FALSE, TRUE );
-		unset($pglf);
+		unset($hclf);
 
 		return TRUE;
 	}

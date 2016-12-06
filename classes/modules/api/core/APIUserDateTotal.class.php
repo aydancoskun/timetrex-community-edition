@@ -137,6 +137,14 @@ class APIUserDateTotal extends APIFactory {
 			$data['filter_data']['date_stamp'] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $data['filter_data']['date_stamp'] ) );
 		}
 
+		if ( isset($data['filter_data']['start_date']) ) {
+			$data['filter_data']['start_date'] = TTDate::parseDateTime( $data['filter_data']['start_date'] );
+		}
+
+		if ( isset($data['filter_data']['end_date']) ) {
+			$data['filter_data']['end_date'] = TTDate::parseDateTime( $data['filter_data']['end_date'] );
+		}
+
 		//This can be used to edit Absences as well, how do we differentiate between them?
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
 
@@ -218,12 +226,15 @@ class APIUserDateTotal extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
-			foreach( $data as $key => $row ) {
-				$recalculate_user_date_stamp = FALSE;
+			//Wrap entire batch in the transaction.
+			$lf = TTnew( 'UserDateTotalListFactory' );
+			$lf->StartTransaction();
 
+			$recalculate_user_date_stamp = FALSE;
+			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserDateTotalListFactory' );
-				$lf->StartTransaction();
+				//$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] > 0 ) {
 					//Modifying existing object.
 					//Get user_date_total object, so we can only modify just changed data for specific records if needed.
@@ -262,6 +273,13 @@ class APIUserDateTotal extends APIFactory {
 								$recalculate_user_date_stamp[$lf->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
 							}
 
+							//Since switching to batch calculation mode, need to store every possible date to recalculate.
+							if ( isset($row['user_id'])	AND $row['user_id'] != '' AND isset($row['date_stamp']) AND $row['date_stamp'] != '' ) {
+								//Since switching to batch calculation mode, need to store every possible date to recalculate.
+								$recalculate_user_date_stamp[(int)$row['user_id']][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] )); //Help avoid confusion with different timezones/DST.
+							}
+							$recalculate_user_date_stamp[$lf->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
+
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
@@ -293,6 +311,11 @@ class APIUserDateTotal extends APIFactory {
 								)
 							) ) {
 						$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Add permission denied') );
+					} else {
+						if ( isset($row['user_id'])	AND $row['user_id'] != '' AND isset($row['date_stamp']) AND $row['date_stamp'] != '' ) {
+							//Since switching to batch calculation mode, need to store every possible date to recalculate.
+							$recalculate_user_date_stamp[(int)$row['user_id']][] = TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $row['date_stamp'] )); //Help avoid confusion with different timezones/DST.
+						}
 					}
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -313,9 +336,14 @@ class APIUserDateTotal extends APIFactory {
 							$save_result[$key] = TRUE;
 						} else {
 							$lf->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
-							$lf->setEnableCalcSystemTotalTime( TRUE );
-							$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
-							$lf->setEnableCalcException( TRUE );
+
+							//Before batch calculation mode was enabled...
+							//$lf->setEnableCalcSystemTotalTime( TRUE );
+							//$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
+							//$lf->setEnableCalcException( TRUE );
+							$lf->setEnableCalcSystemTotalTime( FALSE );
+							$lf->setEnableCalcWeeklySystemTotalTime( FALSE );
+							$lf->setEnableCalcException( FALSE );
 
 							$save_result[$key] = $lf->Save();
 						}
@@ -331,27 +359,34 @@ class APIUserDateTotal extends APIFactory {
 					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
-				} elseif ( $is_valid == TRUE AND $validate_only == FALSE ) {
-					if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
-						Debug::Text('Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10);
-						foreach( $recalculate_user_date_stamp as $user_id => $date_arr ) {
-							$ulf = TTNew('UserListFactory');
-							$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
-							if ( $ulf->getRecordCount() > 0 ) {
-								$cp = TTNew('CalculatePolicy');
-								$cp->setUserObject( $ulf->getCurrent() );
-								$cp->addPendingCalculationDate( $date_arr );
-								$cp->calculate(); //This sets timezone itself.
-								$cp->Save();
-							}
-						}
-					}
 				}
-
-				$lf->CommitTransaction();
+				//$lf->CommitTransaction();
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
+
+			if ( $is_valid == TRUE AND $validate_only == FALSE ) {
+				if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
+					Debug::Arr($recalculate_user_date_stamp, 'Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10);
+					foreach( $recalculate_user_date_stamp as $user_id => $date_arr ) {
+						$ulf = TTNew('UserListFactory');
+						$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
+						if ( $ulf->getRecordCount() > 0 ) {
+							$cp = TTNew('CalculatePolicy');
+							$cp->setUserObject( $ulf->getCurrent() );
+							$cp->addPendingCalculationDate( $date_arr );
+							$cp->calculate(); //This sets timezone itself.
+							$cp->Save();
+						}
+					}
+				} else {
+					Debug::Text('aNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			} else {
+				Debug::Text('bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			$lf->CommitTransaction();
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
@@ -394,10 +429,14 @@ class APIUserDateTotal extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
+			$lf = TTnew( 'UserDateTotalListFactory' );
+			$lf->StartTransaction();
+			
+			$recalculate_user_date_stamp = FALSE;
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'UserDateTotalListFactory' );
-				$lf->StartTransaction();
+				//$lf->StartTransaction();
 				if ( is_numeric($id) ) {
 					//Modifying existing object.
 					//Get user_date_total object, so we can only modify just changed data for specific records if needed.
@@ -418,6 +457,8 @@ class APIUserDateTotal extends APIFactory {
 							) {
 							Debug::Text('Record Exists, deleting record: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
+
+							$recalculate_user_date_stamp[$lf->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getDateStamp() ); //Help avoid confusion with different timezones/DST.
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
 						}
@@ -440,10 +481,15 @@ class APIUserDateTotal extends APIFactory {
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
 						$lf->setEnableTimeSheetVerificationCheck(TRUE); //Unverify timesheet if its already verified.
-						$lf->setEnableCalcSystemTotalTime( TRUE );
-						$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
-						$lf->setEnableCalcException( TRUE );
 
+						//Before batch calculation mode was enabled...
+						//$lf->setEnableCalcSystemTotalTime( TRUE );
+						//$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
+						//$lf->setEnableCalcException( TRUE );
+						$lf->setEnableCalcSystemTotalTime( FALSE );
+						$lf->setEnableCalcWeeklySystemTotalTime( FALSE );
+						$lf->setEnableCalcException( FALSE );
+						
 						$save_result[$key] = $lf->Save();
 						$validator_stats['valid_records']++;
 					}
@@ -457,11 +503,34 @@ class APIUserDateTotal extends APIFactory {
 					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
-				$lf->CommitTransaction();
+				//$lf->CommitTransaction();
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 
+			if ( $is_valid == TRUE ) {
+				if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
+					Debug::Arr($recalculate_user_date_stamp, 'Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10);
+					foreach( $recalculate_user_date_stamp as $user_id => $date_arr ) {
+						$ulf = TTNew('UserListFactory');
+						$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
+						if ( $ulf->getRecordCount() > 0 ) {
+							$cp = TTNew('CalculatePolicy');
+							$cp->setUserObject( $ulf->getCurrent() );
+							$cp->addPendingCalculationDate( $date_arr );
+							$cp->calculate(); //This sets timezone itself.
+							$cp->Save();
+						}
+					}
+				} else {
+					Debug::Text('aNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			} else {
+				Debug::Text('bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+			
+			$lf->CommitTransaction();
+			
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );

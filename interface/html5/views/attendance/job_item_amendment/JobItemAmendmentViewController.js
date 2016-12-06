@@ -3,8 +3,8 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 
 	current_default_record: {},
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'JobItemAmendmentEditView.html';
 		this.permission_id = 'job_item';
 		this.viewId = 'JobItemAmendment';
@@ -45,7 +45,8 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.JOB_ITEM_AMENDMENT,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
@@ -120,7 +121,6 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 		//Estimated Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'estimate_time', mode: 'time_unit', need_parser_sec: true} );
-
 
 		this.addEditFieldToColumn( $.i18n._( 'Estimated Time' ), form_item_input, tab_task_amendment_column1, '', null, true, true );
 
@@ -218,13 +218,13 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 		switch ( key ) {
 			case 'job_id':
 				this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-				this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+				this.setJobItemValueWhenJobChanged( target.getValue( true ),'item_id',{job_id: $this.current_edit_record.job_id});
 				this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
 				break;
 			case 'item_id':
 				this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 				this.setJobItemAmendmentDefaultData();
-				this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+				this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
@@ -270,10 +270,12 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 
 		record = this.uniformVariable( record );
 
-		this.api['validate' + this.api.key_name]( record, {onResult: function( result ) {
-			$this.validateResult( result );
+		this.api['validate' + this.api.key_name]( record, {
+			onResult: function( result ) {
+				$this.validateResult( result );
 
-		}} );
+			}
+		} );
 	},
 
 	onJobQuickSearch: function( key, value ) {
@@ -284,43 +286,47 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 
 			args.filter_data = {manual_id: value};
 
-			this.job_api.getJob( args, {onResult: function( result ) {
+			this.job_api.getJob( args, {
+				onResult: function( result ) {
 
-				var result_data = result.getResult();
+					var result_data = result.getResult();
 
-				if ( result_data.length > 0 ) {
-					$this.edit_view_ui_dic['job_id'].setValue( result_data[0].id );
-					$this.current_edit_record.job_id = result_data[0].id;
-					$this.setJobItemValueWhenJobChanged( result_data[0] );
+					if ( result_data.length > 0 ) {
+						$this.edit_view_ui_dic['job_id'].setValue( result_data[0].id );
+						$this.current_edit_record.job_id = result_data[0].id;
+						$this.setJobItemValueWhenJobChanged( result_data[0] );
 
-				} else {
-					$this.edit_view_ui_dic['job_id'].setValue( '' );
-					$this.current_edit_record.job_id = false;
-					$this.setJobItemValueWhenJobChanged( false );
+					} else {
+						$this.edit_view_ui_dic['job_id'].setValue( '' );
+						$this.current_edit_record.job_id = false;
+						$this.setJobItemValueWhenJobChanged( false );
+					}
+
 				}
-
-			}} );
+			} );
 			$this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 			$this.edit_view_ui_dic['job_id'].setCheckBox( true );
 		} else if ( key === 'job_item_quick_search' ) {
 
 			args.filter_data = {manual_id: value};
 
-			this.job_item_api.getJobItem( args, {onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( result_data.length > 0 ) {
-					$this.edit_view_ui_dic['job_item_id'].setValue( result_data[0].id );
-					$this.current_edit_record.job_item_id = result_data[0].id;
-					$this.setJobItemAmendmentDefaultData();
+			this.job_item_api.getJobItem( args, {
+				onResult: function( result ) {
+					var result_data = result.getResult();
+					if ( result_data.length > 0 ) {
+						$this.edit_view_ui_dic['job_item_id'].setValue( result_data[0].id );
+						$this.current_edit_record.job_item_id = result_data[0].id;
+						$this.setJobItemAmendmentDefaultData();
 
-				} else {
-					$this.edit_view_ui_dic['job_item_id'].setValue( '' );
-					$this.current_edit_record.job_item_id = false;
+					} else {
+						$this.edit_view_ui_dic['job_item_id'].setValue( '' );
+						$this.current_edit_record.job_item_id = false;
+					}
+
 				}
-
-			}} );
-			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
-			this.edit_view_ui_dic['job_item_id'].setCheckBox(true);
+			} );
+			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
+			this.edit_view_ui_dic['job_item_id'].setCheckBox( true );
 		}
 
 	},
@@ -336,8 +342,8 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 		var job_item_widget = $this.edit_view_ui_dic['item_id'];
 		var current_item_id = job_item_widget.getValue();
 		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox(true);
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+		job_item_widget.setCheckBox( true );
+		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 		var args = {};
 		args.filter_data = {job_id: $this.current_edit_record.job_id};
 		$this.edit_view_ui_dic['item_id'].setDefaultArgs( args );
@@ -348,20 +354,22 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 
 			new_arg.filter_data.id = current_item_id;
 			new_arg.filter_columns = $this.edit_view_ui_dic['item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {onResult: function( task_result ) {
+			$this.job_item_api.getJobItem( new_arg, {
+				onResult: function( task_result ) {
 
-				var data = task_result.getResult();
+					var data = task_result.getResult();
 
-				if ( data.length > 0 ) {
-					job_item_widget.setValue( current_item_id );
-					$this.current_edit_record.item_id = current_item_id;
+					if ( data.length > 0 ) {
+						job_item_widget.setValue( current_item_id );
+						$this.current_edit_record.item_id = current_item_id;
 
-					$this.setJobItemAmendmentDefaultData();
-				} else {
-					setDefaultData();
+						$this.setJobItemAmendmentDefaultData();
+					} else {
+						setDefaultData();
+					}
+
 				}
-
-			}} )
+			} )
 
 		} else {
 			setDefaultData();
@@ -392,15 +400,17 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 		var job_item_id;
 		if ( this.current_edit_record.item_id > 0 && this.is_add ) {
 			job_item_id = this.current_edit_record.item_id;
-			this.api['get' + this.api.key_name + 'DefaultData']( job_item_id, {onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( !result_data ) {
-					result_data = [];
-				}
-				$this.current_default_record = result_data;
-				$this.setCurrentEditRecordData();
+			this.api['get' + this.api.key_name + 'DefaultData']( job_item_id, {
+				onResult: function( result ) {
+					var result_data = result.getResult();
+					if ( !result_data ) {
+						result_data = [];
+					}
+					$this.current_default_record = result_data;
+					$this.setCurrentEditRecordData();
 
-			}} );
+				}
+			} );
 		}
 	}
 
@@ -412,14 +422,14 @@ JobItemAmendmentViewController.loadSubView = function( container, beforeViewLoad
 
 	Global.loadViewSource( 'JobItemAmendment', 'SubJobItemAmendmentView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_job_item_amendment_view_controller );
 			}

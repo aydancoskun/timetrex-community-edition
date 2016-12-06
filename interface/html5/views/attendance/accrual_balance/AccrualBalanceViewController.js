@@ -7,8 +7,8 @@ AccrualBalanceViewController = BaseViewController.extend( {
 	sub_accrual_view_controller: null,
 
 	log_object_ids: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'AccrualBalanceEditView.html';
 		this.permission_id = 'accrual';
 		this.viewId = 'AccrualBalance';
@@ -169,31 +169,9 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 	getFilterColumnsFromDisplayColumns: function() {
 		var column_filter = {};
-		column_filter.is_owner = true;
-		column_filter.id = true;
-		column_filter.is_child = true;
-		column_filter.in_use = true;
-		column_filter.first_name = true;
-		column_filter.last_name = true;
 		column_filter.user_id = true;
 		column_filter.accrual_policy_account_id = true;
-
-		// Error: Unable to get property 'getGridParam' of undefined or null reference
-		var display_columns = [];
-		if ( this.grid ) {
-			display_columns = this.grid.getGridParam( 'colModel' );
-		}
-
-		if ( display_columns ) {
-			var len = display_columns.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var column_info = display_columns[i];
-				column_filter[column_info.name] = true;
-			}
-		}
-
-		return column_filter;
+		return this._getFilterColumnsFromDisplayColumns(column_filter,  true);
 	},
 
 	__createRowId: function( data ) {

@@ -53,6 +53,11 @@ var APIStation = ServiceCaller.extend( {
 
 	runManualCommand: function() {
 		return this.argumentsHandler( this.className, 'runManualCommand', arguments );
-	}
+	},
+
+	exportStation: function() {
+		return this.argumentsHandler( this.className, 'exportStation', arguments );
+	},
+
 
 } );

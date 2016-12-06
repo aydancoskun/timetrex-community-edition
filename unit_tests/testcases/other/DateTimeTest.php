@@ -45,6 +45,11 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		TTDate::setTimeZone('Etc/GMT+8', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
+		//If using loadbalancer, we need to make a SQL query to initiate at least one connection to a database.
+		//This is needed for testTimeZone() to work with the load balancer.
+		global $db;
+		$db->Execute( 'SELECT 1' );
+
 		return TRUE;
 	}
 
@@ -252,8 +257,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 			30 	=> 'Minutes (135)'
 		*/
 		TTDate::setTimeUnitFormat(10);
-		$this->assertEquals( TTDate::getTimeUnit( 3600 ),  '01:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 3660 ),  '01:01' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600 ), '01:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 3660 ), '01:01' );
 		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10:01' );
 		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10:11' );
 		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100:11' );
@@ -262,13 +267,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100000:11' );
 		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1000000:11' );
 		//$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ),  				'ERR(FLOAT)' ); //This is passing a float that is losing precision.
-		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX ) ), 				'5124095576030431:00' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX ) ), '5124095576030431:00' );
 		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcadd(PHP_INT_MAX, PHP_INT_MAX ), 660 ) ), '5124095576030431:11' );
 
 
 		TTDate::setTimeUnitFormat(10);
-		$this->assertEquals( TTDate::getTimeUnit( -3600 ),  '-01:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -3660 ),  '-01:01' );
+		$this->assertEquals( TTDate::getTimeUnit( -3600 ), '-01:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -3660 ), '-01:01' );
 		$this->assertEquals( TTDate::getTimeUnit( -36060 ), '-10:01' );
 		$this->assertEquals( TTDate::getTimeUnit( -36660 ), '-10:11' );
 		$this->assertEquals( TTDate::getTimeUnit( -360660 ), '-100:11' );
@@ -277,12 +282,12 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( -360000660 ), '-100000:11' );
 		$this->assertEquals( TTDate::getTimeUnit( -3600000660 ), '-1000000:11' );
 		//$this->assertEquals( TTDate::getTimeUnit( ( ( PHP_INT_MAX + PHP_INT_MAX ) * -1 ) ), 		'ERR(FLOAT)' );
-		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd(PHP_INT_MAX,PHP_INT_MAX), -1 ) ),	'-5124095576030431:00' );
+		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd(PHP_INT_MAX, PHP_INT_MAX), -1 ) ),	'-5124095576030431:00' );
 
 
 		TTDate::setTimeUnitFormat(12);
-		$this->assertEquals( TTDate::getTimeUnit( 3600 ),  '01:00:00' );
-		$this->assertEquals( TTDate::getTimeUnit( 3661 ),  '01:01:01' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600 ), '01:00:00' );
+		$this->assertEquals( TTDate::getTimeUnit( 3661 ), '01:01:01' );
 		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10:01:00' );
 		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10:11:00' );
 		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100:11:00' );
@@ -291,17 +296,17 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100000:11:00' );
 		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1000000:11:00' );
 		//$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ), 	'ERR(FLOAT)' );
-		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX,PHP_INT_MAX) ), '5124095576030431:00:14' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX) ), '5124095576030431:00:14' );
 
-		$this->assertEquals( TTDate::getTimeUnit( bcmul(PHP_INT_MAX,PHP_INT_MAX) ), '9223372036854775807:00:49' );
+		$this->assertEquals( TTDate::getTimeUnit( bcmul(PHP_INT_MAX, PHP_INT_MAX) ), '9223372036854775807:00:49' );
 
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX,PHP_INT_MAX), 0.99999) ), '9223372036854775807:00:49' );
-		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX,PHP_INT_MAX), 0.00001) ), '9223372036854775807:00:49' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX, PHP_INT_MAX), 0.99999) ), '9223372036854775807:00:49' );
+		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcmul(PHP_INT_MAX, PHP_INT_MAX), 0.00001) ), '9223372036854775807:00:49' );
 
 
 		TTDate::setTimeUnitFormat(12);
-		$this->assertEquals( TTDate::getTimeUnit( -3600 ),  '-01:00:00' );
-		$this->assertEquals( TTDate::getTimeUnit( -3661 ),  '-01:01:01' );
+		$this->assertEquals( TTDate::getTimeUnit( -3600 ), '-01:00:00' );
+		$this->assertEquals( TTDate::getTimeUnit( -3661 ), '-01:01:01' );
 		$this->assertEquals( TTDate::getTimeUnit( -36060 ), '-10:01:00' );
 		$this->assertEquals( TTDate::getTimeUnit( -36660 ), '-10:11:00' );
 		$this->assertEquals( TTDate::getTimeUnit( -360660 ), '-100:11:00' );
@@ -310,14 +315,14 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( -360000660 ), '-100000:11:00' );
 		$this->assertEquals( TTDate::getTimeUnit( -3600000660 ), '-1000000:11:00' );
 		//$this->assertEquals( TTDate::getTimeUnit( ( ( PHP_INT_MAX + PHP_INT_MAX ) * -1 ) ), 		'ERR(FLOAT)' );
-		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd(PHP_INT_MAX,PHP_INT_MAX), -1 ) ),	'-5124095576030431:00:14' );
+		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcadd(PHP_INT_MAX, PHP_INT_MAX), -1 ) ),	'-5124095576030431:00:14' );
 
-		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcmul(PHP_INT_MAX,PHP_INT_MAX), -1 ) ),	'-9223372036854775807:00:49' );
+		$this->assertEquals( TTDate::getTimeUnit( bcmul( bcmul(PHP_INT_MAX, PHP_INT_MAX), -1 ) ),	'-9223372036854775807:00:49' );
 
 
 		TTDate::setTimeUnitFormat(23);
-		$this->assertEquals( TTDate::getTimeUnit( 3600 ),  '1.000' );
-		$this->assertEquals( TTDate::getTimeUnit( 3660 ),  '1.0167' );
+		$this->assertEquals( TTDate::getTimeUnit( 3600 ), '1.000' );
+		$this->assertEquals( TTDate::getTimeUnit( 3660 ), '1.0167' );
 		$this->assertEquals( TTDate::getTimeUnit( 36060 ), '10.0167' );
 		$this->assertEquals( TTDate::getTimeUnit( 36660 ), '10.1833' );
 		$this->assertEquals( TTDate::getTimeUnit( 360660 ), '100.1833' );
@@ -325,8 +330,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getTimeUnit( 36000660 ), '10,000.1833' );
 		$this->assertEquals( TTDate::getTimeUnit( 360000660 ), '100,000.1833' );
 		$this->assertEquals( TTDate::getTimeUnit( 3600000660 ), '1,000,000.1833' );
-		$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ),  				'5,124,095,576,030,431.0000' ); //This is passing a float that is losing precision.
-		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX ) ), 				'5,124,095,576,030,431.0000' );
+		$this->assertEquals( TTDate::getTimeUnit( ( PHP_INT_MAX + PHP_INT_MAX ) ), '5,124,095,576,030,431.0000' ); //This is passing a float that is losing precision.
+		$this->assertEquals( TTDate::getTimeUnit( bcadd(PHP_INT_MAX, PHP_INT_MAX ) ), '5,124,095,576,030,431.0000' );
 		$this->assertEquals( TTDate::getTimeUnit( bcadd( bcadd(PHP_INT_MAX, PHP_INT_MAX ), 660 ) ), '5,124,095,576,030,431.0000' );
 	}
 
@@ -636,12 +641,80 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		//Test rounding avg by 15minutes
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:06 AM'), (60 * 15), 20), strtotime('15-Apr-07 8:00 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:06:59 AM'), (60 * 15), 20), strtotime('15-Apr-07 8:00 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:29 AM'), (60 * 15), 20), strtotime('15-Apr-07 8:00 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:30 AM'), (60 * 15), 20), strtotime('15-Apr-07 8:15 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:59 AM'), (60 * 15), 20), strtotime('15-Apr-07 8:15 AM') );
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:08 AM'), (60 * 15), 20), strtotime('15-Apr-07 8:15 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:08:01 AM'), (60 * 15), 20), strtotime('15-Apr-07 8:15 AM') );
+
 		//Test rounding avg by 5minutes
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:06 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:05 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:05 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:01 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:05 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:29 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:05 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:30 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:10 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:31 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:10 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:59 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:10 AM') );
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:08 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:10 AM') );
 		//Test rounding avg by 5minutes when no rounding should occur.
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:05 AM'), (60 * 5), 20), strtotime('15-Apr-07 8:05 AM') );
+
+		//Test rounding avg by 1minute -- This is another special case that we have to be exactly proper rounding for.
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:00:00 AM'), (60 * 1), 20), strtotime('15-Apr-07 8:00 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:00:01 AM'), (60 * 1), 20), strtotime('15-Apr-07 8:00 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:00:29 AM'), (60 * 1), 20), strtotime('15-Apr-07 8:00 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:00:30 AM'), (60 * 1), 20), strtotime('15-Apr-07 8:01 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:00:31 AM'), (60 * 1), 20), strtotime('15-Apr-07 8:01 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:00:59 AM'), (60 * 1), 20), strtotime('15-Apr-07 8:01 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:01:00 AM'), (60 * 1), 20), strtotime('15-Apr-07 8:01 AM') );
+
+
+		//When doing a 15min average rounding, US law states 7mins and 59 seconds can be rounded down in favor of the employer, and 8mins and 0 seconds must be rounded up. See TTDate::roundTime() for more details.
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:06 AM'), (60 * 15), 27), strtotime('15-Apr-07 8:00 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:06:59 AM'), (60 * 15), 27), strtotime('15-Apr-07 8:00 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:00 AM'), (60 * 15), 27), strtotime('15-Apr-07 8:15 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:29 AM'), (60 * 15), 27), strtotime('15-Apr-07 8:15 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:30 AM'), (60 * 15), 27), strtotime('15-Apr-07 8:15 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:07:59 AM'), (60 * 15), 27), strtotime('15-Apr-07 8:15 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:08 AM'), (60 * 15), 27), strtotime('15-Apr-07 8:15 AM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:08:01 AM'), (60 * 15), 27), strtotime('15-Apr-07 8:15 AM') );
+
+		//When doing a 15min average rounding, US law states 7mins and 59 seconds can be rounded down in favor of the employer, and 8mins and 0 seconds must be rounded up. See TTDate::roundTime() for more details.
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:05:01 PM'), (60 * 15), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:06 PM'), (60 * 15), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:06:59 PM'), (60 * 15), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07:29 PM'), (60 * 15), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07:30 PM'), (60 * 15), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07:59 PM'), (60 * 15), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:08 PM'), (60 * 15), 25), strtotime('15-Apr-07 5:15 PM') );
+
+		//When doing a 15min average rounding, US law states 7mins and 59 seconds can be rounded down in favor of the employer, and 8mins and 0 seconds must be rounded up. See TTDate::roundTime() for more details.
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:06 PM'), (60 * 5), 25), strtotime('15-Apr-07 5:05 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07 PM'), (60 * 5), 25), strtotime('15-Apr-07 5:05 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07:01 PM'), (60 * 5), 25), strtotime('15-Apr-07 5:05 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07:29 PM'), (60 * 5), 25), strtotime('15-Apr-07 5:05 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07:30 PM'), (60 * 5), 25), strtotime('15-Apr-07 5:05 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07:31 PM'), (60 * 5), 25), strtotime('15-Apr-07 5:05 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:07:59 PM'), (60 * 5), 25), strtotime('15-Apr-07 5:05 PM') );
+
+
+
+		//Test rounding avg by 1minute -- This is another special case that we have to be exactly proper rounding for.
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:00 PM'), (60 * 1), 27), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:01 PM'), (60 * 1), 27), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:29 PM'), (60 * 1), 27), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:30 PM'), (60 * 1), 27), strtotime('15-Apr-07 5:01 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:31 PM'), (60 * 1), 27), strtotime('15-Apr-07 5:01 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:59 PM'), (60 * 1), 27), strtotime('15-Apr-07 5:01 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:01:00 PM'), (60 * 1), 27), strtotime('15-Apr-07 5:01 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:00 PM'), (60 * 1), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:01 PM'), (60 * 1), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:29 PM'), (60 * 1), 25), strtotime('15-Apr-07 5:00 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:30 PM'), (60 * 1), 25), strtotime('15-Apr-07 5:01 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:31 PM'), (60 * 1), 25), strtotime('15-Apr-07 5:01 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:00:59 PM'), (60 * 1), 25), strtotime('15-Apr-07 5:01 PM') );
+		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 5:01:00 PM'), (60 * 1), 25), strtotime('15-Apr-07 5:01 PM') );
 
 
 		//Test rounding up by 15minutes
@@ -658,6 +731,27 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		//Test rounding up by 5minutes with 2minute grace
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:03 AM'), (60 * 5), 30, (60 * 2) ), strtotime('15-Apr-07 8:05 AM') );
 		$this->assertEquals( (int)TTDate::roundTime( strtotime('15-Apr-07 8:01 AM'), (60 * 5), 30, (60 * 2) ), strtotime('15-Apr-07 8:00 AM') );
+
+
+		//Test time units
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('1:05:00'), (60 * 15), 20), TTDate::parseTimeUnit('1:00') );
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('1:07:29'), (60 * 15), 20), TTDate::parseTimeUnit('1:00') );
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('1:07:30'), (60 * 15), 20), TTDate::parseTimeUnit('1:15') );
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('1:07:31'), (60 * 15), 20), TTDate::parseTimeUnit('1:15') );
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('1:07:59'), (60 * 15), 20), TTDate::parseTimeUnit('1:15') );
+
+		//Test time units with negative values.
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('-1:05:00'), (60 * 15), 20), TTDate::parseTimeUnit('-1:00') );
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('-1:07:29'), (60 * 15), 20), TTDate::parseTimeUnit('-1:00') );
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('-1:07:30'), (60 * 15), 20), TTDate::parseTimeUnit('-1:15') );
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('-1:07:31'), (60 * 15), 20), TTDate::parseTimeUnit('-1:15') );
+		$this->assertEquals( (int)TTDate::roundTime( TTDate::parseTimeUnit('-1:07:59'), (60 * 15), 20), TTDate::parseTimeUnit('-1:15') );
+
+		$this->assertEquals( (int)TTDate::roundTime( (TTDate::parseTimeUnit('1:05:00') * -1), (60 * 15), 20), ( TTDate::parseTimeUnit('1:00') * -1 ) );
+		$this->assertEquals( (int)TTDate::roundTime( (TTDate::parseTimeUnit('1:07:29') * -1), (60 * 15), 20), ( TTDate::parseTimeUnit('1:00') * -1 ) );
+		$this->assertEquals( (int)TTDate::roundTime( (TTDate::parseTimeUnit('1:07:30') * -1), (60 * 15), 20), ( TTDate::parseTimeUnit('1:15') * -1 ) );
+		$this->assertEquals( (int)TTDate::roundTime( (TTDate::parseTimeUnit('1:07:31') * -1), (60 * 15), 20), ( TTDate::parseTimeUnit('1:15') * -1 ) );
+		$this->assertEquals( (int)TTDate::roundTime( (TTDate::parseTimeUnit('1:07:59') * -1), (60 * 15), 20), ( TTDate::parseTimeUnit('1:15') * -1 ) );
 
 	}
 
@@ -724,30 +818,30 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		4th quarter: 1 July 2016 – 30 September 2016
 		*/
 
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2015 12:00AM'), 		'US' ), 2015 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2015 12:00AM'), 		'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Jan-2016 8:00AM'), 		'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('29-Sep-2016 12:00AM'), 		'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 12:00AM'), 		'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 11:59:59PM'), 	'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2016 12:00AM'), 		'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2015 12:00AM'), 'US' ), 2015 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2015 12:00AM'), 'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Jan-2016 8:00AM'), 'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('29-Sep-2016 12:00AM'), 'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 12:00AM'), 'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 11:59:59PM'), 'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2016 12:00AM'), 'US' ), 2017 );
 
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 12:00AM'), 		'US' ), 2016 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2016 12:00AM'), 		'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Jan-2017 8:00AM'), 		'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('29-Sep-2017 12:00AM'), 		'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2017 12:00AM'), 		'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2017 11:59:59PM'), 	'US' ), 2017 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2017 12:00AM'), 		'US' ), 2018 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2016 12:00AM'), 'US' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2016 12:00AM'), 'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Jan-2017 8:00AM'), 'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('29-Sep-2017 12:00AM'), 'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2017 12:00AM'), 'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('30-Sep-2017 11:59:59PM'), 'US' ), 2017 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Oct-2017 12:00AM'), 'US' ), 2018 );
 
 		/*
 		In Canada,[9] the government's financial year runs from 1 April to 31 March (Example 1 April 2015 to 31 March 2016 for the current financial year).
 		 */
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Mar-2015 12:00AM'), 		'CA' ), 2014 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Apr-2015 12:00AM'), 		'CA' ), 2015 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Dec-2015 8:00AM'), 		'CA' ), 2015 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Mar-2016 11:59AM'), 		'CA' ), 2015 );
-		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Apr-2016 12:00AM'), 		'CA' ), 2016 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Mar-2015 12:00AM'), 'CA' ), 2014 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Apr-2015 12:00AM'), 'CA' ), 2015 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Dec-2015 8:00AM'), 'CA' ), 2015 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('31-Mar-2016 11:59AM'), 'CA' ), 2015 );
+		$this->assertEquals( TTDate::getFiscalYearFromEpoch( strtotime('01-Apr-2016 12:00AM'), 'CA' ), 2016 );
 	}
 
 	function test_getWeek() {
@@ -1148,6 +1242,15 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getDSTOffset( strtotime('10-Mar-13 12:30AM'), strtotime('10-Mar-13 1:59AM') ), 0 );
 		$this->assertEquals( TTDate::getDSTOffset( strtotime('10-Mar-13 12:30AM'), strtotime('10-Mar-13 2:00AM') ), 3600 );
 		$this->assertEquals( TTDate::getDSTOffset( strtotime('10-Mar-13 1:30AM'), strtotime('10-Mar-13 6:30AM') ), 3600 );
+
+
+		//This is a quirk with PHP assuming that PST/PDT both mean PST8PDT, and since 05-Nov-2016 is the day DST changed, it adds an hour and uses PDT timezone instead.
+		//  Not really testing anything useful here, other than confirming this quirk exists.
+		$this->assertEquals( TTDate::getDate('DATE+TIME', strtotime('04-Nov-2016 6:00PM PDT') ), '04-Nov-16 6:00 PM PDT' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', strtotime('04-Nov-2016 6:00PM PST') ), '04-Nov-16 7:00 PM PDT' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', strtotime('05-Nov-2016 6:00AM PST') ), '05-Nov-16 7:00 AM PDT' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', strtotime('06-Nov-2016 6:00AM PST') ), '06-Nov-16 6:00 AM PST' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', strtotime('06-Nov-2016 6:00AM PDT') ), '06-Nov-16 5:00 AM PST' );
 	}
 
 	function test_inApplyFrequencyWindow() {
@@ -1324,7 +1427,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$zones = $upf->getOptions('time_zone');
 
 		foreach( $zones as $zone => $name ) {
-			$retval = TTDate::setTimeZone( Misc::trimSortPrefix( $zone ) );
+			$retval = TTDate::setTimeZone( Misc::trimSortPrefix( $zone ), TRUE, TRUE );
 			$this->assertEquals( $retval, TRUE );
 		}
 	}
@@ -1569,13 +1672,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 		//http://stackoverflow.com/questions/2613338/date-returning-wrong-day-although-the-timestamp-is-correct
 		//fall daylight savings. illustrating the missing hour
-		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('6-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM')+7200 );
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('6-Nov-2016 8:00AM'), (strtotime('6-Nov-2016 1:00AM') + 7200) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('06-Nov-2016 08:00AM') );
-		$this->assertEquals( $split_range_arr[0]['end_time_stamp'],   strtotime('06-Nov-2016 02:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('06-Nov-2016 02:00AM') );
 		$this->assertEquals( count($split_range_arr), 1 );
 
 		//the missing hour shows up in the filter
-		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('5-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM')+7200, strtotime('6-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM'));
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('5-Nov-2016 8:00AM'), (strtotime('6-Nov-2016 1:00AM') + 7200), strtotime('6-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM'));
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('5-Nov-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('6-Nov-2016 12:00AM') );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('6-Nov-2016 12:00AM') );
@@ -1585,7 +1688,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count($split_range_arr), 3 );
 
 		//fall daylight savings. illustrating the missing hour
-		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('5-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM')+7200, strtotime('6-Nov-2016 8:00AM'), strtotime('6-Nov-2016 1:00AM')+3600 );
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('5-Nov-2016 8:00AM'), (strtotime('6-Nov-2016 1:00AM') + 7200), strtotime('6-Nov-2016 8:00AM'), (strtotime('6-Nov-2016 1:00AM') + 3600) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('05-Nov-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('06-Nov-2016 12:00AM') );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('06-Nov-2016 12:00AM') );
@@ -1595,13 +1698,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count($split_range_arr), 3 );
 
 		//spring daylight savings. illustrating the extra hour
-		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('13-Mar-2016 8:00AM'), strtotime('13-Mar-2016 12:00AM')+7200 );
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('13-Mar-2016 8:00AM'), (strtotime('13-Mar-2016 12:00AM') + 7200) );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('13-Mar-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('13-Mar-2016 3:00AM') );
 		$this->assertEquals( count($split_range_arr), 1 );
 
 		//spring daylight savings. illustrating the extra hour
-		$split_range_arr = TTDate::splitDateRangeAtMidnight(strtotime('11-Mar-2016 8:00AM'), strtotime('13-Mar-2016 12:00AM')+7200 ,strtotime('13-Mar-2016 4:00AM'), strtotime('13-Mar-2016 1:00AM')+7200);
+		$split_range_arr = TTDate::splitDateRangeAtMidnight(strtotime('11-Mar-2016 8:00AM'), (strtotime('13-Mar-2016 12:00AM') + 7200), strtotime('13-Mar-2016 4:00AM'), (strtotime('13-Mar-2016 1:00AM') + 7200));
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('11-Mar-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('12-Mar-2016 12:00AM') );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('12-Mar-2016 12:00AM') );
@@ -1613,7 +1716,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( count($split_range_arr), 4 );
 
 		//leap year illustration
-		$split_range_arr = TTDate::splitDateRangeAtMidnight(strtotime('28-Feb-2016 8:00AM'), strtotime('1-Mar-2016 12:00AM')+7200 ,strtotime('28-Feb-2016 4:00AM'), strtotime('28-Feb-2016 1:00AM')+7200);
+		$split_range_arr = TTDate::splitDateRangeAtMidnight(strtotime('28-Feb-2016 8:00AM'), (strtotime('1-Mar-2016 12:00AM') + 7200), strtotime('28-Feb-2016 4:00AM'), (strtotime('28-Feb-2016 1:00AM') + 7200));
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('28-Feb-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('29-Feb-2016 12:00AM') );
 		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('29-Feb-2016 12:00AM') );
@@ -1676,6 +1779,8 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 	 * Magic days and all the problems they leave for us.
 	 */
 	function testDSTMagic() {
+		TTDate::setTimeFormat('g:i A T');
+
 		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
 		$time_stamp = 1457859600;
 		$this->assertEquals( strtotime('13-Mar-2016 1:00AM'), $time_stamp );
@@ -1685,18 +1790,17 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 3:00 AM PDT' );
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '14-Mar-16 2:00 AM PDT' );
 
-		TTDate::setTimeZone('Etc/GMT+8', TRUE); //Force to timezone that does not observe
+		TTDate::setTimeFormat('g:i A');
+		TTDate::setTimeZone('Etc/GMT+8', TRUE); //Force to timezone that does not observe DST.
 		$time_stamp = 1457859600;
 		$this->assertEquals( strtotime('13-Mar-2016 1:00AM PST'), $time_stamp );
-		$this->assertEquals( TTDate::getDate('DATE+TIME', $time_stamp), '13-Mar-16 1:00 AM GMT+8' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $time_stamp), '13-Mar-16 1:00 AM' ); //Was: GMT+8 - But some versions of PHP return "-08", so just ignore the timezone setting for this case.
 
 		$this->assertEquals( strtotime('13-Mar-2016 2:00AM PST'), ( $time_stamp + 3600 ) );
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 2:00 AM GMT+8' );
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '14-Mar-16 1:00 AM GMT+8' );
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 3600 ) ), '13-Mar-16 2:00 AM' ); //Was: GMT+8
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp + 86400 ) ), '14-Mar-16 1:00 AM' ); //Was: GMT+8
 
-
-
-
+		TTDate::setTimeFormat('g:i A T');
 		TTDate::setTimeZone('PST8PDT', TRUE); //Force to timezone that observes DST.
 		$time_stamp = 1478419200;
 		$this->assertEquals( strtotime('06-Nov-2016 1:00AM'), $time_stamp );
@@ -1715,11 +1819,11 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		//illustrating that +86400 will not always give you tomorrow.
 		$time_stamp = strtotime('05-Nov-2016 12:00AM');
 		$time_stamp += 86400;
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'06-Nov-16 12:00 AM PDT'); //normal operation
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '06-Nov-16 12:00 AM PDT'); //normal operation
 		$time_stamp += 86400;
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'06-Nov-16 11:00 PM PST'); //extra day!!!
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '06-Nov-16 11:00 PM PST'); //extra day!!!
 		$time_stamp += 86400;
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'07-Nov-16 11:00 PM PST'); //normal operation
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '07-Nov-16 11:00 PM PST'); //normal operation
 
 		//and the same for fall daylight savings
 		$time_stamp = strtotime('15-Mar-2016 12:00AM');
@@ -1737,13 +1841,13 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		//if we do all the math on the middle of day epoch and continually force it back to noon we can avoid problems with dst
 		$time_stamp = TTDate::getMiddleDayEpoch(strtotime('04-Nov-2016 12:00AM'));
 		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'05-Nov-16 12:00 PM PDT'); //normal operation
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '05-Nov-16 12:00 PM PDT'); //normal operation
 		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'06-Nov-16 12:00 PM PST'); //normal operation
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '06-Nov-16 12:00 PM PST'); //normal operation
 		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'07-Nov-16 12:00 PM PST'); //normal operation
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '07-Nov-16 12:00 PM PST'); //normal operation
 		$time_stamp = TTDate::getMiddleDayEpoch($time_stamp + 86400);
-		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ),'08-Nov-16 12:00 PM PST'); //normal operation
+		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '08-Nov-16 12:00 PM PST'); //normal operation
 	}
 
 }

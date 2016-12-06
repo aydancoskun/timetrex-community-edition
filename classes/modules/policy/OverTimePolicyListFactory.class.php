@@ -453,6 +453,7 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 		$otplf = new OverTimePolicyListFactory();
 		$otplf->getByCompanyId($company_id, $where);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -461,7 +462,7 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 			$list[$otp_obj->getID()] = $otp_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

@@ -52,8 +52,6 @@ class StationIncludeUserFactory extends Factory {
 	function setStation($id) {
 		$id = trim($id);
 
-		$slf = TTnew( 'StationListFactory' );
-
 		if (	$id == 0
 				OR
 				$this->Validator->isNumeric(	'station',

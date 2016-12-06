@@ -150,6 +150,7 @@ var PermissionManager = (function() {
 					result = true;
 				}
 				break;
+			case 'GovernmentDocument':
 			case 'Exception':
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
@@ -593,6 +594,16 @@ var PermissionManager = (function() {
 					result = true;
 				}
 				break;
+			case 'GEOFence':
+				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					result = false;
+				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
+					result = false;
+				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
+					PermissionManager.validate( permission_section, 'view_own' ) ) {
+					result = true;
+				}
+				break;
 			case 'ExpensePolicy':
 			case 'LoginUserExpense':
 			case 'JobVacancy':
@@ -620,7 +631,6 @@ var PermissionManager = (function() {
 				}
 				break;
 			default :
-
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
@@ -684,6 +694,9 @@ var PermissionManager = (function() {
 		var permission_section = '';
 
 		switch ( viewId ) {
+			case 'AccumulatedTime':
+				permission_section = 'user_date_total';
+				break;
 			case 'PaymentGateway':
 				permission_section = 'payment_gateway';
 				break;
@@ -696,6 +709,9 @@ var PermissionManager = (function() {
 			case 'ShippingPolicy':
 				permission_section = 'shipping_policy';
 				break;
+			case 'GovernmentDocument':
+				permission_section = 'government_document';
+				break;
 			case 'TaxPolicy':
 				permission_section = 'tax_policy';
 				break;
@@ -707,6 +723,7 @@ var PermissionManager = (function() {
 				permission_section = 'schedule';
 				break;
 			case 'TimeSheet':
+			case 'ManualTimeSheet':
 			case 'UserDateTotalParent':
 			case 'UserDateTotal':
 			case 'InOut':
@@ -822,6 +839,9 @@ var PermissionManager = (function() {
 			case 'Company':
 			case 'Companies':
 				permission_section = 'company';
+				break;
+			case 'GEOFence':
+				permission_section = 'geo_fence';
 				break;
 			case 'Qualification':
 			case 'QualificationGroup':

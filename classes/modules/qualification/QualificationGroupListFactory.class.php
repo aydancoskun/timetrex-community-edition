@@ -99,7 +99,7 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -141,6 +141,7 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 		if ( $children !== FALSE ) {
 			$qglf = new QualificationGroupListFactory();
 
+			$nodes = array();
 			foreach ($children as $object_id => $level ) {
 
 				if ( $object_id !== 0 ) {
@@ -155,7 +156,7 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 
 			}
 
-			if ( isset($nodes) ) {
+			if ( empty($nodes) == FALSE ) {
 				return $nodes;
 			}
 		}
@@ -175,11 +176,13 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 		$children = $this->getFastTreeObject()->getAllChildren( $group_id, $recurse);
 
 		if ( $children !== FALSE ) {
+			$nodes = array();
 			foreach ($children as $object_id => $level ) {
 				$nodes[] = $object_id;
 			}
-
-			if ( isset($nodes) ) {
+			unset($level);//code standards
+			
+			if ( empty($nodes) == FALSE ) {
 				return $nodes;
 			}
 		}
@@ -192,6 +195,7 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = TTi18n::getText('-Default-');
 		}
@@ -200,7 +204,7 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE) {
 			return $list;
 		}
 
@@ -214,6 +218,7 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 
 		$prefix = NULL;
 		$i = 0;
+		$retarr = array();
 		foreach($nodes as $node) {
 			if ( $sort_prefix == TRUE ) {
 				$prefix = '-'.str_pad( $i, 4, 0, STR_PAD_LEFT).'-';
@@ -225,7 +230,7 @@ class QualificationGroupListFactory extends QualificationGroupFactory implements
 		}
 
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 

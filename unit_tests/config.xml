@@ -49,6 +49,9 @@
           <directory suffix=".php">testcases/recruitment/</directory>
         </testsuite>
 
+        <testsuite name="i18n">
+            <directory suffix=".php">testcases/i18n/</directory>
+        </testsuite>
     </testsuites>
 
 </phpunit>

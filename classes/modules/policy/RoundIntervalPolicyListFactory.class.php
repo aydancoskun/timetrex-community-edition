@@ -151,6 +151,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		$riplf = new RoundIntervalPolicyListFactory();
 		$riplf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -159,7 +160,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 			$list[$rip_obj->getID()] = $rip_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -176,7 +177,9 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'd.punch_type_id' => 'desc' );
+			//Always sort by puncy_type_id, then condition_type_id in the hopes that conditional punches apply first, then generic non-conditional apply after.
+			//  This should allow cases where they want to apply some rounding only on conditions, then fall back to a global average 15min rounding outside of that.
+			$order = array( 'd.punch_type_id' => 'desc', 'd.condition_type_id' => 'desc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -262,6 +265,7 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 		$uf = new UserFactory();
 		$pgf = new PolicyGroupFactory();
 		$cgmf = new CompanyGenericMapFactory();
+		$hpf = new HolidayPolicyFactory();
 
 		$ph = array(
 					'company_id' => (int)$company_id,
@@ -271,7 +275,16 @@ class RoundIntervalPolicyListFactory extends RoundIntervalPolicyFactory implemen
 					select	a.*,
 							_ADODB_COUNT
 							(
-								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 130 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 ) THEN 1 ELSE 0 END
+								CASE WHEN EXISTS 
+									( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 130 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 ) 
+									THEN 1 
+									ELSE
+										CASE WHEN EXISTS
+											( select 1 from '. $hpf->getTable() .' as z2 where z2.round_interval_policy_id = a.id and z2.deleted = 0)
+										THEN 1
+										ELSE 0
+										END
+									END
 							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,

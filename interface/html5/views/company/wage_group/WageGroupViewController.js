@@ -1,7 +1,7 @@
 WageGroupViewController = BaseViewController.extend( {
 	el: '#wage_group_view_container',
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'WageGroupEditView.html';
 		this.permission_id = 'wage';
 		this.viewId = 'WageGroup';
@@ -102,15 +102,3 @@ WageGroupViewController = BaseViewController.extend( {
 
 
 } );
-
-WageGroupViewController.loadView = function() {
-
-	Global.loadViewSource( 'WageGroup', 'WageGroupView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

@@ -69,6 +69,7 @@ class InstallSchema_1040A extends InstallSchema_Base {
 					//Try to count the number of permissions and match them to the number of permissions in each preset and use the closest level?
 					$permission_user_data = $pc_obj->getPermission();
 					if ( is_array($permission_user_data) ) {
+						$preset_match = array();
 						foreach( $preset_options as $preset => $preset_name ) {
 							$tmp_preset_permissions = $pf->getPresetPermissions( $preset, array() );
 							$preset_permission_diff_arr = Misc::arrayDiffAssocRecursive($permission_user_data, $tmp_preset_permissions);
@@ -77,6 +78,7 @@ class InstallSchema_1040A extends InstallSchema_Base {
 							Debug::text('Preset Permission Diff Count...: '. $preset_permission_diff_count .' Preset ID: '. $preset, __FILE__, __LINE__, __METHOD__, 10);
 							$preset_match[$preset] = $preset_permission_diff_count;
 						}
+						unset($preset_name);//code standards
 						unset($tmp_preset_permissions);
 
 						krsort($preset_match);

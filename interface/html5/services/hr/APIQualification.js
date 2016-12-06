@@ -45,6 +45,10 @@ var APIQualification = ServiceCaller.extend( {
 
 	},
 
+	exportQualification: function() {
+		return this.argumentsHandler( this.className, 'exportQualification', arguments );
+	},
+
 	generateInvoices: function() {
 
 		return this.argumentsHandler( this.className, 'generateInvoices', arguments );

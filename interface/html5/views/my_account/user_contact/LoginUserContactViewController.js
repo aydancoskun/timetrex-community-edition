@@ -4,13 +4,9 @@ LoginUserContactViewController = BaseViewController.extend( {
 
 	company_api: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.edit_only_mode ) ) {
-			this.edit_only_mode = this.options.edit_only_mode;
-		}
-
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 
 		this.permission_id = 'user';
 		this.viewId = 'LoginUserContact';
@@ -32,6 +28,7 @@ LoginUserContactViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
 
 		this.render();
 		this.buildContextMenu();
@@ -319,15 +316,3 @@ LoginUserContactViewController = BaseViewController.extend( {
 
 
 } );
-
-LoginUserContactViewController.loadView = function() {
-
-	Global.loadViewSource( 'LoginUserContact', 'LoginUserContactView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

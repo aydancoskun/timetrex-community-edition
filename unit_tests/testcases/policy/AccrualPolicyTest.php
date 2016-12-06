@@ -43,9 +43,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-    public function setUp() {
+	public function setUp() {
 		global $dd;
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
@@ -53,7 +53,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -74,16 +74,16 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//$this->deleteAllSchedules();
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
 	function createPayPeriodSchedule() {
 		$ppsf = new PayPeriodScheduleFactory();
@@ -94,7 +94,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setType( 30 );
 		$ppsf->setStartWeekDay( 0 );
 
-		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) ); //Start 6 weeks ago
+		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) ); //Start 6 weeks ago
 
 		$ppsf->setAnchorDate( $anchor_date );
 
@@ -107,14 +107,14 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTimeZone('PST8PDT');
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4*3600) );
-		$ppsf->setMaximumShiftTime( (16*3600) );
+		$ppsf->setNewDayTriggerTime( (4 * 3600) );
+		$ppsf->setMaximumShiftTime( (16 * 3600) );
 		$ppsf->setShiftAssignedDay( 10 );
 
 		$ppsf->setEnableInitialPayPeriods( FALSE );
 		if ( $ppsf->isValid() ) {
 			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$ppsf->setUser( array($this->user_id) );
 			$ppsf->Save();
@@ -124,7 +124,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 
@@ -132,7 +132,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 	function createPayPeriods( $start_date = NULL ) {
 		if ( $start_date == '' ) {
-			$start_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+			$start_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) );
 		}
 
 		$max_pay_periods = 192; //Make a lot of pay periods as we need to test 6 years worth of accruals for different milestones.
@@ -146,12 +146,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 				if ( $i == 0 ) {
 					$end_date = $start_date;
 				} else {
-					$end_date = $end_date + ( (86400*14) );
+					$end_date = ($end_date + ( (86400 * 14) ));
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -720,7 +720,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		if ( $apf->isValid() ) {
 			$insert_id = $apf->Save();
-			Debug::Text('Accrual Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Accrual Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$apmf = TTnew( 'AccrualPolicyMilestoneFactory' );
 
@@ -729,12 +729,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*5 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 5 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -742,12 +742,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 99 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*5 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 5 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -767,12 +767,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*5 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 5 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -780,24 +780,24 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*5 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 5 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 1 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*10 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 10 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -805,72 +805,72 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*5 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 5 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 1 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*10 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 10 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 2 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*15 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 15 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 3 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*20 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 20 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 4 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*25 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 25 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 5 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*30 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 30 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
@@ -880,72 +880,72 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*5 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 5 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 1 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*10 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 10 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 2 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*15 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 15 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 3 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*20 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 20 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 4 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*25 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 25 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 5 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*30 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 30 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -954,24 +954,24 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*6 );
-					$apmf->setMaximumTime( (3600*8)*3 );
-					$apmf->setRolloverTime( (3600*8)*2 );
+					$apmf->setAccrualRate( (3600 * 8) * 6 );
+					$apmf->setMaximumTime( (3600 * 8) * 3 );
+					$apmf->setRolloverTime( (3600 * 8) * 2 );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 1 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*10 );
-					$apmf->setMaximumTime( (3600*8)*5 );
-					$apmf->setRolloverTime( (3600*8)*4 );
+					$apmf->setAccrualRate( (3600 * 8) * 10 );
+					$apmf->setMaximumTime( (3600 * 8) * 5 );
+					$apmf->setRolloverTime( (3600 * 8) * 4 );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -989,24 +989,24 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*5 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 5 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 1 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*10 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );
+					$apmf->setAccrualRate( (3600 * 8) * 10 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -1014,24 +1014,24 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*5 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*8)*1 );
+					$apmf->setAccrualRate( (3600 * 8) * 5 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 8) * 1 );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 
 					$apmf->setAccrualPolicy( $insert_id );
 					$apmf->setLengthOfService( 1 );
 					$apmf->setLengthOfServiceUnit( 40 );
-					$apmf->setAccrualRate( (3600*8)*10 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*8)*2 );
+					$apmf->setAccrualRate( (3600 * 8) * 10 );
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 8) * 2 );
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -1041,11 +1041,11 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setLengthOfServiceUnit( 40 );
 					$apmf->setAccrualRate( 1.0 );
 					$apmf->setAnnualMaximumTime( 0 );
-					$apmf->setMaximumTime( (3600*9999) );
-					$apmf->setRolloverTime( (3600*9999) );					
+					$apmf->setMaximumTime( (3600 * 9999) );
+					$apmf->setRolloverTime( (3600 * 9999) );					
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -1054,12 +1054,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
 					$apmf->setAccrualRate( 1.0 );
-					$apmf->setAnnualMaximumTime( (3600*9999) );
-					$apmf->setMaximumTime( (3600*118) );
-					$apmf->setRolloverTime( (3600*9999) );					
+					$apmf->setAnnualMaximumTime( (3600 * 9999) );
+					$apmf->setMaximumTime( (3600 * 118) );
+					$apmf->setRolloverTime( (3600 * 9999) );					
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;
@@ -1068,12 +1068,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 					$apmf->setLengthOfService( 0 );
 					$apmf->setLengthOfServiceUnit( 40 );
 					$apmf->setAccrualRate( 1.0 );
-					$apmf->setAnnualMaximumTime( (3600*112) );
-					$apmf->setMaximumTime( (3600*118) );
-					$apmf->setRolloverTime( (3600*9999) );					
+					$apmf->setAnnualMaximumTime( (3600 * 112) );
+					$apmf->setMaximumTime( (3600 * 118) );
+					$apmf->setRolloverTime( (3600 * 9999) );					
 
 					if ( $apmf->isValid() ) {
-						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__,10);
+						Debug::Text('Saving Milestone...', __FILE__, __LINE__, __METHOD__, 10);
 						$apmf->Save();
 					}
 					break;												
@@ -1082,7 +1082,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Accrual Policy!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Accrual Policy!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -1090,11 +1090,11 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	function createPunches( $start_date, $end_date, $in_time, $out_time ) {
 		global $dd;
 
-		Debug::Text('Start Date: '. TTDate::getDate('DATE', $start_date) .'('.$start_date.') End: '. TTDate::getDate('DATE', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__,10);
-		for( $i=$start_date; $i < $end_date; $i+=(86400+3601) ) {
+		Debug::Text('Start Date: '. TTDate::getDate('DATE', $start_date) .'('.$start_date.') End: '. TTDate::getDate('DATE', $end_date) .'('. $end_date .')', __FILE__, __LINE__, __METHOD__, 10);
+		for( $i = $start_date; $i < $end_date; $i += (86400 + 3601) ) {
 			$i = TTDate::getBeginDayEpoch( $i );
 			
-			Debug::Text('Date: '. TTDate::getDate('DATE', $i) .' In: '. $in_time .' Out: '. $out_time, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Date: '. TTDate::getDate('DATE', $i) .' In: '. $in_time .' Out: '. $out_time, __FILE__, __LINE__, __METHOD__, 10);
 			$dd->createPunchPair( 	$this->user_id,
 									strtotime( TTDate::getDate('DATE', $i ).' '. $in_time),
 									strtotime( TTDate::getDate('DATE', $i ).' '. $out_time),
@@ -1116,7 +1116,6 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 	function calcAccrualTime( $company_id, $accrual_policy_id, $start_date, $end_date, $day_multiplier = 1 ) {
 		$start_date = TTDate::getMiddleDayEpoch( $start_date );
 		$end_date = TTDate::getMiddleDayEpoch( $end_date );
-		$total_days = TTDate::getDays( ($end_date-$start_date) );
 		//$offset = 79200;
 		$offset = ( (86400 * $day_multiplier) - 7200 );
 
@@ -1128,10 +1127,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 			foreach( $aplf as $ap_obj ) {
 				$aplf->StartTransaction();
 
-				$x=0;
-				for( $i=$start_date; $i < $end_date; $i+=( 86400 * $day_multiplier ) ) { //Try skipping by two days to speed up this test.
+				$x = 0;
+				for( $i = $start_date; $i < $end_date; $i += ( 86400 * $day_multiplier ) ) { //Try skipping by two days to speed up this test.
 					//Debug::Text('Recalculating Accruals for Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( $i ) ), __FILE__, __LINE__, __METHOD__,10);
-					$ap_obj->addAccrualPolicyTime( TTDate::getBeginDayEpoch( $i )+7201, $offset );
+					$ap_obj->addAccrualPolicyTime( (TTDate::getBeginDayEpoch( $i ) + 7201), $offset );
 					//Debug::Text('----------------------------------', __FILE__, __LINE__, __METHOD__,10);
 
 					$x++;
@@ -1162,7 +1161,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 			$accrual_balance = 0;
 		}
 
-		Debug::Text('   Current Accrual Balance: '. $accrual_balance, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('   Current Accrual Balance: '. $accrual_balance, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $accrual_balance;
 	}
@@ -1194,7 +1193,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
-		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date + (86400 * 365 * 2) );
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 20, $accrual_policy_account_id );
@@ -1212,7 +1211,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, TTDate::getBeginYearEpoch( $current_epoch ), TTDate::getEndYearEpoch( $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, (0*3600) );
+		$this->assertEquals( $accrual_balance, (0 * 3600) );
 	}
 
 	/**
@@ -1222,7 +1221,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
-		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date + (86400 * 365 * 2) );
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 30, $accrual_policy_account_id );
@@ -1240,7 +1239,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, TTDate::getBeginYearEpoch( $current_epoch ), TTDate::getEndYearEpoch( $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, (0*3600) );
+		$this->assertEquals( $accrual_balance, (0 * 3600) );
 	}
 
 	/**
@@ -1250,7 +1249,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
-		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date + (86400 * 365 * 2) );
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 40, $accrual_policy_account_id );
@@ -1268,7 +1267,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, TTDate::getBeginYearEpoch( $current_epoch ), TTDate::getEndYearEpoch( $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, (40*3600) );
+		$this->assertEquals( $accrual_balance, (40 * 3600) );
 	}
 
 	/**
@@ -1278,7 +1277,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 
 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
-		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date + (86400 * 365 * 2) );
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 50, $accrual_policy_account_id );
@@ -1296,7 +1295,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, TTDate::getBeginYearEpoch( $current_epoch ), TTDate::getEndYearEpoch( $current_epoch ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, (80*3600) );
+		$this->assertEquals( $accrual_balance, (80 * 3600) );
 	}
 
 	/**
@@ -1324,7 +1323,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, strtotime('+7 years', $current_epoch) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, (1080*3600) );
+		$this->assertEquals( $accrual_balance, (1080 * 3600) );
 	}
 
 	/**
@@ -1844,11 +1843,11 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
 		//$this->assertEquals( $accrual_balance, ( (111*3600)+(60*13)+20 ) ); //111:13:20 <-- This was pre-MiddleDayEpoch() in the proRate function.
-		$this->assertEquals( $accrual_balance, ( (111*3600)+(60*11)+26 ) ); //111:11:26 <-- This is after MiddleDayEpoch() in the proRate function.
+		$this->assertEquals( $accrual_balance, ( (111 * 3600) + (60 * 11) + 26 ) ); //111:11:26 <-- This is after MiddleDayEpoch() in the proRate function.
 	}
 
 	/**
@@ -1873,10 +1872,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (110*3600)+(60*0) ) ); //110:00
+		$this->assertEquals( $accrual_balance, ( (110 * 3600) + (60 * 0) ) ); //110:00
 	}
 
 	/**
@@ -1901,10 +1900,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*31)+5 ) ); //112:31:05
+		$this->assertEquals( $accrual_balance, ( (112 * 3600) + (60 * 31) + 5 ) ); //112:31:05
 	}
 
 	/**
@@ -1929,11 +1928,11 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
 		//$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+12 ) ); //109:34:12
-		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+10 ) ); //109:34:10 <-- This is after MiddleDayEpoch() in the proRate function.
+		$this->assertEquals( $accrual_balance, ( (109 * 3600) + (60 * 34) + 10 ) ); //109:34:10 <-- This is after MiddleDayEpoch() in the proRate function.
 	}
 
 	/**
@@ -1958,10 +1957,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (73*3600)+(60*5)+45 ) ); //73:05:45
+		$this->assertEquals( $accrual_balance, ( (73 * 3600) + (60 * 5) + 45 ) ); //73:05:45
 	}
 
 	/**
@@ -1986,10 +1985,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (120*3600) ) ); //120:00:00
+		$this->assertEquals( $accrual_balance, ( (120 * 3600) ) ); //120:00:00
 	}
 
 
@@ -2003,7 +2002,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$u_obj->data['hire_date'] = TTDate::getMiddleDayEpoch( $u_obj->getHireDate() );
 		$u_obj->Save();
 
- 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+			$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
 		$current_epoch = $hire_date;
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
@@ -2019,10 +2018,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								   NULL,
 								   array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+10 ) ); //109:34:10
+		$this->assertEquals( $accrual_balance, ( (109 * 3600) + (60 * 34) + 10 ) ); //109:34:10
 	}
 
 	/**
@@ -2051,10 +2050,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								   NULL,
 								   array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+10 ) ); //109:34:10
+		$this->assertEquals( $accrual_balance, ( (109 * 3600) + (60 * 34) + 10 ) ); //109:34:10
 	}
 
 	/**
@@ -2083,10 +2082,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								   NULL,
 								   array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (109*3600)+(60*34)+10 ) ); //109:34:10
+		$this->assertEquals( $accrual_balance, ( (109 * 3600) + (60 * 34) + 10 ) ); //109:34:10
 	}
 	/**
 	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceA
@@ -2110,11 +2109,11 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
 		//$this->assertEquals( $accrual_balance, ( (112*3600)+(60*53)+20 ) ); //111:53:20
-		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*51)+26 ) ); //111:51:26 <-- This is after MiddleDayEpoch() in the proRate function.
+		$this->assertEquals( $accrual_balance, ( (112 * 3600) + (60 * 51) + 26 ) ); //111:51:26 <-- This is after MiddleDayEpoch() in the proRate function.
 	}
 
 	/**
@@ -2139,11 +2138,11 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
 		//Pro-Rate part of the first accrual balance.
-		$this->assertEquals( $accrual_balance, ( (112*3600)+(3086) ) ); //112:51.432
+		$this->assertEquals( $accrual_balance, ( (112 * 3600) + (3086) ) ); //112:51.432
 	}
 
 	/**
@@ -2168,10 +2167,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (113*3600)+(60*17)+14 ) ); //113:17:14
+		$this->assertEquals( $accrual_balance, ( (113 * 3600) + (60 * 17) + 14 ) ); //113:17:14
 	}
 
 	/**
@@ -2196,11 +2195,11 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
 		//$this->assertEquals( $accrual_balance, ( (112*3600)+(60*54)+12 ) ); //112:54:12
-		$this->assertEquals( $accrual_balance, ( (112*3600)+(60*54)+10 ) ); //112:54:10 <-- This is after MiddleDayEpoch() in the proRate function.
+		$this->assertEquals( $accrual_balance, ( (112 * 3600) + (60 * 54) + 10 ) ); //112:54:10 <-- This is after MiddleDayEpoch() in the proRate function.
 	}
 
 	/**
@@ -2225,10 +2224,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (113*3600)+(60*5)+45 ) ); //113:05:45
+		$this->assertEquals( $accrual_balance, ( (113 * 3600) + (60 * 5) + 45 ) ); //113:05:45
 	}
 
 	/**
@@ -2253,10 +2252,10 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $accrual_policy_id ) );
 
-		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch+86400*365*2) ) );
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getEndYearEpoch( ( $current_epoch + 86400 * 365 * 2) ) );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 
-		$this->assertEquals( $accrual_balance, ( (120*3600) ) ); //120:00:00
+		$this->assertEquals( $accrual_balance, ( (120 * 3600) ) ); //120:00:00
 	}
 
 	/**
@@ -2302,7 +2301,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (1 * -3600) );
 
 		//Day 2
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2310,7 +2309,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (2 * -3600) );
 
 		//Day 3
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(2*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2318,7 +2317,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (3 * -3600) );
 
 		//Day 4
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(3*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2326,7 +2325,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (4 * -3600) );
 
 		//Day 5
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(4*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2334,7 +2333,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (5 * -3600) );
 
 		//Day 6
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(5*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (5 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2342,7 +2341,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (6 * -3600) );
 
 		//Day 7
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(6*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (6 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2350,7 +2349,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (7 * -3600) );
 
 		//Day 8
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(7*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (7 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2358,7 +2357,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (8 * -3600) );
 
 		//Day 9
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(8*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (8 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2366,7 +2365,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (9 * -3600) );
 
 		//Day 10
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(9*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (9 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2374,7 +2373,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (10 * -3600) );
 
 		//Day 11
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(10*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (10 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2382,7 +2381,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (11 * -3600) );
 
 		//Day 12
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(11*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (11 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$absence_id = $dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2390,7 +2389,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (12 * -3600) );
 
 		//Day 13
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(12*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (12 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2398,7 +2397,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $accrual_balance, (13 * -3600) );
 
 		//Day 14
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(13*86400+3601)) ;
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (13 * 86400 + 3601)) ;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createAbsence( $this->user_id, $date_epoch, (1 * 3600), $policy_ids['absence_policy'][10] );
@@ -2429,7 +2428,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$policy_ids['regular'][10] = $dd->createRegularTimePolicy( $this->company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
 
 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
-		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date + (86400 * 365 * 2) );
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1000, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
@@ -2449,9 +2448,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (0*3600) );
+		$this->assertEquals( $accrual_balance, (0 * 3600) );
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(0*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (0 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2467,7 +2466,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (6*3600) );
+		$this->assertEquals( $accrual_balance, (6 * 3600) );
 		
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2483,17 +2482,17 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (10*3600) );
+		$this->assertEquals( $accrual_balance, (10 * 3600) );
 		
 		//Add batch of punches
 		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$this->createPunches( $date_epoch, ( TTDate::getMiddleDayEpoch($date_epoch) + (9 * 86400) ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (110*3600) );
+		$this->assertEquals( $accrual_balance, (110 * 3600) );
 		
 		
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(11*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (11 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2509,7 +2508,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (116*3600) );
+		$this->assertEquals( $accrual_balance, (116 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2525,7 +2524,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (120*3600) );
+		$this->assertEquals( $accrual_balance, (120 * 3600) );
 	}
 
 	/**
@@ -2550,7 +2549,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$policy_ids['regular'][10] = $dd->createRegularTimePolicy( $this->company_id, 10, $policy_ids['contributing_shift_policy'][10], $policy_ids['pay_code'][100] );
 
 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
-		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date + (86400 * 365 * 2) );
 
 		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1000, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
@@ -2573,9 +2572,9 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createAccrualPolicyUserModifier( $accrual_policy_id, $this->user_id, strtotime( '+10 months', $hire_date), 2 );
 
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (0*3600) );
+		$this->assertEquals( $accrual_balance, (0 * 3600) );
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(0*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (0 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2591,7 +2590,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (12*3600) );
+		$this->assertEquals( $accrual_balance, (12 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2607,17 +2606,17 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (20*3600) );
+		$this->assertEquals( $accrual_balance, (20 * 3600) );
 
 		//Add batch of punches
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$this->createPunches( $date_epoch, ( TTDate::getMiddleDayEpoch($date_epoch) + (9 * 86400) ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (220*3600) );
+		$this->assertEquals( $accrual_balance, (220 * 3600) );
 
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(11*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (11 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2633,7 +2632,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (232*3600) );
+		$this->assertEquals( $accrual_balance, (232 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2649,7 +2648,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (240*3600) );
+		$this->assertEquals( $accrual_balance, (240 * 3600) );
 	}
 
 	/**
@@ -2675,7 +2674,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 		$policy_ids['absence_policy'][10] = $dd->createAbsencePolicy( $this->company_id, 10, $policy_ids['pay_code'][910] );
 
 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
-		$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*2) );
+		$current_epoch = TTDate::getBeginYearEpoch( $hire_date + (86400 * 365 * 2) );
 
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1010, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
 		$dd->createPolicyGroup( 	$this->company_id,
@@ -2693,7 +2692,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									array($policy_ids['regular'][10]) //Regular
 									);
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(0*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (0 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2709,7 +2708,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (6*3600) );
+		$this->assertEquals( $accrual_balance, (6 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2725,18 +2724,18 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (10*3600) );
+		$this->assertEquals( $accrual_balance, (10 * 3600) );
 
 
 		//Add batch of punches
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(1*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$this->createPunches( $date_epoch, ( TTDate::getMiddleDayEpoch($date_epoch) + (9 * 86400) ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (110*3600) );
+		$this->assertEquals( $accrual_balance, (110 * 3600) );
 
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(11*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (11 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2752,7 +2751,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (116*3600) );
+		$this->assertEquals( $accrual_balance, (116 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2768,17 +2767,17 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (118*3600) ); //Hit maximum balance.
+		$this->assertEquals( $accrual_balance, (118 * 3600) ); //Hit maximum balance.
 
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(12*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (12 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createAbsence( $this->user_id, $date_epoch, (5 * 3600), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, (113 * 3600) ); //Reduce maximum balance, so we can hit again below.
 
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() )+(13*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (13 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2794,7 +2793,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (118*3600) );
+		$this->assertEquals( $accrual_balance, (118 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2810,7 +2809,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (118*3600) ); //Hit maximum balance.
+		$this->assertEquals( $accrual_balance, (118 * 3600) ); //Hit maximum balance.
 	}
 
 	/**
@@ -2837,7 +2836,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
 		//$current_epoch = TTDate::getBeginYearEpoch( $hire_date+(86400*365*5) );
-		$current_epoch = TTDate::getBeginMonthEpoch( $hire_date-(86400*7)+(86400*365*5) );
+		$current_epoch = TTDate::getBeginMonthEpoch( ($hire_date - (86400 * 7) + (86400 * 365 * 5)) );
 
 		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 1020, $accrual_policy_account_id, $policy_ids['contributing_shift_policy'][10] );
 		$dd->createPolicyGroup( 	$this->company_id,
@@ -2855,7 +2854,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 									array($policy_ids['regular'][10]) //Regular
 									);
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(0*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) + (0 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2871,7 +2870,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (6*3600) );
+		$this->assertEquals( $accrual_balance, (6 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2887,18 +2886,18 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (10*3600) );
+		$this->assertEquals( $accrual_balance, (10 * 3600) );
 
 
 		//Add batch of punches
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(1*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) + (1 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$this->createPunches( $date_epoch, ( TTDate::getMiddleDayEpoch($date_epoch) + (9 * 86400) ), '8:00AM', '6:00PM' ); //Create 10 days worth of punches.		
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (110*3600) );
+		$this->assertEquals( $accrual_balance, (110 * 3600) );
 
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(11*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) + (11 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2914,7 +2913,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (112*3600) );
+		$this->assertEquals( $accrual_balance, (112 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2930,17 +2929,17 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (112*3600) ); //Hit maximum balance.
+		$this->assertEquals( $accrual_balance, (112 * 3600) ); //Hit maximum balance.
 		
 		
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(12*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) + (12 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createAbsence( $this->user_id, $date_epoch, (5 * 3600), $policy_ids['absence_policy'][10] );
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
 		$this->assertEquals( $accrual_balance, (107 * 3600) ); //Reduce maximum balance, so we can hit again below.
 
 
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(13*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) + (13 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2956,7 +2955,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (107*3600) );
+		$this->assertEquals( $accrual_balance, (107 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -2972,12 +2971,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (107*3600) ); //Hit maximum balance.
+		$this->assertEquals( $accrual_balance, (107 * 3600) ); //Hit maximum balance.
 
 		//
 		//Test immediately before employment anniversary date (shouldn't be any increases as maximum accrual limit is still in effect)
 		//
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(34*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) + (34 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -2993,7 +2992,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (107*3600) );
+		$this->assertEquals( $accrual_balance, (107 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -3009,12 +3008,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (107*3600) );
+		$this->assertEquals( $accrual_balance, (107 * 3600) );
 
 		//
 		//Test on employment anniversary date (limit should be reset now, so increases balance)
 		//
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(35*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) + (35 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 10:00AM'),
@@ -3030,7 +3029,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (109*3600) );
+		$this->assertEquals( $accrual_balance, (109 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 12:00PM'),
@@ -3046,12 +3045,12 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (111*3600) );
+		$this->assertEquals( $accrual_balance, (111 * 3600) );
 
 		//
 		//Test on the day after the employment anniversary date (limit should be reset now, so increases balance)
 		//
-		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch )+(36*86400+3601) );
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( $current_epoch ) + (36 * 86400 + 3601) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 8:00AM'),
@@ -3067,7 +3066,7 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (117*3600) );
+		$this->assertEquals( $accrual_balance, (117 * 3600) );
 
 		$dd->createPunchPair( 	$this->user_id,
 								strtotime($date_stamp.' 2:00PM'),
@@ -3083,7 +3082,103 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
-		$this->assertEquals( $accrual_balance, (118*3600) ); //Reached maximum balance here.
+		$this->assertEquals( $accrual_balance, (118 * 3600) ); //Reached maximum balance here.
+	}
+
+	/**
+	 * @group AccrualPolicy_testInApplyFrequencyWindowA
+	 */
+	function testInApplyFrequencyWindowA() {
+		global $config_vars;
+		//Test InApplyFrequency when the system timezone is EST5EDT, but some users are MST5MDT.
+		$user_obj = $this->getUserObject( $this->user_id );
+
+		$ap_obj = TTnew('AccrualPolicyFactory');
+		$ap_obj->setType( 20 );
+		$ap_obj->setApplyFrequency( 10 ); //Each Pay Period
+		$ap_obj->setMilestoneRolloverHireDate( TRUE );
+		$ap_obj->setMinimumEmployedDays( 0 );
+
+
+		$offset = 79200;
+
+		$current_epoch = strtotime('14-Aug-2016 1:30AM EDT');
+		TTDate::setTimeZone('EST5EDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
+
+		$pay_period_dates = array('start_date' => strtotime('31-Jul-2016 12:00AM'), 'end_date' => strtotime('13-Aug-2016 11:59:59PM') );
+
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), TRUE );
+
+
+		TTDate::setTimeZone('MST7MDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		$pay_period_dates = array('start_date' => strtotime('31-Jul-2016 12:00AM'), 'end_date' => strtotime('13-Aug-2016 11:59:59PM') );
+
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('12-Aug-2016 11:30PM MDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 9:30PM MDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 9:59:58PM MDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 9:59:59PM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 10:00PM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 10:01PM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 10:30PM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 11:30PM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 11:59PM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 12:00AM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 12:01AM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 7:59PM MDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 8:00PM MDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 8:01PM MDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 11:30PM MDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('15-Aug-2016 11:30PM MDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+	}
+
+	/**
+	 * @group AccrualPolicy_testInApplyFrequencyWindowB
+	 */
+	function testInApplyFrequencyWindowB() {
+		global $config_vars;
+		//Test InApplyFrequency when the system timezone is MST5MDT, but some users are EST5EDT.
+		$user_obj = $this->getUserObject( $this->user_id );
+
+		$ap_obj = TTnew('AccrualPolicyFactory');
+		$ap_obj->setType( 20 );
+		$ap_obj->setApplyFrequency( 10 ); //Each Pay Period
+		$ap_obj->setMilestoneRolloverHireDate( TRUE );
+		$ap_obj->setMinimumEmployedDays( 0 );
+
+
+		$offset = 79200;
+
+		$current_epoch = strtotime('14-Aug-2016 1:30AM MDT');
+		TTDate::setTimeZone('MST7MDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		$config_vars['other']['system_timezone'] = TTDate::getTimeZone();
+
+		$pay_period_dates = array('start_date' => strtotime('31-Jul-2016 12:00AM'), 'end_date' => strtotime('13-Aug-2016 11:59:59PM') );
+
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), TRUE );
+
+
+		TTDate::setTimeZone('EST5EDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
+		$pay_period_dates = array('start_date' => strtotime('31-Jul-2016 12:00AM'), 'end_date' => strtotime('13-Aug-2016 11:59:59PM') );
+
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('12-Aug-2016 11:30PM EDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 9:30PM EDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 9:59:58PM EDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 9:59:59PM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 10:00PM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 10:01PM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 10:30PM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 11:30PM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('13-Aug-2016 11:59PM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 12:00AM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 12:01AM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 7:59PM EDT'), $offset, $pay_period_dates, $user_obj ), TRUE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 8:00PM EDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 8:01PM EDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('14-Aug-2016 11:30PM EDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
+		$this->assertEquals( $ap_obj->inApplyFrequencyWindow( strtotime('15-Aug-2016 11:30PM EDT'), $offset, $pay_period_dates, $user_obj ), FALSE );
 	}
 }
 ?>

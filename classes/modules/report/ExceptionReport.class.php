@@ -439,7 +439,7 @@ class ExceptionReport extends Report {
 			$key = 0;
 			if ( isset( $this->tmp_data['exception'] ) ) {
 				foreach( $this->tmp_data['exception'] as $user_id => $level_1 ) {
-					foreach( $level_1 as $id => $level_2 ) {
+					foreach( $level_1 as $level_2 ) {
 						$date_columns = TTDate::getReportDates( NULL, TTDate::parseDateTime( $level_2['date_stamp'] ), FALSE, $this->getUserObject(), array('pay_period_start_date' => strtotime( $level_2['pay_period_start_date'] ), 'pay_period_end_date' => strtotime( $level_2['pay_period_end_date'] ), 'pay_period_transaction_date' => strtotime( $level_2['pay_period_transaction_date'] ) ) );
 
 						if ( isset($this->tmp_data['user'][$user_id]) ) {

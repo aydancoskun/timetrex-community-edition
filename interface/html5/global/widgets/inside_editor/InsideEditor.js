@@ -67,22 +67,17 @@
 		};
 
 		this.removeAllRows = function( include_header ) {
-
 			var table = this.find( '.inside-editor-render' );
 			var trs = table.find( 'tr' );
-
 			if ( include_header ) {
+
 				table.find( 'tr' ).each( function() {
-					$(this ).remove();
+					$( this ).remove();
 				} )
 
 			} else {
-				while ( table.find( 'tr' ).length > 1 ) {
-					$( table.find( 'tr' )[1] ).remove();
-				}
+				table.find( 'tr.inside-editor-row' ).remove();
 			}
-
-
 
 			this.rows_widgets_array = [];
 		};
@@ -100,7 +95,7 @@
 			var minus_icon = row.find( '.minus-icon' );
 
 			plus_icon.click( function() {
-				$this.addRow( null, $( this ).parent().parent().index() );
+				$this.addRow( null, $( this ).parent().parent().index(), row );
 			} );
 
 			minus_icon.click( function() {
@@ -117,17 +112,19 @@
 		this.getDefaultData = function( index ) {
 
 			if ( Global.isSet( this.api ) ) {
-				this.api['get' + this.api.key_name + 'DefaultData']( {onResult: function( result ) {
-					var result_data = result.getResult();
-					result_data.id = false;
+				this.api['get' + this.api.key_name + 'DefaultData']( {
+					onResult: function( result ) {
+						var result_data = result.getResult();
+						result_data.id = false;
 
-					if ( !result_data ) {
-						result_data = [];
+						if ( !result_data ) {
+							result_data = [];
+						}
+
+						$this.addRow( result_data, index );
+
 					}
-
-					$this.addRow( result_data, index );
-
-				}} );
+				} );
 			}
 		};
 
@@ -151,9 +148,9 @@
 			render = Global.loadWidget( o.render );
 			row_render = $( Global.loadWidget( o.row_render ) );
 			var args = o.render_args;
-			var template = _.template( render, args );
+			var template = _.template( render );
 			var render_div = $this.children().eq( 1 );
-			render_div.append( template );
+			render_div.append( template( args ) );
 			render = $( render_div.find( '.inside-editor-render' ) );
 
 		} );
@@ -162,8 +159,6 @@
 
 	};
 
-	$.fn.InsideEditor.defaults = {
-
-	};
+	$.fn.InsideEditor.defaults = {};
 
 })( jQuery );

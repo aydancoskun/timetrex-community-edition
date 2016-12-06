@@ -2,11 +2,23 @@ var TAlertManager = (function() {
 
 	var view = null;
 
+	var isShownNetworkAlert = false;
+
+	var showNetworkErrorAlert = function( error ) {
+		if ( !isShownNetworkAlert ) {
+			TAlertManager.showAlert( Global.network_lost_msg + "<br><br>" + "Error: " + (error.responseText ? error.responseText : 'N/A') + " (" + error.status + ")", 'Error', function() {
+				isShownNetworkAlert = false;
+			} );
+			isShownNetworkAlert = true;
+		}
+
+	}
+
 	var showPreSessionAlert = function() {
 		var result = $( '<div class="session-alert"> ' +
-		'<span class="close-icon">X</span>' +
-		'<span class="content"/>' +
-		'</div>' );
+			'<span class="close-icon">X</span>' +
+			'<span class="content"/>' +
+			'</div>' );
 		setTimeout( function() {
 			$( 'body' ).append( result );
 			result.find( '.content' ).html( $.i18n._( 'Previous Session' ) );
@@ -143,12 +155,12 @@ var TAlertManager = (function() {
 		}
 
 		var result = $( '<div class="t-alert">' +
-		'<div class="content-div"><span class="content"/></div>' +
-		'<span class="title"/>' +
-		'<div class="bottom-bar">' +
-		'<button class="t-button">Close</button>' +
-		'</div>' +
-		'</div>' );
+			'<div class="content-div"><span class="content"/></div>' +
+			'<span class="title"/>' +
+			'<div class="bottom-bar">' +
+			'<button class="t-button">Close</button>' +
+			'</div>' +
+			'</div>' );
 		setTimeout( function() {
 			if ( view !== null ) {
 
@@ -211,13 +223,13 @@ var TAlertManager = (function() {
 			remove();
 		}
 		var result = $( '<div class="confirm-alert"> ' +
-		'<div class="content-div"><span class="content"/></div>' +
-		'<span class="title"></span>' +
-		'<div class="bottom-bar">' +
-		'<button id="yesBtn" class="t-button bottom-bar-yes-btn"></button>' +
-		'<button id="noBtn" class="t-button"></button>' +
-		'</div>' +
-		'</div>' );
+			'<div class="content-div"><span class="content"/></div>' +
+			'<span class="title"></span>' +
+			'<div class="bottom-bar">' +
+			'<button id="yesBtn" class="t-button bottom-bar-yes-btn"></button>' +
+			'<button id="noBtn" class="t-button"></button>' +
+			'</div>' +
+			'</div>' );
 		view = result;
 		$( 'body' ).append( result );
 
@@ -257,7 +269,8 @@ var TAlertManager = (function() {
 		showPreSessionAlert: showPreSessionAlert,
 		showBrowserTopBanner: showBrowserTopBanner,
 		closeBrowserBanner: closeBrowserBanner,
-		showWarningAlert: showWarningAlert
+		showWarningAlert: showWarningAlert,
+		showNetworkErrorAlert:showNetworkErrorAlert
 	}
 
 })();

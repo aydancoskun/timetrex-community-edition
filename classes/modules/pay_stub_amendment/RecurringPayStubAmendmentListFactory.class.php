@@ -176,7 +176,7 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict_order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -188,6 +188,7 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -204,7 +205,7 @@ class RecurringPayStubAmendmentListFactory extends RecurringPayStubAmendmentFact
 			}
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

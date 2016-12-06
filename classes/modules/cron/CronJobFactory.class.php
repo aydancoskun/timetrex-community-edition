@@ -352,13 +352,24 @@ class CronJobFactory extends Factory {
 
 		//Check job last updated date, if its more then 12hrs and its still in the "running" status,
 		//chances are its an orphan. Change status.
-		//if ( $this->getStatus() != 10 AND $this->getLastRunDate() < time()-(12*3600) ) {
-		if ( $this->getStatus() != 10 AND $this->getUpdatedDate() > 0 AND $this->getUpdatedDate() < (time() - ( 6 * 3600 )) ) {
-			Debug::text('ERROR: Job has been running for more then 6 hours! Asssuming its an orphan, marking as ready for next run.', __FILE__, __LINE__, __METHOD__, 10);
-			$this->setStatus(10);
-			$this->Save(FALSE);
+		//if ( $this->getStatus() != 10 AND $this->getUpdatedDate() > 0 AND $this->getUpdatedDate() < (time() - ( 6 * 3600 )) ) {
+		if ( $this->getStatus() != 10 AND $this->getUpdatedDate() > 0 ) {
+			$clear_lock = FALSE;
+			if ( $lock_file->exists() == FALSE ) {
+				Debug::text( 'ERROR: Job PID is not running assuming its an orphan, marking as ready for next run.', __FILE__, __LINE__, __METHOD__, 10 );
+				$clear_lock = TRUE;
+			} elseif ( $this->getUpdatedDate() < (time() - ( 6 * 3600 )) ) {
+				Debug::text( 'ERROR: Job has been running for more then 6 hours! Assuming its an orphan, marking as ready for next run.', __FILE__, __LINE__, __METHOD__, 10 );
+				$clear_lock = TRUE;
+			}
 
-			$lock_file->delete();
+			if ( $clear_lock == TRUE ) {
+				$this->setStatus( 10 );
+				$this->Save( FALSE );
+				$lock_file->delete();
+			}
+
+			unset($clear_lock);
 		}
 
 		if ( !is_executable( $php_cli ) ) {

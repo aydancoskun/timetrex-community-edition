@@ -101,6 +101,7 @@ class APIImport extends APIFactory {
 
 		$validator_obj->isTrue( 'file', FALSE, TTi18n::getText('Please upload file again') );
 
+		$validator = array();
 		$validator[0] = $validator_obj->getErrorsArray();
 		return $this->returnHandler( FALSE, 'IMPORT_FILE', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
 	}

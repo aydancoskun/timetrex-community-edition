@@ -133,9 +133,11 @@ class UserGroupListFactory extends UserGroupFactory implements IteratorAggregate
 
 		$children = $this->getFastTreeObject()->getAllChildren(NULL, 'RECURSE');
 
+		
 		if ( $children !== FALSE ) {
 			$uglf = new UserGroupListFactory();
 
+			$nodes = array();
 			foreach ($children as $object_id => $level ) {
 
 				if ( $object_id !== 0 ) {
@@ -150,7 +152,7 @@ class UserGroupListFactory extends UserGroupFactory implements IteratorAggregate
 
 			}
 
-			if ( isset($nodes) ) {
+			if ( empty($nodes) == FALSE ) {
 				return $nodes;
 			}
 		}
@@ -170,11 +172,13 @@ class UserGroupListFactory extends UserGroupFactory implements IteratorAggregate
 		$children = $this->getFastTreeObject()->getAllChildren( $group_id, $recurse);
 
 		if ( $children !== FALSE ) {
+			$nodes = array();
 			foreach ($children as $object_id => $level ) {
 				$nodes[] = $object_id;
 			}
+			unset($level); //code standards
 
-			if ( isset($nodes) ) {
+			if ( empty($nodes) == FALSE ) {
 				return $nodes;
 			}
 		}
@@ -187,6 +191,7 @@ class UserGroupListFactory extends UserGroupFactory implements IteratorAggregate
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -195,7 +200,7 @@ class UserGroupListFactory extends UserGroupFactory implements IteratorAggregate
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -209,6 +214,7 @@ class UserGroupListFactory extends UserGroupFactory implements IteratorAggregate
 
 		$prefix = NULL;
 		$i = 0;
+		$retarr = array();
 		foreach($nodes as $node) {
 			if ( $sort_prefix == TRUE ) {
 				$prefix = '-'.str_pad( $i, 4, 0, STR_PAD_LEFT).'-';
@@ -220,7 +226,7 @@ class UserGroupListFactory extends UserGroupFactory implements IteratorAggregate
 		}
 
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 

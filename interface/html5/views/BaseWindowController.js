@@ -1,6 +1,6 @@
 BaseWindowController = Backbone.View.extend( {
 
-	initialize: function() {
+	initialize: function( options ) {
 		this.content_div = $( this.el ).find( '.content' );
 		this.stepsWidgetDic = {};
 		this.stepsDataDic = {};

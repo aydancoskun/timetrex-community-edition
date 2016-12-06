@@ -659,8 +659,8 @@ class APIDashboard extends APIFactory {
 						foreach ($val as $val1) {
 							if ( $val1['status_id'] == 10 ) {
 								$val1['status'] = TTi18n::getText('Working');
-							} else if ( $val1['status_id'] == 20 ) {
-								$val1['status'] = $val1['absence_policy'];
+							} elseif ( $val1['status_id'] == 20 ) {
+								$val1['status'] = ( $val1['absence_policy'] != '' ) ? $val1['absence_policy'] : TTi18n::getText('N/A');
 							}
 							$retarr['api_retval'][] = $val1;
 						}

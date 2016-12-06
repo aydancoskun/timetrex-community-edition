@@ -68,7 +68,6 @@ class APIPayStubEntry extends APIFactory {
 	 * @return array
 	 */
 	function getPayStubEntryDefaultData() {
-		$company_obj = $this->getCurrentCompanyObject();
 
 		Debug::Text('Getting pay stub entry default data...', __FILE__, __LINE__, __METHOD__, 10);
 

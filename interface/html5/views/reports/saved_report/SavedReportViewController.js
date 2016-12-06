@@ -3,8 +3,8 @@ SavedReportViewController = BaseViewController.extend( {
 
 	sub_report_schedule_view_controller: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'SavedReportEditView.html';
 		this.permission_id = 'report';
 		this.viewId = 'SavedReport';
@@ -254,7 +254,7 @@ SavedReportViewController = BaseViewController.extend( {
 				break;
 			default:
 				ProgressBar.closeOverlay();
-				Global.log( 'ERROR: Saved Report name not defined: ' + report_name );
+				Debug.Text('ERROR: Saved Report name not defined: ' + report_name , 'SavedReportViewController.js', '', 'onViewClick', 10 );
 				report_name = null;
 				break;
 		}
@@ -282,7 +282,8 @@ SavedReportViewController = BaseViewController.extend( {
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SAVED_REPORT,
 				navigation_mode: true,
-				show_search_inputs: true} );
+				show_search_inputs: true
+			} );
 
 			this.setNavigation();
 
@@ -328,20 +329,25 @@ SavedReportViewController = BaseViewController.extend( {
 
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Description' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Description' ),
 				field: 'description',
 				basic_search: true,
 				adv_search: false,
 				in_column: 1,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -350,8 +356,10 @@ SavedReportViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: false,
 				script_name: 'EmployeeView',
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -360,7 +368,8 @@ SavedReportViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: false,
 				script_name: 'EmployeeView',
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 
 		];
 	},
@@ -549,31 +558,19 @@ SavedReportViewController = BaseViewController.extend( {
 
 } );
 
-SavedReportViewController.loadView = function() {
-
-	Global.loadViewSource( 'SavedReport', 'SavedReportView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};
-
 SavedReportViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 
 	Global.loadViewSource( 'SavedReport', 'SubSavedReportView.html', function( result ) {
 
-		var args = { };
-		var template = _.template( result, args );
+		var args = {};
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_saved_report_controller );
 			}

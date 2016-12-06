@@ -1,7 +1,7 @@
 UserTitleViewController = BaseViewController.extend( {
 	el: '#user_title_view_container',
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserTitleEditView.html';
 		this.permission_id = 'user';
 		this.viewId = 'UserTitle';
@@ -100,15 +100,3 @@ UserTitleViewController = BaseViewController.extend( {
 
 
 } );
-
-UserTitleViewController.loadView = function() {
-
-	Global.loadViewSource( 'UserTitle', 'UserTitleView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

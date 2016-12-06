@@ -782,6 +782,7 @@ class PurgeDatabase {
 				//}
 
 				if ( in_array($table, $current_tables) ) {
+					$query = array();
 					switch ( $table ) {
 						case 'user_generic_status':
 							//Treat the user_generic_status table differently, as rows are never marked as deleted in it.
@@ -1099,7 +1100,7 @@ class PurgeDatabase {
 			//$db->FailTrans();
 			$db->CompleteTrans();
 		}
-		unset($purge_tables, $purge_extra_tables, $current_tables, $query);
+		unset($purge_tables, $current_tables, $query);
 		Debug::Text('Purging database tables complete: '. TTDate::getDate('DATE+TIME', time() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
@@ -1110,12 +1111,14 @@ class PurgeDatabase {
 
 		//Get all tables in a database and their ID columns to aid in creating export/import mapping
 		$exclude_columns = array('id', 'type_id', 'status_id', 'length_of_service_unit_id', 'apply_frequency_id', 'category_id', 'other_id1', 'other_id2', 'other_id3', 'other_id4', 'other_id5', 'ibutton_id', 'manual_id', 'exclusive_id', 'session_id', 'cc_type_id', 'originator_id', 'data_center_id', 'product_edition_id', 'calculation_id', 'severity_id', 'email_notification_id', 'default_schedule_status_id', 'phone_id', 'sex_id' );
+		
+		$table_name_map = array();
 		$table_name_map['user'] = 'users';
+		
 		$dict = NewDataDictionary($db);
 		$tables = $dict->MetaTables();
 		sort($tables);
-
-		$out = NULL;
+		$map = array();
 		foreach( $tables as $table ) {
 			$columns = $dict->MetaColumns( $table );
 

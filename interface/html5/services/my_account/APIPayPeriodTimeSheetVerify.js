@@ -43,9 +43,12 @@ var APIPayPeriodTimeSheetVerify = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'deletePayPeriodTimeSheetVerify', arguments );
 	},
 
-
 	copyPayPeriodTimeSheetVerify: function() {
 		return this.argumentsHandler( this.className, 'copyPayPeriodTimeSheetVerify', arguments );
+	},
+
+	exportPayPeriodTimeSheetVerify: function() {
+		return this.argumentsHandler( this.className, 'exportPayPeriodTimeSheetVerify', arguments );
 	}
 
 

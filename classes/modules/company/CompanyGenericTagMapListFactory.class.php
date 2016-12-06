@@ -173,12 +173,13 @@ class CompanyGenericTagMapListFactory extends CompanyGenericTagMapFactory implem
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-
+		
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[] = $obj->getColumn('name');
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

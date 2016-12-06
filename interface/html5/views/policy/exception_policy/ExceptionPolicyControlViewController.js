@@ -6,8 +6,8 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 	api_exception_policy: null,
 	date_api: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'ExceptionPolicyControlEditView.html';
 		this.permission_id = 'exception_policy';
 		this.viewId = 'ExceptionPolicyControl';
@@ -646,15 +646,3 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 
 } );
-
-ExceptionPolicyControlViewController.loadView = function() {
-
-	Global.loadViewSource( 'ExceptionPolicyControl', 'ExceptionPolicyControlView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

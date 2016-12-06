@@ -5,6 +5,7 @@ AccrualViewController = BaseViewController.extend( {
 	user_group_api: null,
 	user_group_array: null,
 	user_type_array: null,
+	system_type_array: null,
 	delete_type_array: null,
 	date_api: null,
 
@@ -19,11 +20,8 @@ AccrualViewController = BaseViewController.extend( {
 
 //	  parent_filter: null,
 
-	initialize: function() {
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'AccrualEditView.html';
 		this.permission_id = 'accrual';
 		this.viewId = 'Accrual';
@@ -84,6 +82,7 @@ AccrualViewController = BaseViewController.extend( {
 			var result = res.getResult();
 			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['type_id'] ) {
 				$this.basic_search_field_ui_dic['type_id'].setSourceData( Global.buildRecordArray( result ) );
+				$this.system_type_array = result;
 			}
 		} );
 
@@ -339,6 +338,13 @@ AccrualViewController = BaseViewController.extend( {
 	},
 
 	setEditViewData: function() {
+		//use the user_type_array in edit mode and new mode, use the system_type_array in view mode
+		//this prevents users from choosing type_ids that are for system use only but can see the system type_ids when viewing
+		if ( this.is_viewing ) {
+			this.edit_view_ui_dic.type_id.setSourceData(this.system_type_array);
+		} else {
+			this.edit_view_ui_dic.type_id.setSourceData(this.user_type_array);
+		}
 
 		var $this = this;
 		this._super( 'setEditViewData' ); //Set Navigation
@@ -405,33 +411,13 @@ AccrualViewController = BaseViewController.extend( {
 
 	getFilterColumnsFromDisplayColumns: function() {
 		var column_filter = {};
-		column_filter.is_owner = true;
-		column_filter.id = true;
-		column_filter.is_child = true;
-		column_filter.in_use = true;
-		column_filter.first_name = true;
-		column_filter.last_name = true;
 		column_filter.type_id = true;
-		if ( this.sub_view_mode ) {
+		if (this.sub_view_mode) {
 			column_filter.accrual_policy_account = true;
 			column_filter.accrual_policy_account_id = true;
 			column_filter.user_id = true;
 		}
-		// Error: Unable to get property 'getGridParam' of undefined or null reference
-		var display_columns = [];
-		if ( this.grid ) {
-			display_columns = this.grid.getGridParam( 'colModel' );
-		}
-		if ( display_columns ) {
-			var len = display_columns.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var column_info = display_columns[i];
-				column_filter[column_info.name] = true;
-			}
-		}
-
-		return column_filter;
+		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
 	onGridSelectRow: function() {
@@ -717,6 +703,15 @@ AccrualViewController = BaseViewController.extend( {
 				permission_result: true,
 				permission: null
 			} );
+			var export_csv = new RibbonSubMenu( {
+				label: $.i18n._( 'Export' ),
+				id: ContextMenuIconName.export_excel,
+				group: other_group,
+				icon: Icons.export_excel,
+				permission_result: true,
+				permission: null,
+				sort_order: 9000
+			} );
 		}
 
 		return [menu];
@@ -795,6 +790,9 @@ AccrualViewController = BaseViewController.extend( {
 			case ContextMenuIconName.import_icon:
 				ProgressBar.showOverlay();
 				this.onImportClick();
+				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('exportAccrual');
 				break;
 
 		}
@@ -879,6 +877,9 @@ AccrualViewController = BaseViewController.extend( {
 				case ContextMenuIconName.import_icon:
 					this.setDefaultMenuImportIcon( context_btn, grid_selected_length );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
+					break;
 
 			}
 
@@ -953,7 +954,9 @@ AccrualViewController = BaseViewController.extend( {
 				case ContextMenuIconName.timesheet:
 					this.setEditMenuNavViewIcon( context_btn, 'punch' );
 					break;
-
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
+					break;
 			}
 
 		}
@@ -963,7 +966,6 @@ AccrualViewController = BaseViewController.extend( {
 	},
 
 	onNavigationClick: function() {
-
 		var $this = this;
 		var filter = {filter_data: {}};
 		var label = this.sub_view_mode ? $.i18n._( "Accrual Balances" ) : $.i18n._( "Accruals" );
@@ -1151,6 +1153,7 @@ AccrualViewController = BaseViewController.extend( {
 						$this.grid.clearGridData();
 						$this.grid.setGridParam( {data: grid_source_data.concat( new_record )} );
 						$this.grid.trigger( 'reloadGrid' );
+						$this.highLightGridRowById( new_record.id );
 					}
 
 				} else {
@@ -1253,9 +1256,9 @@ AccrualViewController.loadView = function() {
 	Global.loadViewSource( 'Accrual', 'AccrualView.html', function( result ) {
 
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
-		Global.contentContainer().html( template );
+		Global.contentContainer().html( template( args ) );
 	} )
 
 };
@@ -1264,14 +1267,14 @@ AccrualViewController.loadSubView = function( container, beforeViewLoadedFun, af
 
 	Global.loadViewSource( 'Accrual', 'SubAccrualView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_accrual_view_controller );
 			}

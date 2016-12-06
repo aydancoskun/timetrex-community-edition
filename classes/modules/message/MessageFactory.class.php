@@ -321,7 +321,7 @@ class MessageFactory extends Factory {
 		if	(	$this->Validator->isLength(		'body',
 												$text,
 												TTi18n::gettext('Invalid Body length'),
-												5,
+												2, //Allow the word: "ok", or "done" to at least be a response.
 												1024) ) {
 
 			$this->data['body'] = $text;
@@ -430,6 +430,7 @@ class MessageFactory extends Factory {
 		$olf = $this->getObjectHandler();
 		if ( is_object( $olf ) ) {
 
+			$user_ids = array();
 			$olf->getById( $this->getObject() );
 			if ( $olf->getRecordCount() > 0 ) {
 				$obj = $olf->getCurrent();
@@ -499,13 +500,14 @@ class MessageFactory extends Factory {
 				}
 			}
 
-			if ( isset($user_ids) AND is_array($user_ids) ) {
+			if ( empty($user_ids) == FALSE ) {
 				//Get user preferences and determine if they accept email notifications.
 				Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				$uplf = TTnew( 'UserPreferenceListFactory' );
 				$uplf->getByUserId( $user_ids );
 				if ( $uplf->getRecordCount() > 0 ) {
+					$retarr = array();
 					foreach( $uplf as $up_obj ) {
 						if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND $up_obj->getUserObject()->getStatus() == 10 ) {
 							if ( $up_obj->getUserObject()->getWorkEmail() != '' ) {
@@ -518,7 +520,7 @@ class MessageFactory extends Factory {
 						}
 					}
 
-					if ( isset($retarr) ) {
+					if ( empty($retarr) == FALSE ) {
 						Debug::Arr($retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__, 10);
 						return $retarr;
 
@@ -540,7 +542,7 @@ class MessageFactory extends Factory {
 
 		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Message') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>';
 
-		global $current_user, $config_vars;
+		global $current_user;
 		if ( is_object($current_user) AND $current_user->getWorkEmail() != '' ) {
 			$reply_to = Misc::formatEmailAddress( $current_user->getWorkEmail(), $current_user );
 		}
@@ -581,9 +583,7 @@ class MessageFactory extends Factory {
 							'From'	  => $from,
 							'Subject' => $subject,
 							'Bcc'	  => $bcc,
-							//'Reply-To' => $reply_to,
-							//'Return-Path' => $reply_to,
-							//'Errors-To' => $reply_to,
+							//Reply-To/Return-Path are handled in TTMail.
 						);
 
 		$body = '<pre>'.str_replace( $search_arr, $replace_arr, $email_body ).'</pre>';

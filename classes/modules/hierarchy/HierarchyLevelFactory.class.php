@@ -185,7 +185,7 @@ class HierarchyLevelFactory extends Factory {
 
 		$ulf = TTnew( 'UserListFactory' );
 		$hllf = TTnew( 'HierarchyLevelListFactory' );
-		$hulf = TTnew( 'HierarchyUserListFactory' );
+		//$hulf = TTnew( 'HierarchyUserListFactory' );
 
 		if ( $this->getHierarchyControl() == FALSE ) {
 			return FALSE;
@@ -248,7 +248,7 @@ class HierarchyLevelFactory extends Factory {
 		}
 		Debug::Arr($hierarchy_level_data, ' aHierarchy Users:', __FILE__, __LINE__, __METHOD__, 10);
 
-
+		$tmp_hierarchy_users = array();
 		foreach( $hierarchy_level_data as $hierarchy_level_id => $hierarchy_level ) {
 			$tmp_hierarchy_users[$hierarchy_level_id] = $hierarchy_level['user_id'];
 		}
@@ -280,8 +280,8 @@ class HierarchyLevelFactory extends Factory {
 		}
 
 		$remapped_hierarchy_levels = FALSE;
-
-		foreach( $hierarchy_level_data as $hierarchy_level_id => $hierarchy_level ) {
+		$tmp_hierarchy_levels = array();
+		foreach( $hierarchy_level_data as $hierarchy_level ) {
 			$tmp_hierarchy_levels[] = $hierarchy_level['level'];
 		}
 		sort($tmp_hierarchy_levels);
@@ -374,6 +374,7 @@ class HierarchyLevelFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

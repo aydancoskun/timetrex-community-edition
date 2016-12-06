@@ -135,11 +135,12 @@ class StationBranchListFactory extends StationBranchFactory implements IteratorA
 
 		$sblf->getByStationId($id);
 
+		$list = array();
 		foreach ($sblf as $obj) {
 			$list[$obj->getStation()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

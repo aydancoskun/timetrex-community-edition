@@ -94,6 +94,11 @@ class GovernmentForms {
 		return FALSE;
 	}
 
+	function clearForms() {
+		$this->objs = NULL;
+		return TRUE;
+	}
+
 	function validateXML( $xml, $schema_file ) {
 		Debug::text('Schema File: '. $schema_file, __FILE__, __LINE__, __METHOD__, 10);
 		if ( class_exists( 'DomDocument' ) AND file_exists($schema_file) ) {
@@ -137,6 +142,11 @@ class GovernmentForms {
 	}
 
 	function Output( $type ) {
+		if ( !is_array($this->objs) ) {
+			Debug::Text('ERROR! No objects to output!', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
 		$type = strtolower($type);
 
 		//Initialize PDF object so all subclasses can access it.

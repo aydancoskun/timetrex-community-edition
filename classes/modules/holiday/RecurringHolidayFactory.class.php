@@ -258,12 +258,17 @@ class RecurringHolidayFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => $name,
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND name = ? AND deleted=0';
+		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$name_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -473,7 +478,7 @@ class RecurringHolidayFactory extends Factory {
 				$end_month_epoch = mktime(12, 0, 0, ($this->getMonth() + 1), 1, (date('Y', $epoch) + 1));
 
 				$tmp_holiday_epoch = FALSE;
-				
+
 				Debug::text('Start Epoch: '. TTDate::getDate('DATE+TIME', $start_month_epoch) .' End Epoch: '. TTDate::getDate('DATE+TIME', $end_month_epoch) .' Current Epoch: '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 				//Get all day of weeks in the month. Determine which is less or greater then day.
 				$day_of_week_dates = array();
@@ -588,6 +593,7 @@ class RecurringHolidayFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

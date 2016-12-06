@@ -126,7 +126,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL($query, $ph);
 
@@ -283,6 +283,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 		$klf = new KPIListFactory();
 		$klf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -291,7 +292,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 			$list[$kpi_obj->getID()] = $kpi_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -303,6 +304,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -311,7 +313,7 @@ class KPIListFactory extends KPIFactory implements IteratorAggregate {
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

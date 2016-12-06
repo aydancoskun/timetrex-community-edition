@@ -5,8 +5,8 @@ CurrencyViewController = BaseViewController.extend( {
 	round_decimal_places_array: null,
 	sub_currency_rate_view_controller: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'CurrencyEditView.html';
 		this.permission_id = 'currency';
 		this.viewId = 'Currency';
@@ -309,15 +309,3 @@ CurrencyViewController = BaseViewController.extend( {
 
 
 } );
-
-CurrencyViewController.loadView = function() {
-
-	Global.loadViewSource( 'Currency', 'CurrencyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

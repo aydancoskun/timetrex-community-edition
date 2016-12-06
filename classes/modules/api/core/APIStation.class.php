@@ -164,6 +164,17 @@ class APIStation extends APIFactory {
 	}
 
 	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportStation( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getStation( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_station', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
+
+	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.
 	 * @param array $data filter data
 	 * @return array

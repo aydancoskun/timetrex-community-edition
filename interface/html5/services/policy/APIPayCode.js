@@ -45,6 +45,10 @@ var APIPayCode = ServiceCaller.extend( {
 
 	migratePayCode: function() {
 		return this.argumentsHandler( this.className, 'migratePayCode', arguments );
+	},
+
+	exportPayCode: function() {
+		return this.argumentsHandler( this.className, 'exportPayCode', arguments );
 	}
 
 

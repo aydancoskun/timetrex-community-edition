@@ -131,12 +131,19 @@ class CompanyGenericMapFactory extends Factory {
 
 										1090 => 'qualification_group',
 
+										//KPI/Reviews
 										2010 => 'kpi_group',
 										2020 => 'kpi_kpi_group',
 
 										//Invoice Payment Gateway mapping
 										3010 => 'payment_gateway_credit_card_type',
 										3020 => 'payment_gateway_bank_account_type',
+
+										//GEOFence										
+										4000 => 'geo_fence_branch',
+										4010 => 'geo_fence_department',
+										4020 => 'geo_fence_job',
+										4030 => 'geo_fence_job_item',										
 									);
 				break;
 		}
@@ -435,6 +442,7 @@ class CompanyGenericMapFactory extends Factory {
 							if ( $lf->getRecordCount() > 0 ) {
 								$description = TTi18n::getText('Exception Policy').': '. $lf->getCurrent()->getName();
 							}
+
 							break;
 						case 200:
 							$lf = TTnew( 'ExpensePolicyListFactory' );
@@ -595,7 +603,6 @@ class CompanyGenericMapFactory extends Factory {
 
 					Debug::text('Action: '. $log_action .' MapID: '. $this->getMapID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, $table_name );
-
 					break;
 				case 3020: // => 'payment_gateway_bank_account_type',
 					$table_name = 'payment_gateway_bank_account_type';
@@ -605,9 +612,19 @@ class CompanyGenericMapFactory extends Factory {
 
 					Debug::text('Action: '. $log_action .' MapID: '. $this->getMapID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
 					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, $table_name );
-
 					break;
-					break;
+				case 4000:
+				case 4010:
+				case 4020:
+				case 4030:
+					$lf = TTnew( 'GEOFenceListFactory' );
+					$lf->getById( $this->getMapID() );
+					if ( $lf->getRecordCount() > 0 ) {
+						$description = TTi18n::getText('GEO Fence').': '. $lf->getCurrent()->getName();
+					}
+					Debug::text('Action: '. $log_action .' MapID: '. $this->getMapID() .' ObjectID: '. $this->getObjectID() .' Description: '. $description .' Record Count: '. $lf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+					$retval = TTLog::addEntry( $this->getObjectId(), $log_action, $description, NULL, 'GEO Fence' );
+					break;				
 			}
 		}
 

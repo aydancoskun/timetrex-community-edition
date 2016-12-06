@@ -45,6 +45,10 @@ var APIUserReviewControl = ServiceCaller.extend( {
 
 	},
 
+	exportUserReviewControl: function() {
+		return this.argumentsHandler( this.className, 'exportUserReviewControl', arguments );
+	},
+
 	generateInvoices: function() {
 
 		return this.argumentsHandler( this.className, 'generateInvoices', arguments );

@@ -61,8 +61,13 @@ var APIPunch = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'validatePunch', arguments );
 
+	},
+
+	exportPunch: function() {
+		return this.argumentsHandler( this.className, 'exportPunch', arguments );
+	},
+
+	getRequestDefaultData: function() {
+		return this.argumentsHandler( this.className, 'getRequestDefaultData', arguments );
 	}
-
-
-
 } );

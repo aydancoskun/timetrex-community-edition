@@ -42,7 +42,6 @@
 
 }
 
-
 .schedule-view .date-chooser-div .date-picker-div .t-date-picker-div {
     vertical-align: initial;
 }
@@ -50,6 +49,10 @@
 .schedule-view .schedule-mode-div {
     float: left;
     margin-top: 3px;
+}
+
+.schedule-mode-div .toggle-button-div {
+    margin-top: 1px;
 }
 
 .schedule-view .schedule-grid-div {

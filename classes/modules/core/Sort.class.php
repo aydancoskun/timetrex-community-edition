@@ -45,6 +45,8 @@ class Sort {
 		$profiler->startTimer( 'multiSort()' );
 		//Debug::Text('Sorting... Col1: '. $col1 .' Col2: '. $col2 .' Col1 Order: '. $col1_order .' Col2 Order: '. $col2_order, __FILE__, __LINE__, __METHOD__, 10);
 
+		$sort_col1 = array();
+		$sort_col2 = array();
 		foreach ($data as $key => $row) {
 			if ( isset($row[$col1]) ) {
 				$sort_col1[$key] = $row[$col1];
@@ -73,7 +75,7 @@ class Sort {
 			$col2_order = SORT_ASC;
 		}
 
-		if ( isset($sort_col2) ) {
+		if ( is_array($sort_col2) AND count($sort_col2) > 0 ) {
 			array_multisort($sort_col1, $col1_order, $sort_col2, $col2_order, $data);
 		} else {
 			array_multisort($sort_col1, $col1_order, $data);
@@ -116,6 +118,8 @@ class Sort {
 		}
 
 		$params = array();
+		$order_type = array();
+		$tmp_order_element = array();
 		foreach( $cols as $col => $order ) {
 			$params[] = &$colarr[$col];
 			$order = (array)$order;
@@ -160,7 +164,7 @@ class Sort {
 				}
 				$k = $keys[$k];
 
-				if ( !isset($ret[$k]) ) {
+				if ( !isset($retarr[$k]) ) {
 					$retarr[$k] = $array[$k];
 				}
 
@@ -168,6 +172,7 @@ class Sort {
 					$retarr[$k][$col] = $array[$k][$col];
 				}
 			}
+			unset($v); //code standards
 			$first = FALSE;
 		}
 

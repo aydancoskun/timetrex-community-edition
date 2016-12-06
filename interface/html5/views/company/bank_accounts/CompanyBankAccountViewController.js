@@ -1,13 +1,8 @@
 CompanyBankAccountViewController = BaseViewController.extend( {
 	ach_transaction_type_array: null,
 	company_api: null,
-	initialize: function() {
-
-		if ( Global.isSet( this.options.edit_only_mode ) ) {
-			this.edit_only_mode = this.options.edit_only_mode;
-		}
-
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 
 		this.permission_id = 'user';
 		this.viewId = 'CompanyBankAccount';
@@ -30,6 +25,7 @@ CompanyBankAccountViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
 
 		this.render();
 		this.buildContextMenu();

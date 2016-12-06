@@ -13,8 +13,8 @@ LoginViewController = BaseViewController.extend( {
 
 	lan_selector: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		var $this = this;
 		this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 		this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
@@ -31,23 +31,26 @@ LoginViewController = BaseViewController.extend( {
 		var login_data = LocalCacheData.getLoginData();
 
 		//Clean cache that saved in some views
-		this.cleanNecessaryCache();
+		LocalCacheData.cleanNecessaryCache();
 		if ( $.cookie( 'SessionID' ) && $.cookie( 'SessionID' ).length > 0 && LocalCacheData.getLoginData().is_logged_in ) {
 			var timeout_count = 0;
 			$( this.el ).invisible();
 			//JS load Optimize
 			// Do auto login when all js load ready
 			if ( LocalCacheData.loadViewRequiredJSReady ) {
+				Debug.Text('Login Success (first try)', null, null, 'initialize', 10);
 				$this.autoLogin();
 			} else {
 				var auto_login_timer = setInterval( function() {
 					if ( timeout_count == 100 ) {
 						clearInterval( auto_login_timer );
 						TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
+						Debug.Text('Login Failure', null, null, 'initialize', 10);
 						return;
 					}
 					timeout_count = timeout_count + 1;
 					if ( LocalCacheData.loadViewRequiredJSReady ) {
+						Debug.Text('Login Success after retry: '+ timeout_count, null, null, 'initialize', 10);
 						$this.autoLogin();
 						clearInterval( auto_login_timer );
 					}
@@ -110,6 +113,7 @@ LoginViewController = BaseViewController.extend( {
 		this.authentication_api.login( user_name, password, {
 			onResult: function( e ) {
 				if ( LocalCacheData.loadViewRequiredJSReady ) {
+					Debug.Text('Login Success (first try)', null, null, 'onLoginBtnClick', 10);
 					$this.onLoginSuccess( e )
 				} else {
 					var timeout_count = 0;
@@ -117,11 +121,13 @@ LoginViewController = BaseViewController.extend( {
 						if ( timeout_count == 100 ) {
 							clearInterval( auto_login_timer );
 							TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
+							Debug.Text('Login Failure', null, null, 'onLoginBtnClick', 10);
 							return;
 						}
 						timeout_count = timeout_count + 1;
 						if ( LocalCacheData.loadViewRequiredJSReady ) {
 							$this.onLoginSuccess( e );
+							Debug.Text('Login Success after retry: '+ timeout_count, null, null, 'onLoginBtnClick', 10);
 							clearInterval( auto_login_timer );
 						}
 					}, 600 );
@@ -129,22 +135,6 @@ LoginViewController = BaseViewController.extend( {
 			}, delegate: this
 		} );
 
-	},
-
-	cleanNecessaryCache: function() {
-		LocalCacheData.last_timesheet_selected_user = null;
-		LocalCacheData.last_timesheet_selected_date = null;
-		//JS load Optimize
-		if ( LocalCacheData.loadViewRequiredJSReady ) {
-			ALayoutCache.layout_dic = {};
-		}
-		LocalCacheData.view_layout_cache = {};
-		LocalCacheData.result_cache = {};
-		if ( LocalCacheData.current_open_wizard_controller ) {
-			LocalCacheData.current_open_wizard_controller.onCloseClick();
-			LocalCacheData.current_open_wizard_controller = null;
-		}
-		Global.cleanViewTab();
 	},
 
 	onLoginSuccess: function( e, session_id ) {
@@ -163,7 +153,9 @@ LoginViewController = BaseViewController.extend( {
 
 		if ( e && !e.isValid() ) {
 			LocalCacheData.setSessionID( '' );
-			$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
+
+			Global.clearSessionCookie();
+			//$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
 
 			if ( e.getDetails()[0].hasOwnProperty( 'password' ) ) {
 				IndexViewController.openWizard( 'ResetPasswordWizard', {
@@ -372,16 +364,18 @@ LoginViewController = BaseViewController.extend( {
 		Global.topContainer().empty();
 		LocalCacheData.currentShownContextMenuName = null;
 
-		var result = this.authentication_api.getLocale( {async: false} );
-		var login_lan = 'en_US';
+		//Ensure that the language chosen at the login screen is passed in so that the user's country can be appended to create a proper locale.
+		var result = this.authentication_api.getLocale( $( '.language-selector' ).val(), {async: false} );
+		var login_language = 'en_US';
 		if ( result ) {
-			login_lan = result.getResult();
+			login_language = result.getResult();
 		}
 
-		if ( login_lan !== LocalCacheData.getLoginData().locale ) {
+		if ( LocalCacheData.getLoginData().locale != null && login_language !== LocalCacheData.getLoginData().locale ) {
 			ProgressBar.showProgressBar();
 			ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
-			$.cookie( 'language', login_lan, {expires: 10000, path: LocalCacheData.loginData.base_url} );
+
+			Global.setLanguageCookie(login_language);
 			LocalCacheData.setI18nDic( null );
 			setTimeout( function() {
 				window.location.reload( true );
@@ -571,14 +565,12 @@ LoginViewController = BaseViewController.extend( {
 
 		this.lan_selector.setSourceData( array );
 
+
 		this.lan_selector.setValue( LocalCacheData.getLoginData().language );
 
+		var $this = this;
 		this.lan_selector.bind( 'formItemChange', function() {
-			$.cookie( 'language', $this.lan_selector.getValue(), {
-				expires: 10000,
-				path: LocalCacheData.loginData.base_url
-			} );
-
+			Global.setLanguageCookie($this.lan_selector.getValue());
 			LocalCacheData.setI18nDic( null );
 
 			ProgressBar.showProgressBar();
@@ -598,6 +590,7 @@ LoginViewController = BaseViewController.extend( {
 			passwordInput.val( LocalCacheData.all_url_args.password )
 		}
 
+		Global.moveCookiesToNewPath();
 		$( this.el ).attr( 'init_complete', true )
 
 	},
@@ -605,29 +598,6 @@ LoginViewController = BaseViewController.extend( {
 	cleanWhenUnloadView: function( callBack ) {
 		$( '#loginViewContainer' ).remove();
 		this._super( 'cleanWhenUnloadView', callBack );
-	}
+	},
 
 } );
-
-LoginViewController.loadView = function() {
-
-
-	//Load login.css on index.php file since it's the first view user see, we don't want any flash
-
-	Global.loadViewSource( 'Login', 'LoginView.html', function( result ) {
-
-		var args = {
-			secure_login: $.i18n._( 'Secure Login' ),
-			user_name: $.i18n._( 'User Name' ),
-			password: $.i18n._( 'Password' ),
-			forgot_your_password: $.i18n._( 'Forgot Your Password' ),
-			quick_punch: $.i18n._( 'Quick Punch' ),
-			login: $.i18n._( 'Login' ),
-			language: $.i18n._( 'Language' )
-		};
-		var template = _.template( result, args );
-		Global.contentContainer().html( template );
-
-	} );
-
-}

@@ -2,8 +2,8 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 
 		this.title = $.i18n._( 'TimeSheet ReCalculation Wizard' );
 		this.steps = 3;
@@ -75,8 +75,9 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 
 		var timesheet_api = new (APIFactory.getAPIClass( 'APITimeSheet' ))();
 
+		//this is outside the callback to prevent hammer-clicking which was causing problems.
+		this.onCloseClick();
 		timesheet_api.reCalculateTimeSheet( pay_period_ids, user_ids, {onResult: function( result ) {
-			$this.onCloseClick();
 
 			if ( $this.call_back ) {
 				$this.call_back();

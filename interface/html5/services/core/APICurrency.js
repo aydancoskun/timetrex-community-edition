@@ -39,6 +39,9 @@ var APICurrency = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'copyCurrency', arguments );
 
 	},
+	exportCurrency: function() {
+		return this.argumentsHandler( this.className, 'exportCurrency', arguments );
+	},
 	getISOCodesArray: function() {
 
 		return this.argumentsHandler( this.className, 'getISOCodesArray', arguments );

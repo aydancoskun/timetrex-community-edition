@@ -134,6 +134,7 @@ class LogFactory extends Factory {
 											'pay_period_time_sheet_verify'		=> TTi18n::getText('TimeSheet Verify'),
 
 											'pay_stub'							=> TTi18n::getText('Pay Stub'),
+											'government_document'				=> TTi18n::getText('Government Document'),
 											'pay_stub_amendment'				=> TTi18n::getText('Pay Stub Amendment'),
 											'pay_stub_entry_account'			=> TTi18n::getText('Pay Stub Account'),
 											'pay_stub_entry_account_link'		=> TTi18n::getText('Pay Stub Account Linking'),
@@ -216,6 +217,7 @@ class LogFactory extends Factory {
 											'job_applicant_language'			=> TTi18n::getText('Job Applicant Languages'),
 											'job_applicant_membership'			=> TTi18n::getText('Job Applicant Memberships'),
 											'ethnic_group'						=> TTi18n::getText('Ethnic Group'),
+											'geo_fence'							=> TTi18n::getText('GEO Fence')
 									);
 				asort( $retval ); //Sort by name so its easier to find objects.
 				break;
@@ -288,6 +290,7 @@ class LogFactory extends Factory {
 											'pay_period_time_sheet_verify'		=> array('user'),
 
 											'pay_stub'							=> array('pay_stub'),
+											'government_document'				=> array('government_document'),
 											'pay_stub_amendment'				=> array('pay_stub_amendment'),
 											'pay_stub_entry_account'			=> array('pay_stub_account'),
 											'pay_stub_entry_account_link'		=> array('pay_stub_account'),
@@ -371,6 +374,7 @@ class LogFactory extends Factory {
 											'job_applicant_language'			=> array('job_applicant'),
 											'job_applicant_membership'			=> array('job_applicant'),
 											'ethnic_group'						=> array('user'),
+											'geo_fence'							=> array('geo_fence')
 									);
 
 				break;
@@ -810,6 +814,7 @@ class LogFactory extends Factory {
 
 	function getDetails() {
 		if ( getTTProductEdition() > 10 AND $this->isNew() == FALSE AND is_object( $this->getUserObject() ) ) {
+			$global_table_map = array();
 			//Get class for this table
 			Debug::Text( 'Table: '. $this->getTableName(), __FILE__, __LINE__, __METHOD__, 10);
 			require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR . 'includes'. DIRECTORY_SEPARATOR .'TableMap.inc.php');
@@ -821,6 +826,7 @@ class LogFactory extends Factory {
 				$ldlf = TTnew( 'LogDetailListFactory' );
 				$ldlf->getBySystemLogIdAndCompanyId( $this->getID(), $this->getUserObject()->getCompany() );
 				if ( $ldlf->getRecordCount() > 0 ) {
+					$detail_row = array();
 					foreach( $ldlf as $ld_obj ) {
 						if ( $this->getObject() > 0 ) {
 							$class->setID( $this->getObject() ); //Set the object id of the class so we can reference it later if needed.

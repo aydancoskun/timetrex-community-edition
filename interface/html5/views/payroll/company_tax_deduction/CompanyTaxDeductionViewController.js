@@ -35,9 +35,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	start_dates: null,
 	end_dates: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'CompanyTaxDeductionEditView.html';
 		if ( this.sub_view_mode ) {
 			this.permission_id = 'user_tax_deduction';
@@ -330,6 +330,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				break;
 			case ContextMenuIconName.download:
 				this.onDownloadClick();
+				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('export' + this.api.key_name )
 				break;
 
 		}
@@ -4220,14 +4223,14 @@ CompanyTaxDeductionViewController.loadSubView = function( container, beforeViewL
 	Global.loadViewSource( 'CompanyTaxDeduction', 'SubCompanyTaxDeductionView.html', function( result ) {
 
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_company_tax_deduction_view_controller );

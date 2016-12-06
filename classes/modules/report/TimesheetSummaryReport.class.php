@@ -625,7 +625,6 @@ class TimesheetSummaryReport extends Report {
 		$columns = $this->getColumnDataConfig();
 
 		$filter_data = $this->getFilterConfig();
-		$pay_code_type_map = PayCodeListFactory::getPayCodeTypeMap( $this->getUserObject()->getCompany() );
 
 		$currency_convert_to_base = $this->getCurrencyConvertToBase();
 		$base_currency_obj = $this->getBaseCurrencyObject();
@@ -735,7 +734,6 @@ class TimesheetSummaryReport extends Report {
 						}
 					}
 
-					$prev_date_stamp = $date_stamp;
 				}
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );

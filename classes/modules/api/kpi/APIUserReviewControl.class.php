@@ -95,6 +95,7 @@ class APIUserReviewControl extends APIFactory {
 		if ( $urclf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $urclf );
 			Debug::Arr($data, 'Searching Data: ', __FILE__, __LINE__, __METHOD__, 10);
+			$retarr = array();
 			foreach( $urclf as $urc_obj ) {
 				$retarr[] = $urc_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -104,6 +105,17 @@ class APIUserReviewControl extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportUserReviewControl( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getUserReviewControl( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_review', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -351,6 +363,7 @@ class APIUserReviewControl extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id']); //Clear fields that can't be copied
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->setUserReviewControl( $src_rows ); //Save copied rows
 		}

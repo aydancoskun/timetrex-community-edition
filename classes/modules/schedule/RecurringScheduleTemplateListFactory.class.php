@@ -187,6 +187,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		$ppsuf = new PayPeriodScheduleUserFactory();
 		$ppsf = new PayPeriodScheduleFactory();
 		$pguf = new PolicyGroupUserFactory();
+		$filter_data = array();
 
 		$ph = array(
 					'recurring_schedule_control_id' => (int)$recurring_schedule_control_id,

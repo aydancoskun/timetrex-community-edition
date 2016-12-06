@@ -49,7 +49,6 @@ class Group {
 
 		$group_by_cols = array();
 		$aggregate_cols = array();
-		$sort_by_cols = array();
 		if ( is_array( $cols ) ) {
 			foreach ( $cols as $col => $aggregate ) {
 				if ( is_string($aggregate) AND $aggregate != '' ) {
@@ -141,7 +140,7 @@ class Group {
 					if ( isset($aggregate_cols[$key]) ) {
 						//Debug::Arr($aggregate_cols[$key], 'Aggregate MetaData: ', __FILE__, __LINE__, __METHOD__, 10);
 						//Debug::Arr($val, 'Aggregate Data: ', __FILE__, __LINE__, __METHOD__, 10);
-						$retarr[$i][$key] = self::aggregate( $val, $aggregate_cols[$key] );
+						$retarr[$i][$key] = self::aggregate( $val, $aggregate_cols[$key], $subtotal );
 						//Debug::Arr($retarr[$i][$key], 'Aggregate Result: ', __FILE__, __LINE__, __METHOD__, 10);
 					}
 				}
@@ -167,7 +166,7 @@ class Group {
 		return $retval;
 	}
 	
-	static function aggregate( $array, $type ) {
+	static function aggregate( $array, $type, $subtotal = FALSE ) {
 		switch( $type ) {
 			default:
 			case 'sum':
@@ -201,6 +200,14 @@ class Group {
 				break;
 			case 'count':
 				$retarr = count($array);
+				break;
+			case 'concat':
+				if ( $subtotal == FALSE ) {
+					$retarr = implode( ' -- ', $array ); //Using \n or <br> doesn't work properly on HTML/PDF reports, so just use " -- " for now.
+				} else {
+					//Don't concat for subtotal/total rows, as there is no point for text/string columns.
+					$retarr = '';
+				}
 				break;
 		}
 		//Debug::Arr($array, 'Aggregate Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);

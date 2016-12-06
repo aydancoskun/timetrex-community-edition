@@ -9,8 +9,8 @@ KPIViewController = BaseViewController.extend( {
 	sub_document_view_controller: null,
 
 	document_object_type_id: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'KPIEditView.html';
 		this.permission_id = 'kpi';
 		this.viewId = 'KPI';
@@ -46,24 +46,24 @@ KPIViewController = BaseViewController.extend( {
 		this.kpi_group_api.getKPIGroup( '', false, false, {
 			onResult: function( res ) {
 				res = Global.clone( res.getResult() );
-				var all = {};
-				all.name = '-- ' + $.i18n._( 'All' ) + ' --';
-				all.level = 1;
-				all.id = -1;
+			var all = {};
+			all.name = '-- ' + $.i18n._( 'All' ) + ' --';
+			all.level = 1;
+			all.id = -1;
 
 				if ( res.hasOwnProperty( "0" ) && res[0].hasOwnProperty( 'children' ) ) {
-					res[0].children.unshift( all );
-				} else {
-					res = [
-						{children: [all], id: 0, level: 0, name: 'Root'}
-					];
-				}
+				res[0].children.unshift( all );
+			} else {
+				res = [
+					{children: [all], id: 0, level: 0, name: 'Root'}
+				];
+			}
 
-				res = Global.buildTreeRecord( res );
-				$this.kpi_group_array = res;
-				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-				}
+			res = Global.buildTreeRecord( res );
+			$this.kpi_group_array = res;
+			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+			}
 
 			}
 		} );
@@ -436,15 +436,3 @@ KPIViewController = BaseViewController.extend( {
 	}
 
 } );
-
-KPIViewController.loadView = function() {
-
-	Global.loadViewSource( 'KPI', 'KPIView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

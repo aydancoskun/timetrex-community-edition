@@ -214,6 +214,7 @@ class RecurringHolidayListFactory extends RecurringHolidayFactory implements Ite
 		$rhlf = new RecurringHolidayListFactory();
 		$rhlf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -222,7 +223,7 @@ class RecurringHolidayListFactory extends RecurringHolidayFactory implements Ite
 			$list[$rh_obj->getID()] = $rh_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

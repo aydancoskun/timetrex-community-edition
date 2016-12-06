@@ -95,21 +95,13 @@ class APIEthnicGroup extends APIFactory {
 		//Allow supervisor (subordinates only) to see all ethnic groups.
 		//$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view' );
 
-		//Allow getting users from other companies, so we can change admin contacts when using the master company.
-		if ( isset($data['filter_data']['company_id'])
-				AND $data['filter_data']['company_id'] > 0
-				AND ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'view') ) ) {
-			$company_id = $data['filter_data']['company_id'];
-		} else {
-			$company_id = $this->getCurrentCompanyObject()->getId();
-		}
-
 		$eglf = TTnew( 'EthnicGroupListFactory' );
 		$eglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $eglf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $eglf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $eglf );
 
+			$retarr = array();
 			foreach( $eglf as $eg_obj ) {
 				$retarr[] = $eg_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -118,6 +110,17 @@ class APIEthnicGroup extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportEthnicGroup( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getEthnicGroup( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_ethnic_group', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

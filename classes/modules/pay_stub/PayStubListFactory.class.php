@@ -131,7 +131,6 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		}
 
 		$ulf = new UserListFactory();
-		$pplf = new PayPeriodListFactory();
 
 		$ph = array(
 					'id' => (int)$id,
@@ -1243,7 +1242,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		
 		$retval = 1;
 		if ( is_array($pay_period_ids) AND count($pay_period_ids) > 0 ) {
-			$prev_pp_retval = $pp_retval = $retval;
+			$pp_retval = $retval;
 			foreach( $pay_period_ids as $pay_period_id ) {
 				$pslf = TTnew( 'PayStubListFactory' );
 				$pslf->getPayRunStatusByCompanyIdAndPayPeriodId( $company_id, $pay_period_id );

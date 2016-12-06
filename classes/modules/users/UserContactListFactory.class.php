@@ -267,6 +267,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$uclf = new UserContactListFactory();
 		$uclf->getByCompanyId($company_id);
 
+		$user_list = array();
 		if ( $include_blank == TRUE ) {
 			$user_list[0] = '--';
 		}
@@ -283,7 +284,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 			}
 		}
 
-		if ( isset($user_list) ) {
+		if ( empty($user_list) == FALSE ) {
 			return $user_list;
 		}
 
@@ -295,9 +296,11 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
+		$status_options = array();
 		foreach ($lf as $obj) {
 			if ( !isset($status_options) ) {
 				$status_options = $obj->getOptions('status');
@@ -314,7 +317,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 			}
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -456,14 +459,14 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		if ( isset($filter_data['sex']) AND !is_array($filter_data['sex']) AND trim($filter_data['sex']) != '' AND !isset($filter_data['sex_id']) ) {
 			$filter_data['sex_id'] = Option::getByFuzzyValue( $filter_data['sex'], $this->getOptions('sex') );
 		}
-		$query .= ( isset($filter_data['sex_id']) ) ?$this->getWhereClauseSQL( 'a.sex_id', $filter_data['sex_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['sex_id']) ) ? $this->getWhereClauseSQL( 'a.sex_id', $filter_data['sex_id'], 'numeric_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'a.first_name', $filter_data['first_name'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['middle_name']) ) ? $this->getWhereClauseSQL( 'a.middle_name', $filter_data['middle_name'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'a.last_name', $filter_data['last_name'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'a.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
+		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'a.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
+		$query .= ( isset($filter_data['full_name']) ) ? $this->getWhereClauseSQL( 'a.last_name', $filter_data['full_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_phone']) ) ? $this->getWhereClauseSQL( 'a.home_phone', $filter_data['home_phone'], 'phone', $ph ) : NULL;
 		$query .= ( isset($filter_data['work_phone']) ) ? $this->getWhereClauseSQL( 'a.work_phone', $filter_data['work_phone'], 'phone', $ph ) : NULL;
-		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'a.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['city']) ) ? $this->getWhereClauseSQL( 'a.city', $filter_data['city'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['address1']) ) ? $this->getWhereClauseSQL( 'a.address1', $filter_data['address1'], 'text', $ph ) : NULL;

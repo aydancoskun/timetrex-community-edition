@@ -123,7 +123,10 @@ class ExceptionPolicyFactory extends Factory {
 										'J3' => TTi18n::gettext('Job Completed'),
 										'J4' => TTi18n::gettext('No Job or Task'),
 										//'J5' => TTi18n::gettext('No Task'), //Make J4 No Job only?
+										
 										//Add location based exceptions, ie: Restricted Location.
+										'G1' => TTi18n::gettext('GEO Fence Violation'),
+
 									);
 				break;
 			case 'severity':
@@ -708,6 +711,21 @@ class ExceptionPolicyFactory extends Factory {
 												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
 												);
 					break;
+				case 'G1': //GEOFence
+					$retarr[$type_id] = array(
+												'id' => -1,
+												'type_id' => $type_id,
+												'name' => $type_options[$type_id],
+												'active' => FALSE,
+												'severity_id' => 25,
+												'email_notification_id' => 100,
+												'demerit' => 3,
+												'grace' => 0,
+												'is_enabled_grace' => $this->isEnabledGrace( $type_id ),
+												'watch_window' => 0,
+												'is_enabled_watch_window' => $this->isEnabledWatchWindow( $type_id )
+												);
+					break;
 				default:
 					$retarr[$type_id] = array(
 												'id' => -1,
@@ -725,7 +743,7 @@ class ExceptionPolicyFactory extends Factory {
 					break;
 			}
 		}
-
+		unset($exception_name); // code standards
 		return $retarr;
 	}
 
@@ -737,7 +755,7 @@ class ExceptionPolicyFactory extends Factory {
 		$options = $this->getOptions('type');
 
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE OR $product_edition < 20 ) {
-			$corporate_exceptions = array('J1', 'J2', 'J3', 'J4', 'SC', 'C1');
+			$corporate_exceptions = array('J1', 'J2', 'J3', 'J4', 'SC', 'C1', 'G1');
 			foreach( $corporate_exceptions as $corporate_exception ) {
 				unset($options[$corporate_exception]);
 			}
@@ -935,6 +953,7 @@ class ExceptionPolicyFactory extends Factory {
 			return array( 'create_exceptions' => $current_exceptions, 'delete_exceptions' => array() );
 		}
 
+		$delete_exceptions = array();
 		if ( is_array($current_exceptions) AND count($current_exceptions) == 0 ) {
 			//No current exceptions, delete all existing exceptions.
 			foreach( $existing_exceptions as $existing_exception ) {
@@ -947,7 +966,7 @@ class ExceptionPolicyFactory extends Factory {
 
 		//Remove any current exceptions that already exist as existing exceptions.
 		foreach( $current_exceptions as $current_key => $current_exception ) {
-			foreach( $existing_exceptions as $existing_key => $existing_exception ) {
+			foreach( $existing_exceptions as $existing_exception ) {
 				//Need to match all elements except 'id'.
 				if (	(int)$current_exception['exception_policy_id'] == (int)$existing_exception['exception_policy_id']
 						AND
@@ -971,9 +990,8 @@ class ExceptionPolicyFactory extends Factory {
 		$delete_exceptions = array();
 		$matched_key = array();
 
-		$delete_exception = FALSE;
 		$total_current_exceptions = count($current_exceptions);
-		foreach( $existing_exceptions as $existing_key => $existing_exception ) {
+		foreach( $existing_exceptions as $existing_exception ) {
 			$match_count = $total_current_exceptions;
 
 			foreach( $current_exceptions as $current_key => $current_exception ) {
@@ -1072,6 +1090,7 @@ class ExceptionPolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

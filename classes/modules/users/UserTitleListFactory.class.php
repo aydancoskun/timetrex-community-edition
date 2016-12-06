@@ -99,7 +99,7 @@ class UserTitleListFactory extends UserTitleFactory implements IteratorAggregate
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -138,6 +138,7 @@ class UserTitleListFactory extends UserTitleFactory implements IteratorAggregate
 		$utlf = new UserTitleListFactory();
 		$utlf->getByCompanyId($company_id);
 
+		$title_list = array();
 		$title_list[0] = '--';
 
 		foreach ($utlf as $title_obj) {
@@ -152,6 +153,7 @@ class UserTitleListFactory extends UserTitleFactory implements IteratorAggregate
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -160,7 +162,7 @@ class UserTitleListFactory extends UserTitleFactory implements IteratorAggregate
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

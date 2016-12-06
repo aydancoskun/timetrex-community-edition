@@ -103,7 +103,7 @@ class BranchListFactory extends BranchFactory implements IteratorAggregate {
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -262,7 +262,6 @@ class BranchListFactory extends BranchFactory implements IteratorAggregate {
 			$ph[] = $date;
 			$ph[] = $date;
 			$query	.=	' AND ( a.created_date >= ? OR a.updated_date >= ? )';
-			unset($date_filter);
 		}
 
 		$query .= ' AND ( a.deleted = 0 )';
@@ -378,7 +377,7 @@ class BranchListFactory extends BranchFactory implements IteratorAggregate {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -395,7 +394,7 @@ class BranchListFactory extends BranchFactory implements IteratorAggregate {
 			}
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -507,7 +506,7 @@ class BranchListFactory extends BranchFactory implements IteratorAggregate {
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text_metaphone', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['country']) ) ?$this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'a.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['city']) ) ? $this->getWhereClauseSQL( 'a.city', $filter_data['city'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['manual_id']) ) ? $this->getWhereClauseSQL( 'a.manual_id', $filter_data['manual_id'], 'numeric', $ph ) : NULL;

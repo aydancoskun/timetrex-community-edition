@@ -40,8 +40,9 @@ var APIUserContact = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'copyUserContact', arguments );
 
+	},
+
+	exportUserContact: function() {
+		return this.argumentsHandler( this.className, 'exportUserContact', arguments );
 	}
-
-
-
 } );

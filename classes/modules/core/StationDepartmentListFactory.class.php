@@ -135,11 +135,12 @@ class StationDepartmentListFactory extends StationDepartmentFactory implements I
 
 		$sdlf->getByStationId($id);
 
+		$list = array();
 		foreach ($sdlf as $obj) {
 			$list[$obj->getStation()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

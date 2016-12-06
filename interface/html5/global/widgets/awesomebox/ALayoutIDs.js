@@ -30,6 +30,8 @@ ALayoutIDs.BANK_ACCOUNT = 'global_bank_account';
 
 ALayoutIDs.KPI = 'global_kpi';
 
+ALayoutIDs.GEO_FENCE = 'global_geo_fence';
+
 ALayoutIDs.ACCRUAL = 'global_accrual_accrual';
 
 ALayoutIDs.ACCRUAL_BALANCE = 'global_accrual_balance';

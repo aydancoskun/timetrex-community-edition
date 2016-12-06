@@ -41,6 +41,10 @@ var APIPayFormulaPolicy = ServiceCaller.extend( {
 
 	copyPayFormulaPolicy: function() {
 		return this.argumentsHandler( this.className, 'copyPayFormulaPolicy', arguments );
+	},
+
+	exportPayFormulaPolicy: function() {
+		return this.argumentsHandler( this.className, 'exportPayFormulaPolicy', arguments );
 	}
 
 

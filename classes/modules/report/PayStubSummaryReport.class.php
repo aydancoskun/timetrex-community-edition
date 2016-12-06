@@ -684,8 +684,7 @@ class PayStubSummaryReport extends Report {
 	//Get raw data for report
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('pay_stub_entry' => array(), 'user' => array() );		
-		
-		$columns = $this->getColumnDataConfig();
+
 		$filter_data = $this->getFilterConfig();
 
 		$currency_convert_to_base = $this->getCurrencyConvertToBase();
@@ -713,8 +712,6 @@ class PayStubSummaryReport extends Report {
 				$user_id = $pse_obj->getColumn('user_id');
 				$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_period_transaction_date') );
 				$run_id = $pse_obj->getColumn('pay_stub_run_id');
-				$branch = $pse_obj->getColumn('default_branch');
-				$department = $pse_obj->getColumn('default_department');
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 				$currency_rate = $pse_obj->getColumn('currency_rate');
 				$currency_id = $pse_obj->getColumn('currency_id');
@@ -795,7 +792,7 @@ class PayStubSummaryReport extends Report {
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $date_stamp => $level_2 ) {
-						foreach( $level_2 as $run_id => $row ) {
+						foreach( $level_2 as $row ) {
 							$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
 
 							if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {

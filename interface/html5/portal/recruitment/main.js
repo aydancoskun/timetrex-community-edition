@@ -442,7 +442,7 @@ require( [
 				//Optimization: Only change locale if its *not* en_US or enable_default_language_translation = TRUE
 				if ( loginData.locale !== 'en_US' || loginData.enable_default_language_translation == true ) {
 					Global.loadLanguage( loginData.locale );
-					Global.log( 'Using Locale: ' + loginData.locale );
+					Debug.Text('Using Locale: ' + loginData.locale , 'recruitment/main.js', '', 'initApps', 10 );
 				} else {
 					LocalCacheData.setI18nDic( {} );
 				}

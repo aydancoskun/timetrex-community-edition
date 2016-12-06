@@ -3,8 +3,8 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 	type_array: null,
 	filtered_status_array: null,
 	frequency_array: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'RecurringPayStubAmendmentEditView.html';
 		this.permission_id = 'pay_stub_amendment';
 		this.viewId = 'RecurringPayStubAmendment';
@@ -393,15 +393,3 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 
 } );
-
-RecurringPayStubAmendmentViewController.loadView = function() {
-
-	Global.loadViewSource( 'RecurringPayStubAmendment', 'RecurringPayStubAmendmentView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

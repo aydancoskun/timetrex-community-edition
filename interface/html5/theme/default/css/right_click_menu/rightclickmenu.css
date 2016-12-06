@@ -76,7 +76,7 @@
     -o-filter: grayscale(100%);
 
     filter: grayscale(100%);
-    filter: url(gray.svg#grayscale);
+    /*filter: url(gray.svg#grayscale);*/
 
     filter: gray;
 

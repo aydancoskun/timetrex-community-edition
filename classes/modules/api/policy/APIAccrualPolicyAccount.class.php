@@ -101,6 +101,7 @@ class APIAccrualPolicyAccount extends APIFactory {
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -109,6 +110,17 @@ class APIAccrualPolicyAccount extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportAccrualPolicyAccount( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getAccrualPolicyAccount( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_accrual_policy_account', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -337,6 +349,7 @@ class APIAccrualPolicyAccount extends APIFactory {
 		$src_rows = $this->stripReturnHandler( $this->getAccrualPolicyAccount( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
+			$original_ids = array();
 			foreach( $src_rows as $key => $row ) {
 				$original_ids[$key] = $src_rows[$key]['id'];
 				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied

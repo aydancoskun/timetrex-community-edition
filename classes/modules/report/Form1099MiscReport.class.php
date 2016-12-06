@@ -464,7 +464,7 @@ class Form1099MiscReport extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'pay_stub_entry' => array() );
 
-		$columns = $this->getColumnDataConfig();
+		
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 
@@ -473,6 +473,8 @@ class Form1099MiscReport extends Report {
 		//
 		$cdlf = TTnew( 'CompanyDeductionListFactory' );
 		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
+		$tax_deductions = array();
+		$tax_deduction_pay_stub_account_id_map = array();
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $cd_obj ) {
 				$tax_deductions[$cd_obj->getId()] = array(
@@ -503,8 +505,6 @@ class Form1099MiscReport extends Report {
 
 				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
 				//$date_stamp = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
-				$branch = $pse_obj->getColumn('default_branch');
-				$department = $pse_obj->getColumn('default_department');
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id]) ) {
@@ -559,7 +559,7 @@ class Form1099MiscReport extends Report {
 								}
 							}
 						}
-						unset($psen_id, $psen_amount, $state_id, $district_id);
+						unset($psen_id, $psen_amount, $state_id);
 					}
 
 				}
@@ -605,7 +605,7 @@ class Form1099MiscReport extends Report {
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3);
+			unset($this->tmp_data, $row, $date_columns, $processed_data);
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -711,21 +711,30 @@ class Form1099MiscReport extends Report {
 					$f1099m->addRecord( $ee_data );
 					unset($ee_data);
 
+					if ( $format == 'pdf_form_publish_employee' ) {
+						// generate PDF for every employee and assign to each government document records
+						$this->getFormObject()->addForm( $f1099m );
+						GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 220, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
+						$this->getFormObject()->clearForms();
+					}
+
 					$i++;
 					$n++;
 				}
 			}
 		}
+
+		if ( $format == 'pdf_form_publish_employee' ) {
+			$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $current_user->getId() );
+			return $user_generic_status_batch_id;
+		}
+
 		$this->getFormObject()->addForm( $f1099m );
 
 		if ( $format == 'efile_xml' ) {
 			$output_format = 'XML';
-			$file_name = 'w2_efile_'.date('Y_m_d').'.xml';
-			$mime_type = 'applications/octet-stream'; //Force file to download.
 		} else {
 			$output_format = 'PDF';
-			$file_name = $this->file_name.'.pdf';
-			$mime_type = $this->file_mime_type;
 		}
 
 		$output = $this->getFormObject()->output( $output_format );
@@ -735,7 +744,7 @@ class Form1099MiscReport extends Report {
 
 	//Short circuit this function, as no postprocessing is required for exporting the data.
 	function _postProcess( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' ) {
+		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
 			Debug::Text('Skipping postProcess! Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		} else {
@@ -744,7 +753,7 @@ class Form1099MiscReport extends Report {
 	}
 
 	function _output( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' ) {
+		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
 			return $this->_outputPDFForm( $format );
 		} else {
 			return parent::_output( $format );

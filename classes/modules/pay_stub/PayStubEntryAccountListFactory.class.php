@@ -507,6 +507,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -530,7 +531,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			}
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -544,7 +545,8 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 		$psealf = new PayStubEntryAccountListFactory();
 		$psealf->getById($id);
-
+		
+		$entry_name_list = array();
 		if ( $include_blank == TRUE ) {
 			$entry_name_list[0] = '--';
 		}
@@ -602,12 +604,14 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 		$psea_type_map = $pseallf->getCurrent()->getPayStubEntryAccountIDToTypeIDMap();
 
 		if ( $psealf->getRecordCount() > 0 ) {
+			$entry_name_list = array();
 			foreach ($psealf as $psea_obj) {
 				$entry_name_list[$psea_obj->getType()][] = $psea_obj->getId();
 			}
 
+			$tmp_entry_name_list = array();
 			if ( isset($entry_name_list[40]) ) {
-				foreach( $entry_name_list[40] as $key => $entry_name_id ) {
+				foreach( $entry_name_list[40] as $entry_name_id ) {
 					if ( isset($psea_type_map[$entry_name_id]) AND isset($entry_name_list[$psea_type_map[$entry_name_id]]) ) {
 						$tmp_entry_name_list[$entry_name_id] = $entry_name_list[$psea_type_map[$entry_name_id]];
 					}

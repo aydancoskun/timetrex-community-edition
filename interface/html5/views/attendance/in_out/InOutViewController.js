@@ -16,14 +16,8 @@ InOutViewController = BaseViewController.extend( {
 	show_transfer_ui: false,
 	show_node_ui: false,
 
-	initialize: function() {
-
-		if ( Global.isSet( this.options.edit_only_mode ) ) {
-			this.edit_only_mode = this.options.edit_only_mode;
-		}
-
-		this._super( 'initialize' );
-
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.permission_id = 'punch';
 		this.viewId = 'InOut';
 		this.script_name = 'InOutView';
@@ -43,6 +37,7 @@ InOutViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
 
 		//Tried to fix  Cannot call method 'getJobItem' of null. Use ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
@@ -56,7 +51,6 @@ InOutViewController = BaseViewController.extend( {
 		this.initPermission();
 
 		this.initData();
-
 	},
 
 	addPermissionValidate: function( p_id ) {
@@ -342,7 +336,7 @@ InOutViewController = BaseViewController.extend( {
 			case 'job_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.setJobItemValueWhenJobChanged( target.getValue() );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
@@ -399,65 +393,6 @@ InOutViewController = BaseViewController.extend( {
 				this.current_edit_record.status_id = this.old_type_status.status_id;
 			}
 
-		}
-	},
-
-	/*
-	 1. Job is switched.
-	 2. If a Task is already selected (and its not Task=0), keep it selected *if its available* in the newly populated Task list.
-	 3. If the task selected is *not* available in the Task list, or the selected Task=0, then check the default_item_id field from the Job and if its *not* 0 also, select that Task by default.
-	 */
-	setJobItemValueWhenJobChanged: function( job ) {
-
-		var $this = this;
-		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
-		var current_job_item_id = job_item_widget.getValue();
-		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox( true );
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
-		var args = {};
-		args.filter_data = {status_id: 10, job_id: $this.current_edit_record.job_id};
-		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
-
-		if ( current_job_item_id ) {
-
-			var new_arg = Global.clone( args );
-
-			new_arg.filter_data.id = current_job_item_id;
-			new_arg.filter_columns = $this.edit_view_ui_dic['job_item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {
-				onResult: function( task_result ) {
-					var data = task_result.getResult();
-
-					if ( data.length > 0 ) {
-						job_item_widget.setValue( current_job_item_id );
-						$this.current_edit_record.job_item_id = current_job_item_id;
-					} else {
-						setDefaultData();
-					}
-
-				}
-			} )
-
-		} else {
-			setDefaultData();
-		}
-
-		function setDefaultData() {
-			if ( $this.current_edit_record.job_id ) {
-				job_item_widget.setValue( job.default_item_id );
-				$this.current_edit_record.job_item_id = job.default_item_id;
-
-				if ( job.default_item_id === false || job.default_item_id === 0 ) {
-					$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-				}
-
-			} else {
-				job_item_widget.setValue( '' );
-				$this.current_edit_record.job_item_id = false;
-				$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-
-			}
 		}
 	},
 
@@ -908,8 +843,8 @@ InOutViewController = BaseViewController.extend( {
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
 		this.onTransferChanged( this.current_edit_record['transfer'] );
+		this.confirm_on_exit = true; //confirm on leaving even if no changes have been made so users can't accidentally not save punches by logging out without clicking save for example
 	}
-
 } );
 
 InOutViewController.loadView = function() {
@@ -917,9 +852,9 @@ InOutViewController.loadView = function() {
 	Global.loadViewSource( 'InOut', 'InOutView.html', function( result ) {
 
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
-		Global.contentContainer().html( template );
+		Global.contentContainer().html( template(args) );
 	} )
 
 };

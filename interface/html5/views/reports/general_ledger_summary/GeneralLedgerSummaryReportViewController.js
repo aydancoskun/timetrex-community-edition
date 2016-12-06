@@ -1,7 +1,7 @@
 GeneralLedgerSummaryReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'GeneralLedgerSummaryReport';
 		this.viewId = 'GeneralLedgerSummaryReport';
 		this.context_menu_name = $.i18n._( 'General Ledger Summary' );

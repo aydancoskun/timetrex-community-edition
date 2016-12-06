@@ -421,6 +421,7 @@ class FastTree {
 
 		$rs = $this->db->Execute($query, $ph);
 
+		$retarr = array();
 		while ( $row = $rs->FetchRow() ) {
 			if ( $data_format == 1 ) {
 				$retarr[$row['object_id']] = $row;
@@ -429,7 +430,7 @@ class FastTree {
 			}
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			//Debug::Arr( $retarr, ' Children: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $retarr;
 		}
@@ -627,14 +628,15 @@ class FastTree {
 		//Append $array values to end of $ph, return
 		//one "?, " for each element in $array.
 
+		$ph_arr = array();
 		$array_count = count($array);
 		if ( is_array( $array ) AND $array_count > 0) {
-			foreach( $array as $key => $val ) {
+			foreach( $array as $val ) {
 				$ph_arr[] = '?';
 				$ph[] = $val;
 			}
 
-			if ( isset($ph_arr) ) {
+			if ( empty($ph_arr) == FALSE ) {
 				$retval = implode(',', $ph_arr);
 			}
 		} elseif ( is_array($array) ) {
@@ -841,7 +843,7 @@ class FastTree {
 		$depths = array();
 
 		if ( is_array($nodes) ) {
-			foreach( $nodes as $key => $node ) {
+			foreach( $nodes as $node ) {
 				if( $node['level'] == 1 ) {
 
 					//Using sequential keys
@@ -914,6 +916,7 @@ class FastTree {
 			return FALSE;
 		}
 
+		$retarr = array();
 		foreach ($nodes as $node) {
 				switch ($type) {
 					case 'no_tree_text':

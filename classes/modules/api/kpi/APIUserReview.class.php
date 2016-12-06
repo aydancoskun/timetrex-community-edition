@@ -96,6 +96,7 @@ class APIUserReview extends APIFactory {
 		if ( $urlf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $urlf );
 			Debug::Arr($data, 'Searching Data: ', __FILE__, __LINE__, __METHOD__, 10);
+			$retarr = array();
 			foreach( $urlf as $ur_obj ) {
 				$retarr[] = $ur_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 			}
@@ -335,6 +336,7 @@ class APIUserReview extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id']); //Clear fields that can't be copied
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->setUserReview( $src_rows ); //Save copied rows
 		}

@@ -365,13 +365,14 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: permission.recurring_schedule_template
 	} );
 
-	//Job Trancking group
+	//Job Tracking group
 	var jobTrackingSubMenuGroup = new RibbonSubMenuGroup( {
 		label: $.i18n._( 'Job Tracking' ),
 		id: 'jobTrackingGroup',
 		ribbon_menu: attendance_menu,
 		sub_menus: []
 	} );
+
 
 	var job = new RibbonSubMenu( {
 		label: $.i18n._( 'Jobs' ),
@@ -389,6 +390,16 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		icon: 'tasks-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'JobItem' ),
 		permission: permission.job_item
+	} );
+
+	//GeoFencing
+	var geo_fence_attendance = new RibbonSubMenu( {
+		label: $.i18n._( 'GEO<br>Fences' ),
+		id: 'GEOFence',
+		group: jobTrackingSubMenuGroup,
+		icon: 'map-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'GEOFence' ),
+		permission: permission.geo_fence,
 	} );
 
 	var job_group = new RibbonSubMenu( {
@@ -584,6 +595,15 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: permission.department
 	} );
 
+	var geo_fence = new RibbonSubMenu( {
+		label: $.i18n._( 'GEO<br>Fences' ),
+		id: 'GEOFence',
+		group: companySubMenuGroup,
+		icon: 'map-35x35.png',
+		permission_result: (PermissionManager.checkTopLevelPermission( 'GEOFence' ) && ( PermissionManager.checkTopLevelPermission( 'Department' ) || PermissionManager.checkTopLevelPermission( 'Branch' ) )),
+		permission: permission.geo_fence
+	} );
+
 	var hierarchy_control = new RibbonSubMenu( {
 		label: $.i18n._( 'Hierarchy' ),
 		id: 'HierarchyControl',
@@ -694,6 +714,16 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		icon: 'pay_stubs-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'PayStub' ),
 		permission: permission.pay_stub
+	} );
+
+
+	var government_document = new RibbonSubMenu( {
+		label: $.i18n._( 'Government<br>Documents' ),
+		id: 'GovernmentDocument',
+		group: payrollSubMenuGroup,
+		icon: 'payroll_remittance_agency-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'GovernmentDocument' ),
+		permission: permission.government_document
 	} );
 
 	var pay_periods = new RibbonSubMenu( {

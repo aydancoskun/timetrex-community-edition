@@ -5,26 +5,18 @@ RibbonViewController = Backbone.View.extend( {
 
 	subMenuNavMap: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
 		this.render();
-
 		TopMenuManager.ribbon_view_controller = this;
 
 	},
 
-	events: {
-//		  'click .ribbon-sub-menu-icon': 'onSubMenuClick'
-	},
-
 	onMenuSelect: function( e, ui ) {
-
 		if ( TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) >= 0 ) {
 			$( '.context-menu-active' ).removeClass( 'context-menu-active' );
 		}
-
 		TopMenuManager.selected_menu_id = $( ui.tab ).attr( 'ref' );
-
 		if ( TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) >= 0 ) {
 			$( ui.tab ).parent().addClass( 'context-menu-active' );
 		}
@@ -33,7 +25,6 @@ RibbonViewController = Backbone.View.extend( {
 	onSubMenuNavClick: function( target, id ) {
 		var $this = this;
 		var sub_menu = this.subMenuNavMap[id];
-
 		if ( LocalCacheData.openRibbonNaviMenu ) {
 
 			if ( LocalCacheData.openRibbonNaviMenu.attr( 'id' ) === 'sub_nav' + id ) {
@@ -42,12 +33,8 @@ RibbonViewController = Backbone.View.extend( {
 			} else {
 				LocalCacheData.openRibbonNaviMenu.close();
 			}
-
 		}
-
-//		  alert( sub_menu.get('items')[0].get('label') );
 		showNavItems();
-
 		function showNavItems() {
 			var items = sub_menu.get( 'items' );
 			var box = $( "<ul id='sub_nav" + id + "' class='ribbon-sub-menu-nav'> </ul>" );
@@ -61,13 +48,9 @@ RibbonViewController = Backbone.View.extend( {
 					var id = $( this ).attr( 'id' );
 					$this.onReportMenuClick( id )
 				} );
-
 			}
-
 			box = box.RibbonSubMenuNavWidget();
-
 			LocalCacheData.openRibbonNaviMenu = box;
-
 			$( target ).append( box )
 		}
 
@@ -82,10 +65,39 @@ RibbonViewController = Backbone.View.extend( {
 
 	},
 
+	//FIXME: Stops punch inout from being able to exit via the menu system except on items with dropdowns
+	//Does not trigger on Report menu items with dropdowns (see the right event)
 	onSubMenuClick: function( id ) {
-		this.setSelectSubMenu( id );
-		this.openSelectView( id );
+		var $this = this;
+		if ( (LocalCacheData.current_open_primary_controller &&
+			LocalCacheData.current_open_primary_controller.edit_view &&
+			LocalCacheData.current_open_primary_controller.is_changed) ||
+			(LocalCacheData.current_open_report_controller &&
+			LocalCacheData.current_open_report_controller.is_changed) ||
+			(LocalCacheData.current_open_edit_only_controller &&
+			LocalCacheData.current_open_edit_only_controller.is_changed) ||
+			(LocalCacheData.current_open_sub_controller &&
+			LocalCacheData.current_open_sub_controller.edit_view &&
+			LocalCacheData.current_open_sub_controller.is_changed) ) {
+			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
+				if ( flag === true ) {
+					doNext();
+				}
 
+			} );
+			return;
+		} else if ( LocalCacheData.current_open_primary_controller &&
+			LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' &&
+			LocalCacheData.current_open_primary_controller.getPunchMode() === 'manual' ) {
+			LocalCacheData.current_open_primary_controller.doNextIfNoValueChangeInManualGrid( doNext )
+		} else {
+			doNext();
+		}
+
+		function doNext() {
+			$this.setSelectSubMenu( id );
+			$this.openSelectView( id );
+		}
 	},
 
 	buildRibbonMenus: function() {
@@ -236,7 +248,6 @@ RibbonViewController = Backbone.View.extend( {
 	},
 
 	setSelectMenu: function( name ) {
-
 		$( this.el ).tabs( {selected: name} );
 		TopMenuManager.selected_menu_id = name;
 	},
@@ -375,7 +386,8 @@ RibbonViewController = Backbone.View.extend( {
 		current_user_api.Logout( {
 			onResult: function( result ) {
 
-				$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
+				Global.clearSessionCookie();
+				//$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
 				LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
 				TopMenuManager.goToView( 'Login' );
 
@@ -387,12 +399,8 @@ RibbonViewController = Backbone.View.extend( {
 
 RibbonViewController.loadView = function() {
 	Global.topContainer().css( 'display', 'block' );
-
-//	Global.addCss( 'global/widgets/ribbon/RibbonView.css' );
-
 	var result = Global.loadPageSync( 'global/widgets/ribbon/RibbonView.html' );
 	var template = _.template( result );
-
 	Global.topContainer().html( template );
 
 }

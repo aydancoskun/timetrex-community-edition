@@ -1098,12 +1098,12 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		case 'ENUM':
 		case 'SET':
 
-		case MYSQLI_TYPE_TINY_BLOB :
+		case MYSQLI_TYPE_TINY_BLOB:
 		#case MYSQLI_TYPE_CHAR :
-		case MYSQLI_TYPE_STRING :
-		case MYSQLI_TYPE_ENUM :
-		case MYSQLI_TYPE_SET :
-		case 253 :
+		case MYSQLI_TYPE_STRING:
+		case MYSQLI_TYPE_ENUM:
+		case MYSQLI_TYPE_SET:
+		case 253:
 			if ($len <= $this->blobSize) return 'C';
 
 		case 'TEXT':
@@ -1128,7 +1128,15 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		case MYSQLI_TYPE_DATE :
 		case MYSQLI_TYPE_YEAR :
 			return 'D';
-
+		   
+		//Handle geometry types as raw metatype, as they need to be unmolested strings with functions often.
+		case MYSQLI_TYPE_GEOMETRY:
+		case 'GEOMETRY':
+		case 'POINT':
+		case 'LINESTRING':
+		case 'POLYGON':
+			return 'Z';
+		   
 		case 'TIME':
 		case 'DATETIME':
 		case 'TIMESTAMP':

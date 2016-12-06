@@ -51,6 +51,7 @@ class APIInstall extends APIFactory {
 		$install_obj = new Install();
 
 		if (  $install_obj->isInstallMode() == TRUE  ) {
+			$retval = array();
 			$retval['install_mode'] = TRUE;
 			$license_text = $install_obj->getLicenseText();
 
@@ -114,16 +115,19 @@ class APIInstall extends APIFactory {
 				$retval['bcmath'] = $install_obj->checkBCMATH();
 				$retval['mbstring'] = $install_obj->checkMBSTRING();
 				$retval['gettext'] = $install_obj->checkGETTEXT();
+				$retval['intl'] = $install_obj->checkINTL();
 				$retval['soap'] = $install_obj->checkSOAP();
 				$retval['gd'] = $install_obj->checkGD();
 				$retval['json'] = $install_obj->checkJSON();
 				$retval['mcrypt'] = $install_obj->checkMCRYPT();
 				$retval['simplexml'] = $install_obj->checkSimpleXML();
+				$retval['curl'] = $install_obj->checkCURL();
 				$retval['zip'] = $install_obj->checkZIP();
 				$retval['openssl'] = $install_obj->checkOpenSSL();
 				$retval['mail'] = $install_obj->checkMAIL();
 				$retval['pear'] = $install_obj->checkPEAR();
 				$retval['safe_mode'] = $install_obj->checkPHPSafeMode();
+				$retval['allow_fopen_url'] = $install_obj->checkPHPAllowURLFopen();
 				$retval['magic_quotes'] = $install_obj->checkPHPMagicQuotesGPC();
 				$retval['disk_space'] = $install_obj->checkDiskSpace();
 				$retval['memory_limit'] = array(
@@ -176,10 +180,7 @@ class APIInstall extends APIFactory {
 				}
 
 				return $this->returnHandler( $retval );
-
 			}
-
-
 		}
 
 		return $this->returnHandler( FALSE );
@@ -218,7 +219,7 @@ class APIInstall extends APIFactory {
 			//default to disallow connect privs.
 			$test_connection = $install_obj->setNewDatabaseConnection($data['final_type'], $host, $data['user'], $data['password'], $data['database_name']);
 			if ( $test_connection == TRUE ) {
-				$database_exists = $install_obj->checkDatabaseExists($data['database_name']);
+				$test_connection = $install_obj->checkDatabaseExists($data['database_name']);
 			}
 
 			//Test priv user.
@@ -328,7 +329,7 @@ class APIInstall extends APIFactory {
 				$tmp_password = $data['password'];
 			}
 
-			$test_db_connection = $install_obj->setNewDatabaseConnection($data['final_type'], $host, $tmp_user_name, $tmp_password, '');
+			$install_obj->setNewDatabaseConnection($data['final_type'], $host, $tmp_user_name, $tmp_password, '');
 			$install_obj->setDatabaseDriver( $data['final_type'] );
 
 			if ( $install_obj->checkDatabaseExists($data['database_name']) == FALSE ) {
@@ -339,11 +340,12 @@ class APIInstall extends APIFactory {
 			//Make sure InnoDB engine exists on MySQL
 			if ( $install_obj->getDatabaseType() != 'mysql' OR ( $install_obj->getDatabaseType() == 'mysql' AND $install_obj->checkDatabaseEngine() == TRUE ) ) {
 				//Check again to make sure database exists.
-				$db_connection = $install_obj->setNewDatabaseConnection($data['final_type'], $host, $tmp_user_name, $tmp_password, $data['database_name']);
+				$install_obj->setNewDatabaseConnection($data['final_type'], $host, $tmp_user_name, $tmp_password, $data['database_name']);
 				if ( $install_obj->checkDatabaseExists($data['database_name']) == TRUE ) {
 					//Create SQL
 					Debug::Text('yDatabase does exist...', __FILE__, __LINE__, __METHOD__, 10);
 
+					$tmp_config_data = array();
 					$tmp_config_data['database']['type'] = $data['final_type'];
 					$tmp_config_data['database']['host'] = $data['final_host'];
 					$tmp_config_data['database']['database_name'] = $data['database_name'];
@@ -399,7 +401,6 @@ class APIInstall extends APIFactory {
 		$install_obj = new Install();
 
 		if ( $install_obj->isInstallMode() == TRUE ) {
-			$database_engine = TRUE;
 			$install_obj->setDatabaseConnection( $db ); //Default connection
 
 			if ( $install_obj->checkDatabaseExists( $config_vars['database']['database_name'] ) == TRUE ) {
@@ -452,7 +453,6 @@ class APIInstall extends APIFactory {
 
 			$install_obj->setAMFMessageID( $this->getAMFMessageID() );
 
-			$database_engine = TRUE;
 			$install_obj->setDatabaseConnection( $db ); //Default connection
 
 			if ( $install_obj->checkDatabaseExists( $config_vars['database']['database_name'] ) == TRUE ) {
@@ -508,6 +508,7 @@ class APIInstall extends APIFactory {
 		global $cache;
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE ) {
+			$retval = array();
 			$retval['application_name'] = APPLICATION_NAME;
 			$retval['application_version'] = APPLICATION_VERSION;
 
@@ -528,12 +529,12 @@ class APIInstall extends APIFactory {
 	}
 
 	function installDone( $upgrade ) {
-		global $authentication, $cache;
-//		$authentication->Logout(); //Logout during the install process.
+		global $cache;
 
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE ) {
 			//Disable installer now that we're done.
+			$tmp_config_data = array();
 			$tmp_config_data['other']['installer_enabled'] = 'FALSE';
 			$tmp_config_data['other']['default_interface'] = 'html5';
 			$install_obj->writeConfigFile( $tmp_config_data );
@@ -552,6 +553,7 @@ class APIInstall extends APIFactory {
 			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'done'), 'pre_install.php'), "r");
 			@fclose($handle);
 
+			$retval = array();
 			$retval['application_name'] = APPLICATION_NAME;
 //			$retval['base_url'] = Environment::getBaseURL();
 
@@ -574,6 +576,7 @@ class APIInstall extends APIFactory {
 		if ( $install_obj->isInstallMode() == TRUE ) {
 
 			//Set salt if it isn't already.
+			$tmp_config_data = array();
 			$tmp_config_data['other']['salt'] = md5( uniqid() );
 
 			if ( isset($data['base_url']) AND $data['base_url'] != '' ) {
@@ -606,7 +609,7 @@ class APIInstall extends APIFactory {
 			} else {
 				SystemSettingFactory::setSystemSetting( 'anonymous_update_notify', 0 );
 			}
-			
+
 			$ttsc = new TimeTrexSoapClient();
 			$ttsc->saveRegistrationKey();
 
@@ -646,6 +649,7 @@ class APIInstall extends APIFactory {
 			$cf = TTnew( 'CompanyFactory' );
 			$clf = TTnew( 'CompanyListFactory' );
 
+			$company_data = array();
 			if ( isset( $company_id ) AND (int)$company_id > 0 ) {
 				$clf->getByCompanyId( $company_id );
 				if (  $clf->getRecordCount() == 1 ) {
@@ -731,6 +735,7 @@ class APIInstall extends APIFactory {
 
 			} else {
 
+				$validator = array();
 				$validator[] = $cf->Validator->getErrorsArray();
 				$validator_stats = array('total_records' => 1, 'valid_records' => 1 );
 				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
@@ -743,6 +748,7 @@ class APIInstall extends APIFactory {
 	function getUser( $company_id, $user_id ) {
 		$install_obj = new Install();
 		if ( $install_obj->isInstallMode() == TRUE ) {
+			$user_data = array();
 			if ( isset($company_id) AND (int)$company_id > 0 ) {
 				$user_data['company_id'] = $company_id;
 			}
@@ -856,6 +862,7 @@ class APIInstall extends APIFactory {
 
 				$uf->FailTransaction();
 
+				$validator = array();
 				$validator[] = $uf->Validator->getErrorsArray();
 				$validator_stats = array('total_records' => 1, 'valid_records' => 1 );
 				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
@@ -906,9 +913,8 @@ class APIInstall extends APIFactory {
 
 		if ( $install_obj->isInstallMode() == TRUE ) {
 
+			$retval = array();
 			$retval['application_name'] = APPLICATION_NAME ? APPLICATION_NAME : '';
-
-			$uf = TTnew( 'UserFactory' );
 
 			if ( isset($data['company_id']) ) {
 				$retval['company_id'] = $data['company_id'];

@@ -44,8 +44,9 @@ class TTLDAP {
 	//private $password_attribute = NULL;
 
 	function __construct() {
+		// @codingStandardsIgnoreStart --  Unused global variable $LDAP_CONNECT_OPTIONS.
 		global $LDAP_CONNECT_OPTIONS;
-
+		//used in ADODB
 		if ( $this->checkLDAPExtension() == TRUE ) {
 			$LDAP_CONNECT_OPTIONS = array(
 					array('OPTION_NAME' => LDAP_OPT_DEREF, 'OPTION_VALUE' => 2 ),
@@ -57,7 +58,7 @@ class TTLDAP {
 					array('OPTION_NAME' => LDAP_OPT_RESTART, 'OPTION_VALUE' => FALSE )
 			);
 		}
-
+		// @codingStandardsIgnoreEnd
 		return TRUE;
 	}
 
@@ -294,7 +295,6 @@ class TTLDAP {
 				$ldap->SetFetchMode(ADODB_FETCH_ASSOC);
 
 				try {
-					$rs = $ldap->Execute( $filter );
 					$ldap_data = $ldap->GetRow( $filter );
 
 					if ( is_array($ldap_data) AND count($ldap_data) > 0 ) {

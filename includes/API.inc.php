@@ -39,7 +39,7 @@ forceNoCacheHeaders(); //Send headers to disable caching.
 
 //Returns valid classes when unauthenticated.
 function getUnauthenticatedAPIClasses() {
-	return array('APIAuthentication','APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin', 'APIProgressBar', 'APIInstall');
+	return array('APIAuthentication', 'APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin', 'APIProgressBar', 'APIInstall');
 }
 
 //Returns session ID from _COOKIE, _POST, then _GET.

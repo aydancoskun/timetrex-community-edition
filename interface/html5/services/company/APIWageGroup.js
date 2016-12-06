@@ -45,4 +45,8 @@ var APIWageGroup = ServiceCaller.extend( {
 
 	},
 
+	exportWageGroup: function() {
+		return this.argumentsHandler( this.className, 'exportWageGroup', arguments );
+	},
+
 } );

@@ -370,6 +370,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 									'date_format_display' => 'date_format',
 									'time_format_display' => 'time_format',
 									'time_unit_format_display' => 'time_unit_format',
+									'distance_format_display' => 'distance_format',
 									'time_zone_display' => 'time_zone',
 									);
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );

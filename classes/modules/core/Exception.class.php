@@ -40,7 +40,7 @@
  */
 class DBError extends Exception {
 	function __construct($e, $code = 'DBError' ) {
-		global $db, $skip_db_error;
+		global $db, $skip_db_error_exception;
 
 		if ( isset($skip_db_error_exception) AND $skip_db_error_exception === TRUE ) { //Used by system_check script.
 			return TRUE;
@@ -63,12 +63,18 @@ class DBError extends Exception {
 				$code = 'DBTimeout';
 			} elseif ( stristr( $e->getMessage(), 'unique constraint' ) !== FALSE) {
 				$code = 'DBUniqueConstraint';
+			} elseif ( stristr( $e->getMessage(), 'invalid byte sequence' ) !== FALSE) {
+				$code = 'DBInvalidByteSequence';
+			} elseif ( stristr( $e->getMessage(), 'could not serialize' ) !== FALSE) {
+				$code = 'DBSerialize';
 			}
 			Debug::Text( 'Code: '. $code .'('. $e->getCode() .') Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		if ( $e->getTrace() != '' ) {
-			$e = strip_tags( adodb_backtrace( $e->getTrace() ) );
+			ob_start(); //ADDBO_BACKTRACE() always insists on printing its output and returning it, so capture the output and drop it, so we can use the $e variable instead.
+			$e = adodb_backtrace( $e->getTrace(), 9999, 0, FALSE );
+			ob_end_clean();
 			Debug::Arr( $e, 'Exception...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
@@ -79,8 +85,12 @@ class DBError extends Exception {
 			Debug::Display();
 			Debug::writeToLog();
 			Debug::emailLog();
-			ob_flush();
-			ob_clean();
+
+			//Prevent PHP error by checking to make sure output buffer exists before clearing it.
+			if ( ob_get_level() > 0 ) {
+				ob_flush();
+				ob_clean();
+			}
 
 			if ( defined('TIMETREX_JSON_API') ) {
 				if ( DEPLOYMENT_ON_DEMAND == TRUE ) {
@@ -90,6 +100,12 @@ class DBError extends Exception {
 							break;
 						case 'dbuniqueconstraint':
 							$description = TTi18n::getText('%1 has detected a duplicate request, this may be due to double-clicking a button or a poor internet connection.', array( APPLICATION_NAME ) );
+							break;
+						case 'dbinvalidbytesequence':
+							$description = TTi18n::getText('%1 has detected invalid UTF8 characters, if you are attempting to use non-english characters, they may be invalid.', array( APPLICATION_NAME ) );
+							break;
+						case 'dbserialize':
+							$description = TTi18n::getText('%1 has detected a duplicate request running at the exact same time, please try your request again in a couple minutes.', array( APPLICATION_NAME ) );
 							break;
 						default:
 							$description = TTi18n::getText('%1 is currently undergoing maintenance. We\'re sorry for any inconvenience this may cause. Please try again in 15 minutes.', array( APPLICATION_NAME ) );
@@ -102,6 +118,12 @@ class DBError extends Exception {
 							break;
 						case 'dbuniqueconstraint':
 							$description = TTi18n::getText('%1 has detected a duplicate request, this may be due to double-clicking a button or a poor internet connection.', array( APPLICATION_NAME ) );
+							break;
+						case 'dbinvalidbytesequence':
+							$description = TTi18n::getText('%1 has detected invalid UTF8 characters, if you are attempting to use non-english characters, they may be invalid.', array( APPLICATION_NAME ) );
+							break;
+						case 'dbserialize':
+							$description = TTi18n::getText('%1 has detected a duplicate request running at the exact same time, please try your request again in a couple minutes.', array( APPLICATION_NAME ) );
 							break;
 						case 'dberror':
 							$description = TTi18n::getText('%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server.', array( APPLICATION_NAME ));
@@ -118,6 +140,10 @@ class DBError extends Exception {
 				$obj = new APIAuthentication();
 				echo json_encode( $obj->returnHandler( FALSE, 'EXCEPTION', $description ) );
 				exit;
+			} elseif ( PHP_SAPI == 'cli' ) {
+				//Don't attempt to redirect
+				echo "Fatal Exception: Code: ". $code ."... Exiting with error code 254!\n";
+				exit(254);
 			} else {
 				global $config_vars;
 				if ( DEPLOYMENT_ON_DEMAND == FALSE

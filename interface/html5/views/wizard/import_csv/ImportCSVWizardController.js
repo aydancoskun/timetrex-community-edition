@@ -16,8 +16,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 	column_map_data: null, //Used to build grid data
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 
 		this.title = $.i18n._( 'Import Wizard' );
 		this.steps = 6;

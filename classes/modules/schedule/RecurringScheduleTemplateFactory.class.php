@@ -619,9 +619,6 @@ class RecurringScheduleTemplateFactory extends Factory {
 		$start_date_week = TTDate::getBeginWeekEpoch( $recurring_schedule_control_start_date, 0 ); //Start week on Sunday to match Recurring Schedule.
 		//Debug::text('Week of Start Date: '. $start_date_week, __FILE__, __LINE__, __METHOD__, 10);
 
-		$pcf = TTnew( 'PayCodeFactory' );
-		$absence_policy_paid_type_options = $pcf->getOptions('paid_type');
-
 		for ( $i = $start_date; $i <= $end_date; $i += (86400 + 43200) ) {
 			//Handle DST by adding 12hrs to the date to get the mid-day epoch, then forcing it back to the beginning of the day.
 			$i = TTDate::getBeginDayEpoch( $i );
@@ -740,9 +737,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 
 						$status_id = (int)$this->getColumn('status_id');
 						$absence_policy_id = (int)$this->getColumn('absence_policy_id');
-						$absence_policy_type_id = (int)$this->getColumn('absence_policy_type_id');
-						$absence_policy = ( $this->getColumn('absence_policy') != '' ) ? $this->getColumn('absence_policy') : NULL; //Must be NULL to be converted to N/A
-
+						
 						if ( isset($holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]) ) {
 							//We have to assume they are eligible, because we really won't know
 							//if they will have worked enough days or not. We could assume they
@@ -751,8 +746,6 @@ class RecurringScheduleTemplateFactory extends Factory {
 							$status_id = $holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]['status_id'];
 							if ( isset($holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]['absence_policy_id']) ) {
 								$absence_policy_id = (int)$holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]['absence_policy_id'];
-								$absence_policy_type_id = (int)$holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]['type_id'];
-								$absence_policy = $holiday_data[(int)$this->getColumn('policy_group_id')][$iso_date_stamp]['absence_policy'];
 							}
 						}
 
@@ -894,6 +887,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
+		$data = array();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

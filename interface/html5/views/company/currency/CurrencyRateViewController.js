@@ -2,13 +2,9 @@ CurrencyRateViewController = BaseViewController.extend( {
 
 	el: '#currency_rate_view_container', //Must set el here and can only set string, so events can work
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'CurrencyRateEditView.html';
 		this.permission_id = 'currency';
 		this.script_name = 'CurrencyRateView';
@@ -163,14 +159,14 @@ CurrencyRateViewController.loadSubView = function( container, beforeViewLoadedFu
 	Global.loadViewSource( 'CurrencyRate', 'SubCurrencyRateView.html', function( result ) {
 
 		var args = { };
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template(args) );
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_currency_rate_view_controller );

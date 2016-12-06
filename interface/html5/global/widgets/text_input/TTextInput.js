@@ -40,24 +40,25 @@
 
 		var static_width;
 
+		var display_na = true; // Display N/A when no value
+
+		var cancel_date_parse = false;
+
+		var do_validate = true;
+
 		var parseDateAsync = function( callBack ) {
-
 			parsed_value = -1;
-
-			ProgressBar.showOverlay();
 			if ( !api_date ) {
 				api_date = new (APIFactory.getAPIClass( 'APIDate' ))();
 			}
 			api_date.parseTimeUnit( $this.val(), {
 				onResult: function( result ) {
+					if ( cancel_date_parse ) return;
 					parsed_value = result.getResult();
-
 					if ( callBack ) {
 						callBack();
 					}
-
 					ProgressBar.closeOverlay();
-
 				}
 			} );
 		};
@@ -90,7 +91,7 @@
 				if ( check_box ) {
 					check_box.hide();
 				}
-				if ( !this.getValue() ) {
+				if ( !this.getValue() && display_na ) {
 					this.val( $.i18n._( 'N/A' ) );
 				}
 			} else {
@@ -180,27 +181,23 @@
 
 		};
 		this.getValue = function() {
-
 			var val = $this.val();
 			if ( val === $.i18n._( 'N/A' ) ) {
 				val = '';
 			}
-			if ( need_parser_date ) {
+			if ( need_parser_sec || need_parser_date || parsed_value ) {
 				if ( parsed_value === -1 ) {
+					cancel_date_parse = true; // cancel orginal date parse process
 					parsed_value = api_date.parseTimeUnit( val, {async: false} ).getResult();
 				}
 				return parsed_value;
-			} else if ( need_parser_sec ) {
-				return parsed_value;
-			}
-			else {
+			} else {
 				return val;
 			}
 
 		};
 
 		this.setValue = function( val ) {
-
 			if ( !val && val !== 0 ) {
 				val = '';
 			}
@@ -288,8 +285,16 @@
 		this.each( function() {
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 			field = o.field;
+
+			if ( o.hasOwnProperty( 'do_validate' ) ) {
+				do_validate = o.do_validate;
+			}
+
 			if ( o.validation_field ) {
 				validation_field = o.validation_field;
+			}
+			if ( o.hasOwnProperty( 'display_na' ) ) {
+				display_na = o.display_na;
 			}
 			if ( o.hasOwnProperty( 'no_validate_timer_sec' ) && o.no_validate_timer_sec > 0 ) {
 				no_validate_timer_sec = o.no_validate_timer_sec;
@@ -324,15 +329,18 @@
 			$this.autoResize();
 
 			$( this ).keydown( function( e ) {
-
-				if ( hasKeyEvent ) {
-
+				// key is not TAB and ENTER
+				if ( hasKeyEvent && e.keyCode !== 9 && e.keyCode !== 13 ) {
 					$this.trigger( 'formItemKeyDown', [$this] );
 				}
 
 			} );
 
 			$( this ).keyup( function( e ) {
+				var validate_sec = 1000;
+				if ( e.keyCode === 9 || e.keyCode === 13 ) {
+					return;
+				}
 				var is_valid_input = Global.isValidInputCodes( e.keyCode );
 				if ( !is_valid_input ) {
 					return;
@@ -347,38 +355,30 @@
 					clearTimeout( no_validate_timer );
 					no_validate_timer = null;
 				}
-
 				if ( hasKeyEvent ) {
 					$this.trigger( 'formItemKeyUp', [$this] );
 				}
-
-				var validate_sec = 1000;
-
 				if ( error_string && error_string.length > 0 ) {
 					validate_sec = 500;
 				}
-
-				validate_timer = setTimeout( function() {
-
-					if ( check_box ) {
-						$this.setCheckBox( true );
-					}
-
-					if ( need_parser_date || need_parser_sec ) {
-						parseDateAsync( function() {
-
+				if ( do_validate ) {
+					validate_timer = setTimeout( function() {
+						if ( check_box ) {
+							$this.setCheckBox( true );
+						}
+						if ( need_parser_date || need_parser_sec ) {
+							parsed_value = -1; // parse date when get value
+							if ( !disable_keyup_event ) {
+								$this.trigger( 'formItemChange', [$this, true] );
+							}
+						} else {
 							if ( !disable_keyup_event ) {
 								$this.trigger( 'formItemChange', [$this] );
 							}
-
-						} );
-					} else {
-						if ( !disable_keyup_event ) {
-							$this.trigger( 'formItemChange', [$this] );
 						}
-					}
 
-				}, validate_sec );
+					}, validate_sec );
+				}
 
 				// TO make sure the value is set to currentEditRecord when user typing it, but not trigger validate
 				// Do this immediately instead wait for 300 ms.
@@ -387,13 +387,10 @@
 						$this.setCheckBox( true );
 					}
 					if ( need_parser_date || need_parser_sec ) {
-						parseDateAsync( function() {
-
-							if ( !disable_keyup_event ) {
-								$this.trigger( 'formItemChange', [$this, true] );
-							}
-
-						} );
+						parsed_value = -1; // parse date when get value
+						if ( !disable_keyup_event ) {
+							$this.trigger( 'formItemChange', [$this, true] );
+						}
 					} else {
 						if ( !disable_keyup_event ) {
 							$this.trigger( 'formItemChange', [$this, true] );
@@ -422,7 +419,9 @@
 				if ( disable_keyup_event ) {
 					$this.trigger( 'formItemChange', [$this] );
 				}
-				$this.autoResize();
+				if ( !need_parser_date && !need_parser_sec ) {
+					$this.autoResize();
+				}
 			} );
 
 			$( this ).focusin( function() {

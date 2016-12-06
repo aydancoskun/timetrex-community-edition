@@ -140,7 +140,6 @@ class HierarchyUserFactory extends Factory {
 		$id = trim($id);
 
 		$ulf = TTnew( 'UserListFactory' );
-		$hllf = TTnew( 'HierarchyLevelListFactory' );
 
 		if ( $id != 0
 				AND $this->Validator->isResultSetWithRows(	'user',

@@ -106,7 +106,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
-	
+
 		return $this;
 	}
 
@@ -278,8 +278,6 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$otpf = new OverTimePolicyFactory();
-
 		$ph = array(
 					'user_id' => (int)$user_id,
 					'week_start_epoch' => $this->db->BindDate( $week_start_epoch ),
@@ -448,7 +446,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$slf = new ScheduleListFactory();
 		$slf->getByUserIdAndStartDateAndEndDate($user_id, (TTDate::getMiddleDayEpoch($epoch) - 86400), (TTDate::getMiddleDayEpoch($epoch) + 86400) );
 		if ( $slf->getRecordCount() > 0 ) {
-			Debug::Text(' Found User Date ID! User: '. $user_id .' Epoch: '. TTDate::getDATE('DATE+TIME', $epoch ) .'('.$epoch.')', __FILE__, __LINE__, __METHOD__, 10);		
+			Debug::Text(' Found User Date ID! User: '. $user_id .' Epoch: '. TTDate::getDATE('DATE+TIME', $epoch ) .'('.$epoch.')', __FILE__, __LINE__, __METHOD__, 10);
 			$retval = FALSE;
 			$best_diff = FALSE;
 			//Check for schedule policy
@@ -472,7 +470,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 				return $retval;
 			}
 		}
-		
+
 		return FALSE;
 	}
 
@@ -529,6 +527,64 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $result;
+	}
+
+	//Find all *committed* open shifts that conflict, so they can be entered in the replaced_id field.
+	function getConflictingOpenShiftSchedule( $company_id, $start_time, $end_time, $branch_id, $department_id, $job_id, $job_item_id, $replaced_id = 0, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
+		if ( $company_id == '' OR $start_time == '' OR $end_time == '' ) {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.created_date' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		Debug::Text('Getting conflicting Open Shifts...', __FILE__, __LINE__, __METHOD__, 10);
+
+		$ph = array(
+				'company_id' => (int)$company_id,
+				'user_id' => (int)0, //Open Shift
+				'start_time' => $this->db->BindTimeStamp( $start_time ),
+				'end_time' => $this->db->BindTimeStamp( $end_time ),
+				'branch_id' => (int)$branch_id,
+				'department_id' => (int)$department_id,
+				'job_id' => (int)$job_id,
+				'job_item_id' => (int)$job_item_id,
+		);
+
+		$query = '
+					SELECT	a.*
+					FROM	'. $this->getTable() .' as a
+					LEFT JOIN '. $this->getTable() .' as b ON ( a.id = b.replaced_id )
+					WHERE	( 	a.company_id = ?
+								AND a.user_id = ?
+								AND a.start_time = ?
+								AND a.end_time = ?
+								AND a.branch_id = ?
+								AND a.department_id = ?
+								AND a.job_id = ?
+								AND a.job_item_id = ?
+								AND ( a.replaced_id = 0 AND b.replaced_id IS NULL )
+								AND a.deleted = 0
+							)
+					';
+
+		if ( $replaced_id > 0 ) {
+			$query .= ' OR ( a.id = '. (int)$replaced_id .' AND a.deleted = 0 ) ';
+			$order = ( array('a.id' => ' = '. $replaced_id .' desc') + $order );
+		}
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $this;
 	}
 
 	//Returning RecurringScheduleIDs that have already been overridden by a committed shift, so we can exclude them from subsequent queries like getSearchByCompanyIdAndArrayCriteria()
@@ -649,7 +705,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
 		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
 		$ph['company_id'] = (int)$company_id;
-		
+
 		$query .= '
 																			AND sf_c.deleted = 0
 																		)
@@ -667,7 +723,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 										rsf_b.status_id as status_id,
 										rsf_b.start_time as start_time,
 										rsf_b.end_time as end_time,
-			
+
 										rsf_b.branch_id as branch_id,
 										rsf_b.department_id as department_id,
 										rsf_b.job_id as job_id,
@@ -709,9 +765,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$query .= '	LEFT JOIN '. $jif->getTable() .' as y ON a.job_item_id = y.id';
 		}
 
-		$ph['company_id3'] = (int)$company_id;		
-		$query .= '	WHERE ( a.company_id = ? )
-				';
+		$ph['company_id3'] = (int)$company_id;
+		$query .= '	WHERE a.company_id = ? ';
 
 		$query .= ( isset($filter_data['schedule_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['schedule_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['schedule_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['schedule_department_id'], 'numeric_list', $ph ) : NULL;
@@ -726,7 +781,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
-		
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ( isset($filter_data['job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['job_id'], 'numeric_list', $ph ) : NULL;
 			$query .= ( isset($filter_data['include_job_id']) ) ? $this->getWhereClauseSQL( 'a.job_id', $filter_data['include_job_id'], 'numeric_list', $ph ) : NULL;
@@ -735,8 +790,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'numeric_list', $ph ) : NULL;
 		}
 
-		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
-		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
+		//These aren't needed here, asn they are filtered in the UNION SELECTs above. This seems to slow things down substantially in some cases.
+		//$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
+		//$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
 
 		$query .=	'
 						AND ( a.deleted = 0 AND ( uf.deleted IS NULL OR uf.deleted = 0 ) )
@@ -779,7 +835,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		$exclude_recurring_schedule_ids = $this->getOverriddenOpenShiftRecurringSchedules( $company_id, $filter_data );
-		
+
 		if ( !is_array($order) ) {
 			//Use Filter Data ordering if its set.
 			if ( isset($filter_data['sort_column']) AND $filter_data['sort_order']) {
@@ -800,7 +856,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$order = $this->getColumnsFromAliases( $order, $sort_column_aliases );
 		if ( $order == NULL ) {
 			//$order = array( 'udf.pay_period_id' => 'asc', 'udf.user_id' => 'asc', 'a.start_time' => 'asc' );
-			$order = array( 'a.user_id' => '= 0 desc', 'uf.last_name' => 'asc', 'a.start_time' => 'asc' );
+			//Sort by start_time first, then user, so when only showing 1st page, it has all employees working on the first day, not just some of the employees for multiple days.
+			$order = array( 'a.user_id' => '= 0 desc', 'a.start_time' => 'asc', 'uf.last_name' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -873,6 +930,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$df = new DepartmentFactory();
 		$ugf = new UserGroupFactory();
 		$utf = new UserTitleFactory();
+		$sf = new ScheduleFactory();
 		$rsf = new RecurringScheduleFactory();
 		$rscf = new RecurringScheduleControlFactory();
 
@@ -897,6 +955,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					select
 							a.id as id,
 							a.id as schedule_id,
+							a.recurring_schedule_id as recurring_schedule_id,
+							a.replaced_id as replaced_id,
+							sf.id as replaced_by_id,
 							a.status_id as status_id,
 							a.start_time as start_time,
 							a.end_time as end_time,
@@ -963,6 +1024,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							jf.other_id3 as job_other_id3,
 							jf.other_id4 as job_other_id4,
 							jf.other_id5 as job_other_id5,
+							jf.address1 as job_address1,
+							jf.address2 as job_address2,
+							jf.city as job_city,
+							jf.country as job_country,
+							jf.province as job_province,
+							jf.postal_code as job_postal_code,
+							jf.longitude as job_longitude,
+							jf.latitude as job_latitude,
+							jf.location_note as job_location_note,
 							jif.name as job_item,
 							jif.description as job_item_description,
 							jif.manual_id as job_item_manual_id,
@@ -977,6 +1047,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								SELECT
 									sf.id as id,
 									sf.id as schedule_id,
+									sf.replaced_id as replaced_id,
+									NULL as recurring_schedule_id,
 									sf.company_id as company_id,
 
 									sf.user_id as user_id,
@@ -1001,7 +1073,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 									sf.created_date as created_date,
 									sf.updated_date as updated_date,
 									sf.deleted as deleted
-								FROM schedule as sf
+								FROM '. $sf->getTable() .' as sf
 								WHERE sf.company_id = '. (int)$company_id .'
 									AND sf.deleted = 0
 							)
@@ -1010,6 +1082,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								SELECT
 									NULL as id,
 									rsf.id as schedule_id,
+									NULL as replaced_id,
+									rsf.id as recurring_schedule_id,
 									rsf.company_id as company_id,
 
 									rsf.user_id as user_id,
@@ -1037,10 +1111,10 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 									rsf.deleted as deleted
 								FROM '. $rsf->getTable() .' as rsf
 								LEFT JOIN '. $rscf->getTable() .' as rscf ON rsf.recurring_schedule_control_id = rscf.id
-								LEFT JOIN '. $uf->getTable() .' as uf_b ON rsf.user_id = uf_b.id								
+								LEFT JOIN '. $uf->getTable() .' as uf_b ON rsf.user_id = uf_b.id
 								LEFT JOIN '. $ppsuf->getTable() .' as ppsuf ON ( rsf.user_id = ppsuf.user_id )
-								LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id AND ppsf.deleted = 0 )
-								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date AND ppf.deleted = 0 )
+								LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id )
+								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date )
 								LEFT JOIN schedule as sf_b ON (
 																( sf_b.user_id != 0 AND sf_b.user_id = rsf.user_id )
 																AND
@@ -1071,6 +1145,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							)
 					) as a
 
+					LEFT JOIN '. $sf->getTable() .' as sf ON ( a.id = sf.replaced_id AND sf.deleted = 0 )
 					LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id )
 					LEFT JOIN '. $bf->getTable() .' as bf ON ( uf.default_branch_id = bf.id AND bf.deleted = 0)
 					LEFT JOIN '. $bf->getTable() .' as bfb ON ( a.branch_id = bfb.id AND bfb.deleted = 0)
@@ -1101,12 +1176,15 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 						';
 		}
 
-		$query .= '	WHERE ( a.company_id = '. (int)$company_id .' )';
+		$query .= '	WHERE ( a.company_id = '. (int)$company_id .' AND sf.replaced_id IS NULL )';
 
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
 		//Make sure we filter on user_date.user_id column, to handle OPEN shifts.
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['recurring_schedule_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_id', $filter_data['recurring_schedule_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['schedule_id']) ) ? $this->getWhereClauseSQL( 'a.schedule_id', $filter_data['schedule_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'uf.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'uf.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
@@ -1243,6 +1321,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$df = new DepartmentFactory();
 		$ugf = new UserGroupFactory();
 		$utf = new UserTitleFactory();
+		$sf = new ScheduleFactory();
 		$uwf = new UserWageFactory();
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -1334,6 +1413,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		$query .= '
 					from	'. $this->getTable() .' as a
+							LEFT JOIN '. $sf->getTable() .' as sf ON ( a.id = sf.replaced_id AND sf.deleted = 0 )
 							LEFT JOIN '. $spf->getTable() .' as i ON a.schedule_policy_id = i.id
 							LEFT JOIN '. $uf->getTable() .' as d ON ( a.user_id = d.id AND d.deleted = 0 )
 
@@ -1362,7 +1442,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= '
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
-					WHERE ( d.company_id = ? OR a.company_id = ? ) ';
+					WHERE ( d.company_id = ? OR a.company_id = ? ) AND sf.replaced_id IS NULL ';
 
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
@@ -1407,6 +1487,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

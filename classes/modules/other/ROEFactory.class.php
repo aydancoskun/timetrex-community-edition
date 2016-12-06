@@ -592,9 +592,9 @@ class ROEFactory extends Factory {
 				//Only count pay periods that are between the First Day worked and Last Day For Which Paid, thereby ignoring pay periods after the Last Day For Which Paid.
 				//This is important when displaying the maximum number of pay periods (ie: 27/53) and there is a gap between the Final Pay Period Ending Date and the Final Pay Stub End Date.
 				if ( $tmp_after_last_date == FALSE ) {
-					$i++;
-				}
+				$i++;
 			}
+		}
 		}
 
 		Debug::Text('Pay Period Report Start Date: '. TTDate::getDate('DATE+TIME', $start_date), __FILE__, __LINE__, __METHOD__, 10);
@@ -818,9 +818,12 @@ class ROEFactory extends Factory {
 	}
 
 	function combinePostTerminationPayPeriods( $data ) {
+		
+		$retarr = array();
 		if ( is_array($data ) AND count($data) > 0 ) {
 			$tmp_data = array_reverse( $data, TRUE );
 			$prev_pay_period_id = FALSE;
+			
 			foreach( $tmp_data as $pay_period_id => $pp_data ) {
 				if ( $pp_data['after_last_date'] == TRUE ) {
 					$retarr[$prev_pay_period_id]['amount'] += $pp_data['amount'];
@@ -995,7 +998,6 @@ class ROEFactory extends Factory {
 		//FIXME: Alert the user if they don't have enough information in TimeTrex to get accurate values.
 		//Get insurable hours, earnings, and vacation pay now that the final pay stub is generated
 		$setup_data = $this->getSetupData();
-		$insurable_earnings_psea_ids = $setup_data['insurable_earnings_psea_ids'];
 		$absence_policy_ids = $setup_data['absence_policy_ids'];
 		
 		//Find out the date of how far back we have to go to get insurable values.
@@ -1200,6 +1202,7 @@ class ROEFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
+		$data = array();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
@@ -1260,7 +1263,7 @@ class ROEFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('ROE'), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('ROE') .' - '. TTi18n::getText('Employee') .': '. $this->getUserObject()->getFullName() .' '. TTi18n::getText('Final End Date') .': '. TTDate::getDate( 'DATE', $this->getFinalPayStubEndDate() ) .' '. TTi18n::getText('Final Transaction Date') .': '. TTDate::getDate( 'DATE', $this->getFinalPayStubTransactionDate() ) .' '. TTi18n::getText('Insurable Earnings') .': '. Misc::MoneyFormat( $this->getInsurableEarnings() ), NULL, $this->getTable(), $this );
 	}
 }
 ?>

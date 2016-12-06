@@ -75,8 +75,6 @@ if ( $ttsc->isUpdateNotifyEnabled() == TRUE ) {
 			//Only need to call this on the last company
 			if ( $i == ( $clf->getRecordCount() - 1 ) ) {
 				$latest_version = $ttsc->isLatestVersion( $c_obj->getId() );
-				$latest_tax_engine_version = $ttsc->isLatestTaxEngineVersion( $c_obj->getId() );
-				$latest_tax_data_version = $ttsc->isLatestTaxDataVersion( $c_obj->getId() );
 
 				$sslf = new SystemSettingListFactory();
 				$sslf->getByName('new_version');
@@ -87,9 +85,7 @@ if ( $ttsc->isUpdateNotifyEnabled() == TRUE ) {
 				}
 				$obj->setName( 'new_version' );
 
-				if( $latest_version == FALSE
-						OR $latest_tax_engine_version == FALSE
-						OR $latest_tax_data_version == FALSE ) {
+				if( $latest_version == FALSE ) {
 					$obj->setValue( 1 );
 				} else {
 					$obj->setValue( 0 );

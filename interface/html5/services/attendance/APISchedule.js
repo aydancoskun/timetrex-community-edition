@@ -70,12 +70,23 @@ var APISchedule = ServiceCaller.extend( {
 
 	},
 
+	exportSchedule: function() {
+
+		return this.argumentsHandler( this.className, 'exportSchedule', arguments );
+
+	},
+
 	validateSchedule: function() {
 
 		return this.argumentsHandler( this.className, 'validateSchedule', arguments );
 
-	}
+	},
 
+	addPunchesFromScheduledShifts: function () {
+
+		return this.argumentsHandler( this.className, 'addPunchesFromScheduledShifts', arguments );
+
+	}
 
 
 } );

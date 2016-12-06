@@ -7,7 +7,9 @@ var APIAccrualBalance = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'getAccrualBalance', arguments );
 
+	},
+
+	exportAccrualBalance: function() {
+		return this.argumentsHandler( this.className, 'exportAccrualBalance', arguments );
 	}
-
-
 } );

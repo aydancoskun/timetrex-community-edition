@@ -157,8 +157,9 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 
 	function getByCompanyIdAndTypeIDArray($id, $type_id, $key_prefix = NULL, $name_prefix = NULL ) {
 		$oflf = new OtherFieldListFactory();
-		$oflf->getByCompanyIdAndTypeID( $id, $type_id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL );
+		$oflf->getByCompanyIdAndTypeID( $id, $type_id, NULL, NULL, NULL, NULL );
 		if ( $oflf->getRecordCount() > 0 ) {
+			$retarr = array();
 			foreach($oflf as $obj) {
 				if ( is_array($key_prefix) ) {
 					if ( isset($key_prefix[$obj->getType()]) ) {
@@ -212,7 +213,7 @@ class OtherFieldListFactory extends OtherFieldFactory implements IteratorAggrega
 				}
 			}
 
-			if ( isset($retarr) ) {
+			if ( empty($retarr) == FALSE ) {
 				return $retarr;
 			}
 		}

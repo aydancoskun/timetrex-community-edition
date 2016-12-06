@@ -70,6 +70,19 @@ class HolidayPolicyFactory extends Factory {
 										2 => TTi18n::gettext('Holiday Week Days'),
 									);
 				break;
+			case 'shift_on_holiday_type':
+
+				//Label: On the Holiday the Employee:
+				$retval = array(
+						0 => TTi18n::gettext('May Work or May Not Work'),
+						10 => TTi18n::gettext('Must Always Work'),
+						20 => TTi18n::gettext('Must Never Work'),
+						30 => TTi18n::gettext('Must Work (Only if Scheduled)'), //If scheduled to work, they must work. Otherwise if not scheduled (or scheduled absent) and they don't work its fine too.
+						40 => TTi18n::gettext('Must Not Work (Only if Scheduled Absent)'), //If scheduled absent, they must not work. Otherwise if not scheduled, or scheduled to work and they work that is fine too.
+						//50 => TTi18n::gettext('Must Work (if Scheduled), May Work if Not Scheduled)'), //If scheduled to work, they must work, otherwise if not scheduled (or scheduled absent) they don't work its fine too.
+						//60 => TTi18n::gettext('Must Not Work (if Scheduled Absent), May Work if Not Scheduled)'), //If scheduled absent, they must not work.
+				);
+				break;
 			case 'columns':
 				$retval = array(
 										'-1010-type' => TTi18n::gettext('Type'),
@@ -128,6 +141,7 @@ class HolidayPolicyFactory extends Factory {
 										'minimum_worked_period_days' => 'MinimumWorkedPeriodDays',
 										'minimum_worked_days' => 'MinimumWorkedDays',
 										'worked_scheduled_days' => 'WorkedScheduledDays',
+										'shift_on_holiday_type_id' => 'ShiftOnHolidayType',
 										'minimum_worked_after_period_days' => 'MinimumWorkedAfterPeriodDays',
 										'minimum_worked_after_days' => 'MinimumWorkedAfterDays',
 										'worked_after_scheduled_days' => 'WorkedAfterScheduledDays',
@@ -167,7 +181,7 @@ class HolidayPolicyFactory extends Factory {
 	function getAbsencePolicyObject() {
 		return $this->getGenericObject( 'AbsencePolicyListFactory', $this->getAbsencePolicyID(), 'absence_policy_obj' );
 	}
-	
+
 	function getContributingShiftPolicyObject() {
 		return $this->getGenericObject( 'ContributingShiftPolicyListFactory', $this->getContributingShiftPolicy(), 'contributing_shift_policy_obj' );
 	}
@@ -226,9 +240,14 @@ class HolidayPolicyFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => strtolower($name),
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
@@ -414,6 +433,31 @@ class HolidayPolicyFactory extends Factory {
 													$int,
 													TTi18n::gettext('Incorrect Eligibility Type')) ) {
 			$this->data['worked_scheduled_days'] = $int;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getShiftOnHolidayType() {
+		if ( isset($this->data['shift_on_holiday_type_id']) ) {
+			return (int)$this->data['shift_on_holiday_type_id'];
+		}
+
+		return TRUE;
+	}
+	function setShiftOnHolidayType($int) {
+		$int = trim($int);
+
+		if	( empty($int) ) {
+			$int = 0;
+		}
+
+		if	(	$this->Validator->isNumeric(		'shift_on_holiday_type_id',
+													   $int,
+													   TTi18n::gettext('Incorrect On Holiday Eligibility Type')) ) {
+			$this->data['shift_on_holiday_type_id'] = $int;
 
 			return TRUE;
 		}
@@ -675,7 +719,7 @@ class HolidayPolicyFactory extends Factory {
 	function setEligibleContributingShiftPolicy($id) {
 		$id = trim($id);
 
-		if ( $id == 0 || $id == '' ) {
+		if ( $id == 0 OR $id == '' ) {
 
 			$id = NULL;
 		}
@@ -707,7 +751,7 @@ class HolidayPolicyFactory extends Factory {
 	function setContributingShiftPolicy($id) {
 		$id = trim($id);
 
-		if ( $id == 0 || $id == '' ) {
+		if ( $id == 0 OR $id == '' ) {
 
 			$id = NULL;
 		}
@@ -802,11 +846,13 @@ class HolidayPolicyFactory extends Factory {
 		$hprhlf = TTnew( 'HolidayPolicyRecurringHolidayListFactory' );
 		$hprhlf->getByHolidayPolicyId( $this->getId() );
 		Debug::text('Found Recurring Holidays Attached to this Policy: '. $hprhlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+
+		$list = array();
 		foreach ($hprhlf as $obj) {
 			$list[] = $obj->getRecurringHoliday();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -917,6 +963,7 @@ class HolidayPolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

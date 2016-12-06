@@ -134,12 +134,17 @@ class HierarchyControlFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => $name,
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND name = ? AND deleted = 0';
+		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted = 0';
 		$hierarchy_control_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($hierarchy_control_id, 'Unique Hierarchy Control ID: '. $hierarchy_control_id, __FILE__, __LINE__, __METHOD__, 10);
 

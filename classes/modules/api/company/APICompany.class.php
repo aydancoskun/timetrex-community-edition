@@ -115,6 +115,7 @@ class APICompany extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 
@@ -127,6 +128,16 @@ class APICompany extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportCompany( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getCompany( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_company', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -450,6 +461,7 @@ class APICompany extends APIFactory {
 
 			$this->setPagerObject( $cuclf );
 
+			$retarr = array();
 			foreach( $cuclf as $cuc_obj ) {
 				$retarr[] = array(
 									//'company_id' => $data['filter_data']['company_id'],
@@ -504,7 +516,7 @@ class APICompany extends APIFactory {
 		}
 
 		if ( !isset($data['filter_sort']) ) {
-			$data['filter_sort'] = array( array( 'company_id' => 'asc' ), array( 'a.last_name' => 'asc' ) );
+			$data['filter_sort'] = array( 'company_id' => 'asc', 'a.last_name' => 'asc' );
 		}
 
 		Debug::Arr($data, 'Final Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -517,6 +529,7 @@ class APICompany extends APIFactory {
 
 			$this->setPagerObject( $ulf );
 
+			$retarr = array();
 			foreach( $ulf as $u_obj ) {
 				$retarr[] = $u_obj->data;
 
@@ -570,6 +583,7 @@ class APICompany extends APIFactory {
 
 			$this->setPagerObject( $llf );
 
+			$retarr = array();
 			foreach( $llf as $l_obj ) {
 				$retarr[] = array(
 									'company_id' => $l_obj->getColumn('company_id'),
@@ -629,6 +643,7 @@ class APICompany extends APIFactory {
 
 			$this->setPagerObject( $llf );
 
+			$retarr = array();
 			foreach( $llf as $l_obj ) {
 				$retarr[] = array(
 									'company_id' => $l_obj->getColumn('company_id'),
@@ -686,6 +701,7 @@ class APICompany extends APIFactory {
 
 			$this->setPagerObject( $llf );
 
+			$retarr = array();
 			foreach( $llf as $l_obj ) {
 				$retarr[] = $l_obj->getObjectAsArray( $data['filter_columns'] );
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $llf->getCurrentRow() );

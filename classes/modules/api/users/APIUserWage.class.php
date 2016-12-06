@@ -118,6 +118,7 @@ class APIUserWage extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -130,6 +131,17 @@ class APIUserWage extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Export wage data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportUserWage( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getUserWage( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_wage', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -389,6 +401,7 @@ class APIUserWage extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id']); //Clear fields that can't be copied
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setUserWage( $src_rows ); //Save copied rows
@@ -417,14 +430,19 @@ class APIUserWage extends APIFactory {
 			return '0.00';
 		}
 
+		//FIXME: Pass user_id and/or currency_id so we can properly round to the right number of decimals.
 		$uwf = TTnew( 'UserWageFactory' );
 		$uwf->setType( $wage_type_id );
+		//$uwf->setWage( TTi18n::parseFloat( $wage ) );
 		$uwf->setWage( $wage );
 		$uwf->setWeeklyTime( TTDate::parseTimeUnit($weekly_hours) );
+		//$hourly_rate = TTi18n::formatNumber( $uwf->calcHourlyRate(), TRUE, 2, 4 );
 		$hourly_rate = $uwf->calcHourlyRate();
 
 		return $this->returnHandler( $hourly_rate );
 	}
+
+
 
 }
 ?>

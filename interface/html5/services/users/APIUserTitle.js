@@ -41,7 +41,11 @@ var APIUserTitle = ServiceCaller.extend( {
 
 	copyUserTitle: function() {
 		return this.argumentsHandler( this.className, 'copyUserTitle', arguments );
-	}
+	},
+
+	exportUserTitle: function() {
+		return this.argumentsHandler( this.className, 'exportUserTitle', arguments );
+	},
 
 
 } );

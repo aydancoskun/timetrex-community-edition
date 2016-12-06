@@ -43,9 +43,9 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-    public function setUp() {
+	public function setUp() {
 		global $dd;
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 		
 		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
@@ -53,7 +53,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$dd->createCurrency( $this->company_id, 10 );
 
@@ -136,16 +136,16 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//$this->deleteAllSchedules();
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
 	function deleteUserWage( $user_id ) {
 		$uwlf = TTnew( 'UserWageListFactory' );
@@ -191,17 +191,17 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 			'employer_contribution' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 40, 'Employer Total Contributions'),
 			'net_pay' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 40, 'Net Pay'),
 			'regular_time' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Regular Time'),
-            'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
+			'vacation_accrual_release' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 10, 'Vacation Accrual Release'),
 			'vacation_accrual' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 50, 'Vacation Accrual'),
-            'cpp' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'CPP'),
-            'ei' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'EI'),
-            'advanced_percent_2' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Advanced Percent 2'),
-            'advanced_percent_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Advanced Percent 1'),
-            'other2' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Other2'),
-            'other' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Other'),
-            
-            
-            );
+			'cpp' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'CPP'),
+			'ei' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'EI'),
+			'advanced_percent_2' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Advanced Percent 2'),
+			'advanced_percent_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Advanced Percent 1'),
+			'other2' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Other2'),
+			'other' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Other'),
+			
+			
+			);
 
 		return TRUE;
 	}
@@ -230,9 +230,9 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
-        
-        Debug::text('Saving.... Employee Deduction - Custom1', __FILE__, __LINE__, __METHOD__, 10);
-        $pseaf = new PayStubEntryAccountFactory();
+		
+		Debug::text('Saving.... Employee Deduction - Custom1', __FILE__, __LINE__, __METHOD__, 10);
+		$pseaf = new PayStubEntryAccountFactory();
 		$pseaf->setCompany( $this->company_id );
 		$pseaf->setStatus(10);
 		$pseaf->setType(20);
@@ -242,9 +242,9 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
-        
-        Debug::text('Saving.... Employee Deduction - Custom2', __FILE__, __LINE__, __METHOD__, 10);
-        $pseaf = new PayStubEntryAccountFactory();
+		
+		Debug::text('Saving.... Employee Deduction - Custom2', __FILE__, __LINE__, __METHOD__, 10);
+		$pseaf = new PayStubEntryAccountFactory();
 		$pseaf->setCompany( $this->company_id );
 		$pseaf->setStatus(10);
 		$pseaf->setType(20);
@@ -254,7 +254,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
-        
+		
 
 		Debug::text('Saving.... Employee Deduction - Advanced Percent 1', __FILE__, __LINE__, __METHOD__, 10);
 		$pseaf = new PayStubEntryAccountFactory();
@@ -411,7 +411,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 				$cdf->Save();
 			}
 		}
-        
+		
 		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			$cdf = new CompanyDeductionFactory();
 			$cdf->setCompany( $this->company_id );
@@ -581,13 +581,13 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTimeZone('PST8PDT');
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4*3600) );
-		$ppsf->setMaximumShiftTime( (16*3600) );
+		$ppsf->setNewDayTriggerTime( (4 * 3600) );
+		$ppsf->setMaximumShiftTime( (16 * 3600) );
 
 		$ppsf->setEnableInitialPayPeriods( FALSE );
 		if ( $ppsf->isValid() ) {
 			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$ppsf->setUser( array($this->user_id) );
 			$ppsf->Save();
@@ -597,7 +597,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 
@@ -615,12 +615,12 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 				if ( $i == 0 ) {
 					$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-06') );
 				} else {
-					$end_date = $end_date + ( (86400*14) );
+					$end_date = ($end_date + ( (86400 * 14) ));
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 				
-				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -729,7 +729,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		$punch_date = $this->pay_period_objs[0]->getStartDate();
 		$end_punch_date = $this->pay_period_objs[0]->getEndDate();
-		$i=0;
+		$i = 0;
 		while ( $punch_date <= $end_punch_date ) {
 			$date_stamp = TTDate::getDate('DATE', $punch_date );
 
@@ -772,7 +772,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 											)
 									);
 
-			$punch_date+=86400;
+			$punch_date += 86400;
 			$i++;
 		}
 		unset($punch_options_arr, $punch_date, $user_id);
@@ -1162,7 +1162,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		if ( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] >= 3300
 				AND $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] <= 3450
-				AND ( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount']+(1000+1.99) ) == $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] ) {
+				AND ( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] + (1000 + 1.99) ) == $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] ) {
 			$this->assertTrue( TRUE );
 		} else {
 			$this->assertTrue( FALSE, 'Total Gross not within range!' );
@@ -1355,7 +1355,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 			if ( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] >= 3300
 					AND $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] <= 3450
-					AND ( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount']+(1000+1.99) ) == $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] ) {
+					AND ( $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['amount'] + (1000 + 1.99) ) == $pse_arr[$this->pay_stub_account_link_arr['total_gross']][0]['ytd_amount'] ) {
 				$this->assertTrue( TRUE );
 			} else {
 				$this->assertTrue( FALSE, 'Total Gross not within range!' );
@@ -1484,7 +1484,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		//First Wage Entry
 		$this->createUserSalaryWage( $this->user_id, 1, strtotime('01-Jan-2001') );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[0]->getStartDate()-(86400) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[0]->getStartDate() - (86400) ) );
 
 		$this->addPayStubAmendments();
 		$this->createPayStub();
@@ -1527,9 +1527,9 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		//First Wage Entry
 		$this->createUserSalaryWage( $this->user_id, 1, strtotime('01-Jan-2001') );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[0]->getStartDate()-(86400) ) );
-		$this->createUserSalaryWage( $this->user_id, 1500, ( $this->pay_period_objs[0]->getStartDate()+(86400*4) ) );
-		$this->createUserSalaryWage( $this->user_id, 2000, ( $this->pay_period_objs[0]->getStartDate()+(86400*8) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[0]->getStartDate() - (86400) ) );
+		$this->createUserSalaryWage( $this->user_id, 1500, ( $this->pay_period_objs[0]->getStartDate() + (86400 * 4) ) );
+		$this->createUserSalaryWage( $this->user_id, 2000, ( $this->pay_period_objs[0]->getStartDate() + (86400 * 8) ) );
 
 		$this->addPayStubAmendments();
 		$this->createPayStub();
@@ -1583,22 +1583,22 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		//First Wage Entry
 		$this->createUserSalaryWage( $this->user_id, 1, strtotime('01-Jan-2001') );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()-(86400) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*1) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*2) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*3) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*4) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*5) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*6) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*7) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*8) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*9) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*10) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*11) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*12) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*13) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*14) ) );
-		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate()+(86400*15) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() - (86400) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 1) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 2) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 3) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 4) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 5) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 6) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 7) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 8) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 9) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 10) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 11) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 12) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 13) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 14) ) );
+		$this->createUserSalaryWage( $this->user_id, 1000, ( $this->pay_period_objs[1]->getStartDate() + (86400 * 15) ) );
 
 
 		//Create one punch in the next pay period so we can test pro-rating without any regular time.
@@ -2000,6 +2000,5 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-
 }
 ?>

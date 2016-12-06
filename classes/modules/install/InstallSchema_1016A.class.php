@@ -49,7 +49,10 @@ class InstallSchema_1016A extends InstallSchema_Base {
 	}
 
 	function postInstall() {
+		// @codingStandardsIgnoreStart
 		global $cache;
+		//assumed needed elsewhere
+		// @codingStandardsIgnoreEnd
 
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
@@ -60,7 +63,7 @@ class InstallSchema_1016A extends InstallSchema_Base {
 		if ( $cjlf->getRecordCount() > 0 ) {
 			foreach( $cjlf as $cj_obj ) {
 				Debug::text('Original Command: '.  $cj_obj->getCommand(), __FILE__, __LINE__, __METHOD__, 9);
-				$retval = preg_match('/([A-Za-z0-9]+\.php)/i', $cj_obj->getCommand(), $matches );
+				preg_match('/([A-Za-z0-9]+\.php)/i', $cj_obj->getCommand(), $matches );
 
 				if ( isset($matches[0]) AND $matches[0] != '' ) {
 					Debug::text('New Command: '. $matches[0], __FILE__, __LINE__, __METHOD__, 9);

@@ -20,8 +20,8 @@ PremiumPolicyViewController = BaseViewController.extend( {
 	job_item_group_api: null,
 	date_api: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PremiumPolicyEditView.html';
 		this.permission_id = 'premium_policy';
 		this.viewId = 'PremiumPolicy';
@@ -1049,15 +1049,3 @@ PremiumPolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-PremiumPolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'PremiumPolicy', 'PremiumPolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

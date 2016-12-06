@@ -156,6 +156,7 @@ class PunchFactory extends Factory {
 
 											'longitude' => 'Longitude',
 											'latitude' => 'Latitude',
+											'position_accuracy' => 'PositionAccuracy',
 
 											'first_name' => FALSE,
 											'last_name' => FALSE,
@@ -339,8 +340,6 @@ class PunchFactory extends Factory {
 	function setPunchControlID($id) {
 		$id = trim($id);
 
-		$pclf = TTnew( 'PunchControlListFactory' );
-
 		//Can't check to make sure the PunchControl row exists, as it may be inserted later. So just
 		//make sure its an non-zero INT.
 		if (  $this->Validator->isNumeric(	'punch_control',
@@ -501,7 +500,6 @@ class PunchFactory extends Factory {
 	function setStation($id) {
 		$id = trim($id);
 
-		$slf = TTnew( 'StationListFactory' );
 /*
 		if (	$id == 0
 				OR
@@ -522,7 +520,7 @@ class PunchFactory extends Factory {
 		if ( $epoch == '' ) {
 			return FALSE;
 		}
-		
+
 		$original_epoch = $epoch;
 
 		Debug::text(' Rounding Timestamp: '. TTDate::getDate('DATE+TIME', $epoch ) .'('. $epoch .') Status ID: '. $this->getStatus() .' Type ID: '. $this->getType(), __FILE__, __LINE__, __METHOD__, 10);
@@ -911,7 +909,7 @@ class PunchFactory extends Factory {
 		return FALSE;
 	}
 	function setTimeStamp($epoch, $enable_rounding = TRUE) {
-		$epoch = $original_epoch = trim($epoch);
+		$epoch = trim($epoch);
 
 		//We can't disable rounding if its the first IN punch and no transfer actually needs to occur.
 		//Have setTransfer check to see if there is a previous punch and if not, don't allow it to be set.
@@ -1009,7 +1007,7 @@ class PunchFactory extends Factory {
 		return FALSE;
 	}
 	function setLongitude($value) {
-		$value = trim((float)$value);
+		$value = TTi18n::parseFloat( $value );
 
 		if (	$value == 0
 				OR
@@ -1017,7 +1015,7 @@ class PunchFactory extends Factory {
 											$value,
 											TTi18n::gettext('Longitude is invalid')
 											) ) {
-			$this->data['longitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['longitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -1033,7 +1031,7 @@ class PunchFactory extends Factory {
 		return FALSE;
 	}
 	function setLatitude($value) {
-		$value = trim((float)$value);
+		$value = TTi18n::parseFloat( $value );
 
 		if (	$value == 0
 				OR
@@ -1041,7 +1039,7 @@ class PunchFactory extends Factory {
 											$value,
 											TTi18n::gettext('Latitude is invalid')
 											) ) {
-			$this->data['latitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['latitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -1066,7 +1064,7 @@ class PunchFactory extends Factory {
 												(int)$value,
 												TTi18n::gettext('Position Accuracy is invalid')
 											) ) {
-			$this->data['position_accuracy'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['position_accuracy'] = $value; //This in meters.
 
 			return TRUE;
 		}
@@ -1402,11 +1400,11 @@ class PunchFactory extends Factory {
 			$start_epoch = $previous_epoch; //Keep these here in case PunchControlObject can't be determined.
 		}
 
+		$bp_objs = array();
 		if ( $bplf->getRecordCount() > 0 ) {
 			foreach( $bplf as $bp_obj ) {
 				$bp_objs[] = $bp_obj;
 			}
-			
 		}
 		unset($bplf);
 
@@ -1456,7 +1454,7 @@ class PunchFactory extends Factory {
 			}
 		}
 
-		if ( isset($bp_objs) AND is_array( $bp_objs ) ) {
+		if ( empty($bp_objs) == FALSE ) {
 			foreach( $bp_objs as $bp_obj ) {
 				if ( $bp_obj->getAutoDetectType() == 10 ) { //Meal window
 					Debug::Text(' Auto Detect Type: Break Window... Start Epoch: '. TTDate::getDate('DATE+TIME', $start_epoch), __FILE__, __LINE__, __METHOD__, 10);
@@ -1487,7 +1485,7 @@ class PunchFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getDefaultPunchSettings( $user_obj, $epoch, $station_obj = NULL, $permission_obj = NULL ) {
 		$branch_id = $department_id = $job_id = $job_item_id = 0;
 		$transfer = FALSE;
@@ -1496,7 +1494,7 @@ class PunchFactory extends Factory {
 		$prev_punch_obj = $this->getPreviousPunchObject( $epoch, $user_obj->getId(), TRUE ); //Ignore future punches, so auto-punch shifts in the future don't mess up default punch settings.
 		if ( is_object( $prev_punch_obj ) ) {
 			$is_previous_punch = TRUE;
-			
+
 			$prev_punch_obj->setUser( $user_obj->getId() );
 			Debug::Text(' Found Previous Punch within Continuous Time from now: '. TTDate::getDate('DATE+TIME', $prev_punch_obj->getTimeStamp() ) .' ID: '. $prev_punch_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1525,9 +1523,9 @@ class PunchFactory extends Factory {
 
 			$slf = TTnew( 'ScheduleListFactory' );
 			$s_obj = $slf->getScheduleObjectByUserIdAndEpoch( $user_obj->getId(), $epoch );
-			
-			if ( $branch_id == '' OR empty($branch_id) ) {				
-				if ( is_object($station_obj) AND $station_obj->getDefaultBranch() !== FALSE AND $station_obj->getDefaultBranch() != 0 ) {					
+
+			if ( $branch_id == '' OR empty($branch_id) ) {
+				if ( is_object($station_obj) AND $station_obj->getDefaultBranch() !== FALSE AND $station_obj->getDefaultBranch() != 0 ) {
 					$branch_id = $station_obj->getDefaultBranch();
 					//Debug::Text(' aOverriding branch to: '. $branch_id, __FILE__, __LINE__, __METHOD__, 10);
 				} elseif ( is_object($s_obj) AND $s_obj->getBranch() != 0 ) {
@@ -1573,7 +1571,7 @@ class PunchFactory extends Factory {
 				Debug::Text(' Overriding task to: '. $job_item_id, __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
-		
+
 		if ( $is_previous_punch == TRUE AND is_object( $prev_punch_obj ) ) {
 			//Don't enable transfer by default if the previous punch was any OUT punch.
 			//Transfer does the OUT punch for them, so if the previous punch is an OUT punch
@@ -1663,12 +1661,12 @@ class PunchFactory extends Factory {
 							'other_id2' => '',
 							'other_id3' => '',
 							'other_id4' => '',
-							'other_id5' => '',								
-							);			
+							'other_id5' => '',
+							);
 		}
-		
+
 		Debug::Arr($data, ' Default Punch Settings: ', __FILE__, __LINE__, __METHOD__, 10);
-		return $data;		
+		return $data;
 	}
 
 	//Determine if the punch was manually created (without punching in/out) or modified by someone other than the person who punched in/out.
@@ -1699,7 +1697,7 @@ class PunchFactory extends Factory {
 		if ( $this->getHasImage() AND file_exists( $this->getImageFileName( $company_id, $user_id, $punch_id  ) ) ) {
 			return TRUE;
 		}
-		
+
 		return FALSE;
 	}
 	function saveImage( $company_id = NULL, $user_id = NULL, $punch_id = NULL ) {
@@ -1744,6 +1742,7 @@ class PunchFactory extends Factory {
 			return FALSE;
 		}
 
+		$hash_dir = array();
 		$hash = crc32($company_id.$user_id.$punch_id);
 		$hash_dir[0] = substr($hash, 0, 2);
 		$hash_dir[1] = substr($hash, 2, 2);
@@ -2095,9 +2094,12 @@ class PunchFactory extends Factory {
 
 	//Takes Punch rows and calculates the total breaks/lunches and how long each is.
 	static function calcMealAndBreakTotalTime( $data ) {
+
 		if ( is_array($data) AND count($data) > 0 ) {
+			$date_break_totals = array();
+			$tmp_date_break_totals = array();
 			//Sort data by date_stamp at the top, so it works for multiple days at a time.
-			foreach ( $data as $key => $row ) {
+			foreach ( $data as $row ) {
 				if ( $row['type_id'] != 10 ) {
 					if ( $row['status_id'] == 20 ) {
 						$tmp_date_break_totals[$row['date_stamp']][$row['type_id']]['prev'] = TTDate::parseDateTime($row['time_stamp']);
@@ -2131,7 +2133,7 @@ class PunchFactory extends Factory {
 				}
 			}
 
-			if ( isset($date_break_totals) ) {
+			if ( empty($date_break_totals) == FALSE ) {
 				return $date_break_totals;
 			}
 		}
@@ -2252,6 +2254,7 @@ class PunchFactory extends Factory {
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$sf = TTnew('StationFactory');
 
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

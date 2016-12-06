@@ -1,8 +1,8 @@
 OtherFieldViewController = BaseViewController.extend( {
 	el: '#other_field_view_container',
 	type_array: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'OtherFieldEditView.html';
 		this.permission_id = 'other_field';
 		this.viewId = 'OtherField';
@@ -178,15 +178,3 @@ OtherFieldViewController = BaseViewController.extend( {
 
 
 } );
-
-OtherFieldViewController.loadView = function() {
-
-	Global.loadViewSource( 'OtherField', 'OtherFieldView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

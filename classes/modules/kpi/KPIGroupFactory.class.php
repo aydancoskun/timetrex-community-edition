@@ -154,14 +154,19 @@ class KPIGroupFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => $name,
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->table .'
 					where company_id = ?
-						AND name = ?
+						AND lower(name) = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
@@ -254,7 +259,7 @@ class KPIGroupFactory extends Factory {
 	function postSave() {
 
 		$this->StartTransaction();
-		
+
 		$this->getFastTreeObject()->setTree( $this->getCompany() );
 		if ( $this->getDeleted() == TRUE ) {
 			//FIXME: Get parent of this object, and re-parent all groups to it.
@@ -264,6 +269,7 @@ class KPIGroupFactory extends Factory {
 			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
 			$cgmf = TTnew( 'CompanyGenericMapFactory' );
 			$klf->getByCompanyIdAndGroupId( $this->getCompany(), $this->getId() );
+			$ids = array();
 			if ( $klf->getRecordCount() > 0 ) {
 				foreach( $klf as $obj ) {
 					Debug::Text(' Re-Grouping Item: '. $obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
@@ -280,7 +286,7 @@ class KPIGroupFactory extends Factory {
 					$cgm_obj->Delete();
 				}
 			}
-			if ( isset($ids) AND is_array( $ids ) ) {
+			if ( empty($ids) == FALSE ) {
 				foreach( $ids as $id ) {
 					if ( $parent_id > 0 ) {
 						$cgmlf->getByCompanyIDAndObjectTypeAndObjectIDAndMapID( $this->getCompany(), 2020, $id, $parent_id );
@@ -369,6 +375,7 @@ class KPIGroupFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE   ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

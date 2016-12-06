@@ -41,7 +41,11 @@ var APIROE = ServiceCaller.extend( {
 
 	copyROE: function() {
 		return this.argumentsHandler( this.className, 'copyROE', arguments );
-	}
+	},
+
+	exportROE: function() {
+		return this.argumentsHandler( this.className, 'exportROE', arguments );
+	},
 
 
 

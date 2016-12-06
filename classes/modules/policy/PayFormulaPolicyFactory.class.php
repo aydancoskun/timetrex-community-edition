@@ -90,7 +90,7 @@ class PayFormulaPolicyFactory extends Factory {
 					//Required to calculate US federal OT rates that include premium time.
 					//But what date range is the average over? Daily, Weekly, Per Pay Period?
 					$retval[30] = TTi18n::gettext('Average of Contributing Pay Codes'); //Input pay code average calculation
-					
+
 					//For cases where the contract rate may be lower than the FLSA rate, in which case FLSA needs to be used.
 					//But in some cases the contract rate may be higher then it needs to be used.
 					//http://docs.oracle.com/cd/E13053_01/hr9pbr1_website_master/eng/psbooks/hpay/chapter.htm?File=hpay/htm/hpay38.htm
@@ -204,9 +204,14 @@ class PayFormulaPolicyFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
 					'company_id' => (int)$this->getCompany(),
-					'name' => strtolower($name),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
@@ -669,6 +674,7 @@ class PayFormulaPolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

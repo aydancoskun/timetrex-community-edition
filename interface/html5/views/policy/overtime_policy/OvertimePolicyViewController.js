@@ -17,8 +17,8 @@ OvertimePolicyViewController = BaseViewController.extend( {
 	job_group_api: null,
 	job_item_group_api: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'OvertimePolicyEditView.html';
 		this.permission_id = 'over_time_policy';
 		this.viewId = 'OvertimePolicy';
@@ -141,7 +141,24 @@ OvertimePolicyViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'trigger_time', mode:'time_unit', need_parser_sec: true} );
 
-		this.addEditFieldToColumn( $.i18n._( 'Active After' ), form_item_input, tab_overtime_policy_column1, '', null );
+		// Trigger Time Adjusting Contributing Shift
+		trigger_time_adjust_contributing_shift_form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		trigger_time_adjust_contributing_shift_form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'trigger_time_adjust_contributing_shift_policy_id'} );
+
+		widgetContainer = $( "<div class='widget-h-box '></div>" );
+		trigger_time_adjust_label = $( "<span class='widget-right-label'> " + $.i18n._( 'Adjusted By' ) + ": </span>" );
+		widgetContainer.append( form_item_input );
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			widgetContainer.append(trigger_time_adjust_label);
+			widgetContainer.append(trigger_time_adjust_contributing_shift_form_item_input);
+		}
+		this.addEditFieldToColumn( $.i18n._( 'Active After' ), [ form_item_input, trigger_time_adjust_contributing_shift_form_item_input], tab_overtime_policy_column1, '', widgetContainer );
 
 		//Pay Code
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -661,15 +678,3 @@ OvertimePolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-OvertimePolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'OvertimePolicy', 'OvertimePolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

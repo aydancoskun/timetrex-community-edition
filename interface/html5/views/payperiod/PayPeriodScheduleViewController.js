@@ -12,9 +12,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 	timesheet_verify_type_array: null,
 	sub_pay_periods_view_controller: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PayPeriodScheduleEditView.html';
 		this.permission_id = 'pay_period_schedule';
 		this.viewId = 'PayPeriodSchedule';
@@ -713,15 +713,3 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 	}
 
 } );
-
-PayPeriodScheduleViewController.loadView = function() {
-
-	Global.loadViewSource( 'PayPeriodSchedule', 'PayPeriodScheduleView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

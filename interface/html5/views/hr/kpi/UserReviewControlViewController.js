@@ -15,8 +15,8 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 	kpi_api: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserReviewControlEditView.html';
 		this.permission_id = 'user_review';
 		this.viewId = 'UserReviewControl';
@@ -1021,7 +1021,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			ProgressBar.closeOverlay();
 
 		} else {
-			this._super( 'onCopyAsNewClick' );
+			this._super( '_continueDoCopyAsNew' );
 		}
 
 	},
@@ -1121,13 +1121,13 @@ UserReviewControlViewController = BaseViewController.extend( {
 UserReviewControlViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserReviewControl', 'SubUserReviewControlView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_user_review_control_view_controller );
 			}

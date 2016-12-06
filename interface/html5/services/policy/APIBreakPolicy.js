@@ -41,6 +41,10 @@ var APIBreakPolicy = ServiceCaller.extend( {
 
 	copyBreakPolicy: function() {
 		return this.argumentsHandler( this.className, 'copyBreakPolicy', arguments );
+	},
+
+	exportBreakPolicy: function() {
+		return this.argumentsHandler( this.className, 'exportBreakPolicy', arguments );
 	}
 
 

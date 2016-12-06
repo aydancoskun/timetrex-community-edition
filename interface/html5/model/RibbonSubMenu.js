@@ -13,7 +13,6 @@ var RibbonSubMenu = Base.extend( {
 	},
 
 	constructor: function() {
-
 		this._super( 'constructor', arguments[0] );
 
 		if ( !this.get( 'type' ) ) {
@@ -24,18 +23,15 @@ var RibbonSubMenu = Base.extend( {
 
 		if ( this.get( 'permission_result' ) ) { //Only save maps for menus passed validation
 			TopMenuManager.menus_quick_map[this.get( 'id' )] = this.get( 'group' ).get( 'ribbon_menu' ).get( 'id' );
+			this.attributes.add_order = this.get( 'group' ).get( 'sub_menus' ).length + 1; // gives us a default sort order if one isn't specified. (used as a tie breaker)
 			this.get( 'group' ).get( 'sub_menus' ).push( this );
 		}
-
 	}
-
 } )
 
 var RibbonSubMenuType = (function() {
 	var normal = '1';
 	var nav = '2';
 
-	return {NORMAL: normal,
-		NAVIGATION: nav}
-
+	return {NORMAL: normal, NAVIGATION: nav}
 })();

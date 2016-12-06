@@ -528,7 +528,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_FormulaA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -707,7 +707,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -886,7 +886,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_Periodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -1065,7 +1065,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -1244,7 +1244,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaC() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//
 		// Full test with EI/CPP YTD amounts.
@@ -1765,7 +1765,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaC2() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//
 		// Full test with EI/CPP YTD amounts.
@@ -2290,7 +2290,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_Periodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -2469,7 +2469,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaB() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -2648,7 +2648,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_Periodic_FormulaC() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -2827,7 +2827,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaC() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -3006,7 +3006,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_Periodic_FormulaD() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -3185,7 +3185,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaD() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -3365,7 +3365,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaE() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -3497,7 +3497,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Province_NonPeriodic_FormulaF() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
@@ -3775,7 +3775,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2015_Federal_NonPeriodic_FormulaF() {
-		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));

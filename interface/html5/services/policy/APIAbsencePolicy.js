@@ -68,6 +68,10 @@ var APIAbsencePolicy = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'copyAbsencePolicy', arguments );
 
+	},
+
+	exportAbsencePolicy: function() {
+		return this.argumentsHandler( this.className, 'exportAbsencePolicy', arguments );
 	}
 
 

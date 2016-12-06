@@ -180,7 +180,7 @@ class PremiumPolicyFactory extends Factory {
 										'type' => FALSE,
 										'name' => 'Name',
 										'description' => 'Description',
-										
+
 										'pay_type_id' => 'PayType',
 										'pay_type' => FALSE,
 
@@ -217,7 +217,7 @@ class PremiumPolicyFactory extends Factory {
 										'pay_code' => FALSE,
 										'pay_formula_policy_id' => 'PayFormulaPolicy',
 										'pay_formula_policy' => FALSE,
-										
+
 										'branch' => 'Branch',
 										'branch_selection_type_id' => 'BranchSelectionType',
 										'branch_selection_type' => FALSE,
@@ -306,9 +306,14 @@ class PremiumPolicyFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => strtolower($name),
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
@@ -1089,11 +1094,12 @@ class PremiumPolicyFactory extends Factory {
 		} else {
 			$lf = TTnew( 'PremiumPolicyBranchListFactory' );
 			$lf->getByPremiumPolicyId( $this->getId() );
+			$list = array();
 			foreach ($lf as $obj) {
 				$list[] = $obj->getBranch();
 			}
 
-			if ( isset($list) ) {
+			if ( empty($list) == FALSE) {
 				$this->branch_map[$this->getId()] = $list;
 				return $this->branch_map[$this->getId()];
 			}
@@ -1101,6 +1107,7 @@ class PremiumPolicyFactory extends Factory {
 
 		return FALSE;
 	}
+
 	function setBranch($ids) {
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($ids, 'Setting Branch IDs...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1198,17 +1205,19 @@ class PremiumPolicyFactory extends Factory {
 		} else {
 			$lf = TTnew( 'PremiumPolicyDepartmentListFactory' );
 			$lf->getByPremiumPolicyId( $this->getId() );
+			$list = array();
 			foreach ($lf as $obj) {
 				$list[] = $obj->getDepartment();
 			}
 
-			if ( isset($list) ) {
+			if ( empty($list) == FALSE ) {
 				$this->department_map[$this->getId()] = $list;
 				return $this->department_map[$this->getId()];
 			}
 		}
 		return FALSE;
 	}
+
 	function setDepartment($ids) {
 		Debug::text('Setting IDs...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($ids) ) {
@@ -1296,11 +1305,12 @@ class PremiumPolicyFactory extends Factory {
 		} else {
 			$lf = TTnew( 'PremiumPolicyJobGroupListFactory' );
 			$lf->getByPremiumPolicyId( $this->getId() );
+			$list = array();
 			foreach ($lf as $obj) {
 				$list[] = $obj->getJobGroup();
 			}
 
-			if ( isset($list) ) {
+			if ( empty($list) == FALSE ) {
 				$this->job_group_map[$this->getId()] = $list;
 				return $this->job_group_map[$this->getId()];
 			}
@@ -1412,11 +1422,12 @@ class PremiumPolicyFactory extends Factory {
 		} else {
 			$lf = TTnew( 'PremiumPolicyJobListFactory' );
 			$lf->getByPremiumPolicyId( $this->getId() );
+			$list = array();
 			foreach ($lf as $obj) {
 				$list[] = $obj->getjob();
 			}
 
-			if ( isset($list) ) {
+			if ( empty($list) == FALSE ) {
 				$this->job_map[$this->getId()] = $list;
 				return $this->job_map[$this->getId()];
 			}
@@ -1528,11 +1539,12 @@ class PremiumPolicyFactory extends Factory {
 		} else {
 			$lf = TTnew( 'PremiumPolicyJobItemGroupListFactory' );
 			$lf->getByPremiumPolicyId( $this->getId() );
+			$list = array();
 			foreach ($lf as $obj) {
 				$list[] = $obj->getJobItemGroup();
 			}
 
-			if ( isset($list) ) {
+			if ( empty($list) == FALSE ) {
 				$this->job_item_group_map[$this->getId()] = $list;
 				return $this->job_item_group_map[$this->getId()];
 			}
@@ -1540,6 +1552,7 @@ class PremiumPolicyFactory extends Factory {
 
 		return FALSE;
 	}
+
 	function setJobItemGroup($ids) {
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			return FALSE;
@@ -1631,11 +1644,12 @@ class PremiumPolicyFactory extends Factory {
 		} else {
 			$lf = TTnew( 'PremiumPolicyJobItemListFactory' );
 			$lf->getByPremiumPolicyId( $this->getId() );
+			$list = array();
 			foreach ($lf as $obj) {
 				$list[] = $obj->getJobItem();
 			}
 
-			if ( isset($list) ) {
+			if ( empty($list) == FALSE ) {
 				$this->job_item_map[$this->getId()] = $list;
 				return $this->job_item_map[$this->getId()];
 			}
@@ -1643,6 +1657,7 @@ class PremiumPolicyFactory extends Factory {
 
 		return FALSE;
 	}
+
 	function setJobItem($ids) {
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			return FALSE;
@@ -1866,8 +1881,8 @@ class PremiumPolicyFactory extends Factory {
 						//When dealing with partial punches, any overlap whatsoever activates the policy.
 						Debug::text(' Partial Punch Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
-					} elseif ( $in_epoch >= $tmp_start_time_stamp AND $in_epoch <= $tmp_end_time_stamp ) {
-						//Non partial punches, they must punch in within the time window.
+					} elseif ( $in_epoch >= $tmp_start_time_stamp AND $out_epoch <= $tmp_end_time_stamp ) {
+						//Non partial punches, they must punch in AND out (entire shift) within the time window.
 						Debug::text(' Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
 					} elseif ( ( $start_time_stamp == '' OR $end_time_stamp == '' OR $start_time_stamp == $end_time_stamp ) ) { //Must go AFTER the above IF statements.
@@ -2075,6 +2090,7 @@ class PremiumPolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

@@ -665,7 +665,6 @@ class ScheduleSummaryReport extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('schedule' => array(), 'user' => array(), 'total_shift' => array() );
 
-		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'schedule', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
@@ -682,8 +681,6 @@ class ScheduleSummaryReport extends Report {
 		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
 			$filter_data['exclude_user_id'] = array(0);
 		}
-
-		$pay_period_ids = array();
 
 		if ( strpos( $format, 'schedule' ) === FALSE ) { //Avoid running these queries when printing out the schedule.
 			$slf = TTnew( 'ScheduleListFactory' );
@@ -1112,7 +1109,8 @@ class ScheduleSummaryReport extends Report {
 					//Keep track of unique branch/departments, if it exceeds 1 then always display them
 					$unique_branch = array();
 					$unique_department = array();
-
+					$unique_job_item = array();
+					$unique_job = array();
 					foreach( $calendar_array as $calendar_day ) {
 						$date_stamp = $calendar_day['date_stamp'];
 						$lines_per_day = 0;
@@ -1170,7 +1168,7 @@ class ScheduleSummaryReport extends Report {
 							}
 						}
 					}
-					unset($date_stamp, $line_per_day );
+					unset($date_stamp );
 					//Debug::Text('Max Lines Per Day: '. $max_lines_per_day .' User ID: '. $user_id .' Row: '. $row, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Track if the user is assigned to multiple branches/departments, if we are going to display even one in the week, we may as well
@@ -1184,19 +1182,19 @@ class ScheduleSummaryReport extends Report {
 					$multiple_departments = FALSE;
 					if ( isset($unique_department) AND count($unique_department) > 1 ) {
 						$multiple_departments = TRUE;
-						unset($unique_departments);
+						unset($unique_department);
 					}
 
 					$multiple_jobs = FALSE;
-					if ( isset($unique_job) AND count($unique_job) > 1 ) {
+					if ( empty($unique_job) == FALSE ) {
 						$multiple_jobs = TRUE;
-						unset($unique_jobs);
+						unset($unique_job);
 					}
 
 					$multiple_job_items = FALSE;
-					if ( isset($unique_job_item) AND count($unique_job_item) > 1 ) {
+					if ( empty($unique_job_item) == FALSE ) {
 						$multiple_job_items = TRUE;
-						unset($unique_job_items);
+						unset($unique_job_item);
 					}
 
 					if ( $s > 0 ) {
@@ -1269,7 +1267,7 @@ class ScheduleSummaryReport extends Report {
 													//$this->pdf->setFillColor(255, 255, 255);
 													$this->pdf->setFillColorArray( $row_bg_color_arr );
 													$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
-													$schedule_shift_label = array();
+													
 													foreach( $level_5 as $schedule_data_shift ) {
 														if ( isset($schedule_data_shift['status_id']) AND $schedule_data_shift['status_id'] == 20 ) {
 															$this->pdf->setTextColor(255, 0, 0);
@@ -1327,11 +1325,7 @@ class ScheduleSummaryReport extends Report {
 		}
 
 		$filter_data = $this->getFilterConfig();
-		$columns = Misc::trimSortPrefix( $this->getOptions('columns') );
-
-		$adjust_x = 10;
-		$adjust_y = 10;
-
+		
 		//Required fields
 		// 'first_name', 'last_name', 'branch', 'department', 'start_time', 'end_time'
 		$start_week_day = 0;
@@ -1404,8 +1398,6 @@ class ScheduleSummaryReport extends Report {
 		}
 
 		if ( isset($filter_data['start_date']) AND isset($filter_data['end_date']) ) {
-			$pdf_created_date = time();
-
 			$this->pdf = new TTPDF( $this->config['other']['page_orientation'], 'mm', $this->config['other']['page_format'], $this->getUserObject()->getCompanyObject()->getEncoding() );
 
 			$this->pdf->SetAuthor( APPLICATION_NAME );
@@ -1477,6 +1469,7 @@ class ScheduleSummaryReport extends Report {
 										$key = 0;
 										$i = 0;
 										foreach( $calendar_array as $calendar_day ) {
+											
 											if ( ($i % 7) == 0 ) {
 												$calendar_week_array = array_slice( $calendar_array, $i, 7 );
 												if ( $i != 0 ) {
@@ -1486,7 +1479,7 @@ class ScheduleSummaryReport extends Report {
 												$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format );
 
 												$s = 0;
-												foreach( $level_5 as $user_id => $user_schedule ) {
+												foreach( $level_5 as $user_schedule ) {
 													if ( $this->_pdf_checkMaximumPageLimit() == FALSE ) {
 														Debug::Text('Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10);
 														//Exceeded maximum pages, stop processing.
@@ -1520,7 +1513,7 @@ class ScheduleSummaryReport extends Report {
 											$key++;
 											$i++;
 										}
-
+										unset($calendar_day);
 										$this->scheduleFooterWeek( $column_widths );
 										$x++;										
 									}
@@ -1565,7 +1558,7 @@ class ScheduleSummaryReport extends Report {
 
 							$this->scheduleWeekHeader( $calendar_week_array, $column_widths, $format );
 
-							foreach( $this->form_data['schedule_by_user'] as $user_id => $user_schedule ) {
+							foreach( $this->form_data['schedule_by_user'] as $user_schedule ) {
 								if ( $this->_pdf_checkMaximumPageLimit() == FALSE ) {
 									Debug::Text('Exceeded maximum page count...', __FILE__, __LINE__, __METHOD__, 10);
 									//Exceeded maximum pages, stop processing.

@@ -136,7 +136,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		return $this;
 	}
-	
+
 	function getByUserIdAndDateStampAndObjectTypeAndOverrideAndMisMatchPunchControlDateStamp($user_id, $date_stamp, $object_type_id, $override = FALSE) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -165,10 +165,10 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//Ensures that all worked time entries that are map to a punch_control row that is marked as deleted
 		//will also be returned so they can be deleted.
 		$query = '
-					select	a.*
-					from	'. $this->getTable() .' as a
+					SELECT	a.*
+					FROM 	'. $this->getTable() .' as a
 					LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
-					where	a.user_id = ?
+					WHERE 	a.user_id = ?
 						AND a.date_stamp = ?
 						AND
 							(
@@ -179,6 +179,66 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND ( a.deleted = 0 )
 					';
 
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function deleteByUserIdAndDateStampAndObjectTypeAndOverrideAndMisMatchPunchControlDateStamp($user_id, $date_stamp, $object_type_id, $override = FALSE) {
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $date_stamp == '' ) {
+			return FALSE;
+		}
+
+		if ( $object_type_id == '' ) {
+			return FALSE;
+		}
+
+		$pcf = new PunchControlFactory();
+
+		$ph = array(
+				'user_id' => (int)$user_id,
+				'date_stamp' => $this->db->BindDate( $date_stamp ),
+				'override' => $this->toBool( $override ),
+		);
+
+		//Don't check for JUST b.deleted = 0 because of the LEFT JOIN, it might be NULL too.
+		//There is a bug where sometimes a user_date_total row is orphaned with no punch_control rows that aren't deleted
+		//So make sure this query includes those orphaned rows so they can be deleted.
+		//( a.user_date_id != b.user_date_id OR b.deleted = 1 )
+		//Ensures that all worked time entries that are map to a punch_control row that is marked as deleted
+		//will also be returned so they can be deleted.
+		if ( $this->getDatabaseType() === 'mysql' ) {
+			$query = '	DELETE a.*
+						FROM '. $this->getTable() .' as a
+						LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
+						WHERE
+						';
+		} else {
+			$query = '	DELETE 
+						FROM '. $this->getTable() .'
+						USING 	'. $this->getTable() .' as a
+						LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
+						WHERE	user_date_total.id = a.id
+							AND
+						';
+
+		}
+		$query .= '		a.user_id = ?
+						AND a.date_stamp = ?
+						AND
+							(
+								( a.override = ? AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .') )
+								OR
+								( b.id IS NOT NULL AND ( a.user_id = b.user_id AND ( a.date_stamp != b.date_stamp OR b.deleted = 1 ) ) )
+							)
+						AND ( a.deleted = 0 )
+					';
+
+		//Debug::Arr( $ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -253,9 +313,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$strict = TRUE;
 		}
 
-		$pcf = new PunchControlFactory();
-		$pf = new PunchFactory();
-
 		$ph = array(
 					'user_id' => (int)$user_id,
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
@@ -301,9 +358,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 			$strict = TRUE;
 		}
 
-		$pcf = new PunchControlFactory();
-		$pf = new PunchFactory();
-
 		$ph = array(
 					'user_id' => (int)$user_id,
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
@@ -323,27 +377,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.deleted = 0
 					';
 		$query .= $this->getSortSQL( $order, $strict );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	function getByPunchControlId($punch_control_id) {
-		if ( $punch_control_id == '' ) {
-			return FALSE;
-		}
-
-		$ph = array(
-					'punch_control_id' => (int)$punch_control_id,
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where punch_control_id = ?
-						AND deleted = 0
-					';
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -531,8 +564,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		if ( $week_start_epoch == '' ) {
 			return FALSE;
 		}
-
-		$otpf = new OverTimePolicyFactory();
 
 		$ph = array(
 					'user_id' => (int)$user_id,
@@ -1024,7 +1055,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.total_time > 0
 						AND ( a.deleted = 0 )
 				';
-				
+
 		return $this->db->getCol( $query, $ph );
 	}
 
@@ -1059,7 +1090,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.total_time > 0
 						AND ( a.deleted = 0 )
 				';
-				
+
 		return $this->db->getCol( $query, $ph );
 	}
 
@@ -1101,7 +1132,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.total_time_amount > 0
 						AND ( a.deleted = 0 )
 				';
-		
+
 		return $this->db->getCol( $query, $ph );
 	}
 
@@ -1364,7 +1395,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 		return $this;
 	}
-	
+
 	function getByUserIdAndPayPeriodIdAndEndDate($user_id, $pay_period_id, $end_date = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -1470,7 +1501,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		}
 
 		$af = new AccrualFactory();
-		$udtf = new UserDateTotalFactory();
 
 		//
 		// getOrphansByUserIdAndDate() AND getOrphansByUserId() are similar, may need to modify both!
@@ -1544,7 +1574,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND ( a.joined_id is NULL )
 						AND a.deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1580,7 +1610,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		}
 		*/
 
-		$ulf = new UserListFactory();
 		$pcf = new PayCodeFactory();
 
 		$ph = array(
@@ -1676,11 +1705,11 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 				$date_sql = 'date_trunc(\'week\',	a.date_stamp )';
 			}
 		} elseif ( $type == 'month' ) {
-			if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
-				$date_sql = 'month(	a.date_stamp )';
-			} else {
-				$date_sql = 'date_trunc(\'month\',	a.date_stamp )';
-			}
+		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+			$date_sql = 'month(	a.date_stamp )';
+		} else {
+			$date_sql = 'date_trunc(\'month\',	a.date_stamp )';
+		}
 		} else {
 			$date_sql = 'a.date_stamp';
 		}
@@ -1914,7 +1943,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$df = new DepartmentFactory();
 		$ppf_b = new PayPeriodFactory();
 		$pcf = new PayCodeFactory();
-		
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jf = new JobFactory();
 			$jif = new JobItemFactory();
@@ -1953,7 +1982,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							sum(a.total_time) as total_time,
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
-							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden
+							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden,
+							'. $this->getSQLStringAggregate( 'a.note', ' -- ' ) .' as udt_note
 					FROM	'. $this->getTable() .' as a
 					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
 					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id
@@ -1992,7 +2022,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= ( isset($filter_data['punch_job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['punch_job_item_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'a.pay_period_id', $filter_data['pay_period_id'], 'numeric_list', $ph ) : NULL;
-		
+
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => (int)$company_id, 'object_type_id' => 200, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
@@ -2051,7 +2081,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$df = new DepartmentFactory();
 		$ppf_b = new PayPeriodFactory();
 		$pcf = new PayCodeFactory();
-		
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jf = new JobFactory();
 			$jif = new JobItemFactory();
@@ -2087,6 +2117,8 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 
 							min(a.start_time_stamp) as start_time_stamp,
 							max(a.end_time_stamp) as end_time_stamp,
+							sum(a.quantity) as quantity,
+							sum(a.bad_quantity) as bad_quantity,
 							sum(a.total_time) as total_time,
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
@@ -2569,7 +2601,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= ( isset($filter_data['date_stamp']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : NULL;
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['start_date'], 'start_datestamp', $ph ) : NULL;
 		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['end_date'], 'end_datestamp', $ph ) : NULL;
-		
+
 		$query .= ' AND (a.deleted = 0 AND d.deleted = 0) ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );

@@ -132,7 +132,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 						AND a.pay_period_schedule_id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -203,7 +203,7 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 						AND pay_period_schedule_id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -247,11 +247,12 @@ class PayPeriodScheduleUserListFactory extends PayPeriodScheduleUserFactory impl
 
 		$ppsulf->getByPayPeriodScheduleId($id);
 
+		$user_list = array();
 		foreach ($ppsulf as $user) {
 			$user_list[$user->getUser()] = NULL;
 		}
 
-		if ( isset($user_list) ) {
+		if ( empty($user_list) == FALSE ) {
 			return $user_list;
 		}
 

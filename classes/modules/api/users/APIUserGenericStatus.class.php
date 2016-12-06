@@ -72,6 +72,7 @@ class APIUserGenericStatus extends APIFactory {
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ugslf->getRecordCount() );
 				$this->setPagerObject( $ugslf );
 
+				$rows = array();
 				foreach ($ugslf as $ugs_obj) {
 					$rows[] = array(
 										'id' => $ugs_obj->getId(),

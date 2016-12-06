@@ -116,7 +116,6 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 			$strict = TRUE;
 		}
 
-		$pgf = new PolicyGroupFactory();
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
@@ -131,6 +130,43 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 					from	'. $this->getTable() .' as a
 					where	a.company_id = ?
 						AND a.deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	function getByCompanyIdAndContributingShiftPolicyId($id, $contributing_shift_policy_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $contributing_shift_policy_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'id' => (int)$id,
+		);
+
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .' as a
+					where	company_id = ?
+						AND ( 	contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'int' ) .')
+								OR eligible_contributing_shift_policy_id in ('. $this->getListSQL( $contributing_shift_policy_id, $ph, 'int' ) .')
+							)
+						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
@@ -331,6 +367,7 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		$hplf = new HolidayPolicyListFactory();
 		$hplf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -339,7 +376,7 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 			$list[$hp_obj->getID()] = $hp_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

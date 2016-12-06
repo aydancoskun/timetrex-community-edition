@@ -295,6 +295,24 @@ class PayPeriodFactory extends Factory {
 		return FALSE;
 	}
 
+	function isConflicting() {
+		Debug::Text('PayPeriod Schedule ID: '. $this->getPayPeriodSchedule() .' DateStamp: '. $this->getStartDate(), __FILE__, __LINE__, __METHOD__, 10);
+		//Make sure we're not conflicting with any other schedule shifts.
+		$pplf = TTnew( 'PayPeriodListFactory' );
+		$pplf->getConflictingByPayPeriodScheduleIdAndStartDateAndEndDate( $this->getPayPeriodSchedule(), $this->getStartDate(), $this->getEndDate(), (int)$this->getID() );
+		if ( $pplf->getRecordCount() > 0 ) {
+			foreach( $pplf as $conflicting_pp_obj ) {
+				if ( $conflicting_pp_obj->isNew() === FALSE
+						AND $conflicting_pp_obj->getId() != $this->getId() ) {
+					Debug::text('Conflicting Pay Period ID: '. $conflicting_pp_obj->getId() .' PayPeriod ID: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
+	}
+
 	function getPayPeriodDates( $filter_start_date = NULL, $filter_end_date = NULL, $include_pay_period_id = FALSE ) {
 		//Debug::Text('Start Date: '. TTDate::getDate('DATE', $this->getStartDate()) .' End Date: '. TTDate::getDate('DATE', $this->getEndDate()) .' Filter: Start: '. TTDate::getDate('DATE', $filter_start_date ) .' End: '. TTDate::getDate('DATE', $filter_end_date), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getStartDate() > 0 AND $this->getEndDate() > 0 ) {
@@ -350,7 +368,6 @@ class PayPeriodFactory extends Factory {
 				$this->Validator->isTrue(		'start_date',
 												$this->isValidStartDate($epoch),
 												TTi18n::gettext('Conflicting start date'))
-
 			) {
 
 			$this->data['start_date'] = $epoch;
@@ -893,8 +910,6 @@ class PayPeriodFactory extends Factory {
 
 	//Delete all data assigned to this pay period.
 	function deleteData() {
-		$pps_obj = $this->getPayPeriodScheduleObject();
-
 		//Make sure current pay period isnt closed.
 		if ( $this->getStatus() == 20 ) {
 			return FALSE;
@@ -1085,6 +1100,14 @@ class PayPeriodFactory extends Factory {
 											TTi18n::gettext('Conflicting end date'));
 		}
 
+		if ( $this->getDeleted() == FALSE AND ( $this->getStartDate() != FALSE AND $this->getEndDate() != '' AND $this->getPayPeriodSchedule() > 0 ) ) {
+			$this->Validator->isTrue(		'start_date',
+											 !$this->isConflicting(), //Reverse the boolean.
+											 TTi18n::gettext('Conflicting start/end date, pay period already exists.'));
+		} else {
+			Debug::text('Not checking for conflicts... DateStamp: '. (int)$this->getStartDate(), __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		if ( $this->getEndDate() != '' AND $this->getTransactionDate() != '' AND $this->getTransactionDate() < $this->getEndDate() ) {
 			$this->Validator->isTrue(		'transaction_date',
 											FALSE,
@@ -1164,7 +1187,7 @@ class PayPeriodFactory extends Factory {
 			$psf = TTnew( 'PayStubFactory' );
 			$uf = TTNew('UserFactory');
 
-			$query = 'SELECT max(run_id) FROM '. $psf->getTable() .' as a LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id ) WHERE b.company_id = '. (int)$this->getCompany() .' AND a.pay_period_id = 0';
+			$query = 'SELECT  max(run_id) FROM '. $psf->getTable() .' as a LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id ) WHERE b.company_id = '. (int)$this->getCompany() .' AND a.pay_period_id = 0';
 			$run_id = (int)$this->db->GetOne($query);
 			Debug::text('Next Run ID for PayPeriodID=0: '. $run_id .' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1260,6 +1283,7 @@ class PayPeriodFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			$ppsf = TTnew( 'PayPeriodScheduleFactory' );
@@ -1268,6 +1292,8 @@ class PayPeriodFactory extends Factory {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {
 
 					$function = 'get'.$function_stub;
+					$exceptions_arr = array();
+					$timesheet_arr = array();
 					switch( $variable ) {
 						case 'status':
 							$function = 'get'.$variable;
@@ -1305,7 +1331,7 @@ class PayPeriodFactory extends Factory {
 						case 'exceptions_low':
 							//These functions are slow to obtain, so make sure the column is requested explicitly before we include it.
 							if ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) {
-								if ( !isset($exceptions_arr) ) {
+								if ( empty($exceptions_arr) ) {
 									$exceptions_arr = $this->getExceptions();
 								}
 
@@ -1317,7 +1343,7 @@ class PayPeriodFactory extends Factory {
 						case 'total_timesheets':
 							//These functions are slow to obtain, so make sure the column is requested explicitly before we include it.
 							if ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) {
-								if ( !isset($timesheet_arr) ) {
+								if ( empty($timesheet_arr) ) {
 									$timesheet_arr = $this->getTimeSheets();
 								}
 

@@ -11,8 +11,8 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	authorization_api: null,
 
 	request_api: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'TimeSheetAuthorizationEditView.html';
 		this.permission_id = 'punch';
 		this.viewId = 'TimeSheetAuthorization';
@@ -26,6 +26,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
 
 		this.invisible_context_menu_dic[ContextMenuIconName.add] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.delete_icon] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
@@ -42,6 +43,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
 
+		this.hierarchy_type_id = 90;
 	},
 
 	initOptions: function() {
@@ -122,6 +124,13 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		var navigation_group = new RibbonSubMenuGroup( {
 			label: $.i18n._( 'Navigation' ),
 			id: this.viewId + 'navigation',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+
+		var other_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Other' ),
+			id: this.viewId + 'other',
 			ribbon_menu: menu,
 			sub_menus: []
 		} );
@@ -245,9 +254,31 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
+
+    setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
+        if ( !this.viewPermissionValidate( pId ) || this.edit_only_mode ) {
+            context_btn.addClass( 'invisible-image' );
+        }
+
+        if ( grid_selected_length === 1 ) {
+            context_btn.removeClass( 'disable-image' );
+        } else {
+            context_btn.addClass( 'disable-image' );
+        }
+    },
 
 	setDefaultMenuEditIcon: function( context_btn, grid_selected_length, pId ) {
 		if ( !this.editPermissionValidate( pId ) || this.edit_only_mode ) {
@@ -373,6 +404,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				case ContextMenuIconName.authorization_expense:
 					this.setDefaultMenuAuthorizationExpenseIcon( context_btn, grid_selected_length );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
+					break;
 
 			}
 
@@ -431,6 +465,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.authorization_expense:
 					this.setEditMenuAuthorizationExpenseIcon( context_btn );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn );
 					break;
 
 			}
@@ -511,6 +548,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			case ContextMenuIconName.timesheet:
 			case ContextMenuIconName.schedule:
 			case ContextMenuIconName.edit_employee:
+			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
 
@@ -576,6 +614,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				IndexViewController.goToView( 'Schedule', filter );
 				break;
 
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('export' + this.api.key_name )
+				break;
 		}
 
 	},
@@ -614,7 +655,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			current_edit_record_id = $this.current_edit_record.id;
 
 
-			$this.onViewClick( current_edit_record_id );
+			$this.onViewClick( current_edit_record_id , true );
 
 		} else {
 			$this.setErrorMenu();
@@ -758,7 +799,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 
 		var msg = {};
 
-		if ( this.is_edit ) {
+		if ( this.is_edit && this.current_edit_record != undefined) {
 			msg.body = this.current_edit_record['body'];
 			msg.from_user_id = this.current_edit_record['user_id'];
 			msg.to_user_id = this.current_edit_record['user_id'];
@@ -821,6 +862,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				$this.current_edit_record = result_data;
 				$this.initEditView();
 
+				AuthorizationHistory.init($this);
 			}
 		} );
 
@@ -1007,7 +1049,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	buildEditViewUI: function() {
-
 		this._super( 'buildEditViewUI' );
 
 		this.setTabLabels( {
@@ -1019,28 +1060,20 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		//Tab 0 start
 
 		var tab_timesheet_verification = this.edit_view_tab.find( '#tab_timesheet_verification' );
-
 		var tab_timesheet_verification_column1 = tab_timesheet_verification.find( '.first-column' );
-
 		var tab_timesheet_verification_column2 = tab_timesheet_verification.find( '.second-column' );
-
 		this.edit_view_tabs[0] = [];
-
 		this.edit_view_tabs[0].push( tab_timesheet_verification_column1 );
 
 		// Subject
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( {field: 'subject', width: 359} );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_timesheet_verification_column1, '' );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-
 		form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
-
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_timesheet_verification_column1, '', null, null, true );
-
 		tab_timesheet_verification_column2.css( 'display', 'none' );
 
 	},
@@ -1232,13 +1265,12 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		if ( this.is_viewing ) {
 			this.initTimeSheetSummary();
 			this.initExceptionSummary();
-			this.initEmbeddedMessageData();
+			//this.initEmbeddedMessageData();
 		} else {
 			if ( Global.isSet( $this.messages ) ) {
 				$this.messages = null;
 			}
 		}
-
 	},
 
 	buildExceptionDisplayColumns: function( apiDisplayColumnsArray ) {
@@ -1386,8 +1418,12 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 		this.removeExceptionGridNoResultCover();
 		this.exception_grid_no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
 		this.exception_grid_no_result_box.NoResultBox( {related_view_controller: this, is_new: false} );
-		this.exception_grid_no_result_box.attr( 'id', '#exception_grid_no_result_box' );
 		var grid_div = $( '.exception-grid-div' );
+		grid_div.css('position', 'relative');
+		this.exception_grid_no_result_box.attr( 'id', '#exception_grid_no_result_box' );
+		this.exception_grid_no_result_box.css( 'width', parseInt(grid_div.width())+'px' );
+		this.exception_grid_no_result_box.css( 'height', parseInt(grid_div.height())+'px' );
+
 		grid_div.append( this.exception_grid_no_result_box );
 	},
 
@@ -1463,7 +1499,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 					fixed: true,
 					sortable: false,
 					title: false,
-					formatter: this.onCellFormat
+					formatter: $this.onCellFormat
 				};
 				columns.push( punch_in_out_column );
 				var start_date_str = $this.current_edit_record.start_date;
@@ -1739,7 +1775,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				}
 				return punch_info.get( 0 ).outerHTML;
 			} else if ( row.type === TimeSheetAuthorizationViewController.REGULAR_ROW ) {
-
 				punch_info = $( "<span class='top-line-span' style='font-size: 11px'></span>" );
 				if ( Global.isSet( cell_value ) ) {
 					punch_info.text( cell_value );
@@ -1829,61 +1864,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	setTimeSheetSummaryGridSize: function() {
 		this.timesheet_authorization_summary_grid && this.timesheet_authorization_summary_grid.setGridWidth( $( '.timesheet-authorization-grid-div' ).width() );
 	},
-
-	initEmbeddedMessageData: function() {
-		var $this = this;
-		var args = {};
-		args.filter_data = {};
-		args.filter_data.object_type_id = 90;
-		args.filter_data.object_id = this.current_edit_record.id;
-		if ( this.parseToRecordId( this.current_edit_record.id ) == -1 ) {
-			$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
-			return;
-		}
-		$this.message_control_api['getEmbeddedMessage']( args, {
-			onResult: function( res ) {
-				// Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=RequestAuthorization&id=1306 line 1547
-				if ( !$this.edit_view || !$this.edit_view_ui_dic['from'] ) {
-					return;
-				}
-
-				var data = res.getResult();
-
-				if ( Global.isArray( data ) && data.length > 0 ) {
-					$this.messages = data;
-					$( $this.edit_view_tab.find( '#tab_timesheet_verification' ).find( '.edit-view-tab' ).find( '.separate' ) ).css( 'display', 'block' );
-					var container = $( '<div></div>' );
-
-					for ( var key in data ) {
-
-						var currentItem = data[key];
-						/* jshint ignore:start */
-						if ( currentItem.status_id == 10 ) {
-							$this.message_control_api['markRecipientMessageAsRead']( [currentItem.id], {
-								onResult: function( res ) {
-								}
-							} );
-						}
-						/* jshint ignore:end */
-
-						var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + ' @ ' + currentItem.updated_date;
-						$this.edit_view_ui_dic['from'].setValue( from );
-						$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
-						$this.edit_view_ui_dic['body'].setValue( currentItem.body );
-
-						var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_timesheet_verification' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
-						cloneMessageControl.css( 'display', 'block' ).appendTo( container );
-					}
-
-					$this.edit_view_tab.find( '#tab_timesheet_verification' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
-					$this.edit_view_tab.find( '#tab_timesheet_verification' ).find( '.edit-view-tab' ).append( container.html() );
-
-				} else {
-					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
-				}
-			}
-		} );
-	}
 
 } );
 

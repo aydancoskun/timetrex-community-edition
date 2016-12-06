@@ -1181,7 +1181,7 @@ class UserDeductionFactory extends Factory {
 
 				$retval = abs($retval);
 
-				unset($fixed_amount, $tmp_amount, $amount, $min_limit, $max_limit);
+				unset($fixed_amount, $amount);
 
 				break;
 			case 69: // Custom Formulas
@@ -2165,6 +2165,7 @@ class UserDeductionFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			$cdf = new CompanyDeductionFactory();

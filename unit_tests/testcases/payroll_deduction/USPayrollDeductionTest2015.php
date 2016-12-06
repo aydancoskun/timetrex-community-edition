@@ -40,10 +40,10 @@ require_once('PHPUnit/Framework/TestCase.php');
  * @group USPayrollDeductionTest2015
  */
 class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
-    public $company_id = NULL;
+	public $company_id = NULL;
 
-    public function setUp() {
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function setUp() {
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
 
@@ -53,13 +53,13 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		TTDate::setTimeZone('Etc/GMT+8'); //Force to non-DST timezone. 'PST' isnt actually valid.
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
-        return TRUE;
-    }
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		return TRUE;
+	}
 
 	public function mf($amount) {
 		return Misc::MoneyFormat($amount, FALSE);
@@ -87,12 +87,12 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 		$test_rows = Misc::parseCSV( $this->tax_table_file, TRUE );
 
-		$total_rows = count($test_rows)+1;
+		$total_rows = (count($test_rows) + 1);
 		$i = 2;
 		foreach( $test_rows as $row ) {
 			//Debug::text('Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__,10);
 			if ( $row['gross_income'] == '' AND isset($row['low_income']) AND $row['low_income'] != '' AND isset($row['high_income']) AND $row['high_income'] != '' ) {
-				$row['gross_income'] = $row['low_income'] + ( ($row['high_income'] - $row['low_income']) / 2 );
+				$row['gross_income'] = ($row['low_income'] + ( ($row['high_income'] - $row['low_income']) / 2 ));
 			}
 			if ( $row['country'] != '' AND $row['gross_income'] != '' ) {
 				//echo $i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'] ."\n";
@@ -110,13 +110,13 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 				//Some states use other values for allowance/deductions.
 				switch ($row['province']) {
 					case 'GA':
-						Debug::text('Setting UserValue3: '. $row['allowance'], __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Setting UserValue3: '. $row['allowance'], __FILE__, __LINE__, __METHOD__, 10);
 						$pd_obj->setUserValue3( $row['allowance'] );
 						break;
 					case 'IN':
 					case 'IL':
 					case 'VA':
-						Debug::text('Setting UserValue1: '. $row['allowance'], __FILE__, __LINE__, __METHOD__,10);
+						Debug::text('Setting UserValue1: '. $row['allowance'], __FILE__, __LINE__, __METHOD__, 10);
 						$pd_obj->setUserValue1( $row['allowance'] );
 						break;
 				}
@@ -141,14 +141,14 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		}
 
 		//Make sure all rows are tested.
-		$this->assertEquals( $total_rows, $i-1);
+		$this->assertEquals( $total_rows, ($i - 1));
 	}
 
 	
 	function testUS_2015a_Test1() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','OR');
+		$pd_obj = new PayrollDeduction('US', 'OR');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 26 ); //Semi-Monthly
 
@@ -175,9 +175,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	// US Social Security
 	//
 	function testUS_2015a_SocialSecurity() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -197,9 +197,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015a_SocialSecurity_Max() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -219,9 +219,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015a_Medicare() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -240,9 +240,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
 	}
 	function testUS_2015a_Additional_MedicareA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -263,9 +263,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
 	}
 	function testUS_2015a_Additional_MedicareB() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -287,9 +287,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015a_Additional_MedicareC() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -310,9 +310,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerMedicare() ), '14.50' );
 	}
 	function testUS_2015a_Additional_MedicareD() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -334,9 +334,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015a_FederalUI_NoState() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -358,9 +358,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015a_FederalUI_NoState_Max() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -386,9 +386,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015a_FederalUI_State_Max() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setDate(strtotime('01-Jan-2015'));
 		$pd_obj->setAnnualPayPeriods( 24 ); //Semi-Monthly
 
@@ -418,9 +418,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	//Test Periodic vs NonPeriodic formulas.
 	//
 	function testUS_2015_Federal_Periodic_FormulaA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -591,9 +591,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015_Federal_NonPeriodic_FormulaA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
 		$pd_obj->setFormulaType( 20 ); //Periodic
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -764,9 +764,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015_Federal_Periodic_FormulaB() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -938,9 +938,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015_Federal_NonPeriodic_FormulaB() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
 		$pd_obj->setFormulaType( 20 ); //Periodic
 		$pd_obj->setFederalFilingStatus( 10 ); //Single
@@ -1114,9 +1114,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 
 	function testUS_2015_State_Periodic_FormulaA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
 		$pd_obj->setFormulaType( 10 ); //Periodic
 		$pd_obj->setStateFilingStatus( 10 ); //Single
@@ -1287,9 +1287,9 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testUS_2015_State_NonPeriodic_FormulaA() {
-		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('US','MO');
+		$pd_obj = new PayrollDeduction('US', 'MO');
 		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
 		$pd_obj->setFormulaType( 20 ); //NonPeriodic
 		$pd_obj->setStateFilingStatus( 10 ); //Single

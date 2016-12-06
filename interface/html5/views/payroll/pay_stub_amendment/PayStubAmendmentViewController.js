@@ -6,8 +6,8 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 	user_api: null,
 	user_group_api: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PayStubAmendmentEditView.html';
 		this.permission_id = 'pay_stub_amendment';
 		this.viewId = 'PayStubAmendment';
@@ -352,6 +352,15 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVPayStubAmendment' ),
 			permission: null
 		} );
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
 
 //		var costa_rica_std_form_1 = new RibbonSubMenuNavItem( {
 //			label: $.i18n._( 'Costa Rica - Std Form 1' ),
@@ -519,6 +528,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				case ContextMenuIconName.direct_deposit:
 					this.setDefaultMenuDirectDepositIcon( context_btn, grid_selected_length );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
+					break;
 
 			}
 
@@ -647,6 +659,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				case ContextMenuIconName.print_checks:
 				case ContextMenuIconName.direct_deposit:
 					this.setEditMenuViewIcon( context_btn );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
 					break;
 			}
 
@@ -904,15 +919,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	},
 
 	doFormIFrameCall: function( postData ) {
-
-		var url = ServiceCaller.getURLWithSessionId( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name );
-
-		var message_id = UUID.guid();
-
-		url = url + '&MessageID=' + message_id;
-
-		this.sendFormIFrameCall( postData, url, message_id );
-
+		this.sendIframeCall(this.api.className, 'get' + this.api.key_name, postData);
 	},
 
 	setCurrentEditRecordData: function() {
@@ -1528,15 +1535,3 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 
 } );
-
-PayStubAmendmentViewController.loadView = function() {
-
-	Global.loadViewSource( 'PayStubAmendment', 'PayStubAmendmentView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

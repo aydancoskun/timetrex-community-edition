@@ -18,8 +18,8 @@ PayStubViewController = BaseViewController.extend( {
 
 	include_entries: true,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PayStubEditView.html';
 		this.permission_id = 'pay_stub';
 		this.viewId = 'PayStub';
@@ -375,6 +375,17 @@ PayStubViewController = BaseViewController.extend( {
 			} );
 		}
 
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			items: [],
+			permission_result: true,
+			permission: true,
+			sort_order: 9000
+		} );
+
 //		var costa_rica_std_form_1 = new RibbonSubMenuNavItem( {
 //			label: $.i18n._( 'Costa Rica - Std Form 1' ),
 //			id: 'CostaRicaSTDForm1',
@@ -536,6 +547,9 @@ PayStubViewController = BaseViewController.extend( {
 				case ContextMenuIconName.generate_pay_stub:
 					this.setDefaultMenuGeneratePayStubIcon( context_btn, grid_selected_length );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
+					break;
 			}
 		}
 
@@ -670,6 +684,9 @@ PayStubViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.generate_pay_stub:
 					this.setEditMenuGeneratePayStubIcon( context_btn );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
 					break;
 			}
 		}
@@ -896,7 +913,8 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				if ( args ) {
-					$( render ).append( _.template( headerRow, args ) );
+					var template = _.template(headerRow);
+					$( render ).append( template(args) );
 					this.rows_widgets_array.push( true );
 
 					for ( var i = 0; i < item.length; i++ ) {
@@ -944,7 +962,8 @@ PayStubViewController = BaseViewController.extend( {
 					}
 					// show the miscellaneous section
 					if ( misc_show ) {
-						$( render ).append( _.template( headerRow, args ) );
+						var template = _.template(headerRow);
+						$( render ).append( template(args) );
 						this.rows_widgets_array.push( true );
 
 						for ( var x = 0; x < misc.length; x++ ) {
@@ -2429,6 +2448,7 @@ PayStubViewController = BaseViewController.extend( {
 			case ContextMenuIconName.employer_pay_stubs:
 			case ContextMenuIconName.generate_pay_stub:
 			case ContextMenuIconName.edit_pay_period:
+			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
 
@@ -2580,6 +2600,9 @@ PayStubViewController = BaseViewController.extend( {
 				post_data = {0: args, 1: false, 2: 'pdf', 3: false};
 				this.doFormIFrameCall( post_data );
 				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('export' + this.api.key_name )
+				break;
 //			case 'CostaRicaSTDForm1':
 //				post_data = {0: args, 1: true, 2: '-2050-cheque_cr_standard_form_1'};
 //				this.doFormIFrameCall( post_data );
@@ -2638,28 +2661,8 @@ PayStubViewController = BaseViewController.extend( {
 	},
 
 	doFormIFrameCall: function( postData ) {
-
-		var url = ServiceCaller.getURLWithSessionId( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name );
-
-		var message_id = UUID.guid();
-
-		url = url + '&MessageID=' + message_id;
-
-		this.sendFormIFrameCall( postData, url, message_id );
-
+		this.sendIframeCall(this.api.className, 'get' + this.api.key_name , postData);
 	}
 
 
 } );
-
-PayStubViewController.loadView = function() {
-
-	Global.loadViewSource( 'PayStub', 'PayStubView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

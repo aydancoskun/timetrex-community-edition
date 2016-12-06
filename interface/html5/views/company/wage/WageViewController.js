@@ -19,13 +19,9 @@ WageViewController = BaseViewController.extend( {
 	currency: '',
 	code: '',
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'WageEditView.html';
 		this.permission_id = 'wage';
 		this.script_name = 'WageView';
@@ -237,6 +233,16 @@ WageViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
@@ -342,6 +348,9 @@ WageViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.import_icon:
 					this.setDefaultMenuImportIcon( context_btn, grid_selected_length );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
 			}
 
@@ -589,16 +598,16 @@ WageViewController = BaseViewController.extend( {
 	onTypeChange: function( getRate ) {
 
 		if ( parseInt( this.current_edit_record.type_id ) !== 10 ) {
-			this.attachElement('weekly_time');
-			this.attachElement('hourly_rate');
+			this.attachElement( 'weekly_time' );
+			this.attachElement( 'hourly_rate' );
 
 			if ( getRate ) {
 				this.getHourlyRate();
 			}
 
 		} else {
-			this.detachElement('weekly_time');
-			this.detachElement('hourly_rate');
+			this.detachElement( 'weekly_time' );
+			this.detachElement( 'hourly_rate' );
 		}
 	},
 
@@ -1105,47 +1114,36 @@ WageViewController = BaseViewController.extend( {
 		}
 
 		this.editFieldResize( 0 );
-	}
+	},
 
 } );
 
 WageViewController.loadView = function( container ) {
-
 	Global.loadViewSource( 'Wage', 'WageView.html', function( result ) {
-
 		var args = {};
-		var template = _.template( result, args );
-
+		var template = _.template( result );
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 		} else {
-			Global.contentContainer().html( template );
+			Global.contentContainer().html( template( args ) );
 		}
-
 	} );
-
 };
 
 WageViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
-
 	Global.loadViewSource( 'Wage', 'SubWageView.html', function( result ) {
-
 		var args = {};
-		var template = _.template( result, args );
-
+		var template = _.template( result );
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_wage_view_controller );
 			}
-
 		}
-
 	} );
-
 };

@@ -99,7 +99,7 @@ class KPIGroupListFactory extends KPIGroupFactory implements IteratorAggregate {
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL($query, $ph, $limit, $page);
 
@@ -139,6 +139,7 @@ class KPIGroupListFactory extends KPIGroupFactory implements IteratorAggregate {
 		$children = $this->getFastTreeObject()->getAllChildren(NULL, 'RECURSE');
 
 		if ( $children !== FALSE ) {
+			$nodes = array();
 			$qglf = new KPIGroupListFactory();
 
 			foreach ($children as $object_id => $level ) {
@@ -155,7 +156,7 @@ class KPIGroupListFactory extends KPIGroupFactory implements IteratorAggregate {
 
 			}
 
-			if ( isset($nodes) ) {
+			if ( empty($nodes) == FALSE ) {
 				return $nodes;
 			}
 		}
@@ -174,12 +175,14 @@ class KPIGroupListFactory extends KPIGroupFactory implements IteratorAggregate {
 
 		$children = $this->getFastTreeObject()->getAllChildren( $group_id, $recurse);
 
+		$nodes = array();
 		if ( $children !== FALSE ) {
 			foreach ($children as $object_id => $level ) {
 				$nodes[] = $object_id;
 			}
+			unset($level);
 
-			if ( isset($nodes) ) {
+			if ( empty($nodes) == FALSE ) {
 				return $nodes;
 			}
 		}
@@ -192,6 +195,7 @@ class KPIGroupListFactory extends KPIGroupFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = TTi18n::getText('-Default-');
 		}
@@ -200,7 +204,7 @@ class KPIGroupListFactory extends KPIGroupFactory implements IteratorAggregate {
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -214,6 +218,7 @@ class KPIGroupListFactory extends KPIGroupFactory implements IteratorAggregate {
 
 		$prefix = NULL;
 		$i = 0;
+		$retarr = array();
 		foreach($nodes as $node) {
 			if ( $sort_prefix == TRUE ) {
 				$prefix = '-'.str_pad( $i, 4, 0, STR_PAD_LEFT).'-';

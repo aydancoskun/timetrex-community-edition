@@ -102,8 +102,9 @@ class LogRotate {
 	}
 
 	function getRotatedHistoryFiles( $files, $primary_file ) {
+		$retarr = array();
 		if ( is_array($files) ) {
-			foreach( $files as $key => $filename ) {
+			foreach( $files as $filename ) {
 				$pattern = '/'. str_replace( array('/', '\\'), array('\\', '\\\\'), $primary_file) .'\.[0-9]{1,2}/i';
 				//Debug::Text(' Pattern: '. $pattern, __FILE__, __LINE__, __METHOD__, 10);
 				if ( preg_match( $pattern, $filename) == 1 ) {
@@ -112,7 +113,7 @@ class LogRotate {
 			}
 		}
 
-		if ( isset($retarr) AND is_array($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 
@@ -131,7 +132,7 @@ class LogRotate {
 	function handleHistoryFiles( $files, $history = 0 ) {
 		if ( is_array($files) ) {
 			rsort($files);
-			foreach( $files as $key => $filename ) {
+			foreach( $files as $filename ) {
 				$path_info = pathinfo( $filename );
 
 				$new_extension = $this->padExtension( ((int)$path_info['extension'] + 1), $history );
@@ -159,7 +160,7 @@ class LogRotate {
 
 	function _rotate( $files, $rotate_config ) {
 		if ( is_array($files) ) {
-			foreach( $files as $key => $filename ) {
+			foreach( $files as $filename ) {
 				if ( $this->isFileRotatable( $filename ) == TRUE ) {
 					Debug::Text(' File IS a primary log file: '. $filename, __FILE__, __LINE__, __METHOD__, 10);
 

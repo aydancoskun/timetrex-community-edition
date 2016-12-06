@@ -2,8 +2,8 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 
 		this.title = $.i18n._( 'Accrual ReCalculation Wizard' );
 		this.steps = 3;

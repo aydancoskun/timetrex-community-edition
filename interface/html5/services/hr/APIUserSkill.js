@@ -45,6 +45,10 @@ var APIUserSkill = ServiceCaller.extend( {
 
 	},
 
+	exportUserSkill: function() {
+		return this.argumentsHandler( this.className, 'exportUserSkill', arguments );
+	},
+
 	generateInvoices: function() {
 
 		return this.argumentsHandler( this.className, 'generateInvoices', arguments );

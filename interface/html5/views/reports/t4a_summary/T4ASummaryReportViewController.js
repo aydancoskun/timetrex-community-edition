@@ -3,8 +3,8 @@ T4ASummaryReportViewController = ReportBaseViewController.extend( {
 
 	type_array: null,
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'T4ASummaryReport';
 		this.viewId = 'T4ASummaryReport';
 		this.context_menu_name = $.i18n._( 'T4A Summary' );
@@ -123,6 +123,14 @@ T4ASummaryReportViewController = ReportBaseViewController.extend( {
 			id: 'pdf_form',
 			nav: view_print
 		} );
+
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+			var pdf_form_publish_employee = new RibbonSubMenuNavItem({
+				label: $.i18n._('Publish Employee Forms'),
+				id: 'pdf_form_publish_employee',
+				nav: view_print
+			});
+		}
 
 		var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
 			id: ContextMenuIconName.print,

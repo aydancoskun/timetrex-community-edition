@@ -95,7 +95,7 @@ ALayoutCache.buildDefaultColumns = function() {
 		{label: $.i18n._( 'Account Name' ), value: 'account'}
 	];
 	default_columns[ALayoutIDs.TREE_COLUMN] = [
-		{label: $.i18n._( '' ), value: 'id'},
+		{label: '', value: 'id'},
 		{label: $.i18n._( 'Name' ), value: 'name'}
 	];
 

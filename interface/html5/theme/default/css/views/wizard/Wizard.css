@@ -265,7 +265,6 @@
     min-width: 135px;
     padding-right: 7px;
     text-align: right;
-    line-height:15px;
 }
 
 .install-wizard .edit-view-form-item-div .edit-view-form-item-input-div {
@@ -404,11 +403,12 @@ progress::-moz-progress-bar {
 
 .wizard .ribbon-button-bar {
     border-top: 1px solid #999999;
-    bottom: 4em;
+    bottom: 0px;
     padding-top: 5px;
-    position: fixed;
+    position: absolute;
     width: 100%;
     background:#f8f8f8;
+    left:0;
 }
 
 .wizard .menu ul {

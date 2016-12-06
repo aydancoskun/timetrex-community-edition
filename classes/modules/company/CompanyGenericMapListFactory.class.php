@@ -312,12 +312,12 @@ class CompanyGenericMapListFactory extends CompanyGenericMapFactory implements I
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[] = $obj->getMapId();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

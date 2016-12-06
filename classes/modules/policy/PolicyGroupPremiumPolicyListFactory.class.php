@@ -107,12 +107,13 @@ class PolicyGroupPremiumPolicyListFactory extends PolicyGroupPremiumPolicyFactor
 		$pgpplf = new PolicyGroupPremiumPolicyListFactory();
 
 		$pgpplf->getByPolicyGroupId($id);
-
+		
+		$list = array();
 		foreach ($pgpplf as $obj) {
 			$list[$obj->getPremiumPolicy()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

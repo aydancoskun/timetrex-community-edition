@@ -60,8 +60,9 @@ class OverTimePolicyFactory extends Factory {
 										10 => TTi18n::gettext('Daily'),
 										20 => TTi18n::gettext('Weekly'),
 										30 => TTi18n::gettext('Bi-Weekly'), //Need to recalculate two weeks ahead, instead of just one.
-										//32 => TTi18n::gettext('Pay Period'), //Need to recalculate in the future as necessary
-										//34 => TTi18n::gettext('Monthly'), //Need to recalculate in the future as necessary
+
+										//38 => TTi18n::gettext('Pay Period'), //Need to recalculate in the future as necessary. Handling dates in the middle of a week may be a problem too.
+										//39 => TTi18n::gettext('Monthly'), //Need to recalculate in the future as necessary. Handling dates in the middle of a week may be a problem too.
 										40 => TTi18n::gettext('Sunday'),
 										50 => TTi18n::gettext('Monday'),
 										60 => TTi18n::gettext('Tuesday'),
@@ -104,6 +105,17 @@ class OverTimePolicyFactory extends Factory {
 										403 => TTi18n::gettext('5 Or More Days/Week Worked'),
 										404 => TTi18n::gettext('6 Or More Days/Week Worked'),
 										405 => TTi18n::gettext('7 Or More Days/Week Worked'),
+
+										503 => TTi18n::gettext('Every 3 Weeks'), //Need to recalculate two weeks ahead, instead of just one.
+										504 => TTi18n::gettext('Every 4 Weeks'),
+										505 => TTi18n::gettext('Every 5 Weeks'),
+										506 => TTi18n::gettext('Every 6 Weeks'),
+										507 => TTi18n::gettext('Every 7 Weeks'),
+										508 => TTi18n::gettext('Every 8 Weeks'),
+										509 => TTi18n::gettext('Every 9 Weeks'),
+										510 => TTi18n::gettext('Every 10 Weeks'),
+										511 => TTi18n::gettext('Every 11 Weeks'),
+										512 => TTi18n::gettext('Every 12 Weeks'),
 									);
 				break;
 			case 'calculation_order':
@@ -111,6 +123,18 @@ class OverTimePolicyFactory extends Factory {
 										10 => 90, //Daily
 										20 => 200, //Weekly
 										30 => 300, //Bi-Weekly
+
+										503 => 353, //Every 3 Weeks
+										504 => 354, //Every 4 Weeks
+										505 => 355, //Every 5 Weeks
+										506 => 356, //'Every 6 Weeks
+										507 => 357, //'Every 7 Weeks
+										508 => 358, //'Every 8 Weeks
+										509 => 359, //'Every 9 Weeks
+										510 => 360, //'Every 10 Weeks
+										511 => 361, //'Every 11 Weeks
+										512 => 362, //'Every 12 Weeks
+
 										40 => 20, //Sunday
 										50 => 30, //Monday
 										60 => 40, //Tuesday
@@ -249,7 +273,10 @@ class OverTimePolicyFactory extends Factory {
 										'type' => FALSE,
 										'name' => 'Name',
 										'description' => 'Description',
+
 										'trigger_time' => 'TriggerTime',
+										'trigger_time_adjust_contributing_shift_policy_id' => 'TriggerTimeAdjustContributingShiftPolicy',
+										'trigger_time_adjust_contributing_shift_policy' => FALSE,
 
 										'contributing_shift_policy_id' => 'ContributingShiftPolicy',
 										'contributing_shift_policy' => FALSE,
@@ -280,7 +307,7 @@ class OverTimePolicyFactory extends Factory {
 										'job_item_selection_type_id' => 'JobItemSelectionType',
 										'job_item_selection_type' => FALSE,
 										'exclude_default_job_item' => 'ExcludeDefaultJobItem',
-										
+
 										'in_use' => FALSE,
 										'deleted' => 'Deleted',
 										);
@@ -349,9 +376,14 @@ class OverTimePolicyFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => strtolower($name),
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
@@ -463,6 +495,32 @@ class OverTimePolicyFactory extends Factory {
 													$int,
 													TTi18n::gettext('Incorrect Trigger Time')) ) {
 			$this->data['trigger_time'] = $int;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getTriggerTimeAdjustContributingShiftPolicy() {
+		if ( isset($this->data['trigger_time_adjust_contributing_shift_policy_id']) ) {
+			return (int)$this->data['trigger_time_adjust_contributing_shift_policy_id'];
+		}
+
+		return FALSE;
+	}
+	function setTriggerTimeAdjustContributingShiftPolicy($id) {
+		$id = (int)$id;
+
+		$csplf = TTnew( 'ContributingShiftPolicyListFactory' );
+
+		if (	$id == 0
+				OR
+				$this->Validator->isResultSetWithRows(	'trigger_time_adjust_contributing_shift_policy_id',
+														  $csplf->getByID($id),
+														  TTi18n::gettext('Adjusting Contributing Shift Policy is invalid')
+				) ) {
+			$this->data['trigger_time_adjust_contributing_shift_policy_id'] = $id;
 
 			return TRUE;
 		}
@@ -816,7 +874,7 @@ class OverTimePolicyFactory extends Factory {
 
 	function preSave() {
 		$this->data['rate'] = $this->data['accrual_rate'] = 0; //This is required until the schema removes the NOT NULL constraint.
-		
+
 		return TRUE;
 	}
 
@@ -859,6 +917,7 @@ class OverTimePolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

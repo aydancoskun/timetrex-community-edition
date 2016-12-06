@@ -28,6 +28,11 @@ var APICompanyDeduction = ServiceCaller.extend( {
 
 	},
 
+	exportCompanyDeduction: function() {
+		return this.argumentsHandler( this.className, 'exportCompanyDeduction', arguments );
+
+	},
+
 	deleteCompanyDeduction: function() {
 		return this.argumentsHandler( this.className, 'deleteCompanyDeduction', arguments );
 

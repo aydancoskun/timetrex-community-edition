@@ -481,8 +481,9 @@ class AccrualFactory extends Factory {
 		//Remove orphaned entries
 		$alf = TTnew( 'AccrualListFactory' );
 		$alf->getOrphansByUserIdAndDate( $user_id, $date_stamp );
-		Debug::text('Found Orphaned Records: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Found Orphaned Records: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);	
 		if ( $alf->getRecordCount() > 0 ) {
+			$accrual_policy_ids = array();
 			foreach( $alf as $a_obj ) {
 				Debug::text('Orphan Record ID: '. $a_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 				$accrual_policy_ids[] = $a_obj->getAccrualPolicyAccount();
@@ -490,7 +491,7 @@ class AccrualFactory extends Factory {
 			}
 
 			//ReCalc balances
-			if ( isset($accrual_policy_ids) ) {
+			if ( empty($accrual_policy_ids) === FALSE ) {
 				foreach($accrual_policy_ids as $accrual_policy_id) {
 					AccrualBalanceFactory::calcBalance( $user_id, $accrual_policy_id );
 				}
@@ -533,6 +534,7 @@ class AccrualFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

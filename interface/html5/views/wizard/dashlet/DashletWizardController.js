@@ -38,8 +38,8 @@ DashletWizardController = BaseWizardController.extend( {
 		ActiveShiftReport: 'APIActiveShiftReport'
 	},
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.title = $.i18n._( 'Dashlet Wizard' );
 		this.steps = 2;
 		this.current_step = 1;
@@ -565,7 +565,7 @@ DashletWizardController = BaseWizardController.extend( {
 			this.stepsWidgetDic[2].name.setErrorStyle( 'Dashlet title can\'t be empty', true );
 			return;
 		}
-
+		
 		if ( dashlet_type == 'custom_list' ) {
 			var view_name = this.stepsDataDic[2].script;
 			var layout_id = this.stepsDataDic[2].layout;

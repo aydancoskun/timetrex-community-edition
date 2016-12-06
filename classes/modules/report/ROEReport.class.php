@@ -398,9 +398,7 @@ class ROEReport extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'user' => array(), 'roe' => array() );
 
-		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
-		$form_data = $this->formatFormConfig();
 
 		$this->user_ids = array_unique( $this->user_ids ); //Used to get the total number of employees.
 
@@ -508,8 +506,6 @@ class ROEReport extends Report {
 		$show_background = TRUE;
 		Debug::Text('Generating Form... Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
-		$setup_data = $this->getFormConfig();
-		$filter_data = $this->getFilterConfig();
 		//Debug::Arr($setup_data, 'Setup Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);

@@ -104,6 +104,7 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -117,6 +118,19 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
+
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportRecurringScheduleTemplateControl( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getRecurringScheduleTemplateControl( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_recurring_schedule_template', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
+
 
 	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.

@@ -43,7 +43,7 @@ class PunchControlFactory extends Factory {
 	protected $pk_sequence_name = 'punch_control_id_seq'; //PK Sequence name
 
 	protected $tmp_data = NULL;
-	protected $old_date_stamps = array();
+	public $old_date_stamps = array();
 	protected $shift_data = NULL;
 
 	protected $user_obj = NULL;
@@ -151,7 +151,7 @@ class PunchControlFactory extends Factory {
 	function setPunchObject($obj) {
 		if ( is_object($obj) ) {
 			$this->punch_obj = $obj;
-			
+
 			//Set the user/datestamp based on the punch.
 			if ( $obj->getUser() != FALSE AND $obj->getUser() != $this->getUser() ) {
 				$this->setUser( $obj->getUser() );
@@ -248,7 +248,7 @@ class PunchControlFactory extends Factory {
 
 			if	( $epoch > 0 ) {
 				if ( $this->getDateStamp() !== $epoch AND $this->getOldDateStamp() != $this->getDateStamp() AND (int)$this->getDateStamp() != 0 ) {
-					//Only set OldDateStamp if its not empty, that way it won't override an already set OldDateStamp that is valid. 
+					//Only set OldDateStamp if its not empty, that way it won't override an already set OldDateStamp that is valid.
 					Debug::Text(' Setting Old DateStamp... Current Old DateStamp: '. (int)$this->getOldDateStamp() .' Current DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
 					$this->setOldDateStamp( $this->getDateStamp() );
 				}
@@ -362,7 +362,7 @@ class PunchControlFactory extends Factory {
 			if ( $this->getPunchObject()->getDeleted() == TRUE ) {
 				//Check to see if there is another punch in the punch pair, and use that timestamp to assign days instead.
 				Debug::Text('Punch is being deleted, use timestamp from other punch in pair if it exists...', __FILE__, __LINE__, __METHOD__, 10);
-				
+
 				$plf = TTNew('PunchListFactory');
 				$plf->getByPunchControlId( $this->getId() );
 				if ( $plf->getRecordCount() > 0 ) {
@@ -421,6 +421,11 @@ class PunchControlFactory extends Factory {
 			$id = 0;
 		}
 
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
+			$id = $this->getUserObject()->getDefaultBranch();
+			Debug::Text( 'Using Default Branch: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
 		$blf = TTnew( 'BranchListFactory' );
 
 		if (  $id == 0
@@ -451,6 +456,11 @@ class PunchControlFactory extends Factory {
 			$id = 0;
 		}
 
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
+			$id = $this->getUserObject()->getDefaultDepartment();
+			Debug::Text( 'Using Default Department: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
 		$dlf = TTnew( 'DepartmentListFactory' );
 
 		if (  $id == 0
@@ -477,7 +487,7 @@ class PunchControlFactory extends Factory {
 	function setJob($id) {
 		$id = trim($id);
 
-		if ( $id == FALSE OR $id == 0 OR $id == -1 OR $id == '' ) {
+		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
 			$id = 0;
 		}
 
@@ -485,6 +495,11 @@ class PunchControlFactory extends Factory {
 			$jlf = TTnew( 'JobListFactory' );
 		} else {
 			$id = 0;
+		}
+
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
+			$id = $this->getUserObject()->getDefaultJob();
+			Debug::Text( 'Using Default Job: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		if (  $id == 0
@@ -511,7 +526,7 @@ class PunchControlFactory extends Factory {
 	function setJobItem($id) {
 		$id = trim($id);
 
-		if ( $id == FALSE OR $id == 0 OR $id == -1 OR $id == '' ) {
+		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
 			$id = 0;
 		}
 
@@ -519,6 +534,11 @@ class PunchControlFactory extends Factory {
 			$jilf = TTnew( 'JobItemListFactory' );
 		} else {
 			$id = 0;
+		}
+
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
+			$id = $this->getUserObject()->getDefaultJobItem();
+			Debug::Text( 'Using Default Job Item: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		if (  $id == 0
@@ -543,7 +563,7 @@ class PunchControlFactory extends Factory {
 		return FALSE;
 	}
 	function setQuantity($val) {
-		$val = (float)$val;
+		$val = TTi18n::parseFloat( $val );
 
 		if ( $val == FALSE OR $val == 0 OR $val == '' ) {
 			$val = 0;
@@ -570,7 +590,7 @@ class PunchControlFactory extends Factory {
 		return FALSE;
 	}
 	function setBadQuantity($val) {
-		$val = (float)$val;
+		$val = TTi18n::parseFloat( $val );
 
 		if ( $val == FALSE OR $val == 0 OR $val == '' ) {
 			$val = 0;
@@ -825,7 +845,6 @@ class PunchControlFactory extends Factory {
 			if ( $plf->getRecordCount() > 0 AND ( $plf->getRecordCount() % 2 ) == 0 ) {
 				Debug::text(' Found Punches to calculate.', __FILE__, __LINE__, __METHOD__, 10);
 				$in_pair = FALSE;
-				$schedule_obj = NULL;
 				foreach( $plf as $punch_obj ) {
 					//Check for proper in/out pairs
 					//First row should be an Out status (reverse ordering)
@@ -839,9 +858,8 @@ class PunchControlFactory extends Factory {
 						$in_pair = TRUE;
 					} elseif ( $in_pair == TRUE ) {
 						$this->in_punch_obj = $punch_obj;
-						
+
 						$punch_obj->setScheduleID( $punch_obj->findScheduleID( NULL, $this->getUser() ) ); //Find Schedule Object for this Punch
-						$schedule_obj = $punch_obj->getScheduleObject();
 						$in_stamp = $punch_obj->getTimeStamp();
 						$in_actual_stamp = $punch_obj->getActualTimeStamp();
 						//Got a pair... Totaling.
@@ -1137,11 +1155,12 @@ class PunchControlFactory extends Factory {
 			if ( $plf->getRecordCount() > 0 ) {
 				foreach( $plf as $p_obj ) {
 					if ( $p_obj->getID() != $this->getPunchObject()->getID() ) {
-						if ( $this->getPunchObject()->getStatus() == 10 AND $p_obj->getStatus() == 10 AND $this->getPunchObject()->getTimeStamp() > $p_obj->getTimeStamp() ) {
+						if (  $this->getPunchObject()->getStatus() == 10 AND $p_obj->getStatus() == 20 AND $this->getPunchObject()->getTimeStamp() > $p_obj->getTimeStamp() ) {
 							//Make sure we match on status==10 for both sides, otherwise this fails to catch the problem case.
-							$this->Validator->isTRUE(	'time_stamp',
-														FALSE,
-														TTi18n::gettext('In punches cannot occur after an out punch, in the same punch pair (a)'));
+							// Also test $p_obj->getStatus() == 20, to catch cases where a Break In punch is followed by a Lunch Out punch, but the Break In timestamp is AFTER the Lunch Out timestamp.
+							$this->Validator->isTRUE( 'time_stamp',
+													  FALSE,
+													  TTi18n::gettext( 'In punches cannot occur after an out punch, in the same punch pair (a)' ) );
 						} elseif ( $this->getPunchObject()->getStatus() == 20 AND $p_obj->getStatus() == 10 AND $this->getPunchObject()->getTimeStamp() < $p_obj->getTimeStamp() ) {
 							$this->Validator->isTRUE(	'time_stamp',
 														FALSE,
@@ -1153,6 +1172,7 @@ class PunchControlFactory extends Factory {
 			unset($p_obj);
 
 			if ( $this->Validator->isValid() == TRUE ) { //Don't bother checking these resource intensive issues if there are already validation errors.
+
 				$shift_data = $this->getShiftData();
 				if ( is_array($shift_data) AND $this->Validator->hasError('time_stamp') == FALSE ) {
 					foreach ( $shift_data['punches'] as $punch_data ) {
@@ -1469,7 +1489,7 @@ class PunchControlFactory extends Factory {
 				}
 			} else {
 				Debug::Text('No shift data, check for other punches on the same day in case they need to be moved back...', __FILE__, __LINE__, __METHOD__, 10);
-				
+
 				//Handle cases where a punch pair was moved from one day to this day, then the punches that caused that were deleted, and now
 				//it needs to be moved back to the original day.
 				$plf = TTNew('PunchListFactory');
@@ -1540,7 +1560,7 @@ class PunchControlFactory extends Factory {
 							$found_first_record = TRUE;
 							continue;
 						}
-						
+
 						if ( $udt_obj->getOverride() == FALSE ) {
 							Debug::text(' bFound Conflicting User Date Total Records, removing them before re-calc: Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 							$udt_obj->Delete();
@@ -1549,7 +1569,7 @@ class PunchControlFactory extends Factory {
 						}
 					}
 				}
-				
+
 				if ( !isset($udtf) ) {
 					Debug::text(' No Conflicting User Date Total Records, inserting the first one.', __FILE__, __LINE__, __METHOD__, 10);
 					$udtf = TTnew( 'UserDateTotalFactory' );
@@ -1864,7 +1884,7 @@ class PunchControlFactory extends Factory {
 					} elseif ( isset($punch_image_data) AND $punch_image_data != '' ) {
 						$src_punch_obj->setImage( $punch_image_data );
 					}
-					
+
 					//Need to take into account copying a Out punch and inserting it BEFORE another Out punch in a punch pair.
 					//In this case a split needs to occur, and the status needs to stay the same.
 					//Status also needs to stay the same when overwriting an existing punch.
@@ -1993,7 +2013,7 @@ class PunchControlFactory extends Factory {
 			//old_date_stamps can contain other dates from calcUserDate() as well.
 			$this->old_date_stamps[] = $this->getDateStamp(); //Make sure the current date is calculated
 			if ( $this->getOldDateStamp() != '' ) {
-				$this->old_date_stamps[] = $this->getOldDateStamp(); //Make sure the old date is calculated
+			$this->old_date_stamps[] = $this->getOldDateStamp(); //Make sure the old date is calculated
 			}
 			UserDateTotalFactory::reCalculateDay( $this->getUserObject(), $this->old_date_stamps, $this->getEnableCalcException(), $this->getEnablePreMatureException() );
 		}
@@ -2038,6 +2058,7 @@ class PunchControlFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

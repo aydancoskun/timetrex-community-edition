@@ -4,8 +4,8 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 
 	state_field_array: null,
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'Form1099MiscReport';
 		this.viewId = 'Form1099MiscReport';
 		this.context_menu_name = $.i18n._( 'Form 1099-Misc' );
@@ -152,6 +152,14 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 			id: 'pdf_form',
 			nav: view_print
 		} );
+
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+			var pdf_form_publish_employee = new RibbonSubMenuNavItem({
+				label: $.i18n._('Publish Employee Forms'),
+				id: 'pdf_form_publish_employee',
+				nav: view_print
+			});
+		}
 
 		var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
 			id: ContextMenuIconName.print,
@@ -417,6 +425,7 @@ Form1099MiscReportViewController = ReportBaseViewController.extend( {
 		}
 
 	},
+
 
 	getFormSetupData: function() {
 		var other = {};

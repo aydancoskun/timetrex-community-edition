@@ -51,14 +51,14 @@ class OtherFieldFactory extends Factory {
 		switch( $name ) {
 			case 'type':
 				$retval = array(
-									2  => TTi18n::gettext('Company'),
-									4  => TTi18n::gettext('Branch'),
-									5  => TTi18n::gettext('Department'),
-									10	=> TTi18n::gettext('Employee'),
-									12	=> TTi18n::gettext('Employee Title'),
-									15	=> TTi18n::gettext('Punch'),
-									18	=> TTi18n::gettext('Schedule')
-								);
+											2  => TTi18n::gettext('Company'),
+											4  => TTi18n::gettext('Branch'),
+											5  => TTi18n::gettext('Department'),
+											10	=> TTi18n::gettext('Employee'),
+											12	=> TTi18n::gettext('Employee Title'),
+											15	=> TTi18n::gettext('Punch'),
+											18	=> TTi18n::gettext('Schedule')
+									);
 
 				$product_edition = Misc::getCurrentCompanyProductEdition();
 				if ( $product_edition >= TT_PRODUCT_CORPORATE ) {
@@ -463,6 +463,7 @@ class OtherFieldFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

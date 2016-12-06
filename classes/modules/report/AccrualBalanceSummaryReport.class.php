@@ -552,7 +552,7 @@ class AccrualBalanceSummaryReport extends Report {
 			if ( isset( $this->tmp_data['accrual'] ) ) {
 				foreach( $this->tmp_data['accrual'] as $user_id => $level_2 ) {
 					if ( isset($this->tmp_data['user'][$user_id]) ) {
-						foreach( $level_2 as $accrual_policy_account_id => $rows ) {
+						foreach( $level_2 as $rows ) {
 							foreach( $rows as $row ) {
 								if ( isset( $row['date_stamp'] ) ) {
 									$date_columns = TTDate::getReportDates( NULL, TTDate::parseDateTime($row['date_stamp']), FALSE, $this->getUserObject() );
@@ -586,7 +586,7 @@ class AccrualBalanceSummaryReport extends Report {
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $processed_data );
+			unset($this->tmp_data, $row );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;

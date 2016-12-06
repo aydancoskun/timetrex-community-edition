@@ -74,7 +74,8 @@ class Serializer {
 		if (! ( $xml->children() ) ) {
 			return (string)$xml;
 		}
-
+		
+		$element = array();
 		foreach ( $xml->children() as $child ) {
 			$name = $child->getName();
 			if ( count($xml->$name) == 1 ) {
@@ -106,7 +107,7 @@ class Serializer {
 			foreach( $data as $class => $objects ) {
 				$this->simple_xml_obj = new SimpleXMLElement('<timetrex></timetrex>');
 
-				foreach( $objects as $key => $value ) {
+				foreach( $objects as $value ) {
 					$tmp_xml = $this->simple_xml_obj->addChild( $class, '' );
 
 					array_walk_recursive( $value, array( $this, 'XMLArrayWalkCallBack' ), $tmp_xml );

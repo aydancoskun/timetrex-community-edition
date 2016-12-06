@@ -226,11 +226,12 @@ class ContributingShiftPolicyListFactory extends ContributingShiftPolicyFactory 
 		$ppf = new PremiumPolicyFactory();
 		$acpf = new AccrualPolicyFactory();
 		$hpf = new HolidayPolicyFactory();
+		$pfpf = new PayFormulaPolicyFactory();
 
 		$ph = array(
 					'company_id' => (int)$company_id,
 					);
-		
+
 		$query = '
 					select	a.*,
 							_ADODB_COUNT
@@ -252,13 +253,18 @@ class ContributingShiftPolicyListFactory extends ContributingShiftPolicyFactory 
 											THEN 1
 											ELSE
 												CASE WHEN EXISTS
-													( select 1 from '. $hpf->getTable() .' as z where z.contributing_shift_policy_id = a.id and z.deleted = 0)
+													( select 1 from '. $pfpf->getTable() .' as z3 where ( z3.wage_source_contributing_shift_policy_id = a.id OR z3.time_source_contributing_shift_policy_id = a.id ) and z3.deleted = 0)
 												THEN 1
 												ELSE
 													CASE WHEN EXISTS
-														( select 1 from '. $hpf->getTable() .' as z2 where z2.eligible_contributing_shift_policy_id = a.id and z2.deleted = 0)
+														( select 1 from '. $hpf->getTable() .' as z where z.contributing_shift_policy_id = a.id and z.deleted = 0)
 													THEN 1
-													ELSE 0
+													ELSE
+														CASE WHEN EXISTS
+															( select 1 from '. $hpf->getTable() .' as z2 where z2.eligible_contributing_shift_policy_id = a.id and z2.deleted = 0)
+														THEN 1
+														ELSE 0
+														END
 													END
 												END
 											END

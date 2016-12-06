@@ -63,12 +63,14 @@ class UnitConvert {
 						'cm' => 10,
 						'ft' => 304.8,
 						'm' => 1000,
+						'km' => 1000000,
+						'mi' => 1609344,
 					);
 
 	//Only units in the same array can be converted to one another.
 	static $valid_unit_groups = array(
 									'g' => array('g', 'oz', 'lb', 'lbs', 'kg'),
-									'mm' => array('mm', 'in', 'cm', 'ft', 'm')
+									'mm' => array('mm', 'in', 'cm', 'ft', 'm', 'km', 'mi')
 									);
 
 	static function convert( $src_unit, $dst_unit, $measurement, $exponent = 1 ) {
@@ -88,7 +90,7 @@ class UnitConvert {
 
 		//Make sure we can convert from one unit to another.
 		$valid_conversion = FALSE;
-		foreach( self::$valid_unit_groups as $base_unit => $valid_units ) {
+		foreach( self::$valid_unit_groups as $valid_units ) {
 			if ( in_array($src_unit, $valid_units) AND in_array($dst_unit, $valid_units) ) {
 				//Valid conversion
 				$valid_conversion = TRUE;

@@ -73,6 +73,12 @@ var APICompany = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'isBranchAndDepartmentAndJobAndJobItemEnabled', arguments );
 
+	},
+
+	exportCompany: function() {
+
+		return this.argumentsHandler( this.className, 'exportCompany', arguments );
+
 	}
 
 

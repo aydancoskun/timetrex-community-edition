@@ -108,11 +108,12 @@ class PolicyGroupOverTimePolicyListFactory extends PolicyGroupOverTimePolicyFact
 
 		$pgotplf->getByPolicyGroupId($id);
 
+		$list = array();
 		foreach ($pgotplf as $obj) {
 			$list[$obj->getOverTimePolicy()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

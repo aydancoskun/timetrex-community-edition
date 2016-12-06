@@ -299,6 +299,8 @@ class TimesheetDetailReport extends Report {
 										'-3200-gross_wage' => TTi18n::gettext('Gross Wage'),
 										'-3400-gross_wage_with_burden' => TTi18n::gettext('Gross Wage w/Burden'),
 										//'-3390-gross_hourly_rate' => TTi18n::gettext('Gross Hourly Rate'),
+
+										'-3500-udt_note' => TTi18n::gettext('TimeSheet Notes'),
 							);
 
 				$retval = array_merge( $retval, $this->getOptions('paycode_columns') );
@@ -342,6 +344,8 @@ class TimesheetDetailReport extends Report {
 									$retval[$column] = 'min_not_null'; //Need to use the min_not_null otherwise when auto-deduct meal policies exist the IN punch will always be blank.
 								} elseif ( strpos($column, 'max_punch_time_stamp') !== FALSE OR strpos($column, 'max_schedule_time_stamp') !== FALSE ) {
 									$retval[$column] = 'max_not_null';
+								} elseif ( strpos($column, '_note') !== FALSE ) {
+									$retval[$column] = 'concat';
 								} else {
 									$retval[$column] = 'sum';
 								}
@@ -729,6 +733,7 @@ class TimesheetDetailReport extends Report {
 
 	//This function takes worked time for a single day and multiplies it by each hour worked.
 	function splitDataByHoursWorked( $row, $dynamic_columns ) {
+		$retval = array();
 		if ( isset($row['min_punch_time_stamp']) AND isset($row['max_punch_time_stamp']) AND $row['min_punch_time_stamp'] > 0 AND $row['max_punch_time_stamp'] > 0 ) {
 			$total_hours = ( ( $row['max_punch_time_stamp'] - $row['min_punch_time_stamp'] ) / 3600 );
 			if ( $total_hours == 0 ) {
@@ -778,11 +783,10 @@ class TimesheetDetailReport extends Report {
 
 	//Get raw data for report
 	function _getData( $format = NULL ) {
-		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'user_title' => array(), 'timesheet_authorization' => array(), 'verified_timesheet' => array(), 'punch_rows' => array(), 'pay_period_schedule' => array(), 'pay_period' => array() );
+		$this->tmp_data = array('user_date_total' => array(), 'schedule' => array(), 'worked_days' => array(), 'user' => array(), 'user_title' => array(), 'timesheet_authorization' => array(), 'verified_timesheet' => array(), 'punch_rows' => array(), 'punch_control_rows' => array(), 'pay_period_schedule' => array(), 'pay_period' => array() );
 
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
-		$pay_code_type_map = PayCodeListFactory::getPayCodeTypeMap( $this->getUserObject()->getCompany() );
 
 		$currency_convert_to_base = $this->getCurrencyConvertToBase();
 		$base_currency_obj = $this->getBaseCurrencyObject();
@@ -793,6 +797,30 @@ class TimesheetDetailReport extends Report {
 		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		$pay_period_ids = array();
+
+		if ( isset($columns['udt_note']) AND $columns['udt_note'] == TRUE ) {
+			//Get punch notes to append to UDT records below.
+			$punch_control_filter_data = $filter_data;
+			$punch_control_filter_data['has_note'] = TRUE;
+			$pclf = TTnew( 'PunchControlListFactory' );
+			$pclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $punch_control_filter_data);
+			Debug::Text('Got punch control data... Total Rows: '. $pclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pclf->getRecordCount(), NULL, TTi18n::getText('Retrieving Punch Notes Data...') );
+			if ( $pclf->getRecordCount() > 0 ) {
+				foreach( $pclf as $key => $pc_obj ) {
+					if ( $pc_obj->getNote() != '' ) {
+						if ( isset( $this->tmp_data['punch_control_rows'][(int)$pc_obj->getColumn( 'user_id' )][(int)TTDate::strtotime( $pc_obj->getColumn( 'date_stamp' ) )][(int)$pc_obj->getBranch()][(int)$pc_obj->getDepartment()]['udt_note'] ) ) {
+							$this->tmp_data['punch_control_rows'][(int)$pc_obj->getColumn( 'user_id' )][(int)TTDate::strtotime( $pc_obj->getColumn( 'date_stamp' ) )][(int)$pc_obj->getBranch()][(int)$pc_obj->getDepartment()]['udt_note'] .= ' -- ' . $pc_obj->getNote();
+						} else {
+							$this->tmp_data['punch_control_rows'][(int)$pc_obj->getColumn( 'user_id' )][(int)TTDate::strtotime( $pc_obj->getColumn( 'date_stamp' ) )][(int)$pc_obj->getBranch()][(int)$pc_obj->getDepartment()]['udt_note'] = $pc_obj->getNote();
+						}
+					}
+					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				}
+			}
+			unset($pclf, $pc_obj, $punch_control_filter_data);
+			//Debug::Arr($this->tmp_data['punch_control_rows'], ' Punch Control Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		}
 
 		$udtlf = TTnew( 'UserDateTotalListFactory' );
 		$udtlf->getTimesheetDetailReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -893,6 +921,26 @@ class TimesheetDetailReport extends Report {
 						}
 					}
 
+
+					if ( !isset($this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note']) ) {
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'] = '';
+					}
+
+					if ( isset($this->tmp_data['punch_control_rows'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note']) ) {
+						if ( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'] != '' ) {
+							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'] .= ' -- '; //Note delimiter
+						}
+
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'] .= $this->tmp_data['punch_control_rows'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'];
+						unset($this->tmp_data['punch_control_rows'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note']); //Make sure we don't use it twice.
+					}
+
+					if ( $udt_obj->getColumn('udt_note') != '' ) {
+						if ( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'] != '' ) {
+							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'] .= ' -- '; //Note delimiter
+						}
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'] .= $udt_obj->getColumn( 'udt_note' );
+					}
 
 					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
 					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency'] = $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
@@ -1194,7 +1242,7 @@ class TimesheetDetailReport extends Report {
 								} else {
 									$level_5[0] = $level_4;
 								}
-								foreach( $level_5 as $hour_of_day => $row ) {
+								foreach( $level_5 as $row ) {
 									$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
 
 									if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {
@@ -1297,6 +1345,7 @@ class TimesheetDetailReport extends Report {
 										//$this->form_data[$user_id]['data'][] = array_merge( $row, $date_columns, $processed_data );
 									}
 								}
+								
 							}
 						}
 					}
@@ -1390,9 +1439,6 @@ class TimesheetDetailReport extends Report {
 	function timesheetWeekHeader( $column_widths ) {
 		$line_h = $this->_pdf_scaleSize(5);
 
-		$margins = $this->pdf->getMargins();
-		$total_width = ($this->pdf->getPageWidth() - $margins['left'] - $margins['right']);
-
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(10) );
 		$this->pdf->setFillColor(220, 220, 220);
 
@@ -1411,8 +1457,6 @@ class TimesheetDetailReport extends Report {
 	}
 
 	function timesheetDayRow( $format, $columns, $column_widths, $user_data, $data, $prev_data ) {
-		$margins = $this->pdf->getMargins();
-		$total_width = ($this->pdf->getPageWidth() - $margins['left'] - $margins['right']);
 
 		//Handle page break.
 		$page_break_height = 25;
@@ -1505,7 +1549,8 @@ class TimesheetDetailReport extends Report {
 				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
 
 				$n = 0;
-				foreach( $day_punch_data as $punch_control_id => $punch_data ) {
+				$punch_y = 0;
+				foreach( $day_punch_data as $punch_data ) {
 					if ( !isset($punch_data[10]['time_stamp']) ) {
 						$punch_data[10]['time_stamp'] = NULL;
 						$punch_data[10]['type_code'] = NULL;
@@ -1560,6 +1605,7 @@ class TimesheetDetailReport extends Report {
 
 						$regular_time_x = $this->pdf->getX();
 					}
+					unset($value); // code standards
 					unset($pay_code_label);
 					$this->pdf->setXY( ($regular_time_x + $column_widths['regular_time']), $pre_punch_y);
 					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
@@ -1572,7 +1618,6 @@ class TimesheetDetailReport extends Report {
 					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
 
 					//Count how many absence policy rows there are.
-					$over_time_policy_total_rows = count($data['categorized_time']['over_time_policy']);
 					foreach( $data['categorized_time']['over_time_policy'] as $policy_column => $value ) {
 						$this->pdf->Cell( $column_widths['overtime_time'], ($line_h / $total_over_time_rows), $columns[$policy_column].': '.TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1, '', 1);
 						$this->pdf->setXY( $pre_over_time_x, ($this->pdf->getY() + ($line_h / $total_over_time_rows)) );
@@ -1590,7 +1635,6 @@ class TimesheetDetailReport extends Report {
 					$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
 
 					//Count how many absence policy rows there are.
-					$absence_policy_total_rows = count($data['categorized_time']['absence_policy']);
 					foreach( $data['categorized_time']['absence_policy'] as $policy_column => $value ) {
 						$this->pdf->Cell( $column_widths['absence_time'], ($line_h / $total_absence_rows), ( isset($columns[$policy_column]) ? $columns[$policy_column] : TTi18n::getText('N/A') ) .': '. TTDate::getTimeUnit( $data[$policy_column] ), 1, 0, 'C', 1, '', 1);
 						$this->pdf->setXY( $pre_absence_time_x, ($this->pdf->getY() + ($line_h / $total_absence_rows)));
@@ -1640,9 +1684,6 @@ class TimesheetDetailReport extends Report {
 	function timesheetWeekTotal( $column_widths, $week_totals ) {
 		//Debug::Text('Week Total: Row: '. $this->counter_x, __FILE__, __LINE__, __METHOD__, 10);
 
-		$margins = $this->pdf->getMargins();
-		$total_width = ($this->pdf->getPageWidth() - $margins['left'] - $margins['right']);
-
 		$line_h = $this->_pdf_scaleSize(6);
 
 		//Show Week Total.
@@ -1662,8 +1703,6 @@ class TimesheetDetailReport extends Report {
 	}
 
 	function timesheetTotal( $column_widths, $totals ) {
-		$margins = $this->pdf->getMargins();
-		$total_width = ($this->pdf->getPageWidth() - $margins['left'] - $margins['right']);
 
 		$line_h = $this->_pdf_scaleSize(6);
 
@@ -1682,7 +1721,6 @@ class TimesheetDetailReport extends Report {
 
 	function timesheetNoData() {
 		$margins = $this->pdf->getMargins();
-		$current_company = $this->getUserObject()->getCompanyObject();
 
 		$border = 0;
 
@@ -1859,14 +1897,6 @@ class TimesheetDetailReport extends Report {
 	function _outputPDFTimesheet( $format ) {
 		Debug::Text(' Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
-		$border = 0;
-
-		$current_company = $this->getUserObject()->getCompanyObject();
-		if ( !is_object($current_company) ) {
-			Debug::Text('Invalid company object...', __FILE__, __LINE__, __METHOD__, 10);
-			return FALSE;
-		}
-
 		$pdf_created_date = time();
 
 		$adjust_x = 10;
@@ -2010,7 +2040,7 @@ class TimesheetDetailReport extends Report {
 						if ( isset($this->timesheet_totals) AND is_array($this->timesheet_totals) ) {
 							//Display overall totals.
 							$this->timesheetTotal( $column_widths, $this->timesheet_totals );
-							unset($totals);
+							
 						}
 
 						$this->timesheetSignature( $user_data, $data );

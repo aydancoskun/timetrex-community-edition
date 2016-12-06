@@ -1,13 +1,8 @@
 HolidayViewController = BaseViewController.extend( {
 	el: '#holiday_view_container',
 
-	initialize: function() {
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'HolidayEditView.html';
 		this.permission_id = 'holiday_policy';
 		this.viewId = 'Holiday';
@@ -46,14 +41,14 @@ HolidayViewController = BaseViewController.extend( {
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIHoliday' )),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.HOLIDAY,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
@@ -85,35 +80,20 @@ HolidayViewController = BaseViewController.extend( {
 
 	}
 
-
-
-} )
-
-HolidayViewController.loadView = function() {
-
-	Global.loadViewSource( 'Holiday', 'HolidayView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-
-	} )
-
-}
+} );
 
 HolidayViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 
 	Global.loadViewSource( 'Holiday', 'SubHolidayView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_holiday_view_controller );
 			}

@@ -723,13 +723,15 @@ class ADODB_postgres64 extends ADOConnection{
 			$this->_connectionID = pg_connect($str);
 		}
 		if ($this->_connectionID === false) return false;
-		$this->Execute('set datestyle=\'ISO\'');
+		//$this->Execute('set datestyle=\'ISO\''); //Added to Database.inc.php instead as an optimization for delayed execution.
 
-		$info = $this->ServerInfo();
-		$this->pgVersion = (float) substr($info['version'],0,3);
-		if ($this->pgVersion >= 7.1) { // good till version 999
-			$this->_nestedSQL = true;
-		}
+		//$info = $this->ServerInfo();
+		//$this->pgVersion = (float) substr($info['version'],0,3);
+		//if ($this->pgVersion >= 7.1) { // good till version 999
+		//	$this->_nestedSQL = true;
+		//}
+		//Always allow nested SQL as PGSQL 7.1 is way end of life. Another optimization.
+		$this->_nestedSQL = true;
 
 		# PostgreSQL 9.0 changed the default output for bytea from 'escape' to 'hex'
 		# PHP does not handle 'hex' properly ('x74657374' is returned as 't657374')
@@ -1053,6 +1055,7 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 			$t = $fieldobj->type;
 			$len = $fieldobj->max_length;
 		}
+
 		switch (strtoupper($t)) {
 				case 'MONEY': // stupid, postgres expects money to be a string
 				case 'INTERVAL':
@@ -1064,6 +1067,15 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 				case '_VARCHAR':
 				case 'INET':
 				case 'MACADDR':
+				//Handle geometry types as strings.
+				case 'POINT':
+				case 'LINE':
+				case 'LSEG':
+				case 'BOX':
+				case 'PATH':
+				case 'POLYGON':
+				case 'CIRCLE':
+
 					if ($len <= $this->blobSize) return 'C';
 
 				case 'TEXT':
@@ -1103,7 +1115,6 @@ class ADORecordSet_postgres64 extends ADORecordSet{
 				case 'OID':
 				case 'SERIAL':
 					return 'R';
-
 				default:
 					return 'N';
 			}

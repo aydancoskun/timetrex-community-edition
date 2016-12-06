@@ -45,6 +45,10 @@ var APIUserLanguage = ServiceCaller.extend( {
 
 	},
 
+	exportUserLanguage: function() {
+		return this.argumentsHandler( this.className, 'exportUserLanguage', arguments );
+	},
+
 	generateInvoices: function() {
 
 		return this.argumentsHandler( this.className, 'generateInvoices', arguments );

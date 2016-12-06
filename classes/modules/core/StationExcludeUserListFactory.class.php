@@ -135,11 +135,12 @@ class StationExcludeUserListFactory extends StationExcludeUserFactory implements
 
 		$siulf->getByStationId($id);
 
+		$list = array();
 		foreach ($siulf as $obj) {
 			$list[$obj->getStation()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

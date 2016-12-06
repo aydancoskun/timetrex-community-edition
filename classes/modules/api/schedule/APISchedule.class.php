@@ -71,9 +71,10 @@ class APISchedule extends APIFactory {
 					);
 
 		//Get all user_ids.
+		$user_ids = array();
 		if ( is_array($data) ) {
 			$first_date_stamp = $last_date_stamp = FALSE;
-			$prev_branch_id = $prev_department_id = $prev_job_id = $prev_job_item_id = FALSE;
+
 			foreach( $data as $row ) {
 				$user_ids[] = ( isset($row['user_id']) ) ? $row['user_id'] : $this->getCurrentUserObject()->getId();
 
@@ -95,10 +96,10 @@ class APISchedule extends APIFactory {
 		} else {
 			$retarr['date_stamp'] = TTDate::getDate('DATE', time() );
 			Debug::Text( 'No input data to base defaults on...', __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			return $retarr;
 		}
-		
+
 		//Try to determine most common start/end times to use by default.
 		$slf = TTnew('ScheduleListFactory');
 		$most_common_data = $slf->getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate( $company_obj->getID(), $user_ids, TTDate::getBeginWeekEpoch( $first_date_stamp ), TTDate::getEndWeekEpoch( $last_date_stamp ) );
@@ -107,7 +108,7 @@ class APISchedule extends APIFactory {
 			Debug::Text('No schedules to get default default from, extend range back one more week...', __FILE__, __LINE__, __METHOD__, 10);
 			$most_common_data = $slf->getMostCommonScheduleDataByCompanyIdAndUserAndStartDateAndEndDate($company_obj->getId(), $user_ids, TTDate::getBeginWeekEpoch( ( TTDate::getMiddleDayEpoch($first_date_stamp) - (86400 * 7) ) ), TTDate::getEndWeekEpoch( $last_date_stamp ) );
 		}
-		
+
 		if ( isset($most_common_data['start_time']) AND isset($most_common_data['end_time']) ) {
 			$retarr['start_time'] = TTDate::getAPIDate( 'TIME', TTDate::getTimeLockedDate( TTDate::strtotime( $most_common_data['start_time'] ), $first_date_stamp ) );
 			$retarr['end_time'] = TTDate::getAPIDate( 'TIME', TTDate::getTimeLockedDate( TTDate::strtotime( $most_common_data['end_time'] ), $first_date_stamp ) );
@@ -200,7 +201,6 @@ class APISchedule extends APIFactory {
 	 * @return array
 	 */
 	function getCombinedSchedule( $data = NULL, $base_date = NULL, $type = NULL, $strict = NULL ) {
-		global $profiler;
 
 		if ( !$this->getPermissionObject()->Check('schedule', 'enabled')
 				OR !( $this->getPermissionObject()->Check('schedule', 'view') OR $this->getPermissionObject()->Check('schedule', 'view_own') OR $this->getPermissionObject()->Check('schedule', 'view_child') ) ) {
@@ -312,7 +312,7 @@ class APISchedule extends APIFactory {
 			}
 			unset($pplf, $pay_period_ids);
 		}
-		
+
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'schedule', 'view' );
 
@@ -334,7 +334,8 @@ class APISchedule extends APIFactory {
 			$this->setPagerObject( $blf );
 
 			//Make sure if hourly_rates are ever exposed in ScheduleFactory that the proper permissions are checked here.
-			foreach( $blf as $b_obj ) {				
+			$retarr = array();
+			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $blf->getCurrentRow() );
@@ -350,6 +351,17 @@ class APISchedule extends APIFactory {
 	}
 
 	/**
+	 * Export wage data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportSchedule( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getSchedule( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_schedule', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
+
+	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.
 	 * @param array $data filter data
 	 * @return array
@@ -360,7 +372,7 @@ class APISchedule extends APIFactory {
 		if ( isset($data['filter_data']['id']) AND is_array($data['filter_data']['id']) AND count($data['filter_data']['id']) == 0 ) {
 			return $this->returnHandler( TRUE ); //No records returned.
 		}
-		
+
 		return Misc::arrayIntersectByRow( $this->stripReturnHandler( $this->getSchedule( $data, TRUE ) ) );
 	}
 
@@ -386,10 +398,6 @@ class APISchedule extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( !$this->getPermissionObject()->Check('schedule', 'enabled')
-				OR !( $this->getPermissionObject()->Check('schedule', 'edit') OR $this->getPermissionObject()->Check('schedule', 'edit_own') OR $this->getPermissionObject()->Check('schedule', 'edit_child') OR $this->getPermissionObject()->Check('schedule', 'add') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
-		}
 
 		if ( $validate_only == TRUE ) {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
@@ -495,6 +503,8 @@ class APISchedule extends APIFactory {
 
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();	 //This prevents a validation error if company_id is FALSE.
 					$lf->setObjectFromArray( $row );
+
+					$lf->Validator->setValidateOnly( $validate_only );
 
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
@@ -660,7 +670,8 @@ class APISchedule extends APIFactory {
 		if ( !is_array($user_id) AND $user_id > 0 ) {
 			$sf->setUser( $user_id );
 		}
-		
+
+
 		//Prefix the current date to the template, this avoids issues with parsing 24hr clock only, ie: 0600
 		//Flex was only sending the times before, so the above worked, but if date is being sent too then it fails.
 		//$date_epoch = time();
@@ -670,6 +681,9 @@ class APISchedule extends APIFactory {
 		$sf->setEndTime( TTDate::parseDateTime( $end ) );
 
 		$sf->setSchedulePolicyId( $schedule_policy_id );
+
+		$sf->Validator->setValidateOnly( TRUE );
+
 		$sf->preSave();
 
 		return $this->returnHandler( $sf->getTotalTime() );
@@ -697,6 +711,7 @@ class APISchedule extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) == count($data) ) {
 			//Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
+			$id_to_row_map = array();
 			//Map returned rows to ids so we can reference them directly.
 			foreach( $src_rows as $key => $row ) {
 				$id_to_row_map[$row['id']] = $key;
@@ -705,6 +720,7 @@ class APISchedule extends APIFactory {
 
 			//Handle swapping several schedules all at once.
 			//Loop through each src ID and swap it with the same dst_id.
+			$dst_rows = array();
 			foreach( $src_ids as $src_key => $src_id ) {
 				$dst_id = $dst_ids[$src_key];
 
@@ -734,5 +750,121 @@ class APISchedule extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
+
+	/**
+	 * Creates punches from an array of scheduled shift ids.
+	 *
+	 * @param array $schedule_arr should have 2 sub arrays of integer ids, one labeled 'schedule', one labeled 'recurring'
+	 * @return bool
+	 */
+	function addPunchesFromScheduledShifts( $schedule_arr ) {
+		if ( $this->getCurrentCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+			if ( !( $this->getPermissionObject()->Check( 'punch', 'edit' ) OR $this->getPermissionObject()->Check( 'punch', 'edit_own' ) OR $this->getPermissionObject()->Check( 'punch', 'edit_child' ) OR $this->getPermissionObject()->Check( 'punch', 'add' ) ) ) {
+				return $this->getPermissionObject()->PermissionDenied();
+			}
+
+			if ( !$this->getPermissionObject()->Check( 'schedule', 'enabled' )
+					OR !( $this->getPermissionObject()->Check( 'schedule', 'view' ) OR $this->getPermissionObject()->Check( 'schedule', 'view_own' ) OR $this->getPermissionObject()->Check( 'schedule', 'view_child' ) )
+			) {
+				return $this->getPermissionObject()->PermissionDenied();
+			}
+
+			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
+			$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
+
+			if ( isset( $schedule_arr['recurring'] ) AND is_array( $schedule_arr['recurring'] ) AND count( $schedule_arr['recurring'] ) > 0 ) {
+				$data['filter_data']['id'] = $schedule_arr['recurring'];
+				$rslf = TTnew( 'RecurringScheduleListFactory' );
+				$rslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'] );
+
+				if ( $rslf->getRecordCount() > 0 ) {
+					foreach ( $rslf as $rs_obj ) {
+						if ( $this->getPermissionObject()->Check( 'punch', 'add' )
+								AND ( $this->getPermissionObject()->Check( 'punch', 'edit' )
+										OR ( $this->getPermissionObject()->Check( 'punch', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $rs_obj->getCurrent()->getCreatedBy(), $rs_obj->getCurrent()->getUser() ) === TRUE )
+										OR ( $this->getPermissionObject()->Check( 'punch', 'edit_child' ) AND $this->getPermissionObject()->isChild( $rs_obj->getCurrent()->getUser(), $data['filter_data']['permission_children_ids'] ) === TRUE ) )
+						) {
+							$result = ScheduleFactory::addPunchFromScheduleObject( $rs_obj );
+
+							//don't try to punch open schedules.
+							if ( $rs_obj->getUserObject() == FALSE ) {
+								UserGenericStatusFactory::queueGenericStatus(  TTi18n::gettext('OPEN'), 10, TTi18n::gettext( 'Unable to auto-punch OPEN scheduled shift.' ).'...' );
+							} else {
+								$user_full_name = $rs_obj->getUserObject()->getFullName();
+								$date = TTDate::getDate( 'DATE', $rs_obj->getDateStamp() );
+								$start_time = TTDate::getDate( 'TIME', $rs_obj->getStartTime() );
+								$end_time = TTDate::getDate( 'TIME', $rs_obj->getEndTime() );
+								if ( $result == TRUE ) {
+									//success
+									UserGenericStatusFactory::queueGenericStatus( $user_full_name, 30, $date . ' - ' . TTi18n::gettext( 'In' ) . ': ' . $start_time . ' ' . TTi18n::gettext( 'Out' ) . ': ' . $end_time, TRUE );
+								} else {
+									//error
+									UserGenericStatusFactory::queueGenericStatus( $user_full_name, 20, $date . ' - ' . TTi18n::gettext( 'In' ) . ': ' . $start_time . ' ' . TTi18n::gettext( 'Out' ) . ': ' . $end_time . ' - ' . TTi18n::gettext( 'Unable to create punches, they may already exist' ) . '...', NULL );
+								}
+							}
+
+						}
+						unset( $user_full_name, $date, $start_time, $end_time );
+					}
+				}
+				unset( $rslf );
+			}
+
+			if ( isset( $schedule_arr['schedule'] ) AND is_array( $schedule_arr['schedule'] ) AND count( $schedule_arr['schedule'] ) > 0 ) {
+				$data['filter_data']['id'] = $schedule_arr['schedule'];
+				$slf = TTnew( 'ScheduleListFactory' );
+				$slf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'] );
+
+				if ( $slf->getRecordCount() > 0 ) {
+					foreach ( $slf as $s_obj ) {
+						if ( $this->getPermissionObject()->Check( 'punch', 'add' )
+								AND ( $this->getPermissionObject()->Check( 'punch', 'edit' )
+										OR ( $this->getPermissionObject()->Check( 'punch', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $s_obj->getCurrent()->getCreatedBy(), $s_obj->getCurrent()->getUser() ) === TRUE )
+										OR ( $this->getPermissionObject()->Check( 'punch', 'edit_child' ) AND $this->getPermissionObject()->isChild( $s_obj->getCurrent()->getUser(), $data['filter_data']['permission_children_ids'] ) === TRUE ) )
+						) {
+							$result = ScheduleFactory::addPunchFromScheduleObject( $s_obj );
+
+							//don't try to punch open schedules.
+							if ( $s_obj->getUserObject() == FALSE ) {
+								UserGenericStatusFactory::queueGenericStatus(  TTi18n::gettext('OPEN'), 10, TTi18n::gettext( 'Unable to auto-punch OPEN scheduled shift.' ).'...' );
+							} else {
+								$user_full_name = $s_obj->getUserObject()->getFullName();
+								$date = TTDate::getDate( 'DATE', $s_obj->getDateStamp() );
+								$start_time = TTDate::getDate( 'TIME', $s_obj->getStartTime() );
+								$end_time = TTDate::getDate( 'TIME', $s_obj->getEndTime() );
+								if ( $result == TRUE ) {
+									//success
+									UserGenericStatusFactory::queueGenericStatus( $user_full_name, 30, $date . ' - ' . TTi18n::gettext( 'In' ) . ': ' . $start_time . ' ' . TTi18n::gettext( 'Out' ) . ': ' . $end_time, TRUE );
+								} else {
+									//error
+									UserGenericStatusFactory::queueGenericStatus( $user_full_name, 20, $date . ' - ' . TTi18n::gettext( 'In' ) . ': ' . $start_time . ' ' . TTi18n::gettext( 'Out' ) . ': ' . $end_time . ' - ' . TTi18n::gettext( 'Unable to create punches, they may already exist' ) . '...', NULL );
+								}
+							}
+						}
+						unset( $user_full_name, $date, $start_time, $end_time );
+					}
+				}
+				unset( $slf );
+			}
+			unset( $data );
+
+			if ( UserGenericStatusFactory::isStaticQueue() == TRUE ) {
+				$ugsf = TTnew( 'UserGenericStatusFactory' );
+				$ugsf->setUser( $this->getCurrentUserObject()->getId() );
+				$ugsf->setBatchID( $ugsf->getNextBatchId() );
+				$ugsf->setQueue( UserGenericStatusFactory::getStaticQueue() );
+				$ugsf->saveQueue();
+				$user_generic_status_batch_id = $ugsf->getBatchID();
+			} else {
+				$user_generic_status_batch_id = FALSE;
+			}
+			unset( $ugsf );
+
+			return $this->returnHandler( TRUE, TRUE, FALSE, FALSE, FALSE, $user_generic_status_batch_id );
+		}
+
+		return $this->returnHandler( TRUE );
+	}
+
 }
 ?>

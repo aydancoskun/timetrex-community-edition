@@ -42,9 +42,9 @@ class LockFile {
 	var $file_name = NULL;
 
 	var $max_lock_file_age = 86400;
+	var $use_pid = TRUE;
 
 	function __construct( $file_name ) {
-
 		$this->file_name = $file_name;
 
 		return TRUE;
@@ -64,6 +64,35 @@ class LockFile {
 		return FALSE;
 	}
 
+	function getCurrentPID() {
+		if ( $this->use_pid == TRUE AND function_exists('getmypid') == TRUE ) {
+			$retval = getmypid();
+			Debug::Text( 'Current PID: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
+
+			return $retval;
+		}
+
+		return FALSE;
+	}
+
+	function isPIDRunning( $pid ) {
+		if ( $this->use_pid == TRUE AND (int)$pid > 0 AND function_exists('posix_getpgid') == TRUE ) {
+			Debug::Text( 'Checking if PID is running: ' . $pid, __FILE__, __LINE__, __METHOD__, 10 );
+			if ( posix_getpgid( $pid ) === FALSE ) {
+				Debug::Text( '  PID is NOT running!', __FILE__, __LINE__, __METHOD__, 10 );
+				return FALSE;
+			} else {
+				Debug::Text( '  PID IS running!', __FILE__, __LINE__, __METHOD__, 10 );
+				return TRUE;
+			}
+		}
+		//else {
+		//	Debug::Text( 'PID is invalid or POSIX functions dont exist: ' . $pid, __FILE__, __LINE__, __METHOD__, 10 );
+		//}
+
+		return NULL; //Assuming the process is still running if the file exists and PID is invalid.
+	}
+
 	function create() {
 		//Attempt to create directory if it does not already exist.
 		if ( file_exists( dirname( $this->getFileName() ) ) == FALSE ) {
@@ -75,7 +104,9 @@ class LockFile {
 			}
 		}
 
-		return @touch( $this->getFileName() );
+		//Write current PID to file, so we can check if its still running later on.
+		//return @touch( $this->getFileName() );
+		return @file_put_contents( $this->getFileName(), $this->getCurrentPID() );
 	}
 
 	function delete() {
@@ -91,8 +122,20 @@ class LockFile {
 	function exists() {
 		//Ignore lock files older than max_lock_file_age, so if the server crashes or is rebooted during an operation, it will start again the next day.
 		clearstatcache();
-		if ( file_exists( $this->getFileName() ) AND @filemtime( $this->getFileName() ) >= ( time() - $this->max_lock_file_age ) ) {
-			return TRUE;
+		//if ( file_exists( $this->getFileName() ) AND @filemtime( $this->getFileName() ) >= ( time() - $this->max_lock_file_age ) ) {
+		if ( file_exists( $this->getFileName() ) ) {
+			$lock_file_pid = (int)@file_get_contents( $this->getFileName() );
+			Debug::text(' Lock file exists with PID: '. $lock_file_pid, __FILE__, __LINE__, __METHOD__, 10);
+
+			//Check to see if PID is still running or not.
+			$pid_running = $this->isPIDRunning( $lock_file_pid );
+			if ( $pid_running !== NULL ) {
+				//PID result is reliable, use it.
+				return $pid_running;
+			} elseif ( @filemtime( $this->getFileName() ) >= ( time() - $this->max_lock_file_age ) ) {
+				//PID result may not be reliable, fall back to using file time instead.
+				return TRUE;
+			}
 		}
 
 		return FALSE;

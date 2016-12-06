@@ -90,7 +90,7 @@ class APIPunch extends APIFactory {
 			if ( $ulf->getRecordCount() == 1 ) {
 				$user_obj = $ulf->getCurrent();
 
-				$plf = TTNew('PunchListFactory');				
+				$plf = TTNew('PunchListFactory');
 				$data = $plf->getDefaultPunchSettings( $user_obj, $epoch, $current_station, $this->getPermissionObject() );
 				$data['date_stamp'] = TTDate::getAPIDate( 'DATE', $epoch );
 				$data['time_stamp'] = TTDate::getAPIDate( 'DATE+TIME', $epoch );
@@ -101,7 +101,7 @@ class APIPunch extends APIFactory {
 				$data['first_name'] = $user_obj->getFirstName();
 				$data['last_name'] = $user_obj->getLastName();
 				$data['station_id'] = $current_station->getId();
-				
+
 				if ( isset($data ) ) {
 					Debug::Arr($data, 'Punch Data: ', __FILE__, __LINE__, __METHOD__, 10);
 					return $this->returnHandler( $data );
@@ -306,7 +306,7 @@ class APIPunch extends APIFactory {
 			if ( $plf->getRecordCount() == 1 ) {
 				$prev_punch_obj = $plf->getCurrent();
 				Debug::Text('  Getting previous punch data... Type ID: '. $prev_punch_obj->getType() .' Time: '. TTDate::getDATE('DATE+TIME', $prev_punch_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
-				
+
 				if ( $type_id == '' ) {
 					$data['type_id'] = $prev_punch_obj->getNextType();
 					//$data['status_id'] = $prev_punch_obj->getNextStatus(); //JS handles this.
@@ -318,13 +318,59 @@ class APIPunch extends APIFactory {
 					$data['punch_time'] = TTDate::strtotime( $prev_punch_obj->getTimeStamp() );
 				}
 
-				Debug::Text('  Final punch default data... Type ID: '. $data['type_id'] .' Time: '. TTDate::getDATE('DATE+TIME', $data['punch_time'] ), __FILE__, __LINE__, __METHOD__, 10);				
+				Debug::Text('  Final punch default data... Type ID: '. $data['type_id'] .' Time: '. TTDate::getDATE('DATE+TIME', $data['punch_time'] ), __FILE__, __LINE__, __METHOD__, 10);
 			}
 			unset($plf, $prev_punch_obj);
 		}
-		
+
 		$data['punch_time'] = TTDate::getAPIDate( 'TIME', $data['punch_time'] ); //Convert epoch to human readable time.
-		
+
+		return $this->returnHandler( $data );
+	}
+
+	/**
+	 * Get default punch data for creating new punches.
+	 * @return array
+	 */
+	function getRequestDefaultData( $user_id = NULL, $date = NULL, $punch_control_id = NULL, $previous_punch_id = NULL, $status_id = 10, $type_id = 10, $current_punch_id = NULL ) {
+		if ( !is_numeric( $user_id	) ) {
+			$user_id = $this->getCurrentUserObject()->getId();
+		}
+
+		$message = '';
+		$plf = TTnew('PunchListFactory');
+		if ( isset($current_punch_id) ) {
+			$pf_arr = $this->stripReturnHandler( $this->getPunch( array('filter_data' => array('user_id' => $user_id, 'id' => $current_punch_id) ), TRUE ) );
+			if ( !is_array( $pf_arr ) OR count($pf_arr) == 0 ) {
+				return array( 'message' => TTi18n::getText('Due to <specify reason here>, please correct the <Normal/Lunch/Break> <In/Out> punch at <X::XX AM/PM> to be a <Normal/Lunch/Break> <In/Out> punch at <X:XX AM/PM> instead.') );
+			}
+			$pf = TTnew('PunchFactory');
+			$pf->setObjectFromArray($pf_arr[0]);
+
+			$current_punch_time_text = TTDate::getDATE('TIME', $pf->getTimeStamp() );
+
+			$type_text = Option::getByKey( $type_id, $plf->getOptions( 'type' ) );
+			$status_text = Option::getByKey( $status_id, $plf->getOptions( 'status' ) );
+			$message = TTi18n::getText('Due to <specify reason here>, please correct the %1 %2 punch at %3 to be a %1 %2 punch at <X:XX AM/PM> instead.', array($type_text, $status_text, $current_punch_time_text) );
+		} else {
+			//missing punch
+			$punch_data = $this->getPunchDefaultData($user_id, $date, $punch_control_id, $previous_punch_id, $status_id, $type_id);
+			$type_text = Option::getByKey( $punch_data['api_retval']['type_id'], $plf->getOptions( 'type' ) );
+			$status_text = Option::getByKey( $punch_data['api_retval']['status_id'], $plf->getOptions( 'status' ) );
+
+			$type_id = $punch_data['api_retval']['type_id'];
+			//$status_id = $punch_data['api_retval']['status_id'];
+			$message = TTi18n::getText('Due to <specify reason here>, please add the missing %1 %2 punch at <%3>', array($type_text, $status_text, $punch_data['api_retval']['punch_time']) );
+		}
+
+		$data = array(
+				'date_stamp' => TTDate::getDATE('DATE', $date ),
+				//'status_id' => $status_id, sets the wrong status if set.
+				'type_id' => $type_id,
+				'user_id' => $this->getCurrentUserObject()->getId(),
+				'message' => $message
+		);
+
 		return $this->returnHandler( $data );
 	}
 
@@ -402,6 +448,7 @@ class APIPunch extends APIFactory {
 
 			$this->setPagerObject( $plf );
 
+			/** @var PunchFactory $p_obj */
 			foreach( $plf as $p_obj ) {
 				$retarr[] = $p_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -469,10 +516,14 @@ class APIPunch extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
+			$lf = TTnew( 'PunchListFactory' );
+			$lf->StartTransaction();
+
+			$recalculate_user_date_stamp = FALSE;
 			foreach( $data as $key => $row ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'PunchListFactory' );
-				$lf->StartTransaction();
+				//$lf->StartTransaction();
 				if ( isset($row['id']) AND $row['id'] > 0 ) {
 					//Modifying existing object.
 					//Get punch object, so we can only modify just changed data for specific records if needed.
@@ -576,16 +627,29 @@ class APIPunch extends APIFactory {
 								$pcf->setEnableStrictJobValidation( TRUE );
 								$pcf->setEnableCalcUserDateID( TRUE );
 								$pcf->setEnableCalcTotalTime( TRUE );
-								$pcf->setEnableCalcSystemTotalTime( TRUE );
-								$pcf->setEnableCalcWeeklySystemTotalTime( TRUE );
 								$pcf->setEnableCalcUserDateTotal( TRUE );
-								$pcf->setEnableCalcException( TRUE );
+								//Before batch calculation mode was enabled...
+								//$pcf->setEnableCalcSystemTotalTime( TRUE );
+								//$pcf->setEnableCalcWeeklySystemTotalTime( TRUE );
+								//$pcf->setEnableCalcException( TRUE );
+								$pcf->setEnableCalcSystemTotalTime( FALSE );
+								$pcf->setEnableCalcWeeklySystemTotalTime( FALSE );
+								$pcf->setEnableCalcException( FALSE );
 
 								if ( $pcf->isValid( $ignore_warning ) ) {
 									$validator_stats['valid_records']++;
-									if ( $pcf->Save( TRUE, TRUE ) != TRUE ) { //Force isNew() lookup.
+									if ( $pcf->Save( FALSE, TRUE ) != TRUE ) { //Force isNew() lookup.
 										$is_valid = $pcf_valid = FALSE;
+									} else {
+										if ( isset($pcf->old_date_stamps) AND is_array($pcf->old_date_stamps) ) {
+											if ( !isset($recalculate_user_date_stamp[$pcf->getUser()]) ) {
+												$recalculate_user_date_stamp[$pcf->getUser()] = array();
+											}
+											$recalculate_user_date_stamp[$pcf->getUser()] = array_merge( (array)$recalculate_user_date_stamp[$pcf->getUser()], (array)$pcf->old_date_stamps );
+										}
+										$recalculate_user_date_stamp[$pcf->getUser()][] = $pcf->getDateStamp();
 									}
+									unset($pcf);
 								} else {
 									$is_valid = $pcf_valid = FALSE;
 								}
@@ -604,10 +668,33 @@ class APIPunch extends APIFactory {
 					$lf->FailTransaction();
 				}
 
-				$lf->CommitTransaction();
+				//$lf->CommitTransaction();
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
+
+			if ( $is_valid == TRUE AND $validate_only == FALSE ) {
+				if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
+					Debug::Arr($recalculate_user_date_stamp, 'Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10);
+					foreach( $recalculate_user_date_stamp as $user_id => $date_arr ) {
+						$ulf = TTNew('UserListFactory');
+						$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
+						if ( $ulf->getRecordCount() > 0 ) {
+							$cp = TTNew('CalculatePolicy');
+							$cp->setUserObject( $ulf->getCurrent() );
+							$cp->addPendingCalculationDate( $date_arr );
+							$cp->calculate(); //This sets timezone itself.
+							$cp->Save();
+						}
+					}
+				} else {
+					Debug::Text('aNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			} else {
+				Debug::Text('bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			$lf->CommitTransaction();
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
@@ -648,10 +735,14 @@ class APIPunch extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
+			$lf = TTnew( 'PunchListFactory' );
+			$lf->StartTransaction();
+
+			$recalculate_user_date_stamp = FALSE;
 			foreach( $data as $key => $id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'PunchListFactory' );
-				$lf->StartTransaction();
+				//$lf->StartTransaction();
 				if ( is_numeric($id) ) {
 					//Modifying existing object.
 					//Get punch object, so we can only modify just changed data for specific records if needed.
@@ -664,6 +755,8 @@ class APIPunch extends APIFactory {
 								OR ( $this->getPermissionObject()->Check('punch', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getPunchControlObject()->getUser(), $permission_children_ids ) === TRUE )) {
 							Debug::Text('Record Exists, deleting record: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
+
+							$recalculate_user_date_stamp[$lf->getPunchControlObject()->getUser()][] = TTDate::getMiddleDayEpoch( $lf->getPunchControlObject()->getDateStamp() ); //Help avoid confusion with different timezones/DST.
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
 						}
@@ -688,10 +781,15 @@ class APIPunch extends APIFactory {
 					$is_valid = $lf->isValid();
 					if ( $is_valid == TRUE ) {
 						$lf->setEnableCalcTotalTime( TRUE );
-						$lf->setEnableCalcSystemTotalTime( TRUE );
-						$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
 						$lf->setEnableCalcUserDateTotal( TRUE );
-						$lf->setEnableCalcException( TRUE );
+
+						//Before batch calculation mode was enabled...
+						//$lf->setEnableCalcSystemTotalTime( TRUE );
+						//$lf->setEnableCalcWeeklySystemTotalTime( TRUE );
+						//$lf->setEnableCalcException( TRUE );
+						$lf->setEnableCalcSystemTotalTime( FALSE );
+						$lf->setEnableCalcWeeklySystemTotalTime( FALSE );
+						$lf->setEnableCalcException( FALSE );
 
 						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
 						$save_result[$key] = $lf->Save();
@@ -707,10 +805,33 @@ class APIPunch extends APIFactory {
 					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 
-				$lf->CommitTransaction();
+				//$lf->CommitTransaction();
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
+
+			if ( $is_valid == TRUE ) {
+				if ( is_array( $recalculate_user_date_stamp ) AND count( $recalculate_user_date_stamp ) > 0 ) {
+					Debug::Arr($recalculate_user_date_stamp, 'Recalculating other dates...', __FILE__, __LINE__, __METHOD__, 10);
+					foreach( $recalculate_user_date_stamp as $user_id => $date_arr ) {
+						$ulf = TTNew('UserListFactory');
+						$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
+						if ( $ulf->getRecordCount() > 0 ) {
+							$cp = TTNew('CalculatePolicy');
+							$cp->setUserObject( $ulf->getCurrent() );
+							$cp->addPendingCalculationDate( $date_arr );
+							$cp->calculate(); //This sets timezone itself.
+							$cp->Save();
+						}
+					}
+				} else {
+					Debug::Text('aNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			} else {
+				Debug::Text('bNot recalculating batch...', __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			$lf->CommitTransaction();
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
@@ -722,6 +843,17 @@ class APIPunch extends APIFactory {
 
 	function getMealAndBreakTotalTime( $data, $disable_paging = FALSE  ) {
 		return PunchFactory::calcMealAndBreakTotalTime( $this->getPunch( $data, TRUE ) );
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportPunch( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getPunch( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_punch', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 }
 ?>

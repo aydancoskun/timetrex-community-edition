@@ -182,7 +182,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 						AND batch_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -219,6 +219,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 		foreach( $result as $row ) {
 			$total = ( $total + $row['total'] );
 		}
+		$retarr = array();
 		$retarr['total'] = $total;
 
 		$retarr['status'] = array(
@@ -231,7 +232,7 @@ class UserGenericStatusListFactory extends UserGenericStatusFactory implements I
 			$retarr['status'][$row['status_id']] = array('total' => $row['total'], 'percent' => round( ( ($row['total'] / $total) * 100 ), 1 ) );
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 

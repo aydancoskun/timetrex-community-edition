@@ -82,7 +82,7 @@ class APIAbout extends APIFactory {
 		$data['application_name'] = APPLICATION_NAME;
 
 		$data['organization_url'] = ORGANIZATION_URL;
-		
+
 		//Get Employee counts for this month, and last month
 		$month_of_year_arr = TTDate::getMonthOfYearArray();
 
@@ -180,12 +180,7 @@ class APIAbout extends APIFactory {
 		$license->getLicenseFile( FALSE ); //Download updated license file if one exists.
 
 		$latest_version = $ttsc->isLatestVersion( $current_company->getId() );
-		$latest_tax_engine_version = $ttsc->isLatestTaxEngineVersion( $current_company->getId() );
-		$latest_tax_data_version = $ttsc->isLatestTaxDataVersion( $current_company->getId() );
-
-		if( $latest_version == FALSE
-				OR $latest_tax_engine_version == FALSE
-				OR $latest_tax_data_version == FALSE ) {
+		if( $latest_version == FALSE ) {
 			SystemSettingFactory::setSystemSetting( 'new_version', 1 );
 			$data['new_version'] = TRUE;
 		} else {

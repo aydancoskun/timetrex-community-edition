@@ -101,14 +101,16 @@ if ( !isset($disable_database_connection) ) {
 				}
 				unset($db_hosts, $db_host_arr, $db_connection_obj);
 
-				//Make sure when inserting times we always include the timezone.
-				//UNLESS we're using MySQL, because MySQL can't store time stamps with time zones.
 				if ( strncmp($config_vars['database']['type'], 'mysql', 5) == 0 ) {
 					//Put MySQL into ANSI mode
 					//READ COMMITTED mode is what PGSQL defaults to.
 					//This should hopefully fix odd issues like hierarchy trees becoming corrupt.
 					$db->setSessionInitSQL( 'SET SESSION sql_mode=\'ansi\'' );
 					$db->setSessionInitSQL( 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED' );
+					//$db->setSessionInitSQL( 'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ' );
+				} else {
+					$db->setSessionInitSQL( 'SET datestyle = \'ISO\'' ); //Needed for ADODB to properly parse dates, as we removed it from ADODB as an optimization so it can be delayed until the first query is executed.
+					//$db->setSessionInitSQL( 'SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL REPEATABLE READ' ); //This is required to properly handle simultaneous recalculations of timesheets/pay stubs. We moved this to trigger via setTransactionMode() only for certain operations instead though.
 				}
 			} else {
 				//To enable PDO support. Type: pdo_pgsql or pdo_mysql
@@ -123,27 +125,28 @@ if ( !isset($disable_database_connection) ) {
 				}
 				$db->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 
+				//Use long timezone format because PostgreSQL 8.1 doesn't support some short names, like SGT,IST
+				//Using "e" for the timezone fixes the Asia/Calcutta & IST bug where the two were getting confused.
+				//We set the timezone in PostgreSQL like we do with MySQL, so 'e' shouldn't be required anymore.
+				//$db->fmtTimeStamp = "'Y-m-d H:i:s e'";
+				$db->fmtTimeStamp = "'Y-m-d H:i:s'";
+
 				if ( Debug::getVerbosity() == 11 ) {
 					//Use 1 instead of TRUE, so it only outputs some debugging and not things like backtraces for every cache read/write.
 					//Set to 99 to get all debug output.
 					$db->debug = 1;
 				}
 
-				//Make sure when inserting times we always include the timezone.
-				//UNLESS we're using MySQL, because MySQL can't store time stamps with time zones.
 				if ( strncmp($db->databaseType, 'mysql', 5) == 0 ) {
-					$db->fmtTimeStamp = "'Y-m-d H:i:s'";
 					//Put MySQL into ANSI mode
 					//READ COMMITTED mode is what PGSQL defaults to.
 					//This should hopefully fix odd issues like hierarchy trees becoming corrupt.
-					$db->Execute('SET SESSION sql_mode=\'ansi\'');
+					$db->Execute( 'SET SESSION sql_mode=\'ansi\'' );
 					$db->Execute('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+					//$db->Execute( 'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ' );
 				} else {
-					//Use long timezone format because PostgreSQL 8.1 doesn't support some short names, like SGT,IST
-					//Using "e" for the timezone fixes the Asia/Calcutta & IST bug where the two were getting confused.
-					//We set the timezone in PostgreSQL like we do with MySQL, so 'e' shouldn't be required anymore.
-					//$db->fmtTimeStamp = "'Y-m-d H:i:s e'";
-					$db->fmtTimeStamp = "'Y-m-d H:i:s'";
+					$db->Execute( 'SET datestyle = \'ISO\'' ); //Needed for ADODB to properly parse dates, as we removed it from ADODB as an optimization so it can be delayed until the first query is executed.
+					//$db->Execute( 'SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL REPEATABLE READ' ); //This is required to properly handle simultaneous recalculations of timesheets/pay stubs. We moved this to trigger via setTransactionMode() only for certain operations instead though.
 				}
 
 				if ( isset($config_vars['database']['disable_row_count']) AND $config_vars['database']['disable_row_count'] == TRUE ) {
@@ -179,5 +182,5 @@ if ( !isset($disable_database_connection) ) {
 if ( !isset($config_vars['other']['system_timezone']) OR ( isset($config_vars['other']['system_timezone']) AND $config_vars['other']['system_timezone'] == '' ) ) {
 	$config_vars['other']['system_timezone'] = @date('e');
 }
-TTDate::setTimeZone( $config_vars['other']['system_timezone'] );
+TTDate::setTimeZone( $config_vars['other']['system_timezone'], FALSE, FALSE ); //Don't force SQL to be executed here, as an optimization to avoid DB connections when calling things like getProgressBar()
 ?>

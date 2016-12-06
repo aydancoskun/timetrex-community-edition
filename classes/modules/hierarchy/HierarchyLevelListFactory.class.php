@@ -159,7 +159,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 						AND deleted = 0
 				';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict_order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -190,7 +190,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 						AND deleted = 0
 				';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict_order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -223,7 +223,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 						AND deleted = 0
 				';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict_order );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -267,7 +267,9 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 
 	}
 
-	function getLevelsByUserIdAndObjectTypeID( $user_id, $object_type_id = 50 ) { //Requests
+	// 50 = Requests
+	function getLevelsByUserIdAndObjectTypeID( $user_id, $object_type_id = 50 ) {
+	
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -276,7 +278,6 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
 		$hotf = new HierarchyObjectTypeFactory();
 		$hcf = new HierarchyControlFactory();
 
@@ -311,6 +312,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 			//The retarr key is the value that will be displayed to the user when switching levels on the authorization page,
 			//so we need to start that from 1 and increasing sequentially, regardless of what the actual hierarchy level is.
 			$i = 1;
+			$retarr = array();
 			foreach( $rs as $row ) {
 				$retarr[$i] = $row['level'];
 				$i++;
@@ -339,7 +341,6 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 			$strict = TRUE;
 		}
 
-		$uf = new UserFactory();
 		$hcf = new HierarchyControlFactory();
 		$hotf = new HierarchyObjectTypeFactory();
 		$huf = new HierarchyUserFactory();
@@ -369,7 +370,7 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		return $this;
 	}
 
-	function getLevelsAndHierarchyControlIDsByUserIdAndObjectTypeID( $user_id, $object_type_id = 50 ) { //Requests
+	function getLevelsAndHierarchyControlIDsByUserIdAndObjectTypeID( $user_id, $object_type_id = 50 ) { 
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -378,7 +379,6 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
 		$hotf = new HierarchyObjectTypeFactory();
 		$hcf = new HierarchyControlFactory();
 
@@ -413,6 +413,8 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		$rs = $this->db->Execute($query, $ph);
 		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
+		$hierarchy_to_level_map = array();
+		$hierarchy_to_object_type_map = array();
 		if ( $rs->RecordCount() > 0 ) {
 			foreach( $rs as $row ) {
 				$hierarchy_to_level_map[$row['hierarchy_control_id']][] = (int)$row['level'];
@@ -426,10 +428,12 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 			//is looking and requests waiting on OTHER supervisors.
 			//Track the last level for each hierarchy, so we know when to include all requests that may be higher than that level, so if the hierarchy is changed
 			//and levels are taken out, requests don't sit in limbo forever.
+			$retarr = array();
 			foreach( $hierarchy_to_level_map as $hierarchy_control_id => $level_arr ) {
 				//Unique each level arr so we don't start creating extra virtual levels when multiple superiors are at the same level.
 				//This fixes a bug where if there were 5 superiors at the same level, 5 virtual levels would be created.
 				$level_arr = array_unique($level_arr);
+				
 				$i = 1;
 				foreach( $level_arr as $level ) {
 					if ( $level == end($hierarchy_to_level_map[$hierarchy_control_id]) ) {
@@ -521,106 +525,5 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 
 		return $this;
 	}
-
-/*
-	function getByCompanyIdAndObjectTypeId($id, $object_type_id, $where = NULL, $order = NULL) {
-		if ( $id == '' ) {
-			return FALSE;
-		}
-
-		if ( $object_type_id == '' ) {
-			return FALSE;
-		}
-
-		$strict_order = TRUE;
-		if ( $order == NULL ) {
-			//$order = array('b.last_name' => 'asc');
-			$strict_order = FALSE;
-		}
-
-		$cache_id = $id.$object_type_id;
-
-		$hcf = new HierarchyControlFactory();
-		$hotf = new HierarchyObjectTypeFactory();
-
-		$this->rs = $this->getCache($cache_id);
-		if ( $this->rs === FALSE ) {
-			$ph = array(
-						'id' => (int)$id,
-						'object_type_id' => (int)$object_type_id,
-						);
-
-			$query = '
-						select	*
-						from	'. $this->getTable() .' as a,
-								'. $hcf->getTable() .' as b,
-								'. $hotf->getTable() .' as c
-
-						where	a.hierarchy_control_id = b.id
-							AND a.hierarchy_control_id = c.hierarchy_control_id
-							AND b.company_id = ?
-							AND c.object_type_id = ?
-							AND b.deleted = 0
-					';
-			$query .= $this->getWhereSQL( $where );
-			$query .= $this->getSortSQL( $order, $strict_order );
-
-			$this->ExecuteSQL( $query, $ph );
-
-			$this->saveCache($this->rs, $cache_id);
-		}
-
-		return $this;
-	}
-
-	function getByCompanyId($id, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
-		if ( $id == '' ) {
-			return FALSE;
-		}
-
-		$strict_order = TRUE;
-		if ( $order == NULL ) {
-			//$order = array('b.last_name' => 'asc');
-			$strict_order = FALSE;
-		}
-
-		$hcf = new HierarchyControlFactory();
-
-		$ph = array(
-					'id' => (int)$id,
-					);
-
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .' as a,
-							'. $hcf->getTable() .' as b
-
-					where	a.hierarchy_control_id = b.id
-						AND b.company_id = ?
-						AND b.deleted = 0
-				';
-		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict_order );
-
-		$this->ExecuteSQL( $query, $ph, $limit, $page );
-
-		return $this;
-	}
-
-
-	function getByCompanyIdArray($id) {
-
-		$hotlf = new HierarchyObjectTypeListFactory();
-		$hotlf->getByCompanyId( $id ) ;
-
-		$object_type = array();
-		foreach ($hotlf as $object_type) {
-			$object_types[] = $object_type->getObjectType();
-		}
-
-		return $object_types;
-	}
-*/
 }
 ?>

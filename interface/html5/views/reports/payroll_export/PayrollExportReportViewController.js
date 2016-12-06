@@ -14,8 +14,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 
 	save_export_setup_data: {},
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'PayrollExportReport';
 		this.viewId = 'PayrollExportReport';
 		this.context_menu_name = $.i18n._( 'Payroll Export' );
@@ -640,7 +640,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				var row = grid_data[i];
 				var column_id = row.label;
 				var export_column_value = export_columns[row.value];
-				// Error: Uncaught TypeError: Cannot read property 'hour_column' of undefined in /interface/html5/#!m=Exception&sm=PayrollExportReport&sid=1726 line 523 
+				// Error: Uncaught TypeError: Cannot read property 'hour_column' of undefined in /interface/html5/#!m=Exception&sm=PayrollExportReport&sid=1726 line 523
 				if ( !export_column_value ) {
 					if ( default_columns && row.value && default_columns[row.value] ) {
 						export_column_value = default_columns[row.value]
@@ -1522,7 +1522,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box.css( 'display', 'inline' );
-						text_box.setValue( $this.export_setup_data.facility_code_text );
+						text_box.setValue( $this.export_setup_data[code] );
 					} else {
 						text_box.css( 'display', 'none' );
 					}
@@ -1544,7 +1544,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				$this.export_setup_ui_dic[code] = $this.edit_view_form_item_dic[code];
 				delete $this.edit_view_form_item_dic[code];
 
-				
+
 				//State
 				var code1 = 'state_code';
 				var form_item_input1 = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -1562,7 +1562,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input1.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box1.css( 'display', 'inline' );
-						text_box1.setValue( $this.export_setup_data.state_code_text );
+						text_box1.setValue( $this.export_setup_data[code1] );
 					} else {
 						text_box1.css( 'display', 'none' );
 					}
@@ -1598,7 +1598,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input2.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box2.css( 'display', 'inline' );
-						text_box2.setValue( $this.export_setup_data.pay_type_code_text );
+						text_box2.setValue( $this.export_setup_data[code2] );
 					} else {
 						text_box2.css( 'display', 'none' );
 					}
@@ -1633,7 +1633,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				form_item_input3.bind( 'formItemChange', function( e, target ) {
 					if ( target.getValue() === 0 ) {
 						text_box3.css( 'display', 'inline' );
-						text_box3.setValue( $this.export_setup_data.job_title_code_text );
+						text_box3.setValue( $this.export_setup_data[code3] );
 					} else {
 						text_box3.css( 'display', 'none' );
 					}
@@ -1934,14 +1934,7 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				other[other.export_type].export_columns = this.edit_view_ui_dic.csv_export_columns.getValue();
 				break;
 			case 'cms_pbj':
-				other[other.export_type].facility_code = this.edit_view_ui_dic.facility_code.getValue();
-				other[other.export_type].facility_code_text = this.edit_view_ui_dic.facility_code_text.getValue();
-				other[other.export_type].state_code = this.edit_view_ui_dic.state_code.getValue();
-				other[other.export_type].state_code_text = this.edit_view_ui_dic.state_code_text.getValue();
-				other[other.export_type].pay_type_code = this.edit_view_ui_dic.pay_type_code.getValue();
-				other[other.export_type].pay_type_code_text = this.edit_view_ui_dic.pay_type_code_text.getValue();
-				other[other.export_type].job_title_code = this.edit_view_ui_dic.job_title_code.getValue();
-				other[other.export_type].job_title_code_text = this.edit_view_ui_dic.job_title_code_text.getValue();
+				other[other.export_type] = this.getFormSetupFieldValues(['facility_code', 'state_code', 'pay_type_code', 'job_title_code']);
 				break;
 		}
 

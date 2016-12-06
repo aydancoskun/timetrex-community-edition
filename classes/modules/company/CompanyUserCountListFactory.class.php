@@ -284,7 +284,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
 
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+		if ( $this->getDatabaseType() == 'mysql' ) {
 			//$month_sql = '(month( date_stamp ))';
 			$month_sql = '( date_format( date_stamp, \'%Y-%m-01\') )';
 		} else {
@@ -335,7 +335,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
 
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+		if ( $this->getDatabaseType() == 'mysql' ) {
 			//$month_sql = '(month( date_stamp ))';
 			$month_sql = '( date_format( date_stamp, \'%Y-%m-01\') )';
 		} else {
@@ -392,7 +392,7 @@ class CompanyUserCountListFactory extends CompanyUserCountFactory implements Ite
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
 
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+		if ( $this->getDatabaseType() == 'mysql' ) {
 			//$month_sql = '(month( date_stamp ))';
 			$month_sql = '( date_format( a.date_stamp, \'%Y-%m-01\') )';
 		} else {

@@ -41,6 +41,10 @@ var APIMealPolicy = ServiceCaller.extend( {
 
 	copyMealPolicy: function() {
 		return this.argumentsHandler( this.className, 'copyMealPolicy', arguments );
+	},
+
+	exportMealPolicy: function() {
+		return this.argumentsHandler( this.className, 'exportMealPolicy', arguments );
 	}
 
 

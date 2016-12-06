@@ -33,7 +33,7 @@ DashletController = Backbone.View.extend( {
 		ActiveShiftReport: 'APIActiveShiftReport'
 	},
 
-	initialize: function() {
+	initialize: function( options ) {
 		this.api_dashboard = new (APIFactory.getAPIClass( 'APIDashboard' ))();
 		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
 	},
@@ -61,47 +61,47 @@ DashletController = Backbone.View.extend( {
 		if ( Global.detectMobileBrowser() == false ) {
 			interact('#' + $(this.el).attr('id'))
 				.resizable({
-					edges: {left: true, right: true, bottom: true, top: true}
+				edges: {left: true, right: true, bottom: true, top: true}
 				})
 				.on('resizestart', function (event) {
 
 				})
 				.on('resizemove', function (event) {
 
-					var target = event.target;
+				var target = event.target;
 					var xUnit = parseInt(event.rect.width / 20);
 					var yUnit = parseInt(event.rect.height / 20);
 					var left = parseFloat($(target).css('left'));
 					var top = parseFloat($(target).css('top'));
 					if (xUnit > 1) {
-						var percentage_width = ((xUnit * 20) / $this.homeViewController.dashboard_container.width() * 100);
+					var percentage_width = ((xUnit * 20) / $this.homeViewController.dashboard_container.width() * 100);
 						if (Math.abs(percentage_width - 33) < 2) {
-							percentage_width = 33;
-						}
+						percentage_width = 33;
+					}
 						var currentWidth = $(target).width();
-						target.style.width = percentage_width + '%';
+					target.style.width = percentage_width + '%';
 						var newWidth = $(target).width();
-						var widthChanged = newWidth - currentWidth;
+					var widthChanged = newWidth - currentWidth;
 						if (event.edges.left) {
 							$(target).css('left', left - widthChanged);
-						}
 					}
+				}
 					if (yUnit > 1) {
-						var height = (yUnit * 20);
+					var height = (yUnit * 20);
 						var currentHeight = $(target).height();
-						target.style.height = height + 'px';
+					target.style.height = height + 'px';
 						var newHeight = $(target).height();
-						var heightChanged = newHeight - currentHeight;
+					var heightChanged = newHeight - currentHeight;
 						if (event.edges.top) {
 							$(target).css('top', top - heightChanged);
-						}
 					}
-					$this.setGridSize();
+				}
+				$this.setGridSize();
 				})
 				.on('resizeend', function (event) {
-					$this.addIframeBack();
-					$this.homeViewController.updateLayout();
-					$this.saveSize();
+				$this.addIframeBack();
+				$this.homeViewController.updateLayout();
+				$this.saveSize();
 				});
 		}
 
@@ -986,7 +986,7 @@ DashletController = Backbone.View.extend( {
 			len = data.length;
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
-				if ( item.status === 'In' ) {
+				if ( item._status_id === 10 ) {
 					$( this.el ).find( "tr[id='" + (i + 1) + "']" ).addClass( 'light-green' );
 				} else if ( item.status === 'Out' ) {
 					$( this.el ).find( "tr[id='" + (i + 1) + "']" ).addClass( 'light-red' );

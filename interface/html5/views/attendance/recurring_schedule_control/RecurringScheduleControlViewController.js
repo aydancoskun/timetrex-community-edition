@@ -8,8 +8,8 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	user_group_api: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'RecurringScheduleControlEditView.html';
 		this.permission_id = 'recurring_schedule';
 		this.viewId = 'RecurringScheduleControl';
@@ -334,152 +334,13 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	buildContextMenuModels: function() {
 		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
+		var menu = this._super('buildContextMenuModels')[0];
 		//menu group
 		var navigation_group = new RibbonSubMenuGroup( {
 			label: $.i18n._( 'Navigation' ),
 			id: this.viewId + 'navigation',
 			ribbon_menu: menu,
 			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New' ),
-			id: ContextMenuIconName.add,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var mass_edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Mass<br>Edit' ),
-			id: ContextMenuIconName.mass_edit,
-			group: editor_group,
-			icon: Icons.mass_edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.copy,
-			group: editor_group,
-			icon: Icons.copy_as_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy_as_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy<br>as New' ),
-			id: ContextMenuIconName.copy_as_new,
-			group: editor_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_continue = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Continue' ),
-			id: ContextMenuIconName.save_and_continue,
-			group: editor_group,
-			icon: Icons.save_and_continue,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_next = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Next' ),
-			id: ContextMenuIconName.save_and_next,
-			group: editor_group,
-			icon: Icons.save_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Copy' ),
-			id: ContextMenuIconName.save_and_copy,
-			group: editor_group,
-			icon: Icons.save_and_copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& New' ),
-			id: ContextMenuIconName.save_and_new,
-			group: editor_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
 		} );
 
 		var recurring_template = new RibbonSubMenu( {
@@ -576,6 +437,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				break;
 			case ContextMenuIconName.recurring_template:
 			case ContextMenuIconName.schedule:
+			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
 
@@ -587,6 +449,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		this._super( 'setEditViewDataDone' );
 
 		if ( this.is_mass_editing ) {
+			//Do not show the employee dropdown for mass edit, because that does not make sense.
 			this.detachElement( 'user' );
 		} else {
 			this.attachElement( 'user' );
@@ -800,7 +663,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		for ( var i = 0; i < result_data.length; i++) {
 			if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
 				index = i;
-			}
+		}
 		}
 		result_data = result_data[index];
 
@@ -1048,6 +911,9 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				}
 
 				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('exportRecurringScheduleControl');
+				break;
 		}
 	},
 
@@ -1068,7 +934,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					if (hash_id == source_data[i].id) {
 						selected_index = i;
 						break; //exit loop
-					}
+		}
 				}
 			}
 		}
@@ -1150,6 +1016,9 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.schedule:
 					this.setDefaultMenuScheduleIcon( context_btn, grid_selected_length );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
 
 			}
@@ -1325,32 +1194,10 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 	},
 
 	getFilterColumnsFromDisplayColumns: function() {
-
 		var column_filter = {};
-		column_filter.is_owner = true;
-		column_filter.id = true;
-		column_filter.is_child = true;
-		column_filter.in_use = true;
-		column_filter.first_name = true;
-		column_filter.last_name = true;
 		column_filter.user_id = true;
 
-		// Error: Unable to get property 'getGridParam' of undefined or null reference
-		var display_columns = [];
-		if ( this.grid ) {
-			display_columns = this.grid.getGridParam( 'colModel' );
-		}
-
-		if ( display_columns ) {
-			var len = display_columns.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var column_info = display_columns[i];
-				column_filter[column_info.name] = true;
-			}
-		}
-
-		return column_filter;
+		return this._getFilterColumnsFromDisplayColumns(column_filter,  true);
 	},
 
 	setEditMenu: function() {
@@ -1425,6 +1272,9 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				case ContextMenuIconName.schedule:
 					this.setEditMenuScheduleIcon( context_btn );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
+					break;
 			}
 
 		}
@@ -1455,17 +1305,4 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	}
 
-} )
-;
-
-RecurringScheduleControlViewController.loadView = function() {
-
-	Global.loadViewSource( 'RecurringScheduleControl', 'RecurringScheduleControlView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};
+} );

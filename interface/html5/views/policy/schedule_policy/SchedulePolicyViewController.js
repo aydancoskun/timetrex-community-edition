@@ -2,8 +2,8 @@ SchedulePolicyViewController = BaseViewController.extend( {
 	el: '#schedule_policy_view_container',
 
 	over_time_policy_api: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'SchedulePolicyEditView.html';
 		this.permission_id = 'schedule_policy';
 		this.viewId = 'SchedulePolicy';
@@ -372,15 +372,3 @@ SchedulePolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-SchedulePolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'SchedulePolicy', 'SchedulePolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

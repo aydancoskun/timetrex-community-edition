@@ -1,7 +1,7 @@
 ActiveShiftReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'ActiveShiftReport';
 		this.viewId = 'ActiveShiftReport';
 		this.context_menu_name = $.i18n._( 'Whos In Summary' );

@@ -317,11 +317,12 @@ class RecurringScheduleControlFactory extends Factory {
 	function getUser() {
 		$rsulf = TTnew( 'RecurringScheduleUserListFactory' );
 		$rsulf->getByRecurringScheduleControlId( $this->getId() );
+		$list = array();
 		foreach ($rsulf as $obj) {
 			$list[] = $obj->getUser();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -427,6 +428,7 @@ class RecurringScheduleControlFactory extends Factory {
 			$max_week = count($week_arr);
 
 			$i = 1;
+			$arr = array();
 			foreach( $week_arr as $key => $val ) {
 				$new_val = ( $key - ($this->getStartWeek() - 1) );
 
@@ -438,6 +440,7 @@ class RecurringScheduleControlFactory extends Factory {
 
 				$i++;
 			}
+			unset($val); //code standards
 			//var_dump($arr);
 			return $arr;
 		}
@@ -520,6 +523,7 @@ class RecurringScheduleControlFactory extends Factory {
 		//Need to make the 'user' column explicitly defined instead perhaps?
 		//
 		$variable_function_map = $this->getVariableToFunctionMap();
+		$data = array();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

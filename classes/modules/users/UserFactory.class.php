@@ -286,9 +286,9 @@ class UserFactory extends Factory {
 
 										'password' => 'Password', //Must go near the end, so we can validate based on other info.
 										'phone_password' => 'PhonePassword', //Must go near the end, so we can validate based on other info.
-										
+
 										//These must be defined, but they are ignored in setObjectFromArray() due to security risks.
-										'password_reset_key' => 'PasswordResetKey', 
+										'password_reset_key' => 'PasswordResetKey',
 										'password_reset_date' => 'PasswordResetDate',
 										'password_updated_date' => 'PasswordUpdatedDate', //Needs to be defined otherwise password_updated_date never gets set. Also needs to go before setPassword() as it updates the date too.
 
@@ -583,13 +583,14 @@ class UserFactory extends Factory {
 		$hllf = new HierarchyLevelListFactory();
 		$hllf->getObjectTypeAndHierarchyAppendedListByCompanyIDAndUserID( $this->getCompany(), $this->getID() );
 		if ( $hllf->getRecordCount() > 0 ) {
+			$hierarchy_control_retval = array();
 			foreach( $hllf as $hl_obj ) {
 				if ( is_object($hl_obj->getUserObject() ) ) {
 					$hierarchy_control_retval[$hl_obj->getColumn('hierarchy_control_name')][] = $hl_obj->getLevel().'.'. $hl_obj->getUserObject()->getFullName(); //Don't add space after "." to prevent word wrap after the level.
 				}
 			}
 
-			if ( isset($hierarchy_control_retval) ) {
+			if ( empty($hierarchy_control_retval) == FALSE ) {
 				$enable_display_hierarchy_control_name = FALSE;
 				if ( count($hierarchy_control_retval) > 1 ) {
 					$enable_display_hierarchy_control_name = TRUE;
@@ -618,7 +619,7 @@ class UserFactory extends Factory {
 
 		if ( is_array($data) ) {
 			$retval = array();
-			foreach( $data as $id => $name ) {
+			foreach( $data as $name ) {
 				$retval[] = $name;
 			}
 
@@ -762,7 +763,7 @@ class UserFactory extends Factory {
 		if ( $encrypted_password == '' ) {
 			$encrypted_password = $this->getPassword();
 		}
-		
+
 		$split_password = explode(':', $encrypted_password );
 		if ( is_array($split_password) AND count($split_password) == 2 ) {
 			$version = $split_password[0];
@@ -772,11 +773,11 @@ class UserFactory extends Factory {
 
 		return $version;
 	}
-	
+
 	//Always default to latest password version.
 	function encryptPassword( $password, $version = 2 ) {
 		$password = trim($password);
-		
+
 		//Handle password migration/versioning
 		switch( (int)$version ) {
 			case 2: //v2
@@ -905,8 +906,8 @@ class UserFactory extends Factory {
 				AND
 				$this->Validator->isLength(		'password',
 												$password,
-												TTi18n::gettext('Incorrect password length'),
-												4,
+												TTi18n::gettext('Password is too short or too long'),
+												( $force == FALSE ) ? 6 : 4, //DemoData requires 4 chars for password: demo
 												64)
 				AND
 				$this->Validator->isTrue(		'password',
@@ -999,7 +1000,7 @@ class UserFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function isFirstLogin() {
 		if ( DEMO_MODE == FALSE AND $this->getLastLoginDate() == '' ) {
 			Debug::Text('is First Login: TRUE', __FILE__, __LINE__, __METHOD__, 10);
@@ -1010,7 +1011,6 @@ class UserFactory extends Factory {
 	}
 
 	function isCompromisedPassword() {
-		$c_obj = $this->getCompanyObject();
 
 		//Check to see if the password was updated at the same time the user record was created originally, or if the password was updated by an administrator.
 		//  Either way the password should be considered compromised (someone else knows it) and should be changed.
@@ -1025,7 +1025,7 @@ class UserFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function checkPasswordAge() {
 		$c_obj = $this->getCompanyObject();
 		//Always add 1 to the PasswordMaximumAge so if its set to 0 by mistake it will still allow the user to login after changing their password.
@@ -1036,7 +1036,7 @@ class UserFactory extends Factory {
 		}
 		return TRUE;
 	}
-	
+
 	function getPasswordUpdatedDate() {
 		if ( isset($this->data['password_updated_date']) ) {
 			return $this->data['password_updated_date'];
@@ -1497,8 +1497,7 @@ class UserFactory extends Factory {
 	function setFirstNameMetaphone($first_name) {
 		$first_name = metaphone( trim($first_name) );
 
-		if	(	$first_name != '' ) {
-
+		if	( $first_name != '' ) {
 			$this->data['first_name_metaphone'] = $first_name;
 
 			return TRUE;
@@ -1506,7 +1505,6 @@ class UserFactory extends Factory {
 
 		return FALSE;
 	}
-
 
 	function getMiddleInitial() {
 		if ( $this->getMiddleName() != '' ) {
@@ -1591,10 +1589,9 @@ class UserFactory extends Factory {
 	function setLastNameMetaphone($last_name) {
 		$last_name = metaphone( trim($last_name) );
 
-		if	( $last_name != '' ) {
-
+		if ( $last_name != '' ) {
 			$this->data['last_name_metaphone'] = $last_name;
-			
+
 			return TRUE;
 		}
 
@@ -1610,7 +1607,6 @@ class UserFactory extends Factory {
 	}
 
 	function setSecondLastName($second_last_name) {
-		$last_name = trim($second_last_name);
 
 		if	(
 				$second_last_name == ''
@@ -1868,7 +1864,7 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 	function setLongitude($value) {
-		$value = trim((float)$value);
+		$value = TTi18n::parseFloat( $value );
 
 		if (	$value == 0
 				OR
@@ -1876,7 +1872,7 @@ class UserFactory extends Factory {
 											$value,
 											TTi18n::gettext('Longitude is invalid')
 											) ) {
-			$this->data['longitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['longitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -1892,7 +1888,7 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 	function setLatitude($value) {
-		$value = trim((float)$value);
+		$value = TTi18n::parseFloat( $value );
 
 		if (	$value == 0
 				OR
@@ -1900,7 +1896,7 @@ class UserFactory extends Factory {
 											$value,
 											TTi18n::gettext('Latitude is invalid')
 											) ) {
-			$this->data['latitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['latitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -2050,7 +2046,8 @@ class UserFactory extends Factory {
 		}
 
 		$error_threshold = 7; //No DNS checks.
-		if ( PRODUCTION === TRUE AND DEPLOYMENT_ON_DEMAND === TRUE AND DEMO_MODE === FALSE ) {
+		//if ( PRODUCTION === TRUE AND DEPLOYMENT_ON_DEMAND === TRUE AND DEMO_MODE === FALSE ) {
+		if ( PRODUCTION === TRUE AND DEMO_MODE === FALSE ) {
 			$error_threshold = 0; //DNS checks on email address.
 		}
 		if	(	( $home_email == ''
@@ -2176,7 +2173,8 @@ class UserFactory extends Factory {
 		}
 
 		$error_threshold = 7; //No DNS checks.
-		if ( PRODUCTION === TRUE AND DEPLOYMENT_ON_DEMAND === TRUE AND DEMO_MODE === FALSE ) {
+		//if ( PRODUCTION === TRUE AND DEPLOYMENT_ON_DEMAND === TRUE AND DEMO_MODE === FALSE ) {
+		if ( PRODUCTION === TRUE AND DEMO_MODE === FALSE ) {
 			$error_threshold = 0; //DNS checks on email address.
 		}
 		if	(	( $work_email == ''
@@ -2194,7 +2192,7 @@ class UserFactory extends Factory {
 
 			$this->data['work_email'] = $work_email;
 			$this->setEnableClearPasswordResetData( TRUE ); //Clear any outstanding password reset key to prevent unexpected changes later on.
-			
+
 			return TRUE;
 		}
 
@@ -2674,36 +2672,38 @@ class UserFactory extends Factory {
 				$email_is_valid_key = $this->getHomeEmailIsValidKey();
 			}
 
-			$this->Save(FALSE);
+			if ( $this->isValid() ) {
+				$this->Save( FALSE );
 
-			$subject = APPLICATION_NAME .' - '. TTi18n::gettext('Confirm email address');
+				$subject = APPLICATION_NAME .' - '. TTi18n::gettext('Confirm email address');
 
-			$body = '<html><body>';
-			$body .= TTi18n::gettext('The email address %1 has been added to your %2 account', array($primary_email, APPLICATION_NAME) ).', ';
-			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ConfirmEmail.php?action:confirm_email=1&email='. $primary_email .'&key='. $email_is_valid_key .'">'. TTi18n::gettext('please click here to confirm and activate this email address') .'</a>.';
-			$body .= '<br><br>';
-			$body .= '--<br>';
-			$body .= APPLICATION_NAME;
-			$body .= '</body></html>';
+				$body = '<html><body>';
+				$body .= TTi18n::gettext('The email address %1 has been added to your %2 account', array($primary_email, APPLICATION_NAME) ).', ';
+				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ConfirmEmail.php?action:confirm_email=1&email='. $primary_email .'&key='. $email_is_valid_key .'">'. TTi18n::gettext('please click here to confirm and activate this email address') .'</a>.';
+				$body .= '<br><br>';
+				$body .= '--<br>';
+				$body .= APPLICATION_NAME;
+				$body .= '</body></html>';
 
-			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee email confirmation sent for').': '. $primary_email, NULL, $this->getTable() );
+				TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee email confirmation sent for').': '. $primary_email, NULL, $this->getTable() );
 
-			$headers = array(
-								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Email Confirmation') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
-								'Subject' => $subject,
-								'X-TimeTrex-Email-Validate' => 'YES', //Help filter validation emails.
-							);
+				$headers = array(
+						'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Email Confirmation') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
+						'Subject' => $subject,
+						'X-TimeTrex-Email-Validate' => 'YES', //Help filter validation emails.
+				);
 
-			$mail = new TTMail();
-			$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
-			$mail->setHeaders( $headers );
+				$mail = new TTMail();
+				$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
+				$mail->setHeaders( $headers );
 
-			@$mail->getMIMEObject()->setHTMLBody($body);
+				@$mail->getMIMEObject()->setHTMLBody($body);
 
-			$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
-			$retval = $mail->Send();
+				$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
+				$retval = $mail->Send();
 
-			return $retval;
+				return $retval;
+			}
 		}
 
 		return FALSE;
@@ -2727,39 +2727,41 @@ class UserFactory extends Factory {
 
 			$this->setPasswordResetKey( md5( Misc::getUniqueID() ) );
 			$this->setPasswordResetDate( time() );
-			$this->Save(FALSE);
+			if (  $this->isValid() ) {
+				$this->Save( FALSE );
 
-			$subject = APPLICATION_NAME .' '. TTi18n::gettext('password reset requested at') .' '. TTDate::getDate('DATE+TIME', time() ) .' '. TTi18n::gettext('from') .' '. Misc::getRemoteIPAddress();
+				$subject = APPLICATION_NAME .' '. TTi18n::gettext('password reset requested at') .' '. TTDate::getDate('DATE+TIME', time() ) .' '. TTi18n::gettext('from') .' '. Misc::getRemoteIPAddress();
 
-			$body = '<html><body>';
-			$body .= TTi18n::gettext('A password reset has been requested for') .' "'. $this->getUserName() .'", ';
-			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ForgotPassword.php?action:password_reset=1&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
-			$body .= '<br><br>';
-			$body .= TTi18n::gettext('If you did not request your password to be reset, you may ignore this email.');
-			$body .= '<br><br>';
-			$body .= '--<br>';
-			$body .= APPLICATION_NAME;
-			$body .= '</body></html>';
+				$body = '<html><body>';
+				$body .= TTi18n::gettext('A password reset has been requested for') .' "'. $this->getUserName() .'", ';
+				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ForgotPassword.php?action:password_reset=1&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
+				$body .= '<br><br>';
+				$body .= TTi18n::gettext('If you did not request your password to be reset, you may ignore this email.');
+				$body .= '<br><br>';
+				$body .= '--<br>';
+				$body .= APPLICATION_NAME;
+				$body .= '</body></html>';
 
-			//Don't record the reset key in the audit log for security reasons.
-			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. Misc::getRemoteIPAddress(), NULL, $this->getTable() );
+				//Don't record the reset key in the audit log for security reasons.
+				TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. Misc::getRemoteIPAddress(), NULL, $this->getTable() );
 
-			$headers = array(
-								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
-								'Subject' => $subject,
-								'Cc'	  => Misc::formatEmailAddress( $secondary_email, $this ),
-							);
+				$headers = array(
+						'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
+						'Subject' => $subject,
+						'Cc'	  => Misc::formatEmailAddress( $secondary_email, $this ),
+				);
 
-			$mail = new TTMail();
-			$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
-			$mail->setHeaders( $headers );
+				$mail = new TTMail();
+				$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
+				$mail->setHeaders( $headers );
 
-			@$mail->getMIMEObject()->setHTMLBody($body);
+				@$mail->getMIMEObject()->setHTMLBody($body);
 
-			$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
-			$retval = $mail->Send();
+				$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
+				$retval = $mail->Send();
 
-			return $retval;
+				return $retval;
+			}
 		}
 
 		return FALSE;
@@ -2824,7 +2826,7 @@ class UserFactory extends Factory {
 		}
 		return FALSE;
 	}
-	
+
 	function isPhotoExists() {
 		return file_exists( $this->getPhotoFileName() );
 	}
@@ -2951,6 +2953,7 @@ class UserFactory extends Factory {
 				return TRUE;
 			}
 		} catch( Exception $e ) {
+			unset($e); //code standards
 			Debug::text('ERROR: Unable to unsubscribe email: '. $email, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
@@ -3052,7 +3055,7 @@ class UserFactory extends Factory {
 				if ( TTDate::getMiddleDayEpoch( $this->getTerminationDate() ) < TTDate::getMiddleDayEpoch( time() ) ) {
 					$this->Validator->Warning( 'termination_date', TTi18n::gettext('When setting a termination date retroactively, you may need to recalculate this employees timesheet') );
 				}
-				
+
 				if ( $this->isNew() == FALSE ) {
 					//Check to see if worked/absence time exist after termination
 					$udtlf = TTnew('UserDateTotalListFactory');
@@ -3071,7 +3074,7 @@ class UserFactory extends Factory {
 					unset($psalf);
 				}
 			}
-			
+
 			//Check for duplicate email addresses and warn about possible account lock-out due to password reset functionality being disabled.
 			if ( $this->isUniqueWorkEmail( $this->getWorkEmail() ) == FALSE ) {
 				$this->Validator->Warning( 'work_email', TTi18n::gettext('Work email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out' ) );
@@ -3319,7 +3322,7 @@ class UserFactory extends Factory {
 						}
 					}
 				}
-				unset($hierarchy_control_add, $huf, $hierarchy_control_id);
+				unset($huf, $hierarchy_control_id);
 			}
 		}
 
@@ -3384,6 +3387,7 @@ class UserFactory extends Factory {
 				$upf->setDateFormat( $udf_obj->getDateFormat() );
 				$upf->setTimeFormat( $udf_obj->getTimeFormat() );
 				$upf->setTimeUnitFormat( $udf_obj->getTimeUnitFormat() );
+				$upf->setDistanceFormat( $udf_obj->getDistanceFormat() );
 
 				$upf->setTimeZone( $upf->getLocationTimeZone( $this->getCountry(), $this->getProvince(), $this->getWorkPhone(), $this->getHomePhone(), $udf_obj->getTimeZone() ) );
 				Debug::text('Time Zone: '. $upf->getTimeZone(), __FILE__, __LINE__, __METHOD__, 9);
@@ -3407,6 +3411,7 @@ class UserFactory extends Factory {
 				$upf->setDateFormat( 'd-M-y' );
 				$upf->setTimeFormat( 'g:i A' );
 				$upf->setTimeUnitFormat( 10 );
+				$upf->setDistanceFormat( 10 );
 
 				$upf->setTimeZone( $upf->getLocationTimeZone( $this->getCountry(), $this->getProvince(), $this->getWorkPhone(), $this->getHomePhone() ) );
 				Debug::text('Time Zone: '. $upf->getTimeZone(), __FILE__, __LINE__, __METHOD__, 9);
@@ -3543,7 +3548,7 @@ class UserFactory extends Factory {
 			$authentication = TTNew('Authentication');
 			$authentication->logoutUser( $this->getID() );
 		}
-		
+
 		return TRUE;
 	}
 
@@ -3617,6 +3622,7 @@ class UserFactory extends Factory {
 		*/
 
 		$variable_function_map = $this->getVariableToFunctionMap();
+		$data = array();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

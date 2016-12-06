@@ -1,7 +1,7 @@
 EthnicGroupViewController = BaseViewController.extend( {
 	el: '#ethnic_group_view_container',
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'EthnicGroupEditView.html';
 		this.permission_id = 'user';
 		this.viewId = 'EthnicGroup';
@@ -100,15 +100,3 @@ EthnicGroupViewController = BaseViewController.extend( {
 
 
 } );
-
-EthnicGroupViewController.loadView = function() {
-
-	Global.loadViewSource( 'EthnicGroup', 'EthnicGroupView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

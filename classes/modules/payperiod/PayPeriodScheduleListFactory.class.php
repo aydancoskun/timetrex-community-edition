@@ -232,6 +232,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 		$ppslf = new PayPeriodScheduleListFactory();
 		$ppslf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -240,7 +241,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 			$list[$pps_obj->getID()] = $pps_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -252,6 +253,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -260,7 +262,7 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -272,11 +274,12 @@ class PayPeriodScheduleListFactory extends PayPeriodScheduleFactory implements I
 			return FALSE;
 		}
 
+		$retarr = array();
 		foreach ($lf as $obj) {
 			$retarr[$obj->getColumn('user_id')] = $obj->getId();
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 

@@ -41,7 +41,7 @@ BaseWizardController = BaseWindowController.extend( {
 		'click .done-btn': 'onDoneClick'
 	},
 
-	initialize: function() {
+	initialize: function( options ) {
 		this.content_div = $( this.el ).find( '.content' );
 		this.stepsWidgetDic = {};
 		this.stepsDataDic = {};
@@ -578,16 +578,13 @@ BaseWizardController.default_data = null;
 BaseWizardController.callBack = null;
 
 BaseWizardController.openWizard = function( viewId, templateName ) {
-
 	if ( LocalCacheData.current_open_wizard_controller ) {
 		LocalCacheData.current_open_wizard_controller.onCloseClick();
 	}
-
 	Global.loadViewSource( viewId, templateName, function( result ) {
 		var args = {};
-		var template = _.template( result, args );
-
-		$( 'body' ).append( template );
+		var template = _.template( result );
+		$( 'body' ).append( template( args ) );
 
 	} );
 };

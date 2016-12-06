@@ -40,10 +40,10 @@ require_once('PHPUnit/Framework/TestCase.php');
  * @group CRPayrollDeductionTest
  */
 class CRPayrollDeductionTest extends PHPUnit_Framework_TestCase {
-    public $company_id = NULL;
+	public $company_id = NULL;
 
-    public function setUp() {
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function setUp() {
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
 
@@ -51,13 +51,13 @@ class CRPayrollDeductionTest extends PHPUnit_Framework_TestCase {
 
 		TTDate::setTimeZone('Etc/GMT+8'); //Force to non-DST timezone. 'PST' isnt actually valid.
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
-        return TRUE;
-    }
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		return TRUE;
+	}
 
 	public function mf($amount) {
 		return Misc::MoneyFormat($amount, FALSE);
@@ -72,9 +72,9 @@ class CRPayrollDeductionTest extends PHPUnit_Framework_TestCase {
 	//
 
 	function testCR_2007a_BiWeekly_Single_LowIncome() {
-		Debug::text('CR - BiWeekly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('CR - BiWeekly - Beginning of 2007 01-Jan-07: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$pd_obj = new PayrollDeduction('CR',NULL);
+		$pd_obj = new PayrollDeduction('CR', NULL);
 		$pd_obj->setDate(strtotime('01-Jan-07'));
 		$pd_obj->setAnnualPayPeriods( 26 ); //Bi-Weekly
 

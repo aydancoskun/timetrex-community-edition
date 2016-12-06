@@ -51,9 +51,6 @@
  * @package Core
  */
 class TTi18n {
-	static private $locale_handler = NULL;
-	static private $translation_handler = NULL;
-
 	static private $language = 'en';
 	static private $country = 'US';
 
@@ -62,106 +59,51 @@ class TTi18n {
 	static private $normalized_locale = NULL;
 	static private $is_default_locale = TRUE;
 
-	static public function getLocaleHandler() {
-		if ( self::$locale_handler === NULL ) {
-			require_once('I18Nv2.php');
+	static private $currency_formatter = FALSE;
+	static private $number_formatter = FALSE;
 
-			// If first param is not NULL, (eg 'en_US') then I18n throws php notices on debian/ubuntu.
-			//Set second param (paranoid) to TRUE so it doesn't break FPDF/TCPDF
-			self::$locale_handler = &I18Nv2::createLocale( NULL, TRUE );
-		}
+	//default precision is 2 to stay consistent with legacy code.
+	static private $DEFAULT_NUMBER_FORMAT_PATTERN = '#,##0.##';
 
-		return self::$locale_handler;
-	}
+	static function setGetTextLocale( $locale ) {
+		// Beware: this is changing the locale process-wide.
+		// But *only* for LC_MESSAGES, not other LC_*.
+		// This is not thread-safe.	 For threaded web servers,
+		// the slower Translation2 classes should be used.
 
-	/**
-	 * Specifies if the native PHP gettext extension is
-	 * available and safe to use.
-	 *
-	 * @return bool
-	 */
-	static private function useGetTextExtension() {
+		//Setting the locale again here overrides what i18Nv2 just set
+		//breaking Windows. However not setting it breaks some Linux distro's.
+		//Because apparently LC_ALL doesn't matter on some Unix, it still doesn't set LC_MESSAGES.
+		//So if we didn't explicity set LC_MESSAGES above, do it here.
+		if ( OPERATING_SYSTEM == 'LINUX' ) {
+			$rc = setlocale( LC_MESSAGES, $locale.'.UTF-8' );
 
-		//Force the use of GetText extension for now, as Translation2 is WAY to slow right now.
-		//HHVM currently doesn't support getText extension though, so at least allow it to be used.
-		//return TRUE;
-
-		// Use a static for speed.
-		static $use_gettext = NULL;
-
-		if ( $use_gettext === NULL ) {
-			// Here we check that:
-			//	1) gettext extension is loaded
-			//	2) we are running under apache
-			//	3) the apache prefork module is loaded.	 so we are not multi-threaded.
-			if ( extension_loaded( 'gettext' ) ) {
-				$use_gettext = TRUE;
-				
-				//Translation2 is too slow on Windows, force getText for now.
-				//$sapi_name = php_sapi_name();
-				//if ( $sapi_name == 'cli' ) {
-				//	$use_gettext = TRUE;
-				//} elseif ( in_array( php_sapi_name(), array( 'apache', 'apache2handler' ) ) AND in_array( 'prefork', apache_get_modules() ) ) {
-					//Only check apache_modules if we are using Apache.
-				//	$use_gettext = TRUE;
-				//} else {
-				//	$use_gettext = FALSE;
-				//}
+			/* This often reports failure even if it works.
+			if ( $rc == 0 ) {
+				Debug::text('setLocale failed!: '. (int)$rc .' Locale: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
 			}
-			// Note: We could also check for a config file setting that would override this.
-
-			// uncomment for debugging.
-			//$use_gettext = false;
+			*/
 		}
 
-		return $use_gettext;
-	}
+		// Normally, setting env var(s) would not be necessary, but I18Nv2
+		// is explicitly setting LANG* env variables, which seem to be
+		// overriding setlocale(). Setting the env var here, fixes it.
+		// Yes, I know it seems backwards.	YMMV.
+		@putEnv('LANGUAGE=' . $locale);
 
+		$domain = 'messages';
 
-	static public function getTranslationHandler() {
-		if ( self::$translation_handler === NULL ) {
-			if ( self::useGetTextExtension() == TRUE ) {
-				//Debug::Text('Using getText()...', __FILE__, __LINE__, __METHOD__, 10);
-				return new NativeGettextTranslationHandler();
-			} else {
-				//Debug::Text('Using Translation2...', __FILE__, __LINE__, __METHOD__, 10);
-				require_once( 'Translation2.php' );
+		//This fixes the mysterious issue of the "sticky locale". Where PHP
+		//wouldn't change locales half way through a script.
+		textdomain( $domain );
 
-				$locale_dir = Environment::getBasePath() . DIRECTORY_SEPARATOR . 'interface' . DIRECTORY_SEPARATOR . 'locale' .DIRECTORY_SEPARATOR;
+		// Tell gettext where to find the locale translation files.
+		bindtextdomain( $domain, Environment::getBasePath() . DIRECTORY_SEPARATOR . 'interface' . DIRECTORY_SEPARATOR . 'locale');
 
-				// The Translation2 Gettext example has this comment:
-				//
-				//	  "Better set prefetch to FALSE for the gettext container, so we don't need
-				//	   to read in the whole MO file with File_Gettext on every request."
-				//
-				// I haven't investigated this fully yet.  So for now I am doing as they advise.
-				// Probably worth checking out for performance purposes. Also, it is unclear
-				// how this affects PO mode, as opposed to MO.
-				//
-				// NOTE: getText extension caches data within Apache itself, you must restart Apache to clear the cache.
-				$params = array(
-					'prefetch'			=> FALSE,
-					'langs_avail_file'	=> $locale_dir . 'langs.ini',
-					'domains_path_file' => $locale_dir . 'domains.ini',
-					'default_domain'	=> 'messages',
-					'file_type'			=> 'mo',
-					'cacheDir'			=> '/tmp/timetrex/',
-					'lifeTime'			=> ( 86400 * 7 ),
-				);
-				self::$translation_handler = Translation2::factory('gettext', $params);
-				//self::$translation_handler->getDecorator('CacheLiteFunction');
+		// Tell gettext which codeset to use for output.
+		bind_textdomain_codeset( $domain, 'UTF-8');
 
-				// Okay, this is super-gross, as we are modifying private data of the
-				// Translation2::storage object.  Why do we do it?	Because the
-				// brain-dead Translation2 api for gettext only allows specifying
-				// fixed paths via domains.ini file.  Our path depends on our environment
-				// and we need to tell it that.	 So, it appears we either do this nasty
-				// hack, or we have to start modifying the Translation2 code directly.
-				self::$translation_handler->storage->_domains = array( 'messages' => $locale_dir );
-			}
-		}
-
-		return self::$translation_handler;
+		return TRUE;
 	}
 
 
@@ -210,42 +152,12 @@ class TTi18n {
 			$locale = (array)$locale;
 		}
 
-		//Try each Locale in array to see which one works.
+		//Don't call setLocale() with LC_ALL here, only LC_MESSAGES or some other LC_* type that is *NOT* numeric.
+		//  If we change the numeric locale to say es_ES, then PHP converts (float)1.234 to '1,1234' as a string which causes a SQL syntax error when inserting into SQL.
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
-			//setLocale supports passing it an array, so thats easy.
-			$valid_locale = setlocale( LC_ALL, $locale );
+			$valid_locale = setlocale( ( LC_MESSAGES | LC_COLLATE | LC_CTYPE ), $locale );
 		} else {
-			//Add caching here if we find this loop is too slow.
-			self::getLocaleHandler(); //Include I18Nv2 files.
-			$windows_locales = I18Nv2::getStaticProperty('windows');
-
-			$valid_locale = 'en_US';
-			foreach( $locale as $tmp_locale) {
-				//This is setting the locale
-
-				//Match the windows locales directly, because if we use self::getLocaleHandler()->setLocale( $tmp_locale, 'LC_ALL'); instead
-				//it will actually change the locale out from under us causing strange problems, and also circumventing the locale cache
-				//in setLocale() (that prevents changing to the same locale we are already in)
-				//
-				//On windows sometimes its using 127 digits after the decimal because after setLocale() is called, localeconv() returns
-				//an array that is basically empty or uses 127 for everything.
-				//This is fixed in Pear::I18Nv2->setLocale(), so it defaults to english values if it fails.
-				if ( isset( $windows_locales[$tmp_locale] ) ) {
-					Debug::Text('Found valid windows locale: '. $windows_locales[$tmp_locale] .' Linux locale: '. $tmp_locale, __FILE__, __LINE__, __METHOD__, 10);
-					$valid_locale = $tmp_locale;
-					break;
-				}
-
-				/*
-				$windows_locale = self::getLocaleHandler()->setLocale( $tmp_locale, 'LC_ALL');
-				if ( $windows_locale !== FALSE ) {
-					Debug::Text('Found valid windows locale: '. $windows_locale .' Linux locale: '. $tmp_locale, __FILE__, __LINE__, __METHOD__, 10);
-					//Returning $windows_locale appears to fix issues with some systems, but then it causes problems with language selection since its a long locale name that doens't match pt_PT for example.
-					$valid_locale = $tmp_locale;
-					break;
-				}
-				*/
-			}
+			$valid_locale = setlocale( ( LC_COLLATE | LC_CTYPE ), $locale );
 		}
 
 		if ( $valid_locale != '' ) {
@@ -272,13 +184,23 @@ class TTi18n {
 		//3. Just Language
 		//4a. If Linux then try with ".UTF8" appended to all of the above.
 		//4b. If windows, let i18Nv2 normalize to windows locale names.
+
+		//Debug::Text('Locale Argument: '. $locale_arg, __FILE__, __LINE__, __METHOD__, 11);
 		if ( $locale_arg != '' AND strlen( $locale_arg ) <= 7 ) {
+			//If locale argument is passed, normalize it and just attempt to use it.
 			$locale_arr[] = $locale_arg;
 			$locale_arr[] = self::_normalizeLocale( $locale_arg );
+		} elseif ( self::getLanguage() != '' AND self::getCountry() != '' ) {
+			//If no locale argument is passed, try to generate the locale based on just a Language/Country pair.
+			//  Otherwise Language/Country could be from the previous locale (if it was changed multiple times like in a maintenance job) and $locale_arg could be from the current locale.
+			//  If that happens, and locale_arg is not installed on the OS, it will revert back to the previous locale and
+			//  therefore seem like the locales are incorrect or not changing. This has caused some unit tests to fail in the past where the locale changes multiple times without ever calling setLanguage/setCountry
+			//  $locale_arg should never be set if Language/Country are though.
+			Debug::Text('Lanuage: '. self::getLanguage() .' Country: '. self::getCountry(), __FILE__, __LINE__, __METHOD__, 11);
+			$locale_arr[] = $locale = self::getLanguage() . '_' . self::getCountry();
+			$locale_arr[] = self::_normalizeLocale( $locale );
+			$locale_arr[] = self::getLanguage();
 		}
-		$locale_arr[] = $locale = self::getLanguage().'_'.self::getCountry();
-		$locale_arr[] = self::_normalizeLocale( $locale );
-		$locale_arr[] = self::getLanguage();
 
 		//Finally add a fallback locale that should always work, in theory.
 		$locale_arr[] = 'en_US';
@@ -311,14 +233,26 @@ class TTi18n {
 		return FALSE;
 	}
 
+	static public function stripUTF8($str) {
+		//Only strip UTF8 if it actually exists, based on the ".".
+		$position_of_dot = strpos($str, '.');
+		if ( $position_of_dot !== FALSE ) {
+			return substr( $str, 0, $position_of_dot );
+		}
+
+		return $str;
+	}
+
 	static public function setLocaleCookie( $locale = NULL ) {
 		if ( $locale == '' ) {
-			$locale = self::getLocale();
+			//Ensure locale never has ".UTF-8" on the end.
+			//There are 2 strlen calls that only accept locales with less than 7 chars.
+			$locale = self::stripUTF8( self::getLocale() );
 		}
 
 		if ( self::getLocaleCookie() != $locale ) {
 			Debug::Text('Setting Locale cookie: '. $locale, __FILE__, __LINE__, __METHOD__, 11);
-			setcookie( 'language', $locale, ( time() + 9999999 ), Environment::getBaseURL() );
+			setcookie( 'language', $locale, ( time() + 9999999 ), Environment::getCookieBaseURL() );
 		}
 
 		return TRUE;
@@ -368,7 +302,7 @@ class TTi18n {
 	static public function getLocale() {
 		return self::$locale;
 	}
-	static public function setLocale( $locale_arg = NULL, $category = LC_ALL ) {
+	static public function setLocale( $locale_arg = NULL, $category = LC_ALL, $force = FALSE ) {
 		Debug::Text('Generated/Passed In Locale: '. $locale_arg, __FILE__, __LINE__, __METHOD__, 11);
 		$locale = self::tryLocale( self::generateLocale( $locale_arg ) );
 
@@ -376,14 +310,14 @@ class TTi18n {
 
 		//In order to validate Windows locales with tryLocale() we have to always force the locale to be set, otherwise
 		//if tryLocale() doesn't get it right on the first try, the locale is reverted to something that may not work.
-		if ( $locale != self::getLocale() ) {
+		if ( $force == TRUE OR $locale != self::getLocale() ) {
 			if ( in_array( $category, array( LC_ALL, LC_MONETARY, LC_NUMERIC ) ) ) {
 				Debug::Text('Setting currency/numeric Locale to: '. $locale, __FILE__, __LINE__, __METHOD__, 11);
 				//if ( self::getLocaleHandler()->setLocale( $locale, $category ) != $locale ) {
 				//Setting the locale in Windows can cause the locale names to not match at all, so check for FALSE
-				if ( self::getLocaleHandler()->setLocale( $locale, $category ) == FALSE ) {
-					Debug::Text('Failed setting currency/numeric locale: '. $locale, __FILE__, __LINE__, __METHOD__, 11);
-				}
+//				if ( self::getLocaleHandler()->setLocale( $locale, $category ) == FALSE ) {
+//					Debug::Text('Failed setting currency/numeric locale: '. $locale, __FILE__, __LINE__, __METHOD__, 11);
+//				}
 			}
 
 			if ( in_array( $category, array( LC_ALL, LC_MESSAGES ) ) ) {
@@ -392,10 +326,10 @@ class TTi18n {
 				// for each lang/country combination.
 				$normal_locale = self::_normalizeLocale( $locale );
 				Debug::Text('Setting translator to normalized locale: '. $normal_locale, __FILE__, __LINE__, __METHOD__, 11);
-				if ( self::getTranslationHandler()->setLang( $normal_locale ) === FALSE ) {
+				if ( self::setGetTextLocale( $normal_locale ) === FALSE ) {
 					//Fall back on non-normalized locale
 					Debug::Text('Failed setting translator normalized locale: '. $normal_locale .' Falling back to: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
-					if ( self::getTranslationHandler()->setLang( $locale ) === FALSE ) {
+					if ( self::setGetTextLocale( $locale ) === FALSE ) {
 						Debug::Text('Failed setting translator locale: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
 						return FALSE;
 					} else {
@@ -408,6 +342,14 @@ class TTi18n {
 
 			self::$locale = $locale;
 			self::$language = substr($locale, 0, 2 );  //save language here to avoid becoming out of sync.
+
+			//INTL extension is optional as of v10.0, so check if its loaded before instantiating the class. If its not we simply fall back to native functions elsewhere.
+			if ( class_exists('NumberFormatter') ) {
+				self::$currency_formatter = new NumberFormatter( self::$locale, NumberFormatter::CURRENCY );
+
+				//default precision is 6 because it's a little more than the max used in high-precision currency (4).
+				self::$number_formatter = new NumberFormatter( self::$locale, NumberFormatter::PATTERN_DECIMAL, self::$DEFAULT_NUMBER_FORMAT_PATTERN ); //default format shows up to 6 decimal places
+			}
 
 			if ( $category == LC_ALL ) {
 				if ( self::$master_locale == NULL ) {
@@ -547,15 +489,9 @@ class TTi18n {
 
 	*/
 	static public function getLanguageArray() {
-		require_once( 'I18Nv2/Language.php' );
 
-		// We use self::getLanguage() because I18Nv2_Language() expects a 2 char lang code.
-		$lang = new I18Nv2_Language( self::getLanguage(), 'UTF-8' );
-
-		$retarr = $lang->getAllCodes();
-		//asort($retarr);
-
-		// Return supported languages only.
+		$this_language = self::getLanguage();
+		// Return supported languages
 		$supported_langs = array( 'en', 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'ar', 'zh');
 		$beta_langs = array( 'da', 'de', 'es', 'id', 'it', 'fr', 'pt', 'ar', 'zh' );
 
@@ -565,16 +501,21 @@ class TTi18n {
 			$beta_langs[] = 'yi';
 		}
 
-		$retarr2 = array();
-		foreach( $supported_langs as $language ) {
-			if ( in_array( $language, $beta_langs ) ) {
-				$retarr2[$language] = $retarr[$language] .' (UO)'; //UO = UnOfficial languages
-			} else {
-				$retarr2[$language] = $retarr[$language];
+		$retarr = array();
+		if ( class_exists('Locale') ) {
+			foreach( $supported_langs as $language ) {
+				$language_label = mb_convert_case( Locale::getDisplayLanguage( $language, $language ), MB_CASE_TITLE, 'UTF-8' );
+				if ( in_array( $language, $beta_langs ) ) {
+					$language_label = $language_label .' (UO)'; //UO = UnOfficial languages
+				}
+				$retarr[$language] = $language_label;
 			}
+		} else {
+			//If INTL extension is not installed, only show English language. Do not translate this one.
+			$retarr['en'] = 'English';
 		}
 
-		return $retarr2;
+		return $retarr;
 	}
 
 	static public function getTextStringArgs( $str, $args ) {
@@ -604,8 +545,8 @@ class TTi18n {
 		if ( self::$is_default_locale == TRUE ) { //Optimization: If default locale and config isn't set to enable default translation, just return the string immediately.
 			return $str;
 		}
-		
-		return self::getTranslationHandler()->get( $str );
+
+		return gettext( $str );
 	}
 
 	static public function gt( $str, $args = FALSE ) {
@@ -729,6 +670,7 @@ class TTi18n {
 								'yi' => 'yi_US',
 								);
 
+		$locale = self::stripUTF8($locale); //Make sure .utf8 is not passed as part of the locale.
 
 		//Using .UTF-8 fails using Translation2 or Windows. Perhaps we attempt to add this later if it fails on the first try.
 		if ( isset($language[$locale]) ) { //Check for full language first for cases where the same language has different translations for different countries (ie: France/Canada)
@@ -761,55 +703,434 @@ class TTi18n {
 
 	/*
 
+	  String functions
+
+	 */
+	static public function strtolower( $str ) {
+		//Can't optimize this unfortunately, as users using 'en' may want to update records or names in 'fr' and such.
+		//if ( self::getLanguage() == 'en' ) {
+		//	$str = strtolower( $str );
+		//} else {
+			$str = mb_strtolower( $str, 'UTF-8' ); //Force UTF8 encoding always.
+		//}
+
+		return $str;
+	}
+
+	static public function strtoupper( $str ) {
+		//Can't optimize this unfortunately, as users using 'en' may want to update records or names in 'fr' and such.
+		//if ( self::getLanguage() == 'en' ) {
+		//	$str = strtoupper( $str );
+		//} else {
+			$str = mb_strtoupper( $str, 'UTF-8' ); //Force UTF8 encoding always.
+		//}
+
+		return $str;
+	}
+
+	/*
+
 		Number/Currency functions
 
 	*/
 	static public function getCurrencyArray() {
-		require_once('I18Nv2/Currency.php');
 
-		$c = new I18Nv2_Currency();
-
-		$code_arr = $c->getAllCodes();
+		$code_arr = array(
+				'ADP' => 'Andorran Peseta',
+				'AED' => 'United Arab Emirates Dirham',
+				'AFA' => 'Afghani (1927-2002)',
+				'AFN' => 'Afghani',
+				'ALL' => 'Albanian Lek',
+				'AMD' => 'Armenian Dram',
+				'ANG' => 'Netherlands Antillan Guilder',
+				'AOA' => 'Angolan Kwanza',
+				'AOK' => 'Angolan Kwanza (1977-1990)',
+				'AON' => 'Angolan New Kwanza (1990-2000)',
+				'AOR' => 'Angolan Kwanza Reajustado (1995-1999)',
+				'ARA' => 'Argentine Austral',
+				'ARP' => 'Argentine Peso (1983-1985)',
+				'ARS' => 'Argentine Peso',
+				'ATS' => 'Austrian Schilling',
+				'AUD' => 'Australian Dollar',
+				'AWG' => 'Aruban Guilder',
+				'AZM' => 'Azerbaijanian Manat',
+				'BAD' => 'Bosnia-Herzegovina Dinar',
+				'BAM' => 'Bosnia-Herzegovina Convertible Mark',
+				'BBD' => 'Barbados Dollar',
+				'BDT' => 'Bangladesh Taka',
+				'BEC' => 'Belgian Franc (convertible)',
+				'BEF' => 'Belgian Franc',
+				'BEL' => 'Belgian Franc (financial)',
+				'BGL' => 'Bulgarian Hard Lev',
+				'BGN' => 'Bulgarian New Lev',
+				'BHD' => 'Bahraini Dinar',
+				'BIF' => 'Burundi Franc',
+				'BMD' => 'Bermudan Dollar',
+				'BND' => 'Brunei Dollar',
+				'BOB' => 'Boliviano',
+				'BOP' => 'Bolivian Peso',
+				'BOV' => 'Bolivian Mvdol',
+				'BRB' => 'Brazilian Cruzeiro Novo (1967-1986)',
+				'BRC' => 'Brazilian Cruzado',
+				'BRE' => 'Brazilian Cruzeiro (1990-1993)',
+				'BRL' => 'Brazilian Real',
+				'BRN' => 'Brazilian Cruzado Novo',
+				'BRR' => 'Brazilian Cruzeiro',
+				'BSD' => 'Bahamian Dollar',
+				'BTN' => 'Bhutan Ngultrum',
+				'BUK' => 'Burmese Kyat',
+				'BWP' => 'Botswanan Pula',
+				'BYB' => 'Belarussian New Ruble (1994-1999)',
+				'BYR' => 'Belarussian Ruble',
+				'BZD' => 'Belize Dollar',
+				'CAD' => 'Canadian Dollar',
+				'CDF' => 'Congolese Franc Congolais',
+				'CHE' => 'WIR Euro',
+				'CHF' => 'Swiss Franc',
+				'CHW' => 'WIR Franc',
+				'CLF' => 'Chilean Unidades de Fomento',
+				'CLP' => 'Chilean Peso',
+				'CNY' => 'Chinese Yuan Renminbi',
+				'COP' => 'Colombian Peso',
+				'COU' => 'Unidad de Valor Real',
+				'CRC' => 'Costa Rican Colon',
+				'CSD' => 'Serbian Dinar',
+				'CSK' => 'Czechoslovak Hard Koruna',
+				'CUP' => 'Cuban Peso',
+				'CVE' => 'Cape Verde Escudo',
+				'CYP' => 'Cyprus Pound',
+				'CZK' => 'Czech Republic Koruna',
+				'DDM' => 'East German Ostmark',
+				'DEM' => 'Deutsche Mark',
+				'DJF' => 'Djibouti Franc',
+				'DKK' => 'Danish Krone',
+				'DOP' => 'Dominican Peso',
+				'DZD' => 'Algerian Dinar',
+				'ECS' => 'Ecuador Sucre',
+				'ECV' => 'Ecuador Unidad de Valor Constante (UVC)',
+				'EEK' => 'Estonian Kroon',
+				'EGP' => 'Egyptian Pound',
+				'EQE' => 'Ekwele',
+				'ERN' => 'Eritrean Nakfa',
+				'ESA' => 'Spanish Peseta (A account)',
+				'ESB' => 'Spanish Peseta (convertible account)',
+				'ESP' => 'Spanish Peseta',
+				'ETB' => 'Ethiopian Birr',
+				'EUR' => 'Euro',
+				'FIM' => 'Finnish Markka',
+				'FJD' => 'Fiji Dollar',
+				'FKP' => 'Falkland Islands Pound',
+				'FRF' => 'French Franc',
+				'GBP' => 'British Pound Sterling',
+				'GEK' => 'Georgian Kupon Larit',
+				'GEL' => 'Georgian Lari',
+				'GHC' => 'Ghana Cedi',
+				'GIP' => 'Gibraltar Pound',
+				'GMD' => 'Gambia Dalasi',
+				'GNF' => 'Guinea Franc',
+				'GNS' => 'Guinea Syli',
+				'GQE' => 'Equatorial Guinea Ekwele Guineana',
+				'GRD' => 'Greek Drachma',
+				'GTQ' => 'Guatemala Quetzal',
+				'GWE' => 'Portuguese Guinea Escudo',
+				'GWP' => 'Guinea-Bissau Peso',
+				'GYD' => 'Guyana Dollar',
+				'HKD' => 'Hong Kong Dollar',
+				'HNL' => 'Hoduras Lempira',
+				'HRD' => 'Croatian Dinar',
+				'HRK' => 'Croatian Kuna',
+				'HTG' => 'Haitian Gourde',
+				'HUF' => 'Hungarian Forint',
+				'IDR' => 'Indonesian Rupiah',
+				'IEP' => 'Irish Pound',
+				'ILP' => 'Israeli Pound',
+				'ILS' => 'Israeli New Sheqel',
+				'INR' => 'Indian Rupee',
+				'IQD' => 'Iraqi Dinar',
+				'IRR' => 'Iranian Rial',
+				'ISK' => 'Icelandic Krona',
+				'ITL' => 'Italian Lira',
+				'JMD' => 'Jamaican Dollar',
+				'JOD' => 'Jordanian Dinar',
+				'JPY' => 'Japanese Yen',
+				'KES' => 'Kenyan Shilling',
+				'KGS' => 'Kyrgystan Som',
+				'KHR' => 'Cambodian Riel',
+				'KMF' => 'Comoro Franc',
+				'KPW' => 'North Korean Won',
+				'KRW' => 'South Korean Won',
+				'KWD' => 'Kuwaiti Dinar',
+				'KYD' => 'Cayman Islands Dollar',
+				'KZT' => 'Kazakhstan Tenge',
+				'LAK' => 'Laotian Kip',
+				'LBP' => 'Lebanese Pound',
+				'LKR' => 'Sri Lanka Rupee',
+				'LRD' => 'Liberian Dollar',
+				'LSL' => 'Lesotho Loti',
+				'LSM' => 'Maloti',
+				'LTL' => 'Lithuanian Lita',
+				'LTT' => 'Lithuanian Talonas',
+				'LUC' => 'Luxembourg Convertible Franc',
+				'LUF' => 'Luxembourg Franc',
+				'LUL' => 'Luxembourg Financial Franc',
+				'LVL' => 'Latvian Lats',
+				'LVR' => 'Latvian Ruble',
+				'LYD' => 'Libyan Dinar',
+				'MAD' => 'Moroccan Dirham',
+				'MAF' => 'Moroccan Franc',
+				'MDL' => 'Moldovan Leu',
+				'MGA' => 'Madagascar Ariary',
+				'MGF' => 'Madagascar Franc',
+				'MKD' => 'Macedonian Denar',
+				'MLF' => 'Mali Franc',
+				'MMK' => 'Myanmar Kyat',
+				'MNT' => 'Mongolian Tugrik',
+				'MOP' => 'Macao Pataca',
+				'MRO' => 'Mauritania Ouguiya',
+				'MTL' => 'Maltese Lira',
+				'MTP' => 'Maltese Pound',
+				'MUR' => 'Mauritius Rupee',
+				'MVR' => 'Maldive Islands Rufiyaa',
+				'MWK' => 'Malawi Kwacha',
+				'MXN' => 'Mexican Peso',
+				'MXP' => 'Mexican Silver Peso (1861-1992)',
+				'MXV' => 'Mexican Unidad de Inversion (UDI)',
+				'MYR' => 'Malaysian Ringgit',
+				'MZE' => 'Mozambique Escudo',
+				'MZM' => 'Mozambique Metical',
+				'NAD' => 'Namibia Dollar',
+				'NGN' => 'Nigerian Naira',
+				'NIC' => 'Nicaraguan Cordoba',
+				'NIO' => 'Nicaraguan Cordoba Oro',
+				'NLG' => 'Netherlands Guilder',
+				'NOK' => 'Norwegian Krone',
+				'NPR' => 'Nepalese Rupee',
+				'NZD' => 'New Zealand Dollar',
+				'OMR' => 'Oman Rial',
+				'PAB' => 'Panamanian Balboa',
+				'PEI' => 'Peruvian Inti',
+				'PEN' => 'Peruvian Sol Nuevo',
+				'PES' => 'Peruvian Sol',
+				'PGK' => 'Papua New Guinea Kina',
+				'PHP' => 'Philippine Peso',
+				'PKR' => 'Pakistan Rupee',
+				'PLN' => 'Polish Zloty',
+				'PLZ' => 'Polish Zloty (1950-1995)',
+				'PTE' => 'Portuguese Escudo',
+				'PYG' => 'Paraguay Guarani',
+				'QAR' => 'Qatari Rial',
+				'RHD' => 'Rhodesian Dollar',
+				'ROL' => 'Romanian Leu',
+				'RON' => 'Romanian Leu',
+				'RUB' => 'Russian Ruble',
+				'RUR' => 'Russian Ruble (1991-1998)',
+				'RWF' => 'Rwandan Franc',
+				'SAR' => 'Saudi Riyal',
+				'SBD' => 'Solomon Islands Dollar',
+				'SCR' => 'Seychelles Rupee',
+				'SDD' => 'Sudanese Dinar',
+				'SDP' => 'Sudanese Pound',
+				'SEK' => 'Swedish Krona',
+				'SGD' => 'Singapore Dollar',
+				'SHP' => 'Saint Helena Pound',
+				'SIT' => 'Slovenia Tolar',
+				'SKK' => 'Slovak Koruna',
+				'SLL' => 'Sierra Leone Leone',
+				'SOS' => 'Somali Shilling',
+				'SRD' => 'Surinam Dollar',
+				'SRG' => 'Suriname Guilder',
+				'STD' => 'Sao Tome and Principe Dobra',
+				'SUR' => 'Soviet Rouble',
+				'SVC' => 'El Salvador Colon',
+				'SYP' => 'Syrian Pound',
+				'SZL' => 'Swaziland Lilangeni',
+				'THB' => 'Thai Baht',
+				'TJR' => 'Tajikistan Ruble',
+				'TJS' => 'Tajikistan Somoni',
+				'TMM' => 'Turkmenistan Manat',
+				'TND' => 'Tunisian Dinar',
+				'TOP' => 'Tonga Paʻanga',
+				'TPE' => 'Timor Escudo',
+				'TRL' => 'Turkish Lira',
+				'TRY' => 'New Turkish Lira',
+				'TTD' => 'Trinidad and Tobago Dollar',
+				'TWD' => 'Taiwan New Dollar',
+				'TZS' => 'Tanzanian Shilling',
+				'UAH' => 'Ukrainian Hryvnia',
+				'UAK' => 'Ukrainian Karbovanetz',
+				'UGS' => 'Ugandan Shilling (1966-1987)',
+				'UGX' => 'Ugandan Shilling',
+				'USD' => 'US Dollar',
+				'USN' => 'US Dollar (Next day)',
+				'USS' => 'US Dollar (Same day)',
+				'UYP' => 'Uruguay Peso (1975-1993)',
+				'UYU' => 'Uruguay Peso Uruguayo',
+				'UZS' => 'Uzbekistan Sum',
+				'VEB' => 'Venezuelan Bolivar',
+				'VND' => 'Vietnamese Dong',
+				'VUV' => 'Vanuatu Vatu',
+				'WST' => 'Western Samoa Tala',
+				'XAF' => 'CFA Franc BEAC',
+				'XAG' => 'Silver',
+				'XAU' => 'Gold',
+				'XBA' => 'European Composite Unit',
+				'XBB' => 'European Monetary Unit',
+				'XBC' => 'European Unit of Account (XBC)',
+				'XBD' => 'European Unit of Account (XBD)',
+				'XCD' => 'East Caribbean Dollar',
+				'XDR' => 'Special Drawing Rights',
+				'XEU' => 'European Currency Unit',
+				'XFO' => 'French Gold Franc',
+				'XFU' => 'French UIC-Franc',
+				'XOF' => 'CFA Franc BCEAO',
+				'XPD' => 'Palladium',
+				'XPF' => 'CFP Franc',
+				'XPT' => 'Platinum',
+				'XRE' => 'RINET Funds',
+				'XTS' => 'Testing Currency Code',
+				'XXX' => 'No Currency',
+				'YDD' => 'Yemeni Dinar',
+				'YER' => 'Yemeni Rial',
+				'YUD' => 'Yugoslavian Hard Dinar',
+				'YUM' => 'Yugoslavian Noviy Dinar',
+				'YUN' => 'Yugoslavian Convertible Dinar',
+				'ZAL' => 'South African Rand (financial)',
+				'ZAR' => 'South African Rand',
+				'ZMK' => 'Zambian Kwacha',
+				'ZMW' => 'Zambian Kwacha',
+				'ZRN' => 'Zairean New Zaire',
+				'ZRZ' => 'Zairean Zaire',
+				'ZWD' => 'Zimbabwe Dollar'
+		);
 
 		foreach( $code_arr as $iso_code => $name ) {
 			$retarr[$iso_code] = ''.$iso_code.' - '. $name;
 		}
-		
+
 		//Add support for Bitcoin (XBT)
 		$retarr['XBT'] = TTi18n::getText('XBT').' - '. TTi18n::getText('Bitcoin');
+
 
 		return $retarr;
 	}
 
-	static public function formatNumber( $number, $auto_format_decimals = FALSE, $min_decimals = 2, $max_decimals = 4 ) {
-		if ( $auto_format_decimals == TRUE ) {
-			$number = Misc::removeTrailingZeros( $number, $min_decimals );
-			$decimal_places = strlen( Misc::getAfterDecimal( $number, FALSE ) );
-			if ( $decimal_places > $max_decimals ) {
-				$decimal_places = $max_decimals;
-			} elseif ( $decimal_places < $min_decimals ) {
-				$decimal_places = $min_decimals;
+	/**
+	 * Parses a locale specific string that represents a float (ie: -46,1234 or -46.1234) and converts it to a float that PHP will recognize for functions like number_format()/round, etc...
+	 * @return string
+	 */
+	public static function parseFloat( $value ) {
+		if ( is_float( $value ) === TRUE OR is_int( $value ) === TRUE ) {
+			return $value;
+		} elseif ( is_string( $value ) ) {
+			if ( $value == '' ) {
+				return 0;
 			}
 
-			if ( isset(self::getLocaleHandler()->numberFormats[I18Nv2_NUMBER_FLOAT]) ) {
-				$custom_format = self::getLocaleHandler()->numberFormats[I18Nv2_NUMBER_FLOAT];
-			} else {
-				$custom_format = array(
-									'float' => array(
-														0 => 2,
-														1 => '.',
-														2 => ', ',
-													)
-									);
-			}
+			//We can't short circuit this check for locales where decimal symbol = '.', because we still need to handle commas for thousands separators, and casting to float won't do that.
+			$retval = (string)str_replace( array(self::getThousandsSymbol(), self::getDecimalSymbol(), ' '), array('', '.', ''), trim( $value ) ); //Cant cast this to float as it will put back in the "," for a decimal in other locales. Always remove spaces.
+			//Debug::Arr( $retval, 'Symbol: Thousands: ' . self::getThousandsSymbol() . ' Decimal: ' . self::getDecimalSymbol() . ' Value: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 
-			$custom_format[0] = $decimal_places;
-			self::getLocaleHandler()->numberFormats['long_float'] = $custom_format;
-
-			return self::getLocaleHandler()->formatNumber( $number, 'long_float' );
-		} else {
-			return self::getLocaleHandler()->formatNumber( $number );
+			return $retval;
 		}
+
+		//Return boolean TRUE/FALSE, or NULL as 0.
+		return 0;
+	}
+
+	/**
+	 * Get the current locale's decimal symbol
+	 * @return string
+	 */
+	public static function getDecimalSymbol() {
+		if ( is_object(self::$number_formatter) ) {
+			$retval = self::$number_formatter->getSymbol( NumberFormatter::DECIMAL_SEPARATOR_SYMBOL );
+		} else {
+			$retval = '.';
+		}
+
+		//Due to PHPUnit and singleton handling, sometimes the number_formatter gets out of sync and returns a blank string here.
+		//Always check for that and default to a decimal point instead.
+		if ( $retval == '' ) {
+			return '.';
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * Get the current locale's thousands separator symbol
+	 * @return string
+	 */
+	public static function getThousandsSymbol() {
+		if ( is_object(self::$number_formatter) ) {
+			return self::$number_formatter->getSymbol( NumberFormatter::GROUPING_SEPARATOR_SYMBOL );
+		} else {
+			return ',';
+		}
+	}
+
+	public static function getAfterDecimal( $number, $min_decimals = 0, $max_decimals = 16 ) {
+		//$seperator = self::getDecimalSymbol();
+		$seperator = '.'; //Since we call setLocale() *without* LC_NUMERIC now so casted (float) values always use decimal symbol, we should force it to decimal symbol always here.
+		$split_number = explode( $seperator, $number );
+		if ( isset( $split_number[1] ) ) {
+			$decimal_places = strlen( $split_number[1] );
+		} else {
+			$decimal_places = 0;
+		}
+
+		if ( $decimal_places > $max_decimals ) {
+			$decimal_places = $max_decimals;
+		} elseif ( $decimal_places < $min_decimals ) {
+			$decimal_places = $min_decimals;
+		}
+
+		return $decimal_places;
+	}
+
+	/**
+	 * Format a number in the manner consistent with the current locale
+	 * -In the first case, only the number is provided. this formats to the default pattern for the locale.
+	 * -In the second case, $auto_format_decimals is provided as TRUE with both $min_decimals and $max_decimals set. this defines the number of decimals.
+	 *
+	 * @param decimal $number
+	 * @param bool $auto_format_decimals
+	 * @param int $min_decimals
+	 * @param int $max_decimals
+	 * @return string [formatted number]
+	 */
+	static public function formatNumber( $number, $auto_format_decimals = FALSE, $min_decimals = 2, $max_decimals = 4 ) {
+		if ( is_object( self::$number_formatter ) ) { //Make sure INTL extension is installed before using it.
+			if ( $auto_format_decimals == TRUE ) {
+				$number = Misc::removeTrailingZeros( $number, $min_decimals );
+				$decimal_places = self::getAfterDecimal( $number, $min_decimals, $max_decimals );
+
+				//http://icu-project.org/apiref/icu4c/classDecimalFormatSymbols.html
+				$pattern = '#,##0';
+				if ( $decimal_places > 0 ) {
+					$pattern .= '.' . str_repeat( '0', $decimal_places ); //If decimal places are 0, we can't put a "." in the pattern, otherwise it will show "0." or "134.".
+				}
+				self::$number_formatter->setPattern( $pattern );
+
+				//Debug::Arr( $number, 'Symbol: Thousands: ' . self::getThousandsSymbol() . ' Decimal: ' . self::getDecimalSymbol() . ' Value: ' . $number .' Decimal Places: '. $decimal_places .' Pattern: '. $pattern, __FILE__, __LINE__, __METHOD__, 10 );
+				return self::$number_formatter->format( $number );
+			} else {
+				self::$number_formatter->setPattern( self::$DEFAULT_NUMBER_FORMAT_PATTERN );
+
+				return self::$number_formatter->format( $number );
+			}
+		} else {
+			if ( $auto_format_decimals == TRUE ) {
+				$number = Misc::removeTrailingZeros( $number, $min_decimals );
+				$decimal_places = self::getAfterDecimal( $number, $min_decimals, $max_decimals );
+				return number_format( $number, $decimal_places );
+			} else {
+				$number = Misc::removeTrailingZeros( $number, 0 );
+				$decimal_places = self::getAfterDecimal( $number, 0, 2 ); //Force min to 0 and max to 2 without auto formatting.
+				return number_format( $number, $decimal_places );
+			}
+		}
+
 	}
 
 	//
@@ -819,11 +1140,10 @@ class TTi18n {
 		$currency_code_left_str = NULL;
 		$currency_code_right_str = NULL;
 
-		if ( $show_code != 0 ) {
-			if ( is_object( $currency_code ) ) {
-				//CurrencyFactory Object, grab ISO code for this.
-				$currency_code = $currency_code->getISOCode();
-			}
+		//Always need to make sure currency_code is set if an object is passed in, even if show_code == 0, as formatCurrency() below requires a code.
+		if ( is_object( $currency_code ) ) {
+			//CurrencyFactory Object, grab ISO code for this.
+			$currency_code = $currency_code->getISOCode();
 		}
 
 		if ( !is_object($currency_code) AND $show_code != 0 AND $currency_code != '' ) {
@@ -834,8 +1154,22 @@ class TTi18n {
 			}
 		}
 
-		return $currency_code_left_str . self::getLocaleHandler()->formatCurrency( $amount, I18Nv2_CURRENCY_LOCAL ) . $currency_code_right_str;
-		//return $currency_code . self::getLocaleHandler()->formatCurrency( $amount, I18Nv2_CURRENCY_INTERNATIONAL );
+		if ( is_object( self::$currency_formatter ) ) { //Make sure INTL extension is installed before using it.
+			if ( $currency_code == NULL ) {
+				$currency_code = self::$currency_formatter->getTextAttribute( NumberFormatter::CURRENCY_CODE );
+			}
+
+			if ( $show_code == 0 ) {
+				//self::$currency_formatter->setPattern( str_replace('¤', '', self::$currency_formatter->getPattern() ) ); //Strip currency code off pattern. This seems to strip currency symbol too though.
+				return str_replace( self::$currency_formatter->getSymbol( NumberFormatter::CURRENCY_SYMBOL ), self::getCurrencySymbol( $currency_code ), self::$currency_formatter->formatCurrency( $amount, $currency_code ) );
+			} else {
+				return $currency_code_left_str . self::$currency_formatter->formatCurrency( $amount, $currency_code ) . $currency_code_right_str;
+			}
+		} else {
+			//Fallback to this if INTL extension is not installed.
+			Debug::Arr($currency_code, 'zzzsetLocale failed!: ', __FILE__, __LINE__, __METHOD__, 10);
+			return $currency_code_left_str . self::formatNumber( $amount, TRUE, 2, 2 ) . $currency_code_right_str;
+		}
 	}
 
 	static function getCurrencySymbol( $iso_code ) {
@@ -1016,7 +1350,7 @@ class TTi18n {
 	}
 
 	static function detectUTF8($string) {
-			return preg_match('%(?:
+			return (bool)preg_match('%(?:
 			[\xC2-\xDF][\x80-\xBF]        # non-overlong 2-byte
 			|\xE0[\xA0-\xBF][\x80-\xBF]               # excluding overlongs
 			|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}      # straight 3-byte
@@ -1033,75 +1367,4 @@ class TTi18n {
 
 	*/
 }
-
-
-/**
- * Generic interface for a translation handler.
- * This confirms to the interface for Translation2, and
- * let's us easily mix and match Translation2 with native
- * gettext.
- * @package Core
- */
-interface TranslationHandler {
-	// Set the locale to use for LC_MESSAGES translations
-	// Returns TRUE | FALSE
-	function setLang( $locale );
-
-	// Returns translated string.
-	function get( $str );
-}
-
-
-/**
- * @package Core
- */
-class NativeGettextTranslationHandler implements TranslationHandler {
-
-	function setLang( $locale ) {
-
-		// Beware: this is changing the locale process-wide.
-		// But *only* for LC_MESSAGES, not other LC_*.
-		// This is not thread-safe.	 For threaded web servers,
-		// the slower Translation2 classes should be used.
-
-		//Setting the locale again here overrides what i18Nv2 just set
-		//breaking Windows. However not setting it breaks some Linux distro's.
-		//Because apparently LC_ALL doesn't matter on some Unix, it still doesn't set LC_MESSAGES.
-		//So if we didn't explicity set LC_MESSAGES above, do it here.
-		if ( OPERATING_SYSTEM == 'LINUX' ) {
-			$rc = setlocale( LC_MESSAGES, $locale.'.UTF-8' );
-
-			/* This often reports failure even if it works.
-			if ( $rc == 0 ) {
-				Debug::text('setLocale failed!: '. (int)$rc .' Locale: '. $locale, __FILE__, __LINE__, __METHOD__, 10);
-			}
-			*/
-		}
-
-		// Normally, setting env var(s) would not be necessary, but I18Nv2
-		// is explicitly setting LANG* env variables, which seem to be
-		// overriding setlocale(). Setting the env var here, fixes it.
-		// Yes, I know it seems backwards.	YMMV.
-		@putEnv('LANGUAGE=' . $locale);
-
-		$domain = 'messages';
-
-		//This fixes the mysterious issue of the "sticky locale". Where PHP
-		//wouldn't change locales half way through a script.
-		textdomain( $domain );
-
-		// Tell gettext where to find the locale translation files.
-		bindtextdomain( $domain, Environment::getBasePath() . DIRECTORY_SEPARATOR . 'interface' . DIRECTORY_SEPARATOR . 'locale');
-
-		// Tell gettext which codeset to use for output.
-		bind_textdomain_codeset( $domain, 'UTF-8');
-
-		return TRUE;
-	}
-
-	function get( $str ) {
-		return gettext( $str );
-	}
-}
-
 ?>

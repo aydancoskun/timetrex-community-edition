@@ -49,6 +49,10 @@ var APIPayStubEntryAccount = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'copyPayStubEntryAccount', arguments );
 
+	},
+
+	exportPayStubEntryAccount: function() {
+		return this.argumentsHandler( this.className, 'exportPayStubEntryAccount', arguments );
 	}
 
 } );

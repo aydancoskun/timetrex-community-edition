@@ -42,8 +42,9 @@ var APIPermissionControl = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'copyPermissionControl', arguments );
 
-	}
+	},
 
-
-
+	exportPermissionControl: function() {
+		return this.argumentsHandler( this.className, 'exportPermissionControl', arguments );
+	},
 } );

@@ -117,6 +117,16 @@ class APIOtherField extends APIFactory {
 	}
 
 	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportOtherField( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getOtherField( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_custom_field', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
+	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.
 	 * @param array $data filter data
 	 * @return array

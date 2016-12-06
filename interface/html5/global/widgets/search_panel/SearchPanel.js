@@ -182,13 +182,11 @@
 
 			refresh_btn.bind( 'click', function() {
 				refresh_btn.addClass( 'button-rotate' );
-
 				related_view_controller.search();
 
 			} );
 
 			$( searchButtonDiv ).css( 'display', 'none' );
-
 			var searchBtn = $( searchButtonDiv ).find( '#searchBtn' );
 			var clearSearchBtn = $( searchButtonDiv ).find( '#clearSearchBtn' );
 

@@ -526,5 +526,142 @@ class CAPayrollDeductionTest2016 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '1.00' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '1.40' );
 	}
+
+
+	function testCA_2016a_MAXEI_MAXCPPa() {
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 2006 01-Jan-2016: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('CA', 'BC');
+		$pd_obj->setDate(strtotime('10-Nov-2016'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+
+		$pd_obj->setFederalTotalClaimAmount( 11474 );
+		$pd_obj->setProvincialTotalClaimAmount( 10027 );
+		$pd_obj->setWCBRate( 0.18 );
+
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setYearToDateCPPContribution( 0 ); //2544.30 - 1.00
+		$pd_obj->setYearToDateEIContribution( 0 ); //955.04 - 1.00
+
+		$pd_obj->setGrossPayPeriodIncome( 2569.21 );
+
+		//var_dump($pd_obj->getArray());
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2569.21' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '120.51' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '120.51' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '48.30' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '67.62' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '337.80' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '132.70' );
+	}
+
+	function testCA_2016a_MAXEI_MAXCPPb() {
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 2006 01-Jan-2016: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('CA', 'BC');
+		$pd_obj->setDate(strtotime('10-Nov-2016'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+
+		$pd_obj->setFederalTotalClaimAmount( 11474 );
+		$pd_obj->setProvincialTotalClaimAmount( 10027 );
+		$pd_obj->setWCBRate( 0.18 );
+
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setYearToDateCPPContribution( 2524.30 ); //2544.30 - 20.00
+		$pd_obj->setYearToDateEIContribution( 935.04 ); //955.04 - 20.00
+
+		$pd_obj->setGrossPayPeriodIncome( 2569.21 );
+
+		//var_dump($pd_obj->getArray());
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2569.21' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '20.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '20.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '20.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '28.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '337.80' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '132.70' );
+	}
+
+	function testCA_2016a_MAXEI_MAXCPPc() {
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 2006 01-Jan-2016: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('CA', 'BC');
+		$pd_obj->setDate(strtotime('10-Nov-2016'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+
+		$pd_obj->setFederalTotalClaimAmount( 11474 );
+		$pd_obj->setProvincialTotalClaimAmount( 10027 );
+		$pd_obj->setWCBRate( 0.18 );
+
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setYearToDateCPPContribution( 2543.30 ); //2544.30 - 1.00
+		$pd_obj->setYearToDateEIContribution( 954.04 ); //955.04 - 1.00
+
+		$pd_obj->setGrossPayPeriodIncome( 2569.21 );
+
+		//var_dump($pd_obj->getArray());
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '2569.21' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '1.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '1.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '1.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '1.40' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '337.80' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '132.70' );
+	}
+
+	function testCA_2016a_MAXEI_MAXCPPd() {
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 2006 01-Jan-2016: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('CA', 'BC');
+		$pd_obj->setDate(strtotime('10-Nov-2016'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+
+		$pd_obj->setFederalTotalClaimAmount( 11474 );
+		$pd_obj->setProvincialTotalClaimAmount( 10027 );
+		$pd_obj->setWCBRate( 0.18 );
+
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		$pd_obj->setGrossPayPeriodIncome( 1900.00 ); //Less than EI/CPP maximum earnings for the year.
+
+		//var_dump($pd_obj->getArray());
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1900.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '87.39' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerCPP() ), '87.39' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '35.72' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '50.01' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '202.33' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '81.75' );
+	}
 }
 ?>

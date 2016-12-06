@@ -41,6 +41,10 @@ var APIOvertimePolicy = ServiceCaller.extend( {
 
 	copyOverTimePolicy: function() {
 		return this.argumentsHandler( this.className, 'copyOverTimePolicy', arguments );
+	},
+
+	exportOverTimePolicy: function() {
+		return this.argumentsHandler( this.className, 'exportOverTimePolicy', arguments );
 	}
 
 

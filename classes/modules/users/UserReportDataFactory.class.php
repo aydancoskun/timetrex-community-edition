@@ -213,9 +213,9 @@ class UserReportDataFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => $this->getCompany(),
+					'company_id' => (int)$this->getCompany(),
 					'script' => $this->getScript(),
-					'name' => strtolower( $name ),
+					'name' => TTi18n::strtolower( $name ),
 					);
 
 		$query = 'select id from '. $this->getTable() .'
@@ -381,6 +381,7 @@ class UserReportDataFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

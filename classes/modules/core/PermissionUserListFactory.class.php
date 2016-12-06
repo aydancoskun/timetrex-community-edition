@@ -213,7 +213,7 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 					where	a.permission_control_id = ?
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -253,12 +253,12 @@ class PermissionUserListFactory extends PermissionUserFactory implements Iterato
 		$pculf = new PermissionControlUserListFactory();
 
 		$pculf->getByPayPermissionControlId($id);
-
+		$user_list = array();
 		foreach ($pculf as $user) {
 			$user_list[$user->getUser()] = NULL;
 		}
 
-		if ( isset($user_list) ) {
+		if ( empty($user_list) == FALSE ) {
 			return $user_list;
 		}
 

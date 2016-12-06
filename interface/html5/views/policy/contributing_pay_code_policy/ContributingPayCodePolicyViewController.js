@@ -2,8 +2,8 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 	el: '#contributing_pay_code_policy_view_container',
 	sub_document_view_controller: null,
 	document_object_type_id: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'ContributingPayCodePolicyEditView.html';
 		this.permission_id = 'contributing_pay_code_policy';
 		this.viewId = 'ContributingPayCodePolicy';
@@ -18,13 +18,10 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary( 'ContributingPayCodePolicy' );
-
 	},
 
 	buildEditViewUI: function() {
-
 		this._super( 'buildEditViewUI' );
-
 		var $this = this;
 
 		this.setTabLabels( {
@@ -125,15 +122,3 @@ ContributingPayCodePolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-ContributingPayCodePolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'ContributingPayCodePolicy', 'ContributingPayCodePolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

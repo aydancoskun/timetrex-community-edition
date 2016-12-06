@@ -11,8 +11,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 	recurring_schedule_status_array: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'RecurringScheduleTemplateControlEditView.html';
 		this.permission_id = 'recurring_schedule_template';
 		this.viewId = 'RecurringScheduleTemplateControl';
@@ -952,6 +952,15 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			sub_menus: []
 		} );
 
+
+		//menu group
+		var other_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Other' ),
+			id: this.viewId + 'other',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+
 		var add = new RibbonSubMenu( {
 			label: $.i18n._( 'New' ),
 			id: ContextMenuIconName.add,
@@ -1087,6 +1096,16 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_recurring_schedule = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
@@ -1160,6 +1179,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			case ContextMenuIconName.cancel:
 				this.onCancelClick();
 				break;
+			case ContextMenuIconName.export_excel:
 			case ContextMenuIconName.recurring_schedule:
 				this.onNavigationClick( id );
 				break;
@@ -1196,6 +1216,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				Global.addViewTab( this.viewId, 'Recurring Templates', window.location.href );
 				IndexViewController.goToView( 'RecurringScheduleControl', filter );
 
+				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('exportRecurringScheduleTemplateControl');
 				break;
 
 		}
@@ -1273,6 +1296,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.recurring_schedule:
 					this.setDefaultMenuRecurringScheduleIcon( context_btn, grid_selected_length );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length )
 					break;
 
 			}
@@ -1364,6 +1390,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				case ContextMenuIconName.recurring_schedule:
 					this.setEditMenuRecurringScheduleIcon( context_btn );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
+					break;
 			}
 
 		}
@@ -1384,15 +1413,3 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	}
 
 } );
-
-RecurringScheduleTemplateControlViewController.loadView = function() {
-
-	Global.loadViewSource( 'RecurringScheduleTemplateControl', 'RecurringScheduleTemplateControlView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

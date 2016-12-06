@@ -41,6 +41,10 @@ var APIRecurringHoliday = ServiceCaller.extend( {
 
 	copyRecurringHoliday: function() {
 		return this.argumentsHandler( this.className, 'copyRecurringHoliday', arguments );
+	},
+
+	exportRecurringHoliday: function() {
+		return this.argumentsHandler( this.className, 'exportRecurringHoliday', arguments );
 	}
 
 

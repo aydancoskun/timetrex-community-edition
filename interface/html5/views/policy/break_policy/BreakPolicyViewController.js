@@ -4,8 +4,8 @@ BreakPolicyViewController = BaseViewController.extend( {
 	auto_detect_type_array: null,
 
 	date_api: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'BreakPolicyEditView.html';
 		this.permission_id = 'break_policy';
 		this.viewId = 'BreakPolicy';
@@ -326,15 +326,3 @@ BreakPolicyViewController = BaseViewController.extend( {
 	}
 
 } );
-
-BreakPolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'BreakPolicy', 'BreakPolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

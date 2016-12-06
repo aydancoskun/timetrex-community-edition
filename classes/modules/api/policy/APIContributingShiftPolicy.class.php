@@ -80,7 +80,7 @@ class APIContributingShiftPolicy extends APIFactory {
 						'job_selection_type_id' => 10,
 						'job_item_group_selection_type_id' => 10,
 						'job_item_selection_type_id' => 10,
-						'include_partial_shift' => TRUE,
+						'include_shift_type_id' => 100, //Partial
 						'sun' => TRUE,
 						'mon' => TRUE,
 						'tue' => TRUE,
@@ -114,6 +114,7 @@ class APIContributingShiftPolicy extends APIFactory {
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -122,6 +123,17 @@ class APIContributingShiftPolicy extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportContributingShiftPolicy( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getContributingShiftPolicy( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_contributing_shift_policy', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

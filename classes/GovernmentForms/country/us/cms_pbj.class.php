@@ -137,9 +137,9 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 
 								if ( $d == 0 AND $h == 0 ) {
 									$xml->employees->employee[$e]->addChild('employeeId', $this->employee_number );
-									$xml->employees->employee[$e]->addChild('hireDate', date('Y-m-d', TTDate::parseDateTime( $this->{'hire-date_stamp'} ) ) );
+									$xml->employees->employee[$e]->addChild('hireDate', date('Y-m-d', $this->{'hire-date_stamp'} ) );
 									if ( $this->{'termination-date_stamp'} != '' ) {
-										$xml->employees->employee[$e]->addChild('terminationDate', date('Y-m-d', TTDate::parseDateTime( $this->{'termination-date_stamp'} ) ) );
+										$xml->employees->employee[$e]->addChild('terminationDate', date('Y-m-d', $this->{'termination-date_stamp'} ) );
 									}
 
 									$xml->staffingHours->staffHours[$e]->addChild('employeeId', $this->employee_number );
@@ -148,7 +148,7 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 
 								if ( $h == 0 ) {
 									$xml->staffingHours->staffHours[$e]->workDays->addChild('workDay');
-									$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->addChild('date', date('Y-m-d', TTDate::parseDateTime( $this->date_stamp ) ) );
+									$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->addChild('date', date('Y-m-d', $date_stamp ) );
 									$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->addChild('hourEntries');
 								}
 

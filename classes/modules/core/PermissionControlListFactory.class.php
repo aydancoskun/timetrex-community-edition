@@ -247,6 +247,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -258,7 +259,7 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 			}
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -270,11 +271,12 @@ class PermissionControlListFactory extends PermissionControlFactory implements I
 			return FALSE;
 		}
 
+		$retarr = array();
 		foreach ($lf as $obj) {
 			$retarr[$obj->getColumn('user_id')] = $obj->getId();
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 

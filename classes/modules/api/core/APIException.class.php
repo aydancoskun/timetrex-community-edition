@@ -122,5 +122,16 @@ class APIException extends APIFactory {
 
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportException( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getException( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_exceptions', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
 }
 ?>

@@ -1,7 +1,7 @@
 ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'ScheduleSummaryReport';
 		this.viewId = 'ScheduleSummaryReport';
 		this.context_menu_name = $.i18n._( 'Schedule Summary' );

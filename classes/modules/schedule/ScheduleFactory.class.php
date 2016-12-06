@@ -158,6 +158,7 @@ class ScheduleFactory extends Factory {
 										'user_id' => 'User',
 										'date_stamp' => 'DateStamp',
 										'pay_period_id' => 'PayPeriod',
+										'replaced_id' => 'ReplacedId',
 
 										//'user_id' => FALSE,
 										'first_name' => FALSE,
@@ -197,11 +198,11 @@ class ScheduleFactory extends Factory {
 										'job_item' => FALSE,
 										'total_time' => 'TotalTime',
 
-										'other_id1'=> 'OtherID1',
-										'other_id2'=> 'OtherID2',
-										'other_id3'=> 'OtherID3',
-										'other_id4'=> 'OtherID4',
-										'other_id5'=> 'OtherID5',
+										'other_id1' => 'OtherID1',
+										'other_id2' => 'OtherID2',
+										'other_id3' => 'OtherID3',
+										'other_id4' => 'OtherID4',
+										'other_id5' => 'OtherID5',
 
 										'recurring_schedule_template_control_id' => 'RecurringScheduleTemplateControl',
 
@@ -328,7 +329,7 @@ class ScheduleFactory extends Factory {
 		if ( $id == NULL AND $this->getUser() > 0 ) { //Don't attempt to find pay period if user_id is not specified.
 			$id = (int)PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
-		
+
 		$pplf = TTnew( 'PayPeriodListFactory' );
 
 		//Allow NULL pay period, incase its an absence or something in the future.
@@ -341,6 +342,40 @@ class ScheduleFactory extends Factory {
 														TTi18n::gettext('Invalid Pay Period')
 														) ) {
 			$this->data['pay_period_id'] = $id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getReplacedId() {
+		if ( isset($this->data['replaced_id']) ) {
+			return (int)$this->data['replaced_id'];
+		}
+
+		return FALSE;
+	}
+	function setReplacedId($id) {
+		$id = trim($id);
+
+		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
+			$id = 0;
+		}
+
+		$slf = TTnew( 'ScheduleListFactory' );
+
+		if (  $id == 0
+				OR
+				(
+					$this->getID() != $id //Make sure we don't replace ourselves.
+					AND
+					$this->Validator->isResultSetWithRows(	'date_stamp',
+															  $slf->getByID($id),
+															  TTi18n::gettext('Scheduled Shift to replace does not exist.')
+				)
+				) ) {
+			$this->data['replaced_id'] = $id;
 
 			return TRUE;
 		}
@@ -567,7 +602,7 @@ class ScheduleFactory extends Factory {
 
 		return $total_time;
 	}
-	
+
 	function calcRawTotalTime() {
 		if ( $this->getStartTime() > 0 AND $this->getEndTime() > 0 ) {
 			//Due to DST, always pay the employee based on the time they actually worked,
@@ -584,7 +619,7 @@ class ScheduleFactory extends Factory {
 	function calcTotalTime() {
 		if ( $this->getStartTime() > 0 AND $this->getEndTime() > 0 ) {
 			$total_time = $this->calcRawTotalTime();
-			
+
 			$total_time += $this->getMealPolicyDeductTime( $total_time );
 			$total_time += $this->getBreakPolicyDeductTime( $total_time );
 
@@ -756,7 +791,7 @@ class ScheduleFactory extends Factory {
 	function setJob($id) {
 		$id = trim($id);
 
-		if ( $id == FALSE OR $id == 0 OR $id == -1 OR $id == '' ) {
+		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
 			$id = 0;
 		}
 
@@ -796,7 +831,7 @@ class ScheduleFactory extends Factory {
 	function setJobItem($id) {
 		$id = trim($id);
 
-		if ( $id == FALSE OR $id == 0 OR $id == -1 OR $id == '' ) {
+		if ( $id == FALSE OR $id == 0 OR $id == '' ) {
 			$id = 0;
 		}
 
@@ -804,7 +839,7 @@ class ScheduleFactory extends Factory {
 			$id = $this->getUserObject()->getDefaultJobItem();
 			Debug::Text('Using Default Job Item: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		}
-		
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$jilf = TTnew( 'JobItemListFactory' );
 		} else {
@@ -851,7 +886,7 @@ class ScheduleFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getNote() {
 		if ( isset($this->data['note']) ) {
 			return $this->data['note'];
@@ -1048,7 +1083,7 @@ class ScheduleFactory extends Factory {
 
 		return $start_stop_window;
 	}
-	
+
 	function inStartWindow( $epoch ) {
 		//Debug::text(' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1072,7 +1107,7 @@ class ScheduleFactory extends Factory {
 		if ( $epoch == '' ) {
 			return FALSE;
 		}
-		
+
 		$start_stop_window = $this->getStartStopWindow();
 		if ( $epoch >= ( $this->getEndTime() - $start_stop_window ) AND $epoch <= ( $this->getEndTime() + $start_stop_window ) ) {
 			Debug::text(' Within Start/Stop window: '. $start_stop_window, __FILE__, __LINE__, __METHOD__, 10);
@@ -1095,7 +1130,7 @@ class ScheduleFactory extends Factory {
 				//Debug::text('----------------------------------', __FILE__, __LINE__, __METHOD__, 10);
 				//Debug::text('Date Stamp: '. TTDate::getDate('DATE+TIME', $date_stamp). ' Epoch: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
 				//Debug::Arr($schedule_shifts[$date_stamp], 'Date Arr: ', __FILE__, __LINE__, __METHOD__, 10);
-				foreach( $day_shifts_arr as $key => $shift_arr ) {
+				foreach( $day_shifts_arr as$shift_arr ) {
 
 					if ( isset($ret_arr[$date_stamp]) ) {
 						//Debug::text('Already Schedule Shift on this day: '. TTDate::getDate('DATE', $date_stamp), __FILE__, __LINE__, __METHOD__, 10);
@@ -1126,7 +1161,7 @@ class ScheduleFactory extends Factory {
 	}
 
 	function getScheduleArray( $filter_data, $permission_children_ids = NULL ) {
-		global $current_user, $current_user_prefs;
+		global $current_user;
 
 		//Get all schedule data by general filter criteria.
 		//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1141,8 +1176,6 @@ class ScheduleFactory extends Factory {
 
 		$filter_data['start_date'] = TTDate::getBeginDayEpoch( $filter_data['start_date'] );
 		$filter_data['end_date'] = TTDate::getEndDayEpoch( $filter_data['end_date'] );
-
-		$schedule_shifts_index = array();
 
 		$pcf = TTnew( 'PayCodeFactory' );
 		$absence_policy_paid_type_options = $pcf->getOptions('paid_type');
@@ -1160,9 +1193,11 @@ class ScheduleFactory extends Factory {
 		}
 		Debug::text('Found Scheduled Rows: '. $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($absence_policy_paid_type_options, 'Paid Absences: ', __FILE__, __LINE__, __METHOD__, 10);
+		$scheduled_user_ids = array();
 		if ( $slf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $slf->getRecordCount(), NULL, TTi18n::getText('Processing Committed Shifts...') );
 
+			$schedule_shifts = array();
 			$i = 0;
 			foreach( $slf as $s_obj ) {
 				if ( (int)$s_obj->getUser() == 0 AND ( getTTProductEdition() == TT_PRODUCT_COMMUNITY OR $current_user->getCompanyObject()->getProductEdition() == 10 ) ) { continue; }
@@ -1176,10 +1211,18 @@ class ScheduleFactory extends Factory {
 
 				$hourly_rate = Misc::MoneyFormat( $s_obj->getColumn('user_wage_hourly_rate'), FALSE );
 
-				if ( $s_obj->getAbsencePolicyID() > 0
-						AND is_object( $s_obj->getAbsencePolicyObject() )
-						AND is_object( $s_obj->getAbsencePolicyObject()->getPayCodeObject() )
-						AND in_array( $s_obj->getAbsencePolicyObject()->getPayCodeObject()->getType(), $absence_policy_paid_type_options ) == FALSE ) {
+				if ( 	$s_obj->getStatus() == 20 //Absence
+						AND
+						(
+								$s_obj->getAbsencePolicyID() == 0
+								OR
+								(
+									$s_obj->getAbsencePolicyID() > 0
+									AND is_object( $s_obj->getAbsencePolicyObject() )
+									AND is_object( $s_obj->getAbsencePolicyObject()->getPayCodeObject() )
+									AND in_array( $s_obj->getAbsencePolicyObject()->getPayCodeObject()->getType(), $absence_policy_paid_type_options ) == FALSE
+								)
+						) ) {
 					//UnPaid Absence.
 					$total_time_wage = Misc::MoneyFormat(0);
 				} else {
@@ -1189,6 +1232,7 @@ class ScheduleFactory extends Factory {
 				$iso_date_stamp = TTDate::getISODateStamp( $s_obj->getDateStamp() );
 				$schedule_shifts[$iso_date_stamp][$i] = array(
 													'id' => (int)$s_obj->getID(),
+													'recurring_schedule_id' => (int)$s_obj->getColumn('recurring_schedule_id'),
 													'pay_period_id' => (int)$s_obj->getColumn('pay_period_id'),
 													'user_id' => (int)$s_obj->getUser(),
 													'user_created_by' => (int)$s_obj->getColumn('user_created_by'),
@@ -1207,7 +1251,7 @@ class ScheduleFactory extends Factory {
 													'default_job' => $s_obj->getColumn('default_job'),
 													'default_job_item_id' => (int)$s_obj->getColumn('default_job_item_id'),
 													'default_job_item' => $s_obj->getColumn('default_job_item'),
-													
+
 													'job_id' => (int)$s_obj->getColumn('job_id'),
 													'job' => $s_obj->getColumn('job'),
 													'job_status_id' => (int)$s_obj->getColumn('job_status_id'),
@@ -1215,6 +1259,17 @@ class ScheduleFactory extends Factory {
 													'job_branch_id' => (int)$s_obj->getColumn('job_branch_id'),
 													'job_department_id' => (int)$s_obj->getColumn('job_department_id'),
 													'job_group_id' => (int)$s_obj->getColumn('job_group_id'),
+
+													'job_address1' => $s_obj->getColumn('job_address1'),
+													'job_address2' => $s_obj->getColumn('job_address2'),
+													'job_city' => $s_obj->getColumn('job_city'),
+													'job_country' => $s_obj->getColumn('job_country'),
+													'job_province' => $s_obj->getColumn('job_province'),
+													'job_postal_code' => $s_obj->getColumn('job_postal_code'),
+													'job_longitude' => $s_obj->getColumn('job_longitude'),
+													'job_latitude' => $s_obj->getColumn('job_latitude'),
+													'job_location_note' => $s_obj->getColumn('job_location_note'),
+
 													'job_item_id' => (int)$s_obj->getColumn('job_item_id'),
 													'job_item' => $s_obj->getColumn('job_item'),
 
@@ -1225,9 +1280,10 @@ class ScheduleFactory extends Factory {
 													'start_date_stamp' => TTDate::getAPIDate('DATE', $s_obj->getStartTime() ), //Date the schedule starts on.
 													'start_date' => TTDate::getAPIDate('DATE+TIME', $s_obj->getStartTime() ),
 													'end_date' => TTDate::getAPIDate('DATE+TIME', $s_obj->getEndTime() ),
+													'end_date_stamp' => TTDate::getAPIDate('DATE', $s_obj->getEndTime() ), //Date the schedule ends on.
 													'start_time' => TTDate::getAPIDate('TIME', $s_obj->getStartTime() ),
 													'end_time' => TTDate::getAPIDate('TIME', $s_obj->getEndTime() ),
-													
+
 													'start_time_stamp' => $s_obj->getStartTime(),
 													'end_time_stamp' => $s_obj->getEndTime(),
 
@@ -1272,7 +1328,6 @@ class ScheduleFactory extends Factory {
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 			//Debug::Arr($schedule_shifts, 'Committed Schedule Shifts: ', __FILE__, __LINE__, __METHOD__, 10);
-			//Debug::Arr($schedule_shifts_index, 'Committed Schedule Shifts Index: ', __FILE__, __LINE__, __METHOD__, 10);
 			Debug::text('Processed Scheduled Rows: '. $slf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			$schedule_shifts = array();
@@ -1293,7 +1348,7 @@ class ScheduleFactory extends Factory {
 				$filter_data['default_department_ids'] = $filter_data['department_ids'];
 			}
 
-			$scheduled_user_ids = ( isset($scheduled_user_ids) ) ? array_unique($scheduled_user_ids) : array();
+			$scheduled_user_ids = ( empty($scheduled_user_ids) == FALSE ) ? array_unique($scheduled_user_ids) : array();
 			$filter_data['exclude_id'] = array_merge( $filter_data['exclude_id'], $scheduled_user_ids );
 			if ( isset($filter_data['exclude_id']) ) {
 				//Debug::Arr($filter_data['exclude_id'], 'Including all employees. Excluded User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1449,6 +1504,7 @@ class ScheduleFactory extends Factory {
 
 		//Prepare data so we can write it out line by line, left to right.
 		$shift_counter = 0;
+		$tmp_week_data_array = array();
 		foreach( $week_date_stamps as $week_date_stamp ) {
 			Debug::Text('Week Date Stamp: ('.$week_date_stamp.')'. TTDate::getDate('DATE+TIME', strtotime($week_date_stamp)), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1513,7 +1569,7 @@ class ScheduleFactory extends Factory {
 		$i = 0;
 		$total_cells = count($week_data_array);
 
-		foreach( $week_data_array as $key => $data ) {
+		foreach( $week_data_array as $data ) {
 			if ( ($i % 7) == 0 ) {
 				$pdf->Ln();
 			}
@@ -1576,7 +1632,7 @@ class ScheduleFactory extends Factory {
 
 	//function getSchedule( $company_id, $user_ids, $start_date, $end_date, $start_week_day = 0, $group_schedule = FALSE ) {
 	function getSchedule( $filter_data, $start_week_day = 0, $group_schedule = FALSE ) {
-		global $current_user, $current_user_prefs;
+		global $current_user;
 
 		//Individual is one schedule per employee, or all on one schedule.
 		if (!is_array($filter_data) ) {
@@ -1598,9 +1654,10 @@ class ScheduleFactory extends Factory {
 		$pdf->SetFont('freesans', '', 10);
 
 		$border = 0;
-		$adjust_x = 0;
-		$adjust_y = 0;
-
+		$raw_schedule_shifts = array();
+		$schedule_shift_totals = array();
+		$max_week_data = array();
+		$week_date_stamps = array();
 		if ( $group_schedule == FALSE ) {
 			$valid_schedules = 0;
 
@@ -1617,7 +1674,7 @@ class ScheduleFactory extends Factory {
 			unset($tmp_schedule_shifts);
 			//Debug::Arr($raw_schedule_shifts, 'Raw Schedule Shifts: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( isset($raw_schedule_shifts) AND is_array($raw_schedule_shifts) ) {
+			if ( empty($raw_schedule_shifts) == FALSE ) {
 				foreach( $raw_schedule_shifts as $user_id => $day_schedule_shifts ) {
 
 					foreach( $day_schedule_shifts as $day_epoch => $day_schedule_shifts ) {
@@ -1724,11 +1781,9 @@ class ScheduleFactory extends Factory {
 					$pdf->SetFont('freesans', '', 8);
 
 					$cell_width = floor(($pdf->GetPageWidth() - ($left_margin * 2)) / 7);
-					$cell_height = 100;
 
 					$i = 0;
-					$total_days = (count($calendar_array) - 1);
-					$boader = 1;
+					$border = 1;
 					foreach( $calendar_array as $calendar ) {
 						if ( $i == 0 ) {
 							//Calendar Header
@@ -1775,7 +1830,7 @@ class ScheduleFactory extends Factory {
 
 			$sf = TTnew( 'ScheduleFactory' );
 			$raw_schedule_shifts = $sf->getScheduleArray( $filter_data );
-			if ( is_array($raw_schedule_shifts) ) {
+			if ( empty($raw_schedule_shifts) == FALSE ) {
 				foreach( $raw_schedule_shifts as $day_epoch => $day_schedule_shifts ) {
 					foreach ( $day_schedule_shifts as $day_schedule_shift ) {
 						//Debug::Arr($day_schedule_shift, 'bDay Schedule Shift: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1872,11 +1927,9 @@ class ScheduleFactory extends Factory {
 			$pdf->SetFont('freesans', '', 8);
 
 			$cell_width = floor(($pdf->GetPageWidth() - ($left_margin * 2)) / 7);
-			$cell_height = 100;
 
 			$i = 0;
-			$total_days = ( count($calendar_array) - 1 );
-			$boader = 1;
+			$border = 1;
 			foreach( $calendar_array as $calendar ) {
 				if ( $i == 0 ) {
 					//Calendar Header
@@ -1939,6 +1992,112 @@ class ScheduleFactory extends Factory {
 		return FALSE;
 	}
 
+
+	static function addPunchFromScheduleObject($rs_obj) {
+		//Make sure they are working for Auto-fill to kickin.
+		Debug::text('Adding punch from schedule object...', __FILE__, __LINE__, __METHOD__, 10);
+
+		$commit_punch_transaction = FALSE;
+
+		$pf_in = new PunchFactory();
+
+		if ( $rs_obj->getUser() > 0 ) {
+			$pf_in->StartTransaction();
+
+			$pf_in->setUser( $rs_obj->getUser() );
+			$pf_in->setType( 10 ); //Normal
+			$pf_in->setStatus( 10 ); //In
+			$pf_in->setTimeStamp( $rs_obj->getStartTime(), TRUE );
+			$pf_in->setPunchControlID( $pf_in->findPunchControlID() );
+			$pf_in->setActualTimeStamp( $pf_in->getTimeStamp() );
+			$pf_in->setOriginalTimeStamp( $pf_in->getTimeStamp() );
+
+			if ( $pf_in->isValid() ) {
+				Debug::text( 'Punch In: Valid!', __FILE__, __LINE__, __METHOD__, 10 );
+				$pf_in->setEnableCalcTotalTime( FALSE );
+				$pf_in->setEnableCalcSystemTotalTime( FALSE );
+				$pf_in->setEnableCalcUserDateTotal( FALSE );
+				$pf_in->setEnableCalcException( FALSE );
+
+				$pf_in->Save( FALSE );
+			} else {
+				Debug::text( 'Punch In: InValid!', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+
+			Debug::text( 'Punch Out: ' . TTDate::getDate( 'DATE+TIME', $rs_obj->getEndTime() ), __FILE__, __LINE__, __METHOD__, 10 );
+			$pf_out = new PunchFactory();
+			$pf_out->setUser( $rs_obj->getUser() );
+			$pf_out->setType( 10 ); //Normal
+			$pf_out->setStatus( 20 ); //Out
+			$pf_out->setTimeStamp( $rs_obj->getEndTime(), TRUE );
+			$pf_out->setPunchControlID( $pf_in->findPunchControlID() ); //Use the In punch object to find the punch_control_id.
+			$pf_out->setActualTimeStamp( $pf_out->getTimeStamp() );
+			$pf_out->setOriginalTimeStamp( $pf_out->getTimeStamp() );
+
+			if ( $pf_out->isValid() ) {
+				Debug::text( 'Punch Out: Valid!', __FILE__, __LINE__, __METHOD__, 10 );
+				$pf_out->setEnableCalcTotalTime( TRUE );
+				$pf_out->setEnableCalcSystemTotalTime( TRUE );
+				$pf_out->setEnableCalcUserDateTotal( TRUE );
+				$pf_out->setEnableCalcException( TRUE );
+
+				$pf_out->Save( FALSE );
+			} else {
+				Debug::text( 'Punch Out: InValid!', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+
+			if ( $pf_in->isValid() == TRUE OR $pf_out->isValid() == TRUE ) {
+				Debug::text( 'Punch In and Out succeeded, saving punch control!', __FILE__, __LINE__, __METHOD__, 10 );
+
+				$pcf = new PunchControlFactory();
+				$pcf->setId( $pf_in->getPunchControlID() );
+
+				if ( $pf_in->isValid() == TRUE ) {
+					$pcf->setPunchObject( $pf_in );
+				} elseif ( $pf_out->isValid() == TRUE ) {
+					$pcf->setPunchObject( $pf_out );
+				}
+
+				$pcf->setBranch( (int)$rs_obj->getBranch() );
+				$pcf->setDepartment( (int)$rs_obj->getDepartment() );
+				$pcf->setJob( (int)$rs_obj->getJob() );
+				$pcf->setJobItem( (int)$rs_obj->getJobItem() );
+
+				$pcf->setEnableStrictJobValidation( TRUE );
+				$pcf->setEnableCalcUserDateID( TRUE );
+				$pcf->setEnableCalcTotalTime( TRUE );
+				$pcf->setEnableCalcSystemTotalTime( TRUE );
+				$pcf->setEnableCalcUserDateTotal( TRUE );
+				$pcf->setEnableCalcException( TRUE );
+				$pcf->setEnablePreMatureException( FALSE ); //Disable pre-mature exceptions at this point.
+
+				if ( $pcf->isValid() ) {
+					$pcf->Save( TRUE, TRUE );
+
+					$commit_punch_transaction = TRUE;
+				}
+			} else {
+				Debug::text( 'Punch In and Out failed, not saving punch control!', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+
+			if ( $commit_punch_transaction == TRUE ) {
+				Debug::text( 'Committing Punch Transaction!', __FILE__, __LINE__, __METHOD__, 10 );
+				$pf_in->CommitTransaction();
+			} else {
+				Debug::text( 'Rolling Back Punch Transaction!', __FILE__, __LINE__, __METHOD__, 10 );
+				$pf_in->FailTransaction();
+				$pf_in->CommitTransaction();
+				return FALSE;
+			}
+
+			unset( $pf_in, $pf_out, $pcf );
+		} else {
+			Debug::text('Skipping... User id is invalid.', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+		return TRUE;
+	}
+
 	function Validate( $ignore_warning = TRUE ) {
 		Debug::Text('User ID: '. $this->getUser() .' DateStamp: '. $this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1995,15 +2154,15 @@ class ScheduleFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('Shift is after employees termination date') );
 			}
-		}
 
-		if ( $this->getStatus() == 20 AND $this->getAbsencePolicyID() != FALSE AND ( $this->getDateStamp() != FALSE AND $this->getUser() > 0 ) ) {
-			$pglf = TTNew('PolicyGroupListFactory');
-			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('user_id' => array($this->getUser()), 'absence_policy' => array($this->getAbsencePolicyID()) ) );
-			if ( $pglf->getRecordCount() == 0 ) {
-				$this->Validator->isTRUE(	'absence_policy_id',
-								FALSE,
-								TTi18n::gettext('This absence policy is not available for this employee'));
+			if ( $this->getStatus() == 20 AND $this->getAbsencePolicyID() != FALSE AND ( $this->getDateStamp() != FALSE AND $this->getUser() > 0 ) ) {
+				$pglf = TTNew('PolicyGroupListFactory');
+				$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('user_id' => array($this->getUser()), 'absence_policy' => array($this->getAbsencePolicyID()) ) );
+				if ( $pglf->getRecordCount() == 0 ) {
+					$this->Validator->isTRUE(	'absence_policy_id',
+												 FALSE,
+												 TTi18n::gettext('This absence policy is not available for this employee'));
+				}
 			}
 		}
 
@@ -2018,7 +2177,7 @@ class ScheduleFactory extends Factory {
 		}
 
 		if ( $ignore_warning == FALSE ) {
-			//Warn users if they are trying to insert schedules too far in the future. 
+			//Warn users if they are trying to insert schedules too far in the future.
 			if ( $this->getDateStamp() != FALSE AND $this->getDateStamp() > (time() + (86400 * 366 ) ) ) {
 				$this->Validator->Warning( 'date_stamp', TTi18n::gettext('Date is more than one year in the future') );
 			}
@@ -2041,27 +2200,27 @@ class ScheduleFactory extends Factory {
 
 	function preSave() {
 		if ( $this->getSchedulePolicyID() === FALSE ) {
-			$this->setSchedulePolicyID(0);
+			$this->setSchedulePolicyID( 0 );
 		}
 
 		if ( $this->getAbsencePolicyID() === FALSE ) {
-			$this->setAbsencePolicyID(0);
+			$this->setAbsencePolicyID( 0 );
 		}
 
 		if ( $this->getBranch() === FALSE ) {
-			$this->setBranch(0);
+			$this->setBranch( 0 );
 		}
 
 		if ( $this->getDepartment() === FALSE ) {
-			$this->setDepartment(0);
+			$this->setDepartment( 0 );
 		}
 
 		if ( $this->getJob() === FALSE ) {
-			$this->setJob(0);
+			$this->setJob( 0 );
 		}
 
 		if ( $this->getJobItem() === FALSE ) {
-			$this->setJobItem(0);
+			$this->setJobItem( 0 );
 		}
 
 		$this->handleDayBoundary();
@@ -2086,20 +2245,42 @@ class ScheduleFactory extends Factory {
 			$slf = TTnew( 'ScheduleListFactory' );
 			$slf->getConflictingByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getStartTime(), $this->getEndTime() );
 			if ( $slf->getRecordCount() > 0 ) {
-				Debug::Text('Found Conflicting Shift!!', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'Found Conflicting Shift!!', __FILE__, __LINE__, __METHOD__, 10 );
 				//Delete shifts.
-				foreach( $slf as $s_obj ) {
-					Debug::Text('Deleting Schedule Shift ID: '. $s_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-					$s_obj->setDeleted(TRUE);
+				foreach ( $slf as $s_obj ) {
+					Debug::Text( 'Deleting Schedule Shift ID: ' . $s_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+					$s_obj->setDeleted( TRUE );
 					if ( $s_obj->isValid() ) {
 						$s_obj->Save();
 					}
 				}
 			} else {
-				Debug::Text('NO Conflicting Shift found...', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'NO Conflicting Shift found...', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 
+		//Since Add Request icon was added to Attendance -> Schedule, a user could request to fill a *committed* open shift, and once the request is authorized, that open shift will still be there.
+		//The same thing could happen if adding a new shift that was identical to the OPEN shift just with an employee assigned to it.
+		//  So instead of deleting or overwriting the original OPEN shift, simply set "replaced_id" of the current shift to the OPEN shift ID, so we know it was replaced and therefore won't be displayed anymore.
+		//    Now if the shift is deleted, the original OPEN shift will reappear, just like what would happen if it was a OPEN recurring schedule.
+		//However, there is still the case of the user editing an OPEN shift and simply changing the employee to someone else, in this case the original OPEN shift would not be preseverd.
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getUser() > 0 ) { //Don't check for conflicting OPEN shifts when editing/saving an OPEN shift.
+			$slf = TTnew( 'ScheduleListFactory' );
+			$slf->getConflictingOpenShiftSchedule( $this->getCompany(), $this->getStartTime(), $this->getEndTime(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), $this->getReplacedId(), 1 ); //Limit 1;
+			if ( $slf->getRecordCount() > 0 ) {
+				Debug::Text( 'Found Conflicting OPEN Shift!!', __FILE__, __LINE__, __METHOD__, 10 );
+				foreach ( $slf as $s_obj ) {
+					Debug::Text( 'Replacing Schedule OPEN Shift ID: ' . $s_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+					$this->setReplacedId( $s_obj->getId() );
+				}
+			} else {
+				Debug::Text( 'NO Conflicting OPEN Shift found...', __FILE__, __LINE__, __METHOD__, 10 );
+				$this->setReplacedId( 0 );
+			}
+		} elseif ( $this->getUser() == 0 ) {
+			$this->setReplacedId( 0 ); //Force this whenever its an OPEN shift.
+		}
+		
 		return TRUE;
 	}
 
@@ -2240,7 +2421,7 @@ class ScheduleFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
 		$uf = TTnew( 'UserFactory' );
-
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -2332,5 +2513,6 @@ class ScheduleFactory extends Factory {
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Schedule - Employee').': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Start Time').': '. TTDate::getDate('DATE+TIME', $this->getStartTime() ) .' '. TTi18n::getText('End Time').': '. TTDate::getDate('DATE+TIME', $this->getEndTime() ), NULL, $this->getTable(), $this );
 	}
+
 }
 ?>

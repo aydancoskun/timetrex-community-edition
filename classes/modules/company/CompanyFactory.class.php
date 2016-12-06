@@ -1749,8 +1749,8 @@ class CompanyFactory extends Factory {
 
 	function getName() {
 		if ( isset($this->data['name']) ) {
-			return $this->data['name'];
-		}
+		return $this->data['name'];
+	}
 
 		return FALSE;
 	}
@@ -2124,7 +2124,7 @@ class CompanyFactory extends Factory {
 		return FALSE;
 	}
 	function setLongitude($value) {
-		$value = trim((float)$value);
+		$value = TTi18n::parseFloat( $value );
 
 		if (	$value == 0
 				OR
@@ -2132,7 +2132,7 @@ class CompanyFactory extends Factory {
 											$value,
 											TTi18n::gettext('Longitude is invalid')
 											) ) {
-			$this->data['longitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['longitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -2148,7 +2148,7 @@ class CompanyFactory extends Factory {
 		return FALSE;
 	}
 	function setLatitude($value) {
-		$value = trim((float)$value);
+		$value = TTi18n::parseFloat( $value );
 
 		if (	$value == 0
 				OR
@@ -2156,7 +2156,7 @@ class CompanyFactory extends Factory {
 											$value,
 											TTi18n::gettext('Latitude is invalid')
 											) ) {
-			$this->data['latitude'] = number_format( $value, 10 ); //Always use 10 decimal places, this also prevents audit logging 0 vs 0.000000000
+			$this->data['latitude'] = number_format( $value, 6 ); //Always use 6 decimal places as that is to 0.11m accuracy, this also prevents audit logging 0 vs 0.000000000
 
 			return TRUE;
 		}
@@ -3083,7 +3083,7 @@ class CompanyFactory extends Factory {
 
 			$this->saveCache( $retval, $cache_id );
 		}
-		
+
 		return $retval;
 	}
 
@@ -3106,7 +3106,7 @@ class CompanyFactory extends Factory {
 								$last_user_obj = $u_obj;
 								$newest_last_login_date = $u_obj->getLastLoginDate();
 							}
-							
+
 							if ( ( $u_obj->getWorkEmail() != '' OR $u_obj->getHomeEmail() != '' ) AND ( $newest_last_login_date == FALSE OR $u_obj->getLastLoginDate() > $newest_last_login_date ) ) {
 								$last_user_obj = $u_obj;
 								$newest_last_login_date = $u_obj->getLastLoginDate();
@@ -3222,7 +3222,7 @@ class CompanyFactory extends Factory {
 					$cf->setDefault( TRUE );
 
 					if ( $cf->isValid() ) {
-						$currency_id = $cf->Save();
+						$cf->Save();
 					}
 				}
 			}
@@ -3367,6 +3367,7 @@ class CompanyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -3407,7 +3408,7 @@ class CompanyFactory extends Factory {
 						case 'supervisor_user_feedback_rating':
 						case 'admin_user_feedback_rating':
 						case 'all_user_feedback_rating':
-							$data[$variable] = ( $this->getColumn( $variable ) != '' ) ? round( Misc::reScaleRange( $this->getColumn( $variable ), $old_min = -1, $old_max = 1, $new_min = 1, $new_max = 10 ) ) : NULL;
+							$data[$variable] = ( $this->getColumn( $variable ) != '' ) ? round( Misc::reScaleRange( $this->getColumn( $variable ), -1, 1, 1, 10 ) ) : NULL;
 							//$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'name_metaphone':

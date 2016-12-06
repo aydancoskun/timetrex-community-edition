@@ -41,6 +41,10 @@ var APIContributingShiftPolicy = ServiceCaller.extend( {
 
 	copyContributingShiftPolicy: function() {
 		return this.argumentsHandler( this.className, 'copyContributingShiftPolicy', arguments );
+	},
+
+	exportContributingShiftPolicy: function() {
+		return this.argumentsHandler( this.className, 'exportContributingShiftPolicy', arguments );
 	}
 
 

@@ -485,7 +485,6 @@ class Form941Report extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'pay_stub_entry' => array() );
 
-		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 
@@ -741,7 +740,7 @@ class Form941Report extends Report {
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3);
+			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1);
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -839,7 +838,7 @@ class Form941Report extends Report {
 				$f941sb->ein = $f941->ein;
 				$f941sb->name = $f941->name;
 				$f941sb->quarter = $f941->quarter;
-
+				$f941sb_data = array();
 				for( $i = 1; $i <= 3; $i++ ) {
 					if ( isset($this->form_data['pay_period'][$i]) ) {
 						foreach( $this->form_data['pay_period'][$i] as $pay_period_epoch => $data ) {
@@ -858,7 +857,7 @@ class Form941Report extends Report {
 				if ( isset($f941sb_data[3]) ) {
 					$f941sb->month3 = $f941sb_data[3];
 				}
-				unset($i, $d, $f941sb_data);
+				unset($i, $f941sb_data);
 			}
 		} else {
 			Debug::Arr($this->data, 'Invalid Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -872,12 +871,8 @@ class Form941Report extends Report {
 
 		if ( $format == 'efile_xml' ) {
 			$output_format = 'XML';
-			$file_name = '941_efile_'.date('Y_m_d').'.xml';
-			$mime_type = 'applications/octet-stream'; //Force file to download.
 		} else {
 			$output_format = 'PDF';
-			$file_name = $this->file_name.'.pdf';
-			$mime_type = $this->file_mime_type;
 		}
 
 		$output = $this->getFormObject()->output( $output_format );

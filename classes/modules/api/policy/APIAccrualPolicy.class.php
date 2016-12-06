@@ -104,6 +104,7 @@ class APIAccrualPolicy extends APIFactory {
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -112,6 +113,17 @@ class APIAccrualPolicy extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportAccrualPolicy( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getAccrualPolicy( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_accrual_policy', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -339,6 +351,7 @@ class APIAccrualPolicy extends APIFactory {
 
 		$src_rows = $this->stripReturnHandler( $this->getAccrualPolicy( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
+			$original_ids = array();
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
 				$original_ids[$key] = $src_rows[$key]['id'];
@@ -350,7 +363,7 @@ class APIAccrualPolicy extends APIFactory {
 			$retval = $this->setAccrualPolicy( $src_rows ); //Save copied rows
 
 			//Now we need to loop through the result set, and copy the milestones as well.
-			if ( isset($original_ids) ) {
+			if ( empty($original_ids) == FALSE ) {
 				Debug::Arr($original_ids, ' Original IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 				Debug::Arr($retval, ' New IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 

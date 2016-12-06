@@ -135,6 +135,7 @@ class APIUserContact extends APIFactory {
 
 			$this->setPagerObject( $uclf );
 
+			$retarr = array();
 			foreach( $uclf as $uc_obj ) {
 				$user_data = $uc_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -155,6 +156,18 @@ class APIUserContact extends APIFactory {
 
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportUserContact( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getUserContact( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_employee_contacts', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
+
 
 	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.

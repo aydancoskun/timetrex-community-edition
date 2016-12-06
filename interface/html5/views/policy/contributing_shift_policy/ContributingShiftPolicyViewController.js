@@ -2,6 +2,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 	el: '#contributing_shift_policy_view_container',
 	type_array: null,
 	include_holiday_type_array: null,
+	include_shift_type_array: null,
 
 	branch_selection_type_array: null,
 	department_selection_type_array: null,
@@ -19,8 +20,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 	job_item_group_api: null,
 	date_api: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'ContributingShiftPolicyEditView.html';
 		this.permission_id = 'contributing_shift_policy';
 		this.viewId = 'ContributingShiftPolicy';
@@ -47,6 +48,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		var $this = this;
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'include_holiday_type' );
+		this.initDropDownOption( 'include_shift_type' );
 		this.initDropDownOption( 'branch_selection_type' );
 		this.initDropDownOption( 'department_selection_type' );
 		this.initDropDownOption( 'job_group_selection_type' );
@@ -251,10 +253,16 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Holiday Policies' ), form_item_input, tab_date_criteria_column1, '', null, true );
 
-		//Include Partial Shifts in Calculation
-		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'include_partial_shift'} );
-		this.addEditFieldToColumn( $.i18n._( 'Include Partial Shifts in Calculation' ), form_item_input, tab_date_criteria_column1 );
+		// Include Shift Type
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'include_shift_type_id', set_empty: false } );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.include_shift_type_array ) );
+
+		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Between above start/end times)' ) + "</span>" );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( label );
+		this.addEditFieldToColumn( $.i18n._( 'Shift Criteria' ), form_item_input, tab_date_criteria_column1,'', widgetContainer );
 
 		//
 		// Tab2 start
@@ -640,6 +648,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 			}
+			this.buildContextMenu( true );
+			this.setEditMenu();
 		} else if ( this.edit_view_tab_selected_index == 2 ) {
 			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
@@ -649,6 +659,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 			}
+			this.buildContextMenu( true );
+			this.setEditMenu();
 		} else if ( this.edit_view_tab_selected_index === 3 ) {
 
 			if ( this.current_edit_record.id ) {
@@ -745,15 +757,3 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-ContributingShiftPolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'ContributingShiftPolicy', 'ContributingShiftPolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

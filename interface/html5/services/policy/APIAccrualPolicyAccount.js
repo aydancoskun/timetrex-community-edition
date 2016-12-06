@@ -41,6 +41,10 @@ var APIAccrualPolicyAccount = ServiceCaller.extend( {
 
 	copyAccrualPolicyAccount: function() {
 		return this.argumentsHandler( this.className, 'copyAccrualPolicyAccount', arguments );
+	},
+
+	exportAccrualPolicyAccount: function() {
+		return this.argumentsHandler( this.className, 'exportAccrualPolicyAccount', arguments );
 	}
 
 

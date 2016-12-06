@@ -68,12 +68,9 @@ class APIRequest extends APIFactory {
 	 * @return array
 	 */
 	function getRequestDefaultData() {
-		$company_obj = $this->getCurrentCompanyObject();
-
 		Debug::Text('Getting request default data...', __FILE__, __LINE__, __METHOD__, 10);
-
 		$data = array(
-						'date_stamp' => TTDate::getAPIDate('DATE', TTDate::getTime() )
+						'date_stamp' => TTDate::getAPIDate('DATE', TTDate::getTime() ),
 					);
 
 		return $this->returnHandler( $data );
@@ -167,6 +164,7 @@ class APIRequest extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -181,6 +179,16 @@ class APIRequest extends APIFactory {
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportRequest( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getRequest( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_request', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
 	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.
 	 * @param array $data filter data
@@ -219,6 +227,10 @@ class APIRequest extends APIFactory {
 
 		if ( $validate_only == TRUE ) {
 			Debug::Text('Validating Only!', __FILE__, __LINE__, __METHOD__, 10);
+			$permission_children_ids = FALSE;
+		} else {
+			//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
+			$permission_children_ids = $this->getPermissionChildren();
 		}
 
 		extract( $this->convertToMultipleRecords($data) );
@@ -227,42 +239,48 @@ class APIRequest extends APIFactory {
 
 		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
 		$validator = $save_result = FALSE;
-		if ( is_array($data) AND $total_records > 0 ) {
+		if ( is_array( $data ) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
-			foreach( $data as $key => $row ) {
-				$primary_validator = new Validator();
+			foreach ( $data as $key => $row ) {
+				$primary_validator = $tertiary_validator = new Validator();
 				$lf = TTnew( 'RequestListFactory' );
 				$lf->StartTransaction();
-				if ( isset($row['id']) AND $row['id'] > 0 ) {
+				if ( isset( $row['id'] ) AND $row['id'] > 0 ) {
 					//Modifying existing object.
 					//Get request object, so we can only modify just changed data for specific records if needed.
 					$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if (
-							$validate_only == TRUE
-							OR
+								$validate_only == TRUE
+								OR
 								(
-								$this->getPermissionObject()->Check('request', 'edit')
-									OR ( $this->getPermissionObject()->Check('request', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
-								) ) {
+										$this->getPermissionObject()->Check( 'request', 'edit' )
+										OR ( $this->getPermissionObject()->Check( 'request', 'edit_own' ) AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy() ) === TRUE )
+										OR ( $this->getPermissionObject()->Check( 'request', 'edit_child' ) AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
+								)
+						) {
 
-							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text( 'Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
 							$lf = $lf->getCurrent();
 							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
+							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext( 'Edit permission denied' ) );
 						}
 					} else {
 						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
+						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext( 'Edit permission denied, record does not exist' ) );
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('request', 'add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check( 'request', 'add' ), TTi18n::gettext( 'Add permission denied' ) );
+
+					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
+					//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
+					$row['id'] = $lf->getNextInsertId();
 				}
-				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Arr( $row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 				if ( $validate_only == TRUE ) {
 					$lf->Validator->setValidateOnly( $validate_only );
@@ -270,35 +288,49 @@ class APIRequest extends APIFactory {
 
 				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'Setting object data...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->setObjectFromArray( $row );
-
-					//Force Company ID to current company.
-					//$lf->setCompany( $this->getCurrentCompanyObject()->getId() );
-
-					$is_valid = $lf->isValid( $ignore_warning );
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
-						if ( $validate_only == TRUE ) {
-							$save_result[$key] = TRUE;
-						} else {
-							$save_result[$key] = $lf->Save();
+					//Save request_schedule here...
+					if ( $this->getCurrentCompanyObject()->getProductEdition() > 10 ) {
+						if ( isset( $row['request_schedule'] ) AND is_array( $row['request_schedule'] ) AND count( $row['request_schedule'] ) > 0 ) {
+							$rs_obj = TTnew( 'APIRequestSchedule' );
+							foreach ( $row['request_schedule'] as $request_schedule_row ) {
+								if ( is_array( $request_schedule_row ) ) {
+									$request_schedule_row['request_id'] = (int)$row['id'];
+									$request_schedule_row['user_id'] = (int)$row['user_id'];
+									$tertiary_validator = $this->convertAPIreturnHandlerToValidatorObject( $rs_obj->setRequestSchedule( $request_schedule_row, $validate_only ), $tertiary_validator );
+									$is_valid = $tertiary_validator->isValid( $ignore_warning );
+								}
+							}
+							unset( $rs_obj );
 						}
-						$validator_stats['valid_records']++;
+					}
+
+					//Checking tertiary validity
+					if ( $is_valid == TRUE ) {
+						$is_valid = $lf->isValid( $ignore_warning );
+						if ( $is_valid == TRUE ) {
+							Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
+							if ( $validate_only == TRUE ) {
+								$save_result[ $key ] = TRUE;
+							} else {
+								$save_result[ $key ] = $lf->Save( TRUE, TRUE );
+							}
+							$validator_stats['valid_records']++;
+						}
 					}
 				}
 
 				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10 );
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+					$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
 				}
-
 
 				$lf->CommitTransaction();
 

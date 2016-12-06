@@ -4,8 +4,8 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 	round_type_array: null,
 	condition_type_array: null,
 	date_api: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'RoundIntervalPolicyEditView.html';
 		this.permission_id = 'round_policy';
 		this.viewId = 'RoundIntervalPolicy';
@@ -111,7 +111,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		//SEPARATED
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( { label: $.i18n._( 'Only Round Punches Within The Following Window' )} );
-		this.addEditFieldToColumn( $.i18n._( '' ), form_item_input, tab_rounding_policy_column1, '', null, true, false, 'sp_box' );
+		this.addEditFieldToColumn( '', form_item_input, tab_rounding_policy_column1, '', null, true, false, 'sp_box' );
 
 		//Window Based On
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
@@ -280,15 +280,3 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 	}
 
 } );
-
-RoundIntervalPolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'RoundIntervalPolicy', 'RoundIntervalPolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-		Global.contentContainer().html( template );
-
-	} );
-
-};

@@ -41,7 +41,11 @@ var APIException = ServiceCaller.extend( {
 
 	copyException: function() {
 		return this.argumentsHandler( this.className, 'copyException', arguments );
-	}
+	},
+
+	exportException: function() {
+		return this.argumentsHandler( this.className, 'exportException', arguments );
+	},
 
 
 } );

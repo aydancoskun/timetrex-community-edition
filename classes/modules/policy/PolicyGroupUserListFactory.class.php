@@ -214,12 +214,13 @@ class PolicyGroupUserListFactory extends PolicyGroupUserFactory implements Itera
 
 		$pgotplf->getByPolicyGroupId($id);
 
+		$list = array();
 		foreach ($pgotplf as $obj) {
 			$list[$obj->getOverTimePolicy()] = NULL;
 		}
 
-		if ( isset($user) ) {
-			return $user;
+		if ( empty($list) == FALSE ) {
+			return $list;
 		}
 
 		return array();

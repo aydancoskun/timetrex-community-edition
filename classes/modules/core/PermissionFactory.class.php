@@ -52,13 +52,18 @@ class PermissionFactory extends Factory {
 				$retval = array(
 										//-1 => TTi18n::gettext('--'),
 										10 => TTi18n::gettext('Regular Employee (Punch In/Out)'),
-										12 => TTi18n::gettext('Regular Employee (Manual Entry)'), //Can manually Add/Edit own punches/absences.
+										12 => TTi18n::gettext('Regular Employee (Manual Punch)'), //Can manually Add/Edit own punches/absences.
+										14 => TTi18n::gettext('Regular Employee (Manual TimeSheet)'), //Can use manual timesheet and punches.
 										18 => TTi18n::gettext('Supervisor (Subordinates Only)'),
 										20 => TTi18n::gettext('Supervisor (All Employees)'),
 										25 => TTi18n::gettext('HR Manager'),
 										30 => TTi18n::gettext('Payroll Administrator'),
 										40 => TTi18n::gettext('Administrator')
 									);
+
+				if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+					unset($retval[14]);
+				}
 				break;
 			case 'common_permissions':
 				$retval = array(
@@ -103,6 +108,7 @@ class PermissionFactory extends Factory {
 				$retval = array(
 										10 => 1,
 										12 => 2,
+										14 => 3,
 										18 => 10,
 										20 => 15,
 										25 => 18,
@@ -153,6 +159,7 @@ class PermissionFactory extends Factory {
 															'currency',
 															'branch',
 															'department',
+															'geo_fence',
 															'station',
 															'hierarchy',
 															'authorization',
@@ -176,6 +183,7 @@ class PermissionFactory extends Factory {
 														),
 										'attendance'	=> array(
 															'punch',
+															'user_date_total',
 															'absence',
 															'accrual',
 															'request',
@@ -220,6 +228,7 @@ class PermissionFactory extends Factory {
 										'payroll'	=> array(
 															'pay_stub_account',
 															'pay_stub',
+															'government_document',
 															'pay_stub_amendment',
 															'wage',
 															'roe',
@@ -272,6 +281,7 @@ class PermissionFactory extends Factory {
 										'currency' => TTi18n::gettext('Currency'),
 										'branch' => TTi18n::gettext('Branch'),
 										'department' => TTi18n::gettext('Department'),
+										'geo_fence' => TTi18n::gettext('GEOFence'),
 										'station' => TTi18n::gettext('Station'),
 										'hierarchy' => TTi18n::gettext('Hierarchy'),
 										'authorization' => TTi18n::gettext('Authorization'),
@@ -293,6 +303,7 @@ class PermissionFactory extends Factory {
 										'request' => TTi18n::gettext('Requests'),
 										'accrual' => TTi18n::gettext('Accruals'),
 										'punch' => TTi18n::gettext('Punch'),
+										'user_date_total' => TTi18n::gettext('TimeSheet Accumulated Time'),
 										'absence' => TTi18n::gettext('Absence'),
 
 										'job' => TTi18n::gettext('Jobs'),
@@ -331,6 +342,7 @@ class PermissionFactory extends Factory {
 
 										'pay_stub_account' => TTi18n::gettext('Pay Stub Accounts'),
 										'pay_stub' => TTi18n::gettext('Employee Pay Stubs'),
+										'government_document' => TTi18n::gettext('Government Documents'),
 										'pay_stub_amendment' => TTi18n::gettext('Employee Pay Stub Amendments'),
 										'wage' => TTi18n::gettext('Wages'),
 										'pay_period_schedule' => TTi18n::gettext('Pay Period Schedule'),
@@ -513,6 +525,16 @@ class PermissionFactory extends Factory {
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete')
 															),
+											'government_document' => array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'add' => TTi18n::gettext('Add'),
+																'edit' => TTi18n::gettext('Edit'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
+															),
 											'pay_stub_amendment' =>	array(
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_own' => TTi18n::gettext('View Own'),
@@ -575,6 +597,16 @@ class PermissionFactory extends Factory {
 																//'undelete' => TTi18n::gettext('Un-Delete'),
 																'assign' => TTi18n::gettext('Assign Employees')
 
+															),
+											'geo_fence' => array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete' => TTi18n::gettext('Delete'),
 															),
 											'station' =>	array(
 																'enabled' => TTi18n::gettext('Enabled'),
@@ -877,6 +909,7 @@ class PermissionFactory extends Factory {
 																'view_child' => TTi18n::gettext('View Subordinate'),
 																'view' => TTi18n::gettext('View'),
 																'add' => TTi18n::gettext('Add'),
+																'add_advanced' => TTi18n::gettext('Add Advanced'),
 																'edit_own' => TTi18n::gettext('Edit Own'),
 																'edit_child' => TTi18n::gettext('Edit Subordinate'),
 																'edit' => TTi18n::gettext('Edit'),
@@ -899,9 +932,6 @@ class PermissionFactory extends Factory {
 																'delete_child' => TTi18n::gettext('Delete Subordinate'),
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete'),
-																'verify_time_sheet' => TTi18n::gettext('Verify TimeSheet'),
-																'authorize' => TTi18n::gettext('Authorize TimeSheet'),
-																'punch_in_out' => TTi18n::gettext('Punch In/Out'),
 																'edit_transfer' => TTi18n::gettext('Edit Transfer Field'),
 																'default_transfer' => TTi18n::gettext('Default Transfer On'),
 																'edit_branch' => TTi18n::gettext('Edit Branch Field'),
@@ -916,6 +946,28 @@ class PermissionFactory extends Factory {
 																'edit_other_id3' => TTi18n::gettext('Edit Other ID3 Field'),
 																'edit_other_id4' => TTi18n::gettext('Edit Other ID4 Field'),
 																'edit_other_id5' => TTi18n::gettext('Edit Other ID5 Field'),
+
+																'verify_time_sheet' => TTi18n::gettext('Verify TimeSheet'),
+																'authorize' => TTi18n::gettext('Authorize TimeSheet'),
+
+																'punch_in_out' => TTi18n::gettext('Punch In/Out'),
+
+																'punch_timesheet' => TTi18n::gettext('Punch TimeSheet'), //Enables Punch Timesheet button for viewing.
+																'manual_timesheet' => TTi18n::gettext('Manual TimeSheet'), //Enables Manual Timesheet button for viewing.
+															),
+											'user_date_total' => array(
+																'enabled' => TTi18n::gettext('Enabled'),
+																'view_own' => TTi18n::gettext('View Own'),
+																'view_child' => TTi18n::gettext('View Subordinate'),
+																'view' => TTi18n::gettext('View'),
+																'add' => TTi18n::gettext('Add'),
+																'edit_own' => TTi18n::gettext('Edit Own'),
+																'edit_child' => TTi18n::gettext('Edit Subordinate'),
+																'edit' => TTi18n::gettext('Edit'),
+																'delete_own' => TTi18n::gettext('Delete Own'),
+																'delete_child' => TTi18n::gettext('Delete Subordinate'),
+																'delete' => TTi18n::gettext('Delete'),
+																//'undelete' => TTi18n::gettext('Un-Delete'),
 															),
 											'absence' =>	array(
 																'enabled' => TTi18n::gettext('Enabled'),
@@ -1577,6 +1629,7 @@ class PermissionFactory extends Factory {
 																				'enabled' => TRUE,
 																				'view_own' => TRUE,
 																				'add' => TRUE,
+																				'add_advanced' => TRUE,
 																				'edit_own' => TRUE,
 																				'delete_own' => TRUE,
 																			),
@@ -1625,6 +1678,7 @@ class PermissionFactory extends Factory {
 																				'edit_other_id3' => TRUE,
 																				'edit_other_id4' => TRUE,
 																				'edit_other_id5' => TRUE,
+																				'punch_timesheet' => TRUE,
 																			),
 															'accrual' =>	array(
 																				'enabled' => TRUE,
@@ -1643,6 +1697,10 @@ class PermissionFactory extends Factory {
 																				'edit_own_bank' => TRUE,
 																			),
 															'pay_stub' =>	array(
+																				'enabled' => TRUE,
+																				'view_own' => TRUE,
+																			),
+															'government_document' => array(
 																				'enabled' => TRUE,
 																				'view_own' => TRUE,
 																			),
@@ -1686,7 +1744,7 @@ class PermissionFactory extends Factory {
 																			),
 														),
 											),
-									12 => //Role: Regular Employee (Manual Entry)
+									12 => //Role: Regular Employee (Manual Punch)
 											array(
 													20 => //Module: Time & Attendance
 														array(
@@ -1701,6 +1759,15 @@ class PermissionFactory extends Factory {
 																			),
 														),
 												),
+									14 => //Role: Regular Employee (Manual TimeSheet)
+											array(
+													20 => //Module: Time & Attendance
+															array(
+																	'punch' =>	array(
+																			'manual_timesheet' => TRUE,
+																	),
+															),
+											),
 									18 => //Role: Supervisor (Subordinates Only)
 											array(
 													0 => //Module: System
@@ -1862,6 +1929,14 @@ class PermissionFactory extends Factory {
 																				'view_job_analysis' => TRUE,
 																				'view_job_payroll_analysis' => TRUE,
 																				'view_job_barcode' => TRUE
+																			),
+															'geo_fence' =>	array(
+																				'enabled' => TRUE,
+																				'add' => TRUE,
+																				'view' => TRUE, //Must be able to view all fences so they can punch in/out.
+																				'view_own' => TRUE,
+																				'edit_own' => TRUE,
+																				'delete_own' => TRUE,
 																			),
 														),
 													50 => //Module: Document Management
@@ -2130,6 +2205,11 @@ class PermissionFactory extends Factory {
 																				'edit' => TRUE,
 																				'delete' => TRUE,
 																			),
+															'geo_fence' =>	array(
+																				'view' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
+																			),
 														),
 													50 => //Module: Document Management
 														array(
@@ -2336,6 +2416,12 @@ class PermissionFactory extends Factory {
 																				'edit' => TRUE,
 																				'delete' => TRUE
 																			),
+															'government_document' =>	array(
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE
+																			),
 															'pay_stub_amendment' =>	array(
 																				'enabled' => TRUE,
 																				'view' => TRUE,
@@ -2427,6 +2513,13 @@ class PermissionFactory extends Factory {
 														array(
 															'user' =>	array(
 																				'timeclock_admin' => TRUE,
+																			),
+															'user_date_total' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE,
 																			),
 															'policy_group' =>	array(
 																				'enabled' => TRUE,
@@ -2555,6 +2648,12 @@ class PermissionFactory extends Factory {
 																				'delete' => TRUE,
 																				'assign' => TRUE
 																			),
+															'gep_fence' =>	array(
+																				'enabled' => TRUE,
+																				'view' => TRUE,
+																				'add' => TRUE,
+																				'edit' => TRUE,
+																				'delete' => TRUE																			),
 															'station' =>	array(
 																				'enabled' => TRUE,
 																				'view' => TRUE,
@@ -2714,7 +2813,7 @@ class PermissionFactory extends Factory {
 			$this->db->Execute($query, $ph);
 
 			//Make sure we keep the seqenence in sync, only required for MySQL.
-			if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+			if ( $this->getDatabaseType() == 'mysql' ) {
 				Debug::Text('Keeping MySQL sequence in sync...', __FILE__, __LINE__, __METHOD__, 10);
 				$install = TTNew('Install');
 				$install->initializeSequence( $this, $this->getTable(), get_class( $this ), $this->db );
@@ -2790,8 +2889,7 @@ class PermissionFactory extends Factory {
 										'report' => array('view_expense'),
 										'recruitment_report' => 'ALL',
 										);
-		} elseif ( $product_edition == TT_PRODUCT_COMMUNITY OR $product_edition == TT_PRODUCT_PROFESSIONAL ) { //Community or Professional
-			//Company ignore permissions must be enabled always, and unset below if this is the primary company
+		} elseif ( $product_edition == TT_PRODUCT_PROFESSIONAL ) { //Professional
 			$ignore_permissions = array('help' => 'ALL',
 										'company' => array('add', 'delete', 'delete_own', 'undelete', 'view', 'edit', 'login_other_user'),
 										'schedule' => array('edit_job', 'edit_job_item'),
@@ -2820,6 +2918,37 @@ class PermissionFactory extends Factory {
 										'report' => array('view_expense'),
 										'recruitment_report' => 'ALL',
 										);
+		} elseif ( $product_edition == TT_PRODUCT_COMMUNITY ) { //Community
+			//Company ignore permissions must be enabled always, and unset below if this is the primary company
+			$ignore_permissions = array('help' => 'ALL',
+										'company' => array('add', 'delete', 'delete_own', 'undelete', 'view', 'edit', 'login_other_user'),
+										'schedule' => array('edit_job', 'edit_job_item'),
+										'punch' => array('manual_timesheet', 'edit_job', 'edit_job_item', 'edit_quantity', 'edit_bad_quantity'),
+										'user_date_total' => 'ALL',
+										'absence' => array('edit_job', 'edit_job_item'),
+										'job_item' => 'ALL',
+										'invoice_config' => 'ALL',
+										'client' => 'ALL',
+										'client_payment' => 'ALL',
+										'product' => 'ALL',
+										'tax_policy' => 'ALL',
+										'area_policy' => 'ALL',
+										'shipping_policy' => 'ALL',
+										'payment_gateway' => 'ALL',
+										'transaction' => 'ALL',
+										'job_report' => 'ALL',
+										'invoice_report' => 'ALL',
+										'invoice' => 'ALL',
+										'job' => 'ALL',
+										'document' => 'ALL',
+										'job_vacancy' => 'ALL',
+										'job_applicant' => 'ALL',
+										'job_application' => 'ALL',
+										'user_expense' => 'ALL',
+										'expense_policy' => 'ALL',
+										'report' => array('view_expense'),
+										'recruitment_report' => 'ALL',
+			);
 		}
 
 		//If they are currently logged in as the primary company ID, allow multiple company permissions.

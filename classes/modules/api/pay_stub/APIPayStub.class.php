@@ -49,6 +49,22 @@ class APIPayStub extends APIFactory {
 	}
 
 	/**
+	 * overridden to get different columns based on permissions.
+	 * @param bool $name
+	 * @param null $parent
+	 * @return object
+	 */
+	function getOptions( $name, $parent = NULL ) {
+		if ( $name == 'columns'
+				AND ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
+						OR !( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_child') ) ) ) {
+			$name = 'list_columns';
+		}
+
+		return parent::getOptions( $name, $parent );
+	}
+
+	/**
 	 * Get default paystub_entry_account data for creating new paystub_entry_accountes.
 	 * @return array
 	 */
@@ -206,6 +222,17 @@ class APIPayStub extends APIFactory {
 	}
 
 	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportPayStub( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getPayStub( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_pay_stub', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
+
+	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.
 	 * @param array $data filter data
 	 * @return array
@@ -269,7 +296,7 @@ class APIPayStub extends APIFactory {
 							OR
 								(
 								$this->getPermissionObject()->Check('pay_stub', 'edit')
-									OR ( $this->getPermissionObject()->Check('pay_stub', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('pay_stub', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data: ', $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -501,7 +528,7 @@ class APIPayStub extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('pay_stub', 'delete')
-								OR ( $this->getPermissionObject()->Check('pay_stub', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+								OR ( $this->getPermissionObject()->Check('pay_stub', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE ) ) {
 							Debug::Text('Record Exists, deleting record: ', $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {
@@ -645,9 +672,11 @@ class APIPayStub extends APIFactory {
 
 							//Check PS End Date to match with PP End Date
 							//So if an ROE was generated, it won't get deleted when they generate all other Pay Stubs later on.
+							//Unless the ROE used the exact same dates as the pay period? To avoid this, only delete pay stubs for employees with no termination date, or with a termination date after the pay period start date.
 							if ( $pay_stub_obj->getStatus() <= 25
 									AND $pay_stub_obj->getTainted() === FALSE
-									AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() ) ) {
+									AND TTDate::getMiddleDayEpoch( $pay_stub_obj->getEndDate() ) == TTDate::getMiddleDayEpoch( $pay_period_obj->getEndDate() )
+									AND ( is_object( $pay_stub_obj->getUserObject() ) AND ( $pay_stub_obj->getUserObject()->getTerminationDate() == '' OR TTDate::getMiddleDayEpoch( $pay_stub_obj->getUserObject()->getTerminationDate() ) >= TTDate::getMiddleDayEpoch( $pay_period_obj->getStartDate() ) ) ) ) {
 								Debug::text('Deleting pay stub: '. $pay_stub_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 								$pay_stub_obj->setDeleted(TRUE);
 								$pay_stub_obj->Save();

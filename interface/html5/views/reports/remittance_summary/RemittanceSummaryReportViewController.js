@@ -1,7 +1,7 @@
 RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'RemittanceSummaryReport';
 		this.viewId = 'RemittanceSummaryReport';
 		this.context_menu_name = $.i18n._( 'Remittance Summary' );

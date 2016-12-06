@@ -117,6 +117,7 @@ class APIMessageControl extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 
@@ -131,6 +132,16 @@ class APIMessageControl extends APIFactory {
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportMessageControl( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getMessageControl( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_message', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
 
 	/**
 	 * Get message data for one message or thread.
@@ -158,6 +169,7 @@ class APIMessageControl extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 
@@ -221,6 +233,7 @@ class APIMessageControl extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 
@@ -512,6 +525,7 @@ class APIMessageControl extends APIFactory {
 				unset($src_rows[$key]['id'] ); //Clear fields that can't be copied
 				//$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setMessageControl( $src_rows ); //Save copied rows
@@ -575,6 +589,7 @@ class APIMessageControl extends APIFactory {
 
 			$this->setPagerObject( $ulf );
 
+			$retarr = array();
 			foreach( $ulf as $u_obj ) {
 				$user_data = $u_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 

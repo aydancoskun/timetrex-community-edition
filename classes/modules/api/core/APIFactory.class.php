@@ -73,7 +73,7 @@ abstract class APIFactory {
 
 		return 1;
 	}
-	
+
 	//Returns the AMF messageID for each individual call.
 	function getAMFMessageID() {
 		if ( $this->AMF_message_id != NULL ) {
@@ -200,7 +200,7 @@ abstract class APIFactory {
 		$allowed_columns['id'] = TRUE;
 		$allowed_columns['is_owner'] = TRUE;
 		$allowed_columns['is_child'] = TRUE;
-		
+
 		if ( is_array($filter_columns) ) {
 			$retarr = Misc::arrayIntersectByKey( $allowed_columns, $filter_columns );
 		} else {
@@ -241,6 +241,36 @@ abstract class APIFactory {
 		//Debug::Arr($retarr, 'Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retarr;
+	}
+
+	/**
+	 * downloaded a result_set as a csv.
+	 * @param $format
+	 * @param $file_name
+	 * @param $result
+	 * @return array|bool
+	 */
+	function exportRecords( $format, $file_name, $result, $filter_columns ) {
+		if ( isset( $result[0] ) AND is_array( $result[0] ) AND is_array( $filter_columns ) AND count( $filter_columns ) > 0 ) {
+			$columns = Misc::arrayIntersectByKey( array_keys($filter_columns ), Misc::trimSortPrefix( $this->getOptions( 'columns' ) ) );
+
+			$file_extension = $format;
+			$mime_type = 'application/' . $format;
+			$output = '';
+
+			if ( $format == 'csv' ) {
+				$output = Misc::Array2CSV( $result, $columns, FALSE );
+			}
+
+			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			if ( $output !== FALSE ) {
+				Misc::APIFileDownload( $file_name . '.' . $file_extension, $mime_type, $output );
+			} else {
+				return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'ERROR: No data to export...' ) );
+			}
+		}
+
+		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
 	function getNextInsertID() {

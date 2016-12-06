@@ -139,47 +139,6 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		return $this;
 	}
 
-	function getMaximumStartStopWindowByCompanyIdAndRecurringScheduleControlID($company_id, $id, $where = NULL, $order = NULL) {
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		if ( $order == NULL ) {
-			$order = array( 'a.name' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
-		}
-
-		$rstf = new RecurringScheduleTemplateFactory();
-
-		$ph = array(
-					'company' => $company_id,
-					'id' => (int)$id,
-					);
-
-		$query = '
-					select	max(start_stop_window)
-					from	'. $this->getTable() .' as spf
-					LEFT JOIN '. $rstf->getTable() .' as rstf ON ( spf.id = rstf.schedule_policy_id )
-					where	spf.company_id = ?
-						AND rstf.recurring_schedule_template_control_id = ?
-						AND ( spf.deleted = 0 AND rstf.deleted = 0 )';
-
-		$window = $this->db->GetOne($query, $ph);
-
-		if ($window === FALSE ) {
-			$window = 0;
-		}
-		Debug::text('Max Start/Stop Window: '. $window, __FILE__, __LINE__, __METHOD__, 10);
-
-		return $window;
-	}
-
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -262,6 +221,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		$splf = new SchedulePolicyListFactory();
 		$splf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -270,7 +230,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 			$list[$sp_obj->getID()] = $sp_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -282,6 +242,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -290,7 +251,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

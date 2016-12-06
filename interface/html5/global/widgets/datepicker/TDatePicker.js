@@ -164,18 +164,14 @@
 		};
 
 		this.setValue = function( val ) {
-
 			//Error: Uncaught TypeError: Cannot read property 'val' of undefined in /interface/html5/global/widgets/datepicker/TDatePicker.js?v=8.0.0-20141230-130626 line 144 
 			if ( !date_picker_input ) {
 				return;
 			}
-
 			if ( !val ) {
 				val = '';
 			}
-
 			date_picker_input.val( val );
-
 			this.autoResize();
 		};
 

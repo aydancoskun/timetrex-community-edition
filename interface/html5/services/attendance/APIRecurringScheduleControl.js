@@ -41,6 +41,10 @@ var APIRecurringScheduleControl = ServiceCaller.extend( {
 
 	copyRecurringScheduleControl: function() {
 		return this.argumentsHandler( this.className, 'copyRecurringScheduleControl', arguments );
+	},
+
+	exportRecurringScheduleControl: function() {
+		return this.argumentsHandler( this.className, 'exportRecurringScheduleControl', arguments );
 	}
 
 

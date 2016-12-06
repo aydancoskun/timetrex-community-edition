@@ -3,52 +3,30 @@ var FormItemType = function() {
 };
 
 FormItemType.TEXT = 'text';
-
 FormItemType.AWESOME_BOX = 'awesomeBox';
-
 FormItemType.AWESOME_DROPDOWN = 'awesomeDropdown';
-
 FormItemType.FORMULA_BUILDER = 'formulaBuilder';
-
 FormItemType.COMBO_BOX = 'comboBox';
-
 FormItemType.LIST = 'list';
-
 FormItemType.TEXT_INPUT = 'textInput';
-
 FormItemType.TIME_PICKER = 'timePicker';
-
 FormItemType.FEEDBACK_BOX = 'feedbackBox';
-
 FormItemType.TEXT_INPUT_NO_AUTO = 'textInputNoAuto';
-
 FormItemType.PASSWORD_INPUT = 'passwordInput';
-
 FormItemType.TEXT_AREA = 'textArea';
-
 FormItemType.TAG_INPUT = 'tagInput';
-
 FormItemType.DATE_PICKER = 'datePicker';
-
 FormItemType.RANGE_PICKER = 'range_date_picker';
-
 FormItemType.CHECKBOX = 'checkbox';
-
 FormItemType.SEPARATED_BOX = 'separatedBox';
-
 FormItemType.FILE_BROWSER = 'fileBrowser';
-
 FormItemType.IMAGE_BROWSER = 'imageBrowser';
-
 FormItemType.IMAGE_AVD_BROWSER = 'imageADVBrowser';
-
 FormItemType.CAMERA_BROWSER = 'cameraBrowser';
-
 FormItemType.IMAGE_CUT = 'imageCutArea';
-
 FormItemType.INSIDE_EDITOR = 'insideEditor';
-
 FormItemType.IMAGE = 'image';
+FormItemType.COLOR_PICKER = 'colorPicker';
 
 var WidgetNamesDic = function() {
 

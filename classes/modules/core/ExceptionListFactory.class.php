@@ -103,7 +103,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 
 		return $this;
 	}
-
+	
 	function getByIdAndCompanyId($id, $company_id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -320,7 +320,6 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 		$uf = new UserFactory();
 		$epf = new ExceptionPolicyFactory();
 		$ppf = new PayPeriodFactory();
-		$rf = new RequestFactory();
 
 		$ph = array(
 					'pay_period_id' => (int)$pay_period_id,
@@ -808,7 +807,7 @@ class ExceptionListFactory extends ExceptionFactory implements IteratorAggregate
 				$order['c.first_name'] = 'asc';
 			}
 			if ( !isset($order['a.date_stamp']) ) {
-				$order['a.date_stamp'] = 'desc';
+				$order['a.date_stamp'] = 'desc'; 
 			}
 			if ( !isset($order['i.severity_id']) ) {
 				$order['i.severity_id'] = 'desc';

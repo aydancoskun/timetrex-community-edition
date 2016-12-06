@@ -11,8 +11,8 @@ UserLanguageViewController = BaseViewController.extend( {
 	qualification_group_array: null,
 
 	qualification_array: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserLanguageEditView.html';
 		this.permission_id = 'user_language';
 		this.viewId = 'UserLanguage';
@@ -80,7 +80,7 @@ UserLanguageViewController = BaseViewController.extend( {
 	},
 
 	cancelOtherSubViewSelectedStatus: function() {
-		switch( true ) {
+		switch ( true ) {
 			case typeof( this.parent_view_controller.sub_user_skill_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_skill_view_controller.unSelectAll();
 			case typeof( this.parent_view_controller.sub_user_membership_view_controller ) !== 'undefined':
@@ -122,25 +122,27 @@ UserLanguageViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
-		this.api['getCommon' + this.api.key_name + 'Data']( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			$this.unique_columns = {};
+				$this.unique_columns = {};
 
-			$this.linked_columns = {};
+				$this.linked_columns = {};
 
-			if ( !result_data ) {
-				result_data = [];
+				if ( !result_data ) {
+					result_data = [];
+				}
+
+				if ( $this.sub_view_mode && $this.parent_key ) {
+					result_data[$this.parent_key] = $this.parent_value;
+				}
+
+				$this.current_edit_record = result_data;
+				$this.initEditView();
+
 			}
-
-			if ( $this.sub_view_mode && $this.parent_key ) {
-				result_data[$this.parent_key] = $this.parent_value;
-			}
-
-			$this.current_edit_record = result_data;
-			$this.initEditView();
-
-		}} );
+		} );
 
 	},
 
@@ -149,32 +151,36 @@ UserLanguageViewController = BaseViewController.extend( {
 
 		this.initDropDownOption( 'fluency' );
 		this.initDropDownOption( 'competency' );
-		this.qualification_group_api.getQualificationGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.qualification_group_api.getQualificationGroup( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			res = Global.buildTreeRecord( res );
-			$this.qualification_group_array = res;
+				res = Global.buildTreeRecord( res );
+				$this.qualification_group_array = res;
 
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
 //				$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
-			}
+				}
 
-		}} );
+			}
+		} );
 
 		var args = {};
 		var filter_data = {};
 		filter_data.type_id = [40];
 		args.filter_data = filter_data;
-		this.qualification_api.getQualification( args, {onResult: function( res ) {
-			res = res.getResult();
+		this.qualification_api.getQualification( args, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			$this.qualification_array = res;
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['qualification_id'] ) {
-				$this.basic_search_field_ui_dic['qualification_id'].setSourceData( res );
+				$this.qualification_array = res;
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['qualification_id'] ) {
+					$this.basic_search_field_ui_dic['qualification_id'].setSourceData( res );
 //				$this.adv_search_field_ui_dic['qualification_id'].setSourceData( res );
+				}
 			}
-		}} );
+		} );
 
 	},
 
@@ -216,7 +222,6 @@ UserLanguageViewController = BaseViewController.extend( {
 			'tab_attachment': $.i18n._( 'Attachments' ),
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
-
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserLanguage' )),
@@ -287,10 +292,9 @@ UserLanguageViewController = BaseViewController.extend( {
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		form_item_input.TTextArea( {field: 'description', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_language_column1, '', null, null, true );
 		form_item_input.parent().width( '45%' );
-
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
@@ -309,7 +313,8 @@ UserLanguageViewController = BaseViewController.extend( {
 
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
@@ -318,9 +323,11 @@ UserLanguageViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Language' ),
+			new SearchField( {
+				label: $.i18n._( 'Language' ),
 				in_column: 1,
 				field: 'qualification_id',
 				layout_name: ALayoutIDs.QUALIFICATION,
@@ -328,9 +335,11 @@ UserLanguageViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
@@ -338,35 +347,43 @@ UserLanguageViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Tags' ),
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
 				adv_search: false,
 				in_column: 1,
 				object_type_id: 254,
-				form_item_type: FormItemType.TAG_INPUT} ),
+				form_item_type: FormItemType.TAG_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Fluency' ),
+			new SearchField( {
+				label: $.i18n._( 'Fluency' ),
 				in_column: 2,
 				field: 'fluency_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Competency' ),
+			new SearchField( {
+				label: $.i18n._( 'Competency' ),
 				in_column: 2,
 				field: 'competency_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -374,9 +391,11 @@ UserLanguageViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -384,7 +403,8 @@ UserLanguageViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -484,31 +504,18 @@ UserLanguageViewController = BaseViewController.extend( {
 
 	}
 
-
 } );
-
-UserLanguageViewController.loadView = function() {
-
-	Global.loadViewSource( 'UserLanguage', 'UserLanguageView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};
 
 UserLanguageViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserLanguage', 'SubUserLanguageView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_user_language_view_controller );
 			}

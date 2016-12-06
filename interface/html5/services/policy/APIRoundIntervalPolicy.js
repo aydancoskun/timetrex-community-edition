@@ -41,6 +41,10 @@ var APIRoundIntervalPolicy = ServiceCaller.extend( {
 
 	copyRoundIntervalPolicy: function() {
 		return this.argumentsHandler( this.className, 'copyRoundIntervalPolicy', arguments );
+	},
+
+	exportRoundIntervalPolicy: function() {
+		return this.argumentsHandler( this.className, 'exportRoundIntervalPolicy', arguments );
 	}
 
 

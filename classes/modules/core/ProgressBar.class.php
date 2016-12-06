@@ -86,8 +86,6 @@ class ProgressBar {
 			$msg = TTi18n::getText('Processing...');
 		}
 
-		$epoch = microtime(TRUE);
-
 		try {
 			$progress_bar_arr = $this->obj->get( $this->key_prefix.$key );
 			$progress_bar_arr['status_id'] = 9999;

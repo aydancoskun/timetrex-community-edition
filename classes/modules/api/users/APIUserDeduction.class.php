@@ -52,8 +52,6 @@ class APIUserDeduction extends APIFactory {
 	 * @return array
 	 */
 	function getUserDeductionDefaultData() {
-		$company_obj = $this->getCurrentCompanyObject();
-
 		Debug::Text('Getting user_deduction default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
@@ -84,6 +82,7 @@ class APIUserDeduction extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 

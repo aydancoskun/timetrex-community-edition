@@ -248,7 +248,8 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-
+		
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -265,7 +266,7 @@ class CurrencyListFactory extends CurrencyFactory implements IteratorAggregate {
 			}
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

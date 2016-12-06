@@ -64,6 +64,7 @@ class APIUserDefault extends APIFactory {
 						'date_format' => 'd-M-y',
 						'time_format' => 'g:i A',
 						'time_unit_format' => 20, //Hours
+						'distance_format' => 10, //Kilometers
 						'items_per_page' => 50,
 						'enable_email_notification_exception' => TRUE,
 						'enable_email_notification_message' => TRUE,
@@ -93,6 +94,7 @@ class APIUserDefault extends APIFactory {
 
 			$this->setPagerObject( $uplf );
 
+			$retarr = array();
 			foreach( $uplf as $ut_obj ) {
 				$retarr[] = $ut_obj->getObjectAsArray( $data['filter_columns'] );
 

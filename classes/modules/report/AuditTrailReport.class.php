@@ -438,7 +438,7 @@ class AuditTrailReport extends Report {
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $processed_data );
+			unset($this->tmp_data, $row );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;

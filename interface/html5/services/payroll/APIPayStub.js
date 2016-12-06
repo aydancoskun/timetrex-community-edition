@@ -51,6 +51,10 @@ var APIPayStub = ServiceCaller.extend( {
 
 	},
 
+	exportPayStub: function() {
+		return this.argumentsHandler( this.className, 'exportPayStub', arguments );
+	},
+
 	generatePayStubs: function() {
 
 		return this.argumentsHandler( this.className, 'generatePayStubs', arguments );

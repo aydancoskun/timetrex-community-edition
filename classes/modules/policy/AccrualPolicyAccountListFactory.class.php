@@ -116,7 +116,6 @@ class AccrualPolicyAccountListFactory extends AccrualPolicyAccountFactory implem
 			$strict = TRUE;
 		}
 
-		$pgf = new PolicyGroupFactory();
 		$pfpf = new PayFormulaPolicyFactory();
 		$apf = new AccrualPolicyFactory();
 
@@ -147,6 +146,7 @@ class AccrualPolicyAccountListFactory extends AccrualPolicyAccountFactory implem
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -155,7 +155,7 @@ class AccrualPolicyAccountListFactory extends AccrualPolicyAccountFactory implem
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -167,6 +167,7 @@ class AccrualPolicyAccountListFactory extends AccrualPolicyAccountFactory implem
 		$aplf = new AccrualPolicyListFactory();
 		$aplf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = TTi18n::gettext('-- None --');
 		}
@@ -175,7 +176,7 @@ class AccrualPolicyAccountListFactory extends AccrualPolicyAccountFactory implem
 			$list[$ap_obj->getID()] = $ap_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

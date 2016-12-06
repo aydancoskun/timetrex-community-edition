@@ -8,25 +8,15 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	result_details: null,
 
-	initialize: function() {
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		if ( Global.isSet( this.options.parent_view ) ) {
-			this.parent_view = this.options.parent_view;
-		}
-
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		if ( this.parent_view === 'employee' ) {
 			this.context_menu_name = $.i18n._( 'Accruals' );
 			this.navigation_label = $.i18n._( 'Accrual' ) + ':';
 		} else if ( this.parent_view === 'accrual_policy' ) {
-
 			this.context_menu_name = $.i18n._( 'Employee Settings' );
 			this.navigation_label = $.i18n._( 'Employee Accrual Modifier' ) + ':';
 		}
-
-		this._super( 'initialize' );
 		this.edit_view_tpl = 'AccrualPolicyUserModifierEditView.html';
 		this.permission_id = 'accrual_policy';
 		this.script_name = 'AccrualPolicyUserModifierView';
@@ -604,7 +594,6 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 						}
 
 						if ( !found ) {
-//						$this.grid.addRowData( new_record.id, new_record, 0 );
 							$this.grid.clearGridData();
 							$this.grid.setGridParam( {data: new_grid_source_data.concat( new_record )} );
 
@@ -615,6 +604,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 							$this.grid.trigger( 'reloadGrid' );
 							$this.reSelectLastSelectItems();
+							$this.highLightGridRowById( new_record.id );
 						}
 					}
 
@@ -1225,15 +1215,15 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 AccrualPolicyUserModifierViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 
 	Global.loadViewSource( 'AccrualPolicyUserModifier', 'SubAccrualPolicyUserModifierView.html', function( result ) {
-//		var args = { };
-//		var template = _.template( result, args );
-
+		var args = {};
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
-			var template = beforeViewLoadedFun( result );
+			var template_data = beforeViewLoadedFun( result );
+			var template = template_data.template;
+			args = template_data.args;
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_accrual_policy_user_modifier_view_controller );

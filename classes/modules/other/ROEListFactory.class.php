@@ -178,7 +178,7 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 					where	user_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

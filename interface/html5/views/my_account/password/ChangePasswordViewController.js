@@ -6,13 +6,9 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 	result_data: [],
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.edit_only_mode ) ) {
-			this.edit_only_mode = this.options.edit_only_mode;
-		}
-
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 
 		this.permission_id = 'user';
 		this.viewId = 'ChangePassword';

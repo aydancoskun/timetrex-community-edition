@@ -3,14 +3,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 	status_array: null,
 	type_array: null,
 	pay_period_schedule_api: null,
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PayPeriodsEditView.html';
 		this.permission_id = 'pay_period_schedule';
 		this.script_name = 'PayPeriodsView';
@@ -234,8 +229,17 @@ PayPeriodsViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		return [menu];
+		var export_data = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
 
+		return [menu];
 	},
 
 	openEditView: function( id ) {
@@ -344,6 +348,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.delete_data:
 					this.setDefaultMenuDeleteDataIcon( context_btn, grid_selected_length );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
 			}
 
@@ -464,6 +471,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 				case ContextMenuIconName.import_icon:
 				case ContextMenuIconName.delete_data:
 					this.setEditMenuImportIcon( context_btn );
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
+					break;
 			}
 
 		}
@@ -542,6 +552,9 @@ PayPeriodsViewController = BaseViewController.extend( {
 							ProgressBar.closeOverlay();
 						}
 					} );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.onExportClick('export' + this.api.key_name )
 					break;
 			}
 
@@ -692,13 +705,13 @@ PayPeriodsViewController = BaseViewController.extend( {
 		// End date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'end_date',  mode: 'date_time'} );
+		form_item_input.TDatePicker( {field: 'end_date', mode: 'date_time'} );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 		// Transaction date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'transaction_date',  mode: 'date_time'} );
+		form_item_input.TDatePicker( {field: 'transaction_date', mode: 'date_time'} );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Date' ), form_item_input, tab_pay_period_column1, '', null, true );
 
 	},
@@ -768,33 +781,19 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 } );
 
-PayPeriodsViewController.loadView = function( container ) {
-	Global.loadViewSource( 'PayPeriods', 'PayPeriodsView.html', function( result ) {
-		var args = {};
-		var template = _.template( result, args );
-
-		if ( Global.isSet( container ) ) {
-			container.html( template );
-		} else {
-			Global.contentContainer().html( template );
-		}
-
-	} );
-};
-
 PayPeriodsViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 
 	Global.loadViewSource( 'PayPeriods', 'SubPayPeriodsView.html', function( result ) {
 
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_pay_periods_view_controller );
 			}

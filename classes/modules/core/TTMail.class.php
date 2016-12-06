@@ -217,6 +217,7 @@ class TTMail {
 	}
 
 	function Send( $force = FALSE ) {
+		global $config_vars;
 		Debug::Arr($this->getTo(), 'Attempting to send email To: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->getTo() == FALSE ) {
@@ -260,17 +261,24 @@ class TTMail {
 				case 'sendmail':
 				case 'mail':
 					if ( $this->getDeliveryMethod() == 'mail' ) {
-						//Make sure the envelope from header matches the From header
-						//Required to prevent spam filtering due to email mismatch/forgery (EDT_SDHA_ADR_FRG)
 						$headers = $this->getMIMEHeaders();
+
+						//Check to see if they want to force a return-path for better bounce handling.
+						//However if the envelope from header does not match the From header
+						//It may trigger spam filtering due to email mismatch/forgery (EDT_SDHA_ADR_FRG)
+						if ( !isset($headers['Return-Path']) AND isset($config_vars['other']['email_return_path_local_part']) AND $config_vars['other']['email_return_path_local_part'] != '' ) {
+							$headers['Return-Path'] = Misc::getEmailReturnPathLocalPart( $recipient ) .'@'. Misc::getEmailDomain();
+						}
+
 						if ( isset($headers['Return-Path']) ) {
 							$this->getMailObject()->_params = '-f'. $this->parseEmailAddress( $headers['Return-Path'] );
 						} elseif ( isset($headers['From']) ) {
 							$this->getMailObject()->_params = '-f'. $this->parseEmailAddress( $headers['From'] );
 						}
+						
 						unset($headers);
 					}
-					
+
 					$send_retval = $this->getMailObject()->send( $recipient, $this->getMIMEHeaders(), $this->getBody() );
 					if ( PEAR::isError($send_retval) ) {
 						Debug::Text('Send Email Failed... Error: '. $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__, 10);

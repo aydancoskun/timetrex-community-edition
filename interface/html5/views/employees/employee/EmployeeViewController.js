@@ -40,8 +40,8 @@ EmployeeViewController = BaseViewController.extend( {
 
 	select_company_id: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 
 		this.edit_view_tpl = 'EmployeeEditView.html';
 		this.permission_id = 'user';
@@ -312,6 +312,15 @@ EmployeeViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var map = new RibbonSubMenu( {
+			label: $.i18n._( 'Map' ),
+			id: ContextMenuIconName.map,
+			group: other_group,
+			icon: Icons.map,
+			permission_result: true,
+			permission: null
+		} );
+
 		var import_csv = new RibbonSubMenu( {
 			label: $.i18n._( 'Import' ),
 			id: ContextMenuIconName.import_icon,
@@ -319,6 +328,16 @@ EmployeeViewController = BaseViewController.extend( {
 			icon: Icons.import_icon,
 			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
 			permission: null
+		} );
+
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
 		} );
 
 		return [menu];
@@ -584,6 +603,12 @@ EmployeeViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.pay_stub:
 					this.setDefaultMenuPayStubIcon( context_btn, grid_selected_length, 'pay_stub' );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
+					break;
+				case ContextMenuIconName.map:
+					this.setDefaultMenuMapIcon( context_btn);
 					break;
 			}
 
@@ -1043,7 +1068,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 			var args = {parent_view: 'employee'};
 
-			return _.template( tpl, args );
+			return {template: _.template( tpl ), args: args};
 
 		}
 
@@ -1098,7 +1123,7 @@ EmployeeViewController = BaseViewController.extend( {
 			case 'default_job_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'default_job_item_id', { status_id: 10, job_id: this.current_edit_record.default_job_id, company_id: this.select_company_id });
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
@@ -1125,71 +1150,6 @@ EmployeeViewController = BaseViewController.extend( {
 			this.validate();
 		}
 
-	},
-
-	/*
-	 1. Job is switched.
-	 2. If a Task is already selected (and its not Task=0), keep it selected *if its available* in the newly populated Task list.
-	 3. If the task selected is *not* available in the Task list, or the selected Task=0, then check the default_item_id field from the Job and if its *not* 0 also, select that Task by default.
-	 */
-	setJobItemValueWhenJobChanged: function( job ) {
-
-		var $this = this;
-		var job_item_widget = $this.edit_view_ui_dic['default_job_item_id'];
-		var current_job_item_id = job_item_widget.getValue();
-		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox( true );
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
-		var args = {};
-		args.filter_data = {
-			status_id: 10,
-			job_id: $this.current_edit_record.default_job_id,
-			company_id: $this.select_company_id
-		};
-		$this.edit_view_ui_dic['default_job_item_id'].setDefaultArgs( args );
-
-		if ( current_job_item_id ) {
-
-			var new_arg = Global.clone( args );
-
-			new_arg.filter_data.id = current_job_item_id;
-			new_arg.filter_columns = $this.edit_view_ui_dic['default_job_item_id'].getColumnFilter();
-			new_arg.filter_data.company_id = $this.select_company_id;
-			$this.job_item_api.getJobItem( new_arg, {
-				onResult: function( task_result ) {
-					var data = task_result.getResult();
-
-					if ( data.length > 0 ) {
-						job_item_widget.setValue( current_job_item_id );
-						$this.current_edit_record.default_job_item_id = current_job_item_id;
-					} else {
-						setDefaultData();
-					}
-
-				}
-			} )
-
-		} else {
-			setDefaultData();
-		}
-
-		function setDefaultData() {
-
-			if ( $this.current_edit_record.default_job_id ) {
-				job_item_widget.setValue( job.default_item_id );
-				$this.current_edit_record.job_item_id = job.default_item_id;
-
-				if ( job.default_item_id === false || job.default_item_id === 0 ) {
-					$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-				}
-
-			} else {
-				job_item_widget.setValue( '' );
-				$this.current_edit_record.job_item_id = false;
-				$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-
-			}
-		}
 	},
 
 	hierarchyPermissionValidate: function( p_id, selected_item ) {
@@ -1315,11 +1275,11 @@ EmployeeViewController = BaseViewController.extend( {
 							for ( var h_key in this.current_edit_record.hierarchy_control ) {
 								var value = this.current_edit_record.hierarchy_control[h_key];
 								if ( this.edit_view_ui_dic[h_key] ) {
-									widget = this.edit_view_ui_dic[h_key];
-									dont_set_dic[h_key] = true;
-									widget.setValue( value );
-								}
+								widget = this.edit_view_ui_dic[h_key];
+								dont_set_dic[h_key] = true;
+								widget.setValue( value );
 							}
+						}
 						}
 						break;
 					case 'default_job_id':
@@ -1760,6 +1720,7 @@ EmployeeViewController = BaseViewController.extend( {
 							$this.grid.clearGridData();
 							$this.grid.setGridParam( {data: grid_source_data.concat( new_record )} );
 							$this.grid.trigger( 'reloadGrid' );
+							$this.highLightGridRowById( new_record.id );
 						}
 					}
 
@@ -1973,6 +1934,22 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
+	onMapClick: function() {
+		this.is_viewing = false;
+		ProgressBar.showProgressBar(true);
+		var data = {filter_columns: {id:true, first_name:true, last_name:true, address1:true, address2:true, city:true, province:true, country:true, postal_code:true, latitude:true, longitude:true}};
+		var ids = this.getGridSelectIdArray();
+
+		data.filter_data =  Global.convertLayoutFilterToAPIFilter( this.select_layout );
+		if ( ids.length > 0 ) {
+			data.filter_data.id =  ids;
+		}
+		var cells = this.api.getUser(data,{async:false}).getResult();
+		if ( !this.is_mass_editing ) {
+			IndexViewController.openEditView( this, "Map", cells );
+		}
+	},
+
 	onImportClick: function() {
 
 		var $this = this;
@@ -2036,7 +2013,6 @@ EmployeeViewController = BaseViewController.extend( {
 					IndexViewController.goToView( 'PayStubAmendment', filter );
 				}
 				break;
-
 		}
 
 	},
@@ -2926,12 +2902,12 @@ EmployeeViewController = BaseViewController.extend( {
 					if ( result_data.length > 0 ) {
 						$this.edit_view_ui_dic['default_job_id'].setValue( result_data[0].id );
 						$this.current_edit_record.default_job_id = result_data[0].id;
-						$this.setJobItemValueWhenJobChanged( result_data[0] );
+						$this.setJobItemValueWhenJobChanged( result_data[0], 'default_job_item_id', { status_id: 10, job_id: $this.current_edit_record.default_job_id, company_id: $this.select_company_id } );
 
 					} else {
 						$this.edit_view_ui_dic['default_job_id'].setValue( '' );
 						$this.current_edit_record.default_job_id = false;
-						$this.setJobItemValueWhenJobChanged( false );
+						$this.setJobItemValueWhenJobChanged( false, 'default_job_item_id', { status_id: 10, job_id: $this.current_edit_record.default_job_id, company_id: $this.select_company_id } );
 					}
 
 				}
@@ -2964,27 +2940,8 @@ EmployeeViewController = BaseViewController.extend( {
 
 	getFilterColumnsFromDisplayColumns: function() {
 		var column_filter = {};
-		column_filter.is_owner = true;
-		column_filter.id = true;
-		column_filter.is_child = true;
-		column_filter.in_use = true;
-		column_filter.first_name = true;
-		column_filter.last_name = true;
 		column_filter.company_id = true;
-		// Error: Unable to get property 'getGridParam' of undefined or null reference
-		var display_columns = [];
-		if ( this.grid ) {
-			display_columns = this.grid.getGridParam( 'colModel' );
-		}
-		//Fixed possible exception -- Error: Unable to get property 'length' of undefined or null reference in /interface/html5/views/BaseViewController.js?v=7.4.3-20140924-090129 line 5031
-		if ( display_columns ) {
-			var len = display_columns.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var column_info = display_columns[i];
-				column_filter[column_info.name] = true;
-			}
-		}
+		column_filter = this._getFilterColumnsFromDisplayColumns( column_filter );
 
 		return column_filter;
 	},
@@ -3026,18 +2983,15 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_document_view_controller.initData();
 		}
 
-	}
+	},
+
+	getFilterColumnsFromDisplayColumns: function(column_filter, enable_system_columns ) {
+		if ( column_filter== undefined ) {
+			column_filter = {};
+		}
+		column_filter.latitude = true;
+		column_filter.longitude = true;
+		return this._getFilterColumnsFromDisplayColumns(column_filter, enable_system_columns)
+	},
 
 } );
-
-EmployeeViewController.loadView = function() {
-
-	Global.loadViewSource( 'Employee', 'EmployeeView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

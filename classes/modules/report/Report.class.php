@@ -303,7 +303,7 @@ class Report {
 	}
 
 	function __construct() {
-		global $profiler, $config_vars;
+		global $profiler;
 
 		$this->profiler = $profiler;
 
@@ -319,6 +319,8 @@ class Report {
 	function setExecutionTimeLimit( $int = FALSE ) {
 		if ( $int === FALSE ) {
 			$int = $this->config['other']['maximum_execution_limit'];
+
+			global $config_vars;
 			if ( isset($config_vars['other']['report_maximum_execution_limit']) AND $config_vars['other']['report_maximum_execution_limit'] != '' ) {
 				$int = $config_vars['other']['report_maximum_execution_limit'];
 			}
@@ -583,10 +585,11 @@ class Report {
 
 	//Store column options - This must be in the format of 'column' => TRUE, ie: 'regular_time => TRUE
 	function setColumnConfig( $data ) {
+		$formatted_data = array();
 		if ( isset( $data[0] ) ) {
 			//array of format: array('col1', 'col2', 'col3') was passed, flip it first before saving it. so Flex can use the array key to maintain order
 			$data = array_unique($data);
-			foreach( $data as $key => $col ) {
+			foreach( $data as $col ) {
 				$formatted_data[$col] = TRUE;
 			}
 		} else {
@@ -628,6 +631,7 @@ class Report {
 	function convertTimePeriodToStartEndDate( $time_period_arr, $prefix = NULL, $force_dates_for_pay_periods = FALSE ) {
 		Debug::Arr($time_period_arr, 'Input: Time Period Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
+		$retarr = array();
 		//Convert time_period into start/end date, with pay_period_schedule_ids if necessary.
 		if ( isset($time_period_arr['time_period'])
 				AND ( $time_period_arr['time_period'] == 'custom_date' OR $time_period_arr['time_period'] == 'custom_time' ) ) {
@@ -723,6 +727,7 @@ class Report {
 					$data = array_merge( $data, (array)$this->convertTimePeriodToStartEndDate( $data[$column], str_replace('_time_period', '', $column.'_' ) ) );
 				}
 			}
+			unset($column_data); //code standards
 		}
 
 		Debug::Arr($data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -740,6 +745,7 @@ class Report {
 	//Used for converting $test[] = blah, or $test[] = array( 'col' => blah ) to $test['col'] => $blah.
 	//Mainly for multi-dimension awesomebox group by, sub_total by, sorting...
 	function convertArrayNumericKeysToString( $arr ) {
+		$retarr = array();
 		foreach( $arr as $key => $value ) {
 			if ( is_array($value) ) {
 				foreach( $value as $key2 => $value2 ) {
@@ -750,7 +756,7 @@ class Report {
 			}
 		}
 
-		if (isset($retarr) ) {
+		if (empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 
@@ -858,6 +864,7 @@ class Report {
 
 			//Multiple sub-total config into each iteration. Order of the columns matters.
 			//Reverse the array then
+			$sub_total_data = array();
 			for( $i = 0; $i < count($sub_total_config); $i++ ) {
 				$n = ( count($sub_total_config) - 1 );
 				foreach( $sub_total_config as $column ) {
@@ -921,7 +928,7 @@ class Report {
 
 		if ( isset( $data[0] ) ) {
 			//Allow alternative format of: array( 0 => array('col1' => 'asc'), 1 => array('col2' => 'desc') ) so Flex can use the array key to maintain order
-			foreach( $data as $key => $sort_arr ) {
+			foreach( $data as $sort_arr ) {
 				if ( is_array($sort_arr) ) {
 					foreach( $sort_arr as $sort_col => $sort_dir ) {
 						$formatted_data[$sort_col] = $sort_dir;
@@ -1559,6 +1566,7 @@ class Report {
 			foreach( $report_date_columns as $column => $name ) {
 				$format_options[$column] = 'report_date';
 			}
+			unset($name);//code standards
 		} else {
 			Debug::Text('No Report Date columns...', __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -1611,6 +1619,7 @@ class Report {
 					$this->data[$key][$currency_column] = $base_currency_obj->getBaseCurrencyAmount( $row[$currency_column], $row['currency_rate'], $currency_convert_to_base );
 				}
 			}
+			unset($currency_column_value); //code standards
 		}
 
 		Debug::Text(' Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1745,6 +1754,7 @@ class Report {
 					$pplf->getByCompanyId( $this->getUserObject()->getCompany() );
 					$pay_period_options = Misc::trimSortPrefix( $pplf->getArrayByListFactory( $pplf, FALSE, TRUE ) );
 
+					$pay_period_names = array();
 					foreach( $config['pay_period_id'] as $pay_period_id ) {
 						$pay_period_names[] = Option::getByKey( $pay_period_id, $pay_period_options );
 					}
@@ -2004,9 +2014,10 @@ class Report {
 			return FALSE;
 		}
 
-		if ( $format == 'html' ) {
+		//PDFs have multiple format names, so just check if HTML or PDF is in the name at all.
+		if ( strpos($format, 'html') !== FALSE ) {
 			$this->_html_Initialize(); // initialize the html tag, including the head tag, set author, title, description informations.
-		} else {
+		} elseif ( strpos($format, 'pdf') !== FALSE ) {
 			$this->_pdf_Initialize(); //Size page after postProcess() is done. This will resize the page if its already been initialized for charting purposes.
 		}
 
@@ -2024,7 +2035,7 @@ class Report {
 		Debug::Text(' Format: '. $format .' Total Time: '. (microtime(TRUE) - $this->start_time) .' Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Arr( Debug::profileTimers( $this->profiler ), ' Profile Timers: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr( $retval, ' Report Data...', __FILE__, __LINE__, __METHOD__, 10);
-		if ( $format != 'raw' AND $format != 'efile_xml' AND $format != 'html' AND ( !is_array($retval) OR !isset($retval['file_name']) OR !isset($retval['mime_type']) ) ) {
+		if ( $format != 'raw' AND $format != 'pdf_form_publish_employee' AND $format != 'efile_xml' AND $format != 'html' AND ( !is_array($retval) OR !isset($retval['file_name']) OR !isset($retval['mime_type']) ) ) {
 			if ( is_array($retval) AND isset($retval['api_retval']) ) {
 				//Passthru validation errors.
 				return $retval;
@@ -2056,6 +2067,7 @@ class Report {
 				$columns[$column] = $column_options[$column];
 			}
 		}
+		unset($tmp);//code standards
 		//Debug::Arr($columns, 'Columns:  '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $format == 'raw' ) {
@@ -2068,6 +2080,15 @@ class Report {
 				$data = array();
 				$i = 0;
 				foreach( $this->data as $key => $row ) {
+					//Always include columns that start with '_'. As they are special columns that are helpful in many cases. For example the Whos In/Out dashlet needs _status_id to base the bgcolor logic on. This is important for translations, as we can't base any logic on english names (ie: status_id='In')
+					if ( $i == 0 ) {
+						foreach( $row as $row_column_name => $row_column_value ) {
+							if ( $row_column_name[0] == '_' ) {
+								$columns[$row_column_name] = NULL;
+							}
+						}
+					}
+
 					if ( is_array($row) ) {
 						foreach ($columns as $column_key => $tmp ) {
 							if ( isset($row[$column_key]) ) {
@@ -2277,7 +2298,7 @@ class Report {
 				$widths[$key] = 0;
 			}
 			if ( is_array($this->data) ) {
-				foreach( $this->data as $row => $data_arr ) {
+				foreach( $this->data as $data_arr ) {
 					if ( isset($data_arr[$key]) ) {
 						if ( is_array($data_arr[$key]) AND isset($data_arr[$key]['display']) ) {
 							$tmp_len = strlen($data_arr[$key]['display']);
@@ -2413,6 +2434,7 @@ class Report {
 					$widths[$key] += floor($empty_space_per_column);
 					$i++;
 				}
+				unset($width); //code standards
 			}
 		}
 		//Debug::Arr($widths, ' Total Width: '. array_sum($widths) .' bColumn widths: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -2651,9 +2673,6 @@ class Report {
 
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->data), NULL, TTi18n::getText('Generating HTML...') );
 
-		$border = 0;
-
-		$column_options = (array)Misc::trimSortPrefix( $this->getOptions('columns') );
 		$static_column_options = (array)Misc::trimSortPrefix( $this->getOptions('static_columns') );
 		//Remove some columns from sort by that may be common but we don't want duplicate values to be removed. This could be moved to each report if the list gets too large.
 		$sort_by_columns = array_diff_key( (array)$this->getSortConfig(), array( 'full_name' => TRUE, 'first_name' => TRUE, 'last_name' => TRUE, 'verified_time_sheet_date' => TRUE, 'date_stamp' => TRUE, 'start_date' => TRUE, 'end_date' => TRUE, 'start_time' => TRUE, 'end_time' => TRUE ) );
@@ -2671,16 +2690,6 @@ class Report {
 		for( $n = 0; $n <= $sub_total_columns_count; $n++) {
 			$sub_total_rows[$n] = 0;
 		}
-
-		$row_layout = array(
-			'max_width' => 30,
-			'cell_padding' => 2,
-			'height' => 5,
-			'align' => 'R',
-			'border' => 0,
-			'fill' => 1,
-			'stretch' => 1
-		);
 
 		$prev_row = array();
 		$r = 0;
@@ -2758,7 +2767,7 @@ class Report {
 
 					if ( ( isset($row['_subtotal']) AND $row['_subtotal'] == TRUE ) ) {
 						//Figure out how many subtotal columns are set, so we can merge the cells
-						foreach( $sub_total_columns as $k => $sub_total_column ) {
+						foreach( $sub_total_columns as $sub_total_column ) {
 							if ( isset($row[$sub_total_column]) ) {
 								$total_row_sub_total_columns++;
 							}
@@ -2811,6 +2820,8 @@ class Report {
 							//$this->html .= '<td>';
 							//$this->html .= '&nbsp;';
 							//$this->html .= '</td>';
+							$n = '';
+							unset($n); //code standards
 						} else {
 							$blank_row = FALSE;
 							$this->html .= '<td style="'; // wait for setting the css style in below.
@@ -2836,6 +2847,7 @@ class Report {
 
 						$c++;
 					}
+					unset($tmp);//code standards
 
 					$this->html .= '</tr>';
 				}
@@ -2907,6 +2919,7 @@ class Report {
 				$max_height = $height;
 			}
 		}
+		unset($tmp); //code standards
 		$this->profiler->stopTimer( 'Maximum Height' );
 
 		return $max_height;
@@ -2916,8 +2929,6 @@ class Report {
 		$column_options = Misc::trimSortPrefix( $this->getOptions('columns') );
 		$columns = $this->getReportColumns();
 		$header_layout = $this->config['other']['layout']['header'];
-
-		$margins = $this->pdf->getMargins();
 
 		//Draw report information
 		if ( $this->pdf->getPage() > 1 ) {
@@ -2947,6 +2958,7 @@ class Report {
 					Debug::Text(' Invalid Column: '. $column, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
+			unset($tmp); //code standards
 			$this->pdf->Ln();
 			//$this->pdf->Ln( $cell_height ); //Used for multi-cell wrapping
 
@@ -3148,7 +3160,6 @@ class Report {
 	}
 
 	function _html_Initialize() {
-		global $config_vars;
 
 		$this->profiler->startTimer( 'HTML' );
 
@@ -3191,11 +3202,8 @@ class Report {
 			$this->pdf->SetAutoPageBreak(FALSE);
 
 			$column_options = (array)Misc::trimSortPrefix( $this->getOptions('columns') );
-			$static_column_options = (array)Misc::trimSortPrefix( $this->getOptions('static_columns') );
 			$columns = $this->getReportColumns();
-			$sub_total_columns = (array)$this->getSubTotalConfig();
 
-			$sub_total_columns_count = ( count( array_intersect( array_keys( $static_column_options ), array_keys((array)$columns) ) ) > 1 ) ? count($sub_total_columns) : 0; //If there is only one static column, we can't indent the "Grand Total" label.
 			//Debug::Arr($columns, ' Report Columns: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			//
@@ -3296,6 +3304,7 @@ class Report {
 					Debug::Text(' Invalid Column: '. $column, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
+			unset($tmp);//code standards
 			$this->html .= '</tr>';
 			$this->html .= '</thead>';
 		} else {
@@ -3510,8 +3519,6 @@ class Report {
 
 		$border = 0;
 
-		$column_options = (array)Misc::trimSortPrefix( $this->getOptions('columns') );
-		$static_column_options = (array)Misc::trimSortPrefix( $this->getOptions('static_columns') );
 		//Remove some columns from sort by that may be common but we don't want duplicate values to be removed. This could be moved to each report if the list gets too large.
 		$sort_by_columns = array_diff_key( (array)$this->getSortConfig(), array( 'full_name' => TRUE, 'first_name' => TRUE, 'last_name' => TRUE, 'verified_time_sheet_date' => TRUE, 'date_stamp' => TRUE, 'start_date' => TRUE, 'end_date' => TRUE, 'start_time' => TRUE, 'end_time' => TRUE ) );
 		$group_by_columns = $this->getGroupConfig();
@@ -3521,8 +3528,9 @@ class Report {
 			$group_by_columns = array_flip($group_by_columns);
 		}
 		$columns = $this->getReportColumns();
-		$sub_total_columns = (array)$this->getSubTotalConfig();
 
+		$sub_total_columns = (array)$this->getSubTotalConfig();
+		$static_column_options = (array)Misc::trimSortPrefix( $this->getOptions('static_columns') );
 		$sub_total_columns_count = ( count( array_intersect( array_keys( $static_column_options ), array_keys((array)$columns) ) ) > 1 ) ? count($sub_total_columns) : 0; //If there is only one static column, we can't indent the "Grand Total" label.
 		$sub_total_rows = array(); //Count all rows included in sub_total
 		for( $n = 0; $n <= $sub_total_columns_count; $n++) {
@@ -3591,7 +3599,7 @@ class Report {
 				} else {
 					if ( ( isset($row['_subtotal']) AND $row['_subtotal'] == TRUE ) ) {
 						//Figure out how many subtotal columns are set, so we can merge the cells
-						foreach( $sub_total_columns as $k => $sub_total_column ) {
+						foreach( $sub_total_columns as $sub_total_column ) {
 							if ( isset($row[$sub_total_column]) ) {
 								$total_row_sub_total_columns++;
 							}
@@ -3715,6 +3723,8 @@ class Report {
 
 						$c++;
 					}
+					unset($tmp); //code standards
+
 				}
 
 				//UnBold after sub-total rows, but NOT grand total row.
@@ -3789,6 +3799,7 @@ class Report {
 			$rcclf->getByCompanyId( $this->getUserObject()->getCompany() );
 			$columns_data = array();
 			if ( $rcclf->getRecordCount() > 0 ) {
+				$row = array();
 				foreach( $rcclf as $rccf ) {
 					$column = 'custom_column'.$rccf->getId();
 					if ( in_array( $column, $columns ) ) {

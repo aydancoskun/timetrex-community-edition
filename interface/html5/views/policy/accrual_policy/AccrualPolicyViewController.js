@@ -12,8 +12,8 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	accrual_policy_user_modifier_api: null,
 
 	sub_accrual_policy_user_modifier_view_controller: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'AccrualPolicyEditView.html';
 		this.permission_id = 'accrual_policy';
 		this.viewId = 'AccrualPolicy';
@@ -236,6 +236,16 @@ AccrualPolicyViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
@@ -304,8 +314,6 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		for ( var i = 0; i < len; i++ ) {
 			var context_btn = this.context_menu_array[i];
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-			context_btn.removeClass( 'disable-image' );
-
 			switch ( id ) {
 				case ContextMenuIconName.re_calculate_accrual:
 					this.setEditMenuReCalAccrualWizardIcon( context_btn );
@@ -474,11 +482,9 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Day of Month' ), form_item_input, tab_accrual_policy_column1, '', null, true );
 
-
 		var tab_accrual_policy_column2 = tab_accrual_policy.find( '.second-column' );
 		this.edit_view_tabs[0].push( tab_accrual_policy_column2 );
 
-		
 		//Frequency In Which To Apply Time to Employee Records
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
 		form_item_input.SeparatedBox( {label: $.i18n._( 'Frequency In Which To Apply Time to Employee Records' )} );
@@ -543,10 +549,8 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Prorate Initial Accrual Amount' ), form_item_input, tab_accrual_policy_column2, '', widgetContainer, true );
 
-
 		var tab_length_of_service_milestones = this.edit_view_tab.find( '#tab_length_of_service_milestones' );
 
-		
 		//
 		//Inside editor
 		//
@@ -1394,8 +1398,7 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		function beforeLoadView( tpl ) {
 			var args = {parent_view: 'accrual_policy'};
-
-			return _.template( tpl, args );
+			return {template: _.template( tpl ), args: args};
 		}
 
 		function afterLoadView( subViewController ) {
@@ -1410,15 +1413,3 @@ AccrualPolicyViewController = BaseViewController.extend( {
 	}
 
 } );
-
-AccrualPolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'AccrualPolicy', 'AccrualPolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

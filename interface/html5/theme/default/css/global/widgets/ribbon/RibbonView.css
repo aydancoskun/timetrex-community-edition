@@ -154,13 +154,7 @@
 
     background: -ms-linear-gradient(top, #d9eafa 0%, #c8dcf0 100%);
 
-    border: 1px solid #cecece;
     border-radius: 6px;
-    padding-top: 5px;
-    padding-bottom: 5px;
-    padding-left: 4px;
-    padding-right: 4px;
-
 }
 
 .menu ul li .selected-menu {
@@ -334,7 +328,8 @@
     -o-filter: grayscale(100%);
 
     filter: grayscale(100%);
-    filter: url(gray.svg#grayscale);
+    /* Chrome 53 throws 404 instead of making them grey. */
+    /*filter: url(gray.svg#grayscale);*/
 
     filter: gray;
     opacity: 0.5;

@@ -1,7 +1,7 @@
 AccrualPolicyAccountViewController = BaseViewController.extend( {
 	el: '#wage_group_view_container',
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'AccrualPolicyAccountEditView.html';
 		this.permission_id = 'accrual_policy';
 		this.viewId = 'AccrualPolicyAccount';
@@ -109,15 +109,3 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 
 
 } );
-
-AccrualPolicyAccountViewController.loadView = function() {
-
-	Global.loadViewSource( 'AccrualPolicyAccount', 'AccrualPolicyAccountView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

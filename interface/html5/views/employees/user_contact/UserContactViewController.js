@@ -10,13 +10,8 @@ UserContactViewController = BaseViewController.extend( {
 	province_array: null,
 	e_province_array: null,
 
-	initialize: function() {
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserContactEditView.html';
 		this.permission_id = 'user_contact';
 		this.viewId = 'UserContact';
@@ -122,22 +117,20 @@ UserContactViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-
 		this.setTabLabels( {
 			'tab_employee_contact': $.i18n._( 'Employee Contact' ),
 			'tab_attachment': $.i18n._( 'Attachment' ),
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
 
-
-		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUserContact' )),
+		this.navigation.AComboBox({
+			api_class: (APIFactory.getAPIClass('APIUserContact')),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER_CONTACT,
 			navigation_mode: true,
 			show_search_inputs: true
-		} );
+		});
 
 		this.setNavigation();
 
@@ -495,7 +488,6 @@ UserContactViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.TEXT_INPUT
 			} )
 
-
 		];
 	},
 
@@ -507,16 +499,18 @@ UserContactViewController = BaseViewController.extend( {
 			this.adv_search_field_ui_dic['province'].setSourceData( [] );
 		} else {
 
-			this.company_api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.company_api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.province_array = Global.buildRecordArray( res );
+					$this.adv_search_field_ui_dic['province'].setSourceData( $this.province_array );
+
 				}
-
-				$this.province_array = Global.buildRecordArray( res );
-				$this.adv_search_field_ui_dic['province'].setSourceData( $this.province_array );
-
-			}} );
+			} );
 		}
 	},
 
@@ -528,21 +522,23 @@ UserContactViewController = BaseViewController.extend( {
 			$this.e_province_array = [];
 			province_widget.setSourceData( [] );
 		} else {
-			this.company_api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.company_api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.e_province_array = Global.buildRecordArray( res );
+					if ( refresh && $this.e_province_array.length > 0 ) {
+						$this.current_edit_record.province = $this.e_province_array[0].value;
+						province_widget.setValue( $this.current_edit_record.province );
+					}
+
+					province_widget.setSourceData( $this.e_province_array );
+
 				}
-
-				$this.e_province_array = Global.buildRecordArray( res );
-				if ( refresh && $this.e_province_array.length > 0 ) {
-					$this.current_edit_record.province = $this.e_province_array[0].value;
-					province_widget.setValue( $this.current_edit_record.province );
-				}
-
-				province_widget.setSourceData( $this.e_province_array );
-
-			}} );
+			} );
 		}
 	},
 
@@ -673,31 +669,18 @@ UserContactViewController = BaseViewController.extend( {
 
 } );
 
-UserContactViewController.loadView = function() {
-
-	Global.loadViewSource( 'UserContact', 'UserContactView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-
-	} );
-
-};
-
 UserContactViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 
 	Global.loadViewSource( 'UserContact', 'SubUserContactView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_user_contact_view_controller );
 			}

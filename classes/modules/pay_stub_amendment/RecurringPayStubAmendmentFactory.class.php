@@ -330,11 +330,12 @@ class RecurringPayStubAmendmentFactory extends Factory {
 	function getUser() {
 		$rpsaulf = TTnew( 'RecurringPayStubAmendmentUserListFactory' );
 		$rpsaulf->getByRecurringPayStubAmendment( $this->getId() );
+		$user_list = array();
 		foreach ($rpsaulf as $ps_amendment_user) {
 			$user_list[] = $ps_amendment_user->getUser();
 		}
 
-		if ( isset($user_list) ) {
+		if ( empty($user_list) == FALSE ) {
 			return $user_list;
 		}
 
@@ -761,6 +762,7 @@ class RecurringPayStubAmendmentFactory extends Factory {
 
 		$this->StartTransaction();
 
+		$user_ids = array();
 		$tmp_user_ids = $this->getUser();
 		if ( $tmp_user_ids[0] == -1) {
 			$ulf->getByCompanyIdAndStatus( $this->getCompany(), 10 );
@@ -774,7 +776,7 @@ class RecurringPayStubAmendmentFactory extends Factory {
 		unset($tmp_user_ids);
 		Debug::text('Total User IDs: '. count($user_ids), __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( is_array($user_ids) AND count($user_ids) > 0 ) {
+		if ( empty($user_ids) == FALSE ) {
 
 			//Make the PS amendment duplicate check start/end date separate
 			//Make the PS amendment effective date separate.
@@ -1047,8 +1049,8 @@ class RecurringPayStubAmendmentFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
-		$uf = TTnew( 'UserFactory' );
-
+		
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

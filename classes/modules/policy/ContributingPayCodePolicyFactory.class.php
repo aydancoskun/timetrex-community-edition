@@ -103,7 +103,7 @@ class ContributingPayCodePolicyFactory extends Factory {
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
-	
+
 	function getCompany() {
 		if ( isset($this->data['company_id']) ) {
 			return (int)$this->data['company_id'];
@@ -131,9 +131,14 @@ class ContributingPayCodePolicyFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
 					'company_id' => (int)$this->getCompany(),
-					'name' => strtolower($name),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
@@ -248,6 +253,14 @@ class ContributingPayCodePolicyFactory extends Factory {
 											FALSE,
 											TTi18n::gettext('This contributing pay code policy is currently in use') .' '. TTi18n::gettext('by contributing shift policies') );
 			}
+
+			$cdlf = TTNew('CompanyDeductionListFactory');
+			$cdlf->getByCompanyIdAndContributingPayCodePolicyId( $this->getCompany(), $this->getId() );
+			if ( $cdlf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE(	'in_use',
+											 FALSE,
+											 TTi18n::gettext('This contributing pay code policy is currently in use') .' '. TTi18n::gettext('by tax/deductions') );
+			}
 		}
 
 		return TRUE;
@@ -289,6 +302,7 @@ class ContributingPayCodePolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

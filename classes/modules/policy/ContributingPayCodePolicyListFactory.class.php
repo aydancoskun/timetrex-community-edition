@@ -153,6 +153,42 @@ class ContributingPayCodePolicyListFactory extends ContributingPayCodePolicyFact
 		return $this;
 	}
 
+	function getByCompanyIdAndPayCodeId($id, $pay_code_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$cgmf = new CompanyGenericMapFactory();
+
+		$ph = array(
+				'id' => (int)$id,
+		);
+
+		$query = '
+					SELECT	a.*
+					FROM 
+							'. $this->getTable() .' as a,
+							'. $cgmf->getTable() .' as c
+					WHERE	a.company_id = ?
+						AND ( a.id = c.object_id AND a.company_id = c.company_id AND c.object_type_id = 90 )
+						AND c.map_id in ('. $this->getListSQL( $pay_code_id, $ph, 'int' ) .')
+						AND ( a.deleted = 0 )
+						';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {
 			return FALSE;
@@ -188,6 +224,7 @@ class ContributingPayCodePolicyListFactory extends ContributingPayCodePolicyFact
 		$uf = new UserFactory();
 		$cspf = new ContributingShiftPolicyFactory();
 		$cgmf = new CompanyGenericMapFactory();
+		$cdf = new CompanyDeductionFactory();
 
 		$ph = array(
 					'company_id' => (int)$company_id,
@@ -197,7 +234,14 @@ class ContributingPayCodePolicyListFactory extends ContributingPayCodePolicyFact
 					select	DISTINCT a.*,
 							_ADODB_COUNT
 							(
-								CASE WHEN EXISTS ( select 1 from '. $cspf->getTable() .' as x where x.contributing_pay_code_policy_id = a.id and x.deleted = 0) THEN 1 ELSE 0 END
+								CASE WHEN EXISTS ( select 1 from '. $cspf->getTable() .' as x where x.contributing_pay_code_policy_id = a.id and x.deleted = 0) 
+								THEN 1 
+								ELSE 
+									CASE WHEN EXISTS ( select 1 from '. $cdf->getTable() .' as x where x.length_of_service_contributing_pay_code_policy_id = a.id and x.deleted = 0)
+									THEN 1
+									ELSE 0
+									END
+								END
 							) as in_use,
 							y.first_name as created_by_first_name,
 							y.middle_name as created_by_middle_name,

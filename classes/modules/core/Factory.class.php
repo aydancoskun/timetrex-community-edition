@@ -99,6 +99,13 @@ abstract class Factory {
 		return $this->progress_bar_obj;
 	}
 
+	//Allow method to pre-populate/overwrite the cache if needed.
+	function setGenericObject( $obj, $variable ) {
+		$this->$variable = $obj;
+
+		return TRUE;
+	}
+
 	//Generic function to return and cache class objects
 	//ListFactory, ListFactoryMethod, Variable, ID, IDMethod
 	function getGenericObject( $list_factory, $id, $variable, $list_factory_method = 'getById', $id_method = 'getID' ) {
@@ -732,7 +739,7 @@ abstract class Factory {
 		}
 
 		Debug::Text('Setting DB query statement timeout to: '. $milliseconds, __FILE__, __LINE__, __METHOD__, 10);
-		if ( strncmp($this->db->databaseType, 'postgres', 8) == 0 ) {
+		if ( $this->getDatabaseType() == 'postgres' ) {
 			$this->db->Execute('SET statement_timeout = '. (int)$milliseconds);
 		}
 
@@ -986,7 +993,7 @@ abstract class Factory {
 	}
 
 	protected function getSQLToTimeStampFunction() {
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+		if ( $this->getDatabaseType() == 'mysql' ) {
 			$to_timestamp_sql = 'FROM_UNIXTIME';
 		} else {
 			$to_timestamp_sql = 'to_timestamp';
@@ -995,8 +1002,29 @@ abstract class Factory {
 		return $to_timestamp_sql;
 	}
 
+	protected function getDatabaseType() {
+		global $config_vars;
+		if ( strncmp($config_vars['database']['type'], 'mysql', 5) == 0 ) {
+			$database_driver = 'mysql';
+		} else {
+			$database_driver = 'postgres';
+		}
+
+		return $database_driver;
+	}
+
+	protected function getGEOMAsTextFunction( $sql ) {
+		if ( $this->getDatabaseType() == 'mysql' ) {
+			$to_text_sql = 'AsText('. $sql .')';
+		} else {
+			$to_text_sql = $sql;
+		}
+
+		return $to_text_sql;
+	}
+
 	protected function getSQLToEpochFunction( $sql ) {
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+		if ( $this->getDatabaseType() == 'mysql' ) {
 			$to_timestamp_sql = 'UNIX_TIMESTAMP('. $sql .')';
 		} else {
 			//In cases where the column is a timestamp without timezone column (ie: Pay Periods when used from PayPeriodTimeSheetVerify)
@@ -1008,7 +1036,7 @@ abstract class Factory {
 	}
 
 	protected function getSQLToTimeFunction( $sql ) {
-		if ( strncmp($this->db->databaseType, 'mysql', 5) == 0 ) {
+		if ( $this->getDatabaseType() == 'mysql' ) {
 			$to_time_sql = 'TIME('. $sql .')';
 		} else {
 			$to_time_sql = $sql .'::time';
@@ -1017,17 +1045,59 @@ abstract class Factory {
 		return $to_time_sql;
 	}
 
+	protected function getSQLStringAggregate( $sql, $glue ) {
+		if ( $this->getDatabaseType() == 'mysql' ) {
+			$agg_sql = 'group_concat('. $sql .', \''. $glue .'\')';
+		} else {
+			$agg_sql = 'string_agg('. $sql .', \''. $glue .'\')';
+		}
+
+		return $agg_sql;
+	}
+
 	protected function getWhereClauseSQL( $columns, $args, $type, &$ph, $query_stub = NULL, $and = TRUE ) {
 		//Debug::Text('Type: '. $type .' Query Stub: '. $query_stub .' AND: '. (int)$and, __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($columns, 'Columns: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($args, 'Args: ', __FILE__, __LINE__, __METHOD__, 10);
 		switch( strtolower($type) ) {
+			case 'geo_overlaps':
+				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						if ( $this->getDatabaseType() == 'mysql' ) {
+							$query_stub = 'MBRIntersects('. $columns .','. $args .')';
+						} else {
+							$query_stub = $columns .' && polygon('. $this->db->qstr( $args ) .')';
+						}
+					}
+					$retval = $query_stub;
+				}
+				break;
+			case 'geo_contains':
+				if ( isset( $args ) AND is_array( $args ) ) {
+					if ( $this->getDatabaseType() == 'mysql' ) {
+						$args = "GeomFromText('POINT(". implode(' ', $args) .")')";
+					} else {
+						$args = implode(',', $args);
+					}
+				}
+				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
+					if ( $query_stub == '' AND !is_array($columns) ) {
+						if ( $this->getDatabaseType() == 'mysql' ) {
+							$query_stub = 'MBRContains('. $columns .','. $args .')';
+						} else {
+							//$query_stub = 'circle('. $columns .') @> point('. $args .')'; //Sometimes polygons are passed into this, so we can't convert them to circles.
+							$query_stub = $columns .' @> point('. $args .')';
+						}
+					}
+					$retval = $query_stub;
+				}
+				break;
 			case 'text':
 				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
 						$query_stub = 'lower('. $columns .') LIKE ?';
 					}
-					$ph[] = $this->handleSQLSyntax( strtolower($args) );
+					$ph[] = $this->handleSQLSyntax( TTi18n::strtolower($args) );
 					$retval = $query_stub;
 				}
 				break;
@@ -1037,7 +1107,7 @@ abstract class Factory {
 						$query_stub = '( lower('. $columns .') LIKE ? OR '. $columns .'_metaphone LIKE ? )';
 					}
 
-					$ph[] = $this->handleSQLSyntax( strtolower($args) );
+					$ph[] = $this->handleSQLSyntax( TTi18n::strtolower($args) );
 					if ( strpos($args, '"') !== FALSE ) { //ignores metaphone search.
 						$ph[] = '';
 					} else {
@@ -1302,7 +1372,7 @@ abstract class Factory {
 					$retval = $this->getWhereClauseSQL( $columns[0], $args, 'numeric_list', $ph, '', FALSE );
 				}
 				if ( isset( $args ) AND !is_array( $args ) AND trim( $args ) != '' ) {
-					$ph[] = $ph[] = $this->handleSQLSyntax(strtolower( trim( $args ) ));
+					$ph[] = $ph[] = $this->handleSQLSyntax(TTi18n::strtolower( trim( $args ) ));
 					$retval = '(lower('.$columns[1].') LIKE ? OR lower('.$columns[2].') LIKE ? ) ';
 				}
 				break;
@@ -1381,19 +1451,19 @@ abstract class Factory {
 
 			if ( is_array($fields) ) {
 				foreach ( $array as $orig_column => $expression ) {
-					if ( is_array( $expression ) ) { //Handle nested arrays, so we the same column can be specified multiple times.
+				if ( is_array( $expression ) ) { //Handle nested arrays, so we the same column can be specified multiple times.
 						foreach ( $expression as $orig_column => $expression ) {
 							$orig_column = trim( $orig_column );
-							$column = $this->parseColumnName( $orig_column );
+						$column = $this->parseColumnName( $orig_column );
 							$expression = trim( $expression );
 
 							if ( in_array( $column, $fields ) ) {
 								$sql_chunks[] = $orig_column . ' ' . $expression;
-							}
 						}
-					} else {
+					}
+				} else {
 						$orig_column = trim( $orig_column );
-						$column = $this->parseColumnName( $orig_column );
+					$column = $this->parseColumnName( $orig_column );
 						$expression = trim( $expression );
 
 						if ( in_array( $column, $fields ) ) {
@@ -1448,7 +1518,8 @@ abstract class Factory {
 		return $columns;
 	}
 
-	function convertFlexArray( $array ) { //This needs to stick around to handle saved search & layouts created in Flex and still in use.
+	function convertFlexArray( $array ) {
+		//NOTE: This needs to stick around to handle saved search & layouts created in Flex and still in use.
 		//Flex doesn't appear to be consistent on the order the fields are placed into an assoc array, so
 		//handle this type of array too:
 		// array(
@@ -1479,6 +1550,8 @@ abstract class Factory {
 
 	protected function getSortSQL($array, $strict = TRUE, $additional_fields = NULL) {
 		if ( is_array($array) ) {
+			//Disabled in v10 to start migrating away from FlexArray formats.
+			//  This is still needed, as clicking on a column header to sort by that seems to use the wrong format.
 			$array = $this->convertFlexArray( $array );
 
 			$alt_order_options = array( 1 => 'asc', -1 => 'desc');
@@ -1736,6 +1809,20 @@ abstract class Factory {
 
 		return $retval;
 	}
+	function setTransactionMode( $mode = '' ) {
+		Debug::text('setTransactionMode(): Mode: '. $mode, __FILE__, __LINE__, __METHOD__, 9);
+		return $this->db->setTransactionMode( $mode );
+	}
+	function getTransactionMode() {
+		if ( $this->getDatabaseType() == 'mysql' ) {
+			$mode = $this->db->GetOne( 'select @@session.tx_isolation' );
+		} else {
+			$mode = $this->db->GetOne( 'select current_setting(\'transaction_isolation\')' );
+		}
+
+		Debug::text('getTransactionMode(): Mode: '. $mode, __FILE__, __LINE__, __METHOD__, 9);
+		return strtoupper( $mode );
+	}
 
 	//Call class specific validation function just before saving.
 	function isValid( $ignore_warning = TRUE ) {
@@ -1788,9 +1875,42 @@ abstract class Factory {
 			//$total_time = (microtime(TRUE)-$start_time);
 			//Debug::text('Slow Query Executed in: '. $total_time .'ms. Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 		} catch (Exception $e) {
+			if ( $e->getMessage() != '' AND stristr( $e->getMessage(), 'could not serialize' ) !== FALSE ) {
+				Debug::Text('WARNING: Rethrowing Serialization Exception so it can be caught in an outside TRY block...', __FILE__, __LINE__, __METHOD__, 10);
+				//Fail/Commit transaction that failed, so it can automatically be restarted in the outter retry loop.
+				$this->FailTransaction();
+				$this->CommitTransaction();
+				throw $e;
+			} else {
+				throw new DBError( $e );
+			}
+		}
+
+		return TRUE;
+	}
+
+	//Retry the SQL query for $retry_max_attempts, especially useful when using REPEATABLE READ/SERIALIZABLE transactions.
+	// See APITimeSheet->reCalculateTimeSheet() for an example of how to retry an entire transaction.
+	function RetryExecuteSQL( $query, $ph = NULL, $retry_max_attempts = 2, $sleep = 5 ) {
+		$retry_attempts = 0;
+		do {
+			try {
+				$this->rs = $this->db->Execute($query, $ph);
+			} catch (Exception $e) {
+				Debug::text('WARNING: SQL query failed, likely due to transaction isolotion: Retry Attempt: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10);
+				$retry_attempts++;
+				sleep( $sleep );
+				continue;
+			}
+			break;
+		} while ( $retry_attempts <= $retry_max_attempts );
+
+		if ( $retry_max_attempts > 0 AND $retry_attempts == $retry_max_attempts ) { //Allow retry_max_attempst to be set at 0 to prevent any retries and fail without an error.
+			Debug::text('ERROR: SQL query failed after max attempts: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10);
 			throw new DBError($e);
 		}
 
+		Debug::text('SUCCESS: SQL query succeeded after attempts: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
 
@@ -1976,10 +2096,10 @@ abstract class Factory {
 			$ph = array();
 
 			$query = 'DELETE FROM '. $this->getTable() .' WHERE id in ('. $this->getListSQL( $ids, $ph, 'int' ) .')';
-			Debug::text('Bulk Delete Query: '. $query, __FILE__, __LINE__, __METHOD__, 9);
 
 			try {
 				$this->db->Execute($query, $ph);
+				Debug::text('Bulk Delete Query: '. $query .' Affected Rows: '. $this->db->Affected_Rows() .' IDs: '. count($ph), __FILE__, __LINE__, __METHOD__, 9);
 			} catch (Exception $e) {
 				throw new DBError($e);
 			}

@@ -41,15 +41,15 @@
 class UserSettingFactory extends Factory {
 	protected $table = 'user_setting';
 	protected $pk_sequence_name = 'user_setting_id_seq'; //PK Sequence name
-	
+
 	function _getFactoryOptions( $name ) {
 
 		$retval = NULL;
 		switch( $name ) {
 			case 'type':
 				$retval = array(
-								10 => TTi18n::gettext('Public'), 
-								20 => TTi18n::gettext('Private'),		
+								10 => TTi18n::gettext('Public'),
+								20 => TTi18n::gettext('Private'),
 									);
 				break;
 		}
@@ -59,19 +59,19 @@ class UserSettingFactory extends Factory {
 
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
-										'id' => 'ID', 
-										'user_id' => 'User', 
-										'first_name' => FALSE, 
-										'last_name' => FALSE, 
-										'type_id' => 'Type', 
-										'type' => FALSE, 
-										'name' => 'Name', 
-										'value' => 'Value', 
-										'deleted' => 'Deleted', 
+										'id' => 'ID',
+										'user_id' => 'User',
+										'first_name' => FALSE,
+										'last_name' => FALSE,
+										'type_id' => 'Type',
+										'type' => FALSE,
+										'name' => 'Name',
+										'value' => 'Value',
+										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
 	}
-	
+
 	function isUniqueName($name) {
 		if ( $this->getUser() == FALSE ) {
 			return FALSE;
@@ -83,13 +83,13 @@ class UserSettingFactory extends Factory {
 		}
 
 		$ph = array(
-					'user_id' => $this->getUser(), 
-					'name' => $name, 
+					'user_id' => (int)$this->getUser(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .'
 					where user_id = ?
-						AND name = ?
+						AND lower(name) = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
@@ -104,7 +104,7 @@ class UserSettingFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getUser() {
 		if ( isset($this->data['user_id']) ) {
 			return (int)$this->data['user_id'];
@@ -116,8 +116,8 @@ class UserSettingFactory extends Factory {
 
 		$ulf = TTnew( 'UserListFactory' );
 
-		if ( $this->Validator->isResultSetWithRows(	'user_id', 
-															$ulf->getByID($id), 
+		if ( $this->Validator->isResultSetWithRows(	'user_id',
+															$ulf->getByID($id),
 															TTi18n::gettext('Invalid User')
 															) ) {
 			$this->data['user_id'] = $id;
@@ -137,9 +137,9 @@ class UserSettingFactory extends Factory {
 	function setType($type) {
 		$type = trim($type);
 
-		if ( $this->Validator->inArrayKey(	'type', 
-											$type, 
-											TTi18n::gettext('Incorrect Type'), 
+		if ( $this->Validator->inArrayKey(	'type',
+											$type,
+											TTi18n::gettext('Incorrect Type'),
 											$this->getOptions('type')) ) {
 
 			$this->data['type_id'] = $type;
@@ -149,7 +149,7 @@ class UserSettingFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getName() {
 		if ( isset($this->data['name']) ) {
 			return $this->data['name'];
@@ -159,9 +159,9 @@ class UserSettingFactory extends Factory {
 	}
 	function setName($value) {
 		$value = trim($value);
-		if (	$this->Validator->isLength(	'name', 
-											$value, 
-											TTi18n::gettext('Name is too short or too long'), 
+		if (	$this->Validator->isLength(	'name',
+											$value,
+											TTi18n::gettext('Name is too short or too long'),
 											1, 250)
 				AND $this->Validator->isTrue(	'name',
 											$this->isUniqueName($value),
@@ -186,9 +186,9 @@ class UserSettingFactory extends Factory {
 	}
 	function setValue($value) {
 		$value = trim($value);
-		if (	$this->Validator->isLength(	'value', 
-											$value, 
-											TTi18n::gettext('Value is too short or too long'), 
+		if (	$this->Validator->isLength(	'value',
+											$value,
+											TTi18n::gettext('Value is too short or too long'),
 											1, 4096)
 						) {
 
@@ -199,7 +199,7 @@ class UserSettingFactory extends Factory {
 
 		return FALSE;
 	}
-		
+
 
 	function preSave() {
 		return TRUE;
@@ -209,7 +209,7 @@ class UserSettingFactory extends Factory {
 		$this->removeCache( $this->getUser().$this->getName() );
 		return TRUE;
 	}
-	
+
 	function setObjectFromArray( $data ) {
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
@@ -236,6 +236,7 @@ class UserSettingFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -267,11 +268,11 @@ class UserSettingFactory extends Factory {
 
 		return $data;
 	}
-	
+
 	function addLog( $log_action ) {
 		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('User Setting - Name').': '. $this->getName() .' '. TTi18n::getText('Value').': '. $this->getValue(), NULL, $this->getTable() );
 	}
-	
+
 	static function getUserSetting( $user_id, $name ) {
 		$uslf = new UserSettingListFactory();
 		$uslf->getByUserIdAndName( $user_id, $name );
@@ -280,15 +281,15 @@ class UserSettingFactory extends Factory {
 			$retarr = $us_obj->getObjectAsArray();
 			return $retarr;
 		}
-		
+
 		return FALSE;
 	}
-	
+
 	static function setUserSetting( $user_id, $name, $value, $type_id = 10 ) {
 		$row = array(
-			'user_id' => $user_id, 
-			'name' => $name, 
-			'value' => $value, 
+			'user_id' => $user_id,
+			'name' => $name,
+			'value' => $value,
 			'type_id' => $type_id
 		);
 		$uslf = new UserSettingListFactory();
@@ -299,17 +300,17 @@ class UserSettingFactory extends Factory {
 		} else {
 			$usf = new UserSettingFactory();
 		}
-		
-		Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);		   
+
+		Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		$usf->setObjectFromArray( $row );
 		if ( $usf->isValid() ) {
 			$usf->Save();
 		}
-		
+
 		return FALSE;
 
 	}
-	
+
 	static function deleteUserSetting( $user_id, $name ) {
 		$uslf = new UserSettingListFactory();
 		$uslf->getByUserIdAndName( $user_id, $name );
@@ -320,7 +321,7 @@ class UserSettingFactory extends Factory {
 				$usf->Save();
 			}
 		}
-		
+
 		return FALSE;
 	}
 }

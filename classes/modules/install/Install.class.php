@@ -53,8 +53,11 @@ class Install {
 
 
 	function __construct() {
-		global $config_vars, $cache;
-
+		global $config_vars;
+		// @codingStandardsIgnoreStart
+		global $cache;
+		//assumed needed
+		// @codingStandardsIgnoreEnd
 		require_once( Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'install'. DIRECTORY_SEPARATOR .'InstallSchema.class.php');
 
 		$this->config_vars = $config_vars;
@@ -201,9 +204,20 @@ class Install {
 		return $this->is_upgrade;
 	}
 
-	function setDatabaseConnection( $db ) {
-		if ( is_object($db) AND ( is_resource($db->_connectionID) OR is_object($db->_connectionID) ) ) {
-			$this->temp_db = $db;
+	function setDatabaseConnection( $db_obj ) {
+		if ( is_object( $db_obj) ) {
+			if ( $db_obj instanceof ADOdbLoadBalancer ) {
+				$this->temp_db = $db_obj->getConnection( 'master');
+			} elseif ( isset($db_obj->_connectionID) AND is_resource( $db_obj->_connectionID) OR is_object( $db_obj->_connectionID) ) {
+				$this->temp_db = $db_obj;
+			}
+
+			//Because InstallSchema_*.class.php files utilize the $db variable through the Factory.class.php directly,
+			//  any queries will always be load-balanced, even if $this->temp_db is a different connection, and this can cause deadlocks and should never happen.
+			//Therefore, to prevent any chance of loadbalanced connections, make sure $db is always just a single master connection.
+			global $db;
+			$db = $this->temp_db;
+
 			return TRUE;
 		}
 
@@ -237,6 +251,8 @@ class Install {
 				return TRUE;
 			}
 		} catch (Exception $e) {
+
+			unset($e);//code standards
 			return FALSE;
 		}
 
@@ -446,9 +462,8 @@ class Install {
 
 		$is_obj = new InstallSchema( $this->getDatabaseDriver(), '', NULL, $this->getIsUpgrade() );
 
-		$schema_files = array();
-
 		$dir = $is_obj->getSQLFileDirectory();
+		$schema_versions = array();
 		if ( $handle = opendir($dir) ) {
 			while ( FALSE !== ($file = readdir($handle))) {
 				list($schema_base_name, $extension) = explode('.', $file);
@@ -512,7 +527,7 @@ class Install {
 				}
 			}
 		}
-		
+
 		return FALSE;
 	}
 
@@ -559,14 +574,14 @@ class Install {
 			$x = 0;
 			foreach( $schema_versions as $schema_version ) {
 				if ( ( $start_version === NULL OR $schema_version >= $start_version )
-					AND ( $end_version === NULL OR $schema_version <= $end_version )
-						) {
+						AND ( $end_version === NULL OR $schema_version <= $end_version )
+					) {
 
 					//Wrap each schema version in its own transaction (compared to all schema versions in one transaction), this reduces the length of time any one transaction
 					//is open for and should allow vacuum to run more often on PostgreSQL speeding up subsequency schemas.
 					//This may make it harder to test rollback schema upgrades during development though.
 					$this->getDatabaseConnection()->StartTrans();
-					
+
 					$create_schema_result = $this->createSchema( $schema_version );
 
 					if ( is_object($progress_bar) ) {
@@ -586,7 +601,7 @@ class Install {
 
 				//Fast way to clear memory caching only between schema upgrades to make sure it doesn't get too big.
 				$cache->_memoryCachingArray = array();
-				$cache->_memoryCachingCounter = 0; 
+				$cache->_memoryCachingCounter = 0;
 
 				$x++;
 			}
@@ -604,7 +619,7 @@ class Install {
 		$pd_obj = new PayrollDeduction( 'CA', 'AB' );
 		SystemSettingFactory::setSystemSetting( 'tax_data_version', $pd_obj->getDataVersion() );
 		SystemSettingFactory::setSystemSetting( 'tax_engine_version', $pd_obj->getVersion() );
-		
+
 		//Clear all cache after the upgrade as well, as much of it is unlikely to be used again.
 		$this->cleanCacheDirectory();
 		$cache->clean();
@@ -702,7 +717,7 @@ class Install {
 		}
 
 		$table_arr = $db_conn->MetaTables();
-		
+
 		foreach( $global_table_map as $table => $class ) {
 			if ( class_exists( $class ) AND in_array( $table, $table_arr ) ) {
 				$obj = new $class;
@@ -715,7 +730,7 @@ class Install {
 
 		return TRUE;
 	}
-	
+
 	/*
 
 		System Requirements
@@ -737,7 +752,7 @@ class Install {
 		}
 		Debug::text('Comparing with Version: '. $php_version, __FILE__, __LINE__, __METHOD__, 9);
 
-		$min_version = '5.0.0';
+		$min_version = '5.3.0';
 		$max_version = '7.0.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
 
 		$unsupported_versions = array('');
@@ -897,7 +912,7 @@ class Install {
 
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), 9000, NULL, TTi18n::getText('Check File Permission...') );
 		$i = 0;
-		foreach( $dirs as $k => $dir ) {
+		foreach( $dirs as $dir ) {
 			Debug::Text('Checking directory readable/writable: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_dir( $dir ) AND is_readable( $dir ) ) {
 				try {
@@ -926,6 +941,7 @@ class Install {
 							return 1; //Invalid
 						}
 					}
+					unset($cur); //code standards
 				} catch( Exception $e ) {
 					Debug::Text('Failed opening/reading file or directory: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
 					return 1;
@@ -1049,12 +1065,11 @@ class Install {
 		$db_version = (string)$this->getDatabaseVersion();
 
 		if ( $this->getDatabaseType() == 'postgresql' ) {
-			if ( $db_version == NULL OR version_compare( $db_version, '8.0', '>') == 1 ) {
+			if ( $db_version == NULL OR version_compare( $db_version, '9.1', '>=') == 1 ) {
 				return 0;
 			}
 		} elseif ( $this->getDatabaseType() == 'mysql' ) {
-			//Require at least. 4.1.3 and use MySQLi extension?
-			if ( version_compare( $db_version, '4.1.3', '>=') == 1 ) {
+			if ( version_compare( $db_version, '5.5.0', '>=') == 1 ) {
 				return 0;
 			}
 		}
@@ -1081,7 +1096,7 @@ class Install {
 		$storage_engines = $db_conn->getAll($query);
 		//Debug::Arr($storage_engines, 'Available Storage Engines:', __FILE__, __LINE__, __METHOD__, 9);
 		if ( is_array($storage_engines) ) {
-			foreach( $storage_engines as $key => $data ) {
+			foreach( $storage_engines as $data ) {
 				Debug::Text('Engine: '. $data['Engine'] .' Support: '. $data['Support'], __FILE__, __LINE__, __METHOD__, 10);
 				if ( strtolower($data['Engine']) == 'innodb' AND ( strtolower($data['Support']) == 'yes' OR strtolower($data['Support']) == 'default' )	 ) {
 					Debug::text('InnoDB is available!', __FILE__, __LINE__, __METHOD__, 9);
@@ -1125,7 +1140,7 @@ class Install {
 
 		return FALSE;
 	}
-	
+
 	function getWebServerUser() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			if ( function_exists('posix_geteuid') AND function_exists('posix_getpwuid') ) {
@@ -1164,7 +1179,7 @@ class Install {
 				return 0;
 			}
 		}
-		
+
 		return 1; //Fail so we can display the command to the user instead.
 	}
 
@@ -1392,7 +1407,18 @@ class Install {
 			return 0;
 		}
 
-		return 2;
+		return 1;
+	}
+
+	function checkINTL() {
+		//Don't make this a hard requirement in v10 upgrade as its too close to the end of the year.
+		return 0;
+
+//		if ( function_exists('locale_get_default') ) {
+//			return 0;
+//		}
+//
+//		return 1;
 	}
 
 	function checkBCMATH() {
@@ -1515,7 +1541,6 @@ class Install {
 				$files = explode("\n", $file_list_data );
 				unset($file_list_data);
 				if ( is_array($files) ) {
-					$i = 0;
 					foreach( $files as $file ) {
 						if ( $file != '' ) {
 							$file = Environment::getBasePath() . str_replace( array('/', '\\'), DIRECTORY_SEPARATOR, $file ); //Prefix base path to all files.
@@ -1575,6 +1600,14 @@ class Install {
 
 	function checkPHPSafeMode() {
 		if ( ini_get('safe_mode') != '1' ) {
+			return 0;
+		}
+
+		return 1;
+	}
+
+	function checkPHPAllowURLFopen() {
+		if ( ini_get('allow_url_fopen') == '1' ) {
 			return 0;
 		}
 
@@ -1647,9 +1680,11 @@ class Install {
 		$retarr[$this->checkMBSTRING()]++;
 		//$retarr[$this->checkCALENDAR()]++;
 		$retarr[$this->checkGETTEXT()]++;
+		$retarr[$this->checkINTL()]++;
 		$retarr[$this->checkGD()]++;
 		$retarr[$this->checkJSON()]++;
 		$retarr[$this->checkSimpleXML()]++;
+		$retarr[$this->checkCURL()]++;
 		$retarr[$this->checkZIP()]++;
 		$retarr[$this->checkMAIL()]++;
 		$retarr[$this->checkOpenSSL()]++;
@@ -1687,6 +1722,7 @@ class Install {
 		}
 
 		$retarr[$this->checkPHPSafeMode()]++;
+		$retarr[$this->checkPHPAllowURLFopen()]++;
 		$retarr[$this->checkPHPMemoryLimit()]++;
 		$retarr[$this->checkPHPMagicQuotesGPC()]++;
 
@@ -1709,6 +1745,7 @@ class Install {
 	function getFailedRequirements( $post_install_requirements_only = FALSE, $exclude_check = FALSE ) {
 		$fail_all = FALSE;
 
+		$retarr = array();
 		$retarr[] = 'Require';
 
 		if ( $fail_all == TRUE OR $this->checkPHPVersion() != 0 ) {
@@ -1739,6 +1776,10 @@ class Install {
 			$retarr[] = 'GETTEXT';
 		}
 
+		if ( $fail_all == TRUE OR $this->checkINTL() != 0 ) {
+			$retarr[] = 'INTL';
+		}
+
 		if ( $fail_all == TRUE OR $this->checkGD() != 0 ) {
 			$retarr[] = 'GD';
 		}
@@ -1749,6 +1790,10 @@ class Install {
 
 		if ( $fail_all == TRUE OR $this->checkSimpleXML() != 0 ) {
 			$retarr[] = 'SIMPLEXML';
+		}
+
+		if ( $fail_all == TRUE OR $this->checkCURL() != 0 ) {
+			$retarr[] = 'CURL';
 		}
 
 		if ( $fail_all == TRUE OR $this->checkZIP() != 0 ) {
@@ -1825,6 +1870,9 @@ class Install {
 
 		if ( $fail_all == TRUE OR $this->checkPHPSafeMode() != 0 ) {
 			$retarr[] = 'PHPSafeMode';
+		}
+		if ( $fail_all == TRUE OR $this->checkPHPAllowURLFopen() != 0 ) {
+			$retarr[] = 'PHPAllowURLFopen';
 		}
 		if ( $fail_all == TRUE OR $this->checkPHPMemoryLimit() != 0 ) {
 			$retarr[] = 'PHPMemoryLimit';

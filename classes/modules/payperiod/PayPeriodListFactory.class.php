@@ -111,16 +111,17 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 
 		$result = $this->getByIdList($ids, $where, $order);
 
+		$pay_period_schedule_id = array();
 		foreach($result as $pay_period) {
 			$pay_period_schedule_id[$pay_period->getPayPeriodScheduleObject()->getId()] = $pay_period->getPayPeriodScheduleObject()->getName();
 		}
 
 		$use_names = FALSE;
-		if ( $enable_names == TRUE AND isset($pay_period_schedule_id) AND count($pay_period_schedule_id) > 1 ) {
+		if ( $enable_names == TRUE AND empty($pay_period_schedule_id) == FALSE ) {
 			$use_names = TRUE;
 		}
 
-		$pay_period_schedule_name = NULL;
+		$pay_period_list = array();
 		foreach($result as $pay_period) {
 			//Debug::Text('Pay Period: '. $pay_period->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			/*
@@ -132,7 +133,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 			$pay_period_list[$pay_period->getId()] = $pay_period->getName($use_names);
 		}
 
-		if ( isset($pay_period_list) ) {
+		if ( empty($pay_period_list) == FALSE ) {
 			return $pay_period_list;
 		}
 
@@ -145,7 +146,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		}
 
 		Debug::Text('Total Rows: '. $lf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -180,7 +181,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 			$i++;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -245,7 +246,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND a.company_id = ?
 						AND a.deleted=0 AND b.deleted=0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -285,7 +286,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND a.deleted=0 AND b.deleted=0
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict);
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -326,7 +327,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND ( a.deleted=0 AND b.deleted=0 )
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -493,7 +494,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND a.deleted=0
 						AND b.deleted=0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -542,7 +543,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND a.deleted=0
 						AND b.deleted=0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -596,7 +597,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						)
 						AND ( a.deleted=0 AND b.deleted=0 )';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -739,6 +740,76 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
+	function getConflictingByPayPeriodScheduleIdAndStartDateAndEndDate($pay_period_schedule_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
+		Debug::Text('Pay Period Schedule ID: '. $pay_period_schedule_id .' Start Date: '. $start_date .' End Date: '. $end_date .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $pay_period_schedule_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $start_date == '' ) {
+			return FALSE;
+		}
+
+		if ( $end_date == '' ) {
+			return FALSE;
+		}
+
+		//MySQL is picky when it comes to timestamp filters on datestamp columns.
+		$start_datestamp = $this->db->BindDate( $start_date );
+		$end_datestamp = $this->db->BindDate( $end_date );
+
+		$start_timestamp = $this->db->BindTimeStamp( $start_date );
+		$end_timestamp = $this->db->BindTimeStamp( $end_date );
+
+		$ph = array(
+				'pay_period_schedule_id' => (int)$pay_period_schedule_id,
+				'start_date_a' => $start_datestamp,
+				'end_date_b' => $end_datestamp,
+				'id' => (int)$id,
+				'start_date1' => $start_timestamp,
+				'end_date1' => $end_timestamp,
+				'start_date2' => $start_timestamp,
+				'end_date2' => $end_timestamp,
+				'start_date3' => $start_timestamp,
+				'end_date3' => $end_timestamp,
+				'start_date4' => $start_timestamp,
+				'end_date4' => $end_timestamp,
+				'start_date5' => $start_timestamp,
+				'end_date5' => $end_timestamp,
+		);
+
+		//Add filter on date_stamp for optimization
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+					where a.pay_period_schedule_id = ?
+						AND a.start_date >= ?
+						AND a.end_date <= ?
+						AND a.id != ?
+						AND
+						(
+							( a.start_date >= ? AND a.end_date <= ? )
+							OR
+							( a.start_date >= ? AND a.start_date < ? )
+							OR
+							( a.end_date > ? AND a.end_date <= ? )
+							OR
+							( a.start_date <= ? AND a.end_date >= ? )
+							OR
+							( a.start_date = ? AND a.end_date = ? )
+						)
+						AND ( a.deleted = 0 )
+					ORDER BY start_date';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	function getByPayPeriodScheduleIdAndStartTransactionDateAndEndTransactionDate($id, $start_transaction_date, $end_transaction_date, $where = NULL, $order = NULL) {
 		if ( $id == '' ) {
 			return FALSE;
@@ -751,8 +822,6 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		if ( $end_transaction_date == '' ) {
 			return FALSE;
 		}
-
-		$ppsuf = new PayPeriodScheduleUserFactory();
 
 		$ph = array(
 					'id' => (int)$id,
@@ -820,7 +889,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' )
 						AND a.deleted=0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -869,14 +938,14 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					select	a.*
 					from	'. $this->getTable() .' as a
 					LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( a.pay_period_schedule_id = ppsf.id )
-					where	ppsf.company_id = ?						
+					where	ppsf.company_id = ?
 						AND a.transaction_date >= ?
 						AND a.transaction_date <= ?
 						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' )
 						AND a.status_id in ( '. $this->getListSQL( $status_id, $ph, 'int' ) .' )
 						AND a.deleted=0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -919,7 +988,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 						AND a.pay_period_schedule_id in ( '. $this->getListSQL( $id, $ph, 'int' ) .' )
 						AND a.deleted=0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1035,8 +1104,6 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		if ( $transaction_date == '' ) {
 			return FALSE;
 		}
-
-		$ppsuf = new PayPeriodScheduleUserFactory();
 
 		$ph = array(
 					'id' => (int)$id,
@@ -1278,6 +1345,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		//return $this;
 
 		$year_arr = $this->db->getCol($query, $ph);
+		$retarr = array();
 		foreach($year_arr as $year) {
 			$retarr[$year] = $year;
 		}
@@ -1301,8 +1369,6 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 					'id' => (int)$id,
 					);
 
-
-		$uf = new UserFactory();
 		$psf = new PayStubFactory();
 
 		//Make sure just one row per pay period is returned.

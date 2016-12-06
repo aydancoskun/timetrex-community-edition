@@ -130,28 +130,28 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 						// Arrays
 						switch ( $filter_data_type ) {
 							case 'true':
-								$filter_data[ $filter_data_key ] = TRUE;
+								$filter_data[$filter_data_key] = TRUE;
 								break;
 							case 'false':
-								$filter_data[ $filter_data_key ] = FALSE;
+								$filter_data[$filter_data_key] = FALSE;
 								break;
 							case 'null':
-								$filter_data[ $filter_data_key ] = NULL;
+								$filter_data[$filter_data_key] = NULL;
 								break;
 							case 'negative_small_int':
-								$filter_data[ $filter_data_key ] = ( rand( 0, 128 ) * -1 );
+								$filter_data[$filter_data_key] = ( rand( 0, 128 ) * -1 );
 								break;
 							case 'small_int':
-								$filter_data[ $filter_data_key ] = rand( 0, 128 );
+								$filter_data[$filter_data_key] = rand( 0, 128 );
 								break;
 							case 'large_int':
-								$filter_data[ $filter_data_key ] = rand( 2147483648, 21474836489 );
+								$filter_data[$filter_data_key] = rand( 2147483648, 21474836489 );
 								break;
 							case 'string':
-								$filter_data[ $filter_data_key ] = 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 );
+								$filter_data[$filter_data_key] = 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 );
 								break;
 							case 'array':
-								$filter_data[ $filter_data_key ] = array(rand( 0, 128 ), rand( 2147483648, 21474836489 ), 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 ));
+								$filter_data[$filter_data_key] = array(rand( 0, 128 ), rand( 2147483648, 21474836489 ), 'A' . substr( md5( microtime() ), rand( 0, 26 ), 10 ));
 								break;
 							case 'not_set':
 								break;

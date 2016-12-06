@@ -191,6 +191,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 				if ( cache_key && LocalCacheData.result_cache[cache_key] ) {
 					var result = LocalCacheData.result_cache[cache_key];
+					Debug.Arr(result, 'Response from cached result. Key: '+cache_key, 'ServiceCaller.js', 'ServiceCaller', 'call', 10);
 
 					apiReturnHandler = new APIReturnHandler();
 
@@ -283,7 +284,6 @@ var ServiceCaller = Backbone.Model.extend( {
 			ProgressBar.showProgressBar( message_id );
 		}
 
-		ServiceCaller.cancelNetworkError = false;
 		$.ajax(
 			{
 				dataType: 'JSON',
@@ -299,28 +299,12 @@ var ServiceCaller = Backbone.Model.extend( {
 				async: async,
 				url: url,
 				success: function( result ) {
-
+					//Debug.Arr(result, 'Response from API. message_id: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 					if ( !Global.isSet( result ) ) {
 						result = true;
 					}
 					if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
 						ProgressBar.removeProgressBar( message_id );
-					}
-
-					switch ( function_name ) {
-						case 'getOptions':
-						case 'getOtherField':
-						case 'isBranchAndDepartmentAndJobAndJobItemEnabled':
-						case 'getUserGroup':
-						case 'getJobGroup':
-						case 'getJobItemGroup':
-						case 'getProductGroup':
-						case 'getDocumentGroup':
-						case 'getQualificationGroup':
-						case 'getKPIGroup':
-						case 'getHierarchyControlOptions':
-							LocalCacheData.result_cache[cache_key] = result;
-							break;
 					}
 
 					apiReturnHandler = new APIReturnHandler();
@@ -330,18 +314,44 @@ var ServiceCaller = Backbone.Model.extend( {
 					apiReturnHandler.set( 'args', apiArgs );
 
 					if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'EXCEPTION' ) {
+						Debug.Text('API returned exception: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						TAlertManager.showAlert( apiReturnHandler.getDescription(), 'Error' );
 						return;
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'SESSION' ) {
+						Debug.Text('API returned session expired: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
+						LocalCacheData.cleanNecessaryCache(); //make sure the cache is cleared when session is expired
+
 						ServiceCaller.cancelAllError = true;
-
 						LocalCacheData.login_error_string = $.i18n._( 'Session expired, please login again.' );
-
-						$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
-						window.location = Global.getBaseURL() + '#!m=' + 'Login';
+						Global.clearSessionCookie();
+						if (window.location.href == Global.getBaseURL() + '#!m=' + 'Login') {
+							// Prevent a partially loaded login screen when SessionID cookie is set but not valid on server.
+							window.location.reload();
+						} else {
+							window.location = Global.getBaseURL() + '#!m=' + 'Login';
+						}
 
 						return;
 					} else {
+						//Debug.Text('API returned result: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
+
+						//only cache data when api return is successful and can be trusted (ie not logged out or session expired.)
+						switch ( function_name ) {
+							case 'getOptions':
+							case 'getOtherField':
+							case 'isBranchAndDepartmentAndJobAndJobItemEnabled':
+							case 'getUserGroup':
+							case 'getJobGroup':
+							case 'getJobItemGroup':
+							case 'getProductGroup':
+							case 'getDocumentGroup':
+							case 'getQualificationGroup':
+							case 'getKPIGroup':
+							case 'getHierarchyControlOptions':
+								LocalCacheData.result_cache[cache_key] = result;
+								break;
+						}
+
 						//Error: Function expected in /interface/html5/services/ServiceCaller.js?v=9.0.0-20150822-090205 line 269
 						if ( responseObject.get( 'onResult' ) && typeof(responseObject.get( 'onResult' )) == 'function' ) {
 							responseObject.get( 'onResult' )( apiReturnHandler );
@@ -359,22 +369,21 @@ var ServiceCaller = Backbone.Model.extend( {
 						return;
 					}
 
-					var network_lost_msg = $.i18n._( 'The network connection was lost. Please check your network connection then try again.' );
-
 					if ( error.responseText && error.responseText.indexOf( 'User not authenticated' ) >= 0 ) {
 
 						ServiceCaller.cancelAllError = true;
 
 						LocalCacheData.login_error_string = $.i18n._( 'Session timed out, please login again.' );
 
-						$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
+						Global.clearSessionCookie();
+						//$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
 						window.location = Global.getBaseURL() + '#!m=' + 'Login';
 
 						return;
 
 					} else {
 						if ( error.responseText && $.type( error.responseText ) === 'string' ) {
-							TAlertManager.showAlert( network_lost_msg + "\n" + error.responseText, 'Error' );
+							TAlertManager.showNetworkErrorAlert( error );
 						}
 					}
 
@@ -390,10 +399,9 @@ var ServiceCaller = Backbone.Model.extend( {
 						}
 						return apiReturnHandler;
 
-					} else if ( error.status === 0 && !ServiceCaller.cancelNetworkError ) {
-						TAlertManager.showAlert( network_lost_msg );
+					} else if ( error.status === 0 ) {
+						TAlertManager.showNetworkErrorAlert( error );
 						ProgressBar.cancelProgressBar();
-						ServiceCaller.cancelNetworkError = true;
 						return null;
 					} else {
 						return null;
@@ -444,8 +452,6 @@ ServiceCaller.rootURL = null;
 ServiceCaller.sessionID = '';
 
 ServiceCaller.cancelAllError = false;
-
-ServiceCaller.cancelNetworkError = false;
 
 ServiceCaller.ozUrl = false;
 

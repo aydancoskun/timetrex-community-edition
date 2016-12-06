@@ -1,7 +1,7 @@
 TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'TimesheetDetailReport';
 		this.viewId = 'TimesheetDetailReport';
 		this.context_menu_name = $.i18n._( 'Timesheet Detail' );

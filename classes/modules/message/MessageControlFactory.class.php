@@ -353,7 +353,7 @@ class MessageControlFactory extends Factory {
 
 		if ( $this->Validator->isResultSetWithRows(	'object',
 													$this->getObjectHandler()->getByID($id),
-													TTi18n::gettext('Object ID is invalid')
+													TTi18n::gettext('Object is invalid')
 													) ) {
 			$this->data['object_id'] = $id;
 
@@ -430,15 +430,21 @@ class MessageControlFactory extends Factory {
 		if ( $this->Validator->getValidateOnly() == TRUE AND $text == '' ) {
 			$minimum_length = 0;
 		} else {
-			$minimum_length = 5;
+			$minimum_length = 2;
 		}
 
-		if	(	$this->Validator->isLength(		'body',
-												$text,
-												TTi18n::gettext('Invalid Body length'),
-												$minimum_length,
-												(1024 * 10) ) ) {
-
+		if ( $this->Validator->isLength( 'body',
+										 $text,
+										 TTi18n::gettext( 'Message body is too short.' ),
+										 $minimum_length,
+										 ( 1024 * 9999999 ) )
+				AND
+				$this->Validator->isLength( 'body',
+											$text,
+											TTi18n::gettext( 'Message body is too long.' ),
+											0,
+											( 1024 * 10 ) )
+		) {
 			$this->data['body'] = $text;
 
 			return TRUE;
@@ -494,10 +500,10 @@ class MessageControlFactory extends Factory {
 												TTi18n::gettext('Object type is invalid') );
 			}
 
-			if ( $this->getObject() == '' ) {
-					$this->Validator->isTrue(	'object_id',
+			if ( $this->Validator->hasError( 'object' ) == FALSE AND $this->getObject() == '' ) {
+					$this->Validator->isTrue(	'object',
 												FALSE,
-												TTi18n::gettext('Object is invalid') );
+												TTi18n::gettext('Object must be specified') );
 			}
 		}
 
@@ -534,6 +540,7 @@ class MessageControlFactory extends Factory {
 			$uplf = TTnew( 'UserPreferenceListFactory' );
 			$uplf->getByUserId( $user_ids );
 			if ( $uplf->getRecordCount() > 0 ) {
+				$retarr = array();
 				foreach( $uplf as $up_obj ) {
 					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
 						if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
@@ -574,10 +581,12 @@ class MessageControlFactory extends Factory {
 
 		$from = $reply_to = '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Message') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>';
 
-		global $current_user, $config_vars;
-		if ( is_object($current_user) AND $current_user->getWorkEmail() != '' ) {
-			$reply_to = Misc::formatEmailAddress( $current_user->getWorkEmail(), $current_user );
-		}
+//		Always make sure ReplyTo is the generic email address that will cause a bounce.
+//		global $current_user;
+//		if ( is_object($current_user) AND $current_user->getWorkEmail() != '' ) {
+//			$reply_to = Misc::formatEmailAddress( $current_user->getWorkEmail(), $current_user );
+//		}
+
 		Debug::Text('To: '. implode(',', $email_to_arr), __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Text('From: '. $from .' Reply-To: '. $reply_to, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -625,9 +634,7 @@ class MessageControlFactory extends Factory {
 		$headers = array(
 							'From'		=> $from,
 							'Subject'	=> $subject,
-							//'Reply-To'	=> $reply_to,
-							//'Return-Path' => $reply_to,
-							//'Errors-To' => $reply_to,
+							//Reply-To/Return-Path are handled in TTMail.
 						);
 
 		$body = '<html><body><pre>'.str_replace( $search_arr, $replace_arr, $email_body ).'</pre></body></html>';
@@ -759,6 +766,7 @@ class MessageControlFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL ) {
 		$variable_function_map = $this->getVariableToFunctionMap();
+		$data = array();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
 				if ( $include_columns == NULL OR ( isset($include_columns[$variable]) AND $include_columns[$variable] == TRUE ) ) {

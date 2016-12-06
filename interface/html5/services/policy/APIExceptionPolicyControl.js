@@ -43,6 +43,9 @@ var APIExceptionPolicyControl = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'copyExceptionPolicyControl', arguments );
 
-	}
+	},
 
+	exportExceptionPolicyControl: function() {
+		return this.argumentsHandler( this.className, 'exportExceptionPolicyControl', arguments );
+	}
 } );

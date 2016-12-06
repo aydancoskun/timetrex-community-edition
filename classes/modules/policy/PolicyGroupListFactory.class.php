@@ -199,7 +199,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -289,6 +289,8 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$pglf = new PolicyGroupListFactory();
 		$pglf->getByCompanyId($company_id);
 
+		
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -297,7 +299,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 			$list[$pg_obj->getID()] = $pg_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE  ) {
 			return $list;
 		}
 
@@ -309,6 +311,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -317,7 +320,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -329,11 +332,12 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 			return FALSE;
 		}
 
+		$retarr = array();
 		foreach ($lf as $obj) {
 			$retarr[$obj->getColumn('user_id')] = $obj->getId();
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 

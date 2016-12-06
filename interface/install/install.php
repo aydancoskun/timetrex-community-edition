@@ -61,12 +61,12 @@ $templates_c_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPA
 
 echo " 4...";
 $redir = TRUE;
-if ( version_compare( PHP_VERSION, '5.0.0', '<') == 1 ) {
-	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.4</b> or greater!<br><br>\n";
+if ( version_compare( PHP_VERSION, '5.3.0', '<') == 1 ) {
+	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.3</b> or greater!<br><br>\n";
 	$redir = FALSE;
 }
 if ( version_compare( PHP_VERSION, '7.0.99', '>') == 1 ) {
-	echo "You are currenting using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.0.x</b> or earlier!<br><br>\n";
+	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.0.x</b> or earlier!<br><br>\n";
 	$redir = FALSE;
 }
 
@@ -77,12 +77,23 @@ if ( !is_writeable($templates_c_dir) ) {
 }
 
 echo " 6...";
-//No longer required as we can use Pear::Translation2 instead if needed. (ie: HHVM)
-//if ( extension_loaded( 'gettext' ) == FALSE ) {
-//	echo "PHP GetText extension is not installed, TimeTrex requires GetText to be installed.<br><br>\n";
+//These are all extensions required to even initialize the HTML5 interface.
+//if ( extension_loaded( 'intl' ) == FALSE ) {
+//	echo "PHP INTL extension is not installed, TimeTrex requires INTL to be installed.<br><br>\n";
 //	$redir = FALSE;
 //}
-
+if ( extension_loaded( 'gettext' ) == FALSE ) {
+	echo "PHP GetText extension is not installed, TimeTrex requires GetText to be installed.<br><br>\n";
+	$redir = FALSE;
+}
+if ( extension_loaded( 'mbstring' ) == FALSE ) {
+	echo "PHP MBSTRING extension is not installed, TimeTrex requires MBSTRING to be installed.<br><br>\n";
+	$redir = FALSE;
+}
+if ( extension_loaded( 'json' ) == FALSE ) {
+	echo "PHP JSON extension is not installed, TimeTrex requires JSON to be installed.<br><br>\n";
+	$redir = FALSE;
+}
 
 echo " 7...";
 $test_template_c_sub_dir = $templates_c_dir . DIRECTORY_SEPARATOR . uniqid();

@@ -109,6 +109,7 @@ class APIUserTitle extends APIFactory {
 		if ( $utlf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $utlf );
 
+			$retarr = array();
 			foreach( $utlf as $ut_obj ) {
 				$retarr[] = $ut_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -117,6 +118,17 @@ class APIUserTitle extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportUserTitle( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getUserTitle( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_employee_title', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

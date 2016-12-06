@@ -67,6 +67,7 @@ class APIUserReportData extends APIFactory {
 		if ( $ugdlf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $ugdlf );
 
+			$retarr = array();
 			foreach( $ugdlf as $ugd_obj ) {
 				$retarr[] = $ugd_obj->getObjectAsArray( $data['filter_columns'] );
 			}

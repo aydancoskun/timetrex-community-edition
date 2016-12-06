@@ -69,6 +69,7 @@ class Misc {
 					return strtolower($val);
 				}
 			}
+			unset($value); //code standards
 		}
 
 		return NULL;
@@ -92,7 +93,7 @@ class Misc {
 		$retarr = array();
 		$totals = array();
 
-		foreach($array as $key => $value) {
+		foreach($array as $value) {
 			if ( isset($element) AND isset($value[$element]) ) {
 				foreach($value[$element] as $sum_key => $sum_value ) {
 					if ( !isset($totals[$sum_key]) ) {
@@ -330,13 +331,14 @@ class Misc {
 	*/
 	static function arrayIntersectByKey( $keys, $options ) {
 		if ( is_array($keys) AND is_array($options) ) {
+			$retarr = array();
 			foreach( $keys as $key ) {
 				if ( isset($options[$key]) AND $key !== FALSE ) { //Ignore boolean FALSE, so the Root group isn't always selected.
 					$retarr[$key] = $options[$key];
 				}
 			}
 
-			if ( isset($retarr) ) {
+			if ( empty($retarr) == FALSE ) {
 				return $retarr;
 			}
 		}
@@ -393,13 +395,15 @@ class Misc {
 	*/
 	static function arrayDiffByKey( $keys, $options ) {
 		if ( is_array($keys) AND is_array($options) ) {
+			$retarr = array();
 			foreach( $options as $key => $value ) {
 				if ( !in_array($key, $keys, TRUE) ) { //Use strict we ignore boolean FALSE, so the Root group isn't always selected.
 					$retarr[$key] = $options[$key];
 				}
 			}
+			unset($value); //code standards
 
-			if ( isset($retarr) ) {
+			if ( empty($retarr) == FALSE ) {
 				return $retarr;
 			}
 		}
@@ -438,6 +442,7 @@ class Misc {
 	}
 
 	static function arrayDiffAssocRecursive($array1, $array2) {
+		$difference = array();
 		if ( is_array($array1) ) {
 			foreach($array1 as $key => $value) {
 				if ( is_array($value) ) {
@@ -457,7 +462,7 @@ class Misc {
 			}
 		}
 
-		if ( !isset($difference) ) {
+		if ( empty($difference) ) {
 			return FALSE;
 		}
 
@@ -473,6 +478,7 @@ class Misc {
 	//Adds prefix to all array keys, mainly for reportings and joining array data together to avoid conflicting keys.
 	static function addKeyPrefix( $prefix, $arr, $ignore_elements = NULL ) {
 		if ( is_array( $arr ) ) {
+			$retarr = array();
 			foreach( $arr as $key => $value ) {
 				if ( !is_array($ignore_elements) OR ( is_array( $ignore_elements ) AND !in_array( $key, $ignore_elements ) ) ) {
 					$retarr[$prefix.$key] = $value;
@@ -481,7 +487,7 @@ class Misc {
 				}
 			}
 
-			if ( isset($retarr) ) {
+			if ( empty($retarr) == FALSE ) {
 				return $retarr;
 			}
 		}
@@ -493,6 +499,7 @@ class Misc {
 	//Removes prefix to all array keys, mainly for reportings and joining array data together to avoid conflicting keys.
 	static function removeKeyPrefix( $prefix, $arr, $ignore_elements = NULL ) {
 		if ( is_array( $arr ) ) {
+			$retarr = array();
 			foreach( $arr as $key => $value ) {
 				if ( !is_array($ignore_elements) OR ( is_array( $ignore_elements ) AND !in_array( $key, $ignore_elements ) ) ) {
 					$retarr[self::strReplaceOnce($prefix, '', $key)] = $value;
@@ -501,7 +508,7 @@ class Misc {
 				}
 			}
 
-			if ( isset($retarr) ) {
+			if ( empty($retarr) == FALSE ) {
 				return $retarr;
 			}
 		}
@@ -511,6 +518,7 @@ class Misc {
 
 	//Adds sort prefixes to an array maintaining the original order. Primarily used because Flex likes to reorded arrays with string keys.
 	static function addSortPrefix( $arr, $begin_counter = 1 ) {
+		$retarr = array();
 		$i = $begin_counter;
 		foreach( $arr as $key => $value ) {
 			$sort_prefix = NULL;
@@ -521,7 +529,7 @@ class Misc {
 			$i++;
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 
@@ -530,6 +538,7 @@ class Misc {
 
 	//Removes sort prefixes from an array.
 	static function trimSortPrefix( $value, $trim_arr_value = FALSE ) {
+		$retval = array();
 		if ( is_array($value) AND count($value) > 0 ) {
 			foreach( $value as $key => $val ) {
 				if ( $trim_arr_value == TRUE ) {
@@ -542,7 +551,7 @@ class Misc {
 			$retval = preg_replace('/^-[0-9]{3,4}-/i', '', $value );
 		}
 
-		if ( isset($retval) ) {
+		if ( empty($retval) == FALSE ) {
 			return $retval;
 		}
 
@@ -551,7 +560,6 @@ class Misc {
 
 	static function strReplaceOnce($str_pattern, $str_replacement, $string) {
 		if ( strpos($string, $str_pattern) !== FALSE ) {
-			$occurrence = strpos($string, $str_pattern);
 			return substr_replace($string, $str_replacement, strpos($string, $str_pattern), strlen($str_pattern));
 		}
 
@@ -600,9 +608,18 @@ class Misc {
 		//Don't return any TRUE/FALSE here as it could end up in the file.
 	}
 
+	/**
+	 * value should be a float and not a string. be sure to run this before TTi18n currency or number formatter due to foreign numeric formatting for decimal being a comma.
+	 * @param $value float
+	 * @param int $minimum_decimals
+	 * @return string
+	 */
 	static function removeTrailingZeros( $value, $minimum_decimals = 2 ) {
 		//Remove trailing zeros after the decimal, leave a minimum of X though.
-		if ( strpos( $value, '.') !== FALSE ) {
+		//*NOTE: This should always be passed in a float, so we don't need to worry about locales or TTi18n::getDecimalSymbol().
+		//       If you are running into problems traced to here, try casting to float first.
+		//		 If a casted float value is float(50), there won't be a decimal place, so make sure we handle those cases too.
+		if ( is_float($value) OR strpos( $value, '.') !== FALSE ) {
 			$trimmed_value = (float)$value;
 			if ( strpos( $trimmed_value, '.') !== FALSE ) {
 				$tmp_minimum_decimals = strlen( (int)strrev($trimmed_value) );
@@ -614,21 +631,28 @@ class Misc {
 				$minimum_decimals = $tmp_minimum_decimals;
 			}
 
-			return number_format( $value, $minimum_decimals, '.', '' );
+			return number_format( $trimmed_value, $minimum_decimals, '.', '' );
 		}
 
 		return $value;
 	}
 
+	/**
+	 * Just a number format that looks like currency without currency symbol
+	 * can maybe be replaced by TTi18n::numberFormat()
+	 *
+	 * @param $value
+	 * @param bool $pretty
+	 * @return string
+	 */
 	static function MoneyFormat($value, $pretty = TRUE) {
-
-		if ( $pretty == TRUE ) {
-			$thousand_sep = ', ';
+		if ( $pretty === TRUE ) {
+			$thousand_sep = TTi18n::getThousandsSymbol();
 		} else {
 			$thousand_sep = '';
 		}
 
-		return number_format( (float)$value, 2, '.', $thousand_sep);
+		return number_format( (float)$value, 2, TTi18n::getDecimalSymbol(), $thousand_sep );
 	}
 
 	//Removes vowels from the string always keeping the first and last letter.
@@ -684,15 +708,9 @@ class Misc {
 	}
 
 	static function getBeforeDecimal($float) {
-		$float = Misc::MoneyFormat( $float, FALSE );
-
-		$float_array = preg_split('/\./', $float);
-
-		if ( isset($float_array[0]) ) {
-			return $float_array[0];
-		}
-
-		return FALSE;
+		//$split_float = explode(TTi18n::getDecimalSymbol(), $float);
+		$split_float = explode('.', $float);
+		return (int)$split_float[0];
 	}
 
 	static function getAfterDecimal($float, $format_number = TRUE ) {
@@ -700,13 +718,13 @@ class Misc {
 			$float = Misc::MoneyFormat( $float, FALSE );
 		}
 
-		$float_array = preg_split('/\./', $float);
-
-		if ( isset($float_array[1]) ) {
-			return str_pad($float_array[1], 2, '0');
+		//$split_float = explode(TTi18n::getDecimalSymbol(), $float);
+		$split_float = explode('.', $float);
+		if ( isset($split_float[1]) ) {
+			return (int)$split_float[1];
+		} else {
+			return 0;
 		}
-
-		return FALSE;
 	}
 
 	static function removeDecimal( $value ) {
@@ -878,6 +896,7 @@ class Misc {
 
 			//Header
 			if ( $include_header == TRUE ) {
+				$row_header = array();
 				foreach( $columns as $column_name ) {
 					$row_header[] = $column_name;
 				}
@@ -887,6 +906,7 @@ class Misc {
 			}
 
 			foreach( $data as $rows ) {
+				$row_values = array();
 				foreach ($columns as $column_key => $column_name ) {
 					if ( isset($rows[$column_key]) ) {
 						$row_values[] = str_replace("\"", "\"\"", $rows[$column_key]);
@@ -962,6 +982,7 @@ class Misc {
 				}
 				$out .= '							 <xsd:element name="'. $column_key .'" type="xsd:'. $data_type .'"/>'."\n";
 			}
+			unset($column_name); //code standards
 			$out .= '						 </xsd:sequence>'."\n";
 			$out .= '					 </xsd:complexType>'."\n";
 			$out .= '				 </xsd:element>'."\n";
@@ -1022,6 +1043,7 @@ class Misc {
 
 		$dependency_tree = new DependencyTree();
 		$i = 0;
+		$global_class_dependancy_map = array();
 		foreach( $global_class_map as $class => $file ) {
 			if ( stripos( $class, 'Factory' ) !== FALSE
 					AND stripos( $class, 'API' ) === FALSE AND stripos( $class, 'ListFactory' ) === FALSE AND stripos( $class, 'Report' ) === FALSE
@@ -1035,11 +1057,13 @@ class Misc {
 			}
 			$i++;
 		}
+		unset($file); //code standards
 		$ordered_factory_arr = $dependency_tree->getAllNodesInOrder();
 		//Debug::Arr($ordered_factory_arr, 'Ordered Factory List: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( is_array($factory_arr) AND count($factory_arr) > 0 ) {
 			Debug::Arr($factory_arr, 'Factory Filter: ', __FILE__, __LINE__, __METHOD__, 10);
+			$filtered_factory_arr = array();
 			foreach( $ordered_factory_arr as $factory ) {
 				if ( in_array( $factory, $factory_arr) ) {
 					$filtered_factory_arr[] = $factory;
@@ -1114,7 +1138,7 @@ class Misc {
 		//Debug::Text('Search Key: '. $search_key .' Search Value: '. $search_value, __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($arr, 'Hay Stack: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		foreach( $arr as $arr_key => $arr_value ) {
+		foreach( $arr as $arr_value ) {
 			if ( isset($arr_value[$search_key]) ) {
 				if ( $arr_value[$search_key] == $search_value ) {
 					return TRUE;
@@ -1259,6 +1283,7 @@ class Misc {
 		while ( ($data = fgetcsv($handle, $len, $delim) ) !== FALSE) {
 			if ( $data !== array( NULL ) ) { // ignore blank lines
 				if ( $head AND isset($header) ) {
+					$row = array();
 					foreach ($header as $key => $heading) {
 						$row[trim($heading)] = ( isset($data[$key]) ) ? $data[$key] : '';
 					}
@@ -1291,6 +1316,7 @@ class Misc {
 			return FALSE;
 		}
 
+		$retarr = array();
 		foreach( $column_map as $map_arr ) {
 			$timetrex_column = $map_arr['timetrex_column'];
 			$csv_column = $map_arr['csv_column'];
@@ -1305,7 +1331,7 @@ class Misc {
 			}
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 
@@ -1436,19 +1462,69 @@ class Misc {
 	}
 
 	static function getRemoteHTTPFileSize( $url ) {
-		$headers = @get_headers($url, 1);
-		if ( $headers === FALSE ) { //Failure downloading headers from URL.
-			return FALSE;
+		if ( function_exists('curl_exec') ) {
+			Debug::Text( 'Using CURL for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
+			$result = FALSE; // Assume failure.
+
+			$curl = curl_init( $url );
+
+			// Issue a HEAD request and follow any redirects.
+			curl_setopt( $curl, CURLOPT_NOBODY, TRUE );
+			curl_setopt( $curl, CURLOPT_HEADER, TRUE );
+			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
+			curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
+			curl_setopt( $curl, CURLOPT_USERAGENT, APPLICATION_NAME .' '. APPLICATION_VERSION );
+
+			curl_exec($curl);
+			$size = curl_getinfo($curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+			curl_close($curl);
+
+			return $size;
+		} else {
+			Debug::Text( 'Using PHP streams for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
+			$headers = @get_headers( $url, 1 );
+			if ( $headers === FALSE ) { //Failure downloading headers from URL.
+				return FALSE;
+			}
+
+			$headers = array_change_key_case( $headers );
+			if ( isset( $headers[0] ) AND stripos( $headers[0], '404 Not Found' ) !== FALSE ) {
+				return FALSE;
+			}
+
+			$retval = isset( $headers['content-length'] ) ? $headers['content-length'] : FALSE;
+
+			return $retval;
 		}
+	}
 
-		$headers = array_change_key_case( $headers );
-		if ( isset($headers[0]) AND stripos( $headers[0], '404 Not Found') !== FALSE ) {
+	static function downloadHTTPFile( $url, $file_name ) {
+		if ( function_exists('curl_exec') ) {
+			Debug::Text( 'Using CURL for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
+			// open file to write
+			$fp = fopen( $file_name, 'w+' );
+
+			$curl = curl_init();
+			curl_setopt( $curl, CURLOPT_URL, $url );
+			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, FALSE ); // Set return transfer to false
+			curl_setopt( $curl, CURLOPT_BINARYTRANSFER, TRUE );
+			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
+			curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 10 ); // Increase timeout to download big file
+			curl_setopt( $curl, CURLOPT_FILE, $fp ); // Write data to local file
+			curl_exec( $curl );
+			curl_close( $curl );
+			fclose( $fp );
+
+			$file_size = filesize( $file_name );
+			if ( $file_size > 0 ) {
+				return (int)$file_size;
+			}
+
 			return FALSE;
+		} else {
+			Debug::Text( 'Using PHP streams for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
+			return @file_put_contents( $file_name, fopen( $url, 'r' ) );
 		}
-
-		$retval = isset($headers['content-length']) ? $headers['content-length'] : FALSE;
-
-		return $retval;
 	}
 
 	static function getEmailDomain() {
@@ -1477,11 +1553,29 @@ class Misc {
 		return $local_part;
 	}
 
+	static function getEmailReturnPathLocalPart( $email = NULL ) {
+		global $config_vars;
+
+		if ( isset($config_vars['other']['email_return_path_local_part']) AND $config_vars['other']['email_return_path_local_part'] != '' ) {
+			$local_part = $config_vars['other']['email_return_path_local_part'];
+		} else {
+			Debug::Text( 'No Email Local Part set, falling back to default...', __FILE__, __LINE__, __METHOD__, 10);
+			$local_part = self::getEmailLocalPart();
+		}
+
+		//In case we need to put the original TO address in the bounce local part.
+		//This could be an array in some cases.
+//		if ( $email != '' ) {
+//			$local_part .= '+';
+//		}
+
+		return $local_part;
+	}
+
 	//Checks if the domain the user is seeing in their browser matches the configured domain that should be used.
 	//If not we can then do a redirect.
 	static function checkValidDomain() {
 		global $config_vars;
-
 		if ( PRODUCTION == TRUE AND isset($config_vars['other']['enable_csrf_validation']) AND $config_vars['other']['enable_csrf_validation'] == TRUE ) {
 			//Use HTTP_HOST rather than getHostName() as the same site can be referenced with multiple different host names
 			//Especially considering on-site installs that default to 'localhost'
@@ -1497,7 +1591,6 @@ class Misc {
 				$host_name = '';
 			}
 
-			global $config_vars;
 			if ( isset($config_vars['other']['hostname']) AND $config_vars['other']['hostname'] != '' ) {
 				$search_result = strpos( $config_vars['other']['hostname'], $host_name );
 				if ( $search_result === FALSE OR (int)$search_result >= 8 ) { //Check to see if .ini hostname is found within SERVER_NAME in less than the first 8 chars, so we ignore https://.
@@ -1679,6 +1772,7 @@ class Misc {
 			return FALSE;
 		}
 
+		$matches = array();
 		foreach( $search_arr as $key => $search_val ) {
 			similar_text( strtolower($search_str), strtolower($search_val), $percent);
 			if ( $percent >= $minimum_percent_match ) {
@@ -1686,7 +1780,7 @@ class Misc {
 			}
 		}
 
-		if ( isset($matches) AND count($matches) > 0 ) {
+		if ( empty($matches) == FALSE ) {
 			arsort($matches);
 
 			if ( $return_all_matches == TRUE ) {
@@ -2013,7 +2107,7 @@ class Misc {
 	}
 
 	//Parses an RFC822 Email Address ( "John Doe" <john.doe@mydomain.com> ) into its separate components.
-	static function parseRFC822EmailAddress($input) {
+	static function parseRFC822EmailAddress($input, $return_just_key = FALSE) {
 		if ( strstr( $input, '<>' ) !== FALSE ) { //Check for <> together, as that means no email address is specified.
 			return FALSE;
 		}
@@ -2040,7 +2134,15 @@ class Misc {
 						}
 					}
 
-					return $retarr;
+					if ( $return_just_key != '' ) {
+						if ( isset($retarr[$return_just_key]) ) {
+							return $retarr[$return_just_key];
+						}
+
+						return FALSE;
+					} else {
+						return $retarr;
+					}
 				}
 			}
 		} else {
@@ -2053,6 +2155,29 @@ class Misc {
 	static function sendSystemMail( $subject, $body, $attachments = NULL, $force = FALSE ) {
 		if ( $subject == '' OR $body == '' ) {
 			return FALSE;
+		}
+
+		if ( getTTProductEdition() > TT_PRODUCT_COMMUNITY AND DEPLOYMENT_ON_DEMAND == TRUE ) {
+			$allowed_calls = 1000;
+		} elseif( getTTProductEdition() > TT_PRODUCT_COMMUNITY ) {
+			$allowed_calls = 100;
+		} else {
+			$allowed_calls = 25;
+		}
+
+		$rl = TTNew('RateLimit');
+		$rl->setID( 'system_mail_'. Misc::getRemoteIPAddress() );
+		$rl->setAllowedCalls( $allowed_calls );
+		$rl->setTimeFrame( 86400 ); //24hrs
+		if ( $rl->check() == FALSE ) {
+			Debug::Text('Excessive system emails... Preventing error reports from: '. Misc::getRemoteIPAddress() .' for up to 24hrs...', __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		try {
+			$registration_key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
+		} catch (Exception $e) {
+			Debug::Text( 'Error getting registration key!', __FILE__, __LINE__, __METHOD__, 1);
 		}
 
 		$to = 'errors@timetrex.com';
@@ -2073,9 +2198,7 @@ class Misc {
 							'From'	  => $from,
 							'Subject' => $subject,
 							'cc'	  => $cc,
-							'Reply-To' => $to,
-							'Return-Path' => $to,
-							'Errors-To' => $to,
+							'X-Relay-For-Key' => $registration_key,
 						);
 
 		$mail = new TTMail();
@@ -2104,11 +2227,12 @@ class Misc {
 		//In case the cache directory does not exist, disabling caching can prevent errors from occurring or punches to be missed.
 		//So this should be enabled even for ON-DEMAND services just in case.
 		if ( PRODUCTION == TRUE ) {
+			$tmp_config_vars = array();
 			//Disable caching to prevent stale cache data from being read, and further cache errors.
 			$install_obj = new Install();
 			$tmp_config_vars['cache']['enable'] = 'FALSE';
 			$write_config_result = $install_obj->writeConfigFile( $tmp_config_vars );
-			unset($install_obj, $tmp_config_vars);
+			unset($install_obj);
 
 			if ( $email_notification == TRUE ) {
 				if ( $write_config_result == TRUE ) {
@@ -2194,12 +2318,12 @@ class Misc {
 		}
 
 		//check string length is 6-9 chars
-		if ( $length >= 6 && $length <= 9 ) {
+		if ( $length >= 6 AND $length <= 9 ) {
 			$strength++;
 		}
 
 		//check if length is 10-15 chars
-		if ( $length >= 10 && $length <= 15 ) {
+		if ( $length >= 10 AND $length <= 15 ) {
 			$strength += 2;
 		}
 
@@ -2208,9 +2332,39 @@ class Misc {
 			$strength += 3;
 		}
 
+		$duplicate_chars = 1;
+		$consecutive_chars = 1;
+		$char_arr = str_split( strtolower($password) );
+		$prev_char_int = ord($char_arr[0]);
+		foreach( $char_arr as $char ) {
+			$curr_char_int = ord($char);
+			$char_int_diff = abs($prev_char_int - $curr_char_int);
+			if ( $char_int_diff == 0 ) { //Duplicate
+				$duplicate_chars++;
+			} elseif ( $char_int_diff == 1 OR $char_int_diff == -1 ) { //Consecutive
+				$consecutive_chars++;
+			}
+			$prev_char_int = $curr_char_int;
+		}
+		$duplicate_percent = ( ( $duplicate_chars / strlen($password) ) * 100 );
+		$consecutive_percent = ( ( $consecutive_chars / strlen($password) ) * 100 );
+		if ( $duplicate_percent <= 25 ) {
+			$strength++;
+		}
+		if ( $consecutive_percent <= 25 ) {
+			$strength++;
+		}
+
 		//get the numbers in the password
 		preg_match_all('/[0-9]/', $password, $numbers);
-		$strength += ( count($numbers[0]) * 2 );
+		//Prevent the addition of a single number to the beginning/end of the password from increasing the strength.
+		if ( is_numeric( substr( $password, 0, 1) ) == TRUE ) {
+			array_pop( $numbers[0] );
+		}
+		if ( is_numeric( substr( $password, -1, 1) ) == TRUE ) {
+			array_pop( $numbers[0] );
+		}
+		$strength += ( count( $numbers[0] ) * 2 );
 
 		//check for special chars
 		preg_match_all('/[|!@#$%&*\/=?,;.:\-_+~^\\\]/', $password, $specialchars);
@@ -2219,7 +2373,47 @@ class Misc {
 		//get the number of unique chars
 		$chars = str_split($password);
 		$num_unique_chars = count( array_unique($chars) );
+		$unique_percent = ( ( $num_unique_chars / strlen($password) ) * 100 );
+
 		$strength += ( $num_unique_chars * 2 );
+
+
+		//If the password consists of duplicate or consecutive chars, make it the lowest strength.
+		//This should help prevent 12345, or abcde passwords.
+		if ( $unique_percent <= 20 ) {
+			$strength = 1;
+		}
+		if ( $duplicate_percent >= 50 ) {
+			$strength = 1;
+		}
+		if ( $consecutive_percent >= 60 ) {
+			$strength = 1;
+		}
+		Debug::Text('Duplicate: Chars: '. $duplicate_chars .' Percent: '. $duplicate_percent  .' Consec: Chars: '. $consecutive_chars .' Percent: '. $consecutive_percent .' Unique: Chars: '. $num_unique_chars .' Percent: '. $unique_percent, __FILE__, __LINE__, __METHOD__, 10);
+
+		//Check for dictionary word, if its just a dictionary word make it the lowest strength.
+		if ( function_exists( 'pspell_new' ) ) {
+			$pspell_link = pspell_new('en');
+
+			if ( pspell_check($pspell_link, $password ) !== FALSE ) {
+				Debug::Text('Matches dictionary word exactly: '. $password, __FILE__, __LINE__, __METHOD__, 10);
+				$strength = 1;
+			}
+			if ( pspell_check($pspell_link, substr( $password, 1 ) ) !== FALSE ) {
+				Debug::Text('Matches dictionary word after 1st char is dropped: '. $password, __FILE__, __LINE__, __METHOD__, 10);
+				$strength = 1;
+			}
+			if ( pspell_check($pspell_link, substr( $password, 0, -1 ) ) !== FALSE ) {
+				Debug::Text('Matches dictionary word after last char is dropped: '. $password, __FILE__, __LINE__, __METHOD__, 10);
+				$strength = 1;
+			}
+			if ( pspell_check($pspell_link, substr( substr( $password, 1 ), 0, -1 ) ) !== FALSE ) {
+				Debug::Text('Matches dictionary word after first and last char is dropped: '. $password, __FILE__, __LINE__, __METHOD__, 10);
+				$strength = 1;
+			}
+		} else {
+			Debug::Text('WARNING: pspell extension is not enabled...', __FILE__, __LINE__, __METHOD__, 10);
+		}
 
 		//strength is a number 1-10;
 		$strength = $strength > 99 ? 99 : $strength;
@@ -2243,7 +2437,9 @@ class Misc {
 	}
 
 	static function redirectMobileBrowser() {
+		$desktop = 0;
 		extract( FormVariables::GetVariables( array('desktop') ) );
+
 		if ( !isset($desktop) ) {
 			$desktop = 0;
 		}
@@ -2388,6 +2584,7 @@ class Misc {
 		//					'key2' => 0.495,
 		//);
 		if ( is_array($percent_arr) AND count($percent_arr) > 0 ) {
+			$retarr = array();
 			$total = 0;
 			foreach( $percent_arr as $key => $distribution_percent ) {
 				$distribution_amount = bcmul( $amount, $distribution_percent, $precision );
@@ -2519,6 +2716,7 @@ class Misc {
 	}
 
 	static function getInstanceIdentificationString($primary_company, $system_settings ) {
+		$version_string = array();
 		$version_string[] = 'Company:';
 		$version_string[] = ( is_object($primary_company) ) ? $primary_company->getName() : 'N/A';
 		$version_string[] = 'Edition: '. getTTProductEditionName();
@@ -2550,78 +2748,13 @@ class Misc {
 		return str_replace( array('&', '"', '\'', '>', '<'), '', $str );
 	}
 
-	//Returns TRUE/FALSE if the identifier is within the staged rollout period.
-	static function getStagedRollout( $product_edition_id, $identifier, $original_release_date, $max_rollout_days = 10, $force = FALSE ) {
-		//Divide the max_rollout_days into 5 brackets.
-		//In the first 20% of the rollout period, update 1% of the customers.
-		//In the next 20% of the rollout period, update 25% of the customers.
-		//In the next 20% of the rollout period, update 50% of the customers.
-		//In the next 20% of the rollout period, update 75% of the customers.
-		//In the last 20% of the rollout period, update 100% of the customers.
-		$version_updated_date = TTDate::getBeginDayEpoch( $original_release_date );
-		$version_released_days = floor( TTDate::getDays( ( time() - $version_updated_date ) ) );
-		$days_remaining = ( $max_rollout_days - $version_released_days );
-		if ( $days_remaining < 0 ) {
-			$days_remaining = 0;
-		}
-
-		if ( $product_edition_id > 10 ) { //Pro and higher editions.
-			if ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.10 ) ) ) {
-				$percent_chance = 0;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.20 ) ) ) {
-				$percent_chance = 0;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.30 ) ) ) {
-				$percent_chance = 0;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.40 ) ) ) {
-				$percent_chance = 1;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.50 ) ) ) {
-				$percent_chance = 1;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.60 ) ) ) {
-				$percent_chance = 25;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.70 ) ) ) {
-				$percent_chance = 25;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.80 ) ) ) {
-				$percent_chance = 50;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.90 ) ) ) {
-				$percent_chance = 50;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 1.00 ) ) ) {
-				$percent_chance = 100;
-			}
-		} else {
-			//Community Edition, rollout faster, so any major bugs can be caught by them first.
-			if ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.20 ) ) ) {
-				$percent_chance = 1;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.40 ) ) ) {
-				$percent_chance = 25;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.60 ) ) ) {
-				$percent_chance = 50;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 0.80 ) ) ) {
-				$percent_chance = 75;
-			} elseif ( $days_remaining >= ( $max_rollout_days - ( $max_rollout_days * 1.00 ) ) ) {
-				$percent_chance = 100;
-			}
-		}
-
-		srand( hexdec( substr( $identifier, 0, 10 ) ) );
-		$random_trigger = rand( 1, 100 );
-		if ( $force == TRUE OR $random_trigger <= $percent_chance ) {
-			$retval = TRUE;
-		} else {
-			$retval = FALSE;
-		}
-
-		Debug::text('Identifier: '. $identifier .' Original Release Date: '. TTDate::getDate('DATE+TIME', $original_release_date ) .' Rollout Days: '. $max_rollout_days .' Days Remaining: '. $days_remaining .' Percent Chance: '. $percent_chance .' Force: '. (int)$force .' Result: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
-
-		return $retval;
-	}
-
 	static function checkValidImage( $file_data ) {
 		$mime_type = Misc::getMimeType( $file_data, TRUE );
 		if ( strpos( $mime_type, 'image' ) !== FALSE ) {
 			$file_size = strlen( $file_data );
 
 			//use getimagesize() to make sure image isn't too large and actually is an image.
-			$image_size = getimagesizefromstring( $file_data );
+			$size = getimagesizefromstring( $file_data );
 			Debug::Arr($size, 'Mime Type: '. $mime_type .' Bytes: '. $file_size .' Size: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( isset($size) AND isset($size[0]) AND isset($size[1]) ) {
@@ -2641,6 +2774,8 @@ class Misc {
 	}
 
 	static function formatAddress( $name, $address1 = FALSE, $address2 = FALSE, $city = FALSE, $province = FALSE, $postal_code = FALSE, $country = FALSE ) {
+		$retarr = array();
+		$city_arr = array();
 		if ( $name != '' ) {
 			$retarr[] = $name;
 		}
@@ -2665,7 +2800,7 @@ class Misc {
 			$city_arr[] = $postal_code;
 		}
 
-		if ( isset($city_arr) AND is_array($city_arr) ) {
+		if ( empty($city_arr) == FALSE ) {
 			$retarr[] = implode(' ', $city_arr);
 		}
 
@@ -2691,6 +2826,43 @@ class Misc {
 		}
 
 		return $retval;
+	}
+
+	/**
+	 * zips an array of files and returns a file array for download
+	 */
+	static function zip( $file_array, $zip_file_name = FALSE, $ignore_single_file = FALSE ) {
+		if ( !is_array( $file_array ) OR count( $file_array ) == 0 ) {
+			return $file_array;
+		}
+
+		if ( $ignore_single_file == TRUE AND ( count( $file_array ) == 1 OR key_exists( 'file_name', $file_array ) ) ) {
+			//if there's just one file don't bother zipping it.
+			foreach ( $file_array as $file ) {
+				return $file;
+			}
+		} else {
+			if ( $zip_file_name == '' ) {
+				$file_path_info = pathinfo( $file_array[key($file_array)]['file_name'] );
+				$zip_file_name = $file_path_info['filename'] . '.zip';
+			}
+
+			global $config_vars;
+			$tmp_file = tempnam( $config_vars['cache']['dir'], 'zip_' );
+			$zip = new ZipArchive();
+			$result = $zip->open( $tmp_file, ZIPARCHIVE::CREATE );
+			Debug::Text( 'Creating new zip file for download: ' . $zip_file_name . ' File Open Result: ' . $result, __FILE__, __LINE__, __METHOD__, 10 );
+
+			foreach ( $file_array as $file ) {
+				$zip->addFromString( $file['file_name'], $file['data'] );
+			}
+
+			$zip->close();
+			$ret_arr = array('file_name' => $zip_file_name, 'mime_type' => 'application/zip', 'data' => file_get_contents( $tmp_file ));
+			unlink( $tmp_file );
+
+			return $ret_arr;
+		}
 	}
 }
 ?>

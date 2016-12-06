@@ -5,8 +5,8 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 	hierarchy_level_api: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'HierarchyControlEditView.html';
 		this.permission_id = 'hierarchy';
 		this.viewId = 'HierarchyControl';
@@ -488,15 +488,3 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 
 } );
-
-HierarchyControlViewController.loadView = function() {
-
-	Global.loadViewSource( 'HierarchyControl', 'HierarchyControlView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

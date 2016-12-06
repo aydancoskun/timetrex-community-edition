@@ -9,6 +9,10 @@
 
 }
 
+.a-combobox > * {
+    pointer-events: none;
+}
+
 .a-combobox:hover .a-combobox-left-bg {
     background: url("../../../../images/combobox_up_left_down.png") no-repeat scroll 0 0 transparent;
     height: 24px;
@@ -152,7 +156,7 @@
 }
 
 .focus {
-    border: 1px dotted;
+    outline: 1px dotted;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;

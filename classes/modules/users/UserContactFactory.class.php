@@ -172,8 +172,10 @@ class UserContactFactory extends Factory {
 										'user_group' => FALSE,
 										'title' => FALSE,
 										'first_name' => 'FirstName',
+										'first_name_metaphone' => 'FirstNameMetaphone',
 										'middle_name' => 'MiddleName',
 										'last_name' => 'LastName',
+										'last_name_metaphone' => 'LastNameMetaphone',
 										'sex_id' => 'Sex',
 										'sex' => FALSE,
 										'ethnic_group_id' => 'EthnicGroup',
@@ -293,6 +295,25 @@ class UserContactFactory extends Factory {
 													50) ) {
 
 			$this->data['first_name'] = $first_name;
+			$this->setFirstNameMetaphone( $first_name );
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	function getFirstNameMetaphone() {
+		if ( isset($this->data['first_name_metaphone']) ) {
+			return $this->data['first_name_metaphone'];
+		}
+
+		return FALSE;
+	}
+	function setFirstNameMetaphone($first_name) {
+		$first_name = metaphone( trim($first_name) );
+
+		if ( $first_name != '' ) {
+			$this->data['first_name_metaphone'] = $first_name;
 
 			return TRUE;
 		}
@@ -358,6 +379,25 @@ class UserContactFactory extends Factory {
 													50) ) {
 
 			$this->data['last_name'] = $last_name;
+			$this->setLastNameMetaphone( $last_name );
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	function getLastNameMetaphone() {
+		if ( isset($this->data['last_name_metaphone']) ) {
+			return $this->data['last_name_metaphone'];
+		}
+
+		return FALSE;
+	}
+	function setLastNameMetaphone($last_name) {
+		$last_name = metaphone( trim($last_name) );
+
+		if ( $last_name != '' ) {
+			$this->data['last_name_metaphone'] = $last_name;
 
 			return TRUE;
 		}
@@ -1027,6 +1067,7 @@ class UserContactFactory extends Factory {
 
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

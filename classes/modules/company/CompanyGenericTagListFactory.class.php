@@ -86,7 +86,7 @@ class CompanyGenericTagListFactory extends CompanyGenericTagFactory implements I
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'status_id' => 'asc', 'name' => 'asc' );
+			$order = array( 'name' => 'asc' );
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -103,7 +103,7 @@ class CompanyGenericTagListFactory extends CompanyGenericTagFactory implements I
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict);
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -231,18 +231,17 @@ class CompanyGenericTagListFactory extends CompanyGenericTagFactory implements I
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-
+		
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
 
 		foreach ($lf as $obj) {
-			if ( $include_disabled == TRUE OR ( $include_disabled == FALSE ) ) {
-				$list[$obj->getID()] = $obj->getName();
-			}
+			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

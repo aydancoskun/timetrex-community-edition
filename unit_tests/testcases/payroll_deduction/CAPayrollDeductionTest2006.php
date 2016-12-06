@@ -50,14 +50,15 @@ class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
 		$this->company_id = PRIMARY_COMPANY_ID;
 
 		TTDate::setTimeZone('Etc/GMT+8'); //Force to non-DST timezone. 'PST' isnt actually valid.
+		TTi18n::setLocale('en_US', LC_ALL, TRUE ); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
-        return TRUE;
-    }
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
+		return TRUE;
+	}
 
 	public function mf($amount) {
 		return Misc::MoneyFormat($amount, FALSE);

@@ -175,11 +175,16 @@ class APITimeSheet extends APIFactory {
 					'punch_control_id' => TRUE,
 					'longitude' => TRUE,
 					'latitude' => TRUE,
+					'position_accuracy' => TRUE,
 					'date_stamp' => TRUE,
 					'pay_period_id' => TRUE,
 					'note' => TRUE,
 					'tainted' => TRUE,
 					'has_image' => TRUE,
+					'branch_id' => TRUE,
+					'department_id' => TRUE,
+					'job_id' => TRUE,
+					'job_item_id' => TRUE,
 					);
 
 			foreach( $plf as $p_obj ) {
@@ -261,12 +266,12 @@ class APITimeSheet extends APIFactory {
 					'override' => TRUE,
 					'note' => TRUE,
 					);
-			
+
 			if ( isset($wage_permission_children_ids) AND ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) ) {
 				$udt_columns['total_time_amount'] = TRUE;
 				$udt_columns['hourly_rate'] = TRUE;
 			}
-			
+
 			foreach( $udtlf as $udt_obj ) {
 				//Don't need to pass permission_children_ids, as Flex uses is_owner/is_child from the timesheet user record instead, not the punch record.
 				//$user_date_total = $udt_obj->getObjectAsArray( NULL, $data['filter_data']['permission_children_ids'] );
@@ -367,11 +372,11 @@ class APITimeSheet extends APIFactory {
 					$udt_columns['total_time_amount'] = TRUE;
 					$udt_columns['hourly_rate'] = TRUE;
 				}
-						
+
 				foreach( $udtlf as $udt_obj ) {
 					$pp_user_date_total_data[] = $udt_obj->getObjectAsArray( $udt_columns );
 				}
-				
+
 				$pay_period_accumulated_user_date_total_data = UserDateTotalFactory::calcAccumulatedTime( $pp_user_date_total_data, FALSE );
 				if ( isset($pay_period_accumulated_user_date_total_data['total']) ) {
 					$pay_period_accumulated_user_date_total_data = $pay_period_accumulated_user_date_total_data['total'];
@@ -409,7 +414,7 @@ class APITimeSheet extends APIFactory {
 					'exception_policy_type' => TRUE,
 					'pay_period_id' => TRUE,
 					);
-			
+
 			foreach( $elf as $e_obj ) {
 				$exception_data[] = $e_obj->getObjectAsArray( $exception_columns );
 			}
@@ -553,7 +558,7 @@ class APITimeSheet extends APIFactory {
 	 */
 	function getTimeSheetTotalData( $user_id, $base_date) {
 		$timesheet_data = $this->stripReturnHandler( $this->getTimeSheetData( $user_id, $base_date ) );
-		
+
 		if ( is_array( $timesheet_data ) ) {
 			$retarr = array(
 								'timesheet_dates' => $timesheet_data['timesheet_dates'],
@@ -605,7 +610,7 @@ class APITimeSheet extends APIFactory {
 							AND isset($user_ids[0]) AND $user_ids[0] > 0 ) {
 						$ulf->getByIdAndCompanyId( $user_ids, $this->getCurrentCompanyObject()->getId() );
 					} elseif ( $this->getPermissionObject()->Check('punch', 'edit') == TRUE ) { //Make sure they have the permissions to recalculate all employees.
-						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), TTi18n::gettext('Notice'), TTi18n::gettext('Recalculating Company TimeSheet'), $this->getCurrentUserObject()->getId(), 'user_date_total' );
+						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Recalculating Company TimeSheet'), $this->getCurrentUserObject()->getId(), 'user_date_total' );
 						$ulf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );
 						$recalculate_company = TRUE;
 					} else {
@@ -643,11 +648,30 @@ class APITimeSheet extends APIFactory {
 								) {
 
 								TTLog::addEntry( $u_obj->getId(), 500, TTi18n::gettext('Recalculating Employee TimeSheet').': '. $u_obj->getFullName() .' '. TTi18n::gettext('From').': '. TTDate::getDate('DATE', $start_date ) .' '.  TTi18n::gettext('To').': '. TTDate::getDate('DATE', $end_date ), $this->getCurrentUserObject()->getId(), 'user_date_total' );
-								$cp = TTNew('CalculatePolicy');
-								$cp->setUserObject( $u_obj );
-								$cp->addPendingCalculationDate( $start_date, $end_date );
-								$cp->calculate(); //This sets timezone itself.
-								$cp->Save();
+
+								$retry_max_attempts = 3;
+								$sleep = 5;
+								$retry_attempts = 0;
+								do {
+									try {
+										$cp = TTNew( 'CalculatePolicy' );
+										$cp->setUserObject( $u_obj );
+										$cp->addPendingCalculationDate( $start_date, $end_date );
+										$cp->calculate(); //This sets timezone itself.
+										$cp->Save();
+									} catch (Exception $e) {
+										Debug::text('WARNING: SQL query failed, likely due to transaction isolotion: Retry Attempt: '. $retry_attempts .' Sleep: '. $sleep, __FILE__, __LINE__, __METHOD__, 10);
+										$retry_attempts++;
+										sleep( $sleep );
+										continue;
+									}
+									break;
+								} while ( $retry_attempts <= $retry_max_attempts );
+
+								if ( $retry_attempts == $retry_max_attempts ) { //Allow retry_max_attempst to be set at 0 to prevent any retries and fail without an error.
+									Debug::text('ERROR: SQL query failed after max attempts: '. $retry_attempts, __FILE__, __LINE__, __METHOD__, 10);
+									throw new DBError($e);
+								}
 							}
 							//else {
 							//	Debug::text('Skipping inactive or terminated user: '. $u_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
@@ -699,7 +723,7 @@ class APITimeSheet extends APIFactory {
 
 			if ( $pptsvf->isValid() ) {
 				$pptsvf->Save( FALSE );
-			$pptsvlf->CommitTransaction();
+				$pptsvlf->CommitTransaction();
 
 				//return $this->returnHandler( TRUE );
 				return $this->returnHandler( $pptsvf->getId() );

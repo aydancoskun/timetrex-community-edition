@@ -1,7 +1,7 @@
 TaxSummaryReportViewController = ReportBaseViewController.extend( {
 
-	initialize: function() {
-		this.__super( 'initialize' );
+	initialize: function( options ) {
+		this.__super( 'initialize', options );
 		this.script_name = 'TaxSummaryReport';
 		this.viewId = 'TaxSummaryReport';
 		this.context_menu_name = $.i18n._( 'Tax Summary' );

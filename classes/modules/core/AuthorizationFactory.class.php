@@ -44,7 +44,7 @@ class AuthorizationFactory extends Factory {
 
 	protected $obj_handler = NULL;
 	protected $obj_handler_obj = NULL;
-	protected $hierarchy_parent_arr = NULL;
+	protected $hierarchy_arr = NULL;
 
 	function _getFactoryOptions( $name ) {
 
@@ -119,6 +119,10 @@ class AuthorizationFactory extends Factory {
 		return $variable_function_map;
 	}
 
+	function getCurrentUserObject() {
+		return $this->getGenericObject( 'UserListFactory', $this->getCurrentUser(), 'user_obj' );
+	}
+
 	//Stores the current user in memory, so we can determine if its the employee verifying, or a superior.
 	function getCurrentUser() {
 		if ( isset($this->tmp_data['current_user_id']) ) {
@@ -133,9 +137,10 @@ class AuthorizationFactory extends Factory {
 		return TRUE;
 	}
 
-	function getHierarchyParentArray() {
-		if ( is_array($this->hierarchy_parent_arr) ) {
-			return $this->hierarchy_parent_arr;
+
+	function getHierarchyArray() {
+		if ( is_array($this->hierarchy_arr) ) {
+			return $this->hierarchy_arr;
 		} else {
 			$user_id = $this->getCurrentUser();
 
@@ -153,10 +158,10 @@ class AuthorizationFactory extends Factory {
 					Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 					$hlf = TTnew( 'HierarchyListFactory' );
-					$this->hierarchy_parent_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $object_user_id, $this->getObjectType(), FALSE);
+					$this->hierarchy_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $object_user_id, $this->getObjectType(), FALSE);
 
-					Debug::Arr($this->hierarchy_parent_arr, ' Parent Arr: ', __FILE__, __LINE__, __METHOD__, 10);
-					return $this->hierarchy_parent_arr;
+					Debug::Arr($this->hierarchy_arr, ' Hierarchy Arr: ', __FILE__, __LINE__, __METHOD__, 10);
+					return $this->hierarchy_arr;
 				} else {
 					Debug::Text(' Could not find Object User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 				}
@@ -168,12 +173,95 @@ class AuthorizationFactory extends Factory {
 		return FALSE;
 	}
 
+
+	function getHierarchyChildLevelArray() {
+		$retval = array();
+
+		$user_id = $this->getCurrentUser();
+		$parent_arr = $this->getHierarchyArray();
+		if ( is_array( $parent_arr ) AND count( $parent_arr ) > 0 ) {
+			$next_level = FALSE;
+			foreach( $parent_arr as $level => $level_parent_arr ) {
+				if ( in_array( $user_id, $level_parent_arr ) ) {
+					$next_level = TRUE;
+					continue;
+				}
+
+				if ( $next_level == TRUE ) {
+					//Debug::Arr( $level_parent_arr, ' Child: Level: '. $level, __FILE__, __LINE__, __METHOD__, 10 );
+					$retval = array_merge( $retval, $level_parent_arr); //Append from all levels.
+				}
+			}
+		}
+
+		if ( count($retval) > 0 ) {
+			return $retval;
+		}
+
+		return FALSE;
+	}
+
+	function getHierarchyCurrentLevelArray() {
+		$retval = FALSE;
+
+		$user_id = $this->getCurrentUser();
+		$parent_arr = $this->getHierarchyArray();
+		if ( is_array( $parent_arr ) AND count( $parent_arr ) > 0 ) {
+			$next_level = FALSE;
+			foreach( $parent_arr as $level => $level_parent_arr ) {
+				if ( in_array( $user_id, $level_parent_arr ) ) {
+					$next_level = TRUE;
+					continue;
+				}
+
+				if ( $next_level == TRUE  ) { //Current level is alway one level lower, as this often gets called after the level has been changed.
+					$retval = $level_parent_arr;
+					//Debug::Arr( $level_parent_arr, ' Current: Level: ' . $level, __FILE__, __LINE__, __METHOD__, 10 );
+					break;
+				}
+			}
+		}
+
+		return $retval;
+	}
+
+	function getHierarchyParentLevelArray() {
+		$retval = FALSE;
+
+		$user_id = $this->getCurrentUser();
+		$parent_arr = array_reverse( (array)$this->getHierarchyArray() );
+		if ( is_array( $parent_arr ) AND count( $parent_arr ) > 0 ) {
+			$next_level = FALSE;
+			foreach( $parent_arr as $level => $level_parent_arr ) {
+				if ( is_array( $level_parent_arr ) AND in_array( $user_id, $level_parent_arr ) ) {
+					$next_level = TRUE;
+					continue;
+				}
+
+				//Since this loops in reverse, always assume the first element is the parent for cases where a suborindate may be submitting the object (ie: request) and it needs to go to the direct superiors.
+				if ( $next_level == TRUE ) {
+					//Debug::Arr( $level_parent_arr, ' Parents: Level: '. $level, __FILE__, __LINE__, __METHOD__, 10 );
+					$retval = $level_parent_arr;
+					break;
+				}
+			}
+
+			//If we get here without finding a parent, use the lowest lower parents by default.
+			if ( $next_level == FALSE ) {
+				reset($parent_arr);
+				$retval = $parent_arr[key($parent_arr)];
+			}
+		}
+
+		return $retval;
+	}
+
 	//This will return false if it can't find a hierarchy, or if its at the top level (1) and can't find a higher level.
 	function getNextHierarchyLevel() {
 		$retval = FALSE;
 
 		$user_id = $this->getCurrentUser();
-		$parent_arr = $this->getHierarchyParentArray();
+		$parent_arr = $this->getHierarchyArray();
 		if ( is_array($parent_arr) AND count($parent_arr) > 0 ) {
 			foreach( $parent_arr as $level => $level_parent_arr ) {
 				if ( in_array($user_id, $level_parent_arr) ) {
@@ -190,12 +278,13 @@ class AuthorizationFactory extends Factory {
 
 		return $retval;
 	}
+
 	function isValidParent() {
 		$user_id = $this->getCurrentUser();
-		$parent_arr = $this->getHierarchyParentArray();
+		$parent_arr = $this->getHierarchyArray();
 		if ( is_array($parent_arr) AND count($parent_arr) > 0 ) {
 			krsort($parent_arr);
-			foreach( $parent_arr as $level => $level_parent_arr ) {
+			foreach( $parent_arr as $level_parent_arr ) {
 				if ( in_array($user_id, $level_parent_arr) ) {
 					return TRUE;
 				}
@@ -209,7 +298,7 @@ class AuthorizationFactory extends Factory {
 
 	function isFinalAuthorization() {
 		$user_id = $this->getCurrentUser();
-		$parent_arr = $this->getHierarchyParentArray();
+		$parent_arr = $this->getHierarchyArray();
 		if ( is_array($parent_arr) AND count($parent_arr) > 0 ) {
 			//Check that level 1 parent exists
 			if ( isset($parent_arr[1]) AND in_array( $user_id, $parent_arr[1] ) ) {
@@ -353,11 +442,212 @@ class AuthorizationFactory extends Factory {
 				$this->obj_handler_obj->setStatus(55); //'AUTHORIZATION DECLINED'
 				$this->obj_handler_obj->setAuthorized(FALSE);
 			}
-			
+
 			return $this->obj_handler_obj;
-		}	
+		}
 	}
-	
+
+	function getEmailAuthorizationAddresses() {
+		$object_handler_user_id = $this->getObjectHandlerObject()->getUser(); //Object handler (request) user_id.
+
+		$is_final_authorization = $this->isFinalAuthorization();
+		$authorization_level = $this->getObjectHandlerObject()->getAuthorizationLevel(); //This is the *new* level, not the old level.
+
+		$hierarchy_current_level_arr = $this->getHierarchyCurrentLevelArray();
+		Debug::Arr( $hierarchy_current_level_arr, '  Authorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized() .' Is Final Auth: '. (int)$is_final_authorization .' Object Handler User ID: '. $object_handler_user_id, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $this->getAuthorized() == TRUE AND $authorization_level == 0 ) {
+			//Final authorization has taken place
+			//Email original submittor and all lower level superiors?
+			$user_ids = $this->getHierarchyChildLevelArray();
+			$user_ids[] = $object_handler_user_id;
+			//Debug::Arr($user_ids , '  aAuthorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized() .' Child: ' , __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			//Debug::Text('  bAuthorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized(), __FILE__, __LINE__, __METHOD__, 10);
+			//Final authorization has *not* yet taken place
+			if ( $this->getObjectHandlerObject()->getStatus() == 55 ) { //Declined
+				//Authorization declined. Email original submittor and all lower level superiors?
+				$user_ids = $this->getHierarchyChildLevelArray();
+				$user_ids[] = $object_handler_user_id;
+				//Debug::Arr($user_ids , '  b1Authorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized() .' Child: ', __FILE__, __LINE__, __METHOD__, 10);
+			} else {
+				//Authorized at a middle level, email current level superiors only so they know its waiting on them.
+				$user_ids = $this->getHierarchyParentLevelArray();
+				//Debug::Arr($user_ids , '  b3Authorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized() .' Parent: ', __FILE__, __LINE__, __METHOD__, 10);
+			}
+		}
+
+		//Remove the current authorizing user from the array, as they don't need to be notified as they are performing the action.
+		$user_ids = array_diff( (array)$user_ids, array( $this->getCurrentUser() ) ); //CurrentUser is currently logged in user.
+		if ( isset($user_ids) AND is_array($user_ids) AND count($user_ids) > 0 ) {
+			//Get user preferences and determine if they accept email notifications.
+			Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
+
+			$uplf = TTnew( 'UserPreferenceListFactory' );
+			$uplf->getByUserId( $user_ids );
+			if ( $uplf->getRecordCount() > 0 ) {
+				$retarr = array();
+				foreach( $uplf as $up_obj ) {
+					if ( $up_obj->getEnableEmailNotificationMessage() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
+						if ( $up_obj->getUserObject()->getWorkEmail() != '' AND $up_obj->getUserObject()->getWorkEmailIsValid() == TRUE ) {
+							$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getWorkEmail(), $up_obj->getUserObject() );
+						}
+
+						if ( $up_obj->getEnableEmailNotificationHome() AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getHomeEmail() != '' AND $up_obj->getUserObject()->getHomeEmailIsValid() == TRUE ) {
+							$retarr[] = Misc::formatEmailAddress( $up_obj->getUserObject()->getHomeEmail(), $up_obj->getUserObject() );
+						}
+					}
+				}
+
+				if ( isset($retarr) ) {
+					Debug::Arr($retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__, 10);
+					return array_unique($retarr);
+				}
+			}
+		}
+
+		return FALSE;
+	}
+
+	function emailAuthorization() {
+		Debug::Text('emailAuthorization: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$email_to_arr = $this->getEmailAuthorizationAddresses();
+		if ( $email_to_arr == FALSE ) {
+			return FALSE;
+		}
+
+		//Get from User Object so we can include more information in the message.
+		if ( is_object( $this->getCurrentUserObject() ) ) {
+			$u_obj = $this->getCurrentUserObject();
+		} else {
+			Debug::Text('From object does not exist: '. $this->getCurrentUser(), __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		$object_handler_user_obj = $this->getObjectHandlerObject()->getUserObject(); //Object handler (request) user_id.
+		$status_label = Option::getByKey( $this->getObjectHandlerObject()->getStatus(), Misc::trimSortPrefix( $this->getObjectHandlerObject()->getOptions('status') ) ); //PENDING, AUTHORIZED, DECLINED
+		switch( $this->getObjectType() ) {
+			case 90: //TimeSheet
+				$object_type_label = TTi18n::getText('TimeSheet');
+				$object_type_short_description = '';
+				$object_type_long_description = TTi18n::getText('Pay Period') .': '. TTDate::getDate('DATE', $this->getObjectHandlerObject()->getPayPeriodObject()->getStartDate() ) .' -> '. TTDate::getDate('DATE', $this->getObjectHandlerObject()->getPayPeriodObject()->getEndDate() );
+				break;
+			case 200: //Expense
+				$object_type_label = TTi18n::getText('Expense');
+				$object_type_short_description = '';
+				$object_type_long_description = TTi18n::getText('Incurred').': '. TTDate::getDate('DATE', $this->getObjectHandlerObject()->getIncurredDate() ) .' '. TTi18n::getText('for') .' '. $this->getObjectHandlerObject()->getGrossAmount();
+				break;
+			default:
+				$object_type_label = TTi18n::getText('Request');
+				$object_type_short_description = '';
+				$object_type_long_description = TTi18n::getText('Type').': '. Option::getByKey( $this->getObjectHandlerObject()->getType(), Misc::trimSortPrefix( $this->getObjectHandlerObject()->getOptions('type') ) ) .' '. TTi18n::getText('on').' '. TTDate::getDate('DATE', $this->getObjectHandlerObject()->getDateStamp() );
+				break;
+		}
+
+		$from = $reply_to = '"'. APPLICATION_NAME .' - '. $object_type_label .' '. TTi18n::gettext('Authorization') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>';
+
+		Debug::Text('To: '. implode(',', $email_to_arr), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('From: '. $from .' Reply-To: '. $reply_to, __FILE__, __LINE__, __METHOD__, 10);
+
+		//Define subject/body variables here.
+		$search_arr = array(
+				'#object_type#',
+				'#object_type_short_description#',
+				'#object_type_long_description#',
+				'#status#',
+
+				'#current_employee_first_name#',
+				'#current_employee_last_name#',
+
+				'#object_employee_first_name#',
+				'#object_employee_last_name#',
+				'#object_employee_default_branch#',
+				'#object_employee_default_department#',
+				'#object_employee_group#',
+				'#object_employee_title#',
+
+				'#company_name#',
+				'#link#',
+		);
+
+		$replace_arr = array(
+				$object_type_label,
+				$object_type_short_description,
+				$object_type_long_description,
+				$status_label,
+
+				$u_obj->getFirstName(),
+				$u_obj->getLastName(),
+
+				$object_handler_user_obj->getFirstName(),
+				$object_handler_user_obj->getLastName(),
+				( is_object( $object_handler_user_obj->getDefaultBranchObject() ) ) ? $object_handler_user_obj->getDefaultBranchObject()->getName() : NULL,
+				( is_object( $object_handler_user_obj->getDefaultDepartmentObject() ) ) ? $object_handler_user_obj->getDefaultDepartmentObject()->getName() : NULL,
+				( is_object( $object_handler_user_obj->getGroupObject() ) ) ? $object_handler_user_obj->getGroupObject()->getName() : NULL,
+				( is_object( $object_handler_user_obj->getTitleObject() ) ) ? $object_handler_user_obj->getTitleObject()->getName() : NULL,
+
+				( is_object( $object_handler_user_obj->getCompanyObject() ) ) ? $object_handler_user_obj->getCompanyObject()->getName() : NULL,
+				NULL,
+		);
+
+		$email_subject = '#object_type# by #object_employee_first_name# #object_employee_last_name# #status#' .' '. TTi18n::gettext('in') .' '. APPLICATION_NAME;
+
+		$email_body = TTi18n::gettext('*DO NOT REPLY TO THIS EMAIL - PLEASE USE THE LINK BELOW INSTEAD*')."\n\n";
+		$email_body .= '#object_type# by #object_employee_first_name# #object_employee_last_name# #status#' .' '. TTi18n::gettext('in') .' '. APPLICATION_NAME."\n";
+		$email_body .= ( $replace_arr[2] != '' ) ? '#object_type_long_description#'."\n" : NULL;
+		$email_body .= "\n";
+		$email_body .= ( $replace_arr[8] != '' ) ? TTi18n::gettext('Default Branch').': #object_employee_default_branch#'."\n" : NULL;
+		$email_body .= ( $replace_arr[9] != '' ) ? TTi18n::gettext('Default Department').': #object_employee_default_department#'."\n" : NULL;
+		$email_body .= ( $replace_arr[10] != '' ) ? TTi18n::gettext('Group').': #object_employee_group#'."\n" : NULL;
+		$email_body .= ( $replace_arr[11] != '' ) ? TTi18n::gettext('Title').': #object_employee_title#'."\n" : NULL;
+
+		$email_body .= TTi18n::gettext('Link').': <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>';
+
+		$email_body .= ( $replace_arr[12] != '' ) ? "\n\n\n".TTi18n::gettext('Company').': #company_name#'."\n" : NULL; //Always put at the end
+
+		$subject = str_replace( $search_arr, $replace_arr, $email_subject );
+		Debug::Text('Subject: '. $subject, __FILE__, __LINE__, __METHOD__, 10);
+
+		$headers = array(
+				'From'		=> $from,
+				'Subject'	=> $subject,
+				//Reply-To/Return-Path are handled in TTMail.
+		);
+
+		$body = '<html><body><pre>'.str_replace( $search_arr, $replace_arr, $email_body ).'</pre></body></html>';
+		Debug::Text('Body: '. $body, __FILE__, __LINE__, __METHOD__, 10);
+
+		$mail = new TTMail();
+		$mail->setTo( $email_to_arr );
+		$mail->setHeaders( $headers );
+
+		@$mail->getMIMEObject()->setHTMLBody($body);
+
+		$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
+		$retval = $mail->Send();
+
+		if ( $retval == TRUE ) {
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Email Message to').': '. implode(', ', $email_to_arr), NULL, $this->getTable() );
+			return TRUE;
+		}
+
+		return TRUE; //Always return true
+	}
+
+	//Used by Request/TimeSheetVerification/Expense when initially saving a record to notify the immediate superiors, rather than using the message notification.
+	static function emailAuthorizationOnInitialObjectSave($current_user_id, $object_type_id, $object_id) {
+		$authorization_obj = TTNew('AuthorizationFactory');
+		$authorization_obj->setObjectType( $object_type_id );
+		$authorization_obj->setObject( $object_id );
+		$authorization_obj->setCurrentUser( $current_user_id );
+		$authorization_obj->setAuthorized( TRUE );
+		$authorization_obj->emailAuthorization(); //Don't save this...
+
+		return TRUE;
+	}
+
+
 	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getDeleted() === FALSE
 				AND $this->isFinalAuthorization() === FALSE
@@ -376,11 +666,11 @@ class AuthorizationFactory extends Factory {
 
 		return TRUE;
 	}
-	
+
 	function preSave() {
 		//Debug::Text(' Calling preSave!: ', __FILE__, __LINE__, __METHOD__, 10);
 		$this->StartTransaction();
-		
+
 		return TRUE;
 	}
 
@@ -389,7 +679,15 @@ class AuthorizationFactory extends Factory {
 			if ( is_object( $this->getObjectHandlerObject() ) AND $this->getObjectHandlerObject()->isValid() == TRUE ) {
 				Debug::text('  Object Valid...', __FILE__, __LINE__, __METHOD__, 10);
 				//Return true if object saved correctly.
-				$retval = $this->getObjectHandlerObject()->Save();
+				$retval = $this->getObjectHandlerObject()->Save( FALSE );
+				if ( $this->getObjectHandlerObject()->isValid() == FALSE ) {
+					Debug::text('  Object postSave validation FAILED!', __FILE__, __LINE__, __METHOD__, 10);
+					$this->Validator->merge( $this->getObjectHandlerObject()->Validator );
+				} else {
+					Debug::text('  Object postSave validation SUCCESS!', __FILE__, __LINE__, __METHOD__, 10);
+					$this->emailAuthorization();
+				}
+
 				if ( $retval === TRUE ) {
 					$this->CommitTransaction();
 					return TRUE;
@@ -437,6 +735,7 @@ class AuthorizationFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

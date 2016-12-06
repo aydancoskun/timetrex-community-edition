@@ -305,6 +305,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 		$aplf = new AbsencePolicyListFactory();
 		$aplf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -313,7 +314,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 			$list[$ap_obj->getID()] = $ap_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -325,6 +326,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -333,7 +335,7 @@ class AbsencePolicyListFactory extends AbsencePolicyFactory implements IteratorA
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

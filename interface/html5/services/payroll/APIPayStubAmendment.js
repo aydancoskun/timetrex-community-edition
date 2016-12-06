@@ -45,7 +45,11 @@ var APIPayStubAmendment = ServiceCaller.extend( {
 
 	calcAmount: function() {
 		return this.argumentsHandler( this.className, 'calcAmount', arguments );
-	}
+	},
+
+	exportPayStubAmendment: function() {
+		return this.argumentsHandler( this.className, 'exportPayStubAmendment', arguments );
+	},
 
 
 

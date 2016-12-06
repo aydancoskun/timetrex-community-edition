@@ -67,9 +67,9 @@ DONE-C:30-Dec-15				'VT' => 'Vermont',		- http://tax.vermont.gov/business-and-co
 DONE-C:14-Dec-15-NOCHANGE-	'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
 C:30-Dec-15				'DE' => 'Delaware',		- http://revenue.delaware.gov/services/WITBk.shtml *http://revenue.delaware.gov/services/wit_folder/section17.shtml
 C:30-Dec-15				'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
-DONE-C:14-Dec-15				'KY' => 'Kentucky', 	- http://revenue.ky.gov/wht/ *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method)
+DONE-C:14-Dec-15				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method)
 DONE-C:21-Dec-15-NOCHANGE-		'MD' => 'Maryland',		- http://business.marylandtaxes.com/taxinfo/withholding/default.asp *Maryland Withholding Guide* - Use 1.25% LOCAL INCOME TAX tables, *minus 1.25%*, manually calculate each bracket.  **PAY ATTENTION TO FILING STATUS AND WHICH SIDE ITS ON** Use tax_table_bracket_calculator.ods. See MD.class.php for more information.
-DONE-C:14-Dec-15				'ME' => 'Maine',		- http://www.state.me.us/revenue/forms/with/2013.htm -- Check each year on the right of the page.
+DONE-C:14-Dec-15				'ME' => 'Maine',		- http://www.state.me.us/revenue/forms/with/2016.htm -- Check each year on the right of the page.
 DONE-C:14-Dec-15				'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
 DONE-C:21-Dec-15				'NC' => 'North Carolina'- http://www.dornc.com/taxes/wh_tax/index.html *Income Tax Withholding Tables & Instructions for Employers, NC30
 DONE-C:30-Dec-15				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
@@ -80,7 +80,7 @@ DONE-C:21-Dec-15				'MA' => 'Massachusetts' - http://www.mass.gov/dor/individual
 DONE-C:18-Jan-16				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
 
 //Change less often
-C:30-Dec-15				'GA' => 'Georgia',		- http://dor.georgia.gov/tax-guides *Employers Tax Guide
+C:30-Dec-15				'GA' => 'Georgia',		- http://dor.georgia.gov/withholding-tax-information or http://dor.georgia.gov/documents/2016-employer-tax-guide *Employers Tax Guide
 C:30-Dec-15				'HI' => 'Hawaii',		- http://tax.hawaii.gov/forms/a1_b1_5whhold/ *Employers Tax Guide (Booklet A)
 DONE-C:21-Dec-15-NOCHANGE-	'NE' => 'Nebraska',		- http://www.revenue.nebraska.gov/withhold.html *Nebraska  Circular EN, Income Tax Withholding on Wages
 DONE-C:14-Dec-15-NOCHANGE-	'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation

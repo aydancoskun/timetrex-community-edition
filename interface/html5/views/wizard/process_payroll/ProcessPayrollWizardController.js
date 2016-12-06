@@ -8,8 +8,8 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 	alert_message: $.i18n._( 'Please select one or more pay periods in the list above to enable icons.' ),
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 
 		this.title = $.i18n._( 'Payroll Processing Wizard' );
 		this.steps = 9;

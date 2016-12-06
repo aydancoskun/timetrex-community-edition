@@ -101,8 +101,6 @@ class CompanyGenericTagMapFactory extends Factory {
 	function setObjectID($id) {
 		$id = trim($id);
 
-		$pglf = TTnew( 'PolicyGroupListFactory' );
-
 		if ( $this->Validator->isNumeric(	'object_id',
 										$id,
 										TTi18n::gettext('Object ID is invalid')
@@ -145,11 +143,13 @@ class CompanyGenericTagMapFactory extends Factory {
 				Debug::text('Setting Tags: Company: '. $company_id .' Object Type: '. $object_type_id .' Object: '. $object_type_id .' Tags: '. $tags, __FILE__, __LINE__, __METHOD__, 10);
 
 				$existing_tags = CompanyGenericTagFactory::getOrCreateTags( $company_id, $object_type_id, $parsed_tags );
-				$existing_tag_ids = array_values( (array)$existing_tags );
+				
+				//$existing_tag_ids = array_values( (array)$existing_tags );
 				//Debug::Arr($existing_tags, 'Existing Tags: ', __FILE__, __LINE__, __METHOD__, 10);
 				//Debug::Arr($existing_tag_ids, 'Existing Tag IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Get list of mapped Tag IDs that need to be deleted.
+				$del_tag_ids = array();
 				if ( isset($parsed_tags['delete']) ) {
 					foreach( $parsed_tags['delete'] as $del_tag ) {
 						$del_tag = strtolower($del_tag);
@@ -168,7 +168,7 @@ class CompanyGenericTagMapFactory extends Factory {
 					$id = $obj->getTagID();
 					Debug::text('Object Type ID: '. $object_type_id .' Object ID: '. $obj->getObjectID() .' Tag ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
-					if ( isset($del_tag_ids) AND in_array($id, $del_tag_ids) ) {
+					if ( in_array($id, $del_tag_ids) == TRUE ) {
 						Debug::text('Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$obj->Delete();
 					} else {

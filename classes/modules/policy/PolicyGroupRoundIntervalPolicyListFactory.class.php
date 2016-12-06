@@ -107,11 +107,12 @@ class PolicyGroupRoundIntervalPolicyListFactory extends PolicyGroupRoundInterval
 
 		$pgriplf->getByPolicyGroupId($id);
 
+		$list = array();
 		foreach ($pgriplf as $obj) {
 			$list[$obj->getRoundIntervalPolicy()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE  ) {
 			return $list;
 		}
 

@@ -65,9 +65,9 @@ var ApplicationRouter = Backbone.Router.extend( {
 		LocalCacheData.all_url_args = args;
 		if ( view_id == 'Install' ) {
 			if ( LocalCacheData.loadViewRequiredJSReady ) {
-				IndexViewController.openWizard( 'InstallWizard', null, function() {
-					// need to link to the login interface.
-				} );
+			IndexViewController.openWizard( 'InstallWizard', null, function() {
+				// need to link to the login interface.
+			} );
 			} else {
 				auto_login_timer = setInterval( function() {
 					if ( timeout_count == 100 ) {
@@ -230,7 +230,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 				$( 'body' ).removeClass( 'login-bg' );
 				$( 'body' ).addClass( 'application-bg' );
 			}
-
 			Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
 
 				var permission_id = view_id;
@@ -278,19 +277,19 @@ var ApplicationRouter = Backbone.Router.extend( {
 				Global.bottomFeedbackContainer().find( 'img' ).each( function() {
 					// Error: Uncaught ReferenceError: path is not defined in interface/html5/IndexController.js?v=9.0.6-20151231-155152 line 270
 					if ( path ) {
-						if ( Global.isSet( LocalCacheData.getLoginUser().feedback_rating ) && $( this ).attr( 'data-feedback' ) === LocalCacheData.getLoginUser().feedback_rating ) {
-							$( this ).addClass( 'current' ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
-						}
-						$( this ).unbind( 'click' ).bind( 'click', function() {
-							$( this ).TFeedback();
+					if ( Global.isSet( LocalCacheData.getLoginUser().feedback_rating ) && $( this ).attr( 'data-feedback' ) === LocalCacheData.getLoginUser().feedback_rating ) {
+						$( this ).addClass( 'current' ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
+					}
+					$( this ).unbind( 'click' ).bind( 'click', function() {
+						$( this ).TFeedback();
 						} );
-						$( this ).hover( function() {
-							$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
-						}, function() {
-							if ( !$( this ).hasClass( 'current' ) ) {
-								$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '.png' );
-							}
-						} )
+					$( this ).hover( function() {
+						$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '_light.png' );
+					}, function() {
+						if ( !$( this ).hasClass( 'current' ) ) {
+							$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '.png' );
+						}
+					} )
 					}
 				} );
 			}
@@ -519,7 +518,7 @@ IndexViewController = Backbone.View.extend( {
 	el: 'body', //So we can add event listener for all elements
 	router: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
 		this.router = new ApplicationRouter();
 
@@ -636,20 +635,47 @@ IndexViewController.openReport = function( parent_view_controller, view_name, id
 IndexViewController.openEditView = function( parent_view_controller, view_name, id ) {
 	var view_controller = null;
 
-	if ( !PermissionManager.checkTopLevelPermission( view_name ) ) {
+	if ( !PermissionManager.checkTopLevelPermission( view_name ) && view_name !== 'Map' ) {
 		TAlertManager.showAlert( 'Permission denied' );
 		return;
 	}
 
-	if ( LocalCacheData.current_open_edit_only_controller ) {
-		LocalCacheData.current_open_edit_only_controller.onCancelClick();
-	}
+	// Added originally in 83a1df72 for issue #1805 but caused a bug mentioned in issue #2091 the steps to reproduce the bug are as follows:
+	// 1. Go to invoice > client contacts and highlite a Client Contact 2. Click the "Edit Client" button on the ribbon menu
+	// 3. Click the Invoices tab 4. Edit an invoice 5. Click Payment on the ribbon menu 6. Click Cancel to bring you back to the invoice edit scren, then Cancel again to go back to the Invoices tab on the client screen.
+	// 7. You won't be back there. The Client screen will be missing.
+	//if ( LocalCacheData.current_open_edit_only_controller ) {
+		//LocalCacheData.current_open_edit_only_controller.onCancelClick();
+	//}
 
 	// track edit view only view
 	Global.trackView( view_name );
-
 	switch ( view_name ) {
-
+		case "Request":
+			Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
+				/* jshint ignore:start */
+				view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
+				view_controller.parent_view_controller = parent_view_controller;
+				/* jshint ignore:end */
+				//id would be data array here
+				view_controller.openAddView(id);
+				LocalCacheData.current_open_edit_only_controller = view_controller;
+			});
+			break;
+		case "Map":
+			//require(['async!' + APIGlobal.pre_login_data.map_api_url + '!callback'], function () {
+			require(['leaflet', 'leaflet-timetrex', 'leaflet-providers', 'leaflet-routing', 'measurement'], function() {
+				Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
+					/* jshint ignore:start */
+					view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
+					/* jshint ignore:end */
+					view_controller.parent_view_controller = parent_view_controller;
+					//id would be punch array here
+					view_controller.openEditView(id);
+					LocalCacheData.current_open_edit_only_controller = view_controller;
+				});
+			} );
+			break;
 		default:
 			Global.loadViewSource( view_name, view_name + 'ViewController.js', function() {
 				/* jshint ignore:start */

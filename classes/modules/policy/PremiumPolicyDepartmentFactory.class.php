@@ -67,8 +67,6 @@ class PremiumPolicyDepartmentFactory extends Factory {
 	function setPremiumPolicy($id) {
 		$id = trim($id);
 
-		$pplf = TTnew( 'PremiumPolicyListFactory' );
-
 		if (	$id == 0
 				OR
 				$this->Validator->isNumeric(	'premium_policy',

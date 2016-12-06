@@ -105,6 +105,7 @@ class APIUserLicense extends APIFactory {
 
 			$this->setPagerObject( $ullf );
 
+			$retarr = array();
 			foreach( $ullf as $s_obj ) {
 			
 				$retarr[] = $s_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']	);
@@ -118,6 +119,17 @@ class APIUserLicense extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportUserLicense( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getUserLicense( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_license', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -379,6 +391,7 @@ class APIUserLicense extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id']); //Clear fields that can't be copied				
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setUserLicense( $src_rows ); //Save copied rows

@@ -45,6 +45,10 @@ var APIKPI = ServiceCaller.extend( {
 
 	},
 
+	exportKPI: function() {
+		return this.argumentsHandler( this.className, 'exportKPI', arguments );
+	},
+
 	generateInvoices: function() {
 
 		return this.argumentsHandler( this.className, 'generateInvoices', arguments );

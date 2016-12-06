@@ -97,8 +97,6 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 			$strict = TRUE;
 		}
 
-		$suf = new StationUserFactory();
-
 		$ph = array(
 					'id' => (int)$id,
 					);
@@ -203,7 +201,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 						where
 							station_id = ?
 							AND deleted = 0';
-			$query .= $this->getSortSQL( $order );
+			$query .= $this->getSortSQL( $order, $strict );
 
 			$this->ExecuteSQL( $query, $ph );
 
@@ -240,7 +238,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 					where	company_id = ?
 						AND	station_id = ?
 						AND deleted = 0';
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -437,6 +435,7 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 		$blf = new BranchListFactory();
 		$blf->getByCompanyId($company_id);
 
+		$branch_list = array();
 		$branch_list[0] = '--';
 
 		foreach ($blf as $branch) {

@@ -45,7 +45,7 @@ class RegularTimePolicyFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $contributing_shift_policy_obj = NULL;
 	protected $pay_code_obj = NULL;
-	
+
 	function _getFactoryOptions( $name ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -138,7 +138,7 @@ class RegularTimePolicyFactory extends Factory {
 										'company_id' => 'Company',
 										'name' => 'Name',
 										'description' => 'Description',
-										
+
 										'contributing_shift_policy_id' => 'ContributingShiftPolicy',
 										'contributing_shift_policy' => FALSE,
 
@@ -171,7 +171,7 @@ class RegularTimePolicyFactory extends Factory {
 										'job_item_selection_type_id' => 'JobItemSelectionType',
 										'job_item_selection_type' => FALSE,
 										'exclude_default_job_item' => 'ExcludeDefaultJobItem',
-										
+
 										'in_use' => FALSE,
 										'deleted' => 'Deleted',
 										);
@@ -217,9 +217,14 @@ class RegularTimePolicyFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
 					'company_id' => (int)$this->getCompany(),
-					'name' => strtolower($name),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
@@ -708,6 +713,7 @@ class RegularTimePolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

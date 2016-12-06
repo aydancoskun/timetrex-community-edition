@@ -725,7 +725,6 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 			return FALSE;
 		}
 
-		$pplf = new PayPeriodListFactory();
 		$pslf = new PayStubListFactory();
 
 		$ph = array(
@@ -1325,11 +1324,9 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		
 		$psaf = new PayStubAmendmentFactory();
 		$ppf = new PayPeriodFactory();
-		$ppsuf = new PayPeriodScheduleUserFactory();
 		$psf = new PayStubFactory();
 		$uf = new UserFactory();
-		$udtf = new UserDateTotalFactory();
-
+		
 		$ph = array(
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),

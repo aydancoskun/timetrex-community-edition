@@ -43,14 +43,14 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_objs = NULL;
 	protected $pay_stub_account_link_arr = NULL;
 
-    public function setUp() {
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function setUp() {
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$dd = new DemoData();
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$dd->createCurrency( $this->company_id, 10 );
 
@@ -72,16 +72,16 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//$this->deleteAllSchedules();
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
 	function getPayStubAccountLinkArray() {
 		$this->pay_stub_account_link_arr = array(
@@ -117,13 +117,13 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTimeZone('PST8PDT');
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4*3600) );
-		$ppsf->setMaximumShiftTime( (16*3600) );
+		$ppsf->setNewDayTriggerTime( (4 * 3600) );
+		$ppsf->setMaximumShiftTime( (16 * 3600) );
 
 		$ppsf->setEnableInitialPayPeriods( FALSE );
 		if ( $ppsf->isValid() ) {
 			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$ppsf->setUser( array($this->user_id) );
 			$ppsf->Save();
@@ -133,7 +133,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 
@@ -150,14 +150,14 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					//$end_date = TTDate::getBeginYearEpoch();
-					$end_date = strtotime('01-Jan-06')-86400;
+					$end_date = (strtotime('01-Jan-06') - 86400);
 				} else {
-					$end_date = $end_date + ( (86400*14) );
+					$end_date = ($end_date + ( (86400 * 14) ));
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -246,36 +246,63 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		//
 		//So if an employee is hired and terminated on the same day, and is salary, they should get one day pay.
 
-		//proRateSalary($salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $termination_date )
+		//									 proRateSalary($salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $termination_date )
 		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('13-Aug-2016'), FALSE );
 		$this->assertEquals( $pro_rated_salary, '1000.00' );
 
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('13-Aug-2016'), strtotime('13-Aug-2016') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('13-Aug-2016'), FALSE, strtotime('13-Aug-2016') );
 		$this->assertEquals( $pro_rated_salary, '1000.00' );
 
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('13-Aug-2016 11:59:59PM'), strtotime('13-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('13-Aug-2016 11:59:59PM'), FALSE, strtotime('13-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '1000.00' );
 
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('10-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '1000.00' );
 
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('02-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('02-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('10-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '900.00' );
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('06-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('06-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('10-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '500.00' );
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('10-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('10-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('10-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '100.00' );
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('11-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('10-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('11-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('10-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '0.00' );
 
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('09-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('09-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '900.00' );
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('05-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('05-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '500.00' );
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('01-Aug-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('01-Aug-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '100.00' );
-		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('31-Jul-2016 9:00AM') );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016 6:00AM'), FALSE, strtotime('01-Aug-2016 12:00:00AM'), strtotime('10-Aug-2016 11:59:59PM'), FALSE, strtotime('31-Jul-2016 9:00AM') );
 		$this->assertEquals( $pro_rated_salary, '0.00' );
+
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('10-Aug-2016'), strtotime('01-Aug-2016 9:00AM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '1000.00' );
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('11-Aug-2016'), strtotime('02-Aug-2016 9:00AM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '900.00' );
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Jul-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('11-Aug-2016'), strtotime('02-Aug-2016 9:00AM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '900.00' );
+
+		//
+		//Test changing salary in the middle of a pay period.
+		//
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('05-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('11-Aug-2016'), strtotime('01-Aug-2016 9:00AM'), strtotime('11-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '600.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Jul-2016'), strtotime('05-Aug-2016'), strtotime('01-Aug-2016'), strtotime('11-Aug-2016'), strtotime('01-Aug-2016 9:00AM'), strtotime('10-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '400.00' );
+
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('10-Aug-2016 11:59:59PM') );
+		$this->assertEquals( $pro_rated_salary, '1000.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('02-Aug-2016 9:00AM'), strtotime('08-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '700.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('05-Aug-2016'), FALSE, strtotime('01-Aug-2016'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('02-Aug-2016 9:00AM'), strtotime('08-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '400.00' );
+		$pro_rated_salary = UserWageFactory::proRateSalary( 1000.00, strtotime('01-Jul-2016'), strtotime('05-Aug-2016'), strtotime('01-Aug-2016'), strtotime('10-Aug-2016 11:59:59PM'), strtotime('02-Aug-2016 9:00AM'), strtotime('08-Aug-2016 9:00AM') );
+		$this->assertEquals( $pro_rated_salary, '300.00' );
 
 		return TRUE;
 	}
@@ -331,7 +358,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -429,7 +456,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -484,8 +511,8 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		//Start 6 pay periods from the last one. Should be beginning/end of December,
 		//Its the TRANSACTION date that counts
-		$start_pay_period_id = count($this->pay_period_objs)-6;
-		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__,10);
+		$start_pay_period_id = (count($this->pay_period_objs) - 6);
+		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		//
 		// First Pay Stub
@@ -533,7 +560,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -588,7 +615,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 
 		$pay_stub->setDefaultDates();
@@ -621,7 +648,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -672,7 +699,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+2]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 
 		$pay_stub->setDefaultDates();
@@ -706,7 +733,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
 			$pay_stub_id = $pay_stub->Save();
-			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
@@ -760,8 +787,8 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		//Start 6 pay periods from the last one. Should be beginning/end of December,
 		//Its the TRANSACTION date that counts
-		$start_pay_period_id = count($this->pay_period_objs)-6;
-		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__,10);
+		$start_pay_period_id = (count($this->pay_period_objs) - 6);
+		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		//
 		// First Pay Stub
@@ -810,7 +837,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -865,7 +892,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 		$pay_stub->setRun( 1 );
 
@@ -898,7 +925,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -948,7 +975,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 		$pay_stub->setRun( 2 );
 
@@ -981,7 +1008,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -1031,7 +1058,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 		$pay_stub->setRun( 3 );
 
@@ -1064,7 +1091,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -1114,7 +1141,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+2]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 		$pay_stub->setRun( 1 );
 
@@ -1149,7 +1176,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
 			$pay_stub_id = $pay_stub->Save();
-			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
@@ -1202,8 +1229,8 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		//Start 6 pay periods from the last one. Should be beginning/end of December,
 		//Its the TRANSACTION date that counts
-		$start_pay_period_id = count($this->pay_period_objs)-6;
-		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__,10);
+		$start_pay_period_id = (count($this->pay_period_objs) - 6);
+		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		//
 		// First Pay Stub
@@ -1252,7 +1279,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -1307,7 +1334,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 		$pay_stub->setRun( 1 );
 
@@ -1340,7 +1367,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -1390,7 +1417,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 		$pay_stub->setRun( 2 );
 
@@ -1423,7 +1450,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -1476,7 +1503,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 		$pay_stub->setRun( 3 );
 
@@ -1511,7 +1538,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -1558,7 +1585,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+2]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 		$pay_stub->setRun( 1 );
 
@@ -1593,7 +1620,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
 			$pay_stub_id = $pay_stub->Save();
-			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
@@ -1644,8 +1671,8 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		//Start 6 pay periods from the last one. Should be beginning/end of December,
 		//Its the TRANSACTION date that counts
-		$start_pay_period_id = count($this->pay_period_objs)-6;
-		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__,10);
+		$start_pay_period_id = (count($this->pay_period_objs) - 6);
+		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		//
 		// First Pay Stub
@@ -1688,7 +1715,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$first_pay_stub_id = $pay_stub_id = $pay_stub->Save();
 		}
 
@@ -1739,7 +1766,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 
 		$pay_stub->setDefaultDates();
@@ -1772,7 +1799,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$second_pay_stub_id = $pay_stub_id = $pay_stub->Save();
 		}
 
@@ -1821,7 +1848,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+2]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 
 		$pay_stub->setDefaultDates();
@@ -1855,7 +1882,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
 			$third_pay_stub_id = $pay_stub_id = $pay_stub->Save();
-			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
@@ -1979,7 +2006,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		//
 		// Confirm YTD values in second pay stub are correct
 		//
-		Debug::Text('First Pay Stub ID: '. $first_pay_stub_id .' Second Pay Stub ID: '. $second_pay_stub_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('First Pay Stub ID: '. $first_pay_stub_id .' Second Pay Stub ID: '. $second_pay_stub_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$pse_arr = $this->getPayStubEntryArray( $second_pay_stub_id );
 		//Debug::Arr($pse_arr, 'Second Pay Stub Entry Arr: ', __FILE__, __LINE__, __METHOD__,10);
@@ -2068,8 +2095,8 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		//Start 6 pay periods from the last one. Should be beginning/end of December,
 		//Its the TRANSACTION date that counts
-		$start_pay_period_id = count($this->pay_period_objs)-8;
-		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__,10);
+		$start_pay_period_id = (count($this->pay_period_objs) - 8);
+		Debug::text('Starting Pay Period: '. TTDate::getDate('DATE+TIME', $this->pay_period_objs[$start_pay_period_id]->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
 		//
 		// First Pay Stub
@@ -2116,7 +2143,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -2172,7 +2199,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+1]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 1)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 
 		$pay_stub->setDefaultDates();
@@ -2205,7 +2232,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
-			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub_id = $pay_stub->Save();
 		}
 
@@ -2254,7 +2281,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub = new PayStubFactory();
 		$pay_stub->setUser( $this->user_id );
 		$pay_stub->setCurrency( $pay_stub->getUserObject()->getCurrency() );
-		$pay_stub->setPayPeriod( $this->pay_period_objs[$start_pay_period_id+2]->getId() );
+		$pay_stub->setPayPeriod( $this->pay_period_objs[($start_pay_period_id + 2)]->getId() );
 		$pay_stub->setStatus( 10 ); //New
 
 		$pay_stub->setDefaultDates();
@@ -2288,7 +2315,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
 			$pay_stub_id = $pay_stub->Save();
-			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::text('Pay Stub is valid, final save, ID: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );

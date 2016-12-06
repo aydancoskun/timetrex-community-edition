@@ -279,12 +279,17 @@ class PayPeriodScheduleFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => $name,
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
-		$query = 'select id from '. $this->getTable() .' where company_id = ? AND name = ? AND deleted=0';
+		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
 		$pay_period_schedule_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($pay_period_schedule_id, 'Unique Pay Period Schedule ID: '. $pay_period_schedule_id, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -842,11 +847,12 @@ class PayPeriodScheduleFactory extends Factory {
 	function getUser() {
 		$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
 		$ppsulf->getByPayPeriodScheduleId( $this->getId() );
+		$user_list = array();
 		foreach ($ppsulf as $pay_period_schedule) {
 			$user_list[] = $pay_period_schedule->getUser();
 		}
 
-		if ( isset($user_list) ) {
+		if ( empty($user_list) == FALSE ) {
 			return $user_list;
 		}
 
@@ -949,7 +955,6 @@ class PayPeriodScheduleFactory extends Factory {
 		//Debug::text('Primary Date: '. $this->getPrimaryDate() ." - ". TTDate::getDate('DATE+TIME', $this->getPrimaryDate() ), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('Secondary Date: '. $this->getSecondaryDate() ." - ". TTDate::getDate('DATE+TIME', $this->getPrimaryDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
-		$last_pay_period_is_new = FALSE;
 		if ( $end_date != '' AND $end_date != 0 ) {
 			Debug::text('End Date is set: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 			$last_pay_period_end_date = $end_date;
@@ -959,7 +964,6 @@ class PayPeriodScheduleFactory extends Factory {
 			$pplf->getByPayPeriodScheduleId( $this->getId(), NULL, NULL, NULL, array('start_date' => 'desc') );
 			$last_pay_period = $pplf->getCurrent();
 			if ( $last_pay_period->isNew() ) {
-				$last_pay_period_is_new = TRUE;
 
 				Debug::text('No Previous pay periods...', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1506,7 +1510,6 @@ class PayPeriodScheduleFactory extends Factory {
 			$this->setAnchorDate( ( TTDate::parseDateTime($example_dates[0]['start_date']) - 86400 ) ); //Anchor date one day before first start date.
 		}
 
-		$annual_pay_periods = $this->calcAnnualPayPeriods( $type_id );
 		switch ( $type_id ) {
 			case 5: //Manual
 				break;
@@ -1515,6 +1518,8 @@ class PayPeriodScheduleFactory extends Factory {
 			case 20: //BiWeekly
 			case 200: //BiWeekly (27)
 				//Need at least one example.
+				$start_dow = array();
+				$transaction_days = array();
 				foreach( $example_dates as $example_date ) {
 					$start_dow[] = TTDate::getDayOfWeek( TTDate::parseDateTime( $example_date['start_date'] ) );
 					$transaction_days[] = (int)round( TTDate::getDays( ( TTDate::parseDateTime( $example_date['transaction_date'] ) - TTDate::parseDateTime( $example_date['end_date'] ) ) ) );
@@ -1536,6 +1541,10 @@ class PayPeriodScheduleFactory extends Factory {
 			case 30: //Semi-monthly
 				//Need at least three examples?
 				$i = 0;
+				$primary_start_dom = array();
+				$primary_transaction_dom = array();
+				$secondary_start_dom = array();
+				$secondary_transaction_dom = array();
 				foreach( $example_dates as $example_date ) {
 					if ( ($i % 2) == 0 ) {
 						$primary_start_dom[] = TTDate::getDayOfMonth( TTDate::parseDateTime( $example_date['start_date'] ) );
@@ -1673,7 +1682,8 @@ class PayPeriodScheduleFactory extends Factory {
 			$x = 0;
 			$nearest_shift_id = 0;
 			$nearest_punch_difference = FALSE;
-			$prev_punch_obj = FALSE;
+			$shift_data = array();
+			$prev_punch_arr = array();
 			foreach( $plf as $p_obj ) {
 				//Debug::text('Shift: '. $shift .' Punch ID: '. $p_obj->getID() .' Punch Control ID: '. $p_obj->getPunchControlID() .' TimeStamp: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1684,7 +1694,7 @@ class PayPeriodScheduleFactory extends Factory {
 					$epoch = $p_obj->getTimeStamp();
 				}
 
-				if ( isset($prev_punch_arr) AND $p_obj->getTimeStamp() > $prev_punch_arr['time_stamp'] ) {
+				if ( empty($prev_punch_arr) == FALSE AND $p_obj->getTimeStamp() > $prev_punch_arr['time_stamp'] ) {
 					//Make sure $x resets itself after each shift.
 					$shift_data[$shift]['previous_punch_key'] = ( $x - 1 );
 					if ( $shift_data[$shift]['previous_punch_key'] < 0 ) {
@@ -1818,7 +1828,7 @@ class PayPeriodScheduleFactory extends Factory {
 					$shift_data[$shift]['total_time'] += $total_time;
 
 					//Check to see if the previous punch was on a different day then the current punch.
-					if ( isset($prev_punch_arr) AND is_array($prev_punch_arr)
+					if ( empty($prev_punch_arr) == FALSE
 							AND ( $p_obj->getStatus() == 20 AND $prev_punch_arr['status_id'] != 20 )
 							AND TTDate::doesRangeSpanMidnight( $prev_punch_arr['time_stamp'], $p_obj->getTimeStamp() ) == TRUE ) {
 						Debug::text('Punch PAIR DOES span midnight', __FILE__, __LINE__, __METHOD__, 10);
@@ -1833,7 +1843,7 @@ class PayPeriodScheduleFactory extends Factory {
 								$shift_data[$shift]['total_time_per_day'][$begin_day_epoch] += $day_total_time;
 							}
 						}
-						unset($total_time_for_each_day_arr, $begin_day_epoch, $day_total_time, $prev_day_total_time);
+						unset($total_time_for_each_day_arr, $begin_day_epoch, $day_total_time);
 					} else {
 						$shift_data[$shift]['total_time_per_day'][$punch_day_epoch] += $total_time;
 					}
@@ -1850,7 +1860,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 			//Debug::Arr($shift_data, 'aShift Data:', __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( isset($shift_data) ) {
+			if ( empty($shift_data) == FALSE ) {
 				//Loop through each shift to determine the day with the most time.
 				foreach( $shift_data as $tmp_shift_key => $tmp_shift_data ) {
 					krsort($shift_data[$tmp_shift_key]['total_time_per_day']); //Sort by day first
@@ -2174,6 +2184,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

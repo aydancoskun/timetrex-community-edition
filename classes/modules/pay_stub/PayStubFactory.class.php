@@ -70,7 +70,7 @@ class PayStubFactory extends Factory {
 										20 => TTi18n::gettext('LOCKED'),
 										25 => TTi18n::gettext('Open'),
 										30 => TTi18n::gettext('Pending Transaction'),
-										40 => TTi18n::gettext('Paid'), 
+										40 => TTi18n::gettext('Paid'),
 										100 => TTi18n::gettext('Opening Balance (YTD)'),
 									);
 				break;
@@ -155,7 +155,8 @@ class PayStubFactory extends Factory {
 							);
 				break;
 			case 'list_columns':
-				$retval = Misc::arrayIntersectByKey( $this->getOptions('default_display_columns'), Misc::trimSortPrefix( $this->getOptions('columns') ) );
+				$columns = array( 'status', 'start_date', 'end_date', 'transaction_date', 'run_id', 'type' );
+				$retval = Misc::arrayIntersectByKey( $columns, Misc::trimSortPrefix( $this->getOptions('columns') ) );
 				break;
 			case 'default_display_columns': //Columns that are displayed by default.
 				$retval = array(
@@ -463,7 +464,7 @@ class PayStubFactory extends Factory {
 			//Make sure all pay periods end at the last second of the day.
 			$epoch = TTDate::getTimeLockedDate( strtotime('23:59:59', $epoch), $epoch);
 		}
-		
+
 		if	(	$this->Validator->isDate(		'end_date',
 												$epoch,
 												TTi18n::gettext('Incorrect end date'))
@@ -731,13 +732,12 @@ class PayStubFactory extends Factory {
 
 		Debug::Text('Start Date: '. TTDate::getDate('DATE+TIME', $start_date), __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Text('End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Text('Transaction Date: '. TTDate::getDate('DATE+TIME', $transaction_date), __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->setStartDate( $start_date);
 		$this->setEndDate( $end_date );
 		$this->setTransactionDate( $transaction_date );
 
-		Debug::Text('bTransaction Date: '. TTDate::getDate('DATE+TIME', $this->getTransactionDate() ), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Transaction Date: Before: '. TTDate::getDate('DATE+TIME', $transaction_date) .' After: '. TTDate::getDate('DATE+TIME', $this->getTransactionDate() ), __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
 
@@ -809,7 +809,7 @@ class PayStubFactory extends Factory {
 	static function CalcDifferences( $pay_stub_id1, $pay_stub_id2, $pay_stub_2_end_date, $ps_amendment_date = NULL ) {
 		$pay_stub_id1 = (int)$pay_stub_id1;
 		$pay_stub_id2 = (int)$pay_stub_id2;
-		
+
 		//Allow passing blank/null old pay stub, so we can handle cases where an employee wasn't paid at all, but we need to carry-forward the transaction still.
 
 		//PayStub 1 is new.
@@ -1089,7 +1089,7 @@ class PayStubFactory extends Factory {
 												FALSE,
 												TTi18n::gettext('Employee is not specified') );
 			}
-			
+
 			if ( $this->getCurrency() == FALSE ) {
 				$this->Validator->isTrue(		'currency_id',
 												FALSE,
@@ -1416,7 +1416,7 @@ class PayStubFactory extends Factory {
 		}
 		return FALSE;
 	}
-	
+
 	/*
 
 
@@ -2193,7 +2193,7 @@ class PayStubFactory extends Factory {
 		Debug::Text('Bcc: '. $bcc, __FILE__, __LINE__, __METHOD__, 10);
 
 		$u_obj = $this->getUserObject();
-		
+
 		//Define subject/body variables here.
 		$search_arr = array(
 							'#employee_first_name#',
@@ -2227,7 +2227,9 @@ class PayStubFactory extends Factory {
 
 		$email_subject = TTi18n::gettext('Pay Stub waiting in').' '. APPLICATION_NAME;
 
-		$email_body = TTi18n::gettext('You have a new pay stub waiting for you in').' '. APPLICATION_NAME."\n";
+		$email_body = TTi18n::gettext('*DO NOT REPLY TO THIS EMAIL - PLEASE USE THE LINK BELOW INSTEAD*')."\n\n";
+
+		$email_body .= TTi18n::gettext('You have a new pay stub waiting for you in').' '. APPLICATION_NAME."\n";
 
 		$email_body .= "\n";
 
@@ -2256,9 +2258,7 @@ class PayStubFactory extends Factory {
 							'From'	  => $from,
 							'Subject' => $subject,
 							'Bcc'	  => $bcc,
-							//'Reply-To' => $to,
-							//'Return-Path' => $to,
-							//'Errors-To' => $to,
+							//Reply-To/Return-Path are handled in TTMail.
 						);
 
 		$body = '<html><body><pre>'.str_replace( $search_arr, $replace_arr, $email_body ).'</pre></body></html>';
@@ -2313,7 +2313,7 @@ class PayStubFactory extends Factory {
 		return FALSE;
 	}
 
-	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE  ) {
+	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$uf = TTnew( 'UserFactory' );
 
 		$variable_function_map = $this->getVariableToFunctionMap();
@@ -2496,7 +2496,7 @@ class PayStubFactory extends Factory {
 						$eft->setOtherData('cibc_settlement_transit', $company_bank_obj->getTransit() );
 						$eft->setOtherData('cibc_settlement_account', $company_bank_obj->getAccount() );
 					}
-					
+
 					if ( strtolower($export_type) == 'eft_1464_rbc' ) {
 						$eft->setFilePrefixData( '$$AA01CPA1464[PROD{NL$$'."\r\n" ); //Some RBC services require a "routing" line at the top of the file.
 					}
@@ -2682,7 +2682,7 @@ class PayStubFactory extends Factory {
 
 					$eft->compile();
 					$output = $eft->getCompiledData();
-					
+
 					unset($eft);
 					break;
 				case 'cheque_9085':
@@ -3024,7 +3024,7 @@ class PayStubFactory extends Factory {
 					$pdf->SetFont('', '', 10);
 					$pdf->setTextColor(0, 0, 0);
 				}
-				
+
 				//Get pay stub entries.
 				$pself = TTnew( 'PayStubEntryListFactory' );
 				$pself->getByPayStubId( $pay_stub_obj->getId() );
@@ -3406,7 +3406,7 @@ class PayStubFactory extends Factory {
 
 					unset($x, $max_deductions, $tmp_adjust_x, $max_block_adjust_y, $tmp_block_adjust_y, $top_block_adjust_y);
 				}
-				
+
 				//
 				//Employer Contributions
 				//
@@ -3645,7 +3645,7 @@ class PayStubFactory extends Factory {
 					}
 
 					$left_block_adjust_y = $right_block_adjust_y = $block_adjust_y;
-					
+
 					Debug::Text('Tax Info Rows: Left: '. $left_total_rows .' Right: '. $right_total_rows .' Transaction Date: '. TTDate::getDate('DATE', $pp_transaction_date ), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $left_total_rows < $right_total_rows ) {
 						for( $i = 0; $i < ($right_total_rows - $left_total_rows); $i++ ) {
@@ -3822,7 +3822,7 @@ class PayStubFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub') .' - '. TTi18n::getText('Status').': '. Option::getByKey($this->getStatus(), $this->getOptions('status') ) .' '. TTi18n::getText('Start').': '. TTDate::getDate('DATE', $this->getStartDate() ) .' '. TTi18n::getText('End').': '. TTDate::getDate('DATE', $this->getEndDate() ) .' '. TTi18n::getText('Transaction').': '. TTDate::getDate('DATE', $this->getTransactionDate() ), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub') .' - '. TTi18n::getText('Employee') .': '. $this->getUserObject()->getFullName() .' '. TTi18n::getText('Status').': '. Option::getByKey($this->getStatus(), $this->getOptions('status') ) .' '. TTi18n::getText('Start').': '. TTDate::getDate('DATE', $this->getStartDate() ) .' '. TTi18n::getText('End').': '. TTDate::getDate('DATE', $this->getEndDate() ) .' '. TTi18n::getText('Transaction').': '. TTDate::getDate('DATE', $this->getTransactionDate() ), NULL, $this->getTable(), $this );
 	}
 }
 ?>

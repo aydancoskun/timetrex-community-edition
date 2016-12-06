@@ -55,6 +55,7 @@ class Validator {
 			foreach($rs as $result) {
 				return TRUE;
 			}
+			unset($result); //code standards
 		}
 
 		$this->Error($label, $msg);
@@ -68,7 +69,7 @@ class Validator {
 		if ( is_object($rs) ) {
 			foreach($rs as $result) {
 				$this->Error($label, $msg);
-
+				unset($result); // code standards
 				return FALSE;
 			}
 		}
@@ -193,8 +194,10 @@ class Validator {
 	function isFloat($label, $value, $msg = NULL) {
 		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		//if ( preg_match('/^[-0-9\.]+$/', $value) ) {
-		if ( preg_match('/^((\.[0-9]+)|([-0-9]+(\.[0-9]*)?))$/', $value) ) {
+		//Don't use TTi18n::parseFloat() here, as if we are going to be doing that we should do it as early as possible to the user input, like in setObjectFromArray()
+		//  We do need to check if the value passed in is already cast to float/int and just accept it in that case.
+		//    Because in other locales preg_match() casts $value to a string, which means decimal could become a comma, then it won't match.
+		if ( ( is_float( $value ) == TRUE OR is_int( $value ) === TRUE ) OR preg_match('/^((\.[0-9]+)|([-0-9]+(\.[0-9]*)?))$/', $value ) ) {
 			return TRUE;
 		}
 
@@ -318,7 +321,7 @@ class Validator {
 			if ( $duplicate_percent < $max_duplicate_percent ) {
 				return TRUE;
 			}
-			
+
 			$this->Error($label, $msg, $value );
 
 			return FALSE;
@@ -637,10 +640,10 @@ class Validator {
 				break;
 			default:
 				//Allow all foriegn countries to utilize
-				$retval = self::isLength($label, $value, $msg, $min = 1, $max = 255);
+				$retval = self::isLength($label, $value, $msg, 1, 255);
 				break;
 		}
-		
+
 		if ( $retval === TRUE ) {
 			return TRUE;
 		}
@@ -684,14 +687,22 @@ class Validator {
 	}
 
 	function stripNonFloat($value) {
-		$retval = preg_replace('/[^-0-9\.]/', '', $value);
+		//Don't use TTi18n::parseFloat() here, as if we are going to be doing that we should do it as early as possible to the user input, like in setObjectFromArray()
+		//  We do need to check if the value passed in is already cast to float/int and just accept it in that case.
+		//    Because in other locales preg_match() casts $value to a string, which means decimal could become a comma, then it won't match.
+		if ( is_float( $value ) === TRUE OR is_int( $value ) === TRUE ) {
+			return $value;
+		} else {
+			$retval = preg_replace( '/[^-0-9\.]/', '', $value );
+		}
 
 		//Debug::Text('Float String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
 		return $retval;
 	}
 
-	function stripNonTimeUnit($value) { //Suitable to passing to parseTimeUnit() after.
+	//Suitable for passing to parseTimeUnit() after.
+	function stripNonTimeUnit($value) {
 		$retval = preg_replace('/[^-0-9\.:]/', '', $value);
 
 		//Debug::Text('Float String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);
@@ -709,7 +720,7 @@ class Validator {
 
 	function purifyHTML( $value ) {
 		global $config_vars;
-		
+
 		//Require inside this function as HTMLPurifier is a huge file.
 		require_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'HTMLPurifier'. DIRECTORY_SEPARATOR .'HTMLPurifier.standalone.php');
 
@@ -743,6 +754,8 @@ class Validator {
 
 	function varReplace($string, $var_array) {
 		//var_array = arary('var1' => 'blah1', 'var2' => 'blah2');
+		$keys = array();
+		$values = array();
 		if ( is_array($var_array) AND count($var_array) > 0) {
 			foreach($var_array as $key => $value) {
 				$keys[] = '#'.$key;
@@ -773,7 +786,7 @@ class Validator {
 		if ( is_object( $validator ) AND $validator->isValid() == FALSE ) {
 			$this->errors = array_merge( $this->errors, $validator->getErrorsArray() );
 			$this->num_errors += count( $validator->getErrorsArray() );
-			
+
 			$this->warnings = array_merge( $this->warnings, $validator->getWarningsArray() );
 			$this->num_warnings += count( $validator->getWarningsArray() );
 		}
@@ -789,7 +802,7 @@ class Validator {
 		if ( count($this->errors ) > 0) {
 			$output = "<ol>\n";
 			foreach ($this->errors as $label) {
-				foreach ($label as $key => $msg) {
+				foreach ($label as $msg) {
 					$output .= '<li>'.$msg.".</li>";
 				}
 			}
@@ -806,7 +819,7 @@ class Validator {
 			$number_prefix = NULL;
 			$i = 1;
 			foreach ($this->errors as $label) {
-				foreach ($label as $key => $msg) {
+				foreach ($label as $msg) {
 					if ( $numbered_list == TRUE ) {
 						$number_prefix = $i .'. ';
 					}
@@ -879,7 +892,7 @@ class Validator {
 	function getWarningsArray() {
 		return $this->warnings;
 	}
-	
+
 	final function isWarning( $label = NULL ) {
 		if ( $label != NULL ) {
 			return $this->hasWarning( $label );

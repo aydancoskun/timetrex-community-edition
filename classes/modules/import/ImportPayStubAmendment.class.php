@@ -114,7 +114,7 @@ class ImportPayStubAmendment extends Import {
 
 		//Get names without types in front, ie: "Commission"
 		$this->pay_stub_account_short_options = (array)$psealf->getArrayByListFactory( $psealf, FALSE, TRUE, FALSE, FALSE );
-		unset($aplf);
+		unset($psealf);
 
 		return TRUE;
 	}

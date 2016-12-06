@@ -135,6 +135,7 @@ class APIROE extends APIFactory {
 
 			$this->setPagerObject( $rlf );
 
+			$retarr = array();
 			foreach( $rlf as $roe_obj ) {
 				$retarr[] = $roe_obj->getObjectAsArray( $data['filter_columns'] );
 
@@ -147,6 +148,17 @@ class APIROE extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportROE( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getROE( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_roe', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -420,6 +432,7 @@ class APIROE extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id'] ); //Clear fields that can't be copied
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setROE( $src_rows ); //Save copied rows

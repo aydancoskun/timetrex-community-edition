@@ -50,8 +50,6 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		$additional_order_fields = array('last_login_date');
 
-		$uf = new UserFactory();
-
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
@@ -194,8 +192,6 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
-
 		$ph = array();
 
 		$query = '
@@ -300,6 +296,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -316,7 +313,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 			}
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -327,9 +324,8 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 	static function getAllArray() {
 		$clf = new CompanyListFactory();
 		$clf->getAll();
-
-		$company_list[0] = '--';
-
+		
+		$company_list = array( 0 => '--' );
 		foreach ($clf as $company) {
 			$company_list[$company->getID()] = $company->getName();
 		}

@@ -189,7 +189,7 @@ class InstallSchema_Base {
 					//Debug::text('SQL Line: '. trim($sql_line), __FILE__, __LINE__, __METHOD__, 9);
 					if ( trim($sql_line) != '' AND substr( trim($sql_line), 0, 2 ) != '--' ) {
 						try {
-							$retval = $this->getDatabaseConnection()->Execute( $sql_line );
+							$this->getDatabaseConnection()->Execute( $sql_line );
 						} catch ( Exception $e ) {
 							$schema_failure_state = array( $this->getVersion() => $i );
 							Debug::text('SQL Command failed on line: '. $i .' of: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);

@@ -35,6 +35,7 @@
  ********************************************************************************/
 
 include_once('Net/IPv4.php');
+include_once('Net/IPv6.php');
 
 /**
  * @package Core
@@ -211,7 +212,7 @@ class StationFactory extends Factory {
 												16		=> TTi18n::gettext('Punch Mode: Facial Recognition'),
 												32		=> TTi18n::gettext('Punch Mode: Facial Recognition+QRCode'),
 												//64		=> TTi18n::gettext('Punch Mode: Facial Recognition+Quick Punch'),
-												//128	
+												//128
 												//256
 												//512
 												//1024
@@ -377,7 +378,7 @@ class StationFactory extends Factory {
 	function getCompanyObject() {
 		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
-	
+
 	function getCompany() {
 		return (int)$this->data['company_id'];
 	}
@@ -740,11 +741,12 @@ class StationFactory extends Factory {
 	function getGroup() {
 		$lf = TTnew( 'StationUserGroupListFactory' );
 		$lf->getByStationId( $this->getId() );
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[] = $obj->getGroup();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -833,11 +835,12 @@ class StationFactory extends Factory {
 	function getBranch() {
 		$lf = TTnew( 'StationBranchListFactory' );
 		$lf->getByStationId( $this->getId() );
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[] = $obj->getBranch();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -926,11 +929,12 @@ class StationFactory extends Factory {
 	function getDepartment() {
 		$lf = TTnew( 'StationDepartmentListFactory' );
 		$lf->getByStationId( $this->getId() );
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[] = $obj->getDepartment();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -996,11 +1000,12 @@ class StationFactory extends Factory {
 	function getIncludeUser() {
 		$lf = TTnew( 'StationIncludeUserListFactory' );
 		$lf->getByStationId( $this->getId() );
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[] = $obj->getIncludeUser();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -1065,11 +1070,12 @@ class StationFactory extends Factory {
 	function getExcludeUser() {
 		$lf = TTnew( 'StationExcludeUserListFactory' );
 		$lf->getByStationId( $this->getId() );
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[] = $obj->getExcludeUser();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -1756,7 +1762,7 @@ class StationFactory extends Factory {
 	function setCookie() {
 		if ( $this->getStation() ) {
 
-			setcookie('StationID', $this->getStation(), (time() + 157680000), Environment::getBaseURL() );
+			setcookie('StationID', $this->getStation(), (time() + 157680000), Environment::getCookieBaseURL() );
 
 			return TRUE;
 		}
@@ -1765,7 +1771,7 @@ class StationFactory extends Factory {
 	}
 
 	function destroyCookie() {
-		setcookie('StationID', NULL, (time() + 9999999), Environment::getBaseURL() );
+		setcookie('StationID', NULL, (time() + 9999999), Environment::getCookieBaseURL() );
 
 		return TRUE;
 	}
@@ -1829,7 +1835,13 @@ class StationFactory extends Factory {
 
 		$remote_addr = Misc::getRemoteIPAddress();
 
-		if ( in_array( $this->getType(), array(10, 25) ) AND preg_match('/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{1,2})*/', $source) ) {
+		if ( in_array( $this->getType(), array(10, 25) )
+				AND (
+						preg_match('/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{1,2})*/', $source) //IPv4
+						OR
+						preg_match('/(((?=(?>.*?(::))(?!.+\3)))\3?|([\dA-F]{1,4}(\3|:(?!$)|$)|\2))(?4){5}((?4){2}|((2[0-4]|1\d|[1-9])?\d|25[0-5])(\.(?7)){3})*/i', $source) //IPv6
+					)
+			) {
 			Debug::text('Source is an IP address!', __FILE__, __LINE__, __METHOD__, 10);
 		} elseif ( in_array( $this->getType(), array(10, 25, 100) ) AND !in_array( strtolower( $this->getStation() ), $this->getOptions('station_reserved_word') ) )  {
 			//Do hostname lookups for TTA8 timeclocks as well.
@@ -1867,6 +1879,8 @@ class StationFactory extends Factory {
 						( $current_station_id == $this->getSource() )
 					OR
 						( Net_IPv4::ipInNetwork( $remote_addr, $source) )
+					OR
+						( Net_IPv6::isInNetmask( $remote_addr, $source) )
 					OR
 						in_array( $this->getType(), array(100, 110, 120, 200) )
 				)
@@ -1950,8 +1964,8 @@ class StationFactory extends Factory {
 		return FALSE;
 	}
 
-	//A fast way to check many stations if the user is allowed.
-	function checkAllowed($user_id = NULL, $station_id = NULL, $type = 10 ) { //10 = PC
+	//A fast way to check many stations if the user is allowed. 10 = PC
+	function checkAllowed($user_id = NULL, $station_id = NULL, $type = 10 ) {
 		if ($user_id == NULL OR $user_id == '') {
 			global $current_user;
 			$user_id = $current_user->getId();
@@ -1987,7 +2001,7 @@ class StationFactory extends Factory {
 
 	static function getOrCreateStation( $station_id, $company_id, $type_id = 10, $permission_obj = NULL, $user_obj = NULL ) {
 		Debug::text('Checking for Station ID: '. $station_id .' Company ID: '. $company_id .' Type: '. $type_id, __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		$slf = new StationListFactory();
 		$slf->getByStationIdandCompanyId( $station_id, $company_id );
 		if ( $slf->getRecordCount() == 1 ) {
@@ -2123,7 +2137,7 @@ class StationFactory extends Factory {
 					$sf->setGroupSelectionType( 10 ); //All allowed
 					$sf->setBranchSelectionType( 10 ); //All allowed
 					$sf->setDepartmentSelectionType( 10 ); //All allowed
-					
+
 					$sf->setModeFlag( array( 16, 4096 ) ); //Default Facial Recognition, Capture Images in KIOSK mode.
 
 					if ( is_object( $sf->getCompanyObject() ) AND is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {
@@ -2222,7 +2236,7 @@ class StationFactory extends Factory {
 		if ( $this->getStatus() == 20 AND $this->isActiveForAnyEmployee() == FALSE ) {
 			$this->setStatus( 10 ); //Disabled
 		}
-		
+
 		return TRUE;
 	}
 
@@ -2286,6 +2300,7 @@ class StationFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

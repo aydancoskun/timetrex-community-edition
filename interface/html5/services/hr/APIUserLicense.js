@@ -43,6 +43,10 @@ var APIUserLicense = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'copyUserLicense', arguments );
 
+	},
+
+	exportUserLicense: function() {
+		return this.argumentsHandler( this.className, 'exportUserLicense', arguments );
 	}
 
 

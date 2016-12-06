@@ -569,18 +569,18 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		if ( $ulf->getRecordCount() == 1 ) {
 			$user_obj = $ulf->getCurrent();
 
-			//Get timesheet verification hierarchy, so we know who the superiors are.
 			$hlf = TTnew( 'HierarchyListFactory' );
-			$timesheet_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $user_obj->getCompany(), $user_obj->getId(), 90, TRUE, FALSE ); //Immediate superiors only can verify timesheets directly.
+			//Get timesheet verification hierarchy, so we know who the superiors are.
+			//Immediate superiors only can verify timesheets directly so we set $immediate_parents_only = TRUE
+			//  However this prevents superiors from dropping down levels and authorizing, as the superior wouldn't appear in the superior list then, so set $immediate_parents_only = FALSE
+			$timesheet_parent_level_user_ids = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $user_obj->getCompany(), $user_obj->getId(), 90, FALSE, FALSE );
 			Debug::Arr( $timesheet_parent_level_user_ids, 'TimeSheet Parent Level Ids', __FILE__, __LINE__, __METHOD__, 10);
 			if ( in_array( $current_user_id, (array)$timesheet_parent_level_user_ids ) ) {
 				Debug::text('Is TimeSheet Hierarchy Superior: Yes', __FILE__, __LINE__, __METHOD__, 10);
 				return TRUE;
 			}
 			unset($hlf, $timesheet_parent_level_user_ids);
-
 		}
-
 
 		Debug::text('Is TimeSheet Hierarchy Superior: No', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
@@ -623,11 +623,14 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 					$this->setUserVerified( TRUE );
 				}
 			} elseif ( $time_sheet_verification_type_id == 30 ) { //Superior Only
+				//Make sure superiors can drop down levels and verify timesheets in this mode.
 				if ( $this->getCurrentUser() != $this->getUser() AND $is_timesheet_superior == TRUE ) {
 					Debug::Text('Superior is verifiying their suborindates timesheet...', __FILE__, __LINE__, __METHOD__, 10);
 					$this->setStatus( 30 ); //Pending Authorization
-				} else {
+				} elseif( $this->getCurrentUser() == $this->getUser() ) {
 					Debug::Text('ERROR: Superior is trying to verifiy their own timesheet...', __FILE__, __LINE__, __METHOD__, 10);
+				} else {
+					Debug::Text('ERROR: Superior is not in the hierarchy?', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			} elseif ( $time_sheet_verification_type_id == 40 ) { //Superior & Employee
 				if ( $this->isNew() == TRUE ) {
@@ -749,6 +752,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 				}
 			} else {
 				Debug::Text('Not authorizing timesheet...', __FILE__, __LINE__, __METHOD__, 10);
+
+				//Send initial Pending Authorization email to superiors. -- This should only happen on first save by the regular employee.
+				AuthorizationFactory::emailAuthorizationOnInitialObjectSave( $this->getCurrentUser(), 90, $this->getId() );
 			}
 
 			if ( $authorize_timesheet == TRUE OR $this->getAuthorized() == TRUE ) {
@@ -821,6 +827,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

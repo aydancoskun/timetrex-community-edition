@@ -219,6 +219,7 @@ class ExceptionPolicyControlListFactory extends ExceptionPolicyControlFactory im
 		$epclf = new ExceptionPolicyControlListFactory();
 		$epclf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -227,7 +228,7 @@ class ExceptionPolicyControlListFactory extends ExceptionPolicyControlFactory im
 			$list[$epc_obj->getID()] = $epc_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

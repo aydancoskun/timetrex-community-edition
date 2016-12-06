@@ -270,7 +270,6 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$pgf = new PolicyGroupFactory();
 		$pguf = new PolicyGroupUserFactory();
 		$cgmf = new CompanyGenericMapFactory();
-		$ppf = new PremiumPolicyFactory();
 
 		$ph = array(
 					'user_id' => (int)$user_id,
@@ -367,7 +366,6 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$pgf = new PolicyGroupFactory();
 		$pguf = new PolicyGroupUserFactory();
 		$cgmf = new CompanyGenericMapFactory();
-		$ppf = new PremiumPolicyFactory();
 
 		$ph = array(
 					'user_id' => (int)$user_id,
@@ -508,6 +506,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 		$pplf = new PremiumPolicyListFactory();
 		$pplf->getByCompanyId($company_id, $where);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -516,7 +515,7 @@ class PremiumPolicyListFactory extends PremiumPolicyFactory implements IteratorA
 			$list[$pp_obj->getID()] = $pp_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

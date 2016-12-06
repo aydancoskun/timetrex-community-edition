@@ -53,7 +53,7 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 					from	'. $this->getTable() .'
 					WHERE deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, NULL, $limit, $page );
 
@@ -157,11 +157,12 @@ class CronJobListFactory extends CronJobFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[$obj->getID()] = $obj->getName(TRUE);
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

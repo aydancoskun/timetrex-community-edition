@@ -4,14 +4,9 @@ AboutViewController = BaseViewController.extend( {
 
 	employeeActive: [],
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.edit_only_mode ) ) {
-			this.edit_only_mode = this.options.edit_only_mode;
-		}
-
-		this._super( 'initialize' );
-
+		this._super( 'initialize', options );
 		this.viewId = 'About';
 		this.script_name = 'AboutView';
 		this.context_menu_name = $.i18n._( 'About' );

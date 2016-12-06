@@ -311,9 +311,6 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 			$strict_order = FALSE;
 		}
 
-		$af = new AuthorizationFactory();
-		$uf = new UserFactory();
-
 		$ph = array(
 					'status' => $status,
 					'level' => $level,
@@ -361,7 +358,6 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 			$strict_order = FALSE;
 		}
 
-		$af = new AuthorizationFactory();
 		$uf = new UserFactory();
 		$huf = new HierarchyUserFactory();
 
@@ -413,7 +409,6 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 			$strict_order = FALSE;
 		}
 
-		$af = new AuthorizationFactory();
 		$uf = new UserFactory();
 		$huf = new HierarchyUserFactory();
 
@@ -444,9 +439,6 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 	}
 
 	function getSumByPayPeriodIdAndStatus($pay_period_id, $status, $where = NULL, $order = NULL) {
-		$af = new AuthorizationFactory();
-		$uf = new UserFactory();
-
 		$ph = array(
 					'status_id' => $status,
 					);
@@ -468,7 +460,6 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 	}
 
 	function getSumByCompanyIDAndPayPeriodIdAndStatus($company_id, $pay_period_id, $status, $where = NULL, $order = NULL) {
-		$af = new AuthorizationFactory();
 		$uf = new UserFactory();
 
 		$ph = array(
@@ -496,9 +487,7 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 	}
 
 	function getSumByPayPeriodIdAndStatusAndBeforeDate($pay_period_id, $status, $before_date, $where = NULL, $order = NULL) {
-		$af = new AuthorizationFactory();
-		$uf = new UserFactory();
-
+	
 		$ph = array(
 					'pay_period_id' => (int)$pay_period_id,
 					'status_id' => $status,
@@ -570,7 +559,7 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 		$query .= '		AND ( a.deleted = 0 AND c.deleted = 0 ) ';
 
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 

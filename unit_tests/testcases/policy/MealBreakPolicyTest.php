@@ -42,9 +42,9 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 	protected $pay_period_schedule_id = NULL;
 	protected $pay_period_objs = NULL;
 
-    public function setUp() {
+	public function setUp() {
 		global $dd;
-        Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
 		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
@@ -52,7 +52,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		$dd->setEnableQuickPunch( FALSE ); //Helps prevent duplicate punch IDs and validation failures.
 		$dd->setUserNamePostFix( '_'.uniqid( NULL, TRUE ) ); //Needs to be super random to prevent conflicts and random failing tests.
 		$this->company_id = $dd->createCompany();
-		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__,10);
+		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -69,7 +69,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->policy_ids['pay_formula_policy'][100] = $dd->createPayFormulaPolicy( $this->company_id, 100 ); //Reg 1.0x
 
 		$this->policy_ids['pay_code'][100] = $dd->createPayCode( $this->company_id, 100, $this->policy_ids['pay_formula_policy'][100] ); //Regular
-		$this->policy_ids['pay_code'][190] = $dd->createPayCode( $this->company_id, 190 ); //Lunch
+		$this->policy_ids['pay_code'][190] = $dd->createPayCode( $this->company_id, 190, $this->policy_ids['pay_formula_policy'][100] ); //Lunch
 		$this->policy_ids['pay_code'][192] = $dd->createPayCode( $this->company_id, 192 ); //Break
 		$this->policy_ids['pay_code'][300] = $dd->createPayCode( $this->company_id, 300 ); //Prem1
 		$this->policy_ids['pay_code'][310] = $dd->createPayCode( $this->company_id, 310 ); //Prem2
@@ -90,14 +90,14 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
-    public function tearDown() {
-        Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__,10);
+	public function tearDown() {
+		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
 
-        return TRUE;
-    }
+		return TRUE;
+	}
 
 	function createPayPeriodSchedule() {
 		$ppsf = new PayPeriodScheduleFactory();
@@ -109,7 +109,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setType( 20 );
 		$ppsf->setStartWeekDay( 0 );
 
-		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) ); //Start 6 weeks ago
+		$anchor_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) ); //Start 6 weeks ago
 
 		$ppsf->setAnchorDate( $anchor_date );
 
@@ -120,14 +120,14 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		$ppsf->setTimeZone('PST8PDT');
 
 		$ppsf->setDayStartTime( 0 );
-		$ppsf->setNewDayTriggerTime( (4*3600) );
-		$ppsf->setMaximumShiftTime( (16*3600) );
+		$ppsf->setNewDayTriggerTime( (4 * 3600) );
+		$ppsf->setMaximumShiftTime( (16 * 3600) );
 		$ppsf->setShiftAssignedDay( 10 );
 
 		$ppsf->setEnableInitialPayPeriods( FALSE );
 		if ( $ppsf->isValid() ) {
 			$insert_id = $ppsf->Save(FALSE);
-			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Pay Period Schedule ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			$ppsf->setUser( array($this->user_id) );
 			$ppsf->Save();
@@ -137,7 +137,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Pay Period Schedule!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 
@@ -155,14 +155,14 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			for ( $i = 0; $i < $max_pay_periods; $i++ ) {
 				if ( $i == 0 ) {
 					//$end_date = TTDate::getBeginYearEpoch( strtotime('01-Jan-07') );
-					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() )-(86400*(7*6) ) ) );
+					$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) );
 				} else {
-					$end_date = $end_date + ( (86400*14) );
+					$end_date = ($end_date + ( (86400 * 14) ));
 				}
 
-				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date) , __FILE__, __LINE__, __METHOD__,10);
+				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
 
-				$pps_obj->createNextPayPeriod( $end_date , (86400*3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
+				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
 		}
@@ -253,7 +253,11 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		return $date_totals;
 	}
 
-	function createMealPolicy( $company_id, $type ) {
+	function createMealPolicy( $company_id, $type, $pay_code_id = 0 ) {
+		if ( $pay_code_id == 0 ) {
+			$pay_code_id = $this->policy_ids['pay_code'][100];
+		}
+
 		$mpf = new MealPolicyFactory();
 		$mpf->setCompany( $company_id );
 
@@ -261,45 +265,53 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 100: //Normal 1hr lunch
 				$mpf->setName( 'Normal' );
 				$mpf->setType( 20 );
-				$mpf->setTriggerTime( (3600*6) );
+				$mpf->setTriggerTime( (3600 * 6) );
 				$mpf->setAmount( 3600 );
 				$mpf->setIncludeLunchPunchTime( FALSE );
-				$mpf->setPayCode( $this->policy_ids['pay_code'][100] );
+				$mpf->setPayCode( $pay_code_id );
 				break;
 			case 110: //AutoAdd 1hr
 				$mpf->setName( 'AutoAdd 1hr' );
 				$mpf->setType( 15 );
-				$mpf->setTriggerTime( (3600*6) );
+				$mpf->setTriggerTime( (3600 * 6) );
 				$mpf->setAmount( 3600 );
 				$mpf->setIncludeLunchPunchTime( FALSE );
-				$mpf->setPayCode( $this->policy_ids['pay_code'][100] );
+				$mpf->setPayCode( $pay_code_id );
 				break;
 			case 115: //AutoAdd 1hr
 				$mpf->setName( 'AutoAdd 1hr' );
 				$mpf->setType( 15 );
-				$mpf->setTriggerTime( (3600*6) );
+				$mpf->setTriggerTime( (3600 * 6) );
 				$mpf->setAmount( 3600 );
 				$mpf->setIncludeLunchPunchTime( TRUE );
-				$mpf->setPayCode( $this->policy_ids['pay_code'][100] );
+				$mpf->setPayCode( $pay_code_id );
 				break;
 			case 120: //AutoDeduct 1hr
 				$mpf->setName( 'AutoDeduct 1hr' );
 				$mpf->setType( 10 );
-				$mpf->setTriggerTime( (3600*6) );
+				$mpf->setTriggerTime( (3600 * 6) );
 				$mpf->setAmount( 3600 );
 				$mpf->setIncludeLunchPunchTime( FALSE );
-				$mpf->setPayCode( $this->policy_ids['pay_code'][100] );
+				$mpf->setPayCode( $pay_code_id );
+				break;
+			case 130: //AutoDeduct 0.5hr after 7.25
+				$mpf->setName( 'AutoDeduct 1hr' );
+				$mpf->setType( 10 );
+				$mpf->setTriggerTime( (3600 * 7.25) );
+				$mpf->setAmount( 1800 );
+				$mpf->setIncludeLunchPunchTime( FALSE );
+				$mpf->setPayCode( $pay_code_id );
 				break;
 		}
 
 		if ( $mpf->isValid() ) {
 			$insert_id = $mpf->Save();
-			Debug::Text('Meal Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Meal Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Meal Policy!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Meal Policy!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -313,8 +325,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 100: //Normal 15min break
 				$bpf->setName( 'Normal' );
 				$bpf->setType( 20 );
-				$bpf->setTriggerTime( (3600*6) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 6) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setIncludeBreakPunchTime( FALSE );
 				$bpf->setIncludeMultipleBreaks( FALSE );
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
@@ -322,8 +334,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 110: //AutoAdd 15min
 				$bpf->setName( 'AutoAdd 15min' );
 				$bpf->setType( 15 );
-				$bpf->setTriggerTime( (3600*1) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 1) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setIncludeBreakPunchTime( FALSE );
 				$bpf->setIncludeMultipleBreaks( FALSE );
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
@@ -331,8 +343,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 115: //AutoAdd 15min
 				$bpf->setName( 'AutoAdd 15min (Include Punch Time)' );
 				$bpf->setType( 15 );
-				$bpf->setTriggerTime( (3600*1) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 1) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setIncludeBreakPunchTime( TRUE );
 				$bpf->setIncludeMultipleBreaks( FALSE );
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
@@ -341,8 +353,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 120: //AutoDeduct 15min
 				$bpf->setName( 'AutoDeduct 15min' );
 				$bpf->setType( 10 );
-				$bpf->setTriggerTime( (3600*6) );
-				$bpf->setAmount( 15*60 );
+				$bpf->setTriggerTime( (3600 * 6) );
+				$bpf->setAmount( 15 * 60 );
 				$bpf->setIncludeBreakPunchTime( FALSE );
 				$bpf->setIncludeMultipleBreaks( FALSE );
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
@@ -352,8 +364,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 150: //AutoAdd 15min
 				$bpf->setName( 'AutoAdd 15min (Include Both)' );
 				$bpf->setType( 15 );
-				$bpf->setTriggerTime( (3600*1) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 1) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setIncludeBreakPunchTime( TRUE );
 				$bpf->setIncludeMultipleBreaks( TRUE );
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
@@ -361,8 +373,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 152: //AutoAdd 15min
 				$bpf->setName( 'AutoAdd 15min (Include Both) [2]' );
 				$bpf->setType( 15 );
-				$bpf->setTriggerTime( (3600*3) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 3) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setIncludeBreakPunchTime( TRUE );
 				$bpf->setIncludeMultipleBreaks( TRUE );
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
@@ -370,8 +382,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 154: //AutoAdd 15min
 				$bpf->setName( 'AutoAdd 15min (Include Both) [3]' );
 				$bpf->setType( 15 );
-				$bpf->setTriggerTime( (3600*5) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 5) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setIncludeBreakPunchTime( TRUE );
 				$bpf->setIncludeMultipleBreaks( TRUE );
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
@@ -379,8 +391,8 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 			case 156: //AutoAdd 15min
 				$bpf->setName( 'AutoAdd 15min (Include Both) [4]' );
 				$bpf->setType( 15 );
-				$bpf->setTriggerTime( (3600*10) );
-				$bpf->setAmount( 60*15 );
+				$bpf->setTriggerTime( (3600 * 10) );
+				$bpf->setAmount( 60 * 15 );
 				$bpf->setIncludeBreakPunchTime( TRUE );
 				$bpf->setIncludeMultipleBreaks( TRUE );
 				$bpf->setPayCode( $this->policy_ids['pay_code'][100] );
@@ -390,12 +402,12 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 
 		if ( $bpf->isValid() ) {
 			$insert_id = $bpf->Save();
-			Debug::Text('Break Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__,10);
+			Debug::Text('Break Policy ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
 		}
 
-		Debug::Text('Failed Creating Break Policy!', __FILE__, __LINE__, __METHOD__,10);
+		Debug::Text('Failed Creating Break Policy!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}
@@ -480,15 +492,15 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		//Regular Time (Part 1)
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (4 * 3600) );
 		//Regular Time (Part 2)
 		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (4 * 3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
 
@@ -556,15 +568,15 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		//Regular Time (Part 1)
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (4 * 3600) );
 		//Regular Time (Part 2)
 		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (4 * 3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
 
@@ -632,31 +644,31 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (0.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (0.5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (0.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (0.5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (4 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (4 * 3600) );
 		//Lunch Taken
 		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (0.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (0.5 * 3600) );
 		//Lunch Taken
 		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], (0.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], (0.5 * 3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 7 );
 
@@ -724,7 +736,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -736,11 +748,11 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (4 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (4.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (4.5 * 3600) );
 
 		//Lunch Taken
 		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
@@ -818,7 +830,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8.5 * 3600) );
 
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
@@ -831,11 +843,11 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (3.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (3.5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (4.0*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (4.0 * 3600) );
 
 		//Lunch Taken
 		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
@@ -899,7 +911,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		/*
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
@@ -918,11 +930,11 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
 		//Lunch Taken
 		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 100 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (-1*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (-1 * 3600) );
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
@@ -977,17 +989,111 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (5 * 3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
 
 		return TRUE;
 	}
 
+
+	/**
+	 * @group MealBreakPolicy_testAutoDeductMealPolicyC
+	 */
+	function testAutoDeductMealPolicyC() {
+		global $dd;
+
+		//This tests a bug found that preventing regular time from being calculated when using a Contributing Shift Policy using Type=200 (Must Start and End), and a 30min auto-meal break active after 7.25hrs.
+		$pp_test_obj = new PremiumPolicyTest();
+		$this->policy_ids['contributing_shift_policy'][100] = $pp_test_obj->createContributingShiftPolicy( $this->company_id, 200, $this->policy_ids['contributing_pay_code_policy'][12] ); //Regular+Meal/Break -- Full Shift
+
+		$this->policy_ids['regular'][100] = $dd->createRegularTimePolicy( $this->company_id, 20, $this->policy_ids['contributing_shift_policy'][100], $this->policy_ids['pay_code'][100] );
+
+
+		$policy_ids['meal'][] = $this->createMealPolicy( $this->company_id, 120, $this->policy_ids['pay_code'][190] );
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   $policy_ids['meal'], //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array( $this->policy_ids['regular'][100] ) //Regular
+		);
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$date_epoch2 = TTDate::getBeginDayEpoch( ( $date_epoch + 86400 + 3601 ) );
+		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 1:00PM'),
+								 strtotime($date_stamp.' 4:00PM'), //Less than 6hrs so no autodeduct occurs
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 11:00PM'),
+								 strtotime($date_stamp2.' 6:00AM'), //More than 6hrs so autodeduct occurs
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9 * 3600) );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], 9720 );
+		//Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], 22680 );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 100 );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], -2520 );
+		//Regular Time (Lunch deduct)
+		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 100 );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], -1080 );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 5 );
+
+		return TRUE;
+	}
 
 	//
 	// Break Policy
@@ -1080,23 +1186,23 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (1.75*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (1.75 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (2.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (2.25 * 3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 5 );
 
@@ -1192,23 +1298,23 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (1.75*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (1.75 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][3]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][3]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][4]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][4]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (2.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (2.25 * 3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 5 );
 
@@ -1305,7 +1411,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8.25 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -1325,19 +1431,19 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (1.75*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (1.75 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (2.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (2.25 * 3600) );
 
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
@@ -1451,7 +1557,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8.25 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -1471,19 +1577,19 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (1.9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (1.9 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (2.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (2.25 * 3600) );
 
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
@@ -1598,7 +1704,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8.15*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8.15 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -1618,19 +1724,19 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][5]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][5]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (1.65*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (1.65 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][6]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][6]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][6]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (2.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (2.25 * 3600) );
 
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
@@ -1702,7 +1808,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9 * 3600) );
 		/*
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
@@ -1721,11 +1827,11 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (9 * 3600) );
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][2]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][2]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (-0.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (-0.25 * 3600) );
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 3 );
@@ -1780,11 +1886,11 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (5 * 3600) );
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
 
@@ -1883,7 +1989,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -1919,19 +2025,19 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], (1.75*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], (1.75 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], (2.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], (2.25 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], (3*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], (3 * 3600) );
 
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
@@ -2064,7 +2170,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -2100,19 +2206,19 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][9]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], (1.9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][9]['total_time'], (1.9 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][10]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][10]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][10]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], (2.25*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], (2.25 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], (2.9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], (2.9 * 3600) );
 
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
@@ -2216,7 +2322,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -2244,11 +2350,11 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (6.75*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (6.75 * 3600) );
 
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
@@ -2345,7 +2451,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.4*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.4 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -2373,11 +2479,11 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][7]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][7]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][7]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][8]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][8]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (6.65*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][8]['total_time'], (6.65 * 3600) );
 
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][9]['status_id'], 10 );
@@ -2517,7 +2623,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( $udt_arr[$date_epoch][0]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][0]['type_id'], 10 );
-		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.5*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (9.5 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][1]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][1]['type_id'], 20 );
@@ -2561,23 +2667,23 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][11]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][11]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], (0.9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][11]['total_time'], (0.9 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], (1.9*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], (1.9 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][13]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][13]['total_time'], (2*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][13]['total_time'], (2 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][14]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][14]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][14]['total_time'], (2.15*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][14]['total_time'], (2.15 * 3600) );
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][15]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][15]['type_id'], 20 );
-		$this->assertEquals( $udt_arr[$date_epoch][15]['total_time'], (2.15*3600) );
+		$this->assertEquals( $udt_arr[$date_epoch][15]['total_time'], (2.15 * 3600) );
 
 		//Regular Time
 		$this->assertEquals( $udt_arr[$date_epoch][16]['status_id'], 10 );

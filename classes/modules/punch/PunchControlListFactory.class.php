@@ -216,6 +216,9 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 		$plf = new PunchListFactory();
 		$plf->getShiftPunchesByUserIDAndEpoch( $user_id, $epoch );
 		if ( $plf->getRecordCount() > 0 ) {
+
+			$punch_arr = array();			
+			$prev_punch_arr = array();
 			//Check for gaps.
 			$prev_time_stamp = 0;
 			foreach( $plf as $p_obj) {
@@ -240,7 +243,7 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 			//Debug::Arr( $punch_arr, ' Punch Array: ', __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Arr( $next_punch_arr, ' Next Punch Array: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( isset($punch_arr) ) {
+			if ( empty($punch_arr) == FALSE ) {
 				$i = 0;
 				foreach($punch_arr as $punch_control_id => $data ) {
 					$found_gap = FALSE;
@@ -389,7 +392,6 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 		}
 
 		$uf = new UserFactory();
-		$pcf = new PunchControlFactory();
 		$uwf = new UserWageFactory();
 		$bf = new BranchFactory();
 		$df = new DepartmentFactory();
@@ -508,6 +510,8 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'b.job_item_id', $filter_data['job_item_id'], 'numeric_list', $ph ) : NULL;
 		}
 
+		$query .= ( isset($filter_data['has_note']) AND $filter_data['has_note'] == TRUE ) ? ' AND b.note != \'\'' : NULL;
+
 		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 			$ph[] = $this->db->BindDate( (int)$filter_data['start_date'] );
 			$query	.=	' AND b.date_stamp >= ?';
@@ -522,6 +526,8 @@ class PunchControlListFactory extends PunchControlFactory implements IteratorAgg
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

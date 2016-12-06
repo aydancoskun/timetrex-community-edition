@@ -562,8 +562,8 @@ class PayStubAmendmentFactory extends Factory {
 			return FALSE;
 		}
 
-		$pself = TTnew( 'PayStubEntryListFactory' );
-
+		$type_ids = array();
+	
 		//Get Linked accounts so we know which IDs are totals.
 		$total_gross_key = array_search( $this->getPayStubEntryAccountLinkObject()->getTotalGross(), $ids);
 		if ( $total_gross_key !== FALSE ) {
@@ -587,12 +587,14 @@ class PayStubAmendmentFactory extends Factory {
 		}
 		unset($total_employer_deduction_key);
 
+		$type_amount_arr = array();
 		$type_amount_arr['amount'] = 0;
-		if ( isset($type_ids) ) {
+		if ( empty($type_ids) == FALSE ) {
 			//$type_amount_arr = $pself->getSumByPayStubIdAndType( $pay_stub_id, $type_ids );
 			$type_amount_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', $type_ids );
 		}
 
+		$amount_arr = array();
 		$amount_arr['amount'] = 0;
 		if ( count($ids) > 0 ) {
 			//Still other IDs left to total.
@@ -644,7 +646,7 @@ class PayStubAmendmentFactory extends Factory {
 
 	function getAmount() {
 		if ( isset($this->data['amount']) ) {
-			return Misc::removeTrailingZeros( $this->data['amount'], 2);
+			return Misc::removeTrailingZeros( (float)$this->data['amount'], 2);
 		}
 
 		return NULL;
@@ -1053,8 +1055,9 @@ class PayStubAmendmentFactory extends Factory {
 			$pp_obj = $pplf->getCurrent();
 
 			//Only check for CLOSED (not locked) pay periods when the
-			//status of the PSA is *not* 52 and 55
-			if ( $pp_obj->getStatus() == 20 AND ( $this->getStatus() != 52 AND $this->getStatus() != 55 ) ) {
+			//status of the PSA is *not* 52=InUse and 55=PAID.
+			//Allow deleting of 50=Active PSAs in CLOSED pay periods to make it easier to fix the warning that displays in this case when generating pay stubs.
+			if ( $pp_obj->getStatus() == 20 AND ( ( $this->getDeleted() == FALSE AND $this->getStatus() != 52 AND $this->getStatus() != 55 ) OR ( $this->getDeleted() == TRUE AND $this->getStatus() != 50 ) ) ) {
 				$this->Validator->isTrue(		'effective_date',
 												FALSE,
 												TTi18n::gettext('Pay Period that this effective date falls within is currently closed'));
@@ -1096,7 +1099,8 @@ class PayStubAmendmentFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$uf = TTnew( 'UserFactory' );
-
+	
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -1135,7 +1139,7 @@ class PayStubAmendmentFactory extends Factory {
 							break;
 						case 'amount':
 							if ( $this->getType() == 20 ) { //Show percent sign at end, so the user can tell the difference.
-								$data[$variable] = Misc::removeTrailingZeros( $this->getPercentAmount(), 0 ) .'%';
+								$data[$variable] = Misc::removeTrailingZeros( (float)$this->getPercentAmount(), 0 ) .'%';
 							} else {
 								$data[$variable] = $this->getAmount();
 							}
@@ -1154,249 +1158,6 @@ class PayStubAmendmentFactory extends Factory {
 		}
 
 		return $data;
-	}
-
-
-	function getFormObject() {
-		if ( !isset($this->form_obj['cf']) OR !is_object($this->form_obj['cf']) ) {
-			//
-			//Get all data for the form.
-			//
-			require_once( Environment::getBasePath() .'/classes/ChequeForms/ChequeForms.class.php');
-
-			$cf = new ChequeForms();
-			$this->form_obj['cf'] = $cf;
-			return $this->form_obj['cf'];
-		}
-
-		return $this->form_obj['cf'];
-	}
-
-
-	function getChequeFormsObject( $format ) {
-		if ( !isset($this->form_obj[$format]) OR !is_object($this->form_obj[$format]) ) {
-			$this->form_obj[$format] = $this->getFormObject()->getFormObject( strtoupper( $format ) );
-			return $this->form_obj[$format];
-		}
-
-		return $this->form_obj[$format];
-	}
-
-	function exportPayStubAmendment( $psalf = NULL, $export_type = NULL ) {
-		global $current_company;
-
-		if ( !is_object($psalf) AND $this->getId() != '' ) {
-			$psalf = TTnew( 'PayStubAmendmentListFactory' );
-			$psalf->getById( $this->getId() );
-		}
-
-		if ( get_class( $psalf ) !== 'PayStubAmendmentListFactory' ) {
-			return FALSE;
-		}
-
-		if ( $export_type == '' ) {
-			return FALSE;
-		}
-
-		if ( $psalf->getRecordCount() > 0 ) {
-
-			Debug::Text('aExporting...', __FILE__, __LINE__, __METHOD__, 10);
-			switch (strtolower($export_type)) {
-				case 'eft_hsbc':
-				case 'eft_1464':
-				case 'eft_105':
-				case 'eft_ach':
-				case 'eft_beanstream':
-					//Get file creation number
-					$ugdlf = TTnew( 'UserGenericDataListFactory' );
-					$ugdlf->getByCompanyIdAndScriptAndDefault( $current_company->getId(), 'PayStubFactory', TRUE );
-					if ( $ugdlf->getRecordCount() > 0 ) {
-						$ugd_obj = $ugdlf->getCurrent();
-						$setup_data = $ugd_obj->getData();
-					} else {
-						$ugd_obj = TTnew( 'UserGenericDataFactory' );
-					}
-
-					Debug::Text('bExporting...', __FILE__, __LINE__, __METHOD__, 10);
-					//get User Bank account info
-					$balf = TTnew( 'BankAccountListFactory' );
-					$balf->getCompanyAccountByCompanyId( $current_company->getID() );
-					if ( $balf->getRecordCount() > 0 ) {
-						$company_bank_obj = $balf->getCurrent();
-						//Debug::Arr($company_bank_obj, 'Company Bank Object', __FILE__, __LINE__, __METHOD__, 10);
-					}
-
-					if ( isset( $setup_data['file_creation_number'] ) ) {
-						$setup_data['file_creation_number']++;
-					} else {
-						//Start at a high number, in attempt to eliminate conflicts.
-						$setup_data['file_creation_number'] = 500;
-					}
-					Debug::Text('bFile Creation Number: '. $setup_data['file_creation_number'], __FILE__, __LINE__, __METHOD__, 10);
-
-					//Increment file creation number in DB
-					if ( $ugd_obj->getId() == '' ) {
-							$ugd_obj->setID( $ugd_obj->getId() );
-					}
-					$ugd_obj->setCompany( $current_company->getId() );
-					$ugd_obj->setScript( 'PayStubFactory' );
-					$ugd_obj->setName( 'PayStubFactory' );
-					$ugd_obj->setData( $setup_data );
-					$ugd_obj->setDefault( TRUE );
-					if ( $ugd_obj->isValid() ) {
-							$ugd_obj->Save();
-					}
-
-					$eft = new EFT();
-					$eft->setFileFormat( str_replace('eft_', '', $export_type ) );
-
-					$eft->setBusinessNumber( $current_company->getBusinessNumber() ); //ACH
-					$eft->setOriginatorID( $current_company->getOriginatorID() );
-					$eft->setFileCreationNumber( $setup_data['file_creation_number'] );
-					$eft->setInitialEntryNumber( $current_company->getOtherID5() ); //ACH
-					$eft->setDataCenter( $current_company->getDataCenterID() );
-					$eft->setDataCenterName( $current_company->getOtherID4() ); //ACH
-					$eft->setOriginatorShortName( $current_company->getShortName() );
-
-					foreach( $psalf as $key => $psa_obj ) {
-						//Can only export fixed amount PS amendemnts?
-						if ( $psa_obj->getType() == 10 ) {
-							Debug::Text('Looping over Pay Stub Amendment... ID: '. $psa_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-
-							//Get User information
-							$ulf = TTnew( 'UserListFactory' );
-							$user_obj = $ulf->getById( $psa_obj->getUser() )->getCurrent();
-
-							//Get company information
-							$clf = TTnew( 'CompanyListFactory' );
-							$company_obj = $clf->getById( $user_obj->getCompany() )->getCurrent();
-
-							//get User Bank account info
-							$balf = TTnew( 'BankAccountListFactory' );
-							$user_bank_obj = $balf->getUserAccountByCompanyIdAndUserId( $user_obj->getCompany(), $user_obj->getId() );
-							if ( $user_bank_obj->getRecordCount() > 0 ) {
-								$user_bank_obj = $user_bank_obj->getCurrent();
-							} else {
-								continue;
-							}
-
-							$amount = $psa_obj->getAmount();
-							if ( $amount > 0 ) {
-								$record = new EFT_Record();
-								$record->setType('C');
-								$record->setCPACode(200);
-								$record->setAmount( $amount );
-
-								$record->setDueDate( TTDate::getBeginDayEpoch( $psa_obj->getEffectiveDate() ) );
-								$record->setInstitution( $user_bank_obj->getInstitution() );
-								$record->setTransit( $user_bank_obj->getTransit() );
-								$record->setAccount( $user_bank_obj->getAccount() );
-								$record->setName( $user_obj->getFullName() );
-
-								$record->setOriginatorShortName( $company_obj->getShortName() );
-								$record->setOriginatorLongName( substr($company_obj->getName(), 0, 30) );
-								$record->setOriginatorReferenceNumber( 'PSA'.$psa_obj->getId() );
-
-								if ( isset($company_bank_obj) AND is_object($company_bank_obj) ) {
-									$record->setReturnInstitution( $company_bank_obj->getInstitution() );
-									$record->setReturnTransit( $company_bank_obj->getTransit() );
-									$record->setReturnAccount( $company_bank_obj->getAccount() );
-								}
-								$eft->setRecord( $record );
-							}
-							unset($amount);
-
-							$this->getProgressBarObject()->set( NULL, $key );
-						} else {
-							Debug::Text('Skipping percent PS amendment... ID: '. $psa_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-						}
-					}
-					$eft->compile();
-					$output = $eft->getCompiledData();
-					break;
-				case 'cheque_9085':
-				case 'cheque_9209p':
-				case 'cheque_dlt103':
-				case 'cheque_dlt104':
-				case 'cheque_cr_standard_form_1':
-				case 'cheque_cr_standard_form_2':
-					//Wait until Cheque class is created first.
-					$cheque_form_obj = $this->getChequeFormsObject( str_replace('cheque_', '', $export_type) );
-					$psealf = TTnew( 'PayStubEntryAccountListFactory' );
-
-					$i = 0;
-					foreach( $psalf as $key => $psa_obj ) {
-						//Can only export fixed amount PS amendemnts?
-
-						if ( $psa_obj->getType() == 10 ) {
-							
-							//Get User information
-							$ulf = TTnew( 'UserListFactory' );
-							$user_obj = $ulf->getById( $psa_obj->getUser() )->getCurrent();
-
-							//Get company information
-							$clf = TTnew( 'CompanyListFactory' );
-							$company_obj = $clf->getById( $user_obj->getCompany() )->getCurrent();
-
-							if ( $user_obj->getCountry() == 'CA' ) {
-								$date_format = 'd/m/Y';
-							} else {
-								$date_format = 'm/d/Y';
-							}
-							$pay_stub_amendment = array(
-											'id' => $psa_obj->getId(),
-											'display_id' => str_pad($psa_obj->getId(), 15, 0, STR_PAD_LEFT),
-											'user_id' => $psa_obj->getUser(),											
-											'status' => $psa_obj->getStatus(),
-											'amount' => $psa_obj->getAmount(),
-											'date' => TTDate::getTime(),
-
-											'full_name' => $user_obj->getFullName(),
-											'address1' => $user_obj->getAddress1(),
-											'address2' => $user_obj->getAddress2(),
-											'city' => $user_obj->getCity(),
-											'province' => $user_obj->getProvince(),
-											'postal_code' => $user_obj->getPostalCode(),
-											'country' => $user_obj->getCountry(),
-
-											'company_name' => $company_obj->getName(),
-
-											'symbol' => $psa_obj->getUserObject()->getCurrencyObject()->getSymbol(),
-
-											'created_date' => $psa_obj->getCreatedDate(),
-											'created_by' => $psa_obj->getCreatedBy(),
-											'updated_date' => $psa_obj->getUpdatedDate(),
-											'updated_by' => $psa_obj->getUpdatedBy(),
-											'deleted_date' => $psa_obj->getDeletedDate(),
-											'deleted_by' => $psa_obj->getDeletedBy()
-										);
-				
-							$cheque_form_obj->addRecord( $pay_stub_amendment );
-							$this->getFormObject()->addForm( $cheque_form_obj );
-
-							$this->getProgressBarObject()->set( NULL, $key );
-						} else {
-							Debug::Text('Skipping percent PS amendment... ID: '. $psa_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-						}
-
-						$this->getProgressBarObject()->set( NULL, $i );
-						$i++;
-					}
-
-					if ( stristr( $export_type, 'cheque') ) {
-						$output_format = 'PDF';
-					}
-					$output = $this->getFormObject()->output( $output_format );
-
-					break;
-			}
-		}
-
-		if ( isset($output) ) {
-			return $output;
-		}
-
-		return FALSE;
 	}
 
 	function addLog( $log_action ) {

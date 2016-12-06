@@ -42,6 +42,7 @@ class FormVariables {
 	static function getVariables($form_variables, $form_type = 'BOTH', $filter_input = TRUE, $filter_ignore_name_arr = array('next_page', 'batch_next_page') ) {
 		$form_type = trim(strtoupper($form_type));
 
+		$retarr = array();
 		if ( is_array($form_variables) ) {
 			foreach($form_variables as $variable_name) {
 				$retarr[$variable_name] = NULL; //Need to set variables to NULL, otherwise we get a lot of variable not set errors.
@@ -75,7 +76,7 @@ class FormVariables {
 				}
 			}
 
-			if ( isset($retarr) ) {
+			if ( empty($retarr) == FALSE ) {
 				return $retarr;
 			}
 		}

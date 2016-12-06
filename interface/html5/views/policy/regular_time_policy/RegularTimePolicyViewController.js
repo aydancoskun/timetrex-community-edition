@@ -17,8 +17,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 	job_group_api: null,
 	job_item_group_api: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'RegularTimePolicyEditView.html';
 		this.permission_id = 'regular_time_policy';
 		this.viewId = 'RegularTimePolicy';
@@ -621,15 +621,3 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 	}
 
 } );
-
-RegularTimePolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'RegularTimePolicy', 'RegularTimePolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

@@ -398,7 +398,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		if ( $phone_id == '') {
 			return FALSE;
 		}
-		
+
 		$ph = array(
 					'phone_id' => $phone_id,
 					'status' => (int)$status,
@@ -1246,15 +1246,15 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			$query	.=	' AND a.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
 		}
 		if ( isset($filter_data['city']) AND !is_array($filter_data['city']) AND trim($filter_data['city']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['city']));
+			$ph[] = TTi18n::strtolower(trim($filter_data['city']));
 			$query	.=	' AND lower(a.city) LIKE ?';
 		}
 		if ( isset($filter_data['first_name']) AND !is_array($filter_data['first_name']) AND trim($filter_data['first_name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['first_name']));
+			$ph[] = TTi18n::strtolower(trim($filter_data['first_name']));
 			$query	.=	' AND lower(a.first_name) LIKE ?';
 		}
 		if ( isset($filter_data['last_name']) AND !is_array($filter_data['last_name']) AND trim($filter_data['last_name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['last_name']));
+			$ph[] = TTi18n::strtolower(trim($filter_data['last_name']));
 			$query	.=	' AND lower(a.last_name) LIKE ?';
 		}
 		if ( isset($filter_data['home_phone']) AND !is_array($filter_data['home_phone']) AND trim($filter_data['home_phone']) != '' ) {
@@ -1422,15 +1422,15 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			$query	.=	' AND a.province in ('. $this->getListSQL($filter_data['province'], $ph) .') ';
 		}
 		if ( isset($filter_data['city']) AND !is_array($filter_data['city']) AND trim($filter_data['city']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['city']));
+			$ph[] = TTi18n::strtolower(trim($filter_data['city']));
 			$query	.=	' AND lower(a.city) LIKE ?';
 		}
 		if ( isset($filter_data['first_name']) AND !is_array($filter_data['first_name']) AND trim($filter_data['first_name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['first_name']));
+			$ph[] = TTi18n::strtolower(trim($filter_data['first_name']));
 			$query	.=	' AND lower(a.first_name) LIKE ?';
 		}
 		if ( isset($filter_data['last_name']) AND !is_array($filter_data['last_name']) AND trim($filter_data['last_name']) != '' ) {
-			$ph[] = strtolower(trim($filter_data['last_name']));
+			$ph[] = TTi18n::strtolower(trim($filter_data['last_name']));
 			$query	.=	' AND lower(a.last_name) LIKE ?';
 		}
 		if ( isset($filter_data['home_phone']) AND !is_array($filter_data['home_phone']) AND trim($filter_data['home_phone']) != '' ) {
@@ -1877,7 +1877,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 											'pay_period_schedule',
 											'policy_group',
 											);
-		
+
 		if ( $include_last_punch_time == TRUE ) {
 			$additional_order_fields[] = 'max_punch_time_stamp';
 		}
@@ -1971,7 +1971,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		if ( $include_last_punch_time == TRUE ) {
 			$query .= '	punch.max_punch_time_stamp as max_punch_time_stamp, ';
 		}
-		
+
 		//We need to use SUB-SELECTs when joining to permission_control/permission_user, pay_period_schedule/pay_period_schedule_user, policy_group/policy_group_user
 		//Since the employee may not be assigned to any of them, or they may be assigned to ones that were already deleted, and a basic LEFT JOIN
 		//will return multiple records for a single employee unless its done with a sub-select. This can be tested by created a new pay period schedule,

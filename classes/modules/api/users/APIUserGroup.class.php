@@ -115,6 +115,7 @@ class APIUserGroup extends APIFactory {
 
 				$this->setPagerObject( $uglf );
 
+				$retarr = array();
 				foreach( $uglf as $ug_obj ) {
 					$retarr[] = $ug_obj->getObjectAsArray( $data['filter_columns'] );
 
@@ -378,6 +379,7 @@ class APIUserGroup extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				$src_rows[$key]['parent_id'] = $dst_id;
 			}
+			unset($row); //code standards
 			Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setUserGroup( $src_rows ); //Save copied rows

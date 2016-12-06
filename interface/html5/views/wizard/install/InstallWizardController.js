@@ -14,8 +14,8 @@ InstallWizardController = BaseWizardController.extend( {
 
 	edit_view_error_ui_dic: {},
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.title_1 = $( this.el ).find( '.title-1' );
 		this.steps = 5;
 		this.script_name = 'wizard_install';
@@ -417,6 +417,10 @@ InstallWizardController = BaseWizardController.extend( {
 					this.addEditFieldToColumn( $.i18n._( 'GETTEXT Enabled' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( {field: 'intl'} );
+					this.addEditFieldToColumn( $.i18n._( 'INTL Enabled' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'soap'} );
 					this.addEditFieldToColumn( $.i18n._( 'SOAP Enabled' ), form_item_input, requirements_column2, '', null, true, true );
 
@@ -439,6 +443,10 @@ InstallWizardController = BaseWizardController.extend( {
 					this.addEditFieldToColumn( $.i18n._( 'SimpleXML Enabled' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( {field: 'curl'} );
+					this.addEditFieldToColumn( $.i18n._( 'CURL Enabled' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'zip'} );
 					this.addEditFieldToColumn( $.i18n._( 'ZIP Enabled' ), form_item_input, requirements_column2, '', null, true, true );
 
@@ -457,6 +465,10 @@ InstallWizardController = BaseWizardController.extend( {
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'safe_mode'} );
 					this.addEditFieldToColumn( $.i18n._( 'Safe Mode Turned Off' ), form_item_input, requirements_column2, '', null, true, true );
+
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( {field: 'allow_fopen_url'} );
+					this.addEditFieldToColumn( $.i18n._( 'ALLOW_FOPEN_URL Turned Off' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'magic_quotes'} );
@@ -1307,7 +1319,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( setpData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (BCMATH extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (BCMATH extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1315,15 +1327,23 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (MBSTRING extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (MBSTRING extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'gettext':
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
-							} else if ( stepData[key] > 0 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (GETTEXT extension must be enabled)' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Not Installed. (GETTEXT extension must be enabled)' ) );
+								widget.addClass( 'dataError' );
+							}
+							break;
+						case 'intl':
+							if ( stepData[key] == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Not Installed. (INTL extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1331,7 +1351,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (SOAP extension must be enabled)' ) )
+								widget.html( $.i18n._( 'Not Installed. (SOAP extension must be enabled)' ) )
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1339,7 +1359,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (GD extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (GD extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1347,7 +1367,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (JSON extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (JSON extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1355,7 +1375,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (MCRYPT extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (MCRYPT extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1363,7 +1383,15 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (SimpleXML extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (SimpleXML extension must be enabled)' ) );
+								widget.addClass( 'dataError' );
+							}
+							break;
+						case 'curl':
+							if ( stepData[key] == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'Not Installed. (CURL extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1371,7 +1399,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (ZIP extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (ZIP extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1379,7 +1407,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (MAIL extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (MAIL extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1387,7 +1415,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Warning: Not Installed. (OpenSSL extension must be enabled)' ) );
+								widget.html( $.i18n._( 'Not Installed. (OpenSSL extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1396,11 +1424,11 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
 								if ( stepData.php_os == 'WINNT' ) {
-									widget.html( $.i18n._( 'Warning: Not Installed.' )
+									widget.html( $.i18n._( 'Not Installed.' )
 										+ '(' + $.i18n._( 'try running' ) + ': ' + '"<b>go-pear.bat</b>"' + ')'
 									)
 								} else {
-									widget.html( $.i18n._( 'Warning: Not Installed.' )
+									widget.html( $.i18n._( 'Not Installed.' )
 										+ '('
 										+ $.i18n._( 'install the PEAR RPM or package from' ) + ' '
 										+ '<a href=\"http://pear.php.net\">http://pear.php.net</a>'
@@ -1415,6 +1443,14 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
 								widget.html( $.i18n._( 'Safe Mode is On. (Please disable it in php.ini)' ) );
+								widget.addClass( 'dataError' );
+							}
+							break;
+						case 'allow_fopen_url':
+							if ( stepData[key] == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+							} else if ( stepData[key] == 1 ) {
+								widget.html( $.i18n._( 'allow_fopen_url is Off. (Please enable it in php.ini)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1443,7 +1479,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( str );
 								edit_view_form_item_dic.hide();
 							} else if ( stepData[key].check_php_memory_limit == 1 ) {
-								widget.html( $.i18n._( 'Warning' ) + ': ' + stepData[key].memory_limit + 'M' + ' (' + $.i18n._( 'Set this to 128M or higher' ) + ')' );
+								widget.html( stepData[key].memory_limit + 'M' + ' (' + $.i18n._( 'Set this to 128M or higher' ) + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1452,7 +1488,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'Warning' ) + ': ' + key + ' ' + $.i18n._( 'in' ) + ' timetrex.ini.php' + $.i18n._( 'is incorrect, perhaps it should be' ) + ' ' + stepData[key].recommended_base_url + ' ' + $.i18n._( 'instead' ) );
+								widget.html( key + ' ' + $.i18n._( 'in' ) + ' timetrex.ini.php' + $.i18n._( 'is incorrect, perhaps it should be' ) + ' ' + stepData[key].recommended_base_url + ' ' + $.i18n._( 'instead' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1461,7 +1497,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'Warning: PHP open_basedir setting' ) + ' ' + '(' + stepData[key].php_open_base_dir + ') ' + $.i18n._( 'does not include directory of PHP CLI binary' ) + ' ' + '(' + stepData[key].php_cli_directory + ')' );
+								widget.html( $.i18n._( 'PHP open_basedir setting' ) + ' ' + '(' + stepData[key].php_open_base_dir + ') ' + $.i18n._( 'does not include directory of PHP CLI binary' ) + ' ' + '(' + stepData[key].php_cli_directory + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1470,7 +1506,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'Warning: PHP CLI' ) + ' ' + '(' + stepData[key].php_cli + ')' + ' ' + $.i18n._( 'does not exist or is not executable.' ) );
+								widget.html( $.i18n._( 'PHP CLI' ) + ' ' + '(' + stepData[key].php_cli + ')' + ' ' + $.i18n._( 'does not exist or is not executable.' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1479,7 +1515,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'Warning: PHP CLI requirements failed while executing' ) + '<br>'
+								widget.html( $.i18n._( 'PHP CLI requirements failed while executing' ) + '<br>'
 									+ stepData[key].php_cli_requirements_command + '<br>'
 									+ $.i18n._( 'Likely caused by having two PHP.INI files with different settings.' )
 								);
@@ -1490,7 +1526,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else {
-								widget.html( $.i18n._( 'Warning: Not writable' ) );
+								widget.html( $.i18n._( 'Not writable' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1499,7 +1535,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'Warning: Not writable' ) + ' (' + stepData[key].cache_dir + ')' );
+								widget.html( $.i18n._( 'Not writable' ) + ' (' + stepData[key].cache_dir + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1508,7 +1544,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'Warning: Not writable' ) + ' (' + stepData[key].storage_path + ')' );
+								widget.html( $.i18n._( 'Not writable' ) + ' (' + stepData[key].storage_path + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1517,7 +1553,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'Warning: Not writable' ) + ' (' + stepData[key].log_path + ')' );
+								widget.html( $.i18n._( 'Not writable' ) + ' (' + stepData[key].log_path + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1526,7 +1562,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'Warning: Please delete all files/directories in' ) + ': ' + ' <b>' + stepData[key].cache_dir + '</b>' );
+								widget.html( $.i18n._( 'Please delete all files/directories in' ) + ': ' + ' <b>' + stepData[key].cache_dir + '</b>' );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1534,7 +1570,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else {
-								widget.html( $.i18n._( 'Warning: File permissions are invalid, some' ) + ' ' + $.i18n._( stepData.application_name ) + ' ' + $.i18n._( 'files are not readable/writable. See detailed error messages below.' ) )
+								widget.html( $.i18n._( 'File permissions are invalid, some' ) + ' ' + $.i18n._( stepData.application_name ) + ' ' + $.i18n._( 'files are not readable/writable. See detailed error messages below.' ) )
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1542,7 +1578,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else {
-								widget.html( $.i18n._( 'Warning' ) + ': ' + $.i18n._( 'File checksums do not match, some' ) + ' ' + $.i18n._( stepData.application_name ) + ' ' + $.i18n._( 'files may be corrupted, missing, or not installed properly. See detailed error messages below.' ) );
+								widget.html( $.i18n._( 'File checksums do not match, some' ) + ' ' + $.i18n._( stepData.application_name ) + ' ' + $.i18n._( 'files may be corrupted, missing, or not installed properly. See detailed error messages below.' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;

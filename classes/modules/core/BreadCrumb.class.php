@@ -137,7 +137,7 @@ class BreadCrumb {
 		}
 
 		$result = $rs->GetRows();
-
+		$retarr = array();
 		foreach ($result as $row) {
 			$retarr[] = array(
 								'name' => $row['name'],
@@ -145,7 +145,7 @@ class BreadCrumb {
 			//Debug::text('Picking up Bread Crumb: '. $row['name'] .' URL: '. $row['url'], __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		if ( isset($retarr) ) {
+		if ( empty($retarr) == FALSE ) {
 			return $retarr;
 		}
 
@@ -171,6 +171,7 @@ class BreadCrumb {
 
 		try {
 			$rs = $db->Execute($query, $ph);
+			unset($rs); //code standards
 		} catch (Exception $e) {
 			throw new DBError($e);
 		}
@@ -192,6 +193,7 @@ class BreadCrumb {
 			$crumbs = array_reverse($crumbs);
 		}
 
+		$links = array();
 		//var_dump($crumbs);
 		$links[] = '<a href="'. Environment::getBaseURL() .'">'. TTi18n::gettext(self::$home_name) .'</a>';
 

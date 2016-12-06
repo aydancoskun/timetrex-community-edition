@@ -402,7 +402,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$title_options = array();
 				}
 
-				$user_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 10, '-8000-user_', TTi18n::getText('Employee').': ' );
+				$user_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 10, '-8000-', TTi18n::getText('Employee').': ' );
 				if ( !is_array($user_options) ) {
 					$user_options = array();
 				}
@@ -524,7 +524,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 	function getExportTypeTemplate( $config, $format ) {
 		$config = Misc::trimSortPrefix( $config );
-		
+
 		if ( $format == 'payroll_export' ) {
 			unset($config['columns'], $config['group'], $config['sort'], $config['sub_total']);
 			$config['other']['disable_grand_total'] = TRUE; //Disable grand totals.
@@ -715,7 +715,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						if ( isset($setup_data['sage_50']['customer_name']) AND !empty($setup_data['sage_50']['customer_name']) ) {
 							$config['columns'][] = $setup_data['sage_50']['customer_name'];
 						}
-						
+
 						$config['columns'] += Misc::trimSortPrefix( $this->getOptions('dynamic_columns') );
 
 						$config['group'][] = 'pay_period_end_date';
@@ -726,11 +726,11 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						if ( isset($setup_data['sage_50']['customer_name']) AND !empty($setup_data['sage_50']['customer_name']) ) {
 							$config['group'][] = $setup_data['sage_50']['customer_name'];
 						}
-						
+
 						$config['sort'][] = array('pay_period_end_date' => 'asc', 'employee_number' => 'asc', 'last_name' => 'asc', 'first_name' => 'asc');
 						break;
 					case 'cms_pbj':  //This is XML.
-						break;					
+						break;
 					case 'csv':
 						//If this needs to be customized, they can just export any regular report. This could probably be removed completely except for the Hour Code mapping...
 						$config['columns'][] = 'full_name';
@@ -790,6 +790,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 		$data = NULL;
 
 		$setup_data['export_type'] = strtolower(trim($setup_data['export_type']));
+		$export_data_map = array();
+		$config = array();
 		switch( $setup_data['export_type'] ) {
 			case 'adp': //ADP export format.
 				//File format supports multiple rows per employee (file #) all using the same columns. No need to jump through nasty hoops to fit everything on row.
@@ -812,7 +814,6 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$setup_data['adp']['columns'] = Misc::trimSortPrefix( $setup_data['adp']['columns'] );
 
 				foreach( $setup_data['adp']['columns'] as $column_id => $column_data ) {
-					$column_name = NULL;
 					if ( $column_data['hour_column'] == 'regular_time' ) {
 						$export_data_map[$column_id] = 'regular_time';
 					} elseif ($column_data['hour_column'] == 'overtime' ) {
@@ -835,6 +836,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$company_code_column = Misc::trimSortPrefix( $setup_data['adp']['company_code'] );
 				$batch_id_column = Misc::trimSortPrefix( $setup_data['adp']['batch_id'] );
 				$temp_dept_column = Misc::trimSortPrefix( $setup_data['adp']['temp_dept'] );
+				$tmp_rows = array();
 				foreach($rows as $row) {
 					$static_columns = array(
 										'company_code' => ( isset($row[$company_code_column]) ) ? $row[$company_code_column] : $setup_data['adp']['company_code_value'],
@@ -852,6 +854,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 								if ( ( $column_data['hour_column'] == $export_column_id OR $column_data['hour_column'].'_code' == $export_column_id )
 										AND !in_array( $export_column_id, array('company_code', 'batch_id', 'temp_dept', 'employee_number')) ) {
+									$tmp_row = array();
 									//if ( (int)substr( $export_column_id, 0, 1 ) > 0 ) {
 									if ( strpos( $export_column_id, 'other_' ) !== FALSE OR (int)substr( $export_column_id, 0, 1 ) > 0 ) {
 										$tmp_row[$column_data['hour_column'].'_code'] = $column_data['hour_code'];
@@ -920,13 +923,13 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				if ( isset($setup_data[$setup_data['export_type']]['work_class']) AND strpos( $setup_data[$setup_data['export_type']]['work_class'], '_' ) !== FALSE ) {
 					$config['group'][] = Misc::trimSortPrefix( 'pay_period_start_date' );
 					$config['group'][] = Misc::trimSortPrefix( 'date_stamp' );
-				}				
+				}
 				if ( isset($setup_data[$setup_data['export_type']]['temp_dept']) AND strpos( $setup_data[$setup_data['export_type']]['temp_dept'], '_' ) !== FALSE ) {
 					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['temp_dept'] );
 				}
 				if ( isset($setup_data[$setup_data['export_type']]['job_cost']) AND strpos( $setup_data[$setup_data['export_type']]['job_cost'], '_' ) !== FALSE ) {
 					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_cost'] );
-				}				
+				}
 				if ( isset($setup_data[$setup_data['export_type']]['work_class']) AND strpos( $setup_data[$setup_data['export_type']]['work_class'], '_' ) !== FALSE ) {
 					$config['group'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['work_class'] );
 				}
@@ -955,16 +958,16 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				if ( isset($setup_data[$setup_data['export_type']]['work_class']) AND strpos( $setup_data[$setup_data['export_type']]['work_class'], '_' ) !== FALSE ) {
 					$config['sort'][] = Misc::trimSortPrefix( 'pay_period_start_date' );
 					$config['sort'][] = Misc::trimSortPrefix( 'date_stamp' );
-				}				
+				}
 				if ( isset($setup_data[$setup_data['export_type']]['temp_dept']) AND strpos( $setup_data[$setup_data['export_type']]['temp_dept'], '_' ) !== FALSE ) {
 					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['temp_dept'] ) => 'asc' );
 				}
 				if ( isset($setup_data[$setup_data['export_type']]['job_cost']) AND strpos( $setup_data[$setup_data['export_type']]['job_cost'], '_' ) !== FALSE ) {
 					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['job_cost'] ) => 'asc' );
-				}				
+				}
 				if ( isset($setup_data[$setup_data['export_type']]['work_class']) AND strpos( $setup_data[$setup_data['export_type']]['work_class'], '_' ) !== FALSE ) {
 					$config['sort'][] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['work_class'] );
-				}								
+				}
 				if ( isset($setup_data[$setup_data['export_type']]['state_columns']) AND strpos( $setup_data[$setup_data['export_type']]['state_columns'], '_' ) !== FALSE ) {
 					$config['sort'][] = array( Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['state_columns'] ) => 'asc' );
 				}
@@ -1028,25 +1031,24 @@ class PayrollExportReport extends TimesheetSummaryReport {
 											'overtime' => 'O/T Hours',
 											'other_code' => 'Other Hours Code',
 											'other_amount' => 'Other Hours',
-											);					
+											);
 				}
 
 				if ( !( ( isset($setup_data[$setup_data['export_type']]['temp_dept']) AND $setup_data[$setup_data['export_type']]['temp_dept'] != '' ) OR ( isset($setup_data[$setup_data['export_type']]['temp_dept_value']) AND $setup_data[$setup_data['export_type']]['temp_dept_value'] != '' ) ) ) {
 					unset($export_column_map['temp_dept']); //If the ADP company is not setup for Labor Distribution by Dept, then this column must be removed.
 				}
-				
+
 				ksort($setup_data[$setup_data['export_type']]['columns']);
 				$setup_data[$setup_data['export_type']]['columns'] = Misc::trimSortPrefix( $setup_data[$setup_data['export_type']]['columns'] );
 
 				foreach( $setup_data[$setup_data['export_type']]['columns'] as $column_id => $column_data ) {
-					$column_name = NULL;
 					if ( $column_data['hour_column'] == 'regular_time' ) {
 						$export_data_map[$column_id] = 'regular_time';
 					} elseif ($column_data['hour_column'] == 'overtime' ) {
 						$export_data_map[$column_id] = 'overtime';
 					} elseif ( $column_data['hour_column'] == 'other' OR $column_data['hour_column'] >= 3 ) {
 						$export_data_map[$column_id] = $column_data;
-					}					
+					}
 				}
 
 				if ( !isset($setup_data[$setup_data['export_type']]['company_code_value']) ) {
@@ -1086,7 +1088,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 						if ( isset($work_class) AND $work_class != '' ) {
 							$static_columns['job_cost'] .= '-'. $work_class;
-							
+
 							if ( isset($row['date_stamp']) AND isset($row['pay_period_start_date']) ) {
 								//Debug::Text('Pay Period Start Date: '. $row['pay_period_start_date'] .' Date: '. $row['date_stamp'], __FILE__, __LINE__, __METHOD__, 10);
 								$day_of_pay_period = str_pad( ( round( TTDate::getDays( ( TTDate::parseDateTime( $row['date_stamp'] ) - TTDate::parseDateTime( $row['pay_period_start_date'] ) ) ) ) + 1 ), 2, 0, STR_PAD_LEFT);
@@ -1133,8 +1135,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$data = Misc::Array2CSV( $tmp_rows, $export_column_map, FALSE );
 				}
 				unset($tmp_rows, $export_column_map, $column_id, $column_data, $rows, $row);
-				
-				break;			
+
+				break;
 			case 'paychex_preview_advanced_job': //PayChex Preview with job information
 				unset($rows); //Ignore any existing timesheet summary data, we will be using our own job data below.
 				//Debug::Arr($setup_data, 'PayChex Advanced Job Setup Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -1167,7 +1169,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$jar->sort();
 				$rows = $jar->data;
 				//Debug::Arr($rows, 'Raw Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-				
+
 				//Need to get job data from job report instead of TimeSheet Summary report.
 				if ( !isset($setup_data['paychex_preview_advanced_job']['client_number']) ) {
 					$setup_data['paychex_preview_advanced_job']['client_number'] = '0000';
@@ -1268,16 +1270,17 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 
 				$export_column_map['employee_number'] = '';
-				foreach($earnings as $key => $value) {
+				foreach($earnings as $value) {
 					$export_column_map[$value] = '';
 				}
 
 				$i = 0;
+				$tmp_hour_codes = array();
 				foreach($rows as $row) {
 					if ( $i == 0 ) {
 						//Include header.
 						$tmp_row['employee_number'] = 'Employee Number';
-						foreach($earnings as $key => $value) {
+						foreach($earnings as $value) {
 							$tmp_row[$value] = $value . ' Hours';
 						}
 						$tmp_rows[] = $tmp_row;
@@ -1427,7 +1430,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				break;
 			case 'surepayroll': //SurePayroll Export format.
 				$file_name = strtolower(trim($setup_data['export_type'])).'_'.date('Y_m_d').'.csv';
-				
+
 				ksort($setup_data['surepayroll']['columns']);
 				$setup_data['surepayroll']['columns'] = Misc::trimSortPrefix( $setup_data['surepayroll']['columns'] );
 
@@ -1613,6 +1616,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$setup_data['va_munis']['columns'] = Misc::trimSortPrefix( $setup_data['va_munis']['columns'] );
 
 				$i = 0;
+				$hour_code_map = array();
 				foreach($rows as $row) {
 					//Combine all hours from the same code together.
 					foreach( $setup_data['va_munis']['columns'] as $column_id => $column_data ) {
@@ -1621,7 +1625,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						} else {
 							$hour_code = trim($column_data['hour_code']);
 						}
-						
+
 						$hour_code_map[$hour_code][$column_id] = NULL;
 						if ( isset( $row[$column_id.'_time'] ) AND $hour_code != '' ) {
 							if ( !isset($tmp_hour_codes[$hour_code]) ) {
@@ -1672,6 +1676,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 								break;
 							}
 						}
+						unset($tmp); //code standards
 						$data .= ( $is_absence == TRUE ) ? 'Y' : 'N';
 
 						//$data .= ', ';
@@ -1731,7 +1736,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				ksort($setup_data['accero']['columns']);
 				$setup_data['accero']['columns'] = Misc::trimSortPrefix( $setup_data['accero']['columns'] );
-				
+
 				if ( !isset($setup_data['accero']['temp_dept_value']) ) {
 					$setup_data['accero']['temp_dept_value'] = NULL;
 				}
@@ -1791,7 +1796,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$data = '';
 					foreach( $tmp_rows as $tmp_row ) {
 						$data .= implode($tmp_row, '')."\r\n";
-					}					
+					}
 				}
 				unset($tmp_rows, $tmp_row, $export_column_map, $column_id, $column_data, $rows, $row);
 				break;
@@ -1833,7 +1838,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 			case 'sage_50': //sage_50 Export format.
 				//It appears that Sage 50 can't import overtime, unless its handled through item numbers?
 				//https://support.na.sage.com/selfservice/viewContent.do?externalId=41370&sliceId=1
-				
+
 				$file_name = strtolower(trim($setup_data['export_type'])).'_'.date('Y_m_d').'.imp';
 
 				ksort($setup_data['sage_50']['columns']);
@@ -1864,7 +1869,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				$data = '';
 				if ( isset( $tmp_rows ) ) {
-					foreach( $tmp_rows as $employee_number => $detail_records ) {
+					foreach( $tmp_rows as $detail_records ) {
 						$data .= '<Timeslip>'."\r\n";
 						$total_detail_records = count($detail_records);
 						if ( $total_detail_records > 0 ) {
@@ -1915,7 +1920,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 				$config['group'][] = 'employee_number';
 				$config['group'][] = 'hire-date_stamp';
-				$config['group'][] = 'termination-date_stamp';				
+				$config['group'][] = 'termination-date_stamp';
 				$config['group'][] = 'date_stamp';
 
 
@@ -1994,7 +1999,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					} else {
 						$rows[$key]['pbj_hours'] = FALSE;
 					}
-					
+
 					$rows[$key]['pbj_job_title_code'] = ( isset($job_title_code_column) AND isset($row[$job_title_code_column]) ) ? $row[$job_title_code_column] : $setup_data[$setup_data['export_type']]['job_title_code_value'];
 					$rows[$key]['pbj_pay_type_code'] = ( isset($pay_type_code_column) AND isset($row[$pay_type_code_column]) ) ? $row[$pay_type_code_column] : $setup_data[$setup_data['export_type']]['pay_type_code_value'];
 				}
@@ -2005,27 +2010,29 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$pbj = $gf->getFormObject('CMS_PBJ', 'US');
 
 				foreach($rows as $key => $row) {
-					$facility_code = ( isset($facility_code_column) AND isset($row[$facility_code_column]) ) ? $row[$facility_code_column] : $setup_data[$setup_data['export_type']]['facility_code_value'];
-					$state_code = ( isset($state_code_column) AND isset($row[$state_code_column]) ) ? $row[$state_code_column] : $setup_data[$setup_data['export_type']]['state_code_value'];
+					if ( $row['pbj_hours'] > 0 ) {
+						$facility_code = ( isset( $facility_code_column ) AND isset( $row[$facility_code_column] ) ) ? $row[$facility_code_column] : $setup_data[$setup_data['export_type']]['facility_code_value'];
+						$state_code = ( isset( $state_code_column ) AND isset( $row[$state_code_column] ) ) ? $row[$state_code_column] : $setup_data[$setup_data['export_type']]['state_code_value'];
 
-					//Debug::Text('Add Record: '. $row['employee_number'] .' Date: '. $row['date_stamp'], __FILE__, __LINE__, __METHOD__, 10);
+						//Debug::Text('Add Record: '. $row['employee_number'] .' Date: '. $row['date_stamp'], __FILE__, __LINE__, __METHOD__, 10);
 
-					if ( !isset($pbj->date) ) {
-						//Debug::Text('Facility Code: '. $facility_code .' State: '. $state_code, __FILE__, __LINE__, __METHOD__, 10);
-						$pbj->facility_code = $facility_code;
-						$pbj->state_code = $state_code;
-						$pbj->date = TTDate::parseDateTime( $row['date_stamp'] );
+						if ( !isset( $pbj->date ) ) {
+							//Debug::Text('Facility Code: '. $facility_code .' State: '. $state_code, __FILE__, __LINE__, __METHOD__, 10);
+							$pbj->facility_code = $facility_code;
+							$pbj->state_code = $state_code;
+							$pbj->date = strtotime( $row['date_stamp'] ); //This is ISO Date format.
+						}
+
+						//Make sure these are always set, so GovernmentForms->addRecords() overwrites them for every row.
+						$row['date_stamp'] = ( isset( $row['date_stamp'] ) ) ? strtotime( $row['date_stamp'] ) : FALSE;
+						$row['hire-date_stamp'] = ( isset( $row['hire-date_stamp'] ) ) ? strtotime( $row['hire-date_stamp'] ) : FALSE;
+						$row['termination-date_stamp'] = ( isset( $row['termination-date_stamp'] ) ) ? strtotime( $row['termination-date_stamp'] ) : FALSE;
+
+						$pbj->addRecord( $row );
 					}
-					
-					//Make sure these are always set, so GovernmentForms->addRecords() overwrites them for every row.
-					if ( !isset($row['hire-date_stamp']) ) {
-						$row['hire-date_stamp'] = FALSE;
-					}
-					if ( !isset($row['termination-date_stamp']) ) {
-						$row['termination-date_stamp'] = FALSE;
-					}
-					
-					$pbj->addRecord( $row );
+					//else {
+					//	Debug::Text('  Skipping row with 0 hours: Key: '. $key .' Employee Number: '. $row['employee_number'] .' Date: '. $row['date_stamp'], __FILE__, __LINE__, __METHOD__, 10);
+					//}
 				}
 				$gf->addForm( $pbj );
 
@@ -2392,7 +2399,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$export_column_map['hour_code'] = '';
 				$export_column_map['hours'] = '';
 				$export_column_map['hourly_rate'] = '';
-				
+
 				$i = 0;
 				foreach($rows as $row) {
 					if ( $i == 0 ) {
@@ -2404,7 +2411,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$tmp_rows[$i]['hour_code'] = 'Hours Code';
 						$tmp_rows[$i]['hours'] = 'Hours';
 						$tmp_rows[$i]['hourly_rate'] = 'Hourly Rate';
-						
+
 						$i++;
 					}
 
@@ -2422,7 +2429,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							$tmp_hour_codes[$hour_code]['rate'] = ( isset($row[$column_id.'_hourly_rate']) ) ? $row[$column_id.'_hourly_rate'] : NULL;
 						}
 					}
-					
+
 					if ( isset($tmp_hour_codes) ) {
 						foreach($tmp_hour_codes as $hour_code => $hour_code_arr ) {
 							foreach( $setup_data['csv_advanced']['export_columns'] as $export_column ) {
@@ -2452,7 +2459,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 		if ( is_array($data) ) { //If there is a XML or some validation error, return that to the user.
 			return $data;
 		}
-		
+
 		return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $data );
 	}
 

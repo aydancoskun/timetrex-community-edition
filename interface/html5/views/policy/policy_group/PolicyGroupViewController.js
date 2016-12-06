@@ -3,8 +3,8 @@ PolicyGroupViewController = BaseViewController.extend( {
 	sub_document_view_controller: null,
 	document_object_type_id: null,
 	exception_policy_control_api: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PolicyGroupEditView.html';
 		this.permission_id = 'policy_group';
 		this.viewId = 'PolicyGroup';
@@ -512,15 +512,3 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 
 } );
-
-PolicyGroupViewController.loadView = function() {
-
-	Global.loadViewSource( 'PolicyGroup', 'PolicyGroupView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

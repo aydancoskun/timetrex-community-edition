@@ -3,8 +3,8 @@ PermissionWizardController = BaseWizardController.extend( {
 	el: '.wizard',
 	api_permission: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 
 		this.title = $.i18n._( 'Permission Wizard' );
 		this.steps = 3;

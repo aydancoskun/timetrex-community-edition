@@ -191,26 +191,30 @@ class CurrencyRateFactory extends Factory {
 
 	function getConversionRate() {
 		if ( isset($this->data['conversion_rate']) ) {
-			return $this->data['conversion_rate'];
+			return $this->data['conversion_rate']; //Don't cast to (float) as it may strip some precision.
 		}
 
 		return FALSE;
 	}
 	function setConversionRate( $value ) {
-		$value = trim($value);
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
 
-
-		if ( 	$this->Validator->isTrue(		'conversion_rate',
-												$value,
-												TTi18n::gettext('Conversion rate not specified')
-				) AND $this->Validator->isFloat(	'conversion_rate',
-													$value,
-													TTi18n::gettext('Incorrect Conversion Rate'))
-			) {
-
+		if ( $this->Validator->isTrue( 'conversion_rate',
+									   $value,
+									   TTi18n::gettext( 'Conversion rate not specified' ) )
+				AND $this->Validator->isFloat( 'conversion_rate',
+											   $value,
+											   TTi18n::gettext( 'Incorrect Conversion Rate' ) )
+				AND $this->Validator->isLessThan( 'conversion_rate',
+												  $value,
+												  TTi18n::gettext( 'Conversion Rate is too high' ),
+												  99999999 )
+				AND $this->Validator->isGreaterThan( 'conversion_rate',
+													 $value,
+													 TTi18n::gettext( 'Conversion Rate is too low' ),
+													 -99999999 )
+		) {
 			$this->data['conversion_rate'] = $value;
 
 			return TRUE;
@@ -264,10 +268,11 @@ class CurrencyRateFactory extends Factory {
 					$function = 'set'.$function;
 					switch( $key ) {
 						case 'date_stamp':
-							if ( method_exists( $this, $function ) ) {
-								$this->$function( TTDate::parseDateTime( $data[$key] ) );
-							}
+							$this->$function( TTDate::parseDateTime( $data[$key] ) );
 							break;
+//						case 'conversion_rate':
+//							$this->$function( TTi18n::parseFloat( $data[$key] ) );
+//							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -295,7 +300,7 @@ class CurrencyRateFactory extends Factory {
 								)
 
 		*/
-
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -304,10 +309,11 @@ class CurrencyRateFactory extends Factory {
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
 						case 'date_stamp':
-							if ( method_exists( $this, $function ) ) {
-								$data[$variable] = $this->$function( TRUE );
-							}
+							$data[$variable] = $this->$function( TRUE );
 							break;
+//						case 'conversion_rate':
+//							$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 10, 10 );
+//							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();

@@ -100,6 +100,7 @@ class APIWageGroup extends APIFactory {
 		if ( $utlf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $utlf );
 
+			$retarr = array();
 			foreach( $utlf as $ut_obj ) {
 				$retarr[] = $ut_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -110,6 +111,16 @@ class APIWageGroup extends APIFactory {
 		return $this->returnHandler( TRUE ); //No records returned.
 	}
 
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportWageGroup( $format = 'csv', $data = NULL, $disable_paging = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getWageGroup( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_wage_group', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
 	/**
 	 * Get only the fields that are common across all records in the search criteria. Used for Mass Editing of records.
 	 * @param array $data filter data

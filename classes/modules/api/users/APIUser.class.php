@@ -128,6 +128,17 @@ class APIUser extends APIFactory {
 	}
 
 	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportUser( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getUser( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_employee', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
+	}
+
+	/**
 	 * Get user data for one or more users.
 	 * @param array $data filter data, see reference for details.
 	 * @see \Modules\Users\UserListFactory::getAPISearchByCompanyIdAndArrayCriteria()
@@ -176,6 +187,7 @@ class APIUser extends APIFactory {
 
 			$this->setPagerObject( $ulf );
 
+			$retarr = array();
 			foreach( $ulf as $u_obj ) {
 				//$user_data = $u_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 				$user_data = $u_obj->getObjectAsArray( $data['filter_columns'] );
@@ -624,31 +636,31 @@ class APIUser extends APIFactory {
 						}
 
 						if ( $uf->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
-							$log_description = TTi18n::getText('Password - Web');
-							if ( $current_password != '' ) {
-								if ( $uf->checkPassword($current_password) !== TRUE ) {
-									Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
-									sleep( ($authentication->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
-									$uf->Validator->isTrue(	'current_password',
-															   FALSE,
-															   TTi18n::gettext('Current password is incorrect') );
-								}
-							} else {
-								Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
+						$log_description = TTi18n::getText('Password - Web');
+						if ( $current_password != '' ) {
+							if ( $uf->checkPassword($current_password) !== TRUE ) {
+								Debug::text('Password check failed! Attempt: '. $authentication->rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
+								sleep( ($authentication->rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
 								$uf->Validator->isTrue(	'current_password',
-														   FALSE,
-														   TTi18n::gettext('Current password is incorrect') );
+														FALSE,
+														TTi18n::gettext('Current password is incorrect') );
 							}
+						} else {
+							Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
+							$uf->Validator->isTrue(	'current_password',
+													FALSE,
+													TTi18n::gettext('Current password is incorrect') );
+						}
 
-							if ( $new_password != '' OR $new_password2 != ''  ) {
-								if ( $new_password === $new_password2 ) {
-									$uf->setPassword($new_password);
-								} else {
-									$uf->Validator->isTrue(	'password',
-															   FALSE,
-															   TTi18n::gettext('Passwords don\'t match') );
-								}
+						if ( $new_password != '' OR $new_password2 != ''  ) {
+							if ( $new_password === $new_password2 ) {
+								$uf->setPassword($new_password);
+							} else {
+								$uf->Validator->isTrue(	'password',
+														FALSE,
+														TTi18n::gettext('Passwords don\'t match') );
 							}
+						}
 						} else {
 							Debug::Text('LDAP Authentication is enabled, password changing is disabled! ', __FILE__, __LINE__, __METHOD__, 10);
 							$uf->Validator->isTrue(	'current_password',
@@ -689,6 +701,7 @@ class APIUser extends APIFactory {
 		//Get a unique list of states each employee belongs to
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );
+		$retarr = array();
 		if ( $ulf->getRecordCount() > 0 ) {
 			foreach( $ulf as $u_obj ) {
 				$retarr[$u_obj->getProvince()] = $u_obj->getProvince();

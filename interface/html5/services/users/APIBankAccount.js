@@ -32,6 +32,11 @@ var APIBankAccount = ServiceCaller.extend( {
 	setBankAccount: function() {
 		return this.argumentsHandler( this.className, 'setBankAccount', arguments );
 
+	},
+
+	exoportBankAccount: function() {
+		return this.argumentsHandler( this.className, 'exportBankAccount', arguments );
+
 	}
 
 

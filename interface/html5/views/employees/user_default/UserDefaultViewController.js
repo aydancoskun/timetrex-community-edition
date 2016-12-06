@@ -10,16 +10,13 @@ UserDefaultViewController = BaseViewController.extend( {
 	date_format_array: null,
 	time_format_array: null,
 	time_unit_format_array: null,
+	distance_format_array: null,
 	time_zone_array: null,
 	start_week_day_array: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.edit_only_mode ) ) {
-			this.edit_only_mode = this.options.edit_only_mode;
-		}
-
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 
 		this.permission_id = 'user';
 		this.viewId = 'UserDefault';
@@ -42,6 +39,7 @@ UserDefaultViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
 
 		this.render();
 		this.buildContextMenu();
@@ -61,6 +59,7 @@ UserDefaultViewController = BaseViewController.extend( {
 			{option_name: 'date_format', field_name: 'date_format', api: this.user_preference_api},
 			{option_name: 'time_format', field_name: 'time_format', api: this.user_preference_api},
 			{option_name: 'time_unit_format', field_name: 'time_unit_format', api: this.user_preference_api},
+			{option_name: 'distance_format', field_name: 'distance_format', api: this.user_preference_api},
 			{option_name: 'time_zone', field_name: 'time_zone', api: this.user_preference_api},
 			{option_name: 'start_week_day', field_name: 'start_week_day', api: this.user_preference_api},
 			{option_name: 'country', field_name: 'country', api: this.company_api}
@@ -559,6 +558,12 @@ UserDefaultViewController = BaseViewController.extend( {
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_unit_format_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Time Units' ), form_item_input, tab_employee_preference_column1 );
 
+		// Distance Units
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'distance_format', set_empty: true} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.distance_format_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Distance Units' ), form_item_input, tab_employee_preference_column1 );
+
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'time_zone', set_empty: true} );
@@ -636,15 +641,3 @@ UserDefaultViewController = BaseViewController.extend( {
 
 
 } );
-
-UserDefaultViewController.loadView = function() {
-
-	Global.loadViewSource( 'UserDefault', 'UserDefaultView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

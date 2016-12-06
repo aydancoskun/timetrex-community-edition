@@ -79,7 +79,7 @@ class ImportDepartment extends Import {
 	//
 	// Generic parser functions.
 	//
-	function parse_status_id( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
+	function parse_status( $input, $default_value = NULL, $parse_hint = NULL, $raw_row = NULL ) {
 		if ( strtolower( $input ) == 'e'
 				OR strtolower( $input ) == 'enabled' ) {
 			$retval = 10;

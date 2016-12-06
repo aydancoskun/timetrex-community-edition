@@ -152,30 +152,44 @@ class UserPreferenceFactory extends Factory {
 											'G:i'		=> TTi18n::gettext('20:09'),
 											'g:i A T'	=> TTi18n::gettext('8:09 PM GMT'),
 											'G:i T'		=> TTi18n::gettext('20:09 GMT'),
-											//'g:i:s A'	=> TTi18n::gettext('8:09:11 PM'),
-											//'g:i:s a'	=> TTi18n::gettext('8:09:11 pm'),
-											//'G:i:s'	=> TTi18n::gettext('20:09:11'),
-											//'g:i:s A T'=> TTi18n::gettext('8:09:11 PM GMT'),
-											//'G:i:s T'	=> TTi18n::gettext('20:09:11 GMT'),
+
+											//Include seconds so they can properly validate rounding policies and such.
+											'g:i:s A'	=> TTi18n::gettext('8:09:11 PM'),
+											'g:i:s a'	=> TTi18n::gettext('8:09:11 pm'),
+											'G:i:s'		=> TTi18n::gettext('20:09:11'),
+											'g:i:s A T'	=> TTi18n::gettext('8:09:11 PM GMT'),
+											'G:i:s T'	=> TTi18n::gettext('20:09:11 GMT'),
 									);
 				break;
 			case 'time_format_example':
 				$retval = array(
-											'g:i A'		=> TTi18n::gettext('HH:MM AM'),
-											'g:i a'		=> TTi18n::gettext('HH:MM am'),
-											'G:i'		=> TTi18n::gettext('HH:MM'),
-											'g:i A T'	=> TTi18n::gettext('HH:MM AM TZ'),
-											'G:i T'		=> TTi18n::gettext('HH:MM TZ'),
+											'g:i A'   => TTi18n::gettext( 'HH:MM AM' ),
+											'g:i a'   => TTi18n::gettext( 'HH:MM am' ),
+											'G:i'     => TTi18n::gettext( 'HH:MM' ),
+											'g:i A T' => TTi18n::gettext( 'HH:MM AM TZ' ),
+											'G:i T'   => TTi18n::gettext( 'HH:MM TZ' ),
+
+											'g:i:s A'   => TTi18n::gettext( 'HH:MM:SS AM' ),
+											'g:i:s a'   => TTi18n::gettext( 'HH:MM:SS am' ),
+											'G:i:s'     => TTi18n::gettext( 'HH:MM:SS' ),
+											'g:i:s A T' => TTi18n::gettext( 'HH:MM:SS AM TZ' ),
+											'G:i:s T'   => TTi18n::gettext( 'HH:MM:SS TZ' ),
 									);
 				break;			
 			case 'moment_time_format':
 				$retval = array(
-
 											'g:i A'		=> 'hh:mm A',
 											'g:i a'		=> 'hh:mm a',
 											'G:i'		  => 'HH:mm',
 											'g:i A T'	  => 'hh:mm A Z',
-											'G:i T'		=> 'HH:mm Z'
+											'G:i T'     => 'HH:mm Z',
+
+											//Include seconds so they can properly validate rounding policies and such.
+											'g:i:s A'   => 'hh:mm:ss A',
+											'g:i:s a'   => 'hh:mm:ss a',
+											'G:i:s'     => 'HH:mm:ss',
+											'g:i:s A T' => 'hh:mm:ss A Z',
+											'G:i:s T'   => 'HH:mm:ss Z',
 											);
 				break;
 			case 'date_time_format':
@@ -200,6 +214,13 @@ class UserPreferenceFactory extends Factory {
 											23	=> TTi18n::gettext('Hours (2.3587)'),
 											30	=> TTi18n::gettext('Minutes (135)'),
 											40  => TTi18n::gettext('Seconds (3600)'),
+									);
+				break;
+			case 'distance_format':
+				$retval = array(
+											10 => TTi18n::gettext('Kilometers'),
+											20 => TTi18n::gettext('Miles'),
+											30 => TTi18n::gettext('Meters')
 									);
 				break;
 
@@ -1317,7 +1338,8 @@ class UserPreferenceFactory extends Factory {
 										'-1140-time_format_display' => TTi18n::gettext('Time Format'),
 										'-1150-time_zone_display' => TTi18n::gettext('TimeZone'),
 										'-1160-time_unit_format_display' => TTi18n::gettext('Time Unit Format'),
-										'-1170-items_per_page' => TTi18n::gettext('Items Per Page'),
+										'-1170-distance_format_display' => TTi18n::gettext('Distance Units'),
+										'-1180-items_per_page' => TTi18n::gettext('Items Per Page'),
 										//'-1180-timesheet_view_display' => TTi18n::gettext('TimeSheet View'),
 										'-1190-start_week_day_display' => TTi18n::gettext('Start Weekday'),
 										//'-1100-enable_email_notification_exception' => TTi18n::gettext('Email Notification Exception'),
@@ -1341,6 +1363,7 @@ class UserPreferenceFactory extends Factory {
 								'date_format_display',
 								'time_format_display',
 								'time_unit_format_display',
+								'distance_format_display',
 								'time_zone_display',
 								);
 				break;
@@ -1378,6 +1401,7 @@ class UserPreferenceFactory extends Factory {
 										'time_format' => 'TimeFormat',
 										'time_zone' => 'TimeZone',
 										'time_unit_format' => 'TimeUnitFormat',
+										'distance_format' => 'DistanceFormat',
 
 										//Ignore when setting.
 										'language_display' => FALSE,
@@ -1385,6 +1409,7 @@ class UserPreferenceFactory extends Factory {
 										'time_format_display' => FALSE,
 										'time_zone_display' => FALSE,
 										'time_unit_format_display' => FALSE,
+										'distance_format_display' => FALSE,
 
 										'items_per_page' => 'ItemsPerPage',
 										//'timesheet_view' => 'TimeSheetView',
@@ -1550,8 +1575,6 @@ class UserPreferenceFactory extends Factory {
 		$location_timezones = $this->getOptions('location_timezone');
 		$area_code_timezone = $this->getOptions('area_code_timezone');
 
-		$possible_timezones = array();
-
 		//Work phone can be the most accurate.
 		if ( $work_phone != '' ) {
 			$work_area_code = $this->Validator->getPhoneNumberAreaCode( $work_phone );
@@ -1649,6 +1672,49 @@ class UserPreferenceFactory extends Factory {
 		return FALSE;
 	}
 
+	function convertMetersToDistance( $meters, $format = NULL ) {
+		if ( $format == '' ) {
+			$format = self::getDistanceFormat();
+		}
+
+		switch ( $format ) {
+			case 20: //Miles
+				$dst_unit = 'mi';
+				break;
+			case 30: //Meters
+				$dst_unit = 'm';
+				break;
+			case 10: //KM
+			default:
+				$dst_unit = 'km';
+				break;
+		}
+
+		return UnitConvert::convert( 'm', $dst_unit, $meters );
+	}
+	function getDistanceFormat() {
+		if ( isset($this->data['distance_format']) ) {
+			return $this->data['distance_format'];
+		}
+
+		return FALSE;
+	}
+	function setDistanceFormat($distance_format) {
+		$distance_format = trim($distance_format);
+
+		if ( $this->Validator->inArrayKey(	'distance_format',
+			$distance_format,
+			TTi18n::gettext('Incorrect distance units'),
+			$this->getOptions('distance_format')) ) {
+
+			$this->data['distance_format'] = $distance_format;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function getItemsPerPage() {
 		if ( isset($this->data['items_per_page']) ) {
 			return $this->data['items_per_page'];
@@ -1738,8 +1804,8 @@ class UserPreferenceFactory extends Factory {
 		return FALSE;
 	}
 
-	//Used in Flex interface only, currently its hardcoded for now at least.
-	function getShortcutKeySequence() { //Default: CTRL+ALT
+	//Used in Flex interface only, currently its hardcoded for now at least. Default: CTRL+ALT
+	function getShortcutKeySequence() {
 		if ( isset($this->data['shortcut_key_sequence']) ) {
 			return $this->data['shortcut_key_sequence'];
 		}
@@ -2047,8 +2113,9 @@ class UserPreferenceFactory extends Factory {
 
 		return TRUE;
 	}
-	
-	function getDefaultLoginScreen() { //Default: Home
+
+	//Default: Home/Dashboard
+	function getDefaultLoginScreen() {
 		if ( isset($this->data['default_login_screen']) ) {
 			return $this->data['default_login_screen'];
 		}
@@ -2162,7 +2229,7 @@ class UserPreferenceFactory extends Factory {
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$uf = TTnew( 'UserFactory' );
-
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -2195,6 +2262,7 @@ class UserPreferenceFactory extends Factory {
 						case 'language_display':
 						case 'time_zone_display':
 						case 'time_unit_format_display':
+						case 'distance_format_display':
 						case 'timesheet_view_display':
 						case 'start_week_day_display':
 							switch ( $variable ) {
@@ -2213,6 +2281,9 @@ class UserPreferenceFactory extends Factory {
 									break;
 								case 'time_unit_format_display':
 									$function = 'getTimeUnitFormat';
+									break;
+								case 'distance_format_display':
+									$function = 'getDistanceFormat';
 									break;
 								case 'timesheet_view_display':
 									$function = 'getTimeSheetView';

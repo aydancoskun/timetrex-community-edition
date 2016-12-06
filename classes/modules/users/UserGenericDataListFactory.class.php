@@ -194,7 +194,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 						AND script = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -233,7 +233,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 						AND is_default = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -245,6 +245,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		$ugdlf = new UserGenericDataListFactory();
 		$ugdlf->getByUserIdAndScript($user_id, $script);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -258,7 +259,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 			$list[$ugd_obj->getID()] = $ugd_obj->getName().$default;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -354,7 +355,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 						AND script = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -394,7 +395,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 						AND is_default = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -482,6 +483,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 			return FALSE;
 		}
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -490,7 +492,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -502,6 +504,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 		$ugdlf = new UserGenericDataListFactory();
 		$ugdlf->getByUserIdAndScript($company_id, $script);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -515,7 +518,7 @@ class UserGenericDataListFactory extends UserGenericDataFactory implements Itera
 			$list[$ugd_obj->getID()] = $ugd_obj->getName().$default;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

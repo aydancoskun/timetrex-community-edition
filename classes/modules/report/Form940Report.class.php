@@ -493,7 +493,6 @@ class Form940Report extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'pay_stub_entry' => array(), 'user_total' => array() );
 
-		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 		$setup_data = $this->getFormConfig();
@@ -505,8 +504,6 @@ class Form940Report extends Report {
 
 				$user_id = $this->user_ids[] = $pse_obj->getColumn('user_id');
 				$date_stamp = $this->date_stamps[] = TTDate::strtotime( $pse_obj->getColumn('pay_stub_transaction_date') );
-				$branch = $pse_obj->getColumn('default_branch');
-				$department = $pse_obj->getColumn('default_department');
 				$pay_stub_entry_name_id = $pse_obj->getPayStubEntryNameId();
 
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
@@ -669,7 +666,7 @@ class Form940Report extends Report {
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3);
+			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1);
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -816,12 +813,8 @@ class Form940Report extends Report {
 
 		if ( $format == 'efile_xml' ) {
 			$output_format = 'XML';
-			$file_name = '940_efile_'.date('Y_m_d').'.xml';
-			$mime_type = 'applications/octet-stream'; //Force file to download.
 		} else {
 			$output_format = 'PDF';
-			$file_name = $this->file_name.'.pdf';
-			$mime_type = $this->file_mime_type;
 		}
 
 		$output = $this->getFormObject()->output( $output_format );

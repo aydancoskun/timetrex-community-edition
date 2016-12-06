@@ -2,14 +2,8 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 	el: '#user_date_total_parent_view_container',
 	sub_user_date_total_view_controller: null,
 
-	initialize: function() {
-
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserDateTotalParentEditView.html';
 		this.permission_id = 'punch';
 		this.script_name = 'UserDateTotalParentView';
@@ -76,8 +70,11 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 
 			var date_stamp = Global.strToDate( date_str, 'YYYYMMDD' ).format();
 
-			$this.current_edit_record = {date: date_str, user_id: LocalCacheData.all_url_args.user_id, date_stamp: date_stamp};
-
+			$this.current_edit_record = {
+				date: date_str,
+				user_id: LocalCacheData.all_url_args.user_id,
+				date_stamp: date_stamp
+			};
 			$this.initEditView();
 
 		} else {
@@ -85,15 +82,13 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
 
-
 		}
 
 	},
 
 	buildSearchFields: function() {
 		this._super( 'buildSearchFields' );
-		this.search_fields = [
-		];
+		this.search_fields = [];
 	},
 
 	buildEditViewUI: function() {
@@ -174,19 +169,17 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 		}
 	}
 
-
-
 } );
 
 UserDateTotalParentViewController.loadView = function( container ) {
 	Global.loadViewSource( 'UserDateTotalParent', 'UserDateTotalParentView.html', function( result ) {
-		var args = { };
-		var template = _.template( result, args );
+		var args = {};
+		var template = _.template( result );
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 		} else {
-			Global.contentContainer().html( template );
+			Global.contentContainer().html( template( args ) );
 		}
 
 	} );
@@ -195,20 +188,16 @@ UserDateTotalParentViewController.loadView = function( container ) {
 UserDateTotalParentViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 
 	Global.loadViewSource( 'UserDateTotalParent', 'SubUserDateTotalParentView.html', function( result ) {
-
-		var args = { };
-		var template = _.template( result, args );
-
+		var args = {};
+		var template = _.template( result );
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
-
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_user_date_total_parent_view_controller );
 			}
-
 		}
 
 	} );

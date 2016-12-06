@@ -41,6 +41,10 @@ var APIContributingPayCodePolicy = ServiceCaller.extend( {
 
 	copyContributingPayCodePolicy: function() {
 		return this.argumentsHandler( this.className, 'copyContributingPayCodePolicy', arguments );
+	},
+
+	exportContributingPayCodePolicy: function() {
+		return this.argumentsHandler( this.className, 'exportContributingPayCodePolicy', arguments );
 	}
 
 

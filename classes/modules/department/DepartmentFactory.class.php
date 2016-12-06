@@ -100,6 +100,7 @@ class DepartmentFactory extends Factory {
 										'other_id3' => 'OtherID3',
 										'other_id4' => 'OtherID4',
 										'other_id5' => 'OtherID5',
+										'geo_fence_ids' => 'GEOFenceIds',
 										'tag' => 'Tag',
 										'deleted' => 'Deleted',
 										);
@@ -240,13 +241,13 @@ class DepartmentFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => $name,
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->table .'
 					where company_id = ?
-						AND name = ?
+						AND lower(name) = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
 		//Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
@@ -311,13 +312,14 @@ class DepartmentFactory extends Factory {
 	}
 
 	function getBranch() {
+		$branch_list = array();
 		$dblf = TTnew( 'DepartmentBranchListFactory' );
 		$dblf->getByDepartmentId( $this->getId() );
 		foreach ($dblf as $department_branch) {
 			$branch_list[] = $department_branch->getBranch();
 		}
 
-		if ( isset($branch_list) ) {
+		if ( empty($branch_list) == FALSE) {
 			return $branch_list;
 		}
 
@@ -491,6 +493,16 @@ class DepartmentFactory extends Factory {
 		return FALSE;
 	}
 
+
+	function getGEOFenceIds() {
+		return CompanyGenericMapListFactory::getArrayByCompanyIDAndObjectTypeIDAndObjectID( $this->getCompany(), 4010, $this->getID() );
+	}
+
+	function setGEOFenceIds($ids) {
+		Debug::text('Setting GEO Fence IDs : ', __FILE__, __LINE__, __METHOD__, 10);
+		return CompanyGenericMapFactory::setMapIDs( $this->getCompany(), 4010, $this->getID(), (array)$ids );
+	}
+
 	function getTag() {
 		//Check to see if any temporary data is set for the tags, if not, make a call to the database instead.
 		//postSave() needs to get the tmp_data.
@@ -566,15 +578,23 @@ class DepartmentFactory extends Factory {
 			$query = 'update '. $rstf->getTable() .' set department_id = 0 where department_id = '. (int)$this->getId();
 			$this->db->Execute($query);
 
-			//Job employee criteria
-			$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
-			$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 1020, $this->getID() );
-			if ( $cgmlf->getRecordCount() > 0 ) {
-				foreach( $cgmlf as $cgm_obj ) {
-					Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
-					$cgm_obj->Delete();
+			if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+				$jf = TTNew('JobFactory');
+				$query = 'update '. $jf->getTable() .' set department_id = 0 where department_id = '. (int)$this->getId();
+				$this->db->Execute($query);
+
+				//Job employee criteria
+				$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
+				$cgmlf->getByCompanyIDAndObjectTypeAndMapID( $this->getCompany(), 1020, $this->getID() );
+				if ( $cgmlf->getRecordCount() > 0 ) {
+					foreach( $cgmlf as $cgm_obj ) {
+						Debug::text('Deleteing from Company Generic Map: '. $cgm_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+						$cgm_obj->Delete();
+					}
 				}
+
 			}
+
 
 		}
 
@@ -610,6 +630,7 @@ class DepartmentFactory extends Factory {
 
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

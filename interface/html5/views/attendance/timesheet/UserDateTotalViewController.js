@@ -2,15 +2,10 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 	el: '#user_date_total_view_container', //Must set el here and can only set string, so events can work
 
-	initialize: function() {
-
-		if ( Global.isSet( this.options.sub_view_mode ) ) {
-			this.sub_view_mode = this.options.sub_view_mode;
-		}
-
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserDateTotalEditView.html';
-		this.permission_id = 'punch';
+		this.permission_id = 'user_date_total';
 		this.script_name = 'UserDateTotalView';
 		this.viewId = 'UserDateTotal';
 		this.table_name_key = 'user_date_total';
@@ -535,11 +530,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 				onResult: function( res ) {
 					res = res.getResult();
 					if ( Global.isArray( res ) ) {
-						$('.userDateTotal-currency').text( res[0].symbol );
-						$('.userDateTotal-code').text( res[0].iso_code );
+						$( '.userDateTotal-currency' ).text( res[0].symbol );
+						$( '.userDateTotal-code' ).text( res[0].iso_code );
 					} else {
-						$('.userDateTotal-currency').text( '' );
-						$('.userDateTotal-code').text( '' );
+						$( '.userDateTotal-currency' ).text( '' );
+						$( '.userDateTotal-code' ).text( '' );
 					}
 				}
 			} );
@@ -1036,7 +1031,6 @@ UserDateTotalViewController = BaseViewController.extend( {
 		form_item_input.TCheckbox( {field: 'override'} );
 		this.addEditFieldToColumn( $.i18n._( 'Override' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
 
-
 	},
 
 	cleanWhenUnloadView: function( callBack ) {
@@ -1053,12 +1047,12 @@ UserDateTotalViewController.loadView = function( container ) {
 	Global.loadViewSource( 'UserDateTotal', 'UserDateTotalView.html', function( result ) {
 
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 		} else {
-			Global.contentContainer().html( template );
+			Global.contentContainer().html( template( args ) );
 		}
 
 	} );
@@ -1070,14 +1064,14 @@ UserDateTotalViewController.loadSubView = function( container, beforeViewLoadedF
 	Global.loadViewSource( 'UserDateTotal', 'SubUserDateTotalView.html', function( result ) {
 
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_user_date_total_view_controller );

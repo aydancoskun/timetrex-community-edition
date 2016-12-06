@@ -238,6 +238,17 @@ class PunchSummaryReport extends Report {
 										'-2151-tainted_status' => TTi18n::gettext('Tainted Status'),
 								);
 
+				//Make Long/Lat static so they could group on them if necessary. We can't use sum/avg on them for any useful purpose anyways.
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_COMMUNITY ) {
+					$professional_edition_dynamic_columns = array(
+							'-1680-in_longitude' => TTi18n::gettext('In Longitude'),
+							'-1681-in_latitude' => TTi18n::gettext('In Latitude'),
+							'-1682-out_longitude' => TTi18n::gettext('Out Longitude'),
+							'-1683-out_latitude' => TTi18n::gettext('Out Latitude'),
+					);
+					$retval = array_merge( $retval, $professional_edition_dynamic_columns );
+				}
+
 				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
 					$corporate_edition_static_columns = array(
 											//Static Columns - Aggregate functions can't be used on these.
@@ -279,6 +290,16 @@ class PunchSummaryReport extends Report {
 										'-3000-total_punch' => TTi18n::gettext('Total Punches'), //Group counter...
 										'-3001-total_tainted_punch' => TTi18n::gettext('Total Tainted Punches'), //Group counter...
 							);
+
+				if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_CORPORATE ) {
+					$corporate_edition_dynamic_columns = array(
+																'-2498-quantity' => TTi18n::gettext('Quantity'),
+																'-2499-bad_quantity' => TTi18n::gettext('Bad Quantity'),
+					);
+					$retval = array_merge( $retval, $corporate_edition_dynamic_columns );
+				}
+
+				ksort($retval);
 				break;
 			case 'columns':
 				$retval = array_merge( $this->getOptions('static_columns'), $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') );
@@ -292,8 +313,10 @@ class PunchSummaryReport extends Report {
 							$retval[$column] = 'currency';
 						} elseif ( strpos($column, '_time') OR strpos($column, '_policy') ) {
 							$retval[$column] = 'time_unit';
-						} elseif ( strpos($column, 'total_punch') !== FALSE OR strpos($column, 'total_tainted_punch') !== FALSE ) {
+						} elseif ( strpos($column, 'total_punch') !== FALSE OR strpos($column, 'total_tainted_punch') !== FALSE OR strpos($column, 'quantity') ) {
 							$retval[$column] = 'numeric';
+						} elseif ( strpos($column, 'longitude') OR strpos($column, 'latitude') ) {
+							$retval[$column] = 'string';
 						}
 					}
 				}
@@ -311,6 +334,8 @@ class PunchSummaryReport extends Report {
 							default:
 								if ( strpos($column, '_hourly_rate') !== FALSE OR strpos($column, 'hourly_rate') !== FALSE ) {
 									$retval[$column] = 'avg';
+								} elseif ( strpos($column, 'longitude') OR strpos($column, 'latitude') ) {
+									//$retval[$column] = NULL; //Don't specify any aggregate function.
 								} else {
 									$retval[$column] = 'sum';
 								}
@@ -710,7 +735,6 @@ class PunchSummaryReport extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array('punch' => array(), 'user' => array(), 'verified_timesheet' => array() );
 
-		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
@@ -747,7 +771,7 @@ class PunchSummaryReport extends Report {
 
 				if ( !isset($this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]) ) {
 					$enable_wages = $this->getPermissionObject()->isPermissionChild( $p_obj->getUser(), $wage_permission_children_ids );
-					
+
 					$hourly_rate = 0;
 					if ( $enable_wages ) {
 						$hourly_rate = $p_obj->getColumn( 'hourly_rate' );
@@ -800,6 +824,10 @@ class PunchSummaryReport extends Report {
 						'out_time_stamp' => NULL,
 						'out_actual_time_stamp' => NULL,
 						'out_type' => NULL,
+						'in_longitude' => NULL,
+						'in_latitude' => NULL,
+						'out_longitude' => NULL,
+						'out_latitude' => NULL,
 						'user_wage_id' => $p_obj->getColumn('user_wage_id'),
 						'hourly_rate' => Misc::MoneyFormat( $hourly_rate, FALSE ),
 						'tainted' => 0,
@@ -824,6 +852,11 @@ class PunchSummaryReport extends Report {
 				}
 
 				if ( $p_obj->getColumn('status_id') == 10 ) {
+					if ( $p_obj->getColumn('longitude') != 0 AND $p_obj->getColumn('latitude') != 0 ) {
+						$this->tmp_data['punch'][ $p_obj->getUser() ][ $p_obj->getColumn( 'punch_control_id' ) ]['in_longitude'] = $p_obj->getColumn( 'longitude' );
+						$this->tmp_data['punch'][ $p_obj->getUser() ][ $p_obj->getColumn( 'punch_control_id' ) ]['in_latitude'] = $p_obj->getColumn( 'latitude' );
+					}
+
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_time_stamp') );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_type'] = Option::getByKey($p_obj->getColumn('type_id'), $punch_type_options, NULL );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['in_actual_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_actual_time_stamp') );
@@ -840,6 +873,11 @@ class PunchSummaryReport extends Report {
 
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['total_punch']++;
 				} else {
+					if ( $p_obj->getColumn('longitude') != 0 AND $p_obj->getColumn('latitude') != 0 ) {
+						$this->tmp_data['punch'][ $p_obj->getUser() ][ $p_obj->getColumn( 'punch_control_id' ) ]['out_longitude'] = $p_obj->getColumn( 'longitude' );
+						$this->tmp_data['punch'][ $p_obj->getUser() ][ $p_obj->getColumn( 'punch_control_id' ) ]['out_latitude'] = $p_obj->getColumn( 'latitude' );
+					}
+
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_time_stamp') );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_type'] = Option::getByKey($p_obj->getColumn('type_id'), $punch_type_options, NULL );
 					$this->tmp_data['punch'][$p_obj->getUser()][$p_obj->getColumn('punch_control_id')]['out_actual_time_stamp'] = TTDate::strtotime( $p_obj->getColumn('punch_actual_time_stamp') );
@@ -872,13 +910,13 @@ class PunchSummaryReport extends Report {
 					}
 				}
 
-				unset($hourly_rate, $uw_obj, $actual_time_diff);
+				unset($hourly_rate, $actual_time_diff);
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 		}
 		//Debug::Arr($this->tmp_data['punch'], 'Punch Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 
 		//Get user data for joining.
 		$ulf = TTnew( 'UserListFactory' );
@@ -919,7 +957,7 @@ class PunchSummaryReport extends Report {
 		if ( isset($this->tmp_data['punch']) ) {
 			foreach( $this->tmp_data['punch'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
-					foreach( $level_1 as $punch_control_id => $row ) {
+					foreach( $level_1 as $row ) {
 						$date_columns = TTDate::getReportDates( NULL, $row['date_stamp'], FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
 						//$date_columns1 = TTDate::getReportDates( 'in_time_stamp', $row['in_time_stamp'], FALSE, $this->getUserObject() );
 						//$date_columns2 = TTDate::getReportDates( 'out_time_stamp', $row['out_time_stamp'], FALSE, $this->getUserObject() );

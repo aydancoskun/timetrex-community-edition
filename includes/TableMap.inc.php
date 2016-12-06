@@ -86,6 +86,7 @@ $global_table_map = array(
     'pay_period_schedule_user' => 'PayPeriodScheduleUserFactory',
     'pay_stub_entry' => 'PayStubEntryFactory',
     'pay_stub' => 'PayStubFactory',
+	'government_document' => 'GovernmentDocumentFactory',
     'pay_stub_entry_account_link' => 'PayStubEntryAccountLinkFactory',
     'pay_stub_entry_account' => 'PayStubEntryAccountFactory',
     'recurring_ps_amendment' => 'RecurringPayStubAmendmentFactory',
@@ -176,5 +177,6 @@ $global_table_map = array(
     'job_applicant_language' => 'JobApplicantLanguageFactory',
     'job_applicant_membership' => 'JobApplicantMembershipFactory',
     'ethnic_group' => 'EthnicGroupFactory',
+	'geo_fence' => 'GEOFenceFactory'
 );
 ?>

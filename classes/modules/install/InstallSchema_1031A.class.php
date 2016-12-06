@@ -84,6 +84,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 		$clf = TTnew( 'CompanyListFactory' );
 		$clf->getAll();
 		if ( $clf->getRecordCount() > 0 ) {
+			$object_types = array();
 			foreach ( $clf as $c_obj ) {
 				if ( $c_obj->getStatus() != 30 ) {
 					$company_id = $c_obj->getId();
@@ -121,6 +122,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 
 								//Not all hierarchies can be converted, and if one error occurs then all hierarchy conversions are rolled back
 								//to prevent an invalid hierarchy from being created and possibly becoming a security risk.
+								$parent_groups = array();
 								foreach( $hierarchy_users as $hierarchy_user_arr ) {
 									Debug::Text(' Checking User ID: '. $hierarchy_user_arr['id'], __FILE__, __LINE__, __METHOD__, 10);
 									$id = $hierarchy_user_arr['id'];
@@ -139,7 +141,6 @@ class InstallSchema_1031A extends InstallSchema_Base {
 											$parent_users = array();
 											foreach($parents as $user_id) {
 												$parent_users[] = $user_id;
-												unset($user);
 											}
 
 											$parent_groups[$level] = $parent_users;
@@ -165,6 +166,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 
 							//Decode path_to_root array
 							if ( isset($paths_to_root) AND count($paths_to_root) > 0 ) {
+								$decoded_paths = array();
 								foreach( $paths_to_root as $serialized_path => $children ) {
 									$path_arr = unserialize( $serialized_path );
 									$decoded_paths[] = array( 'hierarchy_control_id' => $hierarchy_id, 'path' => $path_arr, 'children' => $children );
@@ -173,7 +175,7 @@ class InstallSchema_1031A extends InstallSchema_Base {
 
 								Debug::Arr($decoded_paths, ' Decoded Paths: ', __FILE__, __LINE__, __METHOD__, 10);
 
-								if ( isset($decoded_paths) AND is_array($decoded_paths) ) {
+								if ( empty($decoded_paths) == FALSE ) {
 									foreach( $decoded_paths as $decoded_path ) {
 										Debug::Text(' Company ID: '. $company_id, __FILE__, __LINE__, __METHOD__, 10);
 

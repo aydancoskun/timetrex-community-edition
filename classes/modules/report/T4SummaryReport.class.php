@@ -509,7 +509,6 @@ class T4SummaryReport extends Report {
 	function _getData( $format = NULL ) {
 		$this->tmp_data = array( 'pay_stub_entry' => array() );
 
-		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
 
@@ -518,6 +517,9 @@ class T4SummaryReport extends Report {
 		//
 		$cdlf = TTnew( 'CompanyDeductionListFactory' );
 		$cdlf->getByCompanyIdAndStatusIdAndTypeId( $this->getUserObject()->getCompany(), array(10, 20), 10 );
+		$tax_deductions = array();
+		$tax_deduction_users = array();
+		$user_deduction_data = array();
 		if ( $cdlf->getRecordCount() > 0 ) {
 			foreach( $cdlf as $cd_obj ) {
 				if ( in_array( $cd_obj->getCalculation(), array(200, 90, 91) ) ) { //Only consider Province, CPP, EI records.
@@ -532,8 +534,8 @@ class T4SummaryReport extends Report {
 						foreach( $udlf as $ud_obj ) {
 							//Debug::Text('  User Deduction: ID: '. $ud_obj->getID() .' User ID: '. $ud_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10);
 							$user_deduction_data[$ud_obj->getCompanyDeduction()][$ud_obj->getUser()] = $ud_obj;
-						}
-					}
+				}
+			}
 				}
 			}
 			//Debug::Arr($tax_deductions, 'Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -604,7 +606,7 @@ class T4SummaryReport extends Report {
 
 										if ( $tax_deduction_obj->getCalculation() == 90 ) {
 											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['cpp_earnings']			= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['cpp_earnings']['include_pay_stub_entry_account'], $form_data['cpp_earnings']['exclude_pay_stub_entry_account'] );
-										}
+						}
 
 										if ( $tax_deduction_obj->getCalculation() == 91 ) {
 											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['ei_earnings']				= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['ei_earnings']['include_pay_stub_entry_account'],	$form_data['ei_earnings']['exclude_pay_stub_entry_account'] );
@@ -615,7 +617,7 @@ class T4SummaryReport extends Report {
 								}
 							}							
 						}
-						
+
 						for( $n = 0; $n <= 5; $n++) {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['other_box_'.$n]		= Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['other_box'][$n]['include_pay_stub_entry_account'], $form_data['other_box'][$n]['exclude_pay_stub_entry_account'] );
 						}
@@ -666,7 +668,7 @@ class T4SummaryReport extends Report {
 					$key++;
 				}
 			}
-			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1, $level_2, $level_3);
+			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1);
 			
 			//Total data per employee for the T4 forms. Just include the columns that are necessary for the form.
 			if ( is_array($this->data) AND !($format == 'html' OR $format == 'pdf') ) {
@@ -676,7 +678,7 @@ class T4SummaryReport extends Report {
 				foreach( $this->data as $row ) {
 					if ( !isset($this->form_data[$row['user_id']]) ) {
 						$this->form_data[$row['user_id']] = array( 'user_id' => $row['user_id'] );
-					}
+		}
 
 					foreach( $row as $key => $value ) {
 						if ( in_array( $key, $t4_dollar_columns) ) {
@@ -698,10 +700,7 @@ class T4SummaryReport extends Report {
 	}
 
 	function _outputPDFForm( $format = NULL ) {
-		$show_background = TRUE;
-		if ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) {
-			$show_background = FALSE;
-		}
+		
 		Debug::Text('Generating Form... Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
 		$setup_data = $this->getFormConfig();
@@ -899,43 +898,56 @@ class T4SummaryReport extends Report {
 						$ee_data['other_box_5_code'] = $setup_data['other_box'][5]['box'];
 						$ee_data['other_box_5'] = $row['other_box_5'];
 					}
+
 					$t4->addRecord( $ee_data );
 					unset($ee_data);
+
+					if ( $format == 'pdf_form_publish_employee' ) {
+						// generate PDF for every employee and assign to each government document records
+						$this->getFormObject()->addForm( $t4 );
+						GovernmentDocumentFactory::addDocument( $user_obj->getId(), 20, 100, TTDate::getEndYearEpoch( $filter_data['end_date'] ), $this->getFormObject()->output( 'PDF' ) );
+						$this->getFormObject()->clearForms();
+					}
 
 					$i++;
 				}
 			}
 			$this->getFormObject()->addForm( $t4 );
 
+			if ( $format == 'pdf_form_publish_employee' ) {
+				$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
+				return $user_generic_status_batch_id;
+			}
+	
 			//Handle T4Summary
 			$t4s = $this->getT4SumObject();
 			$t4s->setStatus( $setup_data['status_id'] );
 			$t4s->year = $t4->year;
 			$t4s->payroll_account_number = $t4->payroll_account_number;
 			$t4s->company_name = $t4->company_name;
-			$t4s->company_address1 = ( isset( $setup_data['address1'] ) AND $setup_data['address1'] != '' ) ? $setup_data['address1'] : $current_company->getAddress1();
-			$t4s->company_address2 = ( isset( $setup_data['address2'] ) AND $setup_data['address2'] != '' ) ? $setup_data['address2'] : $current_company->getAddress2();
-			$t4s->company_city = ( isset( $setup_data['city'] ) AND $setup_data['city'] != '' ) ? $setup_data['city'] : $current_company->getCity();
-			$t4s->company_province = ( isset( $setup_data['province'] ) AND ( $setup_data['province'] != '' AND $setup_data['province'] != 0 ) ) ? $setup_data['province'] : $current_company->getProvince();
-			$t4s->company_postal_code = ( isset( $setup_data['postal_code'] ) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
-
+				$t4s->company_address1 = ( isset( $setup_data['address1'] ) AND $setup_data['address1'] != '' ) ? $setup_data['address1'] : $current_company->getAddress1();
+				$t4s->company_address2 = ( isset( $setup_data['address2'] ) AND $setup_data['address2'] != '' ) ? $setup_data['address2'] : $current_company->getAddress2();
+				$t4s->company_city = ( isset( $setup_data['city'] ) AND $setup_data['city'] != '' ) ? $setup_data['city'] : $current_company->getCity();
+				$t4s->company_province = ( isset( $setup_data['province'] ) AND ( $setup_data['province'] != '' AND $setup_data['province'] != 0 ) ) ? $setup_data['province'] : $current_company->getProvince();
+				$t4s->company_postal_code = ( isset( $setup_data['postal_code'] ) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
+	
 			$t4s->l76 = $this->getUserObject()->getFullName(); //Contact name.
 			$t4s->l78 = $current_company->getWorkPhone();
-
+	
 			$t4->sumRecords();
 			$total_row = $t4->getRecordsTotal();
 			//$total_row = Misc::ArrayAssocSum( $this->form_data );
-			$t4s->l88 = count( $this->form_data );
-			$t4s->l14 = ( isset( $total_row['l14'] ) ) ? $total_row['l14'] : NULL;
-			$t4s->l22 = ( isset( $total_row['l22'] ) ) ? $total_row['l22'] : NULL;
-			$t4s->l16 = ( isset( $total_row['l16'] ) ) ? $total_row['l16'] : NULL;
-			$t4s->l18 = ( isset( $total_row['l18'] ) ) ? $total_row['l18'] : NULL;
-			$t4s->l27 = ( isset( $total_row['l27'] ) ) ? $total_row['l27'] : NULL;
-			$t4s->l19 = ( isset( $total_row['l19'] ) ) ? $total_row['l19'] : NULL;
-			$t4s->l20 = ( isset( $total_row['l20'] ) ) ? $total_row['l20'] : NULL;
-			$t4s->l52 = ( isset( $total_row['l52'] ) ) ? $total_row['l52'] : NULL;
-
-			if ( isset( $setup_data['remittances_paid'] ) AND $setup_data['remittances_paid'] != '' ) {
+				$t4s->l88 = count( $this->form_data );
+				$t4s->l14 = ( isset( $total_row['l14'] ) ) ? $total_row['l14'] : NULL;
+				$t4s->l22 = ( isset( $total_row['l22'] ) ) ? $total_row['l22'] : NULL;
+				$t4s->l16 = ( isset( $total_row['l16'] ) ) ? $total_row['l16'] : NULL;
+				$t4s->l18 = ( isset( $total_row['l18'] ) ) ? $total_row['l18'] : NULL;
+				$t4s->l27 = ( isset( $total_row['l27'] ) ) ? $total_row['l27'] : NULL;
+				$t4s->l19 = ( isset( $total_row['l19'] ) ) ? $total_row['l19'] : NULL;
+				$t4s->l20 = ( isset( $total_row['l20'] ) ) ? $total_row['l20'] : NULL;
+				$t4s->l52 = ( isset( $total_row['l52'] ) ) ? $total_row['l52'] : NULL;
+	
+				if ( isset( $setup_data['remittances_paid'] ) AND $setup_data['remittances_paid'] != '' ) {
 				$t4s->l82 = (float)$setup_data['remittances_paid'];
 			} else {
 				$total_deductions = Misc::MoneyFormat( Misc::sumMultipleColumns( $total_row, array('l16', 'l27', 'l18', 'l19', 'l22') ), FALSE );
@@ -964,7 +976,7 @@ class T4SummaryReport extends Report {
 
 	//Short circuit this function, as no postprocessing is required for exporting the data.
 	function _postProcess( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' ) {
+		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
 			Debug::Text('Skipping postProcess! Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		} else {
@@ -973,7 +985,7 @@ class T4SummaryReport extends Report {
 	}
 
 	function _output( $format = NULL ) {
-		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' ) {
+		if ( ( $format == 'pdf_form' OR $format == 'pdf_form_government' ) OR ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' ) OR $format == 'efile_xml' OR $format == 'pdf_form_publish_employee' ) {
 			return $this->_outputPDFForm( $format );
 		} else {
 			return parent::_output( $format );

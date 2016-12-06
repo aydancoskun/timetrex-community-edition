@@ -1050,7 +1050,9 @@ function _adodb_column_sql(&$zthis, $action, $type, $fname, $fnameq, $arrFields,
 		    $val = $arrFields[$fname];
 			if (!is_numeric($val)) $val = (integer) $val;
 		    break;
-
+		case "Z": //RAW meta type that passes data to the DB unmolested. Useful for MySQL and advanced datatypes like geometery that require functions to insert/update properly.
+			$val = $arrFields[$fname];
+			break;
 		default:
 			$val = str_replace(array("'"," ","("),"",$arrFields[$fname]); // basic sql injection defence
 			if (empty($val)) $val = '0';

@@ -495,24 +495,17 @@
 
 		//HightLight select item in UnSelect grid when !allow_multiple_selection
 		this.setSelectItem = function( val, target_grid ) {
-
-			if ( !val ) {
-				return;
-			}
-
 			if ( !target_grid ) {
 				target_grid = unselect_grid;
 			}
-
 			var source_data = target_grid.getGridParam( 'data' );
-
-			select_item = val;
-
+			val && (select_item = val);
 			if ( source_data ) {
 				$.each( source_data, function( index, content ) {
-					if ( content[key] == val[key] ) {  //Some times 0, sometimes '0'
+					var temp_val = val;
+					!val && (temp_val = source_data[0]);
+					if ( content[key] == temp_val[key] ) {  //Some times 0, sometimes '0'
 						//Always use id to set select row, all record array should have id
-
 						target_grid.find( 'tr[id="' + content['id'] + '"]' ).focus();
 						if ( target_grid.hasClass( 'unselect-grid' ) ) {
 							if ( unselect_grid_last_row ) {
@@ -527,14 +520,12 @@
 						}
 						target_grid.jqGrid( 'setSelection', content['id'], false );
 						target_grid.jqGrid( 'editRow', content['id'], true );
-						select_item = content;
+						val && (select_item = content);
 						return false;
 					}
 				} );
-
 				this.setTotalDisplaySpan();
 			}
-
 		};
 
 		this.getUnSelectGridData = function() {

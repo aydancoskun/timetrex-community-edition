@@ -71,6 +71,7 @@ class UserDefaultFactory extends Factory {
 											'time_format' => 'TimeFormat',
 											'time_zone' => 'TimeZone',
 											'time_unit_format' => 'TimeUnitFormat',
+											'distance_format' => 'DistanceFormat',
 											'items_per_page' => 'ItemsPerPage',
 											'start_week_day' => 'StartWeekDay',
 											'enable_email_notification_exception' => 'EnableEmailNotificationException',
@@ -84,32 +85,11 @@ class UserDefaultFactory extends Factory {
 	}
 
 	function getCompanyObject() {
-		if ( is_object($this->company_obj) ) {
-			return $this->company_obj;
-		} else {
-			$clf = TTnew( 'CompanyListFactory' );
-			$this->company_obj = $clf->getById( $this->getCompany() )->getCurrent();
-
-			return $this->company_obj;
-		}
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
 	}
 
 	function getTitleObject() {
-		if ( is_object($this->title_obj) ) {
-			return $this->title_obj;
-		} else {
-
-			$utlf = TTnew( 'UserTitleListFactory' );
-			$utlf->getById( $this->getTitle() );
-
-			if ( $utlf->getRecordCount() == 1 ) {
-				$this->title_obj = $utlf->getCurrent();
-
-				return $this->title_obj;
-			}
-
-			return FALSE;
-		}
+		return $this->getGenericObject( 'UserTitleListFactory', $this->getTitle(), 'title_obj' );
 	}
 
 	function isUniqueCompany($company_id) {
@@ -683,7 +663,11 @@ class UserDefaultFactory extends Factory {
 		return $options[$this->getTimeUnitFormat()];
 	}
 	function getTimeUnitFormat() {
+		if ( isset($this->data['time_unit_format']) ) {
 		return $this->data['time_unit_format'];
+	}
+		
+		return FALSE;
 	}
 	function setTimeUnitFormat($time_unit_format) {
 		$time_unit_format = trim($time_unit_format);
@@ -695,6 +679,29 @@ class UserDefaultFactory extends Factory {
 											$upf->getOptions('time_unit_format')) ) {
 
 			$this->data['time_unit_format'] = $time_unit_format;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+	function getDistanceFormat() {
+		if ( isset($this->data['distance_format']) ) {
+			return $this->data['distance_format'];
+		}
+
+		return FALSE;
+	}
+	function setDistanceFormat($distance_format) {
+		$distance_format = trim($distance_format);
+
+		$upf = TTnew( 'UserPreferenceFactory' );
+		if ( $this->Validator->inArrayKey(	'distance_format',
+			$distance_format,
+			TTi18n::gettext('Incorrect distance units'),
+			$upf->getOptions('distance_format')) ) {
+
+			$this->data['distance_format'] = $distance_format;
 
 			return TRUE;
 		}
@@ -792,11 +799,13 @@ class UserDefaultFactory extends Factory {
 	function getCompanyDeduction() {
 		$udcdlf = TTnew( 'UserDefaultCompanyDeductionListFactory' );
 		$udcdlf->getByUserDefaultId( $this->getId() );
+		
+		$list = array();
 		foreach ($udcdlf as $obj) {
 			$list[] = $obj->getCompanyDeduction();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 
@@ -905,8 +914,7 @@ class UserDefaultFactory extends Factory {
 
 
 	function getObjectAsArray( $include_columns = NULL ) {
-		$uf = TTnew( 'UserFactory' );
-
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

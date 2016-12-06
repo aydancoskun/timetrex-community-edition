@@ -9,8 +9,8 @@ UserSkillViewController = BaseViewController.extend( {
 	qualification_group_array: null,
 
 	qualification_array: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserSkillEditView.html';
 		this.permission_id = 'user_skill';
 		this.viewId = 'UserSkill';
@@ -78,7 +78,7 @@ UserSkillViewController = BaseViewController.extend( {
 	},
 
 	cancelOtherSubViewSelectedStatus: function() {
-		switch( true ) {
+		switch ( true ) {
 			case typeof( this.parent_view_controller.sub_user_education_view_controller ) !== 'undefined':
 				this.parent_view_controller.sub_user_education_view_controller.unSelectAll();
 			case typeof( this.parent_view_controller.sub_user_license_view_controller ) !== 'undefined':
@@ -111,32 +111,36 @@ UserSkillViewController = BaseViewController.extend( {
 		var $this = this;
 
 		this.initDropDownOption( 'proficiency' );
-		this.qualification_group_api.getQualificationGroup( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
+		this.qualification_group_api.getQualificationGroup( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			res = Global.buildTreeRecord( res );
-			$this.qualification_group_array = res;
+				res = Global.buildTreeRecord( res );
+				$this.qualification_group_array = res;
 
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-				$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+					$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				}
+
 			}
-
-		}} );
+		} );
 
 		var args = {};
 		var filter_data = {};
 		filter_data.type_id = [10];
 		args.filter_data = filter_data;
-		this.qualification_api.getQualification( args, {onResult: function( res ) {
-			res = res.getResult();
+		this.qualification_api.getQualification( args, {
+			onResult: function( res ) {
+				res = res.getResult();
 
-			$this.qualification_array = res;
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['qualification_id'] ) {
-				$this.basic_search_field_ui_dic['qualification_id'].setSourceData( res );
-				$this.adv_search_field_ui_dic['qualification_id'].setSourceData( res );
+				$this.qualification_array = res;
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['qualification_id'] ) {
+					$this.basic_search_field_ui_dic['qualification_id'].setSourceData( res );
+					$this.adv_search_field_ui_dic['qualification_id'].setSourceData( res );
+				}
 			}
-		}} );
+		} );
 
 	},
 
@@ -167,7 +171,6 @@ UserSkillViewController = BaseViewController.extend( {
 		this.editFieldResize( 0 );
 	},
 
-
 	onMassEditClick: function() {
 
 		var $this = this;
@@ -188,28 +191,29 @@ UserSkillViewController = BaseViewController.extend( {
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
-		this.api['getCommon' + this.api.key_name + 'Data']( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			$this.unique_columns = {};
+				$this.unique_columns = {};
 
-			$this.linked_columns = {};
+				$this.linked_columns = {};
 
-			if ( !result_data ) {
-				result_data = [];
+				if ( !result_data ) {
+					result_data = [];
+				}
+
+				if ( $this.sub_view_mode && $this.parent_key ) {
+					result_data[$this.parent_key] = $this.parent_value;
+				}
+
+				$this.current_edit_record = result_data;
+				$this.initEditView();
+
 			}
-
-			if ( $this.sub_view_mode && $this.parent_key ) {
-				result_data[$this.parent_key] = $this.parent_value;
-			}
-
-			$this.current_edit_record = result_data;
-			$this.initEditView();
-
-		}} );
+		} );
 
 	},
-
 
 	buildEditViewUI: function() {
 
@@ -222,7 +226,6 @@ UserSkillViewController = BaseViewController.extend( {
 			'tab_attachment': $.i18n._( 'Attachments' ),
 			'tab_audit': $.i18n._( 'Audit' )
 		} );
-
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserSkill' )),
@@ -281,7 +284,7 @@ UserSkillViewController = BaseViewController.extend( {
 
 		// Proficiency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'proficiency_id', set_empty: true } );
+		form_item_input.TComboBox( {field: 'proficiency_id', set_empty: true} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.proficiency_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Proficiency' ), form_item_input, tab_skill_column1 );
 
@@ -328,7 +331,7 @@ UserSkillViewController = BaseViewController.extend( {
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( { field: 'description', width: '100%' } );
+		form_item_input.TTextArea( {field: 'description', width: '100%'} );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_skill_column1, '', null, null, true );
 
 		form_item_input.parent().width( '45%' );
@@ -350,7 +353,8 @@ UserSkillViewController = BaseViewController.extend( {
 
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				default_args: default_args,
@@ -359,18 +363,22 @@ UserSkillViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Proficiency' ),
+			new SearchField( {
+				label: $.i18n._( 'Proficiency' ),
 				in_column: 1,
 				field: 'proficiency_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Skill' ),
+			new SearchField( {
+				label: $.i18n._( 'Skill' ),
 				in_column: 1,
 				field: 'qualification_id',
 				layout_name: ALayoutIDs.QUALIFICATION,
@@ -378,17 +386,21 @@ UserSkillViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Tags' ),
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
 				adv_search: true,
 				in_column: 1,
 				object_type_id: 251,
-				form_item_type: FormItemType.TAG_INPUT} ),
+				form_item_type: FormItemType.TAG_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Group' ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 1,
 				multiple: true,
 				field: 'group_id',
@@ -396,33 +408,41 @@ UserSkillViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'First Used Date' ),
+			new SearchField( {
+				label: $.i18n._( 'First Used Date' ),
 				in_column: 2,
 				field: 'first_used_date',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Last Used Date' ),
+			new SearchField( {
+				label: $.i18n._( 'Last Used Date' ),
 				in_column: 2,
 				field: 'last_used_date',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Expiry Date' ),
+			new SearchField( {
+				label: $.i18n._( 'Expiry Date' ),
 				in_column: 2,
 				field: 'expiry_date',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER} ),
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -430,9 +450,11 @@ UserSkillViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -440,7 +462,8 @@ UserSkillViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -496,7 +519,6 @@ UserSkillViewController = BaseViewController.extend( {
 			}
 		}
 	},
-
 
 	initSubDocumentView: function() {
 		var $this = this;
@@ -588,7 +610,6 @@ UserSkillViewController = BaseViewController.extend( {
 		}
 	}
 
-
 } );
 
 //UserSkillViewController.loadView = function() {
@@ -606,13 +627,13 @@ UserSkillViewController = BaseViewController.extend( {
 UserSkillViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserSkill', 'SubUserSkillView.html', function( result ) {
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 		if ( Global.isSet( container ) ) {
-			container.html( template );
+			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 				afterViewLoadedFun( sub_user_skill_view_controller );
 			}

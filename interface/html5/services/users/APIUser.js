@@ -86,6 +86,10 @@ var APIUser = ServiceCaller.extend( {
 	sendValidationEmail: function() {
 		return this.argumentsHandler( this.className, 'sendValidationEmail', arguments );
 
+	},
+
+	exportUser: function() {
+		return this.argumentsHandler( this.className, 'exportUser', arguments );
 	}
 
 

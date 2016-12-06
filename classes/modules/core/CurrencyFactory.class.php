@@ -430,14 +430,19 @@ class CurrencyFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'name' => $name,
+					'company_id' => (int)$this->getCompany(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .'
 					where company_id = ?
-						AND name = ?
+						AND lower(name) = ?
 						AND deleted = 0';
 		$name_id = $this->db->GetOne($query, $ph);
 		Debug::Arr($name_id, 'Unique Name: '. $name, __FILE__, __LINE__, __METHOD__, 10);
@@ -512,21 +517,30 @@ class CurrencyFactory extends Factory {
 
 	function getConversionRate() {
 		if ( isset($this->data['conversion_rate']) ) {
-			return $this->data['conversion_rate'];
+			return $this->data['conversion_rate']; //Don't cast to (float) as it may strip some precision.
 		}
 
 		return FALSE;
 	}
 	function setConversionRate( $value ) {
-		$value = trim($value);
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
 
-		if (	$this->Validator->isFloat(	'conversion_rate',
-											$value,
-											TTi18n::gettext('Incorrect Conversion Rate')) ) {
-
+		if ( $this->Validator->isTrue( 'conversion_rate',
+									   $value,
+									   TTi18n::gettext( 'Conversion rate not specified' ) )
+				AND $this->Validator->isFloat( 'conversion_rate',
+											   $value,
+											   TTi18n::gettext( 'Incorrect Conversion Rate' ) )
+				AND $this->Validator->isLessThan( 'conversion_rate',
+												  $value,
+												  TTi18n::gettext( 'Conversion Rate is too high' ),
+												  99999999 )
+				AND $this->Validator->isGreaterThan( 'conversion_rate',
+													 $value,
+													 TTi18n::gettext( 'Conversion Rate is too low' ),
+													 -99999999 )
+		) {
 			$this->data['conversion_rate'] = $value;
 
 			return TRUE;
@@ -745,7 +759,7 @@ class CurrencyFactory extends Factory {
 				return TRUE;
 			}
 		}
-		
+
 		return FALSE;
 
 	}
@@ -823,14 +837,16 @@ class CurrencyFactory extends Factory {
 		$base_currency = FALSE;
 
 		Debug::Text('Begin updating Currencies...', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		$clf = TTnew( 'CurrencyListFactory' );
 		$clf->getByCompanyId( $company_id );
+		$manual_currencies = array();
+		$active_currencies = array();
 		if ( $clf->getRecordCount() > 0 ) {
 			foreach( $clf as $c_obj) {
 				if ( $c_obj->getBase() == TRUE ) {
 					$base_currency = $c_obj->getISOCode();
-					
+
 					$manual_currencies[$c_obj->getID()] = $c_obj->getISOCode(); //Make base currency manually updated too.
 				} else {
 					if ( $c_obj->getStatus() == 10 AND $c_obj->getAutoUpdate() == TRUE ) {
@@ -849,7 +865,7 @@ class CurrencyFactory extends Factory {
 		//Get the earliest pay period date as the absolute earliest to get rates from.
 		//Loop through each currency and get the latest date.
 		//Download rates to fill in the gaps, if rates returned by server don't fill all gaps, manually fill them ourselves.
-		if ( isset($active_currencies) OR isset($manual_currencies) ) {
+		if ( empty($active_currencies) == FALSE OR empty($manual_currencies) == FALSE ) {
 			$earliest_pay_period_start_date = time();
 			$pplf = TTNew('PayPeriodListFactory');
 			$pplf->getByCompanyId($company_id, 1, NULL, NULL, array( 'start_date' => 'asc' ) );
@@ -859,9 +875,9 @@ class CurrencyFactory extends Factory {
 			unset($pplf);
 			Debug::Text('  Earliest Pay Period Date: '. TTDate::getDATE('DATE', $earliest_pay_period_start_date) .'('. $earliest_pay_period_start_date .')', __FILE__, __LINE__, __METHOD__, 10);
 
-			
+
 			$crlf = TTNew('CurrencyRateListFactory');
-			if ( isset($active_currencies) ) {
+			if ( empty($active_currencies) == FALSE ) {
 				Debug::Text('  Processing Auto-Update Currencies... Total: '. count($active_currencies), __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $active_currencies as $active_currency_id => $active_currency_iso_code ) {
 					$crlf->getByCurrencyId( $active_currency_id, 1, NULL, NULL, array('date_stamp' => 'desc' ) );
@@ -899,8 +915,8 @@ class CurrencyFactory extends Factory {
 			unset($crlf);
 
 			$crlf = TTNew('CurrencyRateListFactory');
-			if ( isset($manual_currencies) ) {
-				Debug::Text('  Processing Manual Currencies... Total: '. count($manual_currencies), __FILE__, __LINE__, __METHOD__, 10);								
+			if ( empty($manual_currencies) == FALSE ) {
+				Debug::Text('  Processing Manual Currencies... Total: '. count($manual_currencies), __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $manual_currencies as $active_currency_id => $active_currency_iso_code ) {
 					$crlf->getByCurrencyId( $active_currency_id, 1, NULL, NULL, array('date_stamp' => 'desc' ) );
 					if ( $crlf->getRecordCount() > 0 ) {
@@ -946,9 +962,9 @@ class CurrencyFactory extends Factory {
 			unset($crlf);
 		}
 		unset( $active_currency_id, $active_currency_iso_code, $latest_currency_rate_date, $currency_rates );
-	
+
 		if ( $base_currency != FALSE
-				AND isset($active_currencies)
+				AND empty($active_currencies) == FALSE
 				AND is_array($active_currencies)
 				AND count($active_currencies) > 0 ) {
 			$currency_rates = $ttsc->getCurrencyExchangeRates( $company_id, $active_currencies, $base_currency );
@@ -986,7 +1002,7 @@ class CurrencyFactory extends Factory {
 
 		Debug::Text('Updating Currency Data Complete...', __FILE__, __LINE__, __METHOD__, 10);
 		unset($ttsc);
-		
+
 		return FALSE;
 	}
 
@@ -1070,6 +1086,9 @@ class CurrencyFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+//						case 'conversion_rate':
+//							$this->$function( TTi18n::parseFloat( $data[$key] ) );
+//							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -1098,6 +1117,7 @@ class CurrencyFactory extends Factory {
 
 		*/
 
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -1115,6 +1135,9 @@ class CurrencyFactory extends Factory {
 						case 'symbol':
 							$data[$variable] = $this->getSymbol();
 							break;
+//						case 'conversion_rate':
+//							$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 10, 10 );
+//							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();

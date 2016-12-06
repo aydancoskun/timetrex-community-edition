@@ -99,7 +99,7 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 					where	company_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
@@ -151,7 +151,8 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 		if ( !is_object($lf) ) {
 			return FALSE;
 		}
-
+		
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = TTi18n::getText('-Default-');
 		}
@@ -160,7 +161,7 @@ class WageGroupListFactory extends WageGroupFactory implements IteratorAggregate
 			$list[$obj->getID()] = $obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

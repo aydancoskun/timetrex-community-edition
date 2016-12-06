@@ -68,8 +68,6 @@ class APIPayPeriodSchedule extends APIFactory {
 	 * @return array
 	 */
 	function getPayPeriodScheduleDefaultData() {
-		$company_id = $this->getCurrentCompanyObject()->getId();
-
 		Debug::Text('Getting user default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
@@ -124,6 +122,7 @@ class APIPayPeriodSchedule extends APIFactory {
 		if ( $ulf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $ulf );
 
+			$retarr = array();
 			foreach( $ulf as $u_obj ) {
 				$retarr[] = $u_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -132,6 +131,17 @@ class APIPayPeriodSchedule extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportPayPeriodSchedule( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getPayPeriodSchedule( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_pay_period_schedule', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**

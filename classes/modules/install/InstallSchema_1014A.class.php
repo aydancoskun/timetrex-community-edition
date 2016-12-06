@@ -52,6 +52,7 @@ class InstallSchema_1014A extends InstallSchema_Base {
 		*/
 		$query = 'select company_id, user_id, section, name, value from permission where deleted = 0 order by company_id, user_id, section, name';
 		$rs = $this->getDatabaseConnection()->Execute( $query );
+		$user_permission_data = array();
 		foreach( $rs as $row ) {
 			$user_permission_data[$row['company_id']][$row['user_id']][$row['section']][$row['name']] = $row['value'];
 
@@ -107,7 +108,7 @@ class InstallSchema_1014A extends InstallSchema_Base {
 		}
 
 		//Group Permissions together
-		if ( isset( $user_permission_data ) ) {
+		if ( empty( $user_permission_data ) == FALSE ) {
 			foreach( $user_permission_data as $company_id => $user_ids ) {
 				//Get default employee permissions to start from.
 				if ( isset($user_permission_data[$company_id]['-1']) ) {
@@ -149,6 +150,7 @@ class InstallSchema_1014A extends InstallSchema_Base {
 
 						$pf = TTnew( 'PermissionFactory' );
 						$preset_arr = array(10, 18, 20, 30, 40);
+						$preset_match = array();
 						foreach( $preset_arr as $preset ) {
 							$tmp_preset_permissions = $pf->getPresetPermissions( $preset, array() );
 							$preset_permission_diff_arr = Misc::arrayDiffAssocRecursive($permission_user_data, $tmp_preset_permissions);
@@ -198,8 +200,10 @@ class InstallSchema_1014A extends InstallSchema_Base {
 	}
 
 	function postInstall() {
+		// @codingStandardsIgnoreStart
 		global $cache;
-
+		//assumed used elsewhere
+		// @codingStandardsIgnoreEnd
 		Debug::text('postInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
 		Debug::text('l: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
@@ -228,8 +232,8 @@ class InstallSchema_1014A extends InstallSchema_Base {
 					$pcf->setDescription( 'Automatically Created By Installer' );
 
 					if ( $pcf->isValid() ) {
-						$pcf_id = $pcf->Save(FALSE);
-
+						$pcf->Save(FALSE);
+						
 						if ( strtolower($group_name) == 'default' ) {
 							//Assign all unassigned users to this permission group.
 							$tmp_user_ids = array_merge( (array)$this->permission_group_users[$company_id][$group_name], array_diff($all_user_ids, $assigned_user_ids) );

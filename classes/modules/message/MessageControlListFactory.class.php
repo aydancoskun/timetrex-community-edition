@@ -178,7 +178,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$msf = new MessageSenderFactory();
 		$rf = new RequestFactory();
 		$uf = new UserFactory();
-		$udf = new UserDateFactory();
+		//$udf = new UserDateFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 
 		$ph = array(
@@ -269,8 +269,6 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 			return FALSE;
 		}
 
-		$additional_order_fields = array('from_last_name', 'to_last_name', 'subject', 'object_type_id');
-
 		$strict = TRUE;
 		if ( $order == NULL ) {
 			$strict = FALSE;
@@ -279,11 +277,8 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 
 		$mrf = new MessageRecipientFactory();
 		$msf = new MessageSenderFactory();
-		$rf = new RequestFactory();
 		$uf = new UserFactory();
-		$udf = new UserDateFactory();
-		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
-
+		
 		$ph = array(
 					'company_id' => (int)$company_id,
 
@@ -556,6 +551,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 
 		$rs = $this->db->Execute($query, $ph);
 
+			$retarr = array();
 		if ( $rs->RecordCount() > 0 ) {
 			foreach( $rs as $row ) {
 				if ( $user_id != $row['from_user_id'] ) {
@@ -618,7 +614,6 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 		$msf = new MessageSenderFactory();
 		$rf = new RequestFactory();
 		$uf = new UserFactory();
-		$udf = new UserDateFactory();
 		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 
 		$ph = array(
@@ -743,8 +738,6 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 			}
 		}
 
-		$additional_order_fields = array('from_last_name', 'to_last_name', 'subject', 'object_type_id');
-
 		$strict = TRUE;
 		if ( $order == NULL ) {
 			$strict = FALSE;
@@ -753,10 +746,7 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 
 		$mrf = new MessageRecipientFactory();
 		$msf = new MessageSenderFactory();
-		$rf = new RequestFactory();
 		$uf = new UserFactory();
-		$udf = new UserDateFactory();
-		$pptsvf = new PayPeriodTimeSheetVerifyFactory();
 		
 		$ph = array(
 					'company_id' => (int)$company_id,

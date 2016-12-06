@@ -794,7 +794,13 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 							e.id as group_id,
 							e.name as "user_group",
 							f.id as title_id,
-							f.name as title
+							f.name as title,
+							y.first_name as created_by_first_name,
+							y.middle_name as created_by_middle_name,
+							y.last_name as created_by_last_name,
+							z.first_name as updated_by_first_name,
+							z.middle_name as updated_by_middle_name,
+							z.last_name as updated_by_last_name
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $apaf->getTable() .' as ab ON ( a.accrual_policy_account_id = ab.id AND ab.deleted = 0 )
 						LEFT JOIN '. $apf->getTable() .' as apf ON ( a.accrual_policy_id = apf.id AND apf.deleted = 0 )

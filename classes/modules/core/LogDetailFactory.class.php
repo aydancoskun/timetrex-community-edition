@@ -82,7 +82,7 @@ class LogDetailFactory extends Factory {
 												$value,
 												TTi18n::gettext('Field is invalid'))
 			) {
-			$this->data['field'] = $id;
+			$this->data['field'] = $value;
 
 			return TRUE;
 		}
@@ -297,25 +297,19 @@ class LogDetailFactory extends Factory {
 				case 'PunchFactory':
 				case 'PunchListFactory':
 					unset(
+							$diff_arr['user_id'], //Set by PunchControlFactory instead.
 							$diff_arr['actual_time_stamp'],
 							$diff_arr['original_time_stamp'],
 							$diff_arr['punch_control_id'],
-							$diff_arr['station_id'],
-							$diff_arr['latitude'],
-							$diff_arr['longitude']
+							$diff_arr['station_id']
 							);
 					break;
 				case 'PunchControlFactory':
 				case 'PunchControlListFactory':
 					unset(
-							//$diff_arr['user_date_id'],
+							$diff_arr['date_stamp'], //Logged in Punch Factory instead.
+							$diff_arr['overlap'],
 							$diff_arr['actual_total_time']
-							);
-					break;
-				case 'PunchControlFactory':
-				case 'PunchControlListFactory':
-					unset(
-							$diff_arr['overlap']
 							);
 					break;
 				case 'ExceptionPolicyFactory':
@@ -323,6 +317,15 @@ class LogDetailFactory extends Factory {
 					unset(
 							$diff_arr['enable_authorization']
 							);
+					break;
+				case 'GEOFenceFactory':
+				case 'GEOFenceListFactory':
+					if ( $this->getDatabaseType() === 'mysql' ) {
+						unset(
+							$diff_arr['geo_circle'],
+							$diff_arr['geo_polygon']
+						);
+					}
 					break;
 				case 'AccrualFactory':
 				case 'AccrualListFactory':
@@ -411,6 +414,8 @@ class LogDetailFactory extends Factory {
 
 			//Debug::Arr($diff_arr, 'Array Diff: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( is_array($diff_arr) AND count($diff_arr) > 0 ) {
+				$ph = array();
+				$data = array();
 				foreach( $diff_arr as $field => $value ) {
 
 					$old_value = NULL;
@@ -441,7 +446,9 @@ class LogDetailFactory extends Factory {
 						$data[] = '(?, ?, ?, ?)';
 					}
 				}
-				if ( isset($data) ) {
+				unset($value); //code standards
+				
+				if ( empty($data) == FALSE ) {
 					//Save data in a single SQL query.
 					$query = 'INSERT INTO '. $this->getTable() .'(SYSTEM_LOG_ID, FIELD, NEW_VALUE, OLD_VALUE) VALUES'. implode(',', $data );
 					//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);

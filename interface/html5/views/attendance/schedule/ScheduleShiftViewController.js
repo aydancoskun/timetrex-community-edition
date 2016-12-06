@@ -15,8 +15,8 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	total_time: null,
 	pre_total_time: 0,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'ScheduleShiftEditView.html';
 		this.permission_id = 'schedule';
 		this.viewId = 'ScheduleShift';
@@ -47,6 +47,40 @@ ScheduleShiftViewController = BaseViewController.extend( {
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
 
+	},
+
+	//Make sure this.current_edit_record is updated before validate
+	validate: function() {
+		var $this = this;
+		var record = {};
+		if ( this.is_mass_editing ) {
+			var record = [];
+			for ( var i = 0; i < this.mass_edit_record_ids.length; i++ ) {
+				var mass_record = {};
+				mass_record['id'] = $this.mass_edit_record_ids[i];
+				for (var key in this.edit_view_ui_dic) {
+
+					if (!this.edit_view_ui_dic.hasOwnProperty(key)) {
+						continue;
+					}
+					var widget = this.edit_view_ui_dic[key];
+					if (Global.isSet(widget.isChecked)) {
+						if (widget.isChecked() && widget.getEnabled()) {
+							mass_record[key] = widget.getValue();
+						}
+					}
+				}
+				record.push(mass_record);
+			}
+		} else {
+			record = this.current_edit_record;
+			record = this.uniformVariable( record );
+		}
+		this.api['validate' + this.api.key_name]( record, {
+			onResult: function( result ) {
+				$this.validateResult( result );
+			}
+		} );
 	},
 
 	jobUIValidate: function( p_id ) {
@@ -225,7 +259,6 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
 			set_empty: !this.checkOpenPermission(),
-			set_open: this.checkOpenPermission(),
 			field: 'user_id',
 			addition_source_function: (function( target, source_data ) {
 				return $this.onEmployeeSourceCreate( target, source_data );
@@ -728,7 +761,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			case 'job_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id', {status_id: 10, job_id: this.current_edit_record.job_id} );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
@@ -954,15 +987,3 @@ ScheduleShiftViewController = BaseViewController.extend( {
 	}
 
 } );
-
-ScheduleShiftViewController.loadView = function() {
-
-	Global.loadViewSource( 'ScheduleShift', 'ScheduleShiftView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

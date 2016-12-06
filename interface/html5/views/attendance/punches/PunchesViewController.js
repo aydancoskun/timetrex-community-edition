@@ -10,8 +10,8 @@ PunchesViewController = BaseViewController.extend( {
 
 	is_mass_adding: false,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PunchesEditView.html';
 		this.permission_id = 'punch';
 		this.viewId = 'Punches';
@@ -479,6 +479,34 @@ PunchesViewController = BaseViewController.extend( {
 			}
 		}
 
+		//Location
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+
+			var latitude = Global.loadWidgetByName(FormItemType.TEXT);
+			latitude.TText({field: 'latitude'});
+			var longitude = Global.loadWidgetByName(FormItemType.TEXT);
+			longitude.TText({field: 'longitude'});
+			widgetContainer = $("<div class='widget-h-box link-widget-box'></div>");
+			var accuracy = Global.loadWidgetByName(FormItemType.TEXT);
+			accuracy.TText({field: 'position_accuracy'});
+			label = $("<span class='widget-right-label'>" + $.i18n._('Accuracy') + ":</span>");
+
+			var map_icon = $('<img class="widget-h-box-mapIcon" src="framework/leaflet/images/marker-icon-red.png" >')
+
+			this.location_wrapper = $('<div class="widget-h-box-mapLocationWrapper"></div>')
+			widgetContainer.append(map_icon);
+			widgetContainer.append(this.location_wrapper);
+			this.location_wrapper.append(latitude);
+			this.location_wrapper.append($('<span>, </span>'));
+			this.location_wrapper.append(longitude);
+			this.location_wrapper.append(label);
+			this.location_wrapper.append(accuracy);
+			this.location_wrapper.append($('<span>m</span>'));
+			this.addEditFieldToColumn($.i18n._('Location'), [latitude, longitude, accuracy], tab_punch_column1, '', widgetContainer, true);
+			widgetContainer.click(function () {
+				$this.onMapClick();
+			});
+		}
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
@@ -753,14 +781,30 @@ PunchesViewController = BaseViewController.extend( {
 			}
 
 		}
-
 		this.actual_time_label.text( actual_time_value );
 
 		this.collectUIDataToCurrentEditRecord();
+		this.setLocationValue();
+
 		this.setEditViewDataDone();
 		this.isEditChange();
 
 	},
+	setLocationValue: function() {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+			this.edit_view_ui_dic['latitude'].setValue(this.current_edit_record.latitude);
+			this.edit_view_ui_dic['longitude'].setValue(this.current_edit_record.longitude);
+			this.edit_view_ui_dic['position_accuracy'].setValue(this.current_edit_record.position_accuracy ? this.current_edit_record.position_accuracy : 0);
+
+			if (!this.current_edit_record.latitude && !this.is_mass_editing) {
+				this.location_wrapper.hide();
+			} else {
+				this.location_wrapper.show();
+			}
+		}
+
+	},
+
 
 	isEditChange: function() {
 
@@ -1254,6 +1298,15 @@ PunchesViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var map = new RibbonSubMenu( {
+			label: $.i18n._( 'Map' ),
+			id: ContextMenuIconName.map,
+			group: other_group,
+			icon: Icons.map,
+			permission_result: true,
+			permission: null
+		} );
+
 		var ttimport = new RibbonSubMenu( {
 			label: $.i18n._( 'Import' ),
 			id: ContextMenuIconName.import_icon,
@@ -1261,6 +1314,16 @@ PunchesViewController = BaseViewController.extend( {
 			icon: Icons.import_icon,
 			permission_result: true,
 			permission: null
+		} );
+
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
 		} );
 
 		return [menu];
@@ -1282,6 +1345,54 @@ PunchesViewController = BaseViewController.extend( {
 			}
 		} );
 
+	},
+
+	onMapClick: function() {
+		ProgressBar.showProgressBar(true);
+
+		var data = {
+			filter_columns: {
+				id: true,
+				latitude: true,
+				longitude: true,
+				punch_date:true,
+				punch_time:true,
+				position_accuracy:true,
+				user_id:true
+			}
+		};
+
+		var ids = [];
+		var cells = {};
+		var tmp_cells ={};
+		if ( this.is_edit ) {
+			//when editing, if the user reloads, the grid's selected id array become the whole grid.
+			//to avoid mapping every punch in that scenario we need to grab the current_edit_record.
+			//check for mass edit as well.
+
+			tmp_cells[this.current_edit_record.punch_date] = []
+			tmp_cells[this.current_edit_record.punch_date].push(this.current_edit_record);
+			cells = tmp_cells;
+
+		} else {
+			ids = this.getGridSelectIdArray();
+			data.filter_data =  Global.convertLayoutFilterToAPIFilter( this.select_layout );
+			if ( ids.length > 0 ) {
+				data.filter_data.id =  ids;
+			}
+			cells = this.api.getPunch(data, {async: false}).getResult();
+			for ( var u in cells ) {
+				if ( tmp_cells[cells[u].punch_date+'-'+cells[u].user_id] == undefined ) {
+					tmp_cells[cells[u].punch_date+'-'+cells[u].user_id] = [];
+				}
+				tmp_cells[cells[u].punch_date+'-'+cells[u].user_id].push(cells[u]);
+			}
+			cells = tmp_cells;
+		}
+
+		if ( !this.is_mass_editing ) {
+			IndexViewController.openEditView( this, "Map", cells );
+		}
 	},
 
 	onContextMenuClick: function( context_btn, menu_name ) {
@@ -1353,9 +1464,13 @@ PunchesViewController = BaseViewController.extend( {
 			case ContextMenuIconName.cancel:
 				this.onCancelClick();
 				break;
+			case ContextMenuIconName.map:
+				this.onMapClick();
+				break;
 			case ContextMenuIconName.timesheet:
 			case ContextMenuIconName.edit_employee:
 			case ContextMenuIconName.import_icon:
+			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
 
@@ -1437,7 +1552,12 @@ PunchesViewController = BaseViewController.extend( {
 				case ContextMenuIconName.edit_employee:
 					this.setDefaultMenuEditIcon( context_btn, grid_selected_length, 'user' );
 					break;
-
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
+					break;
+				case ContextMenuIconName.map:
+					this.setDefaultMenuMapIcon( context_btn);
+					break;
 			}
 
 		}
@@ -1517,6 +1637,9 @@ PunchesViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.edit_employee:
 					this.setEditMenuNavEditIcon( context_btn, 'user' );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
 					break;
 			}
 
@@ -1616,65 +1739,9 @@ PunchesViewController = BaseViewController.extend( {
 					$this.search();
 				} );
 				break;
-		}
-	},
-
-	/*
-	 1. Job is switched.
-	 2. If a Task is already selected (and its not Task=0), keep it selected *if its available* in the newly populated Task list.
-	 3. If the task selected is *not* available in the Task list, or the selected Task=0, then check the default_item_id field from the Job and if its *not* 0 also, select that Task by default.
-	 */
-	setJobItemValueWhenJobChanged: function( job ) {
-
-		var $this = this;
-		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
-		var current_job_item_id = job_item_widget.getValue();
-		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox(true);
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
-		var args = {};
-		args.filter_data = {status_id: 10, job_id: $this.current_edit_record.job_id};
-		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
-
-		if ( current_job_item_id ) {
-
-			var new_arg = Global.clone( args );
-
-			new_arg.filter_data.id = current_job_item_id;
-			new_arg.filter_columns = $this.edit_view_ui_dic['job_item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {
-				onResult: function( task_result ) {
-					var data = task_result.getResult();
-
-					if ( data.length > 0 ) {
-						job_item_widget.setValue( current_job_item_id );
-						$this.current_edit_record.job_item_id = current_job_item_id;
-					} else {
-						setDefaultData();
-					}
-
-				}
-			} )
-
-		} else {
-			setDefaultData();
-		}
-
-		function setDefaultData() {
-			if ( $this.current_edit_record.job_id ) {
-				job_item_widget.setValue( job.default_item_id );
-				$this.current_edit_record.job_item_id = job.default_item_id;
-
-				if ( job.default_item_id === false || job.default_item_id === 0 ) {
-					$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-				}
-
-			} else {
-				job_item_widget.setValue( '' );
-				$this.current_edit_record.job_item_id = false;
-				$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-
-			}
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('exportPunch');
+				break;
 		}
 	},
 
@@ -1949,7 +2016,7 @@ PunchesViewController = BaseViewController.extend( {
 			case 'job_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.setJobItemValueWhenJobChanged( target.getValue() );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
 				}
 				break;
@@ -2021,18 +2088,24 @@ PunchesViewController = BaseViewController.extend( {
 
 			}
 		} );
-	}
+	},
 
+	getSelectEmployee: function( full_item ) {
+		var user;
+		if ( full_item ) {
+			user = LocalCacheData.getLoginUser();
+		} else {
+			user = LocalCacheData.getLoginUser().id;
+		}
+		return user;
+	},
+
+	getFilterColumnsFromDisplayColumns: function(column_filter, enable_system_columns ) {
+		if ( column_filter== undefined ){
+			column_filter = {};
+		}
+		column_filter.latitude = true;
+		column_filter.longitude = true;
+		return this._getFilterColumnsFromDisplayColumns(column_filter, enable_system_columns)
+	},
 } );
-
-PunchesViewController.loadView = function() {
-
-	Global.loadViewSource( 'Punches', 'PunchesView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

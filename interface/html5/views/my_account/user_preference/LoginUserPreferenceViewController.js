@@ -7,6 +7,8 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 	time_unit_format_array: null,
 
+	distance_format_array: null,
+
 	time_zone_array: null,
 	start_week_day_array: null,
 
@@ -17,13 +19,9 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 
 	user_preference_api: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		if ( Global.isSet( this.options.edit_only_mode ) ) {
-			this.edit_only_mode = this.options.edit_only_mode;
-		}
-
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 
 		this.permission_id = 'user_preference';
 		this.viewId = 'LoginUserPreference';
@@ -65,6 +63,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 			{option_name: 'date_format', field_name: null, api: this.api},
 			{option_name: 'time_format', field_name: null, api: this.api},
 			{option_name: 'time_unit_format', field_name: null, api: this.api},
+			{option_name: 'distance_format', field_name: null, api: this.api},
 			{option_name: 'time_zone', field_name: null, api: this.api},
 			{option_name: 'start_week_day', field_name: null, api: this.api},
 			{option_name: 'schedule_icalendar_type', field_name: null, api: this.api},
@@ -310,10 +309,7 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 						$this.refresh_id = result_data
 					}
 
-					$.cookie( 'language', $this.current_edit_record.language, {
-						expires: 10000,
-						path: LocalCacheData.loginData.base_url
-					} );
+					Global.setLanguageCookie($this.current_edit_record.language);
 					LocalCacheData.setI18nDic( null );
 
 					Global.updateUserPreference( function() {
@@ -407,6 +403,12 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		form_item_input.TComboBox( {field: 'time_unit_format'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_unit_format_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Time Units' ), form_item_input, tab_preferences_column1 );
+
+		// Distance Units
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'distance_format'} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.distance_format_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Distance Units' ), form_item_input, tab_preferences_column1 );
 
 		// Time Zone
 

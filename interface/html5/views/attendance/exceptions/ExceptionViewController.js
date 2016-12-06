@@ -2,8 +2,8 @@ ExceptionViewController = BaseViewController.extend( {
 	el: '#exception_view_container',
 	status_array: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'ExceptionEditView.html';
 		this.permission_id = 'punch';
 		this.viewId = 'Exception';
@@ -91,6 +91,9 @@ ExceptionViewController = BaseViewController.extend( {
 				case ContextMenuIconName.edit_pay_period:
 					this.setDefaultMenuEditIcon( context_btn, grid_selected_length, 'pay_period_schedule' );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
+					break;
 
 			}
 
@@ -137,7 +140,10 @@ ExceptionViewController = BaseViewController.extend( {
 	onNavigationClick: function( iconName ) {
 
 		var select_item = this.getSelectedItem();
+		//There are cases where select_item might be null. The export button for example.
+		if(select_item != null) {
 		var user_id = select_item.user_id;
+		}
 		switch ( iconName ) {
 			case ContextMenuIconName.edit_employee:
 				IndexViewController.openEditView( this, 'Employee', user_id );
@@ -171,7 +177,6 @@ ExceptionViewController = BaseViewController.extend( {
 				IndexViewController.goToView( 'TimeSheet', filter );
 
 				break;
-
 		}
 	},
 
@@ -209,6 +214,12 @@ ExceptionViewController = BaseViewController.extend( {
 		var navigation_group = new RibbonSubMenuGroup( {
 			label: $.i18n._( 'Navigation' ),
 			id: this.viewId + 'navigation',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+		var other_navigation_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Other' ),
+			id: this.viewId + 'other',
 			ribbon_menu: menu,
 			sub_menus: []
 		} );
@@ -256,6 +267,17 @@ ExceptionViewController = BaseViewController.extend( {
 			icon: Icons.pay_period_schedule,
 			permission_result: true,
 			permission: null
+		} );
+
+
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_navigation_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
 		} );
 
 		return [menu];
@@ -435,6 +457,7 @@ ExceptionViewController = BaseViewController.extend( {
 					$this.grid.clearGridData();
 					$this.grid.setGridParam( {data: grid_source_data.concat( new_record )} );
 					$this.grid.trigger( 'reloadGrid' );
+					$this.highLightGridRowById( new_record.id );
 				}
 
 			} else {
@@ -642,36 +665,15 @@ ExceptionViewController = BaseViewController.extend( {
 		];
 	},
 
-	getFilterColumnsFromDisplayColumns: function() {
+	getFilterColumnsFromDisplayColumns: function( ) {
 		var column_filter = {};
-		column_filter.is_owner = true;
-		column_filter.id = true;
-		column_filter.is_child = true;
-		column_filter.in_use = true;
-		column_filter.first_name = true;
-		column_filter.last_name = true;
 		column_filter.exception_color = true;
 		column_filter.exception_background_color = true;
 		column_filter.user_id = true;
 		column_filter.pay_period_id = true;
 		column_filter.pay_period_schedule_id = true;
 
-		// Error: Unable to get property 'getGridParam' of undefined or null reference
-		var display_columns = [];
-		if ( this.grid ) {
-			display_columns = this.grid.getGridParam( 'colModel' );
-		}
-
-		if ( display_columns ) {
-			var len = display_columns.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var column_info = display_columns[i];
-				column_filter[column_info.name] = true;
-			}
-		}
-
-		return column_filter;
+		return this._getFilterColumnsFromDisplayColumns(column_filter,  true );
 	},
 
 	setGridCellBackGround: function() {
@@ -709,9 +711,9 @@ ExceptionViewController.loadView = function() {
 	Global.loadViewSource( 'Exception', 'ExceptionView.html', function( result ) {
 
 		var args = {};
-		var template = _.template( result, args );
+		var template = _.template( result );
 
-		Global.contentContainer().html( template );
+		Global.contentContainer().html( template(args) );
 	} )
 
 };

@@ -199,7 +199,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
 
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -282,8 +282,6 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
-
 		$ph = array(
 					'user_id' => (int)$user_id,
 					'date' => $this->db->BindDate( $date ),
@@ -324,8 +322,6 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 			$strict = TRUE;
 		}
 
-		$uf = new UserFactory();
-
 		$ph = array(
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
@@ -341,7 +337,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -368,8 +364,6 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 			$strict = TRUE;
 		}
 
-		$uf = new UserFactory();
-
 		$ph = array(
 					'start_date' => $this->db->BindDate( $start_date ),
 					'end_date' => $this->db->BindDate( $end_date ),
@@ -386,7 +380,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 						AND deleted = 0
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -423,7 +417,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 					';
 
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -467,7 +461,7 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 					';
 
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -653,8 +647,6 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
-
 		$ph = array(
 					'user_id' => (int)$user_id,
 					'date' => $this->db->BindDate( $date ),
@@ -680,11 +672,12 @@ class UserDateListFactory extends UserDateFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
+		$list = array();
 		foreach ($lf as $obj) {
 			$list[] = $obj->getID();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

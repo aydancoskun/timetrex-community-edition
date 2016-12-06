@@ -1,7 +1,7 @@
 AbsencePolicyViewController = BaseViewController.extend( {
 	el: '#absence_policy_view_container',
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'AbsencePolicyEditView.html';
 		this.permission_id = 'absence_policy';
 		this.viewId = 'AbsencePolicy';
@@ -210,15 +210,3 @@ AbsencePolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-AbsencePolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'AbsencePolicy', 'AbsencePolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

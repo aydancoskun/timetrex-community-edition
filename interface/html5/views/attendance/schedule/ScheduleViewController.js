@@ -84,9 +84,9 @@ ScheduleViewController = BaseViewController.extend( {
 
 	year_mode_original_date: null, //set this when search for yer mode with use_date_picker true, so Keep select date in ritict mode
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.permission_id = 'schedule';
 		this.script_name = 'ScheduleView';
 		this.viewId = 'Schedule';
@@ -597,7 +597,7 @@ ScheduleViewController = BaseViewController.extend( {
 		} else {
 			if ( this.is_viewing ) {
 				if ( this.current_edit_record.id ) {
-					selectedId = this.current_edit_record.id;
+				selectedId = this.current_edit_record.id;
 				} else {
 					$this.current_edit_record = this.current_edit_record;
 					this.is_viewing = false;
@@ -924,6 +924,29 @@ ScheduleViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		if ( ( PermissionManager.validate('punch', 'add') && (PermissionManager.validate('punch', 'edit') || PermissionManager.validate('punch', 'edit_child') ) ) ) {
+			var autopunch = new RibbonSubMenu({
+				label: $.i18n._('Auto<br>Punch'),
+				id: 'AutoPunch',
+				group: other_group,
+				icon: Icons.in_out,
+				permission_result: true,
+				permission: true
+			});
+		}
+
+
+		if ( PermissionManager.validate('request', 'add') ) {
+			var auto_request = new RibbonSubMenu({
+				label: $.i18n._('Add<br>Request'),
+				id: 'AddRequest',
+				group: other_group,
+				icon: Icons.request,
+				permission_result: true,
+				permission: true
+			});
+		}
+
 		var print = new RibbonSubMenu( {
 			label: $.i18n._( 'Print' ),
 			id: ContextMenuIconName.print,
@@ -941,9 +964,7 @@ ScheduleViewController = BaseViewController.extend( {
 			nav: print
 		} );
 
-		if ( PermissionManager.validate( 'schedule', 'view' ) ||
-			PermissionManager.validate( 'schedule', 'view_child' ) ) {
-
+		if ( PermissionManager.validate( 'schedule', 'view' ) || PermissionManager.validate( 'schedule', 'view_child' ) ) {
 			var group_combined = new RibbonSubMenuNavItem( {
 				label: $.i18n._( 'Group - Combined' ),
 				id: 'pdf_schedule_group_combined',
@@ -1062,7 +1083,164 @@ ScheduleViewController = BaseViewController.extend( {
 			case ContextMenuIconName.find_available:
 				this.onFindAvailableClick( id );
 				break;
+			case 'AutoPunch':
+				this.addPunchesFromScheduledShifts( id );
+				break;
+			case 'AddRequest':
+				this.addRequestFromScheduledShifts( id );
+				break;
 		}
+	},
+
+	addRequestFromScheduledShifts: function ( id ){
+		if ( LocalCacheData.getCurrentCompany().product_edition_id < 15 ) {
+			TAlertManager.showAlert( Global.getUpgradeMessage() );
+			return false;
+		}
+
+		var request = this.api.getScheduleDefaultData(this.select_cells_Array, {async: false} ).getResult();
+		var shift_array = this.select_cells_Array;
+		var first_shift = shift_array[0];
+		var shift_status = 10;
+		var type_id = 40;
+
+		var mon = false, tue = false, wed = false, thu = false, fri = false, sat = false, sun = false;
+
+		for ( var w in shift_array ) {
+			if ( first_shift.shift == undefined && shift_array[w].shift ) {
+				//Set the archetype to the first day with a shift.
+				first_shift = shift_array[w];
+			}
+
+			//Set selected days of the week.
+			var d = new Date( shift_array[w].time_stamp_num );
+			switch ( d.getDay() ) {
+				case 0:
+					sun = true;
+					break;
+				case 1:
+					mon = true;
+					break;
+				case 2:
+					tue = true;
+					break;
+				case 3:
+					wed = true;
+					break;
+				case 4:
+					thu = true;
+					break;
+				case 5:
+					fri = true;
+					break;
+				case 6:
+					sat = true;
+					break;
+			}
+
+			delete(d);
+		}
+
+		request.mon = mon;
+		request.tue = tue;
+		request.wed = wed;
+		request.thu = thu;
+		request.fri = fri;
+		request.sat = sat;
+		request.sun = sun;
+
+		if ( shift_array[0].date ) {
+			var start_date = shift_array[0].date;
+		}
+
+		if ( shift_array[shift_array.length - 1].date ) {
+			var end_date = shift_array[shift_array.length - 1].date;
+		}
+
+		if ( first_shift ) {
+			if ( first_shift.shift && first_shift.shift.status_id == 10 && first_shift.shift.user_id && first_shift.shift.user_id != 0 ) {
+				shift_status = 20;
+				type_id = 30;
+			}
+		}
+
+		request.status_id = shift_status;
+		request.type_id = type_id;
+		request.user_id = LocalCacheData.getLoginUser().id;
+		request.full_name = LocalCacheData.getLoginUser().full_name;
+		if ( start_date ) {
+			request.date_stamp = start_date;
+			request.start_date = start_date;
+		}
+
+		if ( end_date ) {
+			request.end_date = end_date;
+		}
+
+		if ( first_shift.start_time ) {
+			request.start_time = first_shift.start_time;
+		}
+
+		if ( first_shift.end_time ) {
+			request.end_time = first_shift.end_time;
+		}
+
+		if ( first_shift.branch_id ) {
+			request.branch_id = first_shift.branch_id;
+		}
+
+		if ( first_shift.department_id ) {
+			request.department_id = first_shift.department_id;
+		}
+
+		if ( first_shift.job_id ) {
+			request.job_id = first_shift.job_id;
+		}
+
+		if ( first_shift.job_item_id ) {
+			request.job_item_id = first_shift.job_item_id;
+		}
+
+		IndexViewController.openEditView( this, 'Request', request );
+	},
+
+	addPunchesFromScheduledShifts: function ( id ) {
+
+		if ( LocalCacheData.getCurrentCompany().product_edition_id < 15 ) {
+			TAlertManager.showAlert( Global.getUpgradeMessage() );
+			return false;
+		}
+		if ( this.select_cells_Array == undefined || this.select_cells_Array.length < 1 ) {
+			TAlertManager.showAlert("No schedules selected. You can't autopunch no schedules.");
+			return false;
+		}
+
+		var shift_array = this.select_cells_Array;
+		var schedules = {};
+		var users = [];
+		schedules.schedule = [];
+		schedules.recurring = [];
+
+		for ( var i = 0; i < shift_array.length; i++ ) {
+			if ( shift_array[i].shift != undefined ) { //avoid when no user scheduled.
+				if ( shift_array[i].shift.id && shift_array[i].shift.id > 0 ) {
+					schedules.schedule.push( shift_array[i].shift.id );
+				} else if ( shift_array[i].shift.recurring_schedule_id && shift_array[i].shift.recurring_schedule_id > 0 ) {
+					schedules.recurring.push( shift_array[i].shift.recurring_schedule_id );
+				}
+				users.push( shift_array[i].shift.user_id );
+			}
+		}
+
+		this.api.addPunchesFromScheduledShifts ( schedules, {
+			onResult: function( result ) {
+				if ( result.isValid() ) {
+					UserGenericStatusWindowController.open( result.getAttributeInAPIDetails( 'user_generic_status_batch_id' ), [LocalCacheData.getLoginUser().id] );
+				} else {
+					TAlertManager.showErrorAlert( result );
+				}
+			}
+		} );
 	},
 
 	getSelectEmployee: function() {
@@ -1087,6 +1265,7 @@ ScheduleViewController = BaseViewController.extend( {
 			TAlertManager.showAlert( Global.getUpgradeMessage() );
 			return;
 		}
+
 		var $this = this;
 		var args = {};
 		args.selected = [];
@@ -1103,6 +1282,8 @@ ScheduleViewController = BaseViewController.extend( {
 			new_item.department_id = item.department_id;
 			new_item.job_id = item.job_id;
 			new_item.job_item_id = item.job_item_id;
+			new_item.schedule_policy_id = item.schedule_policy_id;
+			new_item.note = item.note;
 			new_item.group_id = item.group_id;
 			new_item.title_id = item.title_id;
 			new_item.start_date_stamp = item.start_date_stamp;
@@ -1123,7 +1304,8 @@ ScheduleViewController = BaseViewController.extend( {
 		for ( var i = 0; i < len; i++ ) {
 			var item = shift_array[i];
 			item.user_id = employee_id;
-
+			item.replaced_id = item.id;
+			delete item.id;
 		}
 
 		this.api.setSchedule( shift_array, {
@@ -1188,15 +1370,7 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	doFormIFrameCall: function( postData ) {
-
-		var url = ServiceCaller.getURLWithSessionId( 'Class=APIScheduleSummaryReport&Method=getScheduleSummaryReport' );
-
-		var message_id = UUID.guid();
-
-		url = url + '&MessageID=' + message_id;
-
-		this.sendFormIFrameCall( postData, url, message_id );
-
+		this.sendIframeCall('APIScheduleSummaryReport','getScheduleSummaryReport', postData);
 	},
 
 	setScheduleGridDragAble: function() {
@@ -1472,12 +1646,15 @@ ScheduleViewController = BaseViewController.extend( {
 					}
 
 					new_shifts_array.push( new_shift );
-
 					if ( shift.id ) {
 						delete_shifts_array.push( shift.id );
-					} else {
+					} else if ( shift.user_id > 0 ) {
+						//If dragging (move) a recurring shift assigned to a user and dropping on another user, switch the source shift to Absent in the process, otherwise both shifts will exist as being worked.
+						//  However when dragging from a OPEN shift as the source, that isn't required, as the OPEN shift will automatically be filled.
 						shift.status_id = '20';
 						recurring_delete_shifts_array.push( shift );
+					} else if ( shift.user_id == 0 ) {
+						delete_old_items = false; //Never delete old items when the source is a OPEN shift.
 					}
 
 				} else {
@@ -1522,12 +1699,9 @@ ScheduleViewController = BaseViewController.extend( {
 			if ( new_shifts_array.length > 0 ) {
 				$this.api.setSchedule( new_shifts_array, {
 					onResult: function( res ) {
-
 						if ( res.isValid() ) {
-
 							if ( delete_old_items ) {
 								if ( delete_shifts_array.length > 0 ) {
-
 									$this.api.deleteSchedule( delete_shifts_array, {
 										onResult: function() {
 											if ( recurring_delete_shifts_array.length > 0 ) {
@@ -1547,15 +1721,15 @@ ScheduleViewController = BaseViewController.extend( {
 											$this.search();
 										}
 									} );
+								} else {
+									$this.search();
 								}
 							} else {
 								$this.search();
 							}
-
 						} else {
 							TAlertManager.showErrorAlert( res )
 						}
-
 					}
 				} );
 			}
@@ -1729,7 +1903,7 @@ ScheduleViewController = BaseViewController.extend( {
 				if ( !did_clean_dic[tab_id] ) {
 					did_clean_dic[tab_id] = true;
 				}
-			}
+				}
 			if ( this.is_viewing ) {
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( false );
@@ -1756,7 +1930,7 @@ ScheduleViewController = BaseViewController.extend( {
 			case 'job_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.setJobItemValueWhenJobChanged( target.getValue( true ) );
+					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id', {status_id: 10, job_id: this.current_edit_record.job_id} );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
@@ -1876,65 +2050,6 @@ ScheduleViewController = BaseViewController.extend( {
 		} else {
 			this.onAvailableBalanceChange();
 			this.validate();
-		}
-	},
-
-	/*
-	 1. Job is switched.
-	 2. If a Task is already selected (and its not Task=0), keep it selected *if its available* in the newly populated Task list.
-	 3. If the task selected is *not* available in the Task list, or the selected Task=0, then check the default_item_id field from the Job and if its *not* 0 also, select that Task by default.
-	 */
-	setJobItemValueWhenJobChanged: function( job ) {
-
-		var $this = this;
-		var job_item_widget = $this.edit_view_ui_dic['job_item_id'];
-		var current_job_item_id = job_item_widget.getValue();
-		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox( true );
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
-		var args = {};
-		args.filter_data = {status_id: 10, job_id: $this.current_edit_record.job_id};
-		$this.edit_view_ui_dic['job_item_id'].setDefaultArgs( args );
-
-		if ( current_job_item_id ) {
-
-			var new_arg = Global.clone( args );
-
-			new_arg.filter_data.id = current_job_item_id;
-			new_arg.filter_columns = $this.edit_view_ui_dic['job_item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {
-				onResult: function( task_result ) {
-					var data = task_result.getResult();
-
-					if ( data.length > 0 ) {
-						job_item_widget.setValue( current_job_item_id );
-						$this.current_edit_record.job_item_id = current_job_item_id;
-					} else {
-						setDefaultData();
-					}
-
-				}
-			} )
-
-		} else {
-			setDefaultData();
-		}
-
-		function setDefaultData() {
-			if ( $this.current_edit_record.job_id ) {
-				job_item_widget.setValue( job.default_item_id );
-				$this.current_edit_record.job_item_id = job.default_item_id;
-
-				if ( job.default_item_id === false || job.default_item_id === 0 ) {
-					$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-				}
-
-			} else {
-				job_item_widget.setValue( '' );
-				$this.current_edit_record.job_item_id = false;
-				$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-
-			}
 		}
 	},
 
@@ -2329,13 +2444,13 @@ ScheduleViewController = BaseViewController.extend( {
 					}
 					$this.search();
 
-					$this.removeEditView();
+						$this.removeEditView();
 
-				} else {
+					} else {
 					//BUG#2073 - Pulled out the error message box that was showing the result array as its "toString" representation. ([object][object]);
-					$this.setErrorTips( result );
-					$this.setErrorMenu();
-				}
+						$this.setErrorTips( result );
+						$this.setErrorMenu();
+					}
 
 			}
 		} );
@@ -2899,7 +3014,6 @@ ScheduleViewController = BaseViewController.extend( {
 		var user_id = this.current_edit_record.user_id;
 		var total_time = this.current_edit_record.total_time;
 		var last_date_stamp = this.current_edit_record.start_date_stamp;
-		this.attachElement( 'available_balance' );
 
 		//For mass adding case, select multiple cells and click new
 		if ( this.is_mass_adding ) {
@@ -3310,7 +3424,6 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
-
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
@@ -3408,12 +3521,105 @@ ScheduleViewController = BaseViewController.extend( {
 				case ContextMenuIconName.find_available:
 					this.setDefaultMenuFindAvailabletIcon( context_btn, grid_selected_length );
 					break;
+				case 'AutoPunch':
+					this.setAutoPunchIcon( context_btn, grid_selected_length );
+					break;
+				case 'AddRequest':
+					this.setAddRequestIcon( context_btn, grid_selected_length );
+					break;
 			}
 
 		}
 
 		this.setContextMenuGroupVisibility();
 
+	},
+
+	enableAddRequestButton: function() {
+		var schedules = [];
+		//var grid_selected_id_array = this.getGridSelectIdArray();
+		if (!this.select_cellls_and_shifts_array) {
+			return false;
+		}
+		var grid_selected_id_array = this.select_cellls_and_shifts_array
+		var grid_selected_length = grid_selected_id_array.length;
+
+		if (grid_selected_length == 1) {
+			return true;
+		}
+		if (grid_selected_length == 0) {
+			return false;
+		}
+
+		var schedules = this.select_cells_Array;
+		var first = schedules[0];
+
+		for (var n = 1; n < schedules.length; n++) {
+			if ( schedules[n].user_id && first.user_id != schedules[n].user_id ) {
+				Debug.Text('mismatch on user_id','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+				return false;
+			}
+
+			//do not test blank cells beyond user_id
+			if (schedules[n].shift == undefined) {
+				continue;
+			}
+
+			if( (first.shift && schedules[n].shift) ) {
+				if ( first.shift.start_time != schedules[n].shift.start_time ) {
+					Debug.Text('mismatch on start_time','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+				if ( first.shift.end_time != schedules[n].shift.end_time ) {
+					Debug.Text('mismatch on end_time','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+				if ( first.shift.branch_id != schedules[n].shift.branch_id ) {
+					Debug.Text('mismatch on branch_id','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+				if ( first.shift.department_id != schedules[n].shift.department_id ) {
+					Debug.Text('mismatch on department_id','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+				if ( first.shift.job_id != schedules[n].shift.job_id ) {
+					Debug.Text('mismatch on job_id','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+				if ( first.shift.job_item_id != schedules[n].shift.job_item_id ) {
+					Debug.Text('mismatch on job_item_id','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+
+				if( first.shift.schedule_policy_id != schedules[n].shift.schedule_policy_id ) {
+					Debug.Text('mismatch on schedule_policy_id','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+
+				if( first.shift.status_id != schedules[n].shift.status_id ) {
+					Debug.Text('mismatch on status_id','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+				if( first.shift.status_id == 20 && first.shift.absence_policy_id != schedules[n].shift.absence_policy_id ) {
+					Debug.Text('mismatch on absence_policy_id','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+					return false;
+				}
+				//if the first one is a blank in a selection that includes shifts, we need to update the compared record to one with a shift.
+			} else if ( first.shift == undefined && schedules[n].shift ) {
+				first = schedules[n];
+			}
+		}
+
+		Debug.Text('All Selected Schedules Match','ScheduleViewController.js','ScheduleViewController','enableAddRequestButton',10);
+		return true;
+	},
+
+	setAutoPunchIcon: function( context_btn, grid_selected_length ) {
+		if ( grid_selected_length > 0 ) {
+			context_btn.removeClass( 'disable-image' );
+		} else {
+			context_btn.addClass( 'disable-image' );
+		}
 	},
 
 	setEditMenuFindAvailableIcon: function( context_btn ) {
@@ -3566,7 +3772,6 @@ ScheduleViewController = BaseViewController.extend( {
 			args.data = {};
 			args.data.display_columns = selected_display_columns;
 			args.data.filter_data = filter_data;
-
 		}
 
 		args.data.mode = this.getMode();
@@ -3587,7 +3792,6 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	onSearch: function() {
-
 		this.temp_adv_filter_data = null;
 		this.temp_basic_filter_data = null;
 
@@ -3595,6 +3799,11 @@ ScheduleViewController = BaseViewController.extend( {
 
 		if ( this.search_panel.getLayoutsArray() && this.search_panel.getLayoutsArray().length > 0 ) {
 			var default_layout_id = $( this.previous_saved_layout_selector ).children( 'option:contains("' + BaseViewController.default_layout_name + '")' ).attr( 'value' );
+
+			if ( !default_layout_id ) {
+				this.onSaveNewLayout( BaseViewController.default_layout_name );
+				return;
+			}
 			var layout_name = BaseViewController.default_layout_name;
 
 		} else {
@@ -3630,7 +3839,6 @@ ScheduleViewController = BaseViewController.extend( {
 
 			}
 		} );
-
 	},
 
 	setSelectLayout: function() {
@@ -5577,7 +5785,7 @@ ScheduleViewController = BaseViewController.extend( {
 			case ScheduleViewControllerRowType.EMPTY:
 
 				if ( !Global.isSet( cell_value ) ) {
-					time_span.text( $.i18n._( '' ) );
+					time_span.text( '' );
 				}
 
 				time_span.addClass( 'empty' );
@@ -5734,7 +5942,7 @@ ScheduleViewController = BaseViewController.extend( {
 				break;
 			case ScheduleViewControllerRowType.EMPTY:
 				if ( !Global.isSet( cell_value ) ) {
-					time_span.text( $.i18n._( '' ) );
+					time_span.text( '' );
 				}
 
 				time_span.addClass( 'empty' );
@@ -5849,7 +6057,7 @@ ScheduleViewController = BaseViewController.extend( {
 				break;
 			case ScheduleViewControllerRowType.EMPTY:
 				if ( !Global.isSet( cell_value ) ) {
-					time_span.text( $.i18n._( '' ) );
+					time_span.text( '' );
 				}
 
 				time_span.addClass( 'empty' );
@@ -6954,7 +7162,6 @@ ScheduleViewController = BaseViewController.extend( {
 			if ( mode ) {
 				window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date + '&mode=' + mode;
 			} else {
-
 				if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.mode ) {
 					$this.setToggleButtonValue( LocalCacheData.all_url_args.mode );
 					mode = this.getMode();
@@ -6969,13 +7176,15 @@ ScheduleViewController = BaseViewController.extend( {
 
 	reSetURL: function() {
 		var mode = this.getMode();
+		var args;
 		if ( mode ) {
-			window.location = Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode;
+			args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode;
+			window.location = Global.getBaseURL() + args;
 		} else {
-			window.location = Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue();
+			args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue();
+			window.location = Global.getBaseURL() + args;
 		}
-
-		LocalCacheData.all_url_args = null;
+		LocalCacheData.all_url_args = IndexViewController.instance.router.buildArgDic( args.split( '&' ) );
 	},
 
 	setURL: function() {
@@ -7004,7 +7213,7 @@ ScheduleViewController = BaseViewController.extend( {
 					'&tab=' + tab_name );
 
 				} else {
-					Global.setURLToBrowser( window.location = Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&id=' + this.current_edit_record.id );
+					Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&id=' + this.current_edit_record.id );
 
 				}
 
@@ -7279,24 +7488,23 @@ ScheduleViewController = BaseViewController.extend( {
 							var item = data[j];
 
 							if ( Global.isSet( item.user_id ) ) {
-								total_time = item.total_time + total_time;
 								total_wage = parseFloat( item.total_time_wage ) + total_wage;
-
 								if ( item.status_id === 10 ) {
+									total_time = item.total_time + total_time;
 									shifts = shifts + 1;
-								} else {
+								} else if ( data.status_id === 20 && data.absence_policy_id > 0 ) { //&& data.total_time_wage != 0
+									total_time = item.total_time + total_time;
 									absences = absences + 1;
 								}
 							}
-
 						}
 					} else {
-						total_time = data.total_time + total_time;
 						total_wage = parseFloat( data.total_time_wage ) + total_wage;
-
 						if ( data.status_id === 10 ) {
+							total_time = data.total_time + total_time;
 							shifts = shifts + 1;
-						} else {
+						} else if ( data.status_id === 20 && data.absence_policy_id > 0 ) { //&& data.total_time_wage != 0
+							total_time = data.total_time + total_time;
 							absences = absences + 1;
 						}
 					}
@@ -7494,17 +7702,16 @@ ScheduleViewController = BaseViewController.extend( {
 						}
 
 						var row_data = row[no_data_key + '_data'];
-						total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
 
 						total_row_key_data.total_time_wage = parseFloat( parseFloat( row_data.total_time_wage ) + parseFloat( total_row_key_data.total_time_wage ) ).toFixed( 2 );
-//
 						if ( row_data.status_id === 10 ) {
+							total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
 							total_row_key_data.shifts = total_row_key_data.shifts + 1;
 							if ( this.getMode() === ScheduleViewControllerMode.DAY ) {
 								this.buildTotalShiftsValues( total_row_key_data.total_shifts_dic, row[key] );
 							}
-
-						} else if ( row_data.status_id === 20 ) {
+						} else if ( row_data.status_id === 20 && row_data.absence_policy_id > 0 ) { //&& row_data.total_time_wage != 0
+							total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
 							total_row_key_data.absences = total_row_key_data.absences + 1;
 						}
 
@@ -7540,15 +7747,16 @@ ScheduleViewController = BaseViewController.extend( {
 					}
 
 					row_data = row[no_data_key + '_data'];
-					total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
 
 					total_row_key_data.total_time_wage = parseFloat( parseFloat( row_data.total_time_wage ) + parseFloat( total_row_key_data.total_time_wage ) ).toFixed( 2 );
 					if ( row_data.status_id === 10 ) {
+						total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
 						total_row_key_data.shifts = total_row_key_data.shifts + 1;
 						if ( this.getMode() === ScheduleViewControllerMode.DAY ) {
 							this.buildTotalShiftsValues( total_row_key_data.total_shifts_dic, row[key] );
 						}
-					} else if ( row_data.status_id === 20 ) {
+					} else if ( row_data.status_id === 20 && row_data.absence_policy_id > 0 ) { //&& row_data.total_time_wage != 0
+						total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
 						total_row_key_data.absences = total_row_key_data.absences + 1;
 					}
 
@@ -7813,7 +8021,19 @@ ScheduleViewController = BaseViewController.extend( {
 		$( '#schedule_view_container' ).remove();
 		this._super( 'cleanWhenUnloadView', callBack );
 
-	}
+	},
+
+	setAddRequestIcon: function( context_btn, grid_selected_length, pId ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 || !this.addPermissionValidate( 'request' ) || this.edit_only_mode ) {
+			context_btn.addClass( 'invisible-image' );
+		}
+
+		if ( this.enableAddRequestButton() === true ) {
+			context_btn.removeClass( 'disable-image' );
+		} else {
+			context_btn.addClass( 'disable-image' );
+		}
+	},
 
 } );
 
@@ -7834,21 +8054,3 @@ ScheduleViewControllerMode.WEEK = 'week';
 ScheduleViewControllerMode.MONTH = 'month';
 ScheduleViewControllerMode.YEAR = 'year';
 
-ScheduleViewController.loadView = function( container ) {
-
-	//Global.loadViewSource( 'Schedule', 'ScheduleView.css' );
-
-	Global.loadViewSource( 'Schedule', 'ScheduleView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		if ( Global.isSet( container ) ) {
-			container.html( template );
-		} else {
-			Global.contentContainer().html( template );
-		}
-
-	} );
-
-}

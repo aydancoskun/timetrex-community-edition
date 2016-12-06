@@ -3,8 +3,8 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 	type_array: null,
 	pay_type_array: null,
 	wage_source_type_array: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'PayFormulaPolicyEditView.html';
 		this.permission_id = 'pay_formula_policy';
 		this.viewId = 'PayFormulaPolicy';
@@ -362,15 +362,3 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-PayFormulaPolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'PayFormulaPolicy', 'PayFormulaPolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

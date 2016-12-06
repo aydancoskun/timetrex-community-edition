@@ -50,12 +50,13 @@ class SugarCRM {
 
 	function getSoapObject() {
 		if ( $this->soap_client_obj == NULL ) {
+			ini_set('default_socket_timeout', 300); //This helps prevent "Error fetching HTTP headers" SOAP error.
 			$this->soap_client_obj = new SoapClient(NULL, array(
 											'location' => $this->sugarcrm_url,
 											'uri' => 'urn:http://www.sugarcrm.com/sugarcrm',
 											'style' => SOAP_RPC,
 											'use' => SOAP_ENCODED,
-											'connection_timeout' => 10,
+											'connection_timeout' => 30,
 											'keep_alive' => FALSE, //This prevents "Error fetching HTTP headers" SOAP error.
 											'trace' => 1,
 											'exceptions' => 0
@@ -68,6 +69,8 @@ class SugarCRM {
 
 	function convertToNameValueList( $data ) {
 		if ( is_array($data) ) {
+			
+			$retarr = array();
 			foreach( $data as $key => $value ) {
 				$row = new stdClass();
 				$row->name = $key;
@@ -75,7 +78,6 @@ class SugarCRM {
 				$retarr[] = $row;
 				unset($row);
 			}
-
 			return $retarr;
 		}
 
@@ -367,6 +369,8 @@ class SugarCRMReturnHandler {
 	function convertFromNameValueList( $data ) {
 		//Debug::Arr($data, 'Raw data to convert: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( isset($data->name_value_list) ) {
+			
+			$retarr = array();
 			foreach( $data->name_value_list as $field ) {
 				$retarr[$field->name] = $field->value;
 			}
@@ -440,7 +444,7 @@ class SugarCRMReturnHandler {
 				//Debug::Arr($tmp_data, 'Tmp Data', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Check for one field too
-				if ( count(array_keys($tmp_data)) == 1 OR count($select_fields) == 1 ) {
+				if ( count(array_keys($tmp_data)) == 1 ) {
 					Debug::Text('Single field...', __FILE__, __LINE__, __METHOD__, 10);
 					$key = key($tmp_data);
 					$retarr = $tmp_data[$key];
@@ -467,6 +471,9 @@ class SugarCRMReturnHandler {
 		}
 
 		if ( $result->error->number == 0 AND isset($result->result_count) AND $result->result_count > 0 ) {
+			
+			$retarr = array();
+			
 			if ( is_array( $result->entry_list ) ) {
 				//Use getOne or getRow() if only one result is returned.
 				foreach( $result->entry_list as $row ) {

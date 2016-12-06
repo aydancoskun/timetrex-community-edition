@@ -137,11 +137,12 @@ class PremiumPolicyBranchListFactory extends PremiumPolicyBranchFactory implemen
 
 		$ppblf->getByPremiumPolicyId($id);
 
+		$list = array();
 		foreach ($ppblf as $obj) {
 			$list[$obj->getPremiumPolicy()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

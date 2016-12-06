@@ -1,82 +1,78 @@
-RequestViewController = BaseViewController.extend( {
+RequestViewController = RequestViewCommonController.extend( {
 	el: '#request_view_container',
 	type_array: null,
 	status_array: null,
 
-	message_control_api: null,
-
+	api_request_schedule:null,
+	authorization_api:null,
+	navigation:null,
+	hierarchy_type_id:false,
 	messages: null,
 
-	authorization_api: null,
 
-	authorization_history_columns: [],
+	initialize: function( options ) {
+        this._super('initialize', options);
+        this.edit_view_tpl = 'RequestEditView.html';
+        this.permission_id = 'request';
+        this.viewId = 'Request';
+        this.script_name = 'RequestView';
+        this.table_name_key = 'request';
+        this.context_menu_name = $.i18n._('Requests');
+        this.navigation_label = $.i18n._('Request') + ':';
+        this.api = new (APIFactory.getAPIClass('APIRequest'))();
+        this.api_absence_policy = new (APIFactory.getAPIClass('APIAbsencePolicy'))();
+        this.api_schedule = new (APIFactory.getAPIClass('APISchedule'))();
+        this.message_control_api = new (APIFactory.getAPIClass('APIMessageControl'))();
 
-	authorization_history_default_display_columns: [],
+        if (( LocalCacheData.getCurrentCompany().product_edition_id > 10 )) {
+            this.api_request_schedule = new (APIFactory.getAPIClass('APIRequestSchedule'))();
+        }
+        if (( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )) {
+            this.job_api = new (APIFactory.getAPIClass('APIJob'))();
+            this.job_item_api = new (APIFactory.getAPIClass('APIJobItem'))();
+        }
 
-	authorization_history_grid: null,
-
-	initialize: function() {
-		this._super( 'initialize' );
-		this.edit_view_tpl = 'RequestEditView.html';
-		this.permission_id = 'request';
-		this.viewId = 'Request';
-		this.script_name = 'RequestView';
-		this.table_name_key = 'request';
-		this.context_menu_name = $.i18n._( 'Requests' );
-		this.navigation_label = $.i18n._( 'Request' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIRequest' ))();
 		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
-		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
 
-		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
+        this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
+        this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
+        this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
+        this.invisible_context_menu_dic[ContextMenuIconName.save] = true;
+        this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
+        this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
+        this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
+        this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
 
-		this.initPermission();
-		this.render();
-		this.buildContextMenu();
 
-		this.initData();
-		this.setSelectRibbonMenuIfNecessary();
+        this.initPermission();
+        this.render();
+        this.buildContextMenu();
 
-	},
+        this.initData();
+        this.setSelectRibbonMenuIfNecessary();
+    },
 
-	initPermission: function() {
+	// override allows a callback after initOptions when run as sub view (from EmployeeViewController)
+	initOptions: function( callBack ) {
 
-		this._super( 'initPermission' );
+		var options = [
+			{option_name: 'status'},
+			{option_name: 'type'},
+		];
 
-		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
-			this.show_search_tab = true;
-		} else {
-			this.show_search_tab = false;
-		}
+		this.initDropDownOptions( options, function( result ) {
 
-	},
+			if ( callBack ) {
+				callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
+			}
 
-	initOptions: function() {
-		var $this = this;
-
-		this.initDropDownOption( 'type' );
-		this.initDropDownOption( 'status' );
+		} );
 
 	},
 
-	needShowNavigation: function() {
-		if ( this.is_viewing && this.current_edit_record && Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
-			return true;
-		} else {
-			return false;
-		}
-	},
-
-	buildViewUI: function() {
-		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
-		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
+	buildNavigation: function(){
+		// var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
+		// var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
@@ -96,151 +92,51 @@ RequestViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
-		if ( pager_data && source_data ) {
-			this.navigation.setSourceData( source_data );
-			this.navigation.setPagerData( pager_data );
-		}
-
-		//Tab 0 first column start
-
-		var tab_request = this.edit_view_tab.find( '#tab_request' );
-
-		var tab_request_column1 = tab_request.find( '.first-column' );
-
-		this.edit_view_tabs[0] = [];
-
-		this.edit_view_tabs[0].push( tab_request_column1 );
-
-		// Employee
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1, '' );
-
-		// Date
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'date_stamp', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1 );
-
-		// Type
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'type', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_request_column1, '' );
-
-		var separate_box = tab_request.find( '.grid-title' );
-
-		// Authorization History
-
-		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Authorization History' )} );
-		form_item_input.attr( 'id', 'authorization_history' );
-		this.addEditFieldToColumn( null, form_item_input, separate_box );
-
-		// tab_request first column end
-
-		separate_box = tab_request.find( '.separate' ).css( 'display', 'none' );
-
-		// Messages
-
-		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Messages' )} );
-		this.addEditFieldToColumn( null, form_item_input, separate_box );
-
-		// Tab 0 second column start
-
-		var tab_request_column2 = tab_request.find( '.second-column' );
-
-		this.edit_view_tabs[0].push( tab_request_column2 );
-
-		// From
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_request_column2, '' );
-
-		// Subject
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column2 );
-
-		// Body
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column2, '', null, null, true );
-
-		// Tab 0 second column end
-
-		tab_request_column2.css( 'display', 'none' );
-
 	},
 
 	buildEditViewUI: function() {
 
-		this._super( 'buildEditViewUI' );
+        this._super( 'buildEditViewUI' );
 
-		var $this = this;
+        this.setTabLabels( {
+            'tab_request': $.i18n._( 'Message' ),
+            'tab_audit': $.i18n._( 'Audit' )
+        } );
 
-		this.setTabLabels( {
-			'tab_request': $.i18n._( 'Message' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+        var tab_audit_label = this.edit_view.find( 'a[ref=tab_audit]' );
 
-		var tab_audit_label = this.edit_view.find( 'a[ref=tab_audit]' );
+        tab_audit_label.css( 'display', 'none' );
 
-		tab_audit_label.css( 'display', 'none' );
+        //Tab 0 start
 
-		//Tab 0 start
+        var tab_request = this.edit_view_tab.find( '#tab_request' );
 
-		var tab_request = this.edit_view_tab.find( '#tab_request' );
+        var tab_request_column1 = tab_request.find( '.first-column' );
 
-		var tab_request_column1 = tab_request.find( '.first-column' );
+        var tab_request_column2 = tab_request.find( '.second-column' );
 
-		var tab_request_column2 = tab_request.find( '.second-column' );
+        this.edit_view_tabs[0] = [];
 
-		this.edit_view_tabs[0] = [];
+        this.edit_view_tabs[0].push( tab_request_column1 );
 
-		this.edit_view_tabs[0].push( tab_request_column1 );
+        // Subject
+        var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		// Subject
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+        form_item_input.TTextInput( {field: 'subject', width: 359} );
+        this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column1, '' );
 
-		form_item_input.TTextInput( {field: 'subject', width: 359} );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column1, '' );
+        // Body
+        form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		// Body
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+        form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
 
-		form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
+        this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column1, '', null, null, true );
 
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column1, '', null, null, true );
-
-		tab_request_column2.css( 'display', 'none' );
-
-	},
-
-	setGridCellBackGround: function() {
-
-		var data = this.grid.getGridParam( 'data' );
-
-		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
-		if ( !data ) {
-			return;
-		}
-
-		var len = data.length;
-
-		for ( var i = 0; i < len; i++ ) {
-			var item = data[i];
-
-			if ( item.status_id === 30 ) {
-				$( "tr[id='" + item.id + "']" ).addClass( 'bolder-request' );
-			}
-		}
+        tab_request_column2.css( 'display', 'none' );
 	},
 
 	buildAddViewUI: function() {
-
 		this._super( 'buildEditViewUI' );
-
 		var $this = this;
 
 		this.setTabLabels( {
@@ -251,19 +147,23 @@ RequestViewController = BaseViewController.extend( {
 		//Tab 0 start
 
 		var tab_request = this.edit_view_tab.find( '#tab_request' );
-
 		var tab_request_column1 = tab_request.find( '.first-column' );
-
 		var tab_request_column2 = tab_request.find( '.second-column' );
 
 		this.edit_view_tabs[0] = [];
-
 		this.edit_view_tabs[0].push( tab_request_column1 );
+		this.edit_view_tabs[0].push( tab_request_column2 );
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'full_name'} );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1, '' );
+
+		// Type
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_request_column1 );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
@@ -274,25 +174,243 @@ RequestViewController = BaseViewController.extend( {
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1, '', widgetContainer );
 
-		// Type
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_request_column1 );
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
+			//Working Status
+			form_item_input = Global.loadWidgetByName(FormItemType.COMBO_BOX);
+			form_item_input.TComboBox({field: 'status_id', set_empty: false});
+			form_item_input.setSourceData(Global.addFirstItemToArray({10: 'Working', 20: 'Absent'}));
+			this.addEditFieldToColumn($.i18n._('Status'), form_item_input, tab_request_column1);
+
+			//Start Date
+			form_item_input = Global.loadWidgetByName(FormItemType.DATE_PICKER);
+			form_item_input.TDatePicker({field: 'start_date'});
+			this.addEditFieldToColumn($.i18n._('Start Date'), form_item_input, tab_request_column1, '');
+
+			//End  Date
+			form_item_input = Global.loadWidgetByName(FormItemType.DATE_PICKER);
+			form_item_input.TDatePicker({field: 'end_date'});
+			this.addEditFieldToColumn($.i18n._('End Date'), form_item_input, tab_request_column1, '');
+
+			// Effective Days
+			var form_item_sun_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
+			form_item_sun_checkbox.TCheckbox( {field: 'sun'} );
+
+			var form_item_mon_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
+			form_item_mon_checkbox.TCheckbox( {field: 'mon'} );
+
+			var form_item_tue_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
+			form_item_tue_checkbox.TCheckbox( {field: 'tue'} );
+
+			var form_item_wed_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
+			form_item_wed_checkbox.TCheckbox( {field: 'wed'} );
+
+			var form_item_thu_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
+			form_item_thu_checkbox.TCheckbox( {field: 'thu'} );
+
+			var form_item_fri_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
+			form_item_fri_checkbox.TCheckbox( {field: 'fri'} );
+
+			var form_item_sat_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
+			form_item_sat_checkbox.TCheckbox( {field: 'sat'} );
+
+			widgetContainer = $( "<div class=''></div>" );
+
+			var sun = $( "<span class='widget-top-label'> " + $.i18n._( 'Sun' ) + " <br> " + " </span>" );
+			var mon = $( "<span class='widget-top-label'> " + $.i18n._( 'Mon' ) + " <br> " + " </span>" );
+			var tue = $( "<span class='widget-top-label'> " + $.i18n._( 'Tue' ) + " <br> " + " </span>" );
+			var wed = $( "<span class='widget-top-label'> " + $.i18n._( 'Wed' ) + " <br> " + " </span>" );
+			var thu = $( "<span class='widget-top-label'> " + $.i18n._( 'Thu' ) + " <br> " + " </span>" );
+			var fri = $( "<span class='widget-top-label'> " + $.i18n._( 'Fri' ) + " <br> " + " </span>" );
+			var sat = $( "<span class='widget-top-label'> " + $.i18n._( 'Sat' ) + " <br> " + " </span>" );
+
+			sun.append( form_item_sun_checkbox );
+			mon.append( form_item_mon_checkbox );
+			tue.append( form_item_tue_checkbox );
+			wed.append( form_item_wed_checkbox );
+			thu.append( form_item_thu_checkbox );
+			fri.append( form_item_fri_checkbox );
+			sat.append( form_item_sat_checkbox );
+
+			widgetContainer.append( sun );
+			widgetContainer.append( mon );
+			widgetContainer.append( tue );
+			widgetContainer.append( wed );
+			widgetContainer.append( thu );
+			widgetContainer.append( fri );
+			widgetContainer.append( sat );
+
+			this.addEditFieldToColumn( $.i18n._( 'Effective Days' ), [form_item_sun_checkbox, form_item_mon_checkbox, form_item_tue_checkbox, form_item_wed_checkbox, form_item_thu_checkbox, form_item_fri_checkbox, form_item_sat_checkbox], tab_request_column1, '', widgetContainer, false, true );
+
+			//Start time
+			form_item_input = Global.loadWidgetByName(FormItemType.TIME_PICKER);
+			form_item_input.TTimePicker({field: 'start_time'});
+			this.addEditFieldToColumn($.i18n._('In'), form_item_input, tab_request_column1);
+
+			//End  time
+			form_item_input = Global.loadWidgetByName(FormItemType.TIME_PICKER);
+			form_item_input.TTimePicker({field: 'end_time'});
+			this.addEditFieldToColumn($.i18n._('Out'), form_item_input, tab_request_column1);
+
+			// Total
+			form_item_input = Global.loadWidgetByName(FormItemType.TEXT);
+			form_item_input.TText({field: 'total_time'});
+			this.addEditFieldToColumn($.i18n._('Total'), form_item_input, tab_request_column1);
+
+			//Schedule Policy
+			form_item_input = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
+			form_item_input.AComboBox({
+				api_class: (APIFactory.getAPIClass('APISchedulePolicy')),
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.SCHEDULE_POLICY,
+				show_search_inputs: true,
+				set_empty: true,
+				field: 'schedule_policy_id'
+			});
+			this.addEditFieldToColumn($.i18n._('Schedule Policy'), form_item_input, tab_request_column1);
+
+			//Absence Policy
+			form_item_input = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
+			form_item_input.AComboBox({
+				api_class: (APIFactory.getAPIClass('APIAbsencePolicy')),
+				customSearchFilter: function(){
+					return {filter_data: {user_id: LocalCacheData.getLoginUser().id }};
+				},
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.ABSENCES_POLICY,
+				set_empty: true,
+				field: 'absence_policy_id'
+			});
+			this.addEditFieldToColumn($.i18n._('Absence Policy'), form_item_input, tab_request_column1);
+
+			//Available Balance
+			form_item_input = Global.loadWidgetByName(FormItemType.TEXT);
+			form_item_input.TText({field: 'available_balance'});
+			widgetContainer = $("<div class='widget-h-box'></div>");
+			this.available_balance_info = $('<img class="available-balance-info" src="' + Global.getRealImagePath('images/infox16x16.png') + '">');
+			widgetContainer.append(form_item_input);
+			widgetContainer.append(this.available_balance_info);
+			this.addEditFieldToColumn($.i18n._('Available Balance'), form_item_input, tab_request_column1, '', widgetContainer, true);
+
+			//branch
+			form_item_input = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
+			form_item_input.AComboBox({
+				api_class: (APIFactory.getAPIClass('APIBranch')),
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.BRANCH,
+				show_search_inputs: true,
+				set_empty: true,
+				field: 'branch_id'
+			});
+            if ( this.show_branch_ui ) {
+			    this.addEditFieldToColumn($.i18n._('Branch'), form_item_input, tab_request_column1);
+            }
+
+			//Dept
+			form_item_input = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
+			form_item_input.AComboBox({
+				api_class: (APIFactory.getAPIClass('APIDepartment')),
+				allow_multiple_selection: false,
+				layout_name: ALayoutIDs.DEPARTMENT,
+				show_search_inputs: true,
+				set_empty: true,
+				field: 'department_id'
+			});
+
+            if ( this.show_department_ui ) {
+			    this.addEditFieldToColumn($.i18n._('Department'), form_item_input, tab_request_column1);
+            }
+
+			if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				//Job
+				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+
+				form_item_input.AComboBox( {
+					api_class: (APIFactory.getAPIClass( 'APIJob' )),
+					allow_multiple_selection: false,
+					layout_name: ALayoutIDs.JOB,
+					show_search_inputs: true,
+					set_empty: true,
+					setRealValueCallBack: (function( val ) {
+
+						if ( val ) job_coder.setValue( val.manual_id );
+					}),
+					field: 'job_id',
+					added_items: [
+						{value: '-1', label: Global.default_item},
+						{value: '-2', label: Global.selected_item}
+					]
+				} );
+
+				widgetContainer = $( "<div class='widget-h-box'></div>" );
+
+				var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				job_coder.TTextInput( {field: 'job_quick_search', disable_keyup_event: true} );
+				job_coder.addClass( 'job-coder' );
+
+				widgetContainer.append( job_coder );
+				widgetContainer.append( form_item_input );
+				this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_request_column1, '', widgetContainer, true );
+
+
+
+                if ( !this.show_job_ui ) {
+                    //invalid permissions
+                    this.detachElement('job_id');
+                }
+				//Job Item
+				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+
+				form_item_input.AComboBox( {
+					api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+					allow_multiple_selection: false,
+					layout_name: ALayoutIDs.JOB_ITEM,
+					show_search_inputs: true,
+					set_empty: true,
+					setRealValueCallBack: (function( val ) {
+
+						if ( val ) job_item_coder.setValue( val.manual_id );
+					}),
+					field: 'job_item_id',
+					added_items: [
+						{value: '-1', label: Global.default_item},
+						{value: '-2', label: Global.selected_item}
+					]
+				} );
+
+				widgetContainer = $( "<div class='widget-h-box'></div>" );
+
+				var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+				job_item_coder.TTextInput( {field: 'job_item_quick_search', disable_keyup_event: true} );
+				job_item_coder.addClass( 'job-coder' );
+
+				widgetContainer.append( job_item_coder );
+				widgetContainer.append( form_item_input );
+				this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_request_column1, '', widgetContainer, true );
+
+                if ( !this.show_job_item_ui) {
+                    //invalid permissions
+                    this.detachElement('job_item_id');
+                }
+			}
+		}
 
 		// Message
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
+		form_item_input.TTextArea( {field: 'message', width: 400, height: 300} );
+		this.addEditFieldToColumn( $.i18n._( 'Reason / Message' ), form_item_input, tab_request_column1, '', null, null, true );
 
-		form_item_input.TTextArea( {field: 'message', width: 600, height: 400} );
+		//hide initially hidden fields.
+		//tab_request_column2.css( 'display', 'none' );
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
+			this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
+			this.hideAdvancedFields();
+		}
 
-		this.addEditFieldToColumn( $.i18n._( 'Message' ), form_item_input, tab_request_column1, '', null, null, true );
-
-		tab_request_column2.css( 'display', 'none' );
-
+		this.onTypeChanged();
+		this.onWorkingStatusChanged();
 	},
 
 	buildSearchFields: function() {
-
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
@@ -375,7 +493,6 @@ RequestViewController = BaseViewController.extend( {
 	},
 
 	buildContextMenuModels: function() {
-
 		//Context Menu
 		var menu = new RibbonMenu( {
 			label: this.context_menu_name,
@@ -395,6 +512,14 @@ RequestViewController = BaseViewController.extend( {
 		var navigation_group = new RibbonSubMenuGroup( {
 			label: $.i18n._( 'Navigation' ),
 			id: this.viewId + 'navigation',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+
+		//menu group
+		var other_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Other' ),
+			id: this.viewId + 'other',
 			ribbon_menu: menu,
 			sub_menus: []
 		} );
@@ -489,12 +614,28 @@ RequestViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_csv = new RibbonSubMenu({
+			label: $.i18n._('Export'),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
 
-	setCurrentEditRecordData: function() {
+	setCurrentEditRecordData: function(current_edit_record) {
+		if (current_edit_record) {
+			this.current_edit_record = current_edit_record;
+		}
 
+	    if (!this.current_edit_record) {
+	        this.current_edit_record = {};
+        }
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			if ( !this.current_edit_record.hasOwnProperty( key ) ) {
@@ -528,18 +669,13 @@ RequestViewController = BaseViewController.extend( {
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-
 	},
 
 	setEditViewDataDone: function() {
 		var $this = this;
 		this._super( 'setEditViewDataDone' );
-
 		if ( this.is_viewing ) {
 
-			this.getAuthorizationHistoryColumns( function() {
-				$this.initAuthorizationHistoryLayout();
-			} );
 
 		} else {
 			if ( Global.isSet( $this.messages ) ) {
@@ -549,284 +685,32 @@ RequestViewController = BaseViewController.extend( {
 
 	},
 
-	initAuthorizationHistoryLayout: function() {
 
-		var $this = this;
-
-		$this.getAuthorizationHistoryDefaultDisplayColumns( function() {
-
-			if ( !$this.edit_view ) {
-				return;
-			}
-
-			$this.setAuthorizationHistorySelectLayout();
-
-			$this.initAuthorizationHistoryData();
-		} );
-
-	},
-
-	initAuthorizationHistoryData: function() {
-
-		var $this = this;
-		var filter = {};
-		filter.filter_data = {};
-		filter.filter_columns = this.getFilterColumnsFromDisplayColumns( true );
-
-		filter.filter_data.object_id = [this.current_edit_record.id];
-		filter.filter_data.object_type_id = this.current_edit_record.hierarchy_type_id;
-
-		this.authorization_api['get' + this.authorization_api.key_name]( filter, {
-			onResult: function( result ) {
-
-				if ( !$this.edit_view ) {
-					return;
-				}
-
-				var result_data = result.getResult();
-
-				if ( Global.isArray( result_data ) ) {
-
-					$( $this.edit_view.find( '.grid-div' ) ).css( 'display', 'block' );
-
-					$this.showAuthorizationHistoryGridBorders();
-
-					result_data = Global.formatGridData( result_data, $this.authorization_api.key_name );
-
-					$this.authorization_history_grid.clearGridData();
-
-					$this.authorization_history_grid.setGridParam( {data: result_data} );
-					$this.authorization_history_grid.trigger( 'reloadGrid' );
-				} else {
-					$( $this.edit_view.find( '.grid-div' ) ).css( 'display', 'none' );
-				}
-
-				$this.initEmbeddedMessageData();
-
-			}
-		} );
-
-	},
-
-	setAuthorizationHistorySelectLayout: function( column_start_from ) {
-
-		var $this = this;
-		var grid = this.edit_view.find( '#grid' );
-
-		grid.attr( 'id', 'authorization_history_grid' );  //Grid's id is ScriptName + _grid
-
-		grid = this.edit_view.find( '#authorization_history_grid' );
-
-		var column_info_array = [];
-
-		var display_columns = this.buildAuthorizationDisplayColumns( this.authorization_history_default_display_columns );
-
-		//Set Data Grid on List view
-		var len = display_columns.length;
-
-		for ( var i = 0; i < len; i++ ) {
-			var view_column_data = display_columns[i];
-
-			var column_info = {
-				name: view_column_data.value,
-				index: view_column_data.value,
-				label: view_column_data.label,
-				width: 100,
-				sortable: false,
-				title: false
-			};
-			column_info_array.push( column_info );
+	initViewingView: function() {
+		this._super('initViewingView');
+		if (this.edit_view_ui_dic.message) {
+			this.edit_view_ui_dic.message.parents('.edit-view-form-item-div').hide();
 		}
-
-		if ( !this.authorization_history_grid ) {
-			this.authorization_history_grid = grid;
-
-			this.authorization_history_grid = this.authorization_history_grid.jqGrid( {
-				altRows: true,
-				data: [],
-				datatype: 'local',
-				sortable: false,
-				width: this.edit_view.find(".edit-view-tab").width(),
-				rowNum: 10000,
-				height: 25,
-				colNames: [],
-				colModel: column_info_array
-
-			} );
-
-		} else {
-
-			this.authorization_history_grid.jqGrid( 'GridUnload' );
-			this.authorization_history_grid = null;
-
-			grid = this.edit_view.find( '#authorization_history_grid' );
-
-			this.authorization_history_grid = $( grid );
-
-			this.authorization_history_grid = this.authorization_history_grid.jqGrid( {
-				altRows: true,
-				data: [],
-				rowNum: 10000,
-				height: 25,
-				sortable: false,
-				datatype: 'local',
-				width: this.edit_view.find(".edit-view-tab").width(),
-				colNames: [],
-				colModel: column_info_array
-
-			} );
-
-		}
-
-	},
-
-	setAuthorizationGridSize: function() {
-		var history_height_unit;
-		if ( (!this.authorization_history_grid || !this.authorization_history_grid.is( ':visible' )) ) {
-			return;
-		}
-		history_height_unit = this.authorization_history_grid.getGridParam( 'data' ).length;
-		history_height_unit > 5 && (history_height_unit = 5);
-		this.authorization_history_grid.setGridWidth( $( this.edit_view.find( '#authorization_history' ) ).width() );
-		this.authorization_history_grid.setGridHeight( history_height_unit * 25 );
-	},
-
-	buildAuthorizationDisplayColumns: function( apiDisplayColumnsArray ) {
-		var len = this.authorization_history_columns.length;
-		var len1 = apiDisplayColumnsArray.length;
-		var display_columns = [];
-
-		for ( var j = 0; j < len1; j++ ) {
-			for ( var i = 0; i < len; i++ ) {
-				if ( apiDisplayColumnsArray[j] === this.authorization_history_columns[i].value ) {
-					display_columns.push( this.authorization_history_columns[i] );
-				}
-			}
-		}
-		return display_columns;
-
-	},
-
-	showAuthorizationHistoryGridBorders: function() {
-		var top_border = this.edit_view.find( '.grid-top-border' );
-		var bottom_border = this.edit_view.find( '.grid-bottom-border' );
-
-		top_border.css( 'display', 'block' );
-		bottom_border.css( 'display', 'block' );
-	},
-
-	getAuthorizationHistoryDefaultDisplayColumns: function( callBack ) {
-
-		var $this = this;
-		this.authorization_api.getOptions( 'default_display_columns', {
-			onResult: function( columns_result ) {
-				var columns_result_data = columns_result.getResult();
-
-				$this.authorization_history_default_display_columns = columns_result_data;
-
-				if ( callBack ) {
-					callBack();
-				}
-
-			}
-		} );
-
-	},
-
-	getAuthorizationHistoryColumns: function( callBack ) {
-
-		var $this = this;
-		this.authorization_api.getOptions( 'columns', {
-			onResult: function( columns_result ) {
-				var columns_result_data = columns_result.getResult();
-				$this.authorization_history_columns = Global.buildColumnArray( columns_result_data );
-
-				if ( callBack ) {
-					callBack();
-				}
-
-			}
-		} );
-
-	},
-
-	initEmbeddedMessageData: function() {
-		var $this = this;
-		var args = {};
-		args.filter_data = {};
-		args.filter_data.object_type_id = 50;
-		args.filter_data.object_id = this.current_edit_record.id;
-
-		var read_ids = [];
-
-		$this.message_control_api['getEmbeddedMessage']( args, {
-			onResult: function( res ) {
-
-				// Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=RequestAuthorization&id=1306 line 1547
-				if ( !$this.edit_view || !$this.edit_view_ui_dic['from'] ) {
-					return;
-				}
-
-				var data = res.getResult();
-
-				if ( Global.isArray( data ) ) {
-
-					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'block' );
-
-					$this.messages = data;
-
-					var container = $( '<div></div>' );
-
-					for ( var key in data ) {
-
-						var currentItem = data[key];
-						/* jshint ignore:start */
-						if ( currentItem.status_id == 10 ) {
-							read_ids.push( currentItem.id );
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && ( this.edit_view_ui_dic.type_id == 30 || this.edit_view_ui_dic.type_id == 40 ) ) {
+			var dow = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+			var one_selected = false;
+			for (var key in this.current_edit_record) {
+				if (dow.indexOf(key) > -1) {
+					for (var i = 0; i < 7; i++) {
+						if (this.current_edit_record[key] !== 0 && this.current_edit_record[key] !== false) {
+							one_selected = true;
+							break;
 						}
-						/* jshint ignore:end */
-						var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + '@' + currentItem.updated_date;
-						$this.edit_view_ui_dic['from'].setValue( from );
-						$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
-						$this.edit_view_ui_dic['body'].setValue( currentItem.body );
-
-						var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
-
-						cloneMessageControl.css( 'display', 'block' ).appendTo( container );
 					}
 
-					if ( read_ids.length > 0 ) {
-						$this.message_control_api['markRecipientMessageAsRead']( read_ids, {
-							onResult: function( res ) {
-							}
-						} );
+					if (one_selected) {
+						this.edit_view_ui_dic['sun'].parents('.edit-view-form-item-div').show();
+					} else {
+						this.edit_view_ui_dic['sun'].parents('.edit-view-form-item-div').hide();
 					}
-
-					$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
-					$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).append( container.html() );
-
-				} else {
-
-					$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
 				}
-
-				$this.setAuthorizationGridSize();
-
 			}
-		} );
-	},
-
-	onEditClick: function( editId, noRefreshUI ) {
-
-		var $this = this;
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
-		LocalCacheData.current_doing_context_action = 'edit';
-		$this.openEditView();
-
-		$this.initEditView();
-
+		}
 	},
 
 	setURL: function() {
@@ -873,7 +757,7 @@ RequestViewController = BaseViewController.extend( {
 					this.setDefaultMenuViewIcon( context_btn, grid_selected_length );
 					break;
 				case ContextMenuIconName.edit:
-					this.setDefaultMenuEditIcon( context_btn, grid_selected_length );
+					this.setDefaultMenuEditIcon( context_btn, grid_selected_length, 'request' );
 					break;
 				case ContextMenuIconName.delete_icon:
 					this.setDefaultMenuDeleteIcon( context_btn, grid_selected_length );
@@ -895,6 +779,9 @@ RequestViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.edit_employee:
 					this.setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length, 'user' );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
 
 			}
@@ -921,7 +808,7 @@ RequestViewController = BaseViewController.extend( {
 					this.setEditMenuViewIcon( context_btn );
 					break;
 				case ContextMenuIconName.edit:
-					this.setEditMenuEditIcon( context_btn );
+					this.setEditMenuEditIcon( context_btn, 'request' );
 					break;
 				case ContextMenuIconName.delete_icon:
 					this.setEditMenuDeleteIcon( context_btn );
@@ -943,6 +830,9 @@ RequestViewController = BaseViewController.extend( {
 				case ContextMenuIconName.edit_employee:
 					this.setEditMenuNavEditIcon( context_btn, 'user' );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn );
+					break;
 			}
 
 		}
@@ -951,60 +841,55 @@ RequestViewController = BaseViewController.extend( {
 
 	},
 
-	setEditMenuAddIcon: function( context_btn, pId ) {
-		if ( !this.addPermissionValidate( pId ) || this.edit_only_mode ) {
-			context_btn.addClass( 'invisible-image' );
+	setDefaultMenuCancelIcon: function( context_btn, grid_selected_length, pId ) {
+		if ( !this.sub_view_mode && !this.is_viewing ) {
+			context_btn.addClass( 'disable-image' );
 		}
+	},
+
+	setDefaultMenuExportIcon: function( context_btn, grid_selected_length, pId ) {
+		if ( this.edit_only_mode || this.grid == undefined ) {
+			context_btn.addClass( 'invisible-image' );
+		} else {
+			if ( this.is_viewing ||this.is_edit || this.is_add ) {
+				context_btn.addClass('disable-image');
+			}
+		}
+	},
+
+	setEditMenuAddIcon: function( context_btn, pId ) {
+		this._super( 'setEditMenuAddIcon', context_btn, pId );
 
 		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
 
-		if ( this.is_changed ) {
-			context_btn.addClass( 'disable-image' );
-		}
 	},
 
 	setEditMenuDeleteAndNextIcon: function( context_btn, pId ) {
-		if ( this.is_edit ||
-			this.is_add ) {
-
+		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
 	},
 
 	setEditMenuNavViewIcon: function( context_btn, pId ) {
-		if ( this.is_edit ||
-			this.is_add ) {
-
+		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
-
 	},
 
 	setEditMenuViewIcon: function( context_btn, pId ) {
 		context_btn.addClass( 'disable-image' );
 	},
 
-	setEditMenuEditIcon: function( context_btn, pId ) {
-
-		if ( !this.is_viewing ) {
-			context_btn.addClass( 'disable-image' );
-		}
-	},
-
 	setEditMenuDeleteIcon: function( context_btn, pId ) {
-		if ( this.is_edit ||
-			this.is_add ) {
-
+		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
-
 	},
 
 	setEditMenuSendIcon: function( context_btn, pId ) {
-
-		if ( !this.addPermissionValidate( pId ) || this.edit_only_mode ) {
+		if ( ((pId && !this.addPermissionValidate( pId )) || this.edit_only_mode) && !this.is_add ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 
@@ -1018,120 +903,105 @@ RequestViewController = BaseViewController.extend( {
 
 	},
 
-	getFilterColumnsFromDisplayColumns: function( authorization_history ) {
-		// Error: Unable to get property 'getGridParam' of undefined or null reference
-		var display_columns = [];
-		if ( authorization_history ) {
-			if ( this.authorization_history_grid ) {
-				display_columns = this.authorization_history_grid.getGridParam( 'colModel' );
+	 onTypeChanged: function(arg) {
+		if ( this.current_edit_record && LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) && (this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40) ) { //schedule adjustment || absence selected
+
+			if ( this.edit_view_ui_dic.date_stamp ) {
+				this.edit_view_ui_dic.date_stamp.parents('.edit-view-form-item-div').hide();
+			}
+			if ( this.current_edit_record.date_stamp != undefined && this.current_edit_record.start_date == '') {
+				this.edit_view_ui_dic.start_date.setValue(this.current_edit_record.date_stamp);
+				this.current_edit_record.start_date = this.current_edit_record.date_stamp;
+			}
+			if ( this.current_edit_record.date_stamp != undefined && this.current_edit_record.end_date == '') {
+				this.edit_view_ui_dic.end_date.setValue(this.current_edit_record.date_stamp);
+				this.current_edit_record.end_date = this.current_edit_record.date_stamp;
+			}
+			this.showAdvancedFields();
+
+			if ( this.edit_view_ui_dic.type_id.getValue() == 30  ) {
+				this.edit_view_ui_dic.status_id.setValue(20);
+			} else if ( this.edit_view_ui_dic.type_id.getValue()  == 40 ) {
+				this.edit_view_ui_dic.status_id.setValue(10);
+			}
+			this.onWorkingStatusChanged();
+
+			$this = this;
+			if ( !this.sub_view_mode ) {
+				this.setRequestFormDefaultData(arg, function () {
+					$this.getAvailableBalance();
+					$this.setCurrentEditRecordData(this.current_edit_record);
+					$this.getScheduleTotalTime();
+				});
 			}
 		} else {
-			if ( this.grid ) {
-				display_columns = this.grid.getGridParam( 'colModel' );
+
+			this.hideAdvancedFields();
+			if ( this.edit_view_ui_dic.date_stamp ) {
+				this.edit_view_ui_dic.date_stamp.parents('.edit-view-form-item-div').show();
+			}
+			this.onWorkingStatusChanged();
+		}
+	 },
+
+	setRequestFormDefaultData: function (data, callback_function) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) {
+			if ( data == undefined) {
+				var $this = this;
+				this.enable_validation = false;
+				this.api_request_schedule.getRequestScheduleDefaultData(this.uniformVariable(this.current_edit_record), {onResult: function(res){
+					var data = res.getResult();
+					data.date_stamp = data.start_date;
+					//force = true is required to set the current_edit_record and populate edit_view_ui_dic
+					$this.setDefaultData(data, true);
+					if (callback_function) {
+						callback_function();
+					}
+				}});
+			}else{
+				data.date_stamp = data.start_date;
+				//force = true is required to set the current_edit_record and populate edit_view_ui_dic
+				this.setDefaultData(data, true);
+				if (callback_function) {
+					callback_function();
+				}
 			}
 		}
-		var column_filter = {};
-		column_filter.is_owner = true;
-		column_filter.id = true;
-		column_filter.is_child = true;
-		column_filter.in_use = true;
-		column_filter.first_name = true;
-		column_filter.last_name = true;
-		column_filter.user_id = true;
-		column_filter.status_id = true;
-
-		if ( display_columns ) {
-			var len = display_columns.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var column_info = display_columns[i];
-				column_filter[column_info.name] = true;
-			}
-		}
-
-		return column_filter;
 	},
 
-	onCancelClick: function( force, cancel_all ) {
-
-		var $this = this;
-		LocalCacheData.current_doing_context_action = 'cancel';
-		if ( this.is_changed && !force ) {
-			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
-
-				if ( flag === true ) {
-					doNext();
-				}
-
-			} );
-		} else {
-			doNext();
-		}
-
-		function doNext() {
-			if ( !$this.edit_view && $this.parent_view_controller && $this.sub_view_mode ) {
-				$this.parent_view_controller.is_changed = false;
-				$this.parent_view_controller.buildContextMenu( true );
-				$this.parent_view_controller.onCancelClick();
-
+	onAvailableBalanceChange: function() {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
+			if (this.edit_view_ui_dic.absence_policy_id.getValue() != 0) {
+				this.getAvailableBalance();
 			} else {
-
-				if ( $this.is_edit ) {
-					$this.onViewClick( $this.current_edit_record.id );
-				} else {
-					$this.removeEditView();
+				if (this.edit_view_ui_dic.available_balance) {
+					this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
 				}
-
 			}
-
 		}
-
 	},
 
-	onSaveResult: function( result ) {
-		var $this = this;
-		if ( result.isValid() ) {
-
-			$this.is_add = false;
-			var result_data = result.getResult();
-			if ( !this.edit_only_mode ) {
-				if ( result_data === true ) {
-					$this.refresh_id = $this.current_edit_record.id;
-				} else if ( result_data > 0 ) {
-					$this.refresh_id = result_data;
-				}
-
-				$this.search();
-			}
-
-			$this.onSaveDone( result );
-
-			if ( $this.is_edit ) {
-				$this.onViewClick( $this.current_edit_record.id );
-			} else {
-
-				$this.removeEditView();
-			}
-
+	//post hook for onSaveResult
+	onSaveDone: function( result ) {
+		if ( this.is_edit ) {
+			this.onViewClick( this.current_edit_record.id );
+			return false
 		} else {
-			$this.setErrorMenu();
-			$this.setErrorTips( result );
-
+			return true;
 		}
 	},
 
 	uniformVariable: function( records ) {
-
 		if ( typeof records === 'object' ) {
 			records.user_id = LocalCacheData.loginUser.id;
 			records.first_name = LocalCacheData.loginUser.first_name;
 			records.last_name = LocalCacheData.loginUser.last_name;
 		}
 
-		var msg = {};
-
-		if ( this.is_edit ) {
-
+		if ( this.is_add ) {
+			records = this.buildDataForAPI(records);
+		} else if ( this.is_edit ) {
+			var msg = {};
 			msg.body = this.current_edit_record['body'];
 
 			msg.from_user_id = this.current_edit_record['user_id'];
@@ -1147,55 +1017,55 @@ RequestViewController = BaseViewController.extend( {
 				msg.subject = this.current_edit_record['subject'];
 			}
 
-			return msg;
+			if (records && records.request_schedule) {
+				msg.request_schedule = records.request_schedule;
+			}
 
+			return msg;
 		}
 
 		return records;
 	},
 
-	validate: function() {
-		if ( this.is_add ) {
-			this._super( 'validate' );
-
-		} else if ( this.is_edit ) {
-			var $this = this;
-
-			var record = {};
-
-			record = this.current_edit_record;
-
-			record = this.uniformVariable( record );
-
-			this.message_control_api['validateMessageControl']( record, {
-				onResult: function( result ) {
-					$this.validateResult( result );
-
-				}
-			} );
-		}
-	},
-
 	onSaveClick: function( ignoreWarning ) {
+		var $this = this;
 		LocalCacheData.current_doing_context_action = 'save';
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
+
+		for ( key in $this.current_edit_record ) {
+			if ( $this.edit_view_ui_dic[key] != undefined ) {
+				$this.current_edit_record[key] = $this.edit_view_ui_dic[key].getValue();
+			}
+		}
+
 		if ( this.is_add ) {
-			this._super( 'onSaveClick' );
-		} else if ( this.is_edit ) {
-			var $this = this;
-			var record;
-			this.is_add = false;
-			record = this.current_edit_record;
-			record = this.uniformVariable( record );
-			this.message_control_api['setMessageControl']( record, false, ignoreWarning, {
+			// //format data as expected by API
+			record = this.uniformVariable( $this.current_edit_record );
+
+			this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 				onResult: function( result ) {
 					$this.onSaveResult( result );
 				}
 			} );
+		} else if ( this.is_edit ) {
+			var record = {};
+			this.is_add = false;
+			this.setCurrentEditRecordData();
+			record = this.uniformVariable( this.current_edit_record );
+			EmbeddedMessage.reply( [record], ignoreWarning, function( result ) {
+                    if ( result.isValid() ) {
+						var id = $this.current_edit_record.id;
+						//$this.removeEditView();
+						$this.onViewClick( id, true );
+                    } else {
+                        $this.setErrorTips( result );
+                        $this.setErrorMenu();
+                    }
+				}
+			 );
 		}
-
 	},
 
 	search: function( set_default_menu, page_action, page_number, callBack ) {
@@ -1271,6 +1141,9 @@ RequestViewController = BaseViewController.extend( {
 			case ContextMenuIconName.delete_icon:
 				ProgressBar.showOverlay();
 				this.onDeleteClick();
+				if (this.edit_view) {
+					this.buildNavigation();
+				}
 				break;
 			case ContextMenuIconName.delete_and_next:
 				ProgressBar.showOverlay();
@@ -1286,152 +1159,10 @@ RequestViewController = BaseViewController.extend( {
 			case ContextMenuIconName.timesheet:
 			case ContextMenuIconName.schedule:
 			case ContextMenuIconName.edit_employee:
+			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
 
-		}
-	},
-
-	onNavigationClick: function( iconName ) {
-		var $this = this;
-		var filter;
-		var temp_filter;
-		var grid_selected_id_array;
-		var grid_selected_length;
-
-		switch ( iconName ) {
-			case ContextMenuIconName.timesheet:
-				filter = {filter_data: {}};
-				if ( Global.isSet( this.current_edit_record ) ) {
-
-					filter.user_id = this.current_edit_record.user_id ? this.current_edit_record.user_id : LocalCacheData.loginUser.id;
-					filter.base_date = this.current_edit_record.date_stamp;
-
-					Global.addViewTab( this.viewId, 'Requests', window.location.href );
-					IndexViewController.goToView( 'TimeSheet', filter );
-				} else {
-					temp_filter = {};
-					grid_selected_id_array = this.getGridSelectIdArray();
-					grid_selected_length = grid_selected_id_array.length;
-
-					if ( grid_selected_length > 0 ) {
-						var selectedId = grid_selected_id_array[0];
-
-						temp_filter.filter_data = {};
-						temp_filter.filter_columns = {user_id: true, date_stamp: true};
-						temp_filter.filter_data.id = [selectedId];
-
-						this.api['get' + this.api.key_name]( temp_filter, {
-							onResult: function( result ) {
-								var result_data = result.getResult();
-
-								if ( !result_data ) {
-									result_data = [];
-								}
-
-								result_data = result_data[0];
-
-								filter.user_id = result_data.user_id;
-								filter.base_date = result_data.date_stamp;
-
-								Global.addViewTab( $this.viewId, 'Requests', window.location.href );
-								IndexViewController.goToView( 'TimeSheet', filter );
-
-							}
-						} );
-					}
-
-				}
-
-				break;
-
-			case ContextMenuIconName.edit_employee:
-				filter = {filter_data: {}};
-				if ( Global.isSet( this.current_edit_record ) ) {
-					IndexViewController.openEditView( this, 'Employee', this.current_edit_record.user_id ? this.current_edit_record.user_id : LocalCacheData.loginUser.id );
-				} else {
-					temp_filter = {};
-					grid_selected_id_array = this.getGridSelectIdArray();
-					grid_selected_length = grid_selected_id_array.length;
-
-					if ( grid_selected_length > 0 ) {
-						selectedId = grid_selected_id_array[0];
-
-						temp_filter.filter_data = {};
-						temp_filter.filter_columns = {user_id: true};
-						temp_filter.filter_data.id = [selectedId];
-
-						this.api['get' + this.api.key_name]( temp_filter, {
-							onResult: function( result ) {
-								var result_data = result.getResult();
-
-								if ( !result_data ) {
-									result_data = [];
-								}
-
-								result_data = result_data[0];
-
-								IndexViewController.openEditView( $this, 'Employee', result_data.user_id );
-
-							}
-						} );
-					}
-
-				}
-				break;
-			case ContextMenuIconName.schedule:
-
-				filter = {filter_data: {}};
-
-				var include_users = null;
-
-				if ( Global.isSet( this.current_edit_record ) ) {
-
-					include_users = [this.current_edit_record.user_id ? this.current_edit_record.user_id : LocalCacheData.loginUser.id];
-					filter.filter_data.include_user_ids = {value: include_users};
-					;
-					filter.select_date = this.current_edit_record.date_stamp;
-
-					Global.addViewTab( $this.viewId, 'Requests', window.location.href );
-					IndexViewController.goToView( 'Schedule', filter );
-
-				} else {
-					temp_filter = {};
-					grid_selected_id_array = this.getGridSelectIdArray();
-					grid_selected_length = grid_selected_id_array.length;
-
-					if ( grid_selected_length > 0 ) {
-						selectedId = grid_selected_id_array[0];
-
-						temp_filter.filter_data = {};
-						temp_filter.filter_columns = {user_id: true, date_stamp: true};
-						temp_filter.filter_data.id = [selectedId];
-
-						this.api['get' + this.api.key_name]( temp_filter, {
-							onResult: function( result ) {
-								var result_data = result.getResult();
-
-								if ( !result_data ) {
-									result_data = [];
-								}
-
-								result_data = result_data[0];
-
-								include_users = [result_data.user_id];
-
-								filter.filter_data.include_user_ids = {value: include_users};
-
-								filter.select_date = result_data.date_stamp;
-
-								Global.addViewTab( $this.viewId, 'Requests', window.location.href );
-								IndexViewController.goToView( 'Schedule', filter );
-
-							}
-						} );
-					}
-
-				}
-				break;
 		}
 	},
 
@@ -1447,6 +1178,9 @@ RequestViewController = BaseViewController.extend( {
 				}
 			}
 			if ( this.is_viewing ) {
+				if ( Global.isSet( widget.setEnabled ) ) {
+					widget.setEnabled( false );
+				}
 			} else {
 				if ( Global.isSet( widget.setEnabled ) ) {
 					widget.setEnabled( true );
@@ -1455,69 +1189,179 @@ RequestViewController = BaseViewController.extend( {
 		}
 	},
 
-	openEditView: function() {
+	onFormItemChange: function( target, doNotValidate ) {
+		var $this = this;
+		this.setIsChanged( target );
+		this.setMassEditingFieldsWhenFormChange( target );
+		var key = target.getField();
+		var c_value = target.getValue();
+		this.current_edit_record[key] = c_value;
 
-		this.initEditViewUI( this.viewId, this.edit_view_tpl );
+		switch ( key ) {
+			case 'job_id':
+				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
+					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id' );
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
+				}
+				break;
+			case 'job_item_id':
+				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
+				}
+				break;
+			case 'job_quick_search':
+			case 'job_item_quick_search':
+				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					this.onJobQuickSearch( key, c_value,'job_id','job_item_id' )
+				}
+				break;
+			case 'type_id':
+				doNotValidate = true;
+				this.onTypeChanged();
+				break;
 
+			case 'date_stamp':
+				this.onDateStampChanged();
+				break;
+			case 'status_id':
+				this.onWorkingStatusChanged();
+				break;
+			case 'start_date':
+				$this.onStartDateChanged();
+				$this.onAvailableBalanceChange();
+				$this.setRequestFormDefaultData();
+				$this.current_edit_record.start_date = $this.edit_view_ui_dic.start_date.getValue();
+				$this.current_edit_record.date_stamp = $this.edit_view_ui_dic.start_date.getValue();
+				break;
+			case 'end_date':
+				$this.onAvailableBalanceChange();
+				$this.setRequestFormDefaultData();
+				$this.current_edit_record.end_date = $this.edit_view_ui_dic.end_date.getValue();
+				break;
+			case 'start_time':
+			case 'end_time':
+			case 'sun':
+			case 'tue':
+			case 'wed':
+			case 'thu':
+			case 'fri':
+			case 'sat':
+				$this.getScheduleTotalTime();
+				break
+			case'absence_policy_id':
+				$this.onAvailableBalanceChange();
+				break
+
+		}
+
+		if ( key === 'date_stamp' ||
+			key === 'start_date_stamps' ||
+			key === 'start_date_stamp' ||
+			key === 'start_time' ||
+			key === 'end_time' ||
+			key === 'schedule_policy_id' ||
+			key === 'absence_policy_id' ) {
+
+			if ( this.current_edit_record['date_stamp'] !== '' &&
+				this.current_edit_record['start_time'] !== '' &&
+				this.current_edit_record['end_time'] !== '' ) {
+
+				var startTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['start_time'];
+				var endTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['end_time'];
+				var schedulePolicyId = this.current_edit_record['schedule_policy_id'];
+				var user_id = this.current_edit_record.user_id;
+
+				this.api_schedule.getScheduleTotalTime( startTime, endTime, schedulePolicyId, user_id, {
+					onResult: function( total_time ) {
+						//Uncaught TypeError: Cannot set property 'total_time' of null
+						//Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=Schedule&date=20160202&mode=week&a=new&tab=Schedule line 1799
+						if ( !$this.edit_view || !$this.current_edit_record || !$this.edit_view_ui_dic['total_time'] ) {
+							return;
+						}
+
+						//Fixed exception that total_time is null
+						if ( total_time ) {
+							total_time = total_time.getResult();
+						} else {
+							total_time = $this.current_edit_record.total_time ? $this.current_edit_record.total_time : 0;
+						}
+
+						$this.current_edit_record.total_time = total_time;
+						total_time = Global.secondToHHMMSS( total_time );
+						$this.edit_view_ui_dic['total_time'].setValue( total_time );
+
+						$this.onAvailableBalanceChange();
+
+					}
+				} );
+			} else {
+				this.onAvailableBalanceChange();
+			}
+
+		}
+
+		if ( !doNotValidate ) {
+			this.validate();
+		}
+		this.setEditMenu();
 
 	},
 
-	initEditViewUI: function( view_id, edit_view_file_name ) {
-
+	validate: function() {
 		var $this = this;
-
-		if ( this.edit_view ) {
-			this.edit_view.remove();
+		var record = this.current_edit_record;
+		record = this.uniformVariable( record );
+		var api = this.message_control_api;
+		if(this.is_add){
+			record = this.buildDataForAPI(record);
+			api = this.api;
 		}
 
-		this.edit_view = $( Global.loadViewSource( view_id, edit_view_file_name, null, true ) );
-
-		this.edit_view_tab = $( this.edit_view.find( '.edit-view-tab-bar' ) );
-
-		//Give edt view tab a id, so we can load it when put right click menu on it
-		this.edit_view_tab.attr( 'id', this.ui_id + '_edit_view_tab' );
-
-		this.setTabOVisibility( false );
-
-		this.edit_view_tab = this.edit_view_tab.tabs( {
-			show: function( e, ui ) {
-
-				if ( !$this.edit_view_tab || !$this.edit_view_tab.is( ':visible' ) ) {
-					return;
-				}
-
-				$this.onTabShow( e, ui )
+		api['validate' + api.key_name](record, {
+			onResult: function (result) {
+				$this.validateResult(result);
 			}
-		} );
+		});
 
-		this.edit_view_tab.bind( 'tabsselect', function( e, ui ) {
-			$this.onTabIndexChange( e, ui )
-		} );
+	},
 
-		Global.contentContainer().append( this.edit_view );
-		this.initRightClickMenu( RightClickMenuType.EDITVIEW );
-
-		if ( this.is_add ) {
-			this.buildAddViewUI();
-		} else if ( this.is_viewing ) {
-			this.buildViewUI();
-		} else if ( this.is_edit ) {
-			this.buildEditViewUI();
+	onAddClick: function(data) {
+		var $this = this;
+		if (this.edit_view) {
+			this.removeEditView();
 		}
+		this.setCurrentEditViewState( 'new' );
+		this.openEditView();
+		this.buildAddViewUI();
+		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
+		if ( $this.api && typeof $this.api['get' + $this.api.key_name + 'DefaultData'] === 'function' ) {
+			$this.api['get' + $this.api.key_name + 'DefaultData']({
+				onResult: function( result ) {
+					if (data) {
+						//data passed should overwrite the default data from the API.
+						result = $.extend({}, result.getResult(), data);
+					}
+					$this.onAddResult( result );
+					$this.onDateStampChanged();
+					if(result.type_id) {
+						$this.onTypeChanged();
+					}
+					$this.getScheduleTotalTime();
+				}
+			} );
+		}
+	},
 
-		$this.setEditViewTabHeight();
-	}
+	//To be called only by external scripts creating requests (timesheet and schedule at this time)
+	openAddView: function(data_array){
+		this.sub_view_mode = true;
+		this.edit_only_mode = true;
+		var $this = this;
+		this.initOptions( function(){
+			$this.onAddClick(data_array);
+		});
+	},
 
 } );
-
-RequestViewController.loadView = function() {
-
-	Global.loadViewSource( 'Request', 'RequestView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

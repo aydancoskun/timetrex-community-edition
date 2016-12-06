@@ -253,7 +253,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		return $this;
 	}
 
-	function getByPhonePunchDataByCompanyIdAndStartDateAndEndDate($company_id, $start_date, $end_date ) { //$where = NULL, $order = NULL
+	function getByPhonePunchDataByCompanyIdAndStartDateAndEndDate($company_id, $start_date, $end_date ) {
 		if ( $company_id == '') {
 			return FALSE;
 		}
@@ -394,12 +394,13 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 
 		//Need to support table_name -> object_id pairs for including log entires from different tables/objects.
 		if ( isset( $filter_data['table_name_object_id'] ) AND is_array($filter_data['table_name_object_id']) AND count($filter_data['table_name_object_id']) > 0 ) {
+			$sub_query = array();
 			foreach( $filter_data['table_name_object_id'] as $table_name => $object_id ) {
 				$ph[] = strtolower(trim($table_name));
 				$sub_query[] =	'(a.table_name = ? AND a.object_id in ('. $this->getListSQL($object_id, $ph, 'int') .') )';
 			}
 
-			if ( isset($sub_query) ) {
+			if ( empty($sub_query) == FALSE ) {
 				$query .= ' AND ( '. implode(' OR ', $sub_query ) .' ) ';
 			}
 			unset($table_name, $object_id, $sub_query);

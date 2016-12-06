@@ -111,6 +111,7 @@ class APIRecurringScheduleControl extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 
@@ -123,6 +124,17 @@ class APIRecurringScheduleControl extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * Export data to csv
+	 * @param array $data filter data
+	 * @param string $format file format (csv)
+	 * @return array
+	 */
+	function exportRecurringScheduleControl( $format = 'csv', $data = NULL, $disable_paging = TRUE, $expanded_mode = TRUE ) {
+		$result = $this->stripReturnHandler( $this->getRecurringScheduleControl( $data, $disable_paging, $expanded_mode ) );
+		return $this->exportRecords( $format, 'export_recurring_schedule', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -247,7 +259,6 @@ class APIRecurringScheduleControl extends APIFactory {
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
 				}
-
 
 				$lf->CommitTransaction();
 
@@ -405,6 +416,7 @@ class APIRecurringScheduleControl extends APIFactory {
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id'] ); //Clear fields that can't be copied
 			}
+			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $this->setRecurringScheduleControl( $src_rows ); //Save copied rows

@@ -45,4 +45,9 @@ var APIUserPreference = ServiceCaller.extend( {
 
 	},
 
+	exportUserPreference: function() {
+		return this.argumentsHandler( this.className, 'exportUserPreference', arguments );
+
+	},
+
 } );

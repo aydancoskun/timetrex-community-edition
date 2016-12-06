@@ -100,6 +100,7 @@ class APIExceptionPolicyControl extends APIFactory {
 		if ( $blf->getRecordCount() > 0 ) {
 			$this->setPagerObject( $blf );
 
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 			}
@@ -108,6 +109,17 @@ class APIExceptionPolicyControl extends APIFactory {
 		}
 
 		return $this->returnHandler( TRUE ); //No records returned.
+	}
+
+	/**
+	 * @param string $format
+	 * @param null $data
+	 * @param bool $disable_paging
+	 * @return array|bool
+	 */
+	function exportExceptionPolicyControl( $format = 'csv', $data = NULL, $disable_paging = TRUE) {
+		$result = $this->stripReturnHandler( $this->getExceptionPolicyControl( $data, $disable_paging ) );
+		return $this->exportRecords( $format, 'export_exception_policy', $result, ( ( isset($data['filter_columns']) ) ? $data['filter_columns'] : NULL ) );
 	}
 
 	/**
@@ -336,6 +348,7 @@ class APIExceptionPolicyControl extends APIFactory {
 		$src_rows = $this->stripReturnHandler( $this->getExceptionPolicyControl( array('filter_data' => array('id' => $data) ), TRUE ) );
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
+			$original_ids = array();
 			foreach( $src_rows as $key => $row ) {
 				$original_ids[$key] = $src_rows[$key]['id'];
 				unset($src_rows[$key]['id']); //Clear fields that can't be copied
@@ -346,7 +359,7 @@ class APIExceptionPolicyControl extends APIFactory {
 			$retval = $this->stripReturnHandler( $this->setExceptionPolicyControl( $src_rows ) ); //Save copied rows
 
 			//Now we need to loop through the result set, and copy the milestones as well.
-			if ( isset($original_ids) ) {
+			if ( empty($original_ids) == FALSE ) {
 				Debug::Arr($original_ids, ' Original IDs: ', __FILE__, __LINE__, __METHOD__, 10);
 
 				foreach( $original_ids as $key => $original_id ) {

@@ -156,8 +156,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		}
 
-
-
 		if ( view_id !== 'PortalLogin' && !LocalCacheData.getLoginUser() ) {
 			Global.setURLToBrowser( Global.getBaseURL() + '#!m=PortalLogin' );
 			return;
@@ -371,7 +369,7 @@ IndexViewController = Backbone.View.extend( {
 	el: 'body', //So we can add event listener for all elements
 	router: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 		this.router = new ApplicationRouter();
 
 		//Set title in index.php instead.
@@ -485,7 +483,7 @@ IndexViewController.openReport = function( parent_view_controller, view_name, id
 IndexViewController.openEditView = function( parent_view_controller, view_name, id ) {
 	var view_controller = null;
 
-	if ( !PermissionManager.checkTopLevelPermission( view_name ) ) {
+	if ( !PermissionManager.checkTopLevelPermission( view_name ) && view_name !== 'map' ) {
 		TAlertManager.showAlert( 'Permission denied' );
 		return;
 	}

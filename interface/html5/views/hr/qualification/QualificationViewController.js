@@ -8,8 +8,8 @@ QualificationViewController = BaseViewController.extend( {
 
 	document_object_type_id: null,
 
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'QualificationEditView.html';
 		this.permission_id = 'qualification';
 		this.viewId = 'Qualification';
@@ -307,15 +307,3 @@ QualificationViewController = BaseViewController.extend( {
 
 
 } );
-
-QualificationViewController.loadView = function() {
-
-	Global.loadViewSource( 'Qualification', 'QualificationView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} );
-
-};

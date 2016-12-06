@@ -158,9 +158,14 @@ class PayCodeFactory extends Factory {
 	}
 
 	function isUniqueName($name) {
+		$name = trim($name);
+		if ( $name == '' ) {
+			return FALSE;
+		}
+
 		$ph = array(
 					'company_id' => (int)$this->getCompany(),
-					'name' => strtolower($name),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .' where company_id = ? AND lower(name) = ? AND deleted=0';
@@ -273,7 +278,7 @@ class PayCodeFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function isPaid() {
 		if ( $this->getType() == 10 OR $this->getType() == 12 ) {
 			return TRUE;
@@ -406,6 +411,13 @@ class PayCodeFactory extends Factory {
 											TTi18n::gettext('This pay code is currently in use')  .' '. TTi18n::gettext('by break policies') );
 			}
 
+			$csplf = TTNew('ContributingPayCodePolicyListFactory');
+			$csplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
+			if ( $csplf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE(	'in_use',
+											 FALSE,
+											 TTi18n::gettext('This pay code is currently in use')  .' '. TTi18n::gettext('by contributing shift policies') );
+			}
 		} else {
 			if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
 				if ( $this->getName() === FALSE ) {
@@ -550,6 +562,7 @@ class PayCodeFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

@@ -39,15 +39,25 @@ require_once('../includes/global.inc.php');
 require_once('PEAR.php');
 require_once('HTTP/Download.php');
 
-extract	(FormVariables::GetVariables(
-										array	(
-												'action',
-												'api', //Called from Flex
-												'object_type',
-												'parent_object_type_id',
-												'object_id',
-												'parent_id',
-												) ) );
+extract        (FormVariables::GetVariables(
+                                                                               array   (
+                                                                                               'action',
+                                                                                               'api', //Called from Flex
+                                                                                               'object_type',
+                                                                                               'parent_object_type_id',
+                                                                                               'object_id',
+                                                                                               'parent_id',
+                                                                                               ) ) );
+
+//sendFormIFrameCall (js) passes json data
+//Make sure we accept it here GovernmentDocument uses this
+if ( isset($_POST['json']) AND $_POST['json'] != '' ) {
+	$json_arguments = json_decode( $_POST['json'], TRUE );
+	if ( isset($json_arguments['object_id']) ) {
+		Debug::Text('JSON overriding object_id...', __FILE__, __LINE__, __METHOD__, 10);
+		$object_id = $json_arguments['object_id'];
+	}
+}
 
 if ( isset($api) AND $api == TRUE ) {
 	require_once('../includes/API.inc.php');
@@ -154,7 +164,7 @@ switch ($object_type) {
 				Debug::Text('File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 				if ( file_exists($file_name) ) {
 					$rl->delete(); //Clear download rate limit upon successful download.
-					
+
 					$params['file'] = $file_name;
 					$params['ContentType'] = 'image/png';
 					$params['ContentDisposition'] = array( HTTP_DOWNLOAD_ATTACHMENT, 'signature.png' );
@@ -245,6 +255,63 @@ switch ($object_type) {
 				} else {
 					Debug::text('bPhoto Downloads Failed! Attempt: '. $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
 					sleep( ($rl->getAttempts() * 0.5) );
+				}
+			}
+		}
+		break;
+	case 'government_document':
+		Debug::Text('Government Document...', __FILE__, __LINE__, __METHOD__, 10);
+		//RateLimit failed download attempts to prevent brute force.
+		$rl = TTNew('RateLimit');
+		$rl->setID( 'document_'. Misc::getRemoteIPAddress() );
+		$rl->setAllowedCalls( 25 );
+		$rl->setTimeFrame( 900 ); //15 minutes
+		if ( $rl->check() == FALSE ) {
+			Debug::Text('Excessive document download attempts... Preventing downloads from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
+			sleep(5); //Excessive download attempts, sleep longer.
+		} else {
+			if ( $permission->Check( 'government_document', 'view' )
+					OR $permission->Check( 'government_document', 'view_own' )
+					OR $permission->Check( 'government_document', 'view_child' ) ) {
+
+				/** @var APIGovernmentDocument $api_f */
+				$api_f = TTNew( 'APIGovernmentDocument' );
+				$result = $api_f->stripReturnHandler( $api_f->getGovernmentDocument( array('filter_data' => array('id' => $object_id)) ) );
+
+				if ( isset( $result ) AND is_array($result)  AND count( $result ) > 0 ) {
+					$rl->delete(); //Clear download rate limit upon successful download.
+
+					$files = array();
+					foreach ( $result as $doc ) {
+						/** @var GovernmentDocumentFactory $gf */
+						$gf = TTnew( 'GovernmentDocumentFactory' );
+						$file_name = $gf->getFileName( $current_company->getId(), $doc['type_id'], $doc['user_id'], $doc['id'] );
+						if ( $file_name != '' AND file_exists( $file_name ) ) {
+							$file = array();
+							$file['file_name'] = $doc['type'] . '_' . TTDate::getYear( TTDate::parseDateTime( $doc['date'] ) ) . '_' . $gf->Validator->stripNonAlphaNumeric( $doc['last_name'] ) . '_' . $gf->Validator->stripNonAlphaNumeric( $doc['first_name'] ) . '.pdf';
+							$file['data'] = file_get_contents( $file_name );
+							$file['mime_type'] = 'application/pdf';
+							$files[] = $file;
+						}
+					}
+
+					if ( count($files) > 0 ) {
+						$zip_file = Misc::zip( $files, FALSE, TRUE );
+
+						$zip_file_name = 'government_documents.zip';
+						if ( count( $files ) == 1 ) {
+							$zip_file_name = $zip_file['file_name'];
+						}
+						Misc::APIFileDownload( $zip_file_name, $zip_file['mime_type'], $zip_file['data'] );
+					} else {
+						Debug::text( 'ERROR: No file to download! File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+					}
+
+					Debug::writeToLog();
+					die();
+				} else {
+					Debug::text( 'bDocument Downloads Failed! Attempt: ' . $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10 );
+					sleep( ( $rl->getAttempts() * 0.5 ) );
 				}
 			}
 		}

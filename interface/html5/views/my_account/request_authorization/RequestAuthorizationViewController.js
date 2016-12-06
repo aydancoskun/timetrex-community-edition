@@ -1,4 +1,4 @@
-RequestAuthorizationViewController = BaseViewController.extend( {
+RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	el: '#request_authorization_view_container',
 
 	type_array: null,
@@ -6,17 +6,19 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 	messages: null,
 
-	message_control_api: null,
-
 	authorization_api: null,
+	api_request: null,
+	api_absence_policy: null,
 
 	authorization_history_columns: [],
 
 	authorization_history_default_display_columns: [],
 
 	authorization_history_grid: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	pre_request_schedule: true,
+
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'RequestAuthorizationEditView.html';
 		this.permission_id = 'request';
 		this.viewId = 'RequestAuthorization';
@@ -25,8 +27,14 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		this.context_menu_name = $.i18n._( 'Request (Authorizations)' );
 		this.navigation_label = $.i18n._( 'Requests' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIRequest' ))();
-		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
 		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
+		this.api_request = new (APIFactory.getAPIClass( 'APIRequest' ))();
+		this.api_absence_policy = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
+			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+		}
+		this.message_control_api = new (APIFactory.getAPIClass('APIMessageControl'))();
 
 		this.invisible_context_menu_dic[ContextMenuIconName.add] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
@@ -39,12 +47,13 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
 
+		this.initPermission();
 		this.render();
+
 		this.buildContextMenu( true );
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-
 	},
 
 	initOptions: function() {
@@ -52,30 +61,66 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 		this.initDropDownOption( 'type' );
 		var res = this.api.getHierarchyLevelOptions( [-1], {async: false} );
-			var data = res.getResult();
-			$this['hierarchy_level_array'] = Global.buildRecordArray( data );
-			if ( Global.isSet( $this.basic_search_field_ui_dic['hierarchy_level'] ) ) {
-				$this.basic_search_field_ui_dic['hierarchy_level'].setSourceData( Global.buildRecordArray( data ) );
-			}
-
+		var data = res.getResult();
+		$this['hierarchy_level_array'] = Global.buildRecordArray( data );
+		if ( Global.isSet( $this.basic_search_field_ui_dic['hierarchy_level'] ) ) {
+			$this.basic_search_field_ui_dic['hierarchy_level'].setSourceData( Global.buildRecordArray( data ) );
+		}
 	},
 
-	setGridCellBackGround: function() {
+	initPermission: function(){
+		this._super( 'initPermission' );
 
-		var data = this.grid.getGridParam( 'data' );
-
-		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
-		if ( !data ) {
-			return;
+		if ( this.jobUIValidate() ) {
+			this.show_job_ui = true;
+		} else {
+			this.show_job_ui = false;
 		}
 
-		var len = data.length;
+		if ( this.jobItemUIValidate() ) {
+			this.show_job_item_ui = true;
+		} else {
+			this.show_job_item_ui = false;
+		}
 
-		for ( var i = 0; i < len; i++ ) {
-			var item = data[i];
+		if ( this.branchUIValidate() ) {
+			this.show_branch_ui = true;
+		} else {
+			this.show_branch_ui = false;
+		}
 
-			if ( item.status_id === 30 ) {
-				$( "tr[id='" + item.id + "']" ).addClass( 'bolder-request' );
+		if ( this.departmentUIValidate() ) {
+			this.show_department_ui = true;
+		} else {
+			this.show_department_ui = false;
+		}
+
+		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
+		var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
+			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( {async: false} ).getResult();
+		}
+
+		if ( !result ) {
+			this.show_branch_ui = false;
+			this.show_department_ui = false;
+			this.show_job_ui = false;
+			this.show_job_item_ui = false;
+		} else {
+			if ( !result.branch ) {
+				this.show_branch_ui = false;
+			}
+
+			if ( !result.department ) {
+				this.show_department_ui = false;
+			}
+
+			if ( !result.job ) {
+				this.show_job_ui = false;
+			}
+
+			if ( !result.job_item ) {
+				this.show_job_item_ui = false;
 			}
 		}
 	},
@@ -114,6 +159,13 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		var navigation_group = new RibbonSubMenuGroup( {
 			label: $.i18n._( 'Navigation' ),
 			id: this.viewId + 'navigation',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+
+		var other_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Other' ),
+			id: this.viewId + 'other',
 			ribbon_menu: menu,
 			sub_menus: []
 		} );
@@ -237,6 +289,16 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: other_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
@@ -307,6 +369,9 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 				case ContextMenuIconName.authorization_expense:
 					this.setDefaultMenuAuthorizationExpenseIcon( context_btn, grid_selected_length );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn );
+					break;
 
 			}
 
@@ -337,7 +402,7 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			/* jshint ignore:start */
 			switch ( id ) {
 				case ContextMenuIconName.edit:
-					this.setEditMenuEditIcon( context_btn );
+					this.setEditMenuEditIcon( context_btn, 'request' );
 					break;
 				case ContextMenuIconName.view:
 					this.setEditMenuViewIcon( context_btn );
@@ -374,11 +439,12 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 				case ContextMenuIconName.authorization_expense:
 					this.setEditMenuAuthorizationExpenseIcon( context_btn );
 					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn );
+					break;
 
 			}
-
 			/* jshint ignore:end */
-
 		}
 
 		this.setContextMenuGroupVisibility();
@@ -453,154 +519,21 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			case ContextMenuIconName.timesheet:
 			case ContextMenuIconName.schedule:
 			case ContextMenuIconName.edit_employee:
+			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
 
 		}
 		/* jshint ignore:end */
 	},
-	onAuthorizationExpenseClick: function() {
-		IndexViewController.goToView( 'ExpenseAuthorization' );
+
+	onViewclick: function(){
+		this._super('onViewclick');
+		AuthorizationHistory.init(this);
 	},
 
-	onNavigationClick: function( iconName ) {
-
-		var $this = this;
-		var filter;
-		var temp_filter;
-		var grid_selected_id_array;
-		var grid_selected_length;
-
-		var selectedId;
-		/* jshint ignore:start */
-		switch ( iconName ) {
-			case ContextMenuIconName.timesheet:
-				filter = {filter_data: {}};
-				if ( Global.isSet( this.current_edit_record ) ) {
-
-					filter.user_id = this.current_edit_record.user_id ? this.current_edit_record.user_id : LocalCacheData.loginUser.id;
-					filter.base_date = this.current_edit_record.date_stamp;
-
-					Global.addViewTab( $this.viewId, 'Authorization - Request', window.location.href );
-					IndexViewController.goToView( 'TimeSheet', filter );
-
-				} else {
-					temp_filter = {};
-					grid_selected_id_array = this.getGridSelectIdArray();
-					grid_selected_length = grid_selected_id_array.length;
-
-					if ( grid_selected_length > 0 ) {
-						selectedId = grid_selected_id_array[0];
-
-						temp_filter.filter_data = {};
-						temp_filter.filter_columns = {user_id: true, date_stamp: true};
-						temp_filter.filter_data.id = [selectedId];
-
-						this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-							var result_data = result.getResult();
-
-							if ( !result_data ) {
-								result_data = [];
-							}
-
-							result_data = result_data[0];
-
-							filter.user_id = result_data.user_id;
-							filter.base_date = result_data.date_stamp;
-							Global.addViewTab( $this.viewId, 'Authorization - Request', window.location.href );
-							IndexViewController.goToView( 'TimeSheet', filter );
-
-						}} );
-					}
-
-				}
-
-				break;
-
-			case ContextMenuIconName.edit_employee:
-				filter = {filter_data: {}};
-				if ( Global.isSet( this.current_edit_record ) ) {
-					IndexViewController.openEditView( this, 'Employee', this.current_edit_record.user_id ? this.current_edit_record.user_id : LocalCacheData.loginUser.id );
-				} else {
-					temp_filter = {};
-					grid_selected_id_array = this.getGridSelectIdArray();
-					grid_selected_length = grid_selected_id_array.length;
-
-					if ( grid_selected_length > 0 ) {
-						selectedId = grid_selected_id_array[0];
-
-						temp_filter.filter_data = {};
-						temp_filter.filter_columns = {user_id: true};
-						temp_filter.filter_data.id = [selectedId];
-
-						this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-							var result_data = result.getResult();
-
-							if ( !result_data ) {
-								result_data = [];
-							}
-
-							result_data = result_data[0];
-
-							IndexViewController.openEditView( $this, 'Employee', result_data.user_id );
-
-						}} );
-					}
-
-				}
-				break;
-			case ContextMenuIconName.schedule:
-
-				filter = {filter_data: {}};
-
-				var include_users = null;
-
-				if ( Global.isSet( this.current_edit_record ) ) {
-
-					include_users = [this.current_edit_record.user_id ? this.current_edit_record.user_id : LocalCacheData.loginUser.id];
-					filter.filter_data.include_user_ids = {value: include_users };
-					filter.select_date = this.current_edit_record.date_stamp;
-
-					Global.addViewTab( $this.viewId, 'Authorization - Request', window.location.href );
-					IndexViewController.goToView( 'Schedule', filter );
-
-				} else {
-					temp_filter = {};
-					grid_selected_id_array = this.getGridSelectIdArray();
-					grid_selected_length = grid_selected_id_array.length;
-
-					if ( grid_selected_length > 0 ) {
-						selectedId = grid_selected_id_array[0];
-
-						temp_filter.filter_data = {};
-						temp_filter.filter_columns = {user_id: true, date_stamp: true};
-						temp_filter.filter_data.id = [selectedId];
-
-						this.api['get' + this.api.key_name]( temp_filter, {onResult: function( result ) {
-							var result_data = result.getResult();
-
-							if ( !result_data ) {
-								result_data = [];
-							}
-
-							result_data = result_data[0];
-
-							include_users = [result_data.user_id];
-
-							filter.filter_data.include_user_ids = include_users;
-							filter.select_date = result_data.date_stamp;
-
-							Global.addViewTab( $this.viewId, 'Authorization - Request', window.location.href );
-							IndexViewController.goToView( 'Schedule', filter );
-
-						}} );
-					}
-
-				}
-				break;
-		}
-
-		/* jshint ignore:end */
+	onAuthorizationExpenseClick: function() {
+		IndexViewController.goToView( 'ExpenseAuthorization' );
 	},
 
 	onSaveClick: function( ignoreWarning ) {
@@ -617,18 +550,17 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 			record = this.uniformVariable( record );
 
-			this.message_control_api['setMessageControl']( record, false, ignoreWarning, {onResult: function( result ) {
-
-				if ( result.isValid() ) {
-					$this.onViewClick( $this.current_edit_record.id );
+			EmbeddedMessage.reply( record, ignoreWarning, function(result) {
+				if (result.isValid()) {
+					var id = $this.current_edit_record.id;
+					$this.onViewClick(id, true);
+					//$this.initAuthorizationHistoryLayout();
 				} else {
-					$this.setErrorTips( result );
+					$this.setErrorTips(result);
 					$this.setErrorMenu();
 				}
-
-			}} );
+			});
 		}
-
 	},
 
 	onAuthorizationClick: function() {
@@ -639,33 +571,66 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			return;
 		}
 
-		var filter = {};
-		filter.authorized = true;
-		filter.object_id = $this.current_edit_record.id;
-		filter.object_type_id = $this.current_edit_record.hierarchy_type_id;
+		var request_data;
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) {
+			request_data = $this.buildDataForAPI( this.current_edit_record );
+		} else {
+			request_data = this.getSelectedItem();
+		}
 
-		$this.authorization_api['setAuthorization']( [filter], {onResult: function( res ) {
-			$this.search( null, null, null, function( result ) {
-				if ( $.type( result.getResult() ) !== 'array' || result.getResult().length < 1 ) {
-					$this.onCancelClick();
+		$this.api_request['setRequest'](request_data,{
+			onResult: function(res){
+				if ( res.getResult() != false ) {
+					var filter = {};
+					filter.authorized = true;
+					filter.object_id = $this.current_edit_record.id;
+					filter.object_type_id = $this.current_edit_record.hierarchy_type_id;
+
+					$this.authorization_api['setAuthorization']( [filter], {onResult: function( result ) {
+						var retval = result.getResult();
+						if ( retval != false ) {
+							$this.search(null, null, null, function (return_value) {
+								return_value = return_value.getResult();
+								if ( $.type(return_value) !== 'array' || return_value.length < 1 ) {
+									$this.onCancelClick(true);
+								} else {
+									$this.onRightArrowClick();
+								}
+							});
+						} else {
+							$this.setErrorMenu();
+							$this.setErrorTips(result, true);
+						}
+					}} );
 				} else {
-					$this.onRightArrowClick();
+					$this.setErrorMenu();
+					$this.setErrorTips(res, true);
 				}
+			},
+		});
 
-			} );
 
-		}} );
 
 	},
 
 	onPassClick: function() {
-
-		if ( this.grid.getGridParam( 'data' ).length === 1 ) {
-			this.onCancelClick()
-		} else {
-			this.onRightArrowClick();
+		var $this = this;
+		function doNext() {
+			if ($this.grid.getGridParam('data').length === 1) {
+				$this.onCancelClick(true)
+			} else {
+				$this.onRightArrowClick();
+			}
 		}
-
+		if ( this.is_changed ) {
+			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
+				if (flag === true) {
+					doNext();
+				}
+			});
+		} else {
+			doNext();
+		}
 	},
 
 	onAuthorizationRequestClick: function() {
@@ -673,25 +638,35 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	onDeclineClick: function() {
-
 		var $this = this;
-		var filter = {};
+		function doNext(){
+			var filter = {};
 
-		filter.authorized = false;
-		filter.object_id = $this.current_edit_record.id;
-		filter.object_type_id = $this.current_edit_record.hierarchy_type_id;
+			filter.authorized = false;
+			filter.object_id = $this.current_edit_record.id;
+			filter.object_type_id = $this.current_edit_record.hierarchy_type_id;
 
-		$this.authorization_api['setAuthorization']( [filter], {onResult: function( res ) {
-			$this.search( null, null, null, function( result ) {
-				if ( $.type( result.getResult() ) !== 'array' || result.getResult().length < 1 ) {
-					$this.onCancelClick();
-				} else {
-					$this.onRightArrowClick();
+			$this.authorization_api['setAuthorization']([filter], {
+				onResult: function (res) {
+					$this.search(null, null, null, function (result) {
+						if ($.type(result.getResult()) !== 'array' || result.getResult().length < 1) {
+							$this.onCancelClick(true);
+						} else {
+							$this.onRightArrowClick();
+						}
+					});
 				}
-
-			} );
-
-		}} );
+			});
+		}
+		if ( this.is_changed ) {
+			TAlertManager.showConfirmAlert(Global.modify_alert_message, null, function (flag) {
+				if (flag === true) {
+					doNext();
+				}
+			});
+		} else {
+			doNext();
+		}
 	},
 
 	onAuthorizationTimesheetClick: function() {
@@ -767,42 +742,6 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			$this.setErrorTips( result );
 
 		}
-	},
-
-	onCancelClick: function( force, cancel_all ) {
-
-		var $this = this;
-		LocalCacheData.current_doing_context_action = 'cancel';
-		if ( this.is_changed && !force ) {
-			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
-
-				if ( flag === true ) {
-					doNext();
-				}
-
-			} );
-		} else {
-			doNext();
-		}
-
-		function doNext() {
-			if ( !$this.edit_view && $this.parent_view_controller && $this.sub_view_mode ) {
-				$this.parent_view_controller.is_changed = false;
-				$this.parent_view_controller.buildContextMenu( true );
-				$this.parent_view_controller.onCancelClick();
-
-			} else {
-				//Error: Uncaught TypeError: Cannot read property 'id' of null in interface/html5/#!m=TimeSheet&date=null&user_id=null&show_wage=0 line 797
-				if ( $this.is_edit && $this.current_edit_record ) {
-					$this.onViewClick( $this.current_edit_record.id );
-				} else {
-					$this.removeEditView();
-				}
-
-			}
-
-		}
-
 	},
 
 	setEditMenuAuthorizationIcon: function( context_btn, pId ) {
@@ -955,22 +894,128 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 		];
 	},
 
-	openEditView: function() {
+	onFormItemChange: function( target, doNotValidate ) {
+		var $this = this;
+		this.setIsChanged( target );
+		this.setMassEditingFieldsWhenFormChange( target );
+		var key = target.getField();
+		var c_value = target.getValue();
+		this.current_edit_record[key] = c_value;
+		switch ( key ) {
+			case 'job_id':
+				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
+					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id'  );
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
+				}
+				break;
+			case 'job_item_id':
+				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
+				}
+				break;
+			case 'job_quick_search':
+			case 'job_item_quick_search':
+				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					this.onJobQuickSearch( key, c_value,'job_id','job_item_id' )
+				}
+				break;
+			case 'type_id':
+				this.onTypeChanged();
+				break;
 
-		this.initEditViewUI( this.viewId, this.edit_view_tpl );
+			case 'date_stamp':
+				this.onDateStampChanged();
+				break;
+			case 'status_id':
+				this.onWorkingStatusChanged();
+				this.onAvailableBalanceChange();
+				break;
+			case 'start_date':
+				$this.getScheduleTotalTime()
+				$this.onStartDateChanged();
+				$this.current_edit_record.start_date = $this.edit_view_ui_dic.start_date.getValue();
+				$this.current_edit_record.date_stamp = $this.edit_view_ui_dic.start_date.getValue();
+				if ( $this.edit_view_ui_dic.date_stamp ) {
+					$this.edit_view_ui_dic.date_stamp.setValue($this.edit_view_ui_dic.start_date.getValue());
+				}
+				break;
+			case 'end_date':
+				$this.getScheduleTotalTime()
+				$this.current_edit_record.end_date = $this.edit_view_ui_dic.end_date.getValue();
+				break;
+			case 'sun':
+			case 'tue':
+			case 'wed':
+			case 'thu':
+			case 'fri':
+			case 'sat':
+			case 'start_time':
+			case 'end_time':
+			case 'schedule_policy_id':
+				$this.getScheduleTotalTime();
+				break
+			case'absence_policy_id':
+				this.onAvailableBalanceChange();
+				break
+		}
 
+		if ( key === 'date_stamp' ||
+			key === 'start_date_stamps' ||
+			key === 'start_date_stamp' ||
+			key === 'start_time' ||
+			key === 'end_time' ||
+			key === 'schedule_policy_id' ||
+			key === 'absence_policy_id' ) {
+
+			if ( this.current_edit_record['date_stamp'] !== '' &&
+				this.current_edit_record['start_time'] !== '' &&
+				this.current_edit_record['end_time'] !== '' ) {
+
+				var startTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['start_time'];
+				var endTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['end_time'];
+				var schedulePolicyId = this.current_edit_record['schedule_policy_id'];
+				var user_id = this.current_edit_record.user_id;
+
+				this.getScheduleTotalTime();
+
+			} else {
+				this.onAvailableBalanceChange();
+			}
+
+		}
+
+		if ( !doNotValidate ) {
+			this.validate();
+		}
 
 	},
 
-	onEditClick: function( editId, noRefreshUI ) {
-		var $this = this;
-		this.is_viewing = false;
-		this.is_edit = true;
-		this.is_add = false;
-		$this.openEditView();
-		LocalCacheData.current_doing_context_action = 'edit';
-		$this.initEditView();
+	//set widget disablebility if view mode or edit mode
+	setEditViewWidgetsMode: function() {
+		var did_clean_dic = {};
+		for ( var key in this.edit_view_ui_dic ) {
+			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
+				continue;
+			}
+			var widget = this.edit_view_ui_dic[key];
+			widget.css( 'opacity', 1 );
+			var column = widget.parent().parent().parent();
+			var tab_id = column.parent().attr( 'id' );
+			if ( !column.hasClass( 'v-box' ) ) {
+				if ( !did_clean_dic[tab_id] ) {
+					did_clean_dic[tab_id] = true;
+				}
+			}
+			if ( Global.isSet( widget.setEnabled ) ) {
+				widget.setEnabled( true );
+			}
+		}
+	},
 
+	onAvailableBalanceChange: function() {
+		this.getAvailableBalance();
 	},
 
 	setURL: function() {
@@ -984,7 +1029,6 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	getSubViewFilter: function( filter ) {
-
 		if ( filter.length === 0 ) {
 			filter = {};
 		}
@@ -1047,183 +1091,26 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 	},
 
-	needShowNavigation: function() {
-		if ( this.is_viewing && this.current_edit_record && Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
-			return true;
-		} else {
-			return false;
-		}
-	},
-
-	buildViewUI: function() {
-		var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
-		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
-		this._super( 'buildEditViewUI' );
-
-		var $this = this;
-
-		this.setTabLabels( {
-			'tab_request': $.i18n._( 'Request' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
-		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRequest' )),
-			id: this.script_name + '_navigation',
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REQUESRT,
-			navigation_mode: true,
-			show_search_inputs: true
-		} );
-
-		this.setNavigation();
-
-		if ( pager_data && source_data ) {
-			this.navigation.setSourceData( source_data );
-			this.navigation.setPagerData( pager_data );
-		}
-
-		//Tab 0 first column start
-
-		var tab_request = this.edit_view_tab.find( '#tab_request' );
-
-		var tab_request_column1 = tab_request.find( '.first-column' );
-
-		this.edit_view_tabs[0] = [];
-
-		this.edit_view_tabs[0].push( tab_request_column1 );
-
-		// Employee
-		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1, '' );
-
-		// Date
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'date_stamp', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1 );
-
-		// Type
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'type', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_request_column1, '' );
-
-		var separate_box = tab_request.find( '.grid-title' );
-
-		// Authorization History
-
-		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Authorization History' )} );
-		form_item_input.attr( 'id', 'authorization_history' );
-		this.addEditFieldToColumn( null, form_item_input, separate_box );
-
-		// tab_request first column end
-
-		separate_box = tab_request.find( '.separate' ).css( 'display', 'none' );
-
-		// Messages
-
-		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Messages' )} );
-		this.addEditFieldToColumn( null, form_item_input, separate_box );
-
-		// Tab 0 second column start
-
-		var tab_request_column2 = tab_request.find( '.second-column' );
-
-		this.edit_view_tabs[0].push( tab_request_column2 );
-
-		// From
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_request_column2, '' );
-
-		// Subject
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject', selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column2 );
-
-		// Body
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body', width: 600, height: 400, selected_able: true} );
-		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column2, '', null, null, true );
-
-		// Tab 0 second column end
-
-		tab_request_column2.css( 'display', 'none' );
-
-	},
-
 	search: function( set_default_menu, page_action, page_number, callBack ) {
 		this.refresh_id = 0;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack )
-	},
-
-	initEditViewUI: function( view_id, edit_view_file_name ) {
-//		if ( this.sub_view_mode ) {
-//			Global.trackView( 'Sub' + this.viewId + '_view' + '_edit_view' );
-//		} else {
-//			Global.trackView( this.viewId + '_view' + '_edit_view' );
-//		}
-
-		var $this = this;
-
-		if ( this.edit_view ) {
-			this.edit_view.remove();
-		}
-
-		this.edit_view = $( Global.loadViewSource( view_id, edit_view_file_name, null, true ) );
-
-		this.edit_view_tab = $( this.edit_view.find( '.edit-view-tab-bar' ) );
-
-		//Give edt view tab a id, so we can load it when put right click menu on it
-		this.edit_view_tab.attr( 'id', this.ui_id + '_edit_view_tab' );
-
-		this.setTabOVisibility( false );
-
-		this.edit_view_tab = this.edit_view_tab.tabs( {show: function( e, ui ) {
-			$this.onTabShow( e, ui );
-		}} );
-
-		this.edit_view_tab.bind( 'tabsselect', function( e, ui ) {
-			$this.onTabIndexChange( e, ui );
-		} );
-
-		Global.contentContainer().append( this.edit_view );
-		this.initRightClickMenu( RightClickMenuType.EDITVIEW );
-
-		if ( this.is_viewing ) {
-			LocalCacheData.current_doing_context_action = 'view';
-			this.buildViewUI();
-		} else if ( this.is_edit ) {
-			LocalCacheData.current_doing_context_action = 'edit';
-			this.buildEditViewUI();
-		}
-
-		$this.setEditViewTabHeight();
+		this._super( 'search', set_default_menu, page_action, page_number, callBack );
 	},
 
 	setCurrentEditRecordData: function() {
-
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
-			if ( !this.current_edit_record.hasOwnProperty( key ) ) {
-				continue;
-			}
 			var widget = this.edit_view_ui_dic[key];
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'full_name':
-						if ( this.is_viewing ) {
 							widget.setValue( this.current_edit_record['first_name'] + ' ' + this.current_edit_record['last_name'] );
-						}
 						break;
 					case 'subject':
+						widget.setValue( this.current_edit_record[key] );
 						if ( this.is_edit ) {
 							widget.setValue( 'Re: ' + this.messages[0].subject );
-						} else if ( this.is_viewing ) {
-							widget.setValue( this.current_edit_record[key] );
 						}
+
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -1232,21 +1119,13 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 			}
 		}
-
 		this.setEditViewDataDone();
-
 	},
 
 	setEditViewDataDone: function() {
 		var $this = this;
 		this._super( 'setEditViewDataDone' );
-
-		if ( this.is_viewing ) {
-
-			this.getAuthorizationHistoryColumns( function() {
-				$this.initAuthorizationHistoryLayout();
-			} );
-		} else {
+		if ( !this.is_viewing ) {
 			if ( Global.isSet( $this.messages ) ) {
 				$this.messages = null;
 			}
@@ -1254,236 +1133,13 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 
 	},
 
-	initAuthorizationHistoryLayout: function() {
-
-		var $this = this;
-
-		$this.getAuthorizationHistoryDefaultDisplayColumns( function() {
-
-			if ( !$this.edit_view ) {
-				return;
-			}
-
-			$this.setAuthorizationHistorySelectLayout();
-
-			$this.initAuthorizationHistoryData();
-		} );
-
-	},
-
-	initAuthorizationHistoryData: function() {
-
-		var $this = this;
-		var filter = {};
-		filter.filter_data = {};
-		filter.filter_columns = this.getFilterColumnsFromDisplayColumns( true );
-
-		filter.filter_data.object_id = [this.current_edit_record.id];
-		filter.filter_data.object_type_id = this.current_edit_record.hierarchy_type_id;
-
-		this.authorization_api['get' + this.authorization_api.key_name]( filter, {onResult: function( result ) {
-
-			if ( !$this.edit_view ) {
-				return;
-			}
-
-			var result_data = result.getResult();
-
-			if ( Global.isArray( result_data ) ) {
-
-				$( $this.edit_view.find( '.grid-div' ) ).css( 'display', 'block' );
-
-				$this.showAuthorizationHistoryGridBorders();
-
-				result_data = Global.formatGridData( result_data, $this.authorization_api.key_name );
-
-				$this.authorization_history_grid.clearGridData();
-
-				$this.authorization_history_grid.setGridParam( {data: result_data} );
-				$this.authorization_history_grid.trigger( 'reloadGrid' );
-			} else {
-				$( $this.edit_view.find( '.grid-div' ) ).css( 'display', 'none' );
-			}
-
-			$this.initEmbeddedMessageData();
-
-		}} );
-
-	},
-
-	setAuthorizationHistorySelectLayout: function( column_start_from ) {
-
-		var $this = this;
-		var grid = this.edit_view.find( '#grid' );
-
-		grid.attr( 'id', 'authorization_history_grid' );  //Grid's id is ScriptName + _grid
-
-		grid = this.edit_view.find( '#authorization_history_grid' );
-
-		var column_info_array = [];
-
-		var display_columns = this.buildAuthorizationDisplayColumns( this.authorization_history_default_display_columns );
-
-		//Set Data Grid on List view
-		var len = display_columns.length;
-
-		for ( var i = 0; i < len; i++ ) {
-			var view_column_data = display_columns[i];
-
-			var column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
-			column_info_array.push( column_info );
-		}
-
-		if ( !this.authorization_history_grid ) {
-			this.authorization_history_grid = grid;
-
-			this.authorization_history_grid = this.authorization_history_grid.jqGrid( {
-				altRows: true,
-				data: [],
-				datatype: 'local',
-				sortable: false,
-				width: this.edit_view.find(".edit-view-tab").width(),
-				height: 25,
-				rowNum: 10000,
-				colNames: [],
-				colModel: column_info_array
-
-			} );
-
-		} else {
-
-			this.authorization_history_grid.jqGrid( 'GridUnload' );
-			this.authorization_history_grid = null;
-
-			grid = this.edit_view.find( '#authorization_history_grid' );
-
-			this.authorization_history_grid = $( grid );
-
-			this.authorization_history_grid = this.authorization_history_grid.jqGrid( {
-				altRows: true,
-				data: [],
-				rowNum: 10000,
-				sortable: false,
-				datatype: 'local',
-				width: this.edit_view.find(".edit-view-tab").width(),
-				height: 25,
-				colNames: [],
-				colModel: column_info_array
-
-			} );
-
-		}
-
-	},
-
-	setAuthorizationGridSize: function() {
-		var history_height_unit;
-		if ( (!this.authorization_history_grid || !this.authorization_history_grid.is( ':visible' )) ) {
-			return;
-		}
-		history_height_unit = this.authorization_history_grid.getGridParam( 'data' ).length;
-		history_height_unit > 5 && (history_height_unit = 5);
-		this.authorization_history_grid.setGridWidth( $( this.edit_view.find( '#authorization_history' ) ).width() );
-		this.authorization_history_grid.setGridHeight( history_height_unit * 25 );
-	},
-
-	getFilterColumnsFromDisplayColumns: function( authorization_history ) {
-		// Error: Unable to get property 'getGridParam' of undefined or null reference
-		var display_columns = [];
-		if ( authorization_history ) {
-			if ( this.authorization_history_grid ) {
-				display_columns = this.authorization_history_grid.getGridParam( 'colModel' );
-			}
-		} else {
-			if ( this.grid ) {
-				display_columns = this.grid.getGridParam( 'colModel' );
-			}
-		}
-		var column_filter = {};
-		column_filter.is_owner = true;
-		column_filter.id = true;
-		column_filter.is_child = true;
-		column_filter.in_use = true;
-		column_filter.first_name = true;
-		column_filter.last_name = true;
-		column_filter.user_id = true;
-		column_filter.status_id = true;
-
-		if ( display_columns ) {
-			var len = display_columns.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var column_info = display_columns[i];
-				column_filter[column_info.name] = true;
-			}
-		}
-
-		return column_filter;
-	},
-
-	buildAuthorizationDisplayColumns: function( apiDisplayColumnsArray ) {
-		var len = this.authorization_history_columns.length;
-		var len1 = apiDisplayColumnsArray.length;
-		var display_columns = [];
-
-		for ( var j = 0; j < len1; j++ ) {
-			for ( var i = 0; i < len; i++ ) {
-				if ( apiDisplayColumnsArray[j] === this.authorization_history_columns[i].value ) {
-					display_columns.push( this.authorization_history_columns[i] );
-				}
-			}
-		}
-		return display_columns;
-
-	},
-
-	showAuthorizationHistoryGridBorders: function() {
-		var top_border = this.edit_view.find( '.grid-top-border' );
-		var bottom_border = this.edit_view.find( '.grid-bottom-border' );
-
-		top_border.css( 'display', 'block' );
-		bottom_border.css( 'display', 'block' );
-	},
-
-	getAuthorizationHistoryDefaultDisplayColumns: function( callBack ) {
-
-		var $this = this;
-		this.authorization_api.getOptions( 'default_display_columns', {onResult: function( columns_result ) {
-			var columns_result_data = columns_result.getResult();
-
-			$this.authorization_history_default_display_columns = columns_result_data;
-
-			if ( callBack ) {
-				callBack();
-			}
-
-		}} );
-
-	},
-
-	getAuthorizationHistoryColumns: function( callBack ) {
-
-		var $this = this;
-		this.authorization_api.getOptions( 'columns', {onResult: function( columns_result ) {
-			var columns_result_data = columns_result.getResult();
-			$this.authorization_history_columns = Global.buildColumnArray( columns_result_data );
-
-			if ( callBack ) {
-				callBack();
-			}
-
-		}} );
-
-	},
-
 	//Make sure this.current_edit_record is updated before validate
 	validate: function() {
-
 		var $this = this;
 
 		var record = {};
 
-		if ( this.is_mass_editing ) {
+		if ( this.is_edit ) {
 			for ( var key in this.edit_view_ui_dic ) {
 
 				if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
@@ -1501,80 +1157,23 @@ RequestAuthorizationViewController = BaseViewController.extend( {
 			}
 
 		} else {
-			record = this.current_edit_record;
+			record = this.buildDataForAPI(this.current_edit_record);
 		}
 
 		record = this.uniformVariable( record );
-
-		this.message_control_api['validate' + this.message_control_api.key_name]( record, {onResult: function( result ) {
-
-			$this.validateResult( result );
-
-		}} );
+		if ( this.is_edit ) {
+			this.message_control_api['validate' + this.message_control_api.key_name](record, {
+				onResult: function (result) {
+					$this.validateResult(result);
+				}
+			});
+		} else if ( this.is_viewing ) {
+			this.api_request['validate'+this.api.key_name](record, {
+				onResult: function (result) {
+					$this.validateResult(result);
+				}
+			})
+		}
 	},
-
-	initEmbeddedMessageData: function() {
-		var $this = this;
-		var args = {};
-		args.filter_data = {};
-		args.filter_data.object_type_id = 50;
-		args.filter_data.object_id = this.current_edit_record.id;
-
-		$this.message_control_api['getEmbeddedMessage']( args, {onResult: function( res ) {
-			// Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=RequestAuthorization&id=1306 line 1547
-			if ( !$this.edit_view || !$this.edit_view_ui_dic['from']) {
-				return;
-			}
-
-			var data = res.getResult();
-
-			if ( Global.isArray( data ) ) {
-				$( $this.edit_view.find( '.separate' ) ).css( 'display', 'block' );
-
-				$this.messages = data;
-
-				var container = $( '<div></div>' );
-
-				var read_ids = [];
-
-				for ( var key in data ) {
-
-					var currentItem = data[key];
-					/* jshint ignore:start */
-					if ( currentItem.status_id == 10 ) {
-
-						read_ids.push( currentItem.id );
-					}
-					/* jshint ignore:end */
-
-
-					var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + ' @ ' + currentItem.updated_date;
-					$this.edit_view_ui_dic['from'].setValue( from );
-					$this.edit_view_ui_dic['subject'].setValue( currentItem.subject );
-					$this.edit_view_ui_dic['body'].setValue( currentItem.body );
-
-					var cloneMessageControl = $( $this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ) ).clone();
-
-					cloneMessageControl.css( 'display', 'block' ).appendTo( container );
-				}
-
-				if ( read_ids.length > 0 ) {
-					$this.message_control_api['markRecipientMessageAsRead']( read_ids, {onResult: function( res ) {
-						$this.search( false );
-					}} );
-				}
-
-				$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).find( '.second-column' ).remove();
-				$this.edit_view_tab.find( '#tab_request' ).find( '.edit-view-tab' ).append( container.html() );
-			} else {
-
-				$( $this.edit_view.find( '.separate' ) ).css( 'display', 'none' );
-			}
-
-			$this.setAuthorizationGridSize();
-
-		}} );
-	}
-
 
 } );

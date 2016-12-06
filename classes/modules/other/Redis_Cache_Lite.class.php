@@ -86,6 +86,7 @@ class Redis_Cache_Lite extends Cache_Lite {
 		} catch (Exception $e) {
 			$this->_redisHostConn[$key] = FALSE; //Prevent further connections from timing out during this request...
 			Debug::Text( 'Error connecting to the Redis database! (b)', __FILE__, __LINE__, __METHOD__, 1);
+			unset($e);
 			//throw new DBError($e);
 		}
 
@@ -242,6 +243,7 @@ class Redis_Cache_Lite extends Cache_Lite {
 				}
 			}
 		}
+		unset($value);//code standards
 
 		return TRUE;
 	}
@@ -265,6 +267,7 @@ class Redis_Cache_Lite extends Cache_Lite {
 				}
 			}
 		}
+		unset($value);//code standards
 
 		return TRUE;
 	}

@@ -161,6 +161,8 @@
 
 		//deal with result when doing dropdown search, TimesheetAuthorizationViewControl need this.
 		var extendDataProcessWhenSearch;
+
+		var always_include_columns = false;
 //
 //		//Used for modify search result when doing Paging or Searching, For example, used in AccrualBalanceViewController to set correct ids
 //		this.customSearchResultHandler = null;
@@ -621,7 +623,8 @@
 				}
 
 				var filter = {};
-				filter.filter_data = {id: val};
+				//id is a public member of this class which contains the field id, so we wrapped 'id' in quotes here to show it's not the public member from above.
+				filter.filter_data = {'id': val};
 
 				if ( this.customSearchFilter ) {
 					filter = this.customSearchFilter( filter );
@@ -703,6 +706,13 @@
 			$.each( display_columns, function( key, item ) {
 				column_filter[item.name] = true;
 			} );
+
+			if ( always_include_columns && always_include_columns.length > 0 ) {
+				$.each( always_include_columns, function( key, item ) {
+					column_filter[item] = true;
+				} );
+			}
+
 			return column_filter;
 		};
 
@@ -1291,43 +1301,32 @@
 		};
 
 		this.onClose = function( e, target ) {
+			if ( a_dropdown == undefined ) {
+				Debug.Text('ERROR: Unable to close AComboBox check to make sure it wasn\'t instantiated twice.','ACombobox.js', 'ACombobox', 'onClose' ,10);
+			}
 
 			if ( allow_multiple_selection ) {
-
 				//Re load source_data if select items
 				var select_items = a_dropdown.getSelectItems();
-
 				$this.setValue( select_items )
 			} else {
-
 				var select_item = a_dropdown.getSelectItem();
 				$this.setValue( select_item )
 			}
-
-//			if ( !navigation_mode ) {
-//				cached_search_inputs_filter = null;
-//				cached_sort_filter = null;
-//			}
-
 			a_dropdown_div.remove();
-
 			is_mouse_over = false; //When close from esc, this maybe true
-
 			LocalCacheData.openAwesomeBox = null;
-
 			if ( a_dropdown.isChanged() || layout_name === ALayoutIDs.SORT_COLUMN ) {
 				if ( check_box ) {
 					$this.setCheckBox( true );
 				}
-
 				$this.trigger( 'formItemChange', [$this] );
 			}
-
 			dontOpen = true;
 			dontOpenTimer = setTimeout( function() {
 				dontOpen = false;
 			}, 100 );
-
+			$this.find( '.focus-input' ).focus();
 		};
 
 		//set next or last item when key down, call from main.js
@@ -1337,37 +1336,26 @@
 			var next_index;
 			var target_grid;
 			if ( e.keyCode === 40 ) { //Down
-
 				e.preventDefault();
-
-				if ( allow_multiple_selection ) {
-
-				} else {
-
+				if ( !allow_multiple_selection ) {
 					if ( select_index === 0 ) {
 						next_index = 1;
 					} else {
 						next_index = select_index + 1;
 					}
-
 					var next_select_item = this.getItemByIndex( next_index );
 
 					if ( !next_select_item ) {
 						next_index = next_index - 1;
 						next_select_item = this.getItemByIndex( next_index );
 					}
-
 					select_item = next_select_item;
 					a_dropdown.setSelectItem( next_select_item );
 					a_dropdown.setIsChanged( true );
 				}
 			} else if ( e.keyCode === 38 ) { //Up
-
 				e.preventDefault();
-
-				if ( allow_multiple_selection ) {
-
-				} else {
+				if ( !allow_multiple_selection ) {
 					if ( select_index === 0 ) {
 						next_index = 0;
 					} else {
@@ -1380,42 +1368,40 @@
 					a_dropdown.setIsChanged( true );
 				}
 			} else if ( e.keyCode === 39 ) { //right
-
 				if ( allow_multiple_selection && !$( e.target ).hasClass( 'search-input' ) ) {
 					e.preventDefault();
 					a_dropdown.onUnSelectGridDoubleClick();
 					a_dropdown.setIsChanged( true );
 				}
 			} else if ( e.keyCode === 37 ) { //left
-
 				if ( allow_multiple_selection && !$( e.target ).hasClass( 'search-input' ) ) {
 					e.preventDefault();
 					a_dropdown.onSelectGridDoubleClick();
 					a_dropdown.setIsChanged( true );
 				}
 			} else {
-
 				if ( quick_search_timer ) {
 					clearTimeout( quick_search_timer );
 				}
-
 				var focus_target = $( ':focus' );
 				if ( focus_target.length > 0 && $( focus_target[0] ).hasClass( 'search-input' ) ) {
 					return;
 				}
-
 				quick_search_timer = setTimeout( function() {
 					quick_search_typed_keys = '';
-				}, 200 );
-
+				}, 750 );
 				e.preventDefault();
-				quick_search_typed_keys = quick_search_typed_keys + Global.KEYCODES[e.which];
+
+                quick_search_typed_keys = quick_search_typed_keys + String.fromCharCode(e.which).toLowerCase();
+                Debug.Text('Quick search typed keys: ' + quick_search_typed_keys, 'AComboBox.js', 'AComboBox', 'selectNextItem', 10);
+                trimmed_quick_search_typed_keys = quick_search_typed_keys.trim();
+
 				if ( allow_multiple_selection || tree_mode ) {
-					if ( quick_search_typed_keys ) {
+					if ( trimmed_quick_search_typed_keys ) {
 						target_grid = a_dropdown.getFocusInSeletGrid() ? a_dropdown.getSelectGrid() : a_dropdown.getUnSelectGrid();
-						var search_index = quick_search_dic[quick_search_typed_keys] ? quick_search_dic[quick_search_typed_keys] : 0;
+						var search_index = quick_search_dic[trimmed_quick_search_typed_keys] ? quick_search_dic[trimmed_quick_search_typed_keys] : 0;
 						var tds = $( target_grid.find( 'tr' ).find( 'td:eq(1)' ).filter( function() {
-							return $.text( [this] ).toLowerCase().indexOf( quick_search_typed_keys ) == 0;
+							return $.text( [this] ).toLowerCase().indexOf( trimmed_quick_search_typed_keys ) == 0;
 						} ) );
 
 						var td;
@@ -1428,37 +1414,32 @@
 						td = $( tds[search_index] );
 
 						a_dropdown.unSelectAll( target_grid, true );
-
 						next_index = td.parent().index() - 1;
 						next_select_item = target_grid.jqGrid( 'getGridParam', 'data' )[next_index];
 						select_item = next_select_item;
 						a_dropdown.setSelectItem( next_select_item, target_grid );
 						a_dropdown.setIsChanged( true );
 						quick_search_dic = {};
-						quick_search_dic[quick_search_typed_keys] = search_index + 1;
+						quick_search_dic[trimmed_quick_search_typed_keys] = search_index + 1;
 					}
-
 				} else {
-					if ( quick_search_typed_keys ) {
-						search_index = quick_search_dic[quick_search_typed_keys] ? quick_search_dic[quick_search_typed_keys] : 0;
+					if ( trimmed_quick_search_typed_keys ) {
+						search_index = quick_search_dic[trimmed_quick_search_typed_keys] ? quick_search_dic[trimmed_quick_search_typed_keys] : 0;
 						tds = $( a_dropdown.getUnSelectGrid().find( 'tr' ).find( 'td:first' ).filter( function() {
-							return $.text( [this] ).toLowerCase().indexOf( quick_search_typed_keys ) == 0;
+							return $.text( [this] ).toLowerCase().indexOf( trimmed_quick_search_typed_keys ) == 0;
 						} ) );
 						if ( search_index > 0 && search_index < tds.length ) {
 
 						} else {
 							search_index = 0
 						}
-
 						td = $( tds[search_index] );
-
 						next_index = td.parent().index() - 1;
 						next_select_item = this.getItemByIndex( next_index );
 						select_item = next_select_item;
 						a_dropdown.setSelectItem( next_select_item );
-						a_dropdown.setIsChanged( true );
 						quick_search_dic = {};
-						quick_search_dic[quick_search_typed_keys] = search_index + 1;
+						quick_search_dic[trimmed_quick_search_typed_keys] = search_index + 1;
 					}
 				}
 
@@ -2106,6 +2087,10 @@
 			label_span = $( this ).find( '.a-combobox-label' );
 			var focus_input = $( this ).find( '.focus-input' );
 
+			if ( o.always_include_columns ) {
+				always_include_columns = o.always_include_columns;
+			}
+
 			if ( o.extendDataProcessWhenSearch ) {
 				extendDataProcessWhenSearch = o.extendDataProcessWhenSearch;
 			}
@@ -2250,9 +2235,11 @@
 			}
 
 			var $$this = this;
-			focus_input.unbind( 'keyup' ).bind( 'keyup', function( e ) {
-				e.stopPropagation(); //Stop click event to top, prevent the body click event
-				if ( e.keyCode === 13 ) {
+			focus_input.unbind( 'keydown' ).bind( 'keydown', function( e ) {
+				//Stop click event to top, prevent the body click event
+				if ( e.keyCode === 13 || e.keyCode === 32 ) {
+					e.stopPropagation();
+					e.preventDefault();
 					openADropDown();
 				}
 			} );
@@ -2265,9 +2252,9 @@
 				$( $$this ).removeClass( 'focus' );
 			} );
 
-			$( this ).click( function() {
+			$( this ).click( function( e ) {
+				e.stopPropagation();
 				if ( !enabled ) {
-
 					if ( LocalCacheData.current_open_sub_controller &&
 						LocalCacheData.current_open_sub_controller.edit_view &&
 						LocalCacheData.current_open_sub_controller.is_viewing ) {
@@ -2280,6 +2267,11 @@
 						$this.showErrorTip( 10 );
 					}
 
+				} else {
+					if ( dontOpen === true ) {
+						return;
+					}
+					openADropDown();
 				}
 			} );
 
@@ -2298,7 +2290,7 @@
 			if ( !o.width ) {
 				$( this ).css( 'min-width', '169px' );
 			} else {
-				$( this ).css( 'min-width', (o.width + 40) + 'px' );
+				$( this ).css( 'min-width', (o.width + 33) + 'px' );
 			}
 
 			if ( !$this.shouldInitColumns() ) { //Sort Selector in search panel
@@ -2326,16 +2318,6 @@
 			$this.setEmptyLabel();
 
 			//Open ADropDown
-			$( this ).find( '.openADropDown' ).unbind( 'click' ).bind( 'click', function( e ) {
-				e.stopPropagation(); //Stop click event to top, prevent the body click event
-
-				if ( dontOpen === true ) {
-					return;
-				}
-
-				openADropDown();
-
-			} );
 
 			function setADropDownSelectValues( select_items ) {
 
@@ -2346,20 +2328,16 @@
 			}
 
 			function openADropDown() {
-
 				if ( !enabled ) {
 					return;
 				}
-
 				if ( LocalCacheData.openAwesomeBox ) {
-
 					if ( LocalCacheData.openAwesomeBox.getId() === id ) {
 						LocalCacheData.openAwesomeBox.onClose();
 						return;
 					} else {
 						LocalCacheData.openAwesomeBox.onClose();
 					}
-
 				}
 
 				LocalCacheData.openAwesomeBox = $this;

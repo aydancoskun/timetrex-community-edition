@@ -77,7 +77,7 @@ class InstallSchema_1058A extends InstallSchema_Base {
 							if ( $level >= 10 ) { //Only process levels 10 and higher, as those are supervisors and only ones that need adjusting.
 								$old_permission_arr = $pc_obj->getPermission();
 								if ( is_array($old_permission_arr) ) {
-									foreach( $preset_options as $preset => $preset_name	) {
+									foreach( $preset_options as $preset => $preset_name ) {
 										// preset: 10, 18, 20, 30, 40
 										if ( $level == $preset_level_options[$preset] ) {
 											//This automatically includes system presets (user, reports, etc...) so it can override customers custom permissions
@@ -86,6 +86,7 @@ class InstallSchema_1058A extends InstallSchema_Base {
 											$pc_obj->setPermission($permission_arr, $old_permission_arr);
 										}
 									}
+									unset($preset_name); //code standards
 								}
 							}
 						}
@@ -110,6 +111,7 @@ class InstallSchema_1058A extends InstallSchema_Base {
 					//Assign all absence policies to every policy group.
 					$aplf = TTnew('AbsencePolicyListFactory');
 					$aplf->getByCompanyId( $c_obj->getId() );
+					$ap_ids = array();
 					if ( $aplf->getRecordCount() > 0 ) {
 						foreach( $aplf as $ap_obj ) {
 							$ap_ids[] = $ap_obj->getId();

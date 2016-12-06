@@ -317,7 +317,12 @@ class Wage {
 		$dock_absence_amount = 0;
 		$paid_absence_amount = 0;
 		$prev_wage_effective_date = 0;
-		if ( $udtlf->getRecordCount() > 0 ) {
+		$paid_absence_amount_arr = array();
+		$reduce_salary_absence_amount_arr = array();
+		$salary_regular_time = array();
+		$dock_absence_amount_arr = array();
+		$ret_arr = array();
+		if ( $udtlf->getRecordCount() > 0 ){
 			foreach( $udtlf as $udt_obj ) {
 				Debug::text('User Total Row... Object Type: '. $udt_obj->getObjectType() .' PayCode ID: '. $udt_obj->getPayCode() .' Amount: '. $udt_obj->getTotalTimeAmount() .' Hourly Rate: '. $udt_obj->getColumn('hourly_rate') .' Pay Code Type: '. $udt_obj->getColumn('pay_code_type_id') .' User Wage ID: '. $udt_obj->getColumn('user_wage_id'), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -436,7 +441,7 @@ class Wage {
 
 				//Get all wages that apply in this period so we can determine pro-rating for salaries.
 				$uwlf = TTNew('UserWageListFactory');
-				$uwlf->getDefaultWageGroupByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+				$uwlf->getDefaultWageGroupByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() ); //ORDER BY effective_date desc
 				if ( $uwlf->getRecordCount() > 0 ) {
 					foreach( $uwlf as $uw_obj ) {
 						$description = NULL;
@@ -453,7 +458,7 @@ class Wage {
 							}
 							Debug::text('Wage ID: '. $uw_obj->getID() .' Dock Absence Wage: '. $dock_absence_wage .' Paid Absence Wage: '. $paid_absence_wage, __FILE__, __LINE__, __METHOD__, 10);
 
-							$maximum_wage_salary = UserWageFactory::proRateSalary( $this->getMaximumPayPeriodWage( $uw_obj ), $uw_obj->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
+							$maximum_wage_salary = UserWageFactory::proRateSalary( $this->getMaximumPayPeriodWage( $uw_obj ), $uw_obj->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate() );
 
 							$amount = bcsub( $maximum_wage_salary, bcadd( $dock_absence_wage, $paid_absence_wage ) );
 							//Include time if we have it, otherwise use 0.
@@ -462,9 +467,9 @@ class Wage {
 							$pay_stub_entry = $this->getPayStubEntryAccountLinkObject()->getRegularTime();
 							unset($dock_absence_wage, $paid_absence_wage);
 							
-							$salary_dates = UserWageFactory::proRateSalaryDates( $uw_obj->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getTerminationDate() );
-							if ( is_array($salary_dates) ) {
-								$description = TTi18n::getText('Prorate Salary:').' '. TTDate::getDate('DATE', $salary_dates['start_date'] ) .' - '. TTDate::getDate('DATE', $salary_dates['end_date'] ) .' ('. $salary_dates['percent'].'%)';
+							$salary_dates = UserWageFactory::proRateSalaryDates( $uw_obj->getEffectiveDate(), $prev_wage_effective_date, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate() );
+							if ( is_array($salary_dates) AND isset($salary_dates['percent']) AND $salary_dates['percent'] < 100 ) {
+								$description = TTi18n::getText('Prorate Salary').': '. TTDate::getDate('DATE', $salary_dates['start_date'] ) .' - '. TTDate::getDate('DATE', $salary_dates['end_date'] ) .' ('. $salary_dates['percent'].'%)';
 							}
 
 							if ( isset($pay_stub_entry) AND $pay_stub_entry != '' ) {
@@ -478,10 +483,12 @@ class Wage {
 															);
 							}
 
-							$prev_wage_effective_date = $uw_obj->getEffectiveDate();
 
 							unset($pay_stub_entry, $amount, $total_time, $rate);
 						}
+
+						//Must go outside the $uw_obj->getType() != 10 check, so we can properly switch from Salary to Hourly in the middle of a PP.
+						$prev_wage_effective_date = $uw_obj->getEffectiveDate();
 					}
 				}
 				unset($uwlf, $uw_obj);
@@ -496,7 +503,7 @@ class Wage {
 		$ret_arr['other']['paid_absence_amount'] = $paid_absence_amount;
 		$ret_arr['other']['dock_absence_amount'] = $dock_absence_amount;
 
-		if ( isset($ret_arr) ) {
+		if ( empty($ret_arr) == FALSE ) {
 			Debug::Arr($ret_arr, 'UserDateTotal Array', __FILE__, __LINE__, __METHOD__, 10);
 			return $this->user_date_total_arr = $ret_arr;
 		}

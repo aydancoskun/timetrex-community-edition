@@ -257,7 +257,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
@@ -291,7 +290,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
@@ -363,7 +361,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
@@ -399,11 +396,10 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
-					'user_id' => (int)$user_id, 
+					'user_id' => (int)$user_id,
 					'date_stamp' => $this->db->BindDate( $date_stamp ),
 					);
 
@@ -690,7 +686,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$end_time_stamp = ($epoch + $maximum_shift_time);
 
 		$pcf = new PunchControlFactory();
-		$ppf = new PremiumPolicyFactory();
 		$ppbf = new PremiumPolicyBranchFactory();
 		$ppdf = new PremiumPolicyDepartmentFactory();
 
@@ -855,7 +850,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		//  However this can cause other problems, like with duplicate punch detection when automatic punch status is enabled.
 		//  If the same punch is submitted twice, it will be recorded as an IN then an OUT rather than be rejected.
 		//  Therefore we just need to account for this when processing punches from the timeclock.
-		$epoch = TTDate::roundTime($epoch, 60, 30 ); 
+		$epoch = TTDate::roundTime($epoch, 60, 30 );
 
 		$maximum_shift_time = $this->getPayPeriodMaximumShiftTime( $user_id );
 		$start_time = ( $epoch - $maximum_shift_time );
@@ -1010,7 +1005,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
@@ -1041,7 +1035,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 
 		$ph = array(
@@ -1123,7 +1116,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$result = $this->db->GetRow($query, $ph);
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		return $result;
 	}
 
@@ -1511,7 +1504,6 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$ppf_b = new PayPeriodFactory();
 		$uwf = new UserWageFactory();
 		$pcf = new PunchControlFactory();
-		$pf = new PunchFactory();
 		$sf = new StationFactory();
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -1550,6 +1542,8 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 							pcf.job_item_id as job_item_id,
 							pcf.quantity as quantity,
 							pcf.bad_quantity as bad_quantity,
+							a.longitude as longitude,
+							a.latitude as latitude,
 							pcf.total_time as total_time,
 							pcf.actual_total_time as actual_total_time,
 							pcf.other_id1 as other_id1,
@@ -1733,8 +1727,11 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( isset($filter_data['exclude_user_ids']) ) {
-			$filter_data['exclude_id'] = $filter_data['exclude_user_ids'];
+		if ( isset($filter_data['include_user_id']) ) {
+			$filter_data['user_id'] = $filter_data['include_user_id'];
+		}
+		if ( isset($filter_data['exclude_user_id']) ) {
+			$filter_data['exclude_id'] = $filter_data['exclude_user_id'];
 		}
 		if ( isset($filter_data['user_status_ids']) ) {
 			$filter_data['status_id'] = $filter_data['user_status_ids'];
@@ -1757,7 +1754,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		if ( isset($filter_data['punch_department_ids']) ) {
 			$filter_data['punch_department_id'] = $filter_data['punch_department_ids'];
 		}
-		
+
 		$uf = new UserFactory();
 		$pcf = new PunchControlFactory();
 		$uwf = new UserWageFactory();
@@ -1772,9 +1769,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 			$jif = new JobItemFactory();
 		}
 
-		$ph = array(
-					'company_id' => (int)$company_id,
-					);
+		$ph = array();
 
 		$query = '
 					select
@@ -1853,13 +1848,15 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 						s.name as job_item';
 		}
 
+		//There was a bug here where if an employee punched out at 5:00PM, then an Admin entered a 8:00AM IN punch manually, it return the 8AM punch because it has the higher punch_id, rather than grouping on the timestamp directly.
 		$query .= '
-					from	(
-								select tmp2_d.id, max(tmp2_a.id) as punch_id, max(tmp2_a.time_stamp) as max_punch_time_stamp
-								from	'. $this->getTable() .' as tmp2_a
-								LEFT JOIN '. $pcf->getTable() .' as tmp2_b ON tmp2_a.punch_control_id = tmp2_b.id
-								LEFT JOIN '. $uf->getTable() .' as tmp2_d ON tmp2_b.user_id = tmp2_d.id
-								WHERE tmp2_d.company_id = ?';
+						FROM 	'. $uf->getTable() .' as d 
+						LEFT JOIN '. $this->getTable() .' as a ON ( a.id = ( 
+								SELECT tmp2_a.id as punch_id
+								FROM 	'. $this->getTable() .' as tmp2_a
+								LEFT JOIN '. $pcf->getTable() .' as tmp2_b ON ( tmp2_a.punch_control_id = tmp2_b.id )
+								WHERE tmp2_b.user_id = d.id 
+									AND tmp2_a.time_stamp IS NOT NULL ';
 
 								if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
 									$ph[] = $this->db->BindDate($filter_data['start_date']);
@@ -1870,35 +1867,32 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 									$query	.=	' AND tmp2_b.date_stamp <= ?';
 								}
 
-								$query .= '
-									AND tmp2_a.time_stamp is not null
-									AND ( tmp2_a.deleted = 0 AND tmp2_b.deleted = 0 )
-								group by tmp2_d.id
-							) as tmp_a
-							LEFT JOIN '. $this->getTable() .' as a ON tmp_a.punch_id = a.id
-							LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
-							LEFT JOIN '. $uf->getTable() .' as d ON b.user_id = d.id
+		$query .= '
+								ORDER BY tmp2_a.time_stamp desc, tmp2_a.status_id asc LIMIT 1
+								)
+							)
+						LEFT JOIN '. $pcf->getTable() .' as b ON ( a.punch_control_id = b.id )
+						LEFT JOIN '. $bf->getTable() .' as e ON ( d.default_branch_id = e.id AND e.deleted = 0)
+						LEFT JOIN '. $df->getTable() .' as f ON ( d.default_department_id = f.id AND f.deleted = 0)
+						LEFT JOIN '. $ugf->getTable() .' as g ON ( d.group_id = g.id AND g.deleted = 0 )
+						LEFT JOIN '. $utf->getTable() .' as h ON ( d.title_id = h.id AND h.deleted = 0 )
 
-							LEFT JOIN '. $bf->getTable() .' as e ON ( d.default_branch_id = e.id AND e.deleted = 0)
-							LEFT JOIN '. $df->getTable() .' as f ON ( d.default_department_id = f.id AND f.deleted = 0)
-							LEFT JOIN '. $ugf->getTable() .' as g ON ( d.group_id = g.id AND g.deleted = 0 )
-							LEFT JOIN '. $utf->getTable() .' as h ON ( d.title_id = h.id AND h.deleted = 0 )
+						LEFT JOIN '. $bf->getTable() .' as j ON ( b.branch_id = j.id AND j.deleted = 0)
+						LEFT JOIN '. $df->getTable() .' as k ON ( b.department_id = k.id AND k.deleted = 0)
 
-							LEFT JOIN '. $bf->getTable() .' as j ON ( b.branch_id = j.id AND j.deleted = 0)
-							LEFT JOIN '. $df->getTable() .' as k ON ( b.department_id = k.id AND k.deleted = 0)
+						LEFT JOIN '. $sf->getTable() .' as l ON a.station_id = l.id
 
-							LEFT JOIN '. $sf->getTable() .' as l ON a.station_id = l.id
+						LEFT JOIN '. $uwf->getTable() .' as w ON w.id = (select w.id
+																	from '. $uwf->getTable() .' as w
+																	where w.user_id = b.user_id
+																		and w.effective_date <= b.date_stamp
+																		and w.deleted = 0
+																		order by w.effective_date desc LiMiT 1)
 
-							LEFT JOIN '. $uwf->getTable() .' as w ON w.id = (select w.id
-																		from '. $uwf->getTable() .' as w
-																		where w.user_id = b.user_id
-																			and w.effective_date <= b.date_stamp
-																			and w.deleted = 0
-																			order by w.effective_date desc LiMiT 1)
-
-							LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
-							LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
 					';
+
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= '	LEFT JOIN '. $jf->getTable() .' as r ON b.job_id = r.id';
 			$query .= '	LEFT JOIN '. $jif->getTable() .' as s ON b.job_item_id = s.id';
@@ -2122,6 +2116,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 							a.original_time_stamp as original_time_stamp,
 							a.longitude,
 							a.latitude,
+							a.position_accuracy,
 							a.transfer,
 							a.has_image,
 

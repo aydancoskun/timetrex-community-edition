@@ -116,8 +116,6 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$rf = new RequestFactory();
-		$udf = new UserDateFactory();
 		$uf = new UserFactory();
 
 		$ph = array(
@@ -148,9 +146,6 @@ class MessageListFactory extends MessageFactory implements IteratorAggregate {
 			return FALSE;
 		}
 
-		$rf = new RequestFactory();
-		$udf = new UserDateFactory();
-		$uf = new UserFactory();
 
 		$ph = array(
 					'id' => (int)$id,

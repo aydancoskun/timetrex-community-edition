@@ -138,11 +138,12 @@ class PremiumPolicyDepartmentListFactory extends PremiumPolicyDepartmentFactory 
 
 		$ppdlf->getByPremiumPolicyId($id);
 
+		$list = array();
 		foreach ($ppdlf as $obj) {
 			$list[$obj->getPremiumPolicy()] = NULL;
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

@@ -68,8 +68,9 @@ var APIHierarchyControl = ServiceCaller.extend( {
 		LocalCacheData.result_cache['getHierarchyControlOptions'] = null;
 		return this.argumentsHandler( this.className, 'copyHierarchyControl', arguments );
 
-	}
+	},
 
-
-
+	exportHierarchyControl: function() {
+		return this.argumentsHandler( this.className, 'exportHierarchyControl', arguments );
+	},
 } );

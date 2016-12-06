@@ -97,7 +97,7 @@ class RequestFactory extends Factory {
 								'last_name',
 								'type',
 								'date_stamp',
-								'status'
+								'status',
 								);
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
@@ -130,7 +130,7 @@ class RequestFactory extends Factory {
 										'user_group' => FALSE,
 										'title' => FALSE,
 
-										'date_stamp' => FALSE,
+										'date_stamp' => 'DateStamp',
 										'type_id' => 'Type',
 										'type' => FALSE,
 										'hierarchy_type_id' => 'HierarchyTypeId',
@@ -139,6 +139,9 @@ class RequestFactory extends Factory {
 										'authorized' => 'Authorized',
 										'authorization_level' => 'AuthorizationLevel',
 										'message' => 'Message',
+
+										'request_schedule' => FALSE,
+
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
@@ -257,6 +260,11 @@ class RequestFactory extends Factory {
 	function getHierarchyTypeId( $type_id = NULL ) {
 		if ( $type_id == '' ) {
 			$type_id = $this->getType();
+		}
+
+		if ( $type_id == FALSE ) {
+			Debug::text( 'ERROR: Type ID is FALSE', __FILE__, __LINE__, __METHOD__, 10 );
+			return FALSE;
 		}
 
 		//Make sure we support an array of type_ids.
@@ -388,6 +396,26 @@ class RequestFactory extends Factory {
 		return FALSE;
 	}
 
+	function getRequestSchedule() {
+
+		if( $this->getUserObject()->getCompanyObject()->getProductEdition() > 10 ) {
+			$rslf = TTNew( 'RequestScheduleListFactory' );
+			$rslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('request_id' => $this->getId()) );
+			if ( $rslf->getRecordCount() == 1 ) {
+				foreach ( $rslf as $rs_obj ) {
+					$result = $rs_obj->getObjectAsArray();
+					Debug::Arr( $result, 'getRequestSchedule Result: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+					return $result;
+				}
+			} else {
+				Debug::Text( 'Request Schedule rows: 0 ', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		}
+
+		return FALSE;
+	}
+
 	function Validate( $ignore_warning = TRUE ) {
 		if (	$this->isNew() == TRUE
 				AND $this->Validator->hasError('message') == FALSE
@@ -435,7 +463,8 @@ class RequestFactory extends Factory {
 
 	function preSave() {
 		//If this is a new request, find the current authorization level to assign to it.
-		if ( $this->isNew() == TRUE ) {
+		// isNew should be a force check due to request schedule child table
+		if ( $this->isNew(TRUE) == TRUE ) {
 			if ( $this->getStatus() == FALSE ) {
 				$this->setStatus( 30 ); //Pending Auth.
 			}
@@ -454,7 +483,6 @@ class RequestFactory extends Factory {
 			}
 			$this->setAuthorizationLevel( $hierarchy_highest_level );
 		}
-
 		if ( $this->getAuthorized() == TRUE ) {
 			$this->setAuthorizationLevel( 0 );
 		}
@@ -480,13 +508,28 @@ class RequestFactory extends Factory {
 			$mcf->setParent( 0 );
 			$mcf->setSubject( Option::getByKey( $this->getType(), $this->getOptions('type') ) .' '. TTi18n::gettext('request from') .': '. $this->getUserObject()->getFullName(TRUE) );
 			$mcf->setBody( $this->getMessage() );
+			$mcf->setEnableEmailMessage( FALSE ); //Dont email message notification, send authorization notice instead.
 
 			if ( $mcf->isValid() ) {
 				$mcf->Save();
-
 				$mcf->CommitTransaction();
 			} else {
 				$mcf->FailTransaction();
+			}
+			
+			//Send initial Pending Authorization email to superiors. -- This should only happen on first save by the regular employee.
+			AuthorizationFactory::emailAuthorizationOnInitialObjectSave( $this->getUser(), $this->getHierarchyTypeId(), $this->getId() );
+		}
+		
+		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() > 10 ) {
+			if ( $this->getDeleted() == FALSE AND $this->getAuthorized() == TRUE ) {
+				$rsf = TTNew('RequestScheduleFactory');
+				$add_related_schedules_retval = $rsf->addRelatedSchedules( $this );
+				if ( $add_related_schedules_retval == FALSE ) {
+					Debug::Text('  addRelatedSchedules failed, passing along validation errors!', __FILE__, __LINE__, __METHOD__, 10);
+					$this->Validator->Merge( $rsf->Validator );
+				}
+				unset($rsf);
 			}
 		}
 
@@ -580,6 +623,16 @@ class RequestFactory extends Factory {
 							break;
 						case 'date_stamp':
 							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->getDateStamp() );
+							break;
+						case 'request_schedule':
+							if( $this->getUserObject()->getCompanyObject()->getProductEdition() > 10 ) {
+								if ( $this->getType() == 30 OR $this->getType() == 40 ) {
+									$request_schedule = $this->getRequestSchedule( array('request_schedule_id' => $this->getId()) );
+									if ( $request_schedule != FALSE && count( $request_schedule ) > 0 ) {
+										$data[$variable] = $request_schedule;
+									}
+								}
+							}
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

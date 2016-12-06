@@ -4,8 +4,8 @@ MealPolicyViewController = BaseViewController.extend( {
 	auto_detect_type_array: null,
 
 	date_api: null,
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'MealPolicyEditView.html';
 		this.permission_id = 'meal_policy';
 		this.viewId = 'MealPolicy';
@@ -320,15 +320,3 @@ MealPolicyViewController = BaseViewController.extend( {
 
 
 } );
-
-MealPolicyViewController.loadView = function() {
-
-	Global.loadViewSource( 'MealPolicy', 'MealPolicyView.html', function( result ) {
-
-		var args = {};
-		var template = _.template( result, args );
-
-		Global.contentContainer().html( template );
-	} )
-
-};

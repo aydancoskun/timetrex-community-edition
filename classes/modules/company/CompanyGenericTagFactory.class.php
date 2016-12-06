@@ -224,9 +224,9 @@ class CompanyGenericTagFactory extends Factory {
 		}
 
 		$ph = array(
-					'company_id' => $this->getCompany(),
-					'object_type_id' => $this->getObjectType(),
-					'name' => strtolower($name),
+					'company_id' => (int)$this->getCompany(),
+					'object_type_id' => (int)$this->getObjectType(),
+					'name' => TTi18n::strtolower($name),
 					);
 
 		$query = 'select id from '. $this->getTable() .'
@@ -363,6 +363,7 @@ class CompanyGenericTagFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -412,7 +413,7 @@ class CompanyGenericTagFactory extends Factory {
 						continue;
 					}
 
-					$retarr['all'][] = strtolower($tag);
+					$retarr['all'][] = TTi18n::strtolower($tag);
 					if ( substr($raw_tag, 0, 1) == '-' ) {
 						$retarr['delete'][] = $tag;
 					} else {
@@ -435,12 +436,13 @@ class CompanyGenericTagFactory extends Factory {
 
 	static function getOrCreateTags( $company_id, $object_type_id, $parsed_tags ) {
 		if ( is_array($parsed_tags) ) {
+			$existing_tags = array();
 			//Get the IDs for all tags
 			$cgtlf = TTnew( 'CompanyGenericTagListFactory' );
 			$cgtlf->getByCompanyIdAndObjectTypeAndTags($company_id, $object_type_id, $parsed_tags['all']);
 			if ( $cgtlf->getRecordCount() > 0 ) {
 				foreach( $cgtlf as $cgt_obj ) {
-					$existing_tags[strtolower($cgt_obj->getName())] = $cgt_obj->getID();
+					$existing_tags[TTi18n::strtolower($cgt_obj->getName())] = $cgt_obj->getID();
 				}
 				//Debug::Arr($existing_tags, 'aExisting tags:', __FILE__, __LINE__, __METHOD__, 10);
 				$tags_diff = array_diff( $parsed_tags['all'], array_keys($existing_tags) );
@@ -461,14 +463,14 @@ class CompanyGenericTagFactory extends Factory {
 					$cgtf->setName( $new_tag );
 					if ( $cgtf->isValid() ) {
 						$insert_id = $cgtf->Save();
-						$existing_tags[strtolower($new_tag)] = $insert_id;
+						$existing_tags[TTi18n::strtolower($new_tag)] = $insert_id;
 					}
 				}
 				unset($tags_diff, $new_tag, $cgtf, $insert_id);
 			}
 
 			//Debug::Arr($existing_tags, 'Existing Tags: ', __FILE__, __LINE__, __METHOD__, 10);
-			if ( isset($existing_tags) ) {
+			if ( empty($existing_tags) == FALSE) {
 				return $existing_tags;
 			}
 		}

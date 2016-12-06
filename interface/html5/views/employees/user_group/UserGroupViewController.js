@@ -4,8 +4,8 @@ UserGroupViewController = BaseViewController.extend( {
 	grid_table_name: null,
 	grid_select_id_array: null,
 	//Must set el here and can only set string, so events can work
-	initialize: function() {
-		this._super( 'initialize' );
+	initialize: function( options ) {
+		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserGroupEditView.html';
 		this.permission_id = 'user';
 		this.viewId = 'UserGroup';
@@ -22,14 +22,13 @@ UserGroupViewController = BaseViewController.extend( {
 		this.invisible_context_menu_dic[ContextMenuIconName.delete_and_next] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
 		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.export_excel] = true;
 		this.grid_select_id_array = [];
 
 		this.render();
 		this.buildContextMenu();
 		this.initData();
-		this.setSelectRibbonMenuIfNecessary( 'UserGroup' );
-
-
+		this.setSelectRibbonMenuIfNecessary();
 	},
 
 	onDeleteDone: function( result ) {
@@ -130,9 +129,7 @@ UserGroupViewController = BaseViewController.extend( {
 
 			this.api['get' + this.api.key_name]( filter, false, false, {onResult: function( result ) {
 				var result_data = result.getResult();
-
 				result_data = Global.buildTreeRecord( result_data );
-
 				result_data = Global.getParentIdByTreeRecord( result_data, selectedId );
 
 				if ( !result_data ) {
@@ -143,9 +140,7 @@ UserGroupViewController = BaseViewController.extend( {
 
 				$this.openEditView(); // Put it here is to avoid if the selected one is not existed in data or have deleted by other pragram. in this case, the edit view should not be opend.
 
-
 				result_data = result_data[0];
-
 				if ( $this.sub_view_mode && $this.parent_key ) {
 					result_data[$this.parent_key] = $this.parent_value;
 				}
@@ -667,11 +662,3 @@ UserGroupViewController = BaseViewController.extend( {
 	}
 
 } );
-
-UserGroupViewController.loadView = function() {
-	Global.loadViewSource( 'UserGroup', 'UserGroupView.html', function( result ) {
-		var args = {};
-		var template = _.template( result, args );
-		Global.contentContainer().html( template );
-	} );
-};

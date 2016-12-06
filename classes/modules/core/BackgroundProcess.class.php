@@ -124,6 +124,7 @@ class BackgroundProcess {
 		//Lock file name example: <prefix>.lock.<process_number>
 		//ie: timeclocksync.lock.2
 		$last_process_number = 1;
+		$process_numbers = array();
 		if ( is_array($lock_files)	) {
 			foreach( $lock_files as $lock_file ) {
 				if ( preg_match('/'.$this->getLockFilePrefix().'\.lock\.([0-9]{1,'.$this->process_number_digits.'})/i', $lock_file, $matches) ) {
@@ -133,7 +134,7 @@ class BackgroundProcess {
 				}
 			}
 
-			if ( isset($process_numbers) ) {
+			if ( empty($process_numbers) == FALSE ) {
 				rsort($process_numbers);
 				$last_process_number = ( (int)$process_numbers[0] + 1 );
 			}

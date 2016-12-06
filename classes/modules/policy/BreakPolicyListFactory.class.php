@@ -108,44 +108,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 						AND id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	function getByIdAndCompanyIdAndDayTotalTime($id, $company_id, $day_total_time, $where = NULL, $order = NULL) {
-		if ( $id == '') {
-			return FALSE;
-		}
-
-		if ( $company_id == '') {
-			return FALSE;
-		}
-
-		if ( $order == NULL ) {
-			$order = array( 'trigger_time' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
-		}
-
-		$ph = array(
-					'company_id' => (int)$company_id,
-					'day_total_time' => $day_total_time,
-					);
-
-		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	company_id = ?
-						AND trigger_time <= ?
-						AND id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
-						AND deleted = 0
-						ORDER BY trigger_time ASC';
-		$query .= $this->getWhereSQL( $where );
-		//$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -315,49 +278,6 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		return $this;
 	}
 
-	function getByPolicyGroupUserIdAndDayTotalTime($user_id, $day_total_time, $where = NULL, $order = NULL) {
-		if ( $user_id == '') {
-			return FALSE;
-		}
-
-		if ( $order == NULL ) {
-			$order = array( 'd.trigger_time' => 'asc' );
-			$strict = FALSE;
-		} else {
-			$strict = TRUE;
-		}
-
-		$pgf = new PolicyGroupFactory();
-		$pguf = new PolicyGroupUserFactory();
-		$cgmf = new CompanyGenericMapFactory();
-
-		$ph = array(
-					'user_id' => (int)$user_id,
-					'day_total_time' => $day_total_time,
-					);
-
-		$query = '
-					select	d.*
-					from	'. $pguf->getTable() .' as a,
-							'. $pgf->getTable() .' as b,
-							'. $cgmf->getTable() .' as c,
-							'. $this->getTable() .' as d
-					where	a.policy_group_id = b.id
-						AND ( b.id = c.object_id AND c.company_id = b.company_id AND c.object_type_id = 160)
-						AND c.map_id = d.id
-						AND a.user_id = ?
-						AND d.trigger_time <= ?
-						AND ( b.deleted = 0 AND d.deleted = 0 )
-					ORDER BY d.trigger_time ASC
-						';
-		//$query .= $this->getWhereSQL( $where );
-		//$query .= $this->getSortSQL( $order, $strict );
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
 	function getByCompanyId($id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -370,7 +290,6 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 			$strict = TRUE;
 		}
 
-		$pgf = new PolicyGroupFactory();
 		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
@@ -491,6 +410,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 		$mplf = new BreakPolicyListFactory();
 		$mplf->getByCompanyId($company_id);
 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}
@@ -499,7 +419,7 @@ class BreakPolicyListFactory extends BreakPolicyFactory implements IteratorAggre
 			$list[$mp_obj->getID()] = $mp_obj->getName();
 		}
 
-		if ( isset($list) ) {
+		if ( empty($list) == FALSE ) {
 			return $list;
 		}
 

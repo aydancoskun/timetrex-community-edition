@@ -78,6 +78,19 @@ class Environment {
 		return self::getBaseURL();
 	}
 
+	static function getCookieBaseURL() {
+		//  "/timetrex/interface"
+		//  "/timetrex/api/json"
+		//  "/timetrex" <- cookie must go here.
+		$retval = str_replace( '\\', '/', dirname( dirname( self::getAPIBaseURL() ) ) ); //PHP5 compatible. dirname(self::getAPIBaseURL(), 2) only works in PHP7. Also Windows tends to use backslashes in some cases, since this is a URL switch to forward slash always.
+
+		if ( $retval == '' ) {
+			$retval = '/';
+		}
+
+		return $retval;
+	}
+
 	//Returns the BASE_URL for the API functions.
 	static function getAPIBaseURL( $api = NULL ) {
 		global $config_vars;

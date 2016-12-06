@@ -638,7 +638,7 @@ class UserQualificationReport extends Report {
 		$uwlf->getAPILastWageSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
-		foreach ( $uwlf as $key => $uw_obj ) {
+		foreach ( $uwlf as $key => $uw_obj ) {			
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) {
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = Misc::addKeyPrefix('user_wage.', (array)$uw_obj->getObjectAsArray( Misc::removeKeyPrefix( 'user_wage.', $columns ) ));
 			}
@@ -810,7 +810,7 @@ class UserQualificationReport extends Report {
 				$key++;
 
 			}
-			unset($this->tmp_data, $row, $date_columns, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );
+			unset($this->tmp_data, $row, $hire_date_columns, $termination_date_columns, $birth_date_columns, $processed_data );
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 

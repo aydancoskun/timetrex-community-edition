@@ -10,9 +10,9 @@ ROEViewController = BaseViewController.extend( {
 
 	form_setup_item: null,
 
-	initialize: function() {
+	initialize: function( options ) {
 
-		this._super( 'initialize' );
+		this._super( 'initialize', options );
 		this.permission_id = 'roe';
 		this.viewId = 'ROE';
 		this.edit_view_tpl = 'ROEEditView.html';
@@ -48,31 +48,10 @@ ROEViewController = BaseViewController.extend( {
 	},
 
 	getFilterColumnsFromDisplayColumns: function() {
-		// Error: Unable to get property 'getGridParam' of undefined or null reference
-		var display_columns = [];
-		if ( this.grid ) {
-			display_columns = this.grid.getGridParam( 'colModel' );
-		}
-
 		var column_filter = {};
-		column_filter.is_owner = true;
-		column_filter.id = true;
-		column_filter.is_child = true;
-		column_filter.in_use = true;
-		column_filter.first_name = true;
-		column_filter.last_name = true;
 		column_filter.user_id = true;
 
-		if ( display_columns ) {
-			var len = display_columns.length;
-
-			for ( var i = 0; i < len; i++ ) {
-				var column_info = display_columns[i];
-				column_filter[column_info.name] = true;
-			}
-		}
-
-		return column_filter;
+		return this._getFilterColumnsFromDisplayColumns(column_filter,  true);
 	},
 
 	buildContextMenuModels: function() {
@@ -102,6 +81,13 @@ ROEViewController = BaseViewController.extend( {
 		var navigation_group = new RibbonSubMenuGroup( {
 			label: $.i18n._( 'Navigation' ),
 			id: this.viewId + 'navigation',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+
+		var other_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Other' ),
+			id: this.viewId + 'other',
 			ribbon_menu: menu,
 			sub_menus: []
 		} );
@@ -286,6 +272,16 @@ ROEViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_excel = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
+			id: ContextMenuIconName.export_excel,
+			group: navigation_group,
+			icon: Icons.export_excel,
+			permission_result: true,
+			permission: null,
+			sort_order: 9000
+		} );
+
 		return [menu];
 
 	},
@@ -382,6 +378,9 @@ ROEViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.timesheet:
 					this.setDefaultMenuTimesheetIcon( context_btn, grid_selected_length );
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
+					break;
 
 			}
 
@@ -544,6 +543,9 @@ ROEViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.timesheet:
 					this.setEditMenuTimeSheetIcon( context_btn );
+					break;
+				case ContextMenuIconName.export_excel:
+					this.setDefaultMenuExportIcon( context_btn);
 					break;
 			}
 
@@ -810,7 +812,7 @@ ROEViewController = BaseViewController.extend( {
 		var widgetContainer = $( "<div class='widget-h-box'></div>" );
 		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Last day worked or received insurable earnings' ) + ')' + "</span>" );
 		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );		
+		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Last Day For Which Paid' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		//Final Pay Period Ending Date
@@ -990,6 +992,7 @@ ROEViewController = BaseViewController.extend( {
 			case ContextMenuIconName.view:
 			case ContextMenuIconName.print:
 			case ContextMenuIconName.e_file:
+			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
 			case ContextMenuIconName.save_setup:
@@ -1154,35 +1157,30 @@ ROEViewController = BaseViewController.extend( {
 				post_data = {0: args, 1: 'efile_xml'};
 				this.doFormIFrameCall( post_data );
 				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('export' + this.api.key_name )
+				break;
 
 		}
 
 	},
 
 	doFormIFrameCall: function( postData ) {
-
-		var url = ServiceCaller.getURLWithSessionId( 'Class=APIROEReport' + '&Method=getROEReport' );
-
-		var message_id = UUID.guid();
-
-		url = url + '&MessageID=' + message_id;
-
-		this.sendFormIFrameCall( postData, url, message_id );
-
+		this.sendIframeCall('APIROEReport','getROEReport', postData);
 	},
 
 	onSaveResult: function( result ) {
 		this._super( 'onSaveResult', result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
-		}
+				}
 	},
 
 	onSaveAndNewResult: function( result ) {
 		this._super( 'onSaveAndNewResult', result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
-		}
+			}
 	},
 
 	onSaveAndContinueResult: function( result ) {

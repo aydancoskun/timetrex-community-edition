@@ -243,14 +243,12 @@ class UserWageFactory extends Factory {
 
 	function getWage() {
 		if ( isset($this->data['wage']) ) {
-			return Misc::removeTrailingZeros( $this->data['wage'] );
+			return Misc::removeTrailingZeros( (float)$this->data['wage'] );
 		}
 
 		return FALSE;
 	}
 	function setWage($wage) {
-		$wage = trim($wage);
-
 		//Pull out only digits and periods.
 		$wage = $this->Validator->stripNonFloat($wage);
 
@@ -292,14 +290,12 @@ class UserWageFactory extends Factory {
 
 	function getHourlyRate() {
 		if ( isset($this->data['hourly_rate']) ) {
-			return $this->data['hourly_rate'];
+			return (float)$this->data['hourly_rate'];
 		}
 
 		return FALSE;
 	}
 	function setHourlyRate($rate) {
-		$rate = trim($rate);
-
 		//Pull out only digits and periods.
 		$rate = $this->Validator->stripNonFloat($rate);
 
@@ -350,14 +346,12 @@ class UserWageFactory extends Factory {
 
 	function getLaborBurdenPercent() {
 		if ( isset($this->data['labor_burden_percent']) ) {
-			return $this->data['labor_burden_percent'];
+			return (float)$this->data['labor_burden_percent'];
 		}
 
 		return FALSE;
 	}
 	function setLaborBurdenPercent($value) {
-		$value = trim($value);
-
 		//Pull out only digits and periods.
 		$value = $this->Validator->stripNonFloat($value);
 
@@ -501,9 +495,17 @@ class UserWageFactory extends Factory {
 		if ( $rate == '' ) {
 			$rate = $this->getHourlyRate();
 		}
-		$retval = bcmul( $rate, bcadd( bcdiv( $this->getLaborBurdenPercent(), 100 ), 1) );
+		$hourly_wage = bcmul( $rate, bcadd( bcdiv( $this->getLaborBurdenPercent(), 100 ), 1) );
 
-		return Misc::MoneyFormat($retval, FALSE);
+		//return Misc::MoneyFormat($hourly_wage, FALSE);
+		//Format in APIUserWage() instead, as this gets passed back into setHourlyRate() and if in a locale that use comma decimal symbol, it will fail.
+		if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) {
+			$retval = $this->getUserObject()->getCurrencyObject()->round( $hourly_wage );
+		} else {
+			$retval = round( $hourly_wage, 2 );
+		}
+
+		return $retval;
 	}
 
 	function getBaseCurrencyHourlyRate( $rate ) {
@@ -560,14 +562,21 @@ class UserWageFactory extends Factory {
 
 	function calcHourlyRate( $epoch = FALSE, $accurate_calculation = FALSE ) {
 		$hourly_wage = 0;
-
 		if ( $this->getType() == 10 ) {
 			$hourly_wage = $this->getWage();
 		} else {
 			$hourly_wage = $this->getAnnualHourlyRate( $this->getAnnualWage(), $epoch, $accurate_calculation );
 		}
 
-		return Misc::MoneyFormat($hourly_wage, FALSE);
+		//return Misc::MoneyFormat($hourly_wage, FALSE);
+		//Format in APIUserWage() instead, as this gets passed back into setHourlyRate() and if in a locale that use comma decimal symbol, it will fail.
+		if ( is_object( $this->getUserObject() ) AND is_object( $this->getUserObject()->getCurrencyObject() ) ) {
+			$retval = $this->getUserObject()->getCurrencyObject()->round( $hourly_wage );
+		} else {
+			$retval = round( $hourly_wage, 2 );
+		}
+
+		return $retval;
 	}
 
 	function getAnnualHourlyRate( $annual_wage, $epoch = FALSE, $accurate_calculation = FALSE ) {
@@ -613,46 +622,40 @@ class UserWageFactory extends Factory {
 		return $hourly_wage;
 	}
 
-	static function proRateSalary($salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $termination_date ) {
-		$prev_wage_effective_date = (int)$prev_wage_effective_date;
-
-		if ( $wage_effective_date < $pp_start_date ) {
-			$wage_effective_date = $pp_start_date;
+	static function proRateSalary($salary, $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $hire_date = FALSE, $termination_date = FALSE ) {
+		$pro_rate_dates_arr = self::proRateSalaryDates( $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $hire_date, $termination_date );
+		if ( is_array($pro_rate_dates_arr) ) {
+			Debug::text('Salary: '. $salary .' Total Pay Period Days: '. $pro_rate_dates_arr['total_pay_period_days'] .' Wage Effective Days: '. $pro_rate_dates_arr['total_wage_effective_days'], __FILE__, __LINE__, __METHOD__, 10);
+			$pro_rate_salary = bcmul( $salary, bcdiv( $pro_rate_dates_arr['total_wage_effective_days'], $pro_rate_dates_arr['total_pay_period_days'] ) );
 		}
 
-		$total_pay_period_days = ceil( TTDate::getDayDifference( $pp_start_date, $pp_end_date) );
-
-		if ( $prev_wage_effective_date == 0 ) {
-			//ProRate salary to termination date if its in the middle of a pay period. Be sure to assume termination date is at the end of the day (inclusive), not beginning.
-			if ( $termination_date != '' AND $termination_date > 0 AND TTDate::getMiddleDayEpoch( $termination_date ) < TTDate::getMiddleDayEpoch( $pp_end_date ) ) {
-				Debug::text(' Setting PP end date to Termination Date: '. TTDate::GetDate('DATE', $termination_date), __FILE__, __LINE__, __METHOD__, 10);
-				$pp_end_date = TTDate::getEndDayEpoch( $termination_date );
-			}
-
-			Debug::text(' Using Pay Period End Date: '. TTDate::GetDate('DATE', $pp_end_date), __FILE__, __LINE__, __METHOD__, 10);
-			$total_wage_effective_days = ceil( TTDate::getDayDifference( $wage_effective_date, $pp_end_date) );
-		} else {
-			Debug::text(' Using Prev Effective Date: '. TTDate::GetDate('DATE', $prev_wage_effective_date ), __FILE__, __LINE__, __METHOD__, 10);
-			$total_wage_effective_days = ceil( TTDate::getDayDifference( $wage_effective_date, $prev_wage_effective_date ) );
+		//Final sanaity checks.
+		if ( $pro_rate_salary < 0 ) {
+			$pro_rate_salary = 0;
+		} elseif ( $pro_rate_salary > $salary ) {
+			$pro_rate_salary = $salary;
 		}
-
-		Debug::text('Salary: '. $salary .' Total Pay Period Days: '. $total_pay_period_days .' Wage Effective Days: '. $total_wage_effective_days, __FILE__, __LINE__, __METHOD__, 10);
-
-		$pro_rate_salary = bcmul( $salary, bcdiv($total_wage_effective_days, $total_pay_period_days) );
-
 		Debug::text('Pro Rate Salary: '. $pro_rate_salary, __FILE__, __LINE__, __METHOD__, 10);
+
 		return $pro_rate_salary;
 	}
 
-	static function proRateSalaryDates( $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $termination_date ) {
+	static function proRateSalaryDates( $wage_effective_date, $prev_wage_effective_date, $pp_start_date, $pp_end_date, $hire_date = FALSE, $termination_date = FALSE ) {
 		$prev_wage_effective_date = (int)$prev_wage_effective_date;
 
 		if ( $wage_effective_date < $pp_start_date ) {
 			$wage_effective_date = $pp_start_date;
 		}
 
+		if ( $wage_effective_date < $hire_date ) {
+			$wage_effective_date = TTDate::getBeginDayEpoch( $hire_date );
+		}
+
 		$total_pay_period_days = ceil( TTDate::getDayDifference( $pp_start_date, $pp_end_date) );
 
+		$retarr = array();
+
+		$retarr['total_pay_period_days'] = $total_pay_period_days;
 		if ( $prev_wage_effective_date == 0 ) {
 			//ProRate salary to termination date if its in the middle of a pay period. Be sure to assume termination date is at the end of the day (inclusive), not beginning.
 			if ( $termination_date != '' AND $termination_date > 0 AND TTDate::getMiddleDayEpoch( $termination_date ) < TTDate::getMiddleDayEpoch( $pp_end_date ) ) {
@@ -671,13 +674,16 @@ class UserWageFactory extends Factory {
 			$retarr['start_date'] = $wage_effective_date;
 			$retarr['end_date'] = $prev_wage_effective_date;
 		}
+		$retarr['total_wage_effective_days'] = $total_wage_effective_days;
 
 		if ( $retarr['start_date'] > $pp_start_date OR $retarr['end_date'] < $pp_end_date ) {
 			$retarr['percent'] = Misc::removeTrailingZeros( round( bcmul( bcdiv($total_wage_effective_days, $total_pay_period_days), 100), 2), 0 );
-			return $retarr;
+		} else {
+			$retarr['percent'] = 100;
 		}
 
-		return FALSE;
+		//Always need to return an array of dates so proRateSalary() above can use them. However in order to know if any prorating is done or not, we need to return 'percent' = 100 or not.
+		return $retarr;
 	}
 
 	static function getWageFromArray( $date, $wage_arr ) {
@@ -810,6 +816,11 @@ class UserWageFactory extends Factory {
 								$this->$function( TTDate::parseDateTime( $data[$key] ) );
 							}
 							break;
+//						case 'hourly_rate':
+//						case 'wage':
+//						case 'labor_burden_percent':
+//							$this->$function( TTi18n::parseFloat( $data[$key] ) );
+//							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -828,6 +839,7 @@ class UserWageFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {
@@ -859,6 +871,13 @@ class UserWageFactory extends Factory {
 								$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
 							}
 							break;
+//						case 'hourly_rate':
+//						case 'wage':
+//							$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 2, 4 );
+//							break;
+//						case 'labor_burden_percent':
+//							$data[$variable] = TTi18n::formatNumber( $this->$function(), TRUE, 0, 4 );
+//							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();
