@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
 	protected $user_id = NULL;
@@ -66,13 +64,13 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 		//Make sure it is not on a pay period start date though.
 		$user_obj->setHireDate( strtotime('05-Mar-2001') );
 		$user_obj->Save(FALSE);
-		
+
 		$this->assertGreaterThan( 0, $this->company_id );
 		$this->assertGreaterThan( 0, $this->user_id );
 
 		return TRUE;
 	}
-	
+
 	public function tearDown() {
 		Debug::text('Running tearDown(): ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -217,7 +215,7 @@ class RecurringHolidayTest extends PHPUnit_Framework_TestCase {
 
 		$next_date = $rhf->getNextDate( strtotime('29-Nov-2015') );
 		Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);
-		$this->assertEquals( $next_date, strtotime('24-Nov-2016 12:00PM PST') );		
+		$this->assertEquals( $next_date, strtotime('24-Nov-2016 12:00PM PST') );
 
 		$next_date = $rhf->getNextDate( strtotime('30-Nov-2015') );
 		Debug::text('Next Date: '. TTDate::getDate('DATE+TIME', $next_date ), __FILE__, __LINE__, __METHOD__, 10);

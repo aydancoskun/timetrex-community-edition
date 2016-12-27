@@ -1,0 +1,46 @@
+
+<div id='tt_debug_console' style='width:250pt; background-color:#fff; border:1px solid #000; padding:2em; position:absolute; bottom:0px; right:0px; z-index:1000; border-radius-top-left:10px; border-radius-top-right:10px;'>
+    <a style='float:right; padding:10px; text-align:center; color:red; font-weight:bolder; height:10px; width:10px;' class='tt_debug_close_btn' href='#'>x</a>
+    <h3>Developer Tools (<span>v</span><span class='tt_version'></span>)</h3>
+    <hr>
+    <div class='row' id='enabled_row' style='"+rowstyle+"'>
+        <input type='checkbox' id='tt_debug_enable_checkbox' checked='"+ is_enabled +"'>&nbsp;Enable Console Logging
+    </div>
+    <hr>
+    <div class='row' id='set_verbosity_row' style='"+rowstyle+"'>
+        <span>Debug Verbosity
+            <select id="tt_debug_exception_verbosity">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+            </select>
+        </span>
+    </div>
+    <hr>
+    <div class='row' id='trigger_js_exception_row'style='"+rowstyle+"'>
+        <span>Javascript Errors
+            <select id="tt_debug_exception_type_select">
+                <option value="js_error">JavaScript Error</option>
+                <option value="js_load_script_parser_error">Script Load Parser Error</option>
+                <option value="js_load_script_404_error">Script Load 404</option>
+            </select>
+        </span>
+
+        <span>
+            <div class='t-button' id='trigger_js_exception_button'>Trigger</div>
+        </span>
+    </div>
+    <hr>
+    <div class='row' id='trigger_login_timeout_row'style='"+rowstyle+"'>
+        <div class='t-button' id='trigger_js_timeout_button'>Trigger Idle</div>
+    </div>
+</div>

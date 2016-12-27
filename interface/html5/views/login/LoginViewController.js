@@ -65,7 +65,7 @@ LoginViewController = BaseViewController.extend( {
 			LocalCacheData.notification_bar.remove();
 		}
 
-		Global.setAnalyticDimensions();
+		//Global.setAnalyticDimensions(); // #2140 - handled in main.js main thread instead.
 	},
 
 	default: {
@@ -179,32 +179,11 @@ LoginViewController = BaseViewController.extend( {
 			LocalCacheData.setSessionID( result );
 			$.cookie( 'SessionID', result, {expires: 30, path: LocalCacheData.cookie_path} );
 
-//			$this.authentication_api.isApplicationBranded( {onResult: $this.onIsApplicationBranded, delegate: $this} );
-			$this.authentication_api.getApplicationName( {onResult: $this.onGetApplicationName, delegate: $this} );
+// 			$this.authentication_api.getApplicationName( {onResult: $this.onGetApplicationName, delegate: $this} );
 			$this.currentUser_api.getCurrentUser( {onResult: $this.onGetCurrentUser, delegate: $this} ); //Get more in result handler
 		}
 
 	},
-
-	onGetApplicationName: function( e ) {
-		LocalCacheData.setApplicationName( e.getResult() );
-	},
-
-//	onGetCurrentCompany: function( e ) {
-//
-//	},
-//
-//	onGetOrganizationName: function( e ) {
-//		var ozName = e.getResult();
-//		var date = new Date();
-//		e.get( 'delegate' ).authentication_api.getOrganizationURL( {onResult: function( e1 ) {
-//		}, delegate: e.get( 'delegate' )} );
-//	},
-
-//	onIsApplicationBranded: function( e ) {
-//
-//		LocalCacheData.setIsApplicationBranded( e.getResult() );
-//	},
 
 	onGetCurrentUser: function( e ) {
 		LocalCacheData.setLoginUser( e.getResult() );
@@ -317,7 +296,6 @@ LoginViewController = BaseViewController.extend( {
 															LocalCacheData.setUniqueCountryArray( country_result.getResult() );
 															login_view_this.authentication_api.getCurrentCompany( {
 																onResult: function( current_company_result ) {
-
 																	var com_result = current_company_result.getResult();
 																	if ( com_result.is_setup_complete === '1' || com_result.is_setup_complete === 1 ) {
 																		com_result.is_setup_complete = true;
@@ -327,7 +305,11 @@ LoginViewController = BaseViewController.extend( {
 
 																	LocalCacheData.setCurrentCompany( com_result );
 																	login_view_this.goToView();
-
+																	Debug.Text('Version: Client: '+APIGlobal.pre_login_data.application_build + " Server: "+com_result.application_build, 'LoginViewController.js', 'LoginViewController','onUserPreference:next',10);
+																	if ( APIGlobal.pre_login_data.application_build != com_result.application_build) {
+																		Debug.Text("Version mismatch on login: Reloading...", 'LoginViewController.js', 'LoginViewController','onUserPreference:next',10);
+																		window.location.reload(true);
+																	}
 																}
 															} );
 
@@ -403,6 +385,7 @@ LoginViewController = BaseViewController.extend( {
 		if ( !LocalCacheData.getCurrentCompany().is_setup_complete ) {
 			IndexViewController.openWizard( 'QuickStartWizard' );
 		}
+
 		var current_company = LocalCacheData.getCurrentCompany();
 		if ( LocalCacheData && current_company ) {
 			Global.setAnalyticDimensions( LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name );

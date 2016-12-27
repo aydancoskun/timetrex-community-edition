@@ -41,6 +41,11 @@
 class PayrollDeduction_US_IN extends PayrollDeduction_US {
 
 	var $state_options = array(
+								20170101 => array( //01-Jan-2017
+													'rate' => 3.23,
+													'allowance' => 1000,
+													'dependant_allowance' => 1500,
+													),
 								20150101 => array( //01-Jan-2015
 													'rate' => 3.3,
 													'allowance' => 1000,

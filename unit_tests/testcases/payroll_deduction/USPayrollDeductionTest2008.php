@@ -34,14 +34,12 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 /**
  * @group USPayrollDeductionTest2008
  */
 class USPayrollDeductionTest2008 extends PHPUnit_Framework_TestCase {
 	public $company_id = NULL;
-	
+
 	public function setUp() {
 		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 

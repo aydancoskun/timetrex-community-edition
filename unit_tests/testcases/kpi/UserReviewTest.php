@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 /**
  * @group UserReview
  */
@@ -86,7 +84,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
 
 	function createKPIGroup( $company_id , $type, $parent_id = 0 ) {
 		$kgf = TTnew( 'KPIGroupFactory' );
@@ -121,7 +119,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		return FALSE;
 	}
-	
+
 	function createKPI( $company_id , $type, $rate_type, $kpi_group_id = NULL, $minimum_rate = NULL, $maximum_rate = NULL ) {
 		$kf = TTnew( 'KPIFactory' );
 		$kf->setCompany( $company_id );
@@ -234,7 +232,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 				);
 			}
 		}
-	   
+
 		if ( isset( $kpi_arr ) ) {
 			return $kpi_arr;
 		}
@@ -271,9 +269,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		global $dd;
 		$kpi_group_id = $this->createKPIGroup( $this->company_id, 10, 0 );
 		$kpi_id = $this->createKPI( $this->company_id, 10, 10, $kpi_group_id, 1, 10 );
-		
+
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_id );
-		
+
 		$this->assertEquals( $kpi_arr[0]['type_id'], 10 );
 		$this->assertEquals( $kpi_arr[0]['minimum_rate'], 1 );
 		$this->assertEquals( $kpi_arr[0]['maximum_rate'], 10 );
@@ -310,7 +308,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 
 		$kpi_group_ids[] = $this->createKPIGroup( $this->company_id, 20, 0 );
 		$kpi_group_ids[] = $this->createKPIGroup( $this->company_id, 30, 0 );
-		
+
 		$kpi_id = $this->createKPI( $this->company_id, 20, 10, $kpi_group_ids, 10, 100 );
 
 		$kpi_arr = $this->getKPIArrayByGroupId( $kpi_group_ids[0] );
@@ -337,7 +335,7 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		// Test Yes/No KPI type
 		$kpi_group_id = $this->createKPIGroup( $this->company_id, 40, 0 );
 		$kpi_id = $this->createKPI( $this->company_id, 60, 60, $kpi_group_id );
-		
+
 		$user_ids[] = $dd->createUser( $this->company_id, 14 );
 		$user_ids[] = $dd->createUser( $this->company_id, 16 );
 
@@ -525,9 +523,9 @@ class UserReviewTest extends PHPUnit_Framework_TestCase {
 		// Create reviews
 		$user_ids[] = $dd->createUser( $this->company_id, 12 );
 		$user_ids[] = $dd->createUser( $this->company_id, 13 );
-		$user_ids[] = $dd->createUser( $this->company_id, 14 );        
+		$user_ids[] = $dd->createUser( $this->company_id, 14 );
 		$user_ids[] = $dd->createUser( $this->company_id, 15 );
-		
+
 
 		foreach( $kpi_ids as $type => $kpi_id ) {
 			$user_key = rand(0, 2);

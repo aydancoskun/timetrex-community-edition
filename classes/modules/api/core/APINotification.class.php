@@ -150,8 +150,12 @@ class APINotification extends APIFactory {
 				}
 
 				//Only display message to the primary company.
-				if ( ( (time() - (int)APPLICATION_VERSION_DATE) > (86400 * 365) )
-						AND ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) ) { //~1yr
+				if ( 	(
+							( (time() - (int)APPLICATION_VERSION_DATE) > (86400 * 365) ) AND ( $this->getCurrentCompanyObject()->getId() == 1 //~1yr
+							OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) )
+						)
+						OR ( (time() - (int)APPLICATION_VERSION_DATE) > (86400 * 760) ) //2yrs+30days, show to all companies.
+					) {
 					$retarr[] = array(
 										'delay' => -1,
 										'bg_color' => '#FF0000', //Red

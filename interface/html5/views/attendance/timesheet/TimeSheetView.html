@@ -44,31 +44,31 @@
         <table class=" sub-grid" id="premium_grid"></table>
         <table class=" sub-grid" id="absence_grid"></table>
 
-        <div class="total_grids_div">
-            <div class="float-left">
-                <div class="accumulated-total-grid-title" style="display: none"><%=accumulated_time%></div>
-                <table id="accumulated_total_grid"></table>
-            </div>
+        <table class="total_grids_div" id="total_grids_table">
+            <tr style="vertical-align:top;">
+                <td>
+                    <div class="accumulated-total-grid-title" style="display: none"><%=accumulated_time%></div>
+                    <table id="accumulated_total_grid"></table>
+                </td>
 
-            <div class="float-right verification-grid-div">
-                <div class="verification-grid-title" style="display: none"><%=timesheet_verification%></div>
-                <table id="verification_grid" class="float-right"></table>
-                <div class="verification-action-bar">
-                    <span class="verify-description"></span>
-                    <button class="verify-button t-button" style="display: none"><%=verify%></button>
-                </div>
-            </div>
+                <td class="notes_grid_td_container">
+                    <table id="punch_note_grid" class="float-right"></table>
+                </td>
 
-            <div class="float-right">
-                <table id="punch_note_grid" class="float-right"></table>
-            </div>
+                <td>
+                    <div class="verification-grid-div">
+                        <div class="verification-grid-title" style="display: none"><%=timesheet_verification%></div>
+                        <table id="verification_grid" class="float-right"></table>
+                        <div class="verification-action-bar">
+                            <span class="verify-description"></span>
+                            <button class="verify-button t-button" style="display: none"><%=verify%></button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
 
-
-        </div>
-
-
+        </table>
     </div>
     <div class="grid-bottom-border"></div>
     <div class="bottom-div"></div>
-
 </div>

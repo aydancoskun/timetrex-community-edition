@@ -201,7 +201,7 @@ class AuthorizationFactory extends Factory {
 		return FALSE;
 	}
 
-	function getHierarchyCurrentLevelArray() {
+	function getHierarchyCurrentLevelArray( $force = FALSE ) {
 		$retval = FALSE;
 
 		$user_id = $this->getCurrentUser();
@@ -211,7 +211,9 @@ class AuthorizationFactory extends Factory {
 			foreach( $parent_arr as $level => $level_parent_arr ) {
 				if ( in_array( $user_id, $level_parent_arr ) ) {
 					$next_level = TRUE;
-					continue;
+					if ( $force == FALSE ) {
+						continue;
+					}
 				}
 
 				if ( $next_level == TRUE  ) { //Current level is alway one level lower, as this often gets called after the level has been changed.
@@ -219,6 +221,12 @@ class AuthorizationFactory extends Factory {
 					//Debug::Arr( $level_parent_arr, ' Current: Level: ' . $level, __FILE__, __LINE__, __METHOD__, 10 );
 					break;
 				}
+			}
+
+			if ( $next_level == TRUE AND $retval == FALSE ) {
+				//Current level was the top and only level.
+				$retval = $level_parent_arr;
+				//Debug::Arr( $level_parent_arr, ' Current: Level: ' . $level, __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 
@@ -228,7 +236,7 @@ class AuthorizationFactory extends Factory {
 	function getHierarchyParentLevelArray() {
 		$retval = FALSE;
 
-		$user_id = $this->getCurrentUser();
+		$user_id = (int)$this->getCurrentUser();
 		$parent_arr = array_reverse( (array)$this->getHierarchyArray() );
 		if ( is_array( $parent_arr ) AND count( $parent_arr ) > 0 ) {
 			$next_level = FALSE;
@@ -277,6 +285,40 @@ class AuthorizationFactory extends Factory {
 		}
 
 		return $retval;
+	}
+
+	static function getInitialHierarchyLevel( $company_id, $user_id, $hierarchy_type_id ) {
+		$hierarchy_highest_level = 99;
+		if ( $company_id > 0 AND $user_id > 0 AND $hierarchy_type_id > 0 ) {
+			$hlf = TTnew( 'HierarchyListFactory' );
+			$hierarchy_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $company_id, $user_id, $hierarchy_type_id, FALSE );
+			if ( isset( $hierarchy_arr ) AND is_array( $hierarchy_arr ) ) {
+				Debug::Arr( $hierarchy_arr, ' aUser ID ' . $user_id . ' Type ID: ' . $hierarchy_type_id . ' Array: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+				//See if current user is in superior list, if so, start at one level up in the hierarchy, unless its level 1.
+				foreach ( $hierarchy_arr as $level => $superior_user_ids ) {
+					if ( in_array( $user_id, $superior_user_ids, TRUE ) == TRUE ) {
+						Debug::Text( '   Found user in superior list at level: ' . $level, __FILE__, __LINE__, __METHOD__, 10 );
+
+						$i = $level;
+						while ( isset( $hierarchy_arr[$i] ) ) {
+							if ( $i != 1 ) {
+								Debug::Text( '    Removing lower level: ' . $i, __FILE__, __LINE__, __METHOD__, 10 );
+								unset( $hierarchy_arr[$i] );
+							}
+							$i++;
+						}
+					}
+				}
+
+				Debug::Arr( $hierarchy_arr, ' bUser ID ' . $user_id . ' Type ID: ' . $hierarchy_type_id . ' Array: ', __FILE__, __LINE__, __METHOD__, 10 );
+				$hierarchy_arr = array_keys( $hierarchy_arr );
+				$hierarchy_highest_level = end( $hierarchy_arr );
+			}
+		}
+
+		Debug::Text(' Returning initial hierarchy level to: '. $hierarchy_highest_level, __FILE__, __LINE__, __METHOD__, 10);
+		return $hierarchy_highest_level;
 	}
 
 	function isValidParent() {
@@ -419,10 +461,14 @@ class AuthorizationFactory extends Factory {
 			$this->obj_handler_obj = $this->getObjectHandler()->getCurrent();
 			if ( $this->getAuthorized() === TRUE ) {
 				if ( $is_final_authorization === TRUE ) {
-					Debug::Text('  Approving Authorization... Final Authorizing Object: '. $this->getObject() .' - Type: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
-					$this->obj_handler_obj->setAuthorizationLevel( 1 );
-					$this->obj_handler_obj->setStatus(50); //Active/Authorized
-					$this->obj_handler_obj->setAuthorized(TRUE);
+					if ( $this->getCurrentUser() != $this->obj_handler_obj->getUser() ) {
+						Debug::Text('  Approving Authorization... Final Authorizing Object: '. $this->getObject() .' - Type: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
+						$this->obj_handler_obj->setAuthorizationLevel( 1 );
+						$this->obj_handler_obj->setStatus(50); //Active/Authorized
+						$this->obj_handler_obj->setAuthorized(TRUE);
+					} else {
+						Debug::Text('  Currently logged in user is authorizing (or submitting as new) their own request, not authorizing...', __FILE__, __LINE__, __METHOD__, 10);
+					}
 				} else {
 					Debug::text('  Approving Authorization, moving to next level up...', __FILE__, __LINE__, __METHOD__, 10);
 					$current_level = $this->obj_handler_obj->getAuthorizationLevel();
@@ -460,7 +506,17 @@ class AuthorizationFactory extends Factory {
 			//Final authorization has taken place
 			//Email original submittor and all lower level superiors?
 			$user_ids = $this->getHierarchyChildLevelArray();
-			$user_ids[] = $object_handler_user_id;
+
+			if ( strpos( get_class( $this->getObjectHandlerObject() ), 'PayPeriodTimeSheetVerify' ) === 0 ) { //Allow for PayStubListFactoryPlugin to match as well.
+				//Check to see what type of timesheet verification is required, if its superior only, don't email the employee to avoid confusion.
+				if ( $this->getObjectHandlerObject()->getVerificationType() != 30 ) {
+					$user_ids[] = $object_handler_user_id;
+				} else {
+					Debug::text('  TimeSheetVerification for superior only, dont email employee...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			} else {
+				$user_ids[] = $object_handler_user_id;
+			}
 			//Debug::Arr($user_ids , '  aAuthorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized() .' Child: ' , __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			//Debug::Text('  bAuthorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized(), __FILE__, __LINE__, __METHOD__, 10);
@@ -470,6 +526,10 @@ class AuthorizationFactory extends Factory {
 				$user_ids = $this->getHierarchyChildLevelArray();
 				$user_ids[] = $object_handler_user_id;
 				//Debug::Arr($user_ids , '  b1Authorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized() .' Child: ', __FILE__, __LINE__, __METHOD__, 10);
+			} elseif ( $is_final_authorization == TRUE AND $this->getCurrentUser() == $object_handler_user_id AND $this->getAuthorized() == TRUE AND $authorization_level == 1 ) {
+				//Subordinate who is also a superior at the top and only level of the hierarchy is submitting a request.
+				$user_ids = $this->getHierarchyCurrentLevelArray( TRUE ); //Force to real current level.
+				//Debug::Arr($user_ids , '  b2Authorization Level: '. $authorization_level .' Authorized: '. (int)$this->getAuthorized() .' Child: ', __FILE__, __LINE__, __METHOD__, 10);
 			} else {
 				//Authorized at a middle level, email current level superiors only so they know its waiting on them.
 				$user_ids = $this->getHierarchyParentLevelArray();
@@ -484,7 +544,8 @@ class AuthorizationFactory extends Factory {
 			Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$uplf = TTnew( 'UserPreferenceListFactory' );
-			$uplf->getByUserId( $user_ids );
+			//$uplf->getByUserId( $user_ids );
+			$uplf->getByUserIdAndStatus( $user_ids, 10 ); //Only email ACTIVE employees/supervisors.
 			if ( $uplf->getRecordCount() > 0 ) {
 				$retarr = array();
 				foreach( $uplf as $up_obj ) {
@@ -503,6 +564,8 @@ class AuthorizationFactory extends Factory {
 					Debug::Arr($retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__, 10);
 					return array_unique($retarr);
 				}
+			} else {
+				Debug::Text('No user preferences available, or user is not active...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 

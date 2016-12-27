@@ -590,12 +590,15 @@ class APIPayStub extends APIFactory {
 		if ( !is_array($pay_period_ids) ) {
 			$pay_period_ids = array($pay_period_ids);
 		}
+		$pay_period_ids = array_unique( $pay_period_ids );
+
 
 		if ( $user_ids !== NULL AND !is_array($user_ids) AND $user_ids > 0 ) {
 			$user_ids = array($user_ids);
 		} elseif ( is_array($user_ids) AND isset($user_ids[0]) AND $user_ids[0] == 0 ) {
 			$user_ids = NULL;
 		}
+		$user_ids = array_unique( $user_ids );
 
 		if ( $type_id == 5 ) { //Post-Adjustment Carry-Forward, enable correction and force type to Normal.
 			$enable_correction = TRUE;

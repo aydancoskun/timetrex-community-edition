@@ -603,7 +603,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $retarr;
 	}
 
-	
+
 	function calcStatus() {
 		//Get pay period schedule verification type.
 		$time_sheet_verification_type_id = $this->getVerificationType();
@@ -657,23 +657,14 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 			//If this is a new verification, find the current authorization level to assign to it.
 			if ( ( $this->isNew() == TRUE OR $this->getStatus() == 55 ) AND ( $time_sheet_verification_type_id == 30 OR $time_sheet_verification_type_id == 40 ) ) {
-				$hlf = TTnew( 'HierarchyListFactory' );
-				$hierarchy_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID(), 90, FALSE);
-
-				$hierarchy_highest_level = 99;
-				if ( is_array( $hierarchy_arr ) ) {
-					Debug::Arr($hierarchy_arr, ' Hierarchy Array: ', __FILE__, __LINE__, __METHOD__, 10);
-					$hierarchy_arr_keys = array_keys( $hierarchy_arr );
-					$hierarchy_highest_level = end( $hierarchy_arr_keys ) ;
-					Debug::Text(' Setting hierarchy level to: '. $hierarchy_highest_level, __FILE__, __LINE__, __METHOD__, 10);
-				}
+				$hierarchy_highest_level = AuthorizationFactory::getInitialHierarchyLevel( ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getCompany() : 0 ), ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getID() : 0 ), 90 );
 				$this->setAuthorizationLevel( $hierarchy_highest_level );
 			}
 		}
 
 		return TRUE;
 	}
-	
+
 	function Validate( $ignore_warning = TRUE ) {
 		$this->calcStatus();
 
@@ -701,7 +692,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 	function preSave() {
 		$this->calcStatus();
-		
+
 		if ( $this->getAuthorized() == TRUE ) {
 			$this->setAuthorizationLevel( 0 );
 		}

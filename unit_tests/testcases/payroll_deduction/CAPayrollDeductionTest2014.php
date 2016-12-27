@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 /**
  * @group CAPayrollDeductionTest2014
  */
@@ -67,10 +65,6 @@ class CAPayrollDeductionTest2014 extends PHPUnit_Framework_TestCase {
 
 	//
 	// January 2014
-	//
-
-	//
-	// Don't forget to update the Federal Employment Credit in CA.class.php.
 	//
 	function testCSVFile() {
 		$this->assertEquals( file_exists($this->tax_table_file), TRUE);

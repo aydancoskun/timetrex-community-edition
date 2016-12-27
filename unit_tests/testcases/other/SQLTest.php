@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 class SQLTest extends PHPUnit_Framework_TestCase {
 	public function setUp() {
 		global $dd;

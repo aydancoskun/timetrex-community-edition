@@ -360,7 +360,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 				},
 
-				error: function( error ) { //Server exceptions
+				error: function( jqXHR, textStatus, errorThrown ) {
 					if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
 						ProgressBar.removeProgressBar( message_id );
 					}
@@ -369,7 +369,7 @@ var ServiceCaller = Backbone.Model.extend( {
 						return;
 					}
 
-					if ( error.responseText && error.responseText.indexOf( 'User not authenticated' ) >= 0 ) {
+					if ( jqXHR.responseText && jqXHR.responseText.indexOf( 'User not authenticated' ) >= 0 ) {
 
 						ServiceCaller.cancelAllError = true;
 
@@ -382,12 +382,12 @@ var ServiceCaller = Backbone.Model.extend( {
 						return;
 
 					} else {
-						if ( error.responseText && $.type( error.responseText ) === 'string' ) {
-							TAlertManager.showNetworkErrorAlert( error );
+						if ( jqXHR.responseText && $.type( jqXHR.responseText ) === 'string' ) {
+							TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
 						}
 					}
 
-					if ( error.status === 200 && !error.responseText ) {
+					if ( jqXHR.status === 200 && !jqXHR.responseText ) {
 						apiReturnHandler = new APIReturnHandler();
 						apiReturnHandler.set( 'result_data', true );
 						apiReturnHandler.set( 'delegate', responseObject.get( 'delegate' ) );
@@ -399,8 +399,8 @@ var ServiceCaller = Backbone.Model.extend( {
 						}
 						return apiReturnHandler;
 
-					} else if ( error.status === 0 ) {
-						TAlertManager.showNetworkErrorAlert( error );
+					} else if ( jqXHR.status === 0 ) {
+						TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
 						ProgressBar.cancelProgressBar();
 						return null;
 					} else {

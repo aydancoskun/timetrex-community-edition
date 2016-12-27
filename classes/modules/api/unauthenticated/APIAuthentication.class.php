@@ -345,6 +345,16 @@ class APIAuthentication extends APIFactory {
 		return TRUE;
 	}
 
+	function getAnalyticsTrackingCode() {
+		global $config_vars;
+
+		if ( isset($config_vars['other']['analytics_tracking_code']) AND $config_vars['other']['analytics_tracking_code'] != '' ) {
+			return $config_vars['other']['analytics_tracking_code'];
+		}
+
+		return 'UA-333702-3';
+	}
+
 	function getTTProductEdition( $name = FALSE ) {
 		if ( $name == TRUE ) {
 			$edition = getTTProductEditionName();
@@ -405,6 +415,7 @@ class APIAuthentication extends APIFactory {
 			return $clf->getCurrent()->getName();
 		}
 
+		Debug::text('  ERROR: Primary Company does not exist!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
@@ -418,10 +429,17 @@ class APIAuthentication extends APIFactory {
 				'primary_company_id' => PRIMARY_COMPANY_ID, //Needed for some branded checks.
 				'primary_company_name' => 'N/A',
 				'analytics_enabled' => $this->isAnalyticsEnabled(),
+				'application_version' => $this->getApplicationVersion(),
+				'application_version_date' => $this->getApplicationVersionDate(),
 				'application_build' => $this->getApplicationBuild(),
 				'powered_by_logo_enabled' => $this->isPoweredByLogoEnabled(),
 				'deployment_on_demand' => $this->getDeploymentOnDemand(),
+				'analytics_enabled' => $this->isAnalyticsEnabled(),
+				'analytics_tracking_code' => $this->getAnalyticsTrackingCode(),
 				'product_edition' => $this->getTTProductEdition( FALSE ),
+				'product_edition_name' => $this->getTTProductEdition( TRUE ),
+				'registration_key' => 'INSTALLER',
+				'http_host' => $this->getHTTPHost(),
 				'production' => $this->getProduction(),
 				'demo_mode' => DEMO_MODE,
 				'base_url' => Environment::getBaseURL(),
@@ -461,6 +479,7 @@ class APIAuthentication extends APIFactory {
 				'deployment_on_demand' => $this->getDeploymentOnDemand(),
 				'web_session_expire' => ( isset($config_vars['other']['web_session_expire']) AND $config_vars['other']['web_session_expire'] != '' ) ? (bool)$config_vars['other']['web_session_expire'] : FALSE, //If TRUE then session expires when browser closes.
 				'analytics_enabled' => $this->isAnalyticsEnabled(),
+				'analytics_tracking_code' => $this->getAnalyticsTrackingCode(),
 				'registration_key' => $this->getRegistrationKey(),
 				'http_host' => $this->getHTTPHost(),
 				'is_ssl' => Misc::isSSL(),
@@ -479,7 +498,7 @@ class APIAuthentication extends APIFactory {
 				'language' => TTi18n::getLanguage(),
 				'locale' => TTi18n::getNormalizedLocale(), //Needed for HTML5 interface to load proper translation file.
 
-				'map_api_key' => ( isset($config_vars['map']['api_key']) AND $config_vars['map']['api_key'] != '' ) ? $config_vars['other']['map_api_key'] : '',
+				'map_api_key' => ( isset($config_vars['map']['api_key']) AND $config_vars['map']['api_key'] != '' ) ? $config_vars['map']['map_api_key'] : '',
 				'map_provider' => isset($config_vars['map']['provider'] ) ? $config_vars['map']['provider'] : 'timetrex',
 				'map_tile_url' => isset( $config_vars['map']['tile_url'] ) ? rtrim($config_vars['map']['tile_url'], '/') : '//map-tiles.timetrex.com',
 				'map_routing_url' => isset( $config_vars['map']['routing_url'] ) ? rtrim($config_vars['map']['routing_url'], '/') : '//map-routing.timetrex.com',

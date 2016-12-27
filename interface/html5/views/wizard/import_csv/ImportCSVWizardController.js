@@ -154,7 +154,6 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				this.stepsWidgetDic[this.current_step]['saved_mapping'] = previous_saved_layout_selector;
 
 				previous_saved_layout_selector.bind( 'formItemChange', function( e, target ) {
-
 					$this.onSavedLayoutChange( target.getValue() );
 				} );
 
@@ -198,7 +197,6 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	},
 
 	onSavedLayoutChange: function( value ) {
-		
 		var grid = this.stepsWidgetDic[this.current_step].import_data;
 
 		var len = this.saved_layout_array.length;
@@ -234,7 +232,6 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	},
 
 	setSampleRowBaseOnImportFile: function( grid_data ) {
-
 		if ( !this.import_data || !grid_data ) {
 			return;
 		}
@@ -244,7 +241,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			item.row_1 = '';
 			for ( var j = 0; j < this.import_data.length; j++ ) {
 				var import_data = this.import_data[j];
-				if ( item.field === import_data.field ) {
+				//#2132 - match based on map_column_name
+				if ( item.map_column_name === import_data.map_column_name ) {
 					item.row_1 = import_data.row_1;
 					continue;
 				}
@@ -650,52 +648,51 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 				this.api_import.getOptions( 'columns', {
 					onResult: function( result ) {
-					$this.field_source = Global.buildRecordArray( result.getResult() );
-
+						$this.field_source = Global.buildRecordArray( result.getResult() );
 						$this.api_import.getRawData( 1, {
 							onResult: function( getRawDataRes ) {
-						var raw_data = getRawDataRes.getResult();
-						raw_data = $this.buildMappingGridDataArray( raw_data[0] );
 
-								$this.api_import.generateColumnMap( {
-									onResult: function( generateColumnMapRes ) {
-							$this.column_map_data = generateColumnMapRes.getResult();
+							var raw_data = getRawDataRes.getResult();
+							raw_data = $this.buildMappingGridDataArray( raw_data[0] );
 
-							var len = raw_data.length;
-							for ( var key in $this.column_map_data ) {
-								for ( var i = 0; i < len; i++ ) {
-									var raw_data_item = raw_data[i];
-									var col_map_data_item = $this.column_map_data[key];
-									if ( raw_data_item.map_column_name === col_map_data_item.map_column_name ) {
-										raw_data_item.field = key;
-										raw_data_item.default_value = $this.column_map_data[key].default_value ? $this.column_map_data[key].default_value : '';
-										raw_data_item.parse_hint = $this.column_map_data[key].parse_hint ? $this.column_map_data[key].parse_hint : '';
+							$this.api_import.generateColumnMap( {
+								onResult: function( generateColumnMapRes ) {
+									$this.column_map_data = generateColumnMapRes.getResult();
+
+									var len = raw_data.length;
+									for ( var key in $this.column_map_data ) {
+										for ( var i = 0; i < len; i++ ) {
+											var raw_data_item = raw_data[i];
+											var col_map_data_item = $this.column_map_data[key];
+											if ( raw_data_item.map_column_name === col_map_data_item.map_column_name ) {
+												raw_data_item.field = key;
+												raw_data_item.default_value = $this.column_map_data[key].default_value ? $this.column_map_data[key].default_value : '';
+												raw_data_item.parse_hint = $this.column_map_data[key].parse_hint ? $this.column_map_data[key].parse_hint : '';
+											}
+										}
 									}
-								}
-							}
 
-							raw_data.sort( function( a, b ) {
-									return Global.compare( a, b, 'map_column_name' );
-								}
-							);
+									raw_data.sort( function( a, b ) {
+											return Global.compare( a, b, 'map_column_name' );
+										}
+									);
 
-							// use to set Sample row to same layout
-							$this.import_data = raw_data;
+									// use to set Sample row to same layout
+									$this.import_data = raw_data;
 
-							grid.clearGridData();
-							grid.setGridParam( {data: raw_data} );
-							grid.trigger( 'reloadGrid' );
+									grid.clearGridData();
+									grid.setGridParam( {data: raw_data} );
+									grid.trigger( 'reloadGrid' );
 
-							$this.bindGridRenderEvents( grid );
+									$this.bindGridRenderEvents( grid );
 
-							$this.getSavedMapping();
-							$this.setButtonsStatus(); // set button enabled or disabled
+									$this.getSavedMapping();
+									$this.setButtonsStatus(); // set button enabled or disabled
 
 									}
 								} );
 							}
 						} );
-
 					}
 				} );
 

@@ -321,10 +321,25 @@ class APITimeSheet extends APIFactory {
 			foreach( $pplf as $pp_obj ) {
 				$pay_period_data[$pp_obj->getId()] = $pp_obj->getObjectAsArray( $pp_columns );
 				$pay_period_data[$pp_obj->getId()]['timesheet_verify_type_id'] = $pp_obj->getTimeSheetVerifyType();
+				$pay_period_data[$pp_obj->getId()]['start_date_epoch'] = $pp_obj->getStartDate();
+				$pay_period_data[$pp_obj->getId()]['end_date_epoch'] = $pp_obj->getEndDate();
 			}
 		}
 		unset($pp_obj);
 
+		//Fill in payperiod gaps in timesheet primarily for migrating from one schedule to another or for new hires in middle of a pay period
+		$calendar_dates = TTDate::getCalendarArray( $timesheet_dates['start_date'], $timesheet_dates['end_date'], 0, FALSE );
+		foreach ( $calendar_dates as $tmp_date ) {
+			if ( !isset($timesheet_dates['pay_period_date_map'][TTDate::getDate('DATE', $tmp_date['epoch'])]) ) {
+				foreach ( $pay_period_data as $tmp_pp_data ) {
+					if ( $tmp_date['epoch'] >= $tmp_pp_data['start_date_epoch'] AND $tmp_date['epoch'] <= $tmp_pp_data['end_date_epoch']) {
+						$timesheet_dates['pay_period_date_map'][TTDate::getDate('DATE', $tmp_date['epoch'])] = $tmp_pp_data['id'];
+					}
+				}
+			}
+		}
+		ksort($timesheet_dates['pay_period_date_map']);
+		unset($calendar_dates, $tmp_date, $tmp_pp_data);
 
 		$pp_user_date_total_data = array();
 		$pay_period_accumulated_user_date_total_data = array();

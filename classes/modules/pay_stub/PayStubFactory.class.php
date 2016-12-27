@@ -440,6 +440,10 @@ class PayStubFactory extends Factory {
 		if ( is_object( $this->getPayPeriodObject() ) AND
 				( $epoch <= ($this->getPayPeriodObject()->getEndDate() + 59) AND $epoch >= $this->getPayPeriodObject()->getStartDate() ) ) {
 			return TRUE;
+		} elseif ( is_object( $this->getPayPeriodObject() ) == FALSE ) {
+			//In cases where mass editing pay stubs and changing just the end date or transaction date, if the pay period dropdown box is not checked to be mass edited as well,
+			//  then there won't be a pay period object, and it will always cause a validation error. This confuses users, so just assume if no pay period object exists the date is correct.
+			return TRUE;
 		}
 
 		return FALSE;
@@ -2149,7 +2153,8 @@ class PayStubFactory extends Factory {
 
 	function getEmailPayStubAddresses() {
 		$uplf = TTnew( 'UserPreferenceListFactory' );
-		$uplf->getByUserId( $this->getUser() );
+		//$uplf->getByUserId( $this->getUser() );
+		$uplf->getByUserIdAndStatus( $this->getUser(), 10 ); //Only email ACTIVE employees/supervisors.
 		if ( $uplf->getRecordCount() > 0 ) {
 			foreach( $uplf as $up_obj ) {
 				if ( $up_obj->getEnableEmailNotificationPayStub() == TRUE AND is_object( $up_obj->getUserObject() ) AND $up_obj->getUserObject()->getStatus() == 10 ) {
@@ -2167,6 +2172,8 @@ class PayStubFactory extends Factory {
 				Debug::Arr($retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__, 10);
 				return array_unique($retarr);
 			}
+		} else {
+			Debug::Text('No user preferences available, or user is not active...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		return FALSE;
@@ -2421,7 +2428,7 @@ class PayStubFactory extends Factory {
 			$pslf->getById( $this->getId() );
 		}
 
-		if ( get_class( $pslf ) !== 'PayStubListFactory' ) {
+		if ( strpos( get_class( $pslf ), 'PayStubListFactory' ) !== 0 ) { //Allow for PayStubListFactoryPlugin to match as well.
 			return FALSE;
 		}
 

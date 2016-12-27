@@ -170,7 +170,7 @@ class Import {
 	function getRawDataColumns() {
 		$raw_data = $this->getRawData();
 		if ( is_array( $raw_data ) ) {
-			
+
 			$retarr = array();
 			foreach( $raw_data as $raw_data_row ) {
 				foreach( $raw_data_row as $raw_data_column => $raw_data_column_data ) {
@@ -326,15 +326,20 @@ class Import {
 		$full_function_name = 'parse_'.$function_name;
 
 		$input = '';
-		if ( isset($map_data[$function_name]['map_column_name'])
-				AND isset($raw_row[$map_data[$function_name]['map_column_name']]) AND $raw_row[$map_data[$function_name]['map_column_name']] != '' ) {
+//		if ( isset($map_data[$function_name]['map_column_name'])
+//				AND isset($raw_row[$map_data[$function_name]['map_column_name']]) AND $raw_row[$map_data[$function_name]['map_column_name']] != '' ) {
+//
+//			//Make sure we check for proper UTF8 encoding and if its not remove the data so we don't cause a PGSQL invalid byte sequence error.
+//			if ( function_exists('mb_check_encoding') AND mb_check_encoding( $raw_row[$map_data[$function_name]['map_column_name']], 'UTF-8' ) === TRUE ) {
+//				$input = $raw_row[$map_data[$function_name]['map_column_name']];
+//			} else {
+//				Debug::Text('Bad UTF8 encoding!: '. $input, __FILE__, __LINE__, __METHOD__, 10);
+//			}
+//		}
 
-			//Make sure we check for proper UTF8 encoding and if its not remove the data so we don't cause a PGSQL invalid byte sequence error.
-			if ( function_exists('mb_check_encoding') AND mb_check_encoding( $raw_row[$map_data[$function_name]['map_column_name']], 'UTF-8' ) === TRUE ) {
-				$input = $raw_row[$map_data[$function_name]['map_column_name']];
-			} else {
-				Debug::Text('Bad UTF8 encoding!: '. $input, __FILE__, __LINE__, __METHOD__, 10);
-			}
+		//Data is mapped in mapRowData() now, so we just need to handle parsing here.
+		if ( isset($raw_row[$function_name]) ) {
+			$input = $raw_row[$function_name];
 		}
 
 		$default_value = '';
@@ -350,7 +355,7 @@ class Import {
 		if ( $input == '' AND $default_value != '' ) {
 			$input = $default_value;
 		}
-		
+
 		$input = trim($input); //This can affect things like Country/Province matching.
 		if ( method_exists( $this, $full_function_name ) ) {
 			$retval = call_user_func( array( $this, $full_function_name ), $input, $default_value, $parse_hint, $map_data, $raw_row );
@@ -361,7 +366,7 @@ class Import {
 				return $default_value;
 			}
 		}
-		
+
 		return $input;
 	}
 
@@ -372,6 +377,31 @@ class Import {
 		}
 
 		return TRUE;
+	}
+
+	function mapRowData( $column_map, $raw_row ) {
+		foreach( $column_map as $import_column => $import_data ) {
+			//Debug::Arr($import_data, 'Import Data: Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
+			//Don't allow importing "id" columns.
+			if ( strtolower($import_column) != 'id' AND $import_column !== 0 ) {
+				if ( isset($column_map[$import_column]['map_column_name'])
+						AND isset($raw_row[$column_map[$import_column]['map_column_name']]) AND $raw_row[$column_map[$import_column]['map_column_name']] != '' ) {
+					$input = '';
+					//Make sure we check for proper UTF8 encoding and if its not remove the data so we don't cause a PGSQL invalid byte sequence error.
+					if ( function_exists( 'mb_check_encoding' ) AND mb_check_encoding( $raw_row[$column_map[$import_column]['map_column_name']], 'UTF-8' ) === TRUE ) {
+						$input = $raw_row[$column_map[$import_column]['map_column_name']];
+					} else {
+						Debug::Text( 'Bad UTF8 encoding!: ' . $input, __FILE__, __LINE__, __METHOD__, 10 );
+					}
+
+					$input = trim($input); //This can affect things like Country/Province matching.
+					$retarr[$import_column] = $input;
+				}
+			}
+		}
+
+		//Debug::Arr($retarr, 'bRaw Row: ', __FILE__, __LINE__, __METHOD__, 10);
+		return $retarr;
 	}
 
 	function preParseRow( $row_number, $raw_row ) {
@@ -424,26 +454,35 @@ class Import {
 
 		$x = 0;
 		foreach( $raw_data as $raw_row ) {
+			//Map the data first, so all other functions see consistent data.
+			//This is important for getUserIDByRowData(), as sometimes we need to know the user_id in the preParseRow() function for getDefaultData() functions.
+			$raw_row = $this->mapRowData( $column_map, $raw_row );
+
 			$parsed_data[$x] = $this->preParseRow( $x, $raw_row ); //This needs to run for each row so things like manual_ids can get updated automatically.
 			//Debug::Arr($parsed_data[$x], 'Default Data: X: '. $x, __FILE__, __LINE__, __METHOD__, 10);
 
-			foreach( $column_map as $import_column => $import_data ) {
+//			foreach( $column_map as $import_column => $import_data ) {
+//				//Debug::Arr($import_data, 'Import Data X: '. $x .' Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
+//				//Don't allow importing "id" columns.
+//				if ( strtolower($import_column) != 'id' AND $import_column !== 0 ) {
+//					$parsed_data[$x][$import_column] = $this->callInputParseFunction( $import_column, $column_map, $raw_row );
+//					//Debug::Arr($parsed_data[$x][$import_column], 'Import Column: '. $import_column .' Value: ', __FILE__, __LINE__, __METHOD__, 10);
+//				} else {
+//					//Don't allow importing "id" columns.
+//					unset($parsed_data[$x][$import_data['map_column_name']]);
+//				}
+//
+//				if ( $import_column != $import_data['map_column_name'] ) {
+//					//Unset the original unmapped data so it doesn't conflict, especially if its an "id" column.
+//					//Only if the two columns don't match though, as there was a bug that if someone tried to import column names that matched the TimeTrex
+//					//names exactly, it would just unset them all.
+//					unset($parsed_data[$x][$import_data['map_column_name']]);
+//				}
+//			}
+			foreach( $raw_row as $import_column => $import_data ) {
 				//Debug::Arr($import_data, 'Import Data X: '. $x .' Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
-				//Don't allow importing "id" columns.
-				if ( strtolower($import_column) != 'id' AND $import_column !== 0 ) {
-					$parsed_data[$x][$import_column] = $this->callInputParseFunction( $import_column, $column_map, $raw_row );
-					//Debug::Arr($parsed_data[$x][$import_column], 'Import Column: '. $import_column .' Value: ', __FILE__, __LINE__, __METHOD__, 10);
-				} else {
-					//Don't allow importing "id" columns.
-					unset($parsed_data[$x][$import_data['map_column_name']]);
-				}
-				
-				if ( $import_column != $import_data['map_column_name'] ) {
-					//Unset the original unmapped data so it doesn't conflict, especially if its an "id" column.
-					//Only if the two columns don't match though, as there was a bug that if someone tried to import column names that matched the TimeTrex
-					//names exactly, it would just unset them all.
-					unset($parsed_data[$x][$import_data['map_column_name']]);
-				}
+				$parsed_data[$x][$import_column] = $this->callInputParseFunction( $import_column, $column_map, $raw_row );
+				//Debug::Arr($parsed_data[$x][$import_column], 'Import Column: '. $import_column .' Value: ', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			$parsed_data[$x] = $this->postParseRow( $x, $parsed_data[$x] ); //This needs to run for each row so things like manual_ids can get updated automatically.
@@ -655,6 +694,7 @@ class Import {
 		//if there are ever duplicate employee numbers, the import process won't be able to differentiate between them, and the
 		//update process will not work.
 		//Actually, the above is no longer the case.
+		//  **Make sure data is mapped before passed into this function, otherwise it will fail completely. We added mapRowData() to handle this and it should be called before preParseData() is now.
 		if ( isset($raw_row['user_name']) AND $raw_row['user_name'] != '' ) {
 			$filter_data = array( 'user_name' => $raw_row['user_name'] );
 			Debug::Text('Searching for existing record based on User Name: '. $raw_row['user_name'], __FILE__, __LINE__, __METHOD__, 10);
@@ -699,7 +739,7 @@ class Import {
 			$parse_hint = 'first_name';
 		}
 
-		$retval = $input;
+		$retval = preg_replace('!\s+!', ' ', $input); //Replace any double or more spaces with single to avoid problems with parsing middle/first names below.
 		switch ( $parse_hint ) {
 			case 'first_name':
 			case 'last_name':
@@ -729,14 +769,14 @@ class Import {
 				}
 				break;
 			case 'last_first_middle_name':
-				if ( $column == 'first_name' ) {
+				if ( $column == 'first_name' OR $column == 'middle_name' ) {
 					$offset = 1;
 				} else {
 					$offset = 0;
 				}
-				$split_full_name = explode( ',', $input);
+				$split_full_name = explode( ',', trim( $input ) );
 				if ( isset($split_full_name[$offset]) ) {
-					$retval = $split_full_name[$offset];
+					$retval = trim( $split_full_name[$offset] );
 					if ( $column == 'first_name' OR $column == 'middle_name' ) {
 						if ( $column == 'first_name' ) {
 							$offset = 0;
@@ -745,7 +785,11 @@ class Import {
 						}
 
 						$split_retval = explode( ' ', $retval);
-						$retval = $split_retval[$offset];
+						if ( isset($split_retval[$offset]) ) {
+							$retval = trim( $split_retval[$offset] );
+						} else {
+							$retval = '';
+						}
 					}
 				}
 				break;

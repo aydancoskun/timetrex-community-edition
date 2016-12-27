@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 class PermissionTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
 	protected $user_id = NULL;
@@ -157,7 +155,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
 	function getAllPayPeriods() {
 		$pplf = new PayPeriodListFactory();
 		//$pplf->getByCompanyId( $this->company_id );
@@ -174,7 +172,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
 	function editUserPermission( $user_id, $section, $name, $value ) {
 		$pclf = TTnew( 'PermissionControlListFactory' );
 		$pclf->getByCompanyIdAndUserID( $this->company_id, $user_id );
@@ -264,7 +262,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		//Admin user at the top
 		$dd->createAuthorizationHierarchyLevel( $this->company_id, $hierarchy_control_id, $superior_user_id, 1 );
-		
+
 		$permission = TTnew('Permission');
 		$permission_arr = $permission->getPermissions( $superior_user_id, $this->company_id );
 		$this->assertGreaterThan( 20, count($permission_arr) ); //Needs to be low enough for community edition.
@@ -393,7 +391,7 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
 	/**
 	 * @ORIGINAL: group Permission_testBasicHierarchyPermissionFunctionsD
 	 * @group Permission_test

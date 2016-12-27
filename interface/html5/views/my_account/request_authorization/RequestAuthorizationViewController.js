@@ -9,6 +9,8 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	authorization_api: null,
 	api_request: null,
 	api_absence_policy: null,
+	message_control_api:null,
+
 
 	authorization_history_columns: [],
 
@@ -30,6 +32,8 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
 		this.api_request = new (APIFactory.getAPIClass( 'APIRequest' ))();
 		this.api_absence_policy = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
+		this.message_control_api = new (APIFactory.getAPIClass('APIMessageControl'))();
+
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
 			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
@@ -674,30 +678,9 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	},
 
 	uniformVariable: function( records ) {
-
-		var msg = {};
-
 		if ( this.is_edit ) {
-
-			msg.body = this.current_edit_record['body'];
-
-			msg.from_user_id = this.current_edit_record['user_id'];
-			msg.to_user_id = this.current_edit_record['user_id'];
-
-			msg.object_id = this.current_edit_record['id'];
-
-			msg.object_type_id = 50;
-
-			if ( Global.isFalseOrNull( this.current_edit_record['subject'] ) ) {
-				msg.subject = this.edit_view_ui_dic['subject'].getValue();
-			} else {
-				msg.subject = this.current_edit_record['subject'];
-			}
-
-			return msg;
-
+			return this.uniformMessageVariable(records);
 		}
-
 		return records;
 	},
 
@@ -957,7 +940,8 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				$this.getScheduleTotalTime();
 				break
 			case'absence_policy_id':
-				this.onAvailableBalanceChange();
+				this.selected_absence_policy_record = this.edit_view_ui_dic.absence_policy_id.getValue();
+				this.getAvailableBalance();
 				break
 		}
 
@@ -1173,6 +1157,13 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 					$this.validateResult(result);
 				}
 			})
+		}
+	},
+
+
+	openAuthorizationView: function() {
+		if ( !this.edit_view ) {
+			this.initEditViewUI(this.viewId, this.edit_view_tpl);
 		}
 	},
 

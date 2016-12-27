@@ -537,6 +537,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			ignoreWarning = false;
 		}
 		this.is_add = false;
+		this.is_changed = false;
+
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save_and_next';
 		record = this.uniformVariable( record );

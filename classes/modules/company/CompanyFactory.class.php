@@ -1605,6 +1605,7 @@ class CompanyFactory extends Factory {
 											'admin_user_feedback_rating' => FALSE,
 											'all_user_feedback_rating' => FALSE,
 
+											'application_build' => FALSE,
 											'deleted' => 'Deleted',
 											);
 			return $variable_function_map;
@@ -3412,6 +3413,9 @@ class CompanyFactory extends Factory {
 							//$data[$variable] = $this->getColumn( $variable );
 							break;
 						case 'name_metaphone':
+							break;
+						case 'application_build':
+							$data[$variable] = APPLICATION_BUILD; //this is used by JS to determine when the version has changed to force a reload.
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

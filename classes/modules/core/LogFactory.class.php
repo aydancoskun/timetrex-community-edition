@@ -134,6 +134,7 @@ class LogFactory extends Factory {
 											'pay_period_time_sheet_verify'		=> TTi18n::getText('TimeSheet Verify'),
 
 											'pay_stub'							=> TTi18n::getText('Pay Stub'),
+											'pay_stub_entry'					=> TTi18n::getText('Pay Stub Entry'),
 											'government_document'				=> TTi18n::getText('Government Document'),
 											'pay_stub_amendment'				=> TTi18n::getText('Pay Stub Amendment'),
 											'pay_stub_entry_account'			=> TTi18n::getText('Pay Stub Account'),
@@ -290,6 +291,7 @@ class LogFactory extends Factory {
 											'pay_period_time_sheet_verify'		=> array('user'),
 
 											'pay_stub'							=> array('pay_stub'),
+											'pay_stub_entry'					=> array('pay_stub'),
 											'government_document'				=> array('government_document'),
 											'pay_stub_amendment'				=> array('pay_stub_amendment'),
 											'pay_stub_entry_account'			=> array('pay_stub_account'),

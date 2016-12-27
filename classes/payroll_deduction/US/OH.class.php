@@ -41,7 +41,7 @@
 class PayrollDeduction_US_OH extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-												20140801 => array(
+												20150801 => array(
 															0 => array(
 																	array( 'income' => 5000,	'rate' => 0.556,	'constant' => 0 ),
 																	array( 'income' => 10000,	'rate' => 1.112,	'constant' => 27.80 ),
@@ -114,7 +114,7 @@ class PayrollDeduction_US_OH extends PayrollDeduction_US {
 																),
 															),
 												);
-		
+
 	var $state_options = array(
 								//01-Jan-09: No Change.
 								20080101 => array(

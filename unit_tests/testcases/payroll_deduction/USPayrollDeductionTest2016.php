@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 /**
  * @group USPayrollDeductionTest2016
  */
@@ -144,7 +142,7 @@ class USPayrollDeductionTest2016 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $total_rows, ($i - 1 ) );
 	}
 
-	
+
 	function testUS_2016a_Test1() {
 		Debug::text('US - SemiMonthly - Beginning of 2016 01-Jan-2016: ', __FILE__, __LINE__, __METHOD__, 10);
 

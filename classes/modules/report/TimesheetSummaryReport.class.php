@@ -196,7 +196,7 @@ class TimesheetSummaryReport extends Report {
 										'-1431-branch_manual_id' => TTi18n::gettext('Branch Code'),
 										'-1440-department_name' => TTi18n::gettext('Department'),
 										'-1441-department_manual_id' => TTi18n::gettext('Department Code'),
-										
+
 										//This can't be a secure SIN otherwise it doesn't make much sense putting it on here... But if its here then
 										//supervisors can see it and it may be a security concern.
 										//'-1480-sin' => TTi18n::gettext('SIN/SSN'),
@@ -215,7 +215,7 @@ class TimesheetSummaryReport extends Report {
 					$retval['-1105-default_job'] = TTi18n::gettext('Default Job');
 					$retval['-1107-default_job_item'] = TTi18n::gettext('Default Task');
 				}
-				
+
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column')  );
 				ksort($retval);
 				break;
@@ -245,7 +245,7 @@ class TimesheetSummaryReport extends Report {
 										'-3215-overtime_wage' => TTi18n::gettext('Total OverTime Wage'),
 										'-3220-absence_wage' => TTi18n::gettext('Total Absence Time Wage'),
 										'-3225-premium_wage' => TTi18n::gettext('Total Premium Time Wage'),
-										
+
 										'-3200-gross_wage' => TTi18n::gettext('Gross Wage'),
 										'-3400-gross_wage_with_burden' => TTi18n::gettext('Gross Wage w/Burden'),
 										//'-3390-gross_hourly_rate' => TTi18n::gettext('Gross Hourly Rate'),
@@ -651,7 +651,7 @@ class TimesheetSummaryReport extends Report {
 				$department_id = $udt_obj->getColumn('department_id');
 				$currency_rate = $udt_obj->getColumn('currency_rate');
 				$currency_id = $udt_obj->getColumn('currency_id');
-				
+
 				//With pay codes, paid time makes sense now and is associated with branch/departments too.
 				$time_columns = $udt_obj->getTimeCategory( FALSE, $columns  ); //Exclude 'total' as its not used in reports anyways, and causes problems when grouping by branch/default branch.
 
@@ -675,7 +675,7 @@ class TimesheetSummaryReport extends Report {
 															'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
 															'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
 															);
-						
+
 						if ( !isset($include_no_data_rows_arr[$udt_obj->getColumn('pay_period_id')][$date_stamp]) ) {
 							$include_no_data_rows_arr[$udt_obj->getColumn('pay_period_id')][$date_stamp] = array(
 																			'branch_id' => 0,
@@ -684,15 +684,17 @@ class TimesheetSummaryReport extends Report {
 																			'pay_period_end_date' => strtotime( $udt_obj->getColumn('pay_period_end_date') ),
 																			'pay_period_transaction_date' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
 																			'pay_period' => strtotime( $udt_obj->getColumn('pay_period_transaction_date') ),
-																			'pay_period_id' => $udt_obj->getColumn('pay_period_id'),																		   
+																			'pay_period_id' => $udt_obj->getColumn('pay_period_id'),
 																		   );
 						}
 					}
 
-					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
-					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency'] = $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
-					if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
+					if ( $udt_obj->getPayCode() > 0 ) { //Make sure we don't set the currency based on worked_time that will always be currency_id=0 and have no pay_code_id associated.
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency'] = $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
+						if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
+							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
+						}
 					}
 
 					foreach( $time_columns as $column ) {
@@ -782,7 +784,7 @@ class TimesheetSummaryReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array('other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE) ) );
-			
+
 			if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
 				$this->tmp_data['user'][$u_obj->getId()]['currency_rate'] = $u_obj->getColumn('currency_rate');
@@ -795,7 +797,7 @@ class TimesheetSummaryReport extends Report {
 				foreach( $include_no_data_rows_arr as $tmp_pay_period_id => $tmp_date_stamps ) {
 					foreach( $tmp_date_stamps as $tmp_date_stamp => $tmp_pay_period_data ) {
 						$this->tmp_data['user_date_total'][$u_obj->getId()][$tmp_date_stamp][0][0] = $tmp_pay_period_data;
-					}					
+					}
 				}
 				unset($tmp_pay_period_id, $tmp_date_stamps, $tmp_date_stamp, $tmp_pay_period_data);
 			}
@@ -805,7 +807,7 @@ class TimesheetSummaryReport extends Report {
 		unset($include_no_data_rows_arr);
 
 		//Debug::Arr($this->tmp_data['user'], 'User Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		$blf = TTnew( 'BranchListFactory' );
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text(' Branch Total Rows: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -855,7 +857,7 @@ class TimesheetSummaryReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 
-		if ( isset($this->tmp_data['user_date_total']) ) {		
+		if ( isset($this->tmp_data['user_date_total']) ) {
 			foreach( $this->tmp_data['user_date_total'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach( $level_1 as $date_stamp => $level_2 ) {
@@ -897,7 +899,7 @@ class TimesheetSummaryReport extends Report {
 								} else {
 									$processed_data['schedule_absent'] = 0;
 								}
-								
+
 								if ( isset($this->tmp_data['user'][$user_id]['default_branch_id']) AND isset($this->tmp_data['default_branch'][$this->tmp_data['user'][$user_id]['default_branch_id']]) ) {
 									$tmp_default_branch = $this->tmp_data['default_branch'][$this->tmp_data['user'][$user_id]['default_branch_id']];
 								} else {

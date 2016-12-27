@@ -1,6 +1,7 @@
 RequestViewCommonController = BaseViewController.extend( {
 
 	authorization_history:null,
+	selected_absence_policy_record: null,
 
 	setGridCellBackGround: function() {
 		var data = this.grid.getGridParam( 'data' );
@@ -223,7 +224,6 @@ RequestViewCommonController = BaseViewController.extend( {
 				var schedule_api = new (APIFactory.getAPIClass('APISchedule'))();
 				this.total_time = schedule_api.getScheduleTotalTime(startTime, endTime, schedulePolicyId, user_id, {async: false}).getResult();
 				this.current_edit_record['total_time'] = this.total_time;
-
 				var total_time = Global.secondToHHMMSS(this.total_time);
 
 				this.edit_view_ui_dic['total_time'].setValue(total_time);
@@ -256,7 +256,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		if (status_id == 20 && ( type_id == 30 || type_id == 40)) {
 			ui_field.parents('.edit-view-form-item-div').show();
 			if ((this.viewId == 'Request' && this.is_viewing) == false) {
-				this.getAvailableBalance();
+				this.onAvailableBalanceChange();
 			}
 		} else{
 			ui_field.parents('.edit-view-form-item-div').hide();
@@ -265,7 +265,7 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	onDateStampChanged: function(){
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate('request', 'add_advanced') ) {
 			this.edit_view_ui_dic.start_date.setValue(this.current_edit_record.date_stamp);
 			this.current_edit_record.start_date = this.current_edit_record.date_stamp;
 		}
@@ -277,9 +277,10 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	getAvailableBalance: function() {
-		if(this.is_viewing){
+		if ( this.is_viewing && this.viewId != 'RequestAuthorization' ) {
 			return;
 		}
+
 		if ( ((this.viewId == 'Request' && !this.is_viewing) || this.viewId == 'RequestAuthorization' ) &&
 			this.current_edit_record.status_id &&
 			this.current_edit_record.status_id == 20 &&
@@ -308,7 +309,11 @@ RequestViewCommonController = BaseViewController.extend( {
 				this.pre_total_time, {
 					onResult: function (result) {
 						$this.getBalanceHandler(result, date_stamp);
-						$this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').show();
+						if ( result && $this.selected_absence_policy_record ) {
+							$this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').show();
+						} else {
+							$this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
+						}
 					}
 				}
 			);
@@ -435,13 +440,11 @@ RequestViewCommonController = BaseViewController.extend( {
 
 				$this.initEditView();
 				$this.initViewingView();
-				//var $edit_view_ui_dic = $this.edit_view_ui_dic;
+				$this.navigation.setValue(result_data.id)
 
 				//This line is required to avoid problems with the absence policy box not showing properly on initial load.
 				$this.onWorkingStatusChanged();
 
-				//$this.edit_view_ui_dic = $edit_view_ui_dic;
-				$this.getAvailableBalance();
 				EmbeddedMessage.init( $this.current_edit_record.id, 50, $this, $this.edit_view, $this.edit_view_tab, $this.edit_view_ui_dic, function(){
 					$this.authorization_history = AuthorizationHistory.init($this);
 				} );
@@ -465,8 +468,6 @@ RequestViewCommonController = BaseViewController.extend( {
 				}
 			} else {
 				this.showAdvancedFields();
-
-				this.getAvailableBalance();
 				this.getScheduleTotalTime();
 			}
 		}
@@ -562,8 +563,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		form_item_input.TText({field: 'date_stamp'});
 		this.addEditFieldToColumn($.i18n._('Date'), form_item_input, tab_request_column1);
 
-
-		if (LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate('request', 'add_advanced')) {
+		if (LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate('request', 'add_advanced') || this.viewId == 'RequestAuthorization' || this.current_edit_record.request_schedule_id > 0 ) {
 			//Working Status
 			var form_item_input = Global.loadWidgetByName(FormItemType.COMBO_BOX);
 			form_item_input.TComboBox({field: 'status_id', set_empty: false});
@@ -671,6 +671,11 @@ RequestViewCommonController = BaseViewController.extend( {
 				customSearchFilter: function (filter) {
 					return $this.setAbsencePolicyFilter(filter);
 				},
+				setRealValueCallBack: function(value){
+					// #2135 fix for cases where user is removed from absence policies between creating request and approval
+					$this.selected_absence_policy_record = value;
+					$this.onAvailableBalanceChange();
+				}
 			});
 			this.addEditFieldToColumn($.i18n._('Absence Policy'), form_item_input, tab_request_column1);
 
@@ -1031,5 +1036,17 @@ RequestViewCommonController = BaseViewController.extend( {
 			context_btn.addClass( 'disable-image' );
 		}
 	},
+
+	// Creates the record shipped to the API at setMesssage
+	uniformMessageVariable: function(records){
+		var msg = {};
+
+		msg.subject = this.edit_view_ui_dic['subject'].getValue();
+		msg.body = this.edit_view_ui_dic['body'].getValue();
+		msg.object_id = this.current_edit_record['id'];
+		msg.object_type_id = 50;
+
+		return msg;
+	}
 
 } );

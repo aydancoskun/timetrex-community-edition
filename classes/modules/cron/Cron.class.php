@@ -118,7 +118,8 @@ class Cron {
 		}
 
 		//If any of the array entries is '*', just return that as the string and ignore everything else.
-		if ( is_array($arr) AND in_array('*', $arr) === TRUE ) {
+		// Use STRICT=TRUE on in_array() check, otherwise (int)0 matches '*' search.
+		if ( is_array($arr) AND in_array('*', $arr, TRUE) === TRUE ) {
 			return '*';
 		} else {
 			if ( is_array( $arr ) ) {

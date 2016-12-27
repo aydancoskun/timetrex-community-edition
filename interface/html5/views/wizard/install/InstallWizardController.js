@@ -1002,23 +1002,33 @@ InstallWizardController = BaseWizardController.extend( {
 			}
 			if ( result.test_connection !== null ) {
 				if ( result.test_connection === true ) {
-					step_title_htm = step_title_htm
-						+ '<p>'
-						+ $.i18n._('Connection test to your database as a non-privileged user has') + ' '
-						+ '<b>' + $.i18n._('SUCCEEDED') + '</b>' + '!' + ' '
-						+ $.i18n._('You may continue.')
-						+ '</p>';
-					if (showTrue) {
+					if ( result.database_version === 1 ) {
+						step_title_htm = step_title_htm
+							+ '<p style="background-color: #ff0000">'
+							+ $.i18n._('Database version check') + ' '
+							+ '<b>' + $.i18n._('FAILED') + '</b>' + '!' + ' '
+							+ $.i18n._('Please upgrade your database to meet the minimum version requirements and try again.')
+							+ '</p>';
 						TAlertManager.showAlert(step_title_htm);
+						return false;
+					} else {
+						step_title_htm = step_title_htm
+							+ '<p>'
+							+ $.i18n._('Connection test to your database as a non-privileged user has') + ' '
+							+ '<b>' + $.i18n._('SUCCEEDED') + '</b>' + '!' + ' '
+							+ $.i18n._('You may continue.')
+							+ '</p>';
+						if (showTrue) {
+							TAlertManager.showAlert(step_title_htm);
+						}
+						return true;
 					}
-					return true;
-
 				} else if ( result.test_connection === false ) {
 					step_title_htm = step_title_htm
 						+ '<p style="background-color: #ff0000">'
 						+ $.i18n._( 'Connection test to your database as a non-privileged user has' ) + ' '
 						+ '<b>' + $.i18n._( 'FAILED' ) + '</b>' + '!' + ' '
-						+ $.i18n._( 'Please correct them and try again.' )
+						+ $.i18n._( 'Please correct your settings and try again.' )
 						+ '</p>';
 
 					TAlertManager.showAlert( step_title_htm );

@@ -168,7 +168,11 @@ Used to be:
 
 		}
 
-		$deduction = $retarr['standard_deduction'][$this->getDistrictFilingStatus()];
+		if ( isset($retarr['standard_deduction'][$this->getDistrictFilingStatus()]) ) {
+			$deduction = $retarr['standard_deduction'][$this->getDistrictFilingStatus()];
+		} else {
+			$deduction = $retarr['standard_deduction'][10];
+		}
 
 		Debug::text('Standard Deduction: '. $deduction, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -182,7 +186,11 @@ Used to be:
 
 		}
 
-		$allowance = $retarr['allowance'][$this->getDistrictFilingStatus()];
+		if ( isset($retarr['allowance'][$this->getDistrictFilingStatus()]) ) {
+			$allowance = $retarr['allowance'][$this->getDistrictFilingStatus()];
+		} else {
+			$allowance = $retarr['allowance'][10];
+		}
 
 		if ( $this->getDistrictAllowance() == 0 ) {
 			$retval = 0;

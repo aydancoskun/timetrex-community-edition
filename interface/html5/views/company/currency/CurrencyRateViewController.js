@@ -98,9 +98,13 @@ CurrencyRateViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_currency_rate_column1 );
 
 		// Conversion Rate
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'conversion_rate', width: 200} );
-		this.addEditFieldToColumn( $.i18n._( 'Conversion Rate' ), form_item_input, tab_currency_rate_column1 );
+		form_item_input = Global.loadWidgetByName(FormItemType.TEXT_INPUT);
+		form_item_input.TTextInput({field: 'conversion_rate', width: 114});
+		var widgetContainer = $("<div class=''></div>");
+		var conversion_rate_clarification_box = $("<span id='rate_conversion_rate_clarification_box'></span>");
+		widgetContainer.append(form_item_input);
+		widgetContainer.append(conversion_rate_clarification_box);
+		this.addEditFieldToColumn($.i18n._('Conversion Rate'), [form_item_input], tab_currency_rate_column1, '', widgetContainer, false, true);
 
 
 	},
@@ -147,6 +151,19 @@ CurrencyRateViewController = BaseViewController.extend( {
 
 		}} );
 
+	},
+
+	onFormItemChange: function (target, doNotValidate) {
+		if ( target.getField() == 'conversion_rate' ) {
+			this.setConversionRateExampleText(target.getValue(), null, this.edit_view_ui_dic.currency_id.getValue());
+		}
+		this._super('onFormItemChange', target, doNotValidate);
+	},
+
+
+	initEditView: function( editId, noRefreshUI ) {
+		this._super('initEditView');
+		this.setConversionRateExampleText(this.edit_view_ui_dic.conversion_rate.getValue(), null, this.edit_view_ui_dic.currency_id.getValue());
 	},
 
 

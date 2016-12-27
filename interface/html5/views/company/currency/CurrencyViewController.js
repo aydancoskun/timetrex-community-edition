@@ -101,11 +101,17 @@ CurrencyViewController = BaseViewController.extend( {
 		form_item_input.TCheckbox( {field: 'is_base'} );
 		this.addEditFieldToColumn( $.i18n._( 'Base Currency' ), form_item_input, tab_currency_column1 );
 
-		// Conversion Rate
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'conversion_rate', width: 114} );
-		this.addEditFieldToColumn( $.i18n._( 'Conversion Rate' ), form_item_input, tab_currency_column1 );
+		// Conversion Rate
+		form_item_input = Global.loadWidgetByName(FormItemType.TEXT_INPUT);
+		form_item_input.TTextInput({field: 'conversion_rate', width: 114});
+
+		var widgetContainer = $("<div class=''></div>");
+		var conversion_rate_clarification_box = $("<span id='conversion_rate_clarification_box'></span>");
+
+		widgetContainer.append(form_item_input);
+		widgetContainer.append(conversion_rate_clarification_box);
+		this.addEditFieldToColumn($.i18n._('Conversion Rate'), [form_item_input], tab_currency_column1, '', widgetContainer, false, true);
 
 		// Default Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -305,7 +311,17 @@ CurrencyViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX} )];
-	}
+	},
 
+	onFormItemChange: function (target, doNotValidate) {
+		if ( target.getField() == 'conversion_rate' ) {
+			this.setConversionRateExampleText(target.getValue(), this.edit_view_ui_dic.iso_code.getValue());
+		}
+		this._super('onFormItemChange', target, doNotValidate);
+	},
 
+	initEditView: function( editId, noRefreshUI ) {
+		this._super('initEditView');
+		this.setConversionRateExampleText(this.edit_view_ui_dic.conversion_rate.getValue(), this.edit_view_ui_dic.iso_code.getValue());
+	},
 } );

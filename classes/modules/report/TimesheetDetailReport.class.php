@@ -268,7 +268,7 @@ class TimesheetDetailReport extends Report {
 
 										'-2085-worked_days' => TTi18n::gettext('Worked Days'),
 										'-2090-worked_hour_of_day_total' => TTi18n::gettext('Worked Employees/Hour'),
-										
+
 										'-2094-min_punch_time_stamp' => TTi18n::gettext('First In Punch'),
 										'-2095-max_punch_time_stamp' => TTi18n::gettext('Last Out Punch'),
 
@@ -761,7 +761,7 @@ class TimesheetDetailReport extends Report {
 				}
 				*/
 				$retval[$i]['worked_hour_of_day_total'] = 1.00;
-				
+
 				foreach( $row as $column => $value ) {
 					if ( isset( $dynamic_columns[$column] ) AND is_numeric($value) AND !in_array( $column, array('min_punch_time_stamp', 'max_punch_time_stamp') ) ) {
 						$retval[$i][$column] = ( $value / $total_hours );
@@ -777,7 +777,7 @@ class TimesheetDetailReport extends Report {
 		if ( !isset($retval) ) {
 			$retval[0] = $row;
 		}
-		
+
 		return $retval;
 	}
 
@@ -840,7 +840,7 @@ class TimesheetDetailReport extends Report {
 
 				//With pay codes, paid time makes sense now and is associated with branch/departments too.
 				$time_columns = $udt_obj->getTimeCategory( FALSE, $columns  ); //Exclude 'total' as its not used in reports anyways, and causes problems when grouping by branch/default branch.
-				
+
 				//Debug::Text('Column: '. $column .' Total Time: '. $udt_obj->getColumn('total_time') .' Status: '. $status_id .' Type: '. $type_id .' Rate: '. $udt_obj->getColumn( 'hourly_rate' ), __FILE__, __LINE__, __METHOD__, 10);
 				if ( ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 )
 					OR ( ( !isset($filter_data['include_no_data_rows']) OR ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 0 ) ) AND $date_stamp != '' AND count($time_columns) > 0 AND $udt_obj->getColumn('total_time') != 0 )	 ) {
@@ -894,7 +894,7 @@ class TimesheetDetailReport extends Report {
 															'min_schedule_time_stamp' => NULL,
 															'max_schedule_time_stamp' => NULL,
 															);
-						
+
 						if ( !isset($include_no_data_rows_arr[$udt_obj->getColumn('pay_period_id')][$date_stamp]) ) {
 							$include_no_data_rows_arr[$udt_obj->getColumn('pay_period_id')][$date_stamp] = array(
 																			'branch_id' => 0,
@@ -942,10 +942,12 @@ class TimesheetDetailReport extends Report {
 						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['udt_note'] .= $udt_obj->getColumn( 'udt_note' );
 					}
 
-					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
-					$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency'] = $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
-					if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
-						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
+					if ( $udt_obj->getPayCode() > 0 ) { //Make sure we don't set the currency based on worked_time that will always be currency_id=0 and have no pay_code_id associated.
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency_rate'] = $currency_rate;
+						$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['currency'] = $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $currency_id, $currency_options );
+						if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
+							$this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['current_currency'] = Option::getByKey( $base_currency_obj->getId(), $currency_options );
+						}
 					}
 
 					foreach( $time_columns as $column ) {
@@ -1064,7 +1066,7 @@ class TimesheetDetailReport extends Report {
 					}
 				}
 				unset( $user_id, $date_stamp, $branch_id, $department_id);
-				
+
 			}
 			//Debug::Arr($this->tmp_data['schedule'], 'Schedule Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 			unset($slf, $s_obj, $status);
@@ -1102,11 +1104,11 @@ class TimesheetDetailReport extends Report {
 						if ( strpos($format, 'pdf_') !== FALSE ) {
 							$this->form_data['user_date_total'][$u_obj->getId()]['data'][$tmp_date_stamp] = $tmp_pay_period_data;
 						}
-					}					
+					}
 				}
 				unset($tmp_pay_period_id, $tmp_date_stamps, $tmp_date_stamp, $tmp_pay_period_data);
 			}
-			
+
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 		unset($include_no_data_rows_arr);
@@ -1290,11 +1292,11 @@ class TimesheetDetailReport extends Report {
 
 									$processed_data['min_schedule_diff'] = ( $row['min_punch_time_stamp'] != '' AND $row['min_schedule_time_stamp'] != '' ) ? ( $row['min_punch_time_stamp'] - $row['min_schedule_time_stamp'] ) : NULL;
 									$processed_data['max_schedule_diff'] = ( $row['max_punch_time_stamp'] != '' AND $row['max_schedule_time_stamp'] != '' ) ? ( $row['max_punch_time_stamp'] - $row['max_schedule_time_stamp'] ) : NULL;
-									
+
 									if ( isset($this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_working']) ) {
 										$processed_data['schedule_working'] = $this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_working'];
 										$processed_data['schedule_working_diff'] = ($row['worked_time'] - $this->tmp_data['schedule'][$user_id][$date_stamp][$branch][$department]['schedule_working']);
-										
+
 
 										//We can only include scheduled_time once per user/date combination. Otherwise its duplicates the amounts and makes it incorrect.
 										//So once its used unset it so it can't be used again.
@@ -1345,7 +1347,7 @@ class TimesheetDetailReport extends Report {
 										//$this->form_data[$user_id]['data'][] = array_merge( $row, $date_columns, $processed_data );
 									}
 								}
-								
+
 							}
 						}
 					}
@@ -2040,7 +2042,7 @@ class TimesheetDetailReport extends Report {
 						if ( isset($this->timesheet_totals) AND is_array($this->timesheet_totals) ) {
 							//Display overall totals.
 							$this->timesheetTotal( $column_widths, $this->timesheet_totals );
-							
+
 						}
 
 						$this->timesheetSignature( $user_data, $data );
@@ -2051,7 +2053,7 @@ class TimesheetDetailReport extends Report {
 						$page_count++;
 					} else {
 						if ( isset($filter_data['include_no_data_rows']) AND $filter_data['include_no_data_rows'] == 1 ) {
-							$this->pdf->AddPage( 'P', 'LETTER' );						
+							$this->pdf->AddPage( 'P', 'LETTER' );
 							$this->timesheetHeader( $user_data );
 							$this->timesheetNoData();
 							$this->timesheetFooter( $pdf_created_date, $adjust_x, $adjust_y );

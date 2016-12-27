@@ -1967,7 +1967,7 @@ class SetupPresets extends Factory {
 																	),
 									);
 					Debug::Arr($form_roe_config, 'ROE TaxForm Config: '. $country, __FILE__, __LINE__, __METHOD__, 10);
-					
+
 					$ugdlf = TTnew( 'UserGenericDataListFactory' );
 					$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getCompanyObject()->getId(), 'roe', TRUE );
 					if ( $ugdlf->getRecordCount() == 1 ) {
@@ -2941,7 +2941,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'co': //colorado
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 12200;
+					$state_unemployment_wage_base = 12500;
 
 					break;
 				case 'ct': //connecticut
@@ -3853,7 +3853,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'or': //oregon
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 36900;
+					$state_unemployment_wage_base = 38400;
 
 					//Workers Benefit - Employee
 					$this->createCompanyDeduction(
@@ -3988,7 +3988,7 @@ class SetupPresets extends Factory {
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper($province).' - Employment Security' ),
 														'user_value1' => 0.00, //Percent
-														'user_value2' => 22000, //WageBase
+														'user_value2' => 22400, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
@@ -4010,8 +4010,8 @@ class SetupPresets extends Factory {
 														'calculation_id' => 15,
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper($province).' - Job Development Fund' ),
-														'user_value1' => 0.51, //Percent
-														'user_value2' => 22000, //WageBase
+														'user_value1' => 0.21, //Percent
+														'user_value2' => 22400, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
@@ -4034,7 +4034,7 @@ class SetupPresets extends Factory {
 														'calculation_order' => 186,
 														'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper($province).' - Temporary Disability Ins.' ),
 														'user_value1' => 1.20, //Percent
-														'user_value2' => 66300, //WageBase
+														'user_value2' => 68100, //WageBase
 														'user_value3' => 0,
 														'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 														'exclude_pay_stub_entry_account' => array(
@@ -6407,7 +6407,7 @@ class SetupPresets extends Factory {
 												);
 					}
 					unset($accrual_policy_id);
-					
+
 					break;
 				default:
 					//Vacation
@@ -6676,7 +6676,7 @@ class SetupPresets extends Factory {
 			}
 			unset($accrual_policy_id);
 		}
-		
+
 		return TRUE;
 	}
 
@@ -6783,9 +6783,9 @@ class SetupPresets extends Factory {
 												'pay_code_id' => current( $this->getPayCodeByCompanyIDAndName( 'Paid Time Off (PTO)' ) )
 											)
 										);
-			} 
+			}
 		}
-		
+
 		return TRUE;
 	}
 
@@ -6949,7 +6949,7 @@ class SetupPresets extends Factory {
 										);
 			}
 		}
-		
+
 		return TRUE;
 	}
 
@@ -7205,7 +7205,7 @@ class SetupPresets extends Factory {
 										);
 			}
 		}
-		
+
 		return TRUE;
 	}
 
@@ -7395,7 +7395,7 @@ class SetupPresets extends Factory {
 										)
 									);
 		}
-		
+
 		return TRUE;
 	}
 
@@ -8389,7 +8389,7 @@ class SetupPresets extends Factory {
 			$this->PayCode();
 			$this->ContributingPayCodePolicy();
 			$this->ContributingShiftPolicy();
-			
+
 			$this->AbsencePolicy();
 			$this->HolidayPolicy();
 			$this->RegularTimePolicy();

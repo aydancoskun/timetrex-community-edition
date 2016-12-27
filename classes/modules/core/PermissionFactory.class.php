@@ -269,7 +269,7 @@ class PermissionFactory extends Factory {
 					unset( $retval['recruitment'] );
 					unset( $retval['payroll'][array_search( 'user_expense', $retval['payroll'])], $retval['policy'][array_search( 'expense_policy', $retval['policy'])] );
 				} elseif ( $product_edition == TT_PRODUCT_COMMUNITY OR $product_edition == TT_PRODUCT_PROFESSIONAL ) { //Community or Professional
-					unset( $retval['recruitment'], $retval['invoice'], $retval['job'] );
+					unset( $retval['recruitment'], $retval['invoice'], $retval['job'], $retval['geo_fence'], $retval['government_document'] );
 					unset( $retval['payroll'][array_search( 'user_expense', $retval['payroll'])], $retval['policy'][array_search( 'expense_policy', $retval['policy'])] );
 				}
 
@@ -281,7 +281,7 @@ class PermissionFactory extends Factory {
 										'currency' => TTi18n::gettext('Currency'),
 										'branch' => TTi18n::gettext('Branch'),
 										'department' => TTi18n::gettext('Department'),
-										'geo_fence' => TTi18n::gettext('GEOFence'),
+										'geo_fence' => TTi18n::gettext('GEO Fence'),
 										'station' => TTi18n::gettext('Station'),
 										'hierarchy' => TTi18n::gettext('Hierarchy'),
 										'authorization' => TTi18n::gettext('Authorization'),
@@ -2887,6 +2887,9 @@ class PermissionFactory extends Factory {
 										'user_expense' => 'ALL',
 										'expense_policy' => 'ALL',
 										'report' => array('view_expense'),
+										'job_vacancy' => 'ALL',
+										'job_applicant' => 'ALL',
+										'job_application' => 'ALL',
 										'recruitment_report' => 'ALL',
 										);
 		} elseif ( $product_edition == TT_PRODUCT_PROFESSIONAL ) { //Professional
@@ -2908,6 +2911,7 @@ class PermissionFactory extends Factory {
 										'job_report' => 'ALL',
 										'invoice_report' => 'ALL',
 										'invoice' => 'ALL',
+										'geo_fence' => 'ALL',
 										'job' => 'ALL',
 										'document' => 'ALL',
 										'job_vacancy' => 'ALL',
@@ -2916,6 +2920,9 @@ class PermissionFactory extends Factory {
 										'user_expense' => 'ALL',
 										'expense_policy' => 'ALL',
 										'report' => array('view_expense'),
+										'job_vacancy' => 'ALL',
+										'job_applicant' => 'ALL',
+										'job_application' => 'ALL',
 										'recruitment_report' => 'ALL',
 										);
 		} elseif ( $product_edition == TT_PRODUCT_COMMUNITY ) { //Community
@@ -2939,14 +2946,19 @@ class PermissionFactory extends Factory {
 										'job_report' => 'ALL',
 										'invoice_report' => 'ALL',
 										'invoice' => 'ALL',
+										'geo_fence' => 'ALL',
 										'job' => 'ALL',
 										'document' => 'ALL',
+										'government_document' => 'ALL',
 										'job_vacancy' => 'ALL',
 										'job_applicant' => 'ALL',
 										'job_application' => 'ALL',
 										'user_expense' => 'ALL',
 										'expense_policy' => 'ALL',
 										'report' => array('view_expense'),
+										'job_vacancy' => 'ALL',
+										'job_applicant' => 'ALL',
+										'job_application' => 'ALL',
 										'recruitment_report' => 'ALL',
 			);
 		}

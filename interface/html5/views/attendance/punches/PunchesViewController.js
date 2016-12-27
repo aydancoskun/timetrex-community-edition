@@ -480,7 +480,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		//Location
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10  ) {
 
 			var latitude = Global.loadWidgetByName(FormItemType.TEXT);
 			latitude.TText({field: 'latitude'});
@@ -506,6 +506,11 @@ PunchesViewController = BaseViewController.extend( {
 			widgetContainer.click(function () {
 				$this.onMapClick();
 			});
+
+			// #2117 - Manual location only supported in edit because we need a punch record to append the data to.
+			if(!this.is_edit && !this.is_viewing) {
+				widgetContainer.parents('.edit-view-form-item-div').hide();
+			}
 		}
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );

@@ -3043,28 +3043,28 @@ class CompanyDeductionFactory extends Factory {
 
 		$c_obj = $this->getCompanyObject();
 		if ( is_object($c_obj) AND $c_obj->getStatus() != 30 ) {
-				Debug::text('Company: '. $c_obj->getName() .' Date: '. TTDate::getDate('DATE+TIME', $date), __FILE__, __LINE__, __METHOD__, 9);
+			Debug::text('Company: '. $c_obj->getName() .' Date: '. TTDate::getDate('DATE+TIME', $date), __FILE__, __LINE__, __METHOD__, 9);
 			$cdlf = TTnew( 'CompanyDeductionListFactory' );
 			$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $c_obj->getID(), array('calculation_id' => array(100, 200), 'country' => 'CA') );
-					if ( $cdlf->getRecordCount() > 0 ) {
+			if ( $cdlf->getRecordCount() > 0 ) {
 				foreach ( $cdlf as $cd_obj ) {
-							$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
-							$pd_obj->setDate( $date );
+					$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
+					$pd_obj->setDate( $date );
 
-							if ( $cd_obj->getCalculation() == 100 ) { //Federal
-								$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
-								$claim_amount = $pd_obj->getFederalTotalClaimAmount();
-							} elseif ( $cd_obj->getCalculation() == 200 ) { //Provincial
-								$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
-								$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
-							}
+					if ( $cd_obj->getCalculation() == 100 ) { //Federal
+						$pd_obj->setFederalTotalClaimAmount( $cd_obj->getUserValue1() );
+						$claim_amount = $pd_obj->getFederalTotalClaimAmount();
+					} elseif ( $cd_obj->getCalculation() == 200 ) { //Provincial
+						$pd_obj->setProvincialTotalClaimAmount( $cd_obj->getUserValue1() );
+						$claim_amount = $pd_obj->getProvincialTotalClaimAmount();
+					}
 
-							if ( (float)$cd_obj->getUserValue1() != (float)$claim_amount ) {
+					if ( (float)$cd_obj->getUserValue1() != (float)$claim_amount ) {
 						Debug::text( 'Updating claim amounts... Old: ' . $cd_obj->getUserValue1() . ' New: ' . $claim_amount, __FILE__, __LINE__, __METHOD__, 9 );
-								//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
+						//Use a SQL query instead of modifying the CompanyDeduction class, as that can cause errors when we add columns to the table later on.
 						$query = 'UPDATE ' . $cd_obj->getTable() . ' set user_value1 = ' . (float)$claim_amount . ' where id = ' . (int)$cd_obj->getId();
 						$this->db->Execute( $query );
-							} else {
+					} else {
 						Debug::text( 'Amount matches, no changes needed... Old: ' . $cd_obj->getUserValue1() . ' New: ' . $claim_amount, __FILE__, __LINE__, __METHOD__, 9 );
 					}
 				}

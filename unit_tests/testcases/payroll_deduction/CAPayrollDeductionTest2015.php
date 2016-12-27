@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 /**
  * @group CAPayrollDeductionTest2015
  */
@@ -67,10 +65,6 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 
 	//
 	// January 2015
-	//
-
-	//
-	// Don't forget to update the Federal Employment Credit in CA.class.php.
 	//
 	function testCSVFile() {
 		$this->assertEquals( file_exists($this->tax_table_file), TRUE);
@@ -4047,7 +4041,7 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setYearToDateDeduction( 0 );
 		$pd_obj->setGrossPayPeriodIncome( 1416.67 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1416.67' );
-		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDEductions() ), '133.53' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDEductions() ), '132.42' );
 
 		//Actual Income/Deductions for the year.
 		$pd_obj->setDate(strtotime('01-Dec-2016'));

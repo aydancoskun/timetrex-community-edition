@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
 	protected $user_id = NULL;
@@ -454,7 +452,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL, //Absence
 									$this->policy_ids['regular'] //Regular
 									);
-		
+
 		$date_epoch = TTDate::getBeginWeekEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
@@ -2500,7 +2498,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][12]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][12]['type_id'], 110 );
-		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], 692 );		
+		$this->assertEquals( $udt_arr[$date_epoch][12]['total_time'], 692 );
 		//Break Time Taken
 		$this->assertEquals( $udt_arr[$date_epoch][13]['status_id'], 10 );
 		$this->assertEquals( $udt_arr[$date_epoch][13]['type_id'], 110 );
@@ -2728,7 +2726,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 
 		//Make sure no other hours
 		$this->assertEquals( count($udt_arr[$date_epoch]), 26 );
-		
+
 		return TRUE;
 	}
 }

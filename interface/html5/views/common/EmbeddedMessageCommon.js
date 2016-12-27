@@ -51,8 +51,10 @@ EmbeddedMessage = {
                          */
                         var from = currentItem.from_first_name + ' ' + currentItem.from_last_name + ' @ ' + currentItem.updated_date;
                         edit_view_ui_dic['from'].setValue( from );
-                        edit_view_ui_dic['subject'].setValue( currentItem.subject );
-                        edit_view_ui_dic['body'].setValue( currentItem.body );
+
+                        edit_view_ui_dic['subject'].setValue( Global.htmlDecode(currentItem.subject) );
+                        edit_view_ui_dic['body'].setValue( Global.htmlDecode(currentItem.body) );
+
                         var cloneMessageControl = $(edit_view_tab.find('#tab_request').find('.edit-view-tab').find('.embedded-message-template')).clone();
                         cloneMessageControl.removeClass( 'embedded-message-template' );
                         cloneMessageControl.addClass( 'embedded-message-container' );

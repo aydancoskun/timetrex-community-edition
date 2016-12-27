@@ -216,11 +216,11 @@ class TTi18n {
 				$retarr[] = $tmp_locale.'.utf8';
 			}
 		} else {
-			//Normalize each locale to Windows.
-			$retarr = $locale_arr;
+			//Normalize each locale to Windows. Switch en_US to en-US instead. See: https://msdn.microsoft.com/en-us/library/39cwe7zf(v=vs.140).aspx
+			$retarr = str_replace( '_', '-', $locale_arr );
 		}
 
-		Debug::Text('Array of Locales to try in order for "'.$locale_arg.'": '. self::getLocaleArrayAsString( $retarr ), __FILE__, __LINE__, __METHOD__, 11);
+		Debug::Text('Array of Locales to try in order for "'. $locale_arg .'": '. self::getLocaleArrayAsString( $retarr ), __FILE__, __LINE__, __METHOD__, 11);
 
 		return $retarr;
 	}
@@ -401,7 +401,7 @@ class TTi18n {
 	 * @return string|boolean
 	 * @author Dan Libby <dan@osc.co.cr>
 	 */
-	static public function chooseBestLocale( $user_locale_pref = NULL) {
+	static public function chooseBestLocale( $user_locale_pref = NULL ) {
 		Debug::text('Choosing Best Locale...', __FILE__, __LINE__, __METHOD__, 11);
 
 		$success = FALSE;
@@ -1159,6 +1159,12 @@ class TTi18n {
 				$currency_code = self::$currency_formatter->getTextAttribute( NumberFormatter::CURRENCY_CODE );
 			}
 
+			//If currency_code is still blank, force it to a default value, otherwise the currency formatter won't output anything at all.
+			if ( $currency_code == '' ) {
+				Debug::text('ERROR: Unable to determine currency code, defaulting to USD!', __FILE__, __LINE__, __METHOD__, 10);
+				$currency_code = 'USD';
+			}
+
 			if ( $show_code == 0 ) {
 				//self::$currency_formatter->setPattern( str_replace('¤', '', self::$currency_formatter->getPattern() ) ); //Strip currency code off pattern. This seems to strip currency symbol too though.
 				return str_replace( self::$currency_formatter->getSymbol( NumberFormatter::CURRENCY_SYMBOL ), self::getCurrencySymbol( $currency_code ), self::$currency_formatter->formatCurrency( $amount, $currency_code ) );
@@ -1167,7 +1173,6 @@ class TTi18n {
 			}
 		} else {
 			//Fallback to this if INTL extension is not installed.
-			Debug::Arr($currency_code, 'zzzsetLocale failed!: ', __FILE__, __LINE__, __METHOD__, 10);
 			return $currency_code_left_str . self::formatNumber( $amount, TRUE, 2, 2 ) . $currency_code_right_str;
 		}
 	}

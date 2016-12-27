@@ -765,8 +765,7 @@ class Install {
 				v5.2.2 - Fails to populate $HTTP_RAW_POST_DATA http://bugs.php.net/bug.php?id=41293
 					   - Implemented work around in global.inc.php
 		*/
-		$invalid_versions = array('5.0.4');
-
+		$invalid_versions = array('');
 
 		if ( version_compare( $php_version, $min_version, '<') == 1 ) {
 			//Version too low
@@ -845,8 +844,15 @@ class Install {
 	}
 
 	function getDatabaseVersion() {
+		$db_conn = $this->getDatabaseConnection();
+		if ( $db_conn == FALSE ) {
+			Debug::text('WARNING: No Database Connection...', __FILE__, __LINE__, __METHOD__, 9);
+			return NULL;
+		}
+
 		if ( $this->getDatabaseType() == 'postgresql' ) {
 			$version = @pg_version();
+			Debug::Arr($version, 'PostgreSQL Version: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $version == FALSE ) {
 				//No connection
 				return NULL;
@@ -855,6 +861,7 @@ class Install {
 			}
 		} elseif ( $this->getDatabaseType() == 'mysqlt' OR $this->getDatabaseType() == 'mysqli' ) {
 			$version = @get_server_info();
+			Debug::Text('MySQL Version: '. $version, __FILE__, __LINE__, __METHOD__, 10);
 			return $version;
 		}
 
@@ -865,14 +872,14 @@ class Install {
 		$retval = array();
 
 		if ( function_exists('pg_connect') ) {
-			$retval['postgres8'] = 'PostgreSQL v8+';
+			$retval['postgres8'] = 'PostgreSQL v9.1+';
 
 			// set edb_redwood_date = 'off' must be set, otherwise enterpriseDB
 			// changes all date columns to timestamp columns and breaks TimeTrex.
-			$retval['enterprisedb'] = 'EnterpriseDB (DISABLE edb_redwood_date)';
+			//$retval['enterprisedb'] = 'EnterpriseDB (DISABLE edb_redwood_date)';
 		}
 		if ( function_exists('mysqli_real_connect') ) {
-			$retval['mysqli'] = 'MySQLi (v5.0.48+ w/InnoDB)';
+			$retval['mysqli'] = 'MySQLi (v5.5+ w/InnoDB)';
 		}
 		//MySQLt driver is no longer supported, as it causes conflicts with ADODB and complex queries.
 		if ( function_exists('mysql_connect') ) {
@@ -1063,6 +1070,10 @@ class Install {
 
 	function checkDatabaseVersion() {
 		$db_version = (string)$this->getDatabaseVersion();
+		if ( $db_version == NULL ) {
+			Debug::Text('WARNING:  No database connection, unable to verify version!', __FILE__, __LINE__, __METHOD__, 10);
+			return 0;
+		}
 
 		if ( $this->getDatabaseType() == 'postgresql' ) {
 			if ( $db_version == NULL OR version_compare( $db_version, '9.1', '>=') == 1 ) {
@@ -1074,6 +1085,7 @@ class Install {
 			}
 		}
 
+		Debug::Text('ERROR: Database version failed!', __FILE__, __LINE__, __METHOD__, 10);
 		return 1;
 	}
 
@@ -1675,6 +1687,7 @@ class Install {
 
 		$retarr[$this->checkPHPVersion()]++;
 		$retarr[$this->checkDatabaseType()]++;
+		//$retarr[$this->checkDatabaseVersion()]++; //Requires DB connection, which we often won't have.
 		$retarr[$this->checkSOAP()]++;
 		$retarr[$this->checkBCMATH()]++;
 		$retarr[$this->checkMBSTRING()]++;
@@ -1755,6 +1768,11 @@ class Install {
 		if ( $fail_all == TRUE OR $this->checkDatabaseType() != 0 ) {
 			$retarr[] = 'DatabaseType';
 		}
+
+		//Requires DB connection, which we often won't have.
+		//if ( $fail_all == TRUE OR $this->checkDatabaseVersion() != 0 ) {
+		//	$retarr[] = 'DatabaseVersion';
+		//}
 
 		if ( $fail_all == TRUE OR $this->checkSOAP() != 0 ) {
 			$retarr[] = 'SOAP';

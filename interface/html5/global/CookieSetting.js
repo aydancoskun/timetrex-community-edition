@@ -21,11 +21,3 @@ function setCookie( cname, cvalue, exdays, path, domain ) {
 	}
 
 }
-
-var new_session = getCookie( 'NewSessionID' );
-var host = window.location.hostname;
-host = host.substring( (host.indexOf( '.' ) + 1) );
-if ( new_session ) {
-	setCookie( 'SessionID', new_session, 30, '/' );
-	setCookie( 'NewSessionID', null, 0, '/', host );
-}

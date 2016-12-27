@@ -62,7 +62,7 @@ class APIRecurringScheduleControl extends APIFactory {
 		if ( $default_display_weeks < 4 ) {
 			$default_display_weeks = 4;
 		}
-		
+
 		$data = array(
 						'company_id' => $company_obj->getId(),
 						'start_week' => 1,
@@ -206,6 +206,9 @@ class APIRecurringScheduleControl extends APIFactory {
 								(
 								$this->getPermissionObject()->Check('recurring_schedule', 'edit')
 									OR ( $this->getPermissionObject()->Check('recurring_schedule', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									//When checking isChild() - $lf->getCurrent()->getUser() against $permission_children_ids, that checks who *used* to be assigned to the record, not who is currently assigned in $row['user'].
+									// But in cases where a Subordinate Only permissions group user has a subordinate one day with a recurring schedule assigned to them as part of a larger batch, then that person gets swithced into a new hierarchy,
+									// if the recurring schedule is edited, that subordinate will get removed and unscheduled most likely unless we check the permissions based on the previous user_ids instead of the new $row['user'] user_ids.
 									OR ( $this->getPermissionObject()->Check('recurring_schedule', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 

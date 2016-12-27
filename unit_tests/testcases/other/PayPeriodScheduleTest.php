@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 /**
  * @group PayPeriodSchedule
  */
@@ -243,7 +241,7 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 
 		$ret_obj->setType( 10 ); //Switch back to Weekly (52)
 		$ret_obj->setAnnualPayPeriods( $ret_obj->calcAnnualPayPeriods() );
-		
+
 		$ret_obj->getNextPayPeriod( $next_end_date );
 		$next_end_date = $ret_obj->getNextEndDate();
 		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '27-Dec-04 12:00:00 AM PST', '5- Start Date');

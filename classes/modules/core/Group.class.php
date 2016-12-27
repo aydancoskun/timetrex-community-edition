@@ -165,13 +165,13 @@ class Group {
 
 		return $retval;
 	}
-	
+
 	static function aggregate( $array, $type, $subtotal = FALSE ) {
 		switch( $type ) {
 			default:
 			case 'sum':
 				//$retarr = array_sum($array);
-				$retarr = self::arraySum($array); 
+				$retarr = self::arraySum($array);
 				break;
 			case 'average':
 			case 'avg':
@@ -203,7 +203,8 @@ class Group {
 				break;
 			case 'concat':
 				if ( $subtotal == FALSE ) {
-					$retarr = implode( ' -- ', $array ); //Using \n or <br> doesn't work properly on HTML/PDF reports, so just use " -- " for now.
+					//Pass $array through array_filter() without any callback, as that will remove any FALSE/NULL values, elimating strings like: ' -- -- -- -- '
+					$retarr = implode( ' -- ', array_filter($array) ); //Using \n or <br> doesn't work properly on HTML/PDF reports, so just use " -- " for now.
 				} else {
 					//Don't concat for subtotal/total rows, as there is no point for text/string columns.
 					$retarr = '';

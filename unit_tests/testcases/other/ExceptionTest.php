@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 class ExceptionTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
 	protected $user_id = NULL;
@@ -351,7 +349,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 												'grace' => 300,
 												'watch_window' => 3600,
 												),
-									);					
+									);
 					break;
 				case 'S6': //Normal
 					$data['exceptions'] = array(
@@ -1198,8 +1196,8 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $exception_arr['M4'][0]['type_id'], 50 ); //ACTIVE
 
 		return TRUE;
-	}		
-	
+	}
+
 	/**
 	 * @group Punch_testExceptionMissingBreakInPreMature
 	 */
@@ -1248,7 +1246,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
 	/**
 	 * @group Punch_testExceptionMissingBreakOut
 	 */
@@ -1308,9 +1306,9 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $exception_arr['M4'][0]['type_id'], 50 ); //ACTIVE
 
 		return TRUE;
-	}			
-		
-	
+	}
+
+
 	/**
 	 * @group Punch_testExceptionInLateA
 	 */
@@ -2166,7 +2164,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 										),
 								TRUE
 								);
-								
+
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
 		//print_r($punch_arr);
 		$this->assertEquals( 2, count($punch_arr[$date_epoch]) );
@@ -2212,7 +2210,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 											'job_id' => 0,
 											'job_item_id' => 0,
 										),
-								TRUE 
+								TRUE
 								);
 		$this->deleteExceptions( $date_epoch ); //Exceptions could be calculated above, so delete them here.
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );

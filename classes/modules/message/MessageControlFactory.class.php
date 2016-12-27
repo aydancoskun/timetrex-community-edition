@@ -352,7 +352,7 @@ class MessageControlFactory extends Factory {
 		$id = trim($id);
 
 		if ( $this->Validator->isResultSetWithRows(	'object',
-													$this->getObjectHandler()->getByID($id),
+													( is_object( $this->getObjectHandler() ) ) ? $this->getObjectHandler()->getByID($id) : FALSE,
 													TTi18n::gettext('Object is invalid')
 													) ) {
 			$this->data['object_id'] = $id;
@@ -538,7 +538,8 @@ class MessageControlFactory extends Factory {
 			Debug::Arr($user_ids, 'Recipient User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$uplf = TTnew( 'UserPreferenceListFactory' );
-			$uplf->getByUserId( $user_ids );
+			//$uplf->getByUserId( $user_ids );
+			$uplf->getByUserIdAndStatus( $user_ids, 10 ); //Only email ACTIVE employees/supervisors.
 			if ( $uplf->getRecordCount() > 0 ) {
 				$retarr = array();
 				foreach( $uplf as $up_obj ) {
@@ -557,6 +558,8 @@ class MessageControlFactory extends Factory {
 					Debug::Arr($retarr, 'Recipient Email Addresses: ', __FILE__, __LINE__, __METHOD__, 10);
 					return array_unique($retarr);
 				}
+			} else {
+				Debug::Text('No user preferences available, or user is not active...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 

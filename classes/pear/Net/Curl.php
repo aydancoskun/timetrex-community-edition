@@ -6,10 +6,10 @@
  * PHP version 5.1.0+
  *
  * Copyright (c) 2007, The PEAR Group
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without 
+ *
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
  *  - Redistributions of source code must retain the above copyright notice,
@@ -17,20 +17,20 @@
  *  - Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- *  - Neither the name of the The PEAR Group nor the names of its contributors 
- *    may be used to endorse or promote products derived from this software 
+ *  - Neither the name of the The PEAR Group nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @category  Net
@@ -373,9 +373,9 @@ class Net_Curl
      * The Net_Curl PHP 5.x constructor, called when a new Net_Curl object
      * is initialized (also called via 4.x constructor)
      *
-     * @param string $url       The URL to fetch (can be set using the $url 
+     * @param string $url       The URL to fetch (can be set using the $url
      *                          property as well)
-     * @param string $userAgent The userAgent string (can be set using the 
+     * @param string $userAgent The userAgent string (can be set using the
      *                          $userAgent property as well)
      *
      * @access public
@@ -400,9 +400,9 @@ class Net_Curl
      *
      * PHP 4.x constructor.
      *
-     * @param string $url       The URL to fetch (can be set using the $url 
+     * @param string $url       The URL to fetch (can be set using the $url
      *                          property as well)
-     * @param string $userAgent The userAgent string (can be set using the 
+     * @param string $userAgent The userAgent string (can be set using the
      *                          $userAgent property as well)
      *
      * @access public
@@ -459,7 +459,11 @@ class Net_Curl
         $ret = true;
 
         // Basic stuff
-		$ret = curl_setopt($this->_ch, CURLOPT_SAFE_UPLOAD, false ); //Fixes change in PHP v5.6 that prevents @$file_name uploading.
+        if ( class_exists('\CURLFile') ) {
+            $ret = curl_setopt( $this->_ch, CURLOPT_SAFE_UPLOAD, TRUE ); //Fixes change in PHP v5.6 that prevents @$file_name uploading.
+        } else {
+            $ret = curl_setopt( $this->_ch, CURLOPT_SAFE_UPLOAD, FALSE ); //Fixes change in PHP v5.6 that prevents @$file_name uploading.
+        }
         $ret = curl_setopt($this->_ch, CURLOPT_URL, $this->url);
         $ret = curl_setopt($this->_ch, CURLOPT_HEADER, $this->header);
 
@@ -470,15 +474,15 @@ class Net_Curl
 
         // HTTP Authentication
         if ($this->username != '') {
-            $ret = curl_setopt($this->_ch, 
-                               CURLOPT_USERPWD, 
+            $ret = curl_setopt($this->_ch,
+                               CURLOPT_USERPWD,
                                $this->username . ':' . $this->password);
         }
 
         // SSL Checks
         if (isset($this->sslVersion)) {
-            $ret = curl_setopt($this->_ch, 
-                               CURLOPT_SSLVERSION, 
+            $ret = curl_setopt($this->_ch,
+                               CURLOPT_SSLVERSION,
                                $this->sslVersion);
         }
 
@@ -487,8 +491,8 @@ class Net_Curl
         }
 
         if (isset($this->sslCertPasswd)) {
-            $ret = curl_setopt($this->_ch, 
-                               CURLOPT_SSLCERTPASSWD, 
+            $ret = curl_setopt($this->_ch,
+                               CURLOPT_SSLCERTPASSWD,
                                $this->sslCertPasswd);
         }
 
@@ -498,8 +502,8 @@ class Net_Curl
         }
 
         if (isset($this->proxyUser) || isset($this->proxyPassword)) {
-            $ret = curl_setopt($this->_ch, 
-                               CURLOPT_PROXYUSERPWD, 
+            $ret = curl_setopt($this->_ch,
+                               CURLOPT_PROXYUSERPWD,
                                $this->proxyUser . ':' . $this->proxyPassword);
         }
 
@@ -582,7 +586,10 @@ class Net_Curl
             if (is_array($this->fields)) {
                 $sets = array();
                 foreach ($this->fields as $key => $val) {
-                    if (strlen($val) > 1 && $val{0} == '@') {
+                    if ( class_exists('\CURLFile') AND is_object($val) ) {
+                        $sets = null;
+                        break;
+                    } elseif ( strlen($val) > 1 && $val{0} == '@') {
                         $file = substr($val, 1);
                         if (is_file($file) && is_readable($file)) {
                             $sets = null;
@@ -611,8 +618,8 @@ class Net_Curl
         }
 
         // If a Location: header is passed then follow it
-        $ret = curl_setopt($this->_ch, 
-                           CURLOPT_FOLLOWLOCATION, 
+        $ret = curl_setopt($this->_ch,
+                           CURLOPT_FOLLOWLOCATION,
                            $this->followLocation);
 
         // If a timeout is set and is greater then zero then set it
@@ -637,8 +644,8 @@ class Net_Curl
         // Other HTTP headers
         if ($this->httpHeaders !== null) {
             if (is_array($this->httpHeaders)) {
-                $ret = curl_setopt($this->_ch, 
-                                   CURLOPT_HTTPHEADER, 
+                $ret = curl_setopt($this->_ch,
+                                   CURLOPT_HTTPHEADER,
                                    $this->httpHeaders);
             } else {
                 return PEAR::raiseError('Net_Curl::$httpHeaders must be an array');
@@ -697,7 +704,7 @@ class Net_Curl
      *
      * @param int   $option cURL constant (ie. CURLOPT_URL)
      * @param mixed $value  The option's value
-     * 
+     *
      * @author Joe Stump <joe@joestump.net>
      * @access public
      * @return boolean
@@ -819,7 +826,7 @@ class Net_Curl
      * @access private
      * @return void
      */
-    function _mapDeprecatedVariables() 
+    function _mapDeprecatedVariables()
     {
         $bad = array();
         if ($this->follow_location !== false) {

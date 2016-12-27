@@ -1464,6 +1464,7 @@ MessageControlViewController = BaseViewController.extend( {
 	onSaveClick: function( ignoreWarning ) {
 		LocalCacheData.current_doing_context_action = 'save';
 		var $this = this;
+		this.collectUIDataToCurrentEditRecord();
 		var record = this.current_edit_record;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;

@@ -34,12 +34,10 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Extensions/SeleniumTestCase.php');
-
 /**
  * @group UI
  */
-class UILoginTest extends PHPUnit_Extensions_SeleniumTestCase {
+class UILoginTest extends PHPUnit_Extensions_Selenium2TestCase {
 	public function setUp() {
 		global $selenium_config;
 		$this->selenium_config = $selenium_config;
@@ -63,23 +61,47 @@ class UILoginTest extends PHPUnit_Extensions_SeleniumTestCase {
 
 	function Login() {
 		Debug::text('Login to: '. $this->selenium_config['default_url'], __FILE__, __LINE__, __METHOD__, 10);
-		$this->open( $this->selenium_config['default_url'] );
-		$this->waitForAttribute( 'css=div.login-view@init_complete' );
+		$this->url( $this->selenium_config['default_url'] );
 
-		$this->type('id=user_name', 'demoadmin1');
-		$this->type('id=password', 'demo.de');
-		$this->click('id=login_btn');
-		$this->waitForAttribute( 'css=div.view@init_complete' );
+//		$this->waitForAttribute( 'css=div.login-view@init_complete' );
+//
+//		$this->type('id=user_name', 'demoadmin1');
+//		$this->type('id=password', 'demo.de');
+//		$this->click('id=login_btn');
+//		$this->waitForAttribute( 'css=div.view@init_complete' );
+
+		$this->waitUntil(function () {
+			if ($this->byId('user_name')) {
+				return true;
+			}
+			return null;
+		}, 5000);
+		$this->clickOnElement('user_name');
+		$this->keys('demoadmin1');
+
+		$this->clickOnElement('password');
+		$this->keys('demo.de');
+
+		$this->clickOnElement('login_btn');
 
 		Debug::text('Login Complete...', __FILE__, __LINE__, __METHOD__, 10);
 	}
 
 	function Logout() {
-		$view_name = $this->getText('xpath=//div[@id=\'ribbon\']/ul/li[11]/a');
+//		$view_name = $this->getText('xpath=//div[@id=\'ribbon\']/ul/li[11]/a');
+//		Debug::text('View: '. $view_name, __FILE__, __LINE__, __METHOD__, 10);
+//		$this->click('link=My Account');
+//		$this->click('id=Logout');
+//		$this->waitForAttribute( 'css=div.login-view@init_complete' );
+
+		$view_name = $this->byXPath('xpath=//div[@id=\'ribbon\']/ul/li[11]/a');
 		Debug::text('View: '. $view_name, __FILE__, __LINE__, __METHOD__, 10);
 		$this->click('link=My Account');
 		$this->click('id=Logout');
 		$this->waitForAttribute( 'css=div.login-view@init_complete' );
+
+
+
 		Debug::text('Logout...', __FILE__, __LINE__, __METHOD__, 10);
 	}
 

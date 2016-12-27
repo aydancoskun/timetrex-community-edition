@@ -41,6 +41,16 @@
 class PayrollDeduction_US_SC extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20170101 => array(
+															0 => array(
+																	array( 'income' => 2140,	'rate' => 1.7,	'constant' => 0 ),
+																	array( 'income' => 4280,	'rate' => 3,	'constant' => 27.82 ),
+																	array( 'income' => 6420,	'rate' => 4,	'constant' => 70.62 ),
+																	array( 'income' => 8560,	'rate' => 5,	'constant' => 134.82 ),
+																	array( 'income' => 10700,	'rate' => 6,	'constant' => 220.42 ),
+																	array( 'income' => 10700,	'rate' => 7,	'constant' => 327.42 ),
+																),
+															),
 												20060101 => array(
 															0 => array(
 																	array( 'income' => 2000,	'rate' => 2,	'constant' => 0 ),
@@ -56,9 +66,14 @@ class PayrollDeduction_US_SC extends PayrollDeduction_US {
 	var $state_options = array(
 								20060101 => array(
 													'standard_deduction_rate' => 10,
+													'standard_deduction_maximum' => 2860,
+													'allowance' => 2370
+													),
+								20060101 => array(
+													'standard_deduction_rate' => 10,
 													'standard_deduction_maximum' => 2600,
 													'allowance' => 2300
-													)
+													),
 								);
 
 	function getStateAnnualTaxableIncome() {

@@ -4,14 +4,18 @@ var TAlertManager = (function() {
 
 	var isShownNetworkAlert = false;
 
-	var showNetworkErrorAlert = function( error ) {
+	var showNetworkErrorAlert = function( jqXHR, textStatus, errorThrown ) {
+		if ( textStatus == "parsererror" ) {
+			Global.sendErrorReport(textStatus + ': ' + errorThrown + " ~FROM TAlertManager::showNetworkErrorAlert()~", false, false, jqXHR);
+			return;
+		}
+
 		if ( !isShownNetworkAlert ) {
-			TAlertManager.showAlert( Global.network_lost_msg + "<br><br>" + "Error: " + (error.responseText ? error.responseText : 'N/A') + " (" + error.status + ")", 'Error', function() {
+			TAlertManager.showAlert( Global.network_lost_msg + "<br><br>" + "Error: " + textStatus + ': <br>"'+ errorThrown +'"' + '<br><hr>' + (jqXHR.responseText ? jqXHR.responseText : 'N/A') + " (" + jqXHR.status + ")", 'Error', function() {
 				isShownNetworkAlert = false;
 			} );
 			isShownNetworkAlert = true;
 		}
-
 	}
 
 	var showPreSessionAlert = function() {
@@ -76,8 +80,7 @@ var TAlertManager = (function() {
 
 	var showBrowserTopBanner = function() {
 		var div = $( '<div class="browser-banner"><a href="http://www.timetrex.com/supported_web_browsers.php" target="_blank"><span class="label"></span></a></div>' );
-
-		div.children().find( 'span' ).text( $.i18n._( LocalCacheData.getLoginData().application_name + ' requires a modern HTML5 standards compatible web browser, click here for more information.' ) );
+		div.find( 'span' ).text( $.i18n._( LocalCacheData.getLoginData().application_name + ' requires a modern HTML5 standards compatible web browser, click here for more information.' ) );
 
 		$( 'body' ).append( div );
 	};

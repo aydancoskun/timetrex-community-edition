@@ -213,26 +213,35 @@ class APIInstall extends APIFactory {
 			$host_arr = Misc::parseDatabaseHostString( $data['final_host'] );
 			$host = $host_arr[0][0];
 
-			$database_engine = TRUE;
 			//Test regular user
 			//This used to connect to the template1 database, but it seems newer versions of PostgreSQL
 			//default to disallow connect privs.
 			$test_connection = $install_obj->setNewDatabaseConnection($data['final_type'], $host, $data['user'], $data['password'], $data['database_name']);
 			if ( $test_connection == TRUE ) {
+				$install_obj->setDatabaseDriver( $data['final_type'] );
 				$test_connection = $install_obj->checkDatabaseExists($data['database_name']);
+
+				//Check database version/engine
+				$database_version = $install_obj->checkDatabaseVersion();
+			} else {
+				$database_version = 0; //Success
 			}
 
 			//Test priv user.
 			if ( $data['priv_user'] != '' AND $data['priv_password'] != '' ) {
 				Debug::Text('Testing connection as priv user', __FILE__, __LINE__, __METHOD__, 10);
+				$install_obj->setDatabaseDriver( $data['final_type'] );
 				$test_priv_connection = $install_obj->setNewDatabaseConnection($data['final_type'], $host, $data['priv_user'], $data['priv_password'], '');
 			} else {
 				$test_priv_connection = TRUE;
 			}
 
+			$database_engine = TRUE;
+
 			$data['test_connection'] = $test_connection;
 			$data['test_priv_connection'] = $test_priv_connection;
 			$data['database_engine'] = $database_engine;
+			$data['database_version'] = $database_version;
 
 			$data['type_options'] = $install_obj->getDatabaseTypeArray();
 			$data['application_name'] = APPLICATION_NAME;
@@ -583,10 +592,10 @@ class APIInstall extends APIFactory {
 				$tmp_config_data['path']['base_url'] = $data['base_url'];
 			}
 			if ( isset($data['log_dir']) AND $data['log_dir'] != '' ) {
-				$tmp_config_data['path']['log_dir'] = $data['log_dir'];
+				$tmp_config_data['path']['log'] = $data['log_dir'];
 			}
 			if ( isset($data['storage_dir']) AND $data['storage_dir'] != '' ) {
-				$tmp_config_data['path']['storage_dir'] = $data['storage_dir'];
+				$tmp_config_data['path']['storage'] = $data['storage_dir'];
 			}
 			if ( isset($data['cache_dir']) AND $data['cache_dir'] != '' ) {
 				$tmp_config_data['cache']['dir'] = $data['cache_dir'];

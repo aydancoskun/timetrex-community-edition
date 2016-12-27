@@ -1,11 +1,19 @@
 #!/bin/bash
 
+#
+# Requires composer modules, install with: "composer install" in this directory
+#
+
+
 #Unit testw with HHVM
 #hhvm /usr/bin/phpunit -d max_execution_time=86400 --configuration config.xml
 
+
+
 php_bin=/usr/bin/php
 #php_bin=/usr/bin/hhvm
-phpunit_bin=/usr/bin/phpunit
+#phpunit_bin=/usr/bin/phpunit
+phpunit_bin=vendor/phpunit/phpunit/phpunit
 
 if [ "$#" -eq 0 ] ; then
 	echo "Running tests in parallel..."

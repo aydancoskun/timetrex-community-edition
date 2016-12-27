@@ -662,7 +662,7 @@ class PayStubEntryFactory extends Factory {
 	}
 
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub Entry') .': '. TTi18n::getText('Amount') .': '. $this->getAmount(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getPayStub(), $log_action, TTi18n::getText('Pay Stub Entry') .': '. $this->getPayStubEntryAccountObject()->getName() .': '. TTi18n::getText('Amount') .': '. $this->getAmount(), NULL, $this->getTable(), $this );
 	}
 }
 ?>

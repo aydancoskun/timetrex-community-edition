@@ -109,7 +109,7 @@ class PayPeriodScheduleUserFactory extends Factory {
 															)
 				AND	$this->Validator->isTrue(		'user',
 													$this->isUniqueUser($id),
-													TTi18n::gettext('Selected Employee is already assigned to another Pay Period')
+													TTi18n::gettext('Selected Employee is already assigned to another Pay Period Schedule')
 													)
 			) {
 
@@ -120,7 +120,7 @@ class PayPeriodScheduleUserFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	//This table doesn't have any of these columns, so overload the functions.
 	function getDeleted() {
 		return FALSE;

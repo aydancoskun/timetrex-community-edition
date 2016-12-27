@@ -82,7 +82,11 @@ class ImportUserWage extends Import {
 
 
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getUserWageDefaultData() );
+		$user_id = $this->getUserIdByRowData( $raw_row ); //Try to get user_id of row so we set default effective_date to the employees hire_date.
+		$user_wage_default_data = $this->getObject()->stripReturnHandler( $this->getObject()->getUserWageDefaultData( $user_id ) );
+		$user_wage_default_data['effective_date'] = TTDate::parseDateTime( $user_wage_default_data['effective_date'] ); //Effective Date is formatted for user to see, so convert it to epoch for importing.
+
+		$retval = $user_wage_default_data;
 
 		return $retval;
 	}
@@ -153,7 +157,7 @@ class ImportUserWage extends Import {
 				$retval = array_search( strtolower($input), array_map('strtolower', $options) );
 			}
 		}
-		
+
 		if ( $retval === FALSE ) {
 			if ( strtolower( $input ) == 'salary' OR strtolower( $input ) == 'salaried' OR strtolower( $input ) == 's' OR strtolower( $input ) == 'annual' ) {
 				$retval = 20;

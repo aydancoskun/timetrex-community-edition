@@ -469,18 +469,7 @@ class RequestFactory extends Factory {
 				$this->setStatus( 30 ); //Pending Auth.
 			}
 
-			if ( is_object( $this->getUserObject() ) ) {
-				$hlf = TTnew( 'HierarchyListFactory' );
-				$hierarchy_arr = $hlf->getHierarchyParentByCompanyIdAndUserIdAndObjectTypeID( $this->getUserObject()->getCompany(), $this->getUserObject()->getID(), $this->getHierarchyTypeId(), FALSE);
-			}
-
-			$hierarchy_highest_level = 99;
-			if ( isset($hierarchy_arr) AND is_array( $hierarchy_arr ) ) {
-				Debug::Arr($hierarchy_arr, ' Hierarchy Array: ', __FILE__, __LINE__, __METHOD__, 10);
-				$hierarchy_arr = array_keys( $hierarchy_arr );
-				$hierarchy_highest_level = end( $hierarchy_arr ) ;
-				Debug::Text(' Setting hierarchy level to: '. $hierarchy_highest_level, __FILE__, __LINE__, __METHOD__, 10);
-			}
+			$hierarchy_highest_level = AuthorizationFactory::getInitialHierarchyLevel( ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getCompany() : 0 ), ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getID() : 0 ), $this->getHierarchyTypeId() );
 			$this->setAuthorizationLevel( $hierarchy_highest_level );
 		}
 		if ( $this->getAuthorized() == TRUE ) {
@@ -516,11 +505,11 @@ class RequestFactory extends Factory {
 			} else {
 				$mcf->FailTransaction();
 			}
-			
+
 			//Send initial Pending Authorization email to superiors. -- This should only happen on first save by the regular employee.
 			AuthorizationFactory::emailAuthorizationOnInitialObjectSave( $this->getUser(), $this->getHierarchyTypeId(), $this->getId() );
 		}
-		
+
 		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() > 10 ) {
 			if ( $this->getDeleted() == FALSE AND $this->getAuthorized() == TRUE ) {
 				$rsf = TTNew('RequestScheduleFactory');

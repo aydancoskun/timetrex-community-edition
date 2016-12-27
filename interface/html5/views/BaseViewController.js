@@ -1248,6 +1248,8 @@ BaseViewController = Backbone.View.extend( {
 			ignoreWarning = false;
 		}
 		this.is_add = false;
+		this.is_changed = false;
+
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save_and_next';
 		record = this.uniformVariable( record );
@@ -3346,21 +3348,36 @@ BaseViewController = Backbone.View.extend( {
 
 	onLeftArrowClick: function() {
 		var $this = this;
-		var selected_index = this.navigation.getSelectIndex();
-		var source_data = this.navigation.getSourceData();
-		var current_pager_data = this.navigation.getPagerData();
-		var next_select_item;
-		if ( selected_index > 0 ) {
-			next_select_item = this.navigation.getItemByIndex( selected_index - 1 );
-			$this.onRightOrLeftArrowClickCallBack( next_select_item );
-		} else if ( selected_index === 0 && current_pager_data.current_page > 1 ) {
-			this.navigation.onADropDownSearch( 'unselect_grid', current_pager_data.current_page - 1, 'last', function( result ) {
-				next_select_item = result;
-				$this.onRightOrLeftArrowClickCallBack( next_select_item );
-			} );
+
+		if ( this.is_changed ) {
+			TAlertManager.showConfirmAlert(Global.modify_alert_message, null, function (flag) {
+				if ( flag === true ) {
+					$this.is_changed = false;
+					doLeftArrowClick();
+				}
+				ProgressBar.closeOverlay();
+			});
 		} else {
-			this.onCancelClick();
-			return;
+			doLeftArrowClick();
+		}
+
+		function doLeftArrowClick() {
+			var selected_index = $this.navigation.getSelectIndex();
+			var source_data = $this.navigation.getSourceData();
+			var current_pager_data = $this.navigation.getPagerData();
+			var next_select_item;
+			if (selected_index > 0) {
+				next_select_item = $this.navigation.getItemByIndex(selected_index - 1);
+				$this.onRightOrLeftArrowClickCallBack(next_select_item);
+			} else if (selected_index === 0 && current_pager_data.current_page > 1) {
+				$this.navigation.onADropDownSearch('unselect_grid', current_pager_data.current_page - 1, 'last', function (result) {
+					next_select_item = result;
+					$this.onRightOrLeftArrowClickCallBack(next_select_item);
+				});
+			} else {
+				$this.onCancelClick();
+				return;
+			}
 		}
 	},
 
@@ -3383,28 +3400,42 @@ BaseViewController = Backbone.View.extend( {
 
 	onRightArrowClick: function() {
 		var $this = this;
-		var selected_index = this.getRightArrowClickSelectedIndex( this.navigation.getSelectIndex() );
-		var source_data = this.navigation.getSourceData();
-		var current_pager_data = this.navigation.getPagerData();
-		var next_select_item;
-		//Error: Uncaught TypeError: Cannot read property 'length' of null in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-125919 line 2956
-		if ( !source_data ) {
-			return;
+		if ( this.is_changed ) {
+			TAlertManager.showConfirmAlert(Global.modify_alert_message, null, function (flag) {
+				if ( flag === true ) {
+					$this.is_changed = false;
+					doRightArrowClick();
+				}
+				ProgressBar.closeOverlay();
+			});
+		} else {
+			doRightArrowClick();
 		}
 
-		if ( selected_index < (source_data.length - 1) ) {
-			next_select_item = this.navigation.getItemByIndex( (selected_index + 1) );
-			$this.onRightOrLeftArrowClickCallBack( next_select_item );
+		function doRightArrowClick() {
+			var selected_index = $this.getRightArrowClickSelectedIndex($this.navigation.getSelectIndex());
+			var source_data = $this.navigation.getSourceData();
+			var current_pager_data = $this.navigation.getPagerData();
+			var next_select_item;
+			//Error: Uncaught TypeError: Cannot read property 'length' of null in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-125919 line 2956
+			if (!source_data) {
+				return;
+			}
 
-			//Error: Unable to get property 'current_page' of undefined or null reference in interface/html5/views/BaseViewController.js?v=9.0.0-20151016-102254 line 3204
-		} else if ( selected_index === (source_data.length - 1) && current_pager_data && current_pager_data.current_page < current_pager_data.last_page_number ) {
-			this.navigation.onADropDownSearch( 'unselect_grid', current_pager_data.current_page + 1, 'first', function( result ) {
-				next_select_item = result;
-				$this.onRightOrLeftArrowClickCallBack( next_select_item );
-			} );
-		} else {
-			this.onCancelClick();
-			return;
+			if (selected_index < (source_data.length - 1)) {
+				next_select_item = $this.navigation.getItemByIndex((selected_index + 1));
+				$this.onRightOrLeftArrowClickCallBack(next_select_item);
+
+				//Error: Unable to get property 'current_page' of undefined or null reference in interface/html5/views/BaseViewController.js?v=9.0.0-20151016-102254 line 3204
+			} else if (selected_index === (source_data.length - 1) && current_pager_data && current_pager_data.current_page < current_pager_data.last_page_number) {
+				$this.navigation.onADropDownSearch('unselect_grid', current_pager_data.current_page + 1, 'first', function (result) {
+					next_select_item = result;
+					$this.onRightOrLeftArrowClickCallBack(next_select_item);
+				});
+			} else {
+				$this.onCancelClick();
+				return;
+			}
 		}
 
 	},
@@ -6878,7 +6909,40 @@ BaseViewController = Backbone.View.extend( {
 	}
 	},
 
+	setConversionRateExampleText: function(conversion_rate, iso_code, currency_id){
+		var data = {};
+		data.filter_data =  Global.convertLayoutFilterToAPIFilter( this.select_layout );
+		var api = new (APIFactory.getAPIClass( 'APICurrency' ))();
+		var my_currencies = api.getCurrency(data,{async:false}).getResult();
+		var base_currency_iso_code = '';
+		if ( this.edit_view_ui_dic.round_decimal_places ) {
+			var decimal_places = this.edit_view_ui_dic.round_decimal_places.getValue();
+		}
+		for ( var i = 0; i < my_currencies.length; i++ ) {
+			if ( my_currencies[i].is_base ){
+				base_currency_iso_code = my_currencies[i].iso_code;
 
+			}
+			if ( currency_id && !iso_code && my_currencies[i].id == currency_id) {
+				iso_code = my_currencies[i].iso_code;
+				if ( !decimal_places ) {
+					decimal_places = my_currencies[i].round_decimal_places;
+				}
+			}
+		}
+
+		//need different id on the subview for rate.
+		if ( iso_code != base_currency_iso_code ) {
+			if (this.sub_view_mode) {
+				$('#rate_conversion_rate_clarification_box').html('&nbsp;&nbsp;1.00 ' + base_currency_iso_code + ' = ' + Global.removeTrailingZeros(conversion_rate, decimal_places) + ' ' + iso_code);
+			} else {
+				$('#conversion_rate_clarification_box').html('&nbsp;&nbsp;1.00 ' + base_currency_iso_code + ' = ' + Global.removeTrailingZeros(conversion_rate, decimal_places) + ' ' + iso_code);
+			}
+		} else {
+			$('#conversion_rate_clarification_box').hide();
+		}
+
+	},
 } );
 //Don't check the file for now. Too many issues
 /* jshint ignore:end */

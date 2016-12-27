@@ -41,6 +41,18 @@
 class PayrollDeduction_US_RI extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20170101 => array(
+															10 => array(
+																	array( 'income' => 61300,	'rate' => 3.75,	'constant' => 0 ),
+																	array( 'income' => 139400,	'rate' => 4.75,	'constant' => 2298.75 ),
+																	array( 'income' => 139400,	'rate' => 5.99,	'constant' => 6008.50 ),
+																	),
+															20 => array(
+																	array( 'income' => 61300,	'rate' => 3.75,	'constant' => 0 ),
+																	array( 'income' => 139400,	'rate' => 4.75,	'constant' => 2298.75 ),
+																	array( 'income' => 139400,	'rate' => 5.99,	'constant' => 6008.50 ),
+																	),
+															),
 												20160101 => array(
 															10 => array(
 																	array( 'income' => 60850,	'rate' => 3.75,	'constant' => 0 ),

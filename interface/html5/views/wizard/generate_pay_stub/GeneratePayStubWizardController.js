@@ -146,17 +146,23 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		var api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
 		switch ( this.current_step ) {
 			case 2:
+				var pay_period_ids = current_step_data.pay_period_id
+				pay_period_ids = Global.array_unique(pay_period_ids);
+
 				if ( current_step_data ) {
-					current_step_ui.pay_period_id.setValue( current_step_data.pay_period_id );
+					current_step_ui.pay_period_id.setValue( pay_period_ids );
 				}
 				if ( current_step_data.pay_period_id ) {
-					$this.setPayRun( current_step_data.pay_period_id );
+					$this.setPayRun( pay_period_ids );
 				}
 				this.onPayPeriodChange();
 				break;
 			case 3:
+				var user_ids = current_step_data.user_id;
+				user_ids = Global.array_unique(user_ids);
+
 				if ( current_step_data.user_id ) {
-					current_step_ui.user_id.setValue( current_step_data.user_id );
+					current_step_ui.user_id.setValue( user_ids );
 				}
 				break;
 		}

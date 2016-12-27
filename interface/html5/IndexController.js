@@ -662,6 +662,17 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 				LocalCacheData.current_open_edit_only_controller = view_controller;
 			});
 			break;
+		case "RequestAuthorization":
+			Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
+				/* jshint ignore:start */
+				view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
+				view_controller.parent_view_controller = parent_view_controller;
+				/* jshint ignore:end */
+				//id would be data array here
+				view_controller.openAuthorizationView();
+				LocalCacheData.current_open_edit_only_controller = view_controller;
+			});
+			break;
 		case "Map":
 			//require(['async!' + APIGlobal.pre_login_data.map_api_url + '!callback'], function () {
 			require(['leaflet', 'leaflet-timetrex', 'leaflet-providers', 'leaflet-routing', 'measurement'], function() {

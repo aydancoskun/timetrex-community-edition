@@ -144,6 +144,46 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		return $this;
 	}
 
+	function getByUserIdAndStatus($id, $status_id = 10, $where = NULL, $order = NULL) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		if ( $status_id == '' ) {
+			return FALSE;
+		}
+
+		if ( is_array($id) ) {
+			$this->rs = FALSE;
+		} else {
+			$this->rs = $this->getCache($id);
+		}
+
+		if ( $this->rs === FALSE ) {
+			$uf = new UserFactory();
+
+			$ph = array();
+
+			$query = '
+						SELECT	*
+						FROM	'. $this->getTable() .' as a
+						LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id )
+						WHERE	a.user_id in ('. $this->getListSQL( $id, $ph, 'int' ) .')
+							AND b.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+							AND ( a.deleted = 0 AND b.deleted = 0 ) ';
+			$query .= $this->getWhereSQL( $where );
+			$query .= $this->getSortSQL( $order );
+
+			$this->ExecuteSQL( $query, $ph );
+
+			if ( !is_array($id) ) {
+				$this->saveCache($this->rs, $id);
+			}
+		}
+
+		return $this;
+	}
+
 	function getByCompanyId($company_id, $order = NULL) {
 		if ( $company_id == '') {
 			return FALSE;

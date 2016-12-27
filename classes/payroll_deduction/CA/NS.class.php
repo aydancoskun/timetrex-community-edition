@@ -62,31 +62,32 @@ class PayrollDeduction_CA_NS extends PayrollDeduction_CA {
 																),
 													);
 
-	function getProvincialSurtax() {
-		/*
-			V1 =
-			For NS
-				Where T4 <= 10000
-				V1 = 0
-
-				Where T4 > 10000
-				V1 = 0.10 * ( T4 - 10000 )
-		*/
-
-		$T4 = $this->getProvincialBasicTax();
-		$V1 = 0;
-
-		if ( $this->getDate() >= 20080101 ) {
-			if ( $T4 <= 10000 ) {
-				$V1 = 0;
-			} elseif ( $T4 > 10000 ) {
-				$V1 = bcmul( 0.10, bcsub( $T4, 10000 ) );
-			}
-		}
-
-		Debug::text('V1: '. $V1, __FILE__, __LINE__, __METHOD__, 10);
-
-		return $V1;
-	}
+//	function getProvincialSurtax() {
+//		/*
+//			V1 =
+//			For NS
+//				Where T4 <= 10000
+//				V1 = 0
+//
+//				Where T4 > 10000
+//				V1 = 0.10 * ( T4 - 10000 )
+//		*/
+//
+//		$T4 = $this->getProvincialBasicTax();
+//		$V1 = 0;
+//
+//		//This was phased at some point, but not 100% sure when.
+//		if ( $this->getDate() >= 20080101 ) {
+//			if ( $T4 <= 10000 ) {
+//				$V1 = 0;
+//			} elseif ( $T4 > 10000 ) {
+//				$V1 = bcmul( 0.10, bcsub( $T4, 10000 ) );
+//			}
+//		}
+//
+//		Debug::text('V1: '. $V1, __FILE__, __LINE__, __METHOD__, 10);
+//
+//		return $V1;
+//	}
 }
 ?>

@@ -3,11 +3,8 @@
 }
 
 .time-sheet-view .control-bar {
-    left: 50%;
     position: relative;
     text-align: center;
-    transform: translateX(-50%);
-    -webkit-transform: translateX(-50%);
 }
 
 .time-sheet-view .control-bar .control-bar-center {

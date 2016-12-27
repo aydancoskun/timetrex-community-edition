@@ -1806,7 +1806,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		if ( api_instance ) {
 
-			if ( this.need_refresh_display_columns && option === 'columns' ) {
+			if ( this.need_refresh_display_columns && (option === 'columns' || field == 'custom_filter') ) {
 				api_instance.getOptions( option, {
 					noCache: true, onResult: function( result ) {
 

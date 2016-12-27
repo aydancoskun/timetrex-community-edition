@@ -49,7 +49,7 @@ class ScheduleSummaryReport extends Report {
 										'pdf_schedule',
 										'pdf_schedule_print'
 									);
-	
+
 	function __construct() {
 		$this->title = TTi18n::getText('Schedule Summary Report');
 		$this->file_name = 'schedule_summary_report';
@@ -690,7 +690,7 @@ class ScheduleSummaryReport extends Report {
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach ( $slf as $key => $s_obj ) {
 					$enable_wages = $this->getPermissionObject()->isPermissionChild( $s_obj->getUser(), $wage_permission_children_ids );
-					
+
 					$hourly_rate = 0;
 					if ( $enable_wages ) {
 						$hourly_rate = $s_obj->getColumn( 'user_wage_hourly_rate' );
@@ -868,7 +868,7 @@ class ScheduleSummaryReport extends Report {
 				$label[] = TTi18n::getText('Task').': N/A';
 			}
 		}
-		
+
 		if ( $user !== 0 AND $user != '' ) {
 			$label[] = TTi18n::getText('Employee').': '. $user;
 		}
@@ -1186,13 +1186,13 @@ class ScheduleSummaryReport extends Report {
 					}
 
 					$multiple_jobs = FALSE;
-					if ( empty($unique_job) == FALSE ) {
+					if ( isset($unique_job) AND count($unique_job) > 1 ) {
 						$multiple_jobs = TRUE;
 						unset($unique_job);
 					}
 
 					$multiple_job_items = FALSE;
-					if ( empty($unique_job_item) == FALSE ) {
+					if ( isset($unique_job_item) AND count($unique_job_item) > 1 ) {
 						$multiple_job_items = TRUE;
 						unset($unique_job_item);
 					}
@@ -1263,11 +1263,11 @@ class ScheduleSummaryReport extends Report {
 														$this->pdf->Cell($column_widths['day'], $row_height, $job_item, 'LR', 2, 'C', TRUE, NULL, 1);
 														$x++;
 													}
-											
+
 													//$this->pdf->setFillColor(255, 255, 255);
 													$this->pdf->setFillColorArray( $row_bg_color_arr );
 													$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(8) );
-													
+
 													foreach( $level_5 as $schedule_data_shift ) {
 														if ( isset($schedule_data_shift['status_id']) AND $schedule_data_shift['status_id'] == 20 ) {
 															$this->pdf->setTextColor(255, 0, 0);
@@ -1276,7 +1276,7 @@ class ScheduleSummaryReport extends Report {
 														} else {
 															$this->pdf->Cell($column_widths['day'], $row_height, $schedule_data_shift['start_time'] .' - '. $schedule_data_shift['end_time'], 'LR', 2, 'C', TRUE, NULL, 1);
 														}
-		
+
 														$x++;
 													}
 												}
@@ -1325,7 +1325,7 @@ class ScheduleSummaryReport extends Report {
 		}
 
 		$filter_data = $this->getFilterConfig();
-		
+
 		//Required fields
 		// 'first_name', 'last_name', 'branch', 'department', 'start_time', 'end_time'
 		$start_week_day = 0;
@@ -1469,7 +1469,7 @@ class ScheduleSummaryReport extends Report {
 										$key = 0;
 										$i = 0;
 										foreach( $calendar_array as $calendar_day ) {
-											
+
 											if ( ($i % 7) == 0 ) {
 												$calendar_week_array = array_slice( $calendar_array, $i, 7 );
 												if ( $i != 0 ) {
@@ -1502,7 +1502,7 @@ class ScheduleSummaryReport extends Report {
 
 													if ( $this->scheduleUserWeek( $user_schedule, $calendar_week_array, $start_week_day, $column_widths, $format, $key ) == TRUE ) {
 														$s++;
-													}													
+													}
 												}
 											}
 
@@ -1515,7 +1515,7 @@ class ScheduleSummaryReport extends Report {
 										}
 										unset($calendar_day);
 										$this->scheduleFooterWeek( $column_widths );
-										$x++;										
+										$x++;
 									}
 								}
 							}

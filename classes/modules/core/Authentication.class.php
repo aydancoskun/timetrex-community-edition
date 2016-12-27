@@ -158,7 +158,7 @@ class Authentication {
 
 		return FALSE;
 	}
-	
+
 	function getType() {
 		return $this->type_id;
 	}
@@ -391,7 +391,7 @@ class Authentication {
 			if ( $this->getEnableExpireSession() === TRUE ) {
 				$cookie_expires = 0; //Expire when browser closes.
 			}
-			Debug::text('Cookie Expires: '. $cookie_expires, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Cookie Expires: '. $cookie_expires .' Path: '. Environment::getCookieBaseURL(), __FILE__, __LINE__, __METHOD__, 10);
 
 			//15-Jun-2016: This should be not be needed anymore as it has been around for several years now.
 			//setcookie( $this->getName(), NULL, ( time() + 9999999 ), Environment::getBaseURL(), NULL, Misc::isSSL( TRUE ) ); //Delete old directory cookie as it can cause a conflict if it stills exists.
@@ -406,7 +406,7 @@ class Authentication {
 
 			return TRUE;
 		}
-		
+
 		return FALSE;
 	}
 
@@ -532,7 +532,7 @@ class Authentication {
 
 		return FALSE;
 	}
-	
+
 	function getHTTPAuthenticationUsername() {
 		$user_name = FALSE;
 		if ( isset($_SERVER['PHP_AUTH_USER']) AND $_SERVER['PHP_AUTH_USER'] != '' ) {
@@ -555,11 +555,11 @@ class Authentication {
 			exit;
 		}
 	}
-	
+
 	//Allow web server to handle authentication with Basic Auth/LDAP/SSO/AD, etc...
 	function loginHTTPAuthentication() {
 		$user_name = self::getHTTPAuthenticationUsername();
-		
+
 		global $config_vars;
 		if ( isset($config_vars['other']['enable_http_authentication']) AND $config_vars['other']['enable_http_authentication'] == 1 AND $user_name != '' ) {
 			//Debug::Arr($_SERVER, 'Server vars: ', __FILE__, __LINE__, __METHOD__, 10);

@@ -53,7 +53,7 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 	var $state_income_tax_rate_options = array(
 												20060101 => array(
 															10 => array(
-																	array( 'income' => 750,	'rate' => 1.0,	'constant' => 0 ),
+																	array( 'income' => 750,		'rate' => 1.0,	'constant' => 0 ),
 																	array( 'income' => 2250,	'rate' => 2.0,	'constant' => 7.50 ),
 																	array( 'income' => 3750,	'rate' => 3.0,	'constant' => 37.50 ),
 																	array( 'income' => 5250,	'rate' => 4.0,	'constant' => 82.50 ),
@@ -61,7 +61,7 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 																	array( 'income' => 7000,	'rate' => 6.0,	'constant' => 230 ),
 																	),
 															20 => array(
-																	array( 'income' => 500,	'rate' => 1.0,	'constant' => 0 ),
+																	array( 'income' => 500,		'rate' => 1.0,	'constant' => 0 ),
 																	array( 'income' => 1500,	'rate' => 2.0,	'constant' => 5 ),
 																	array( 'income' => 2500,	'rate' => 3.0,	'constant' => 25 ),
 																	array( 'income' => 3500,	'rate' => 4.0,	'constant' => 55 ),
@@ -77,7 +77,7 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 																	array( 'income' => 10000,	'rate' => 6.0,	'constant' => 340 ),
 																	),
 															40 => array(
-																	array( 'income' => 500,	'rate' => 1.0,	'constant' => 0 ),
+																	array( 'income' => 500,		'rate' => 1.0,	'constant' => 0 ),
 																	array( 'income' => 1500,	'rate' => 2.0,	'constant' => 5 ),
 																	array( 'income' => 2500,	'rate' => 3.0,	'constant' => 25 ),
 																	array( 'income' => 3500,	'rate' => 4.0,	'constant' => 55 ),

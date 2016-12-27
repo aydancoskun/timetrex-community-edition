@@ -34,19 +34,17 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 /**
  * @group CAPayrollDeductionTest2006
  */
 class CAPayrollDeductionTest2006 extends PHPUnit_Framework_TestCase {
     public $company_id = NULL;
-	
+
     public function setUp() {
         Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__,10);
 
 		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
-		
+
 		$this->company_id = PRIMARY_COMPANY_ID;
 
 		TTDate::setTimeZone('Etc/GMT+8'); //Force to non-DST timezone. 'PST' isnt actually valid.

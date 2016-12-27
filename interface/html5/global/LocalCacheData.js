@@ -227,12 +227,13 @@ LocalCacheData.setCopyRightInfo = function( val ) {
 };
 
 LocalCacheData.getApplicationName = function() {
-	return LocalCacheData.getRequiredLocalCache( 'applicationName' );
+	//return LocalCacheData.getRequiredLocalCache( 'applicationName' );
+	return LocalCacheData.getLoginData().application_name;
 };
 
-LocalCacheData.setApplicationName = function( val ) {
-	LocalCacheData.setLocalCache( 'applicationName', val );
-};
+// LocalCacheData.setApplicationName = function( val ) {
+// 	LocalCacheData.setLocalCache( 'applicationName', val );
+// };
 
 LocalCacheData.getCurrentCompany = function() {
 	return LocalCacheData.getRequiredLocalCache( 'current_company', 'JSON' );

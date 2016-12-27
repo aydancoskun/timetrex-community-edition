@@ -41,6 +41,20 @@
 class PayrollDeduction_US_ME extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20170101 => array(
+															10 => array(
+																	array( 'income' => 21100,	'rate' => 5.8,	'constant' => 0 ),
+																	array( 'income' => 50000,	'rate' => 6.75,	'constant' => 1224 ),
+																	array( 'income' => 200001,	'rate' => 7.15,	'constant' => 3175 ),
+																	array( 'income' => 200001,	'rate' => 10.15,'constant' => 13900 ),
+																	),
+															20 => array(
+																	array( 'income' => 42250,	'rate' => 5.8,	'constant' => 0 ),
+																	array( 'income' => 100000,	'rate' => 6.75,	'constant' => 2451 ),
+																	array( 'income' => 200001,	'rate' => 7.15,	'constant' => 6349 ),
+																	array( 'income' => 200001,	'rate' => 10.15,'constant' => 13499 ),
+																	),
+															),
 												20160101 => array(
 															10 => array(
 																	array( 'income' => 8750,	'rate' => 0,	'constant' => 0 ),
@@ -181,7 +195,18 @@ class PayrollDeduction_US_ME extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
-								20160101 => array( //01-Jan-15
+								20170101 => array( //01-Jan-17 - Standard Deduction formula seems to have changed slightly in 2017.
+													'allowance' => 4050,
+													'standard_deduction' => array(
+																					'10' => 8750,
+																					'20' => 20350,
+																					),
+													'standard_deduction_threshold' => array(
+																					'10' => array( 70000, 145000, 75000 ), //Min/Max/Divisor
+																					'20' => array( 140000, 290000, 150000 ), //Min/Max/Divsor
+																					),
+													),
+								20160101 => array( //01-Jan-16
 													'allowance' => 4050
 													),
 								20150101 => array( //01-Jan-15
@@ -205,16 +230,48 @@ class PayrollDeduction_US_ME extends PayrollDeduction_US {
 	function getStatePayPeriodDeductionRoundedValue( $amount ) {
 		return $this->RoundNearestDollar( $amount );
 	}
-								
+
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
+		$state_deductions = $this->getStateStandardDeduction();
 		$state_allowance = $this->getStateAllowanceAmount();
 
-		$income = bcsub( $annual_income, $state_allowance );
+		$income = bcsub( bcsub( $annual_income, $state_deductions), $state_allowance );
 
 		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $income;
+	}
+
+	function getStateStandardDeduction() {
+		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		if ( $retarr == FALSE ) {
+			return FALSE;
+		}
+
+		if ( !isset($retarr['standard_deduction'][$this->getStateFilingStatus()]) ) {
+			return FALSE;
+		}
+
+		if ( !isset($retarr['standard_deduction_threshold'][$this->getStateFilingStatus()]) ) {
+			return FALSE;
+		}
+
+		$annual_income = $this->getAnnualTaxableIncome();
+		$deduction = $retarr['standard_deduction'][$this->getStateFilingStatus()];
+		$thresholds = $retarr['standard_deduction_threshold'][$this->getStateFilingStatus()];
+
+		if ( $annual_income <= $thresholds[0] ) {
+			$retval = $deduction;
+		} elseif ( $annual_income >= $thresholds[1] ) {
+			$retval = 0;
+		} else {
+			$retval = bcmul( bcsub( 1, bcdiv( bcsub( $annual_income, $thresholds[0] ), $thresholds[2], 4 ) ), $deduction );
+		}
+
+		Debug::text('Standard Deduction: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+
+		return $retval;
 	}
 
 	function getStateAllowanceAmount() {

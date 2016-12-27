@@ -56,8 +56,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '10.0.0' );
-define('APPLICATION_VERSION_DATE', @strtotime('22-Oct-2016') ); // Release date of version.
+define('APPLICATION_VERSION', '10.0.2' );
+define('APPLICATION_VERSION_DATE', @strtotime('21-Dec-2016') ); // Release date of version.
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
 
@@ -303,7 +303,7 @@ function forceNoCacheHeaders() {
 
 	//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
 	//Header('Content-Security-Policy: default-src *; script-src \'self\' *.google-analytics.com *.google.com');
-	header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.googleapis.com *.gstatic.com *.google.com; img-src \'self\' map.timetrex.com:3128 *.timetrex.com *.google-analytics.com *.googleapis.com *.gstatic.com *.google.com data:');
+	header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com; img-src \'self\' map.timetrex.com:3128 *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com data:');
 
 	//Help prevent XSS or frame clickjacking.
 	header('X-XSS-Protection: 1; mode=block');

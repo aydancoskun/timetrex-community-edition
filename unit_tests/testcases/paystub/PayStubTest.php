@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 class PayStubTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
 	protected $user_id = NULL;
@@ -337,7 +335,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 							'state_unemployment' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'NY - Unemployment Insurance'),
 							'vacation_accrual' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 50, 'Vacation Accrual'),
 							);
-		
+
 		//addEntry( $pay_stub_entry_account_id, $amount, $units = NULL, $rate = NULL, $description = NULL, $ps_amendment_id = NULL, $ytd_amount = NULL, $ytd_units = NULL) {
 		$pay_stub->addEntry( $pse_accounts['regular_time'], 100.01 );
 		$pay_stub->addEntry( $pse_accounts['regular_time'], 10.01 );
@@ -556,7 +554,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pay_stub->addEntry( $pse_accounts['vacation_accrual'], 5.01 );
 
-		
+
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
@@ -833,7 +831,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pay_stub->addEntry( $pse_accounts['vacation_accrual'], 5.01 );
 
-		
+
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
@@ -1130,7 +1128,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['amount'], '2.04' );
 		$this->assertEquals( $pse_arr[$this->pay_stub_account_link_arr['employer_contribution']][0]['ytd_amount'], '58.25' );
 		unset($pse_arr, $pay_stub_id, $pay_stub);
-		
+
 		//
 		// Last Pay Stub
 		// THIS SHOULD BE IN THE NEW YEAR, so YTD amounts are zero'd.
@@ -1275,7 +1273,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		$pay_stub->addEntry( $pse_accounts['vacation_accrual'], 5.01 );
 
-		
+
 		$pay_stub->setEnableProcessEntries(TRUE);
 		$pay_stub->processEntries();
 		if ( $pay_stub->isValid() == TRUE ) {
@@ -1661,7 +1659,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 
 		return TRUE;
 	}
-	
+
 	/**
 	 * @group PayStub_testEditMultiplePayStub
 	 */

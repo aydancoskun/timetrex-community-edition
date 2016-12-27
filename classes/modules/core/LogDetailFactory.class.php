@@ -275,6 +275,12 @@ class LogDetailFactory extends Factory {
 							$diff_arr['is_primary']
 							);
 					break;
+				case 'PayStubEntryFactory':
+				case 'PayStubEntryListFactory':
+					unset(
+							$diff_arr['pay_stub_id']
+							);
+					break;
 				case 'StationFactory':
 				case 'StationListFactory':
 					unset(

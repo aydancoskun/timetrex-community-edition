@@ -3689,7 +3689,7 @@ class CalculatePolicy {
 										$scheduled_id_cache[$p_obj->getID()] = $p_obj->findScheduleID( NULL, $user_id );
 									}
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
-										if ( $p_obj->getTimeStamp() < $p_obj->getScheduleObject()->getStartTime() ) {
+										if ( $p_obj->getScheduleObject()->getStatus() == 10 AND $p_obj->getTimeStamp() < $p_obj->getScheduleObject()->getStartTime() ) { //Be sure to ignore Absence scheduled shifts.
 											if ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getGrace() ) == TRUE ) {
 												Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 											} elseif ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
@@ -3705,6 +3705,8 @@ class CalculatePolicy {
 																				'schedule_obj' => $p_obj->getScheduleObject(),
 																			);
 											}
+										} else {
+											Debug::text('	 NO Working Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 										}
 									} else {
 										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
@@ -3725,7 +3727,7 @@ class CalculatePolicy {
 										$scheduled_id_cache[$p_obj->getID()] = $p_obj->findScheduleID( NULL, $user_id );
 									}
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
-										if ( $p_obj->getTimeStamp() > $p_obj->getScheduleObject()->getStartTime() ) {
+										if ( $p_obj->getScheduleObject()->getStatus() == 10 AND $p_obj->getTimeStamp() > $p_obj->getScheduleObject()->getStartTime() ) { //Be sure to ignore Absence scheduled shifts.
 											if ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getGrace() ) == TRUE ) {
 												Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 											} elseif (	TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getStartTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
@@ -3741,6 +3743,8 @@ class CalculatePolicy {
 																				'schedule_obj' => $p_obj->getScheduleObject(),
 																			);
 											}
+										} else {
+											Debug::text('	 NO Working Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 										}
 									} else {
 										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
@@ -3837,7 +3841,7 @@ class CalculatePolicy {
 										$scheduled_id_cache[$p_obj->getID()] = $p_obj->findScheduleID( NULL, $user_id );
 									}
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
-										if ( $p_obj->getTimeStamp() < $p_obj->getScheduleObject()->getEndTime() ) {
+										if ( $p_obj->getScheduleObject()->getStatus() == 10 AND $p_obj->getTimeStamp() < $p_obj->getScheduleObject()->getEndTime() ) { //Be sure to ignore Absence scheduled shifts.
 											if ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getEndTime(), $ep_obj->getGrace() ) == TRUE ) {
 												Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 											} elseif ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getEndTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
@@ -3858,6 +3862,8 @@ class CalculatePolicy {
 													$current_exceptions[] = $tmp_exception;
 												} //else { //Save exception to be triggered if the next punch doesn't match the same time.
 											}
+										} else {
+											Debug::text('	 NO Working Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 										}
 									} else {
 										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
@@ -3890,7 +3896,7 @@ class CalculatePolicy {
 										$scheduled_id_cache[$p_obj->getID()] = $p_obj->findScheduleID( NULL, $user_id );
 									}
 									if ( $p_obj->setScheduleID( $scheduled_id_cache[$p_obj->getID()] ) == TRUE ) {
-										if ( $p_obj->getTimeStamp() > $p_obj->getScheduleObject()->getEndTime() ) {
+										if ( $p_obj->getScheduleObject()->getStatus() == 10 AND $p_obj->getTimeStamp() > $p_obj->getScheduleObject()->getEndTime() ) { //Be sure to ignore Absence scheduled shifts.
 											if ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getEndTime(), $ep_obj->getGrace() ) == TRUE ) {
 												Debug::text('	 Within Grace time, IGNORE EXCEPTION: ', __FILE__, __LINE__, __METHOD__, 10);
 											} elseif ( TTDate::inWindow( $p_obj->getTimeStamp(), $p_obj->getScheduleObject()->getEndTime(), $ep_obj->getWatchWindow() ) == TRUE ) {
@@ -3906,6 +3912,8 @@ class CalculatePolicy {
 																				'schedule_obj' => $p_obj->getScheduleObject(),
 																			);
 											}
+										} else {
+											Debug::text('	 NO Working Schedule Found', __FILE__, __LINE__, __METHOD__, 10);
 										}
 									} else {
 										Debug::text('	 NO Schedule Found', __FILE__, __LINE__, __METHOD__, 10);

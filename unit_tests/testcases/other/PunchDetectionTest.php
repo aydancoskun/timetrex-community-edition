@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
 	protected $user_id = NULL;
@@ -298,7 +296,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 
 		return $date_totals;
 	}
-	
+
 	function getPunchDataArray( $start_date, $end_date ) {
 		$plf = new PunchListFactory();
 

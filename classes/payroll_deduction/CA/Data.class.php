@@ -50,22 +50,38 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	*/
 	var $basic_claim_code_options = array(
 							//Make sure updateCompanyDeductionForTaxYear() is run in the installer so it updates the Tax/Deduction records properly.
+							20170101 => array( //01-Jan-2017:
+									   'CA' => 11635, //Federal
+									   'BC' => 10208,
+									   'AB' => 18690,
+									   'SK' => 16065,
+									   'MB' => 9271,
+									   'QC' => 0,
+									   'ON' => 10171,
+									   'NL' => 8978,
+									   'NB' => 9895,
+									   'NS' => 8481,
+									   'PE' => 8000,
+									   'NT' => 14278,
+									   'YT' => 11635,
+									   'NU' => 13128,
+										),
 							20160701 => array( //01-Jul-2016:
-											   'CA' => 11474, //Federal
-											   'BC' => 10027,
-											   'AB' => 18451,
-											   'SK' => 15843,
-											   'MB' => 9134,
-											   'QC' => 0,
-											   'ON' => 10011,
-											   'NL' => 8802,
-											   'NB' => 9758,
-											   'NS' => 8481,
-											   'PE' => 8292,
-											   'NT' => 14081,
-											   'YT' => 11474,
-											   'NU' => 12947,
-							),
+									   'CA' => 11474, //Federal
+									   'BC' => 10027,
+									   'AB' => 18451,
+									   'SK' => 15843,
+									   'MB' => 9134,
+									   'QC' => 0,
+									   'ON' => 10011,
+									   'NL' => 8802,
+									   'NB' => 9758,
+									   'NS' => 8481,
+									   'PE' => 8292,
+									   'NT' => 14081,
+									   'YT' => 11474,
+									   'NU' => 12947,
+										),
 							20160101 => array( //01-Jan-2016:
 										'CA' => 11474, //Federal
 										'BC' => 10027,
@@ -312,6 +328,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		CPP settings
 	*/
 	var $cpp_options = array(
+							20170101 => array( //2017
+									    'maximum_pensionable_earnings' => 55300,
+									    'basic_exemption' => 3500,
+									    'employee_rate' => 0.0495,
+									    'employee_maximum_contribution' => 2564.10
+										),
 							20160101 => array( //2016
 										'maximum_pensionable_earnings' => 54900,
 										'basic_exemption' => 3500,
@@ -396,12 +418,18 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		EI settings
 	*/
 	var $ei_options = array(
+							20170101 => array( //2017
+									    'maximum_insurable_earnings' => 51300,
+									    'employee_rate' => 0.0163,
+									    'employee_maximum_contribution' => 836.19,
+									    'employer_rate' => 1.4
+										),
 							20160101 => array( //2016
 										'maximum_insurable_earnings' => 50800,
 										'employee_rate' => 0.0188,
 										'employee_maximum_contribution' => 955.04,
 										'employer_rate' => 1.4
-										),		
+										),
 							20150101 => array( //2015
 										'maximum_insurable_earnings' => 49500,
 										'employee_rate' => 0.0188,
@@ -480,6 +508,7 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal employment credit
 	*/
 	var $federal_employment_credit_options = array(
+													20170101 => array( 'credit' => 1178 ),
 													20160101 => array( 'credit' => 1161 ),
 													20150101 => array( 'credit' => 1146 ),
 													20140101 => array( 'credit' => 1127 ),
@@ -497,6 +526,13 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal Income Tax Rates
 	*/
 	var $federal_income_tax_rate_options = array(
+												20170101 => array(
+																array( 'income' => 45916,	'rate' => 15,	'constant' => 0 ),
+																array( 'income' => 91831,	'rate' => 20.5,	'constant' => 2525 ),
+																array( 'income' => 142353,	'rate' => 26,	'constant' => 7576 ),
+																array( 'income' => 202800,	'rate' => 29,	'constant' => 11847 ),
+																array( 'income' => 202800,	'rate' => 33,	'constant' => 19959 ),
+															),
 												20160101 => array(
 																array( 'income' => 45282,	'rate' => 15,	'constant' => 0 ),
 																array( 'income' => 90563,	'rate' => 20.5,	'constant' => 2491 ),
@@ -632,7 +668,7 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		if ( $date == '' ) {
 			$date = $this->getDate();
 		}
-		
+
 		$data = $this->getBasicClaimCodeData( $date );
 
 		if ( isset($data['CA']) ) {
@@ -787,20 +823,20 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		}
 
 		Debug::text('bUsing ('. $province .') values from: '. TTDate::getDate('DATE+TIME', $this->getDateEpoch( $epoch ) ), __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		$this->income_tax_rates = FALSE;
 		if ( isset($this->federal_income_tax_rate_options) AND count($this->federal_income_tax_rate_options) > 0 ) {
 			foreach( $this->getDataFromRateArray($epoch, $this->federal_income_tax_rate_options ) as $effective_date => $data ) {
 				$this->income_tax_rates['federal'][] = array('income' => $data['income'], 'rate' => ( $data['rate'] / 100 ), 'constant' => $data['constant'] );
 			}
 		}
-		
+
 		if ( isset($this->provincial_income_tax_rate_options) AND count($this->provincial_income_tax_rate_options) > 0 ) {
 			foreach( $this->getDataFromRateArray($epoch, $this->provincial_income_tax_rate_options ) as $effective_date => $data ) {
 				$this->income_tax_rates['provincial'][] = array('income' => $data['income'], 'rate' => ( $data['rate'] / 100 ), 'constant' => $data['constant'] );
 			}
 		}
-		
+
 		return $this;
 	}
 

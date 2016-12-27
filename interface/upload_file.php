@@ -436,15 +436,31 @@ switch ($object_type) {
 			}
 			Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($success) AND $success != '' ) {
-				Debug::Text('Rename', __FILE__, __LINE__, __METHOD__, 10);
+				$clf = new CompanyListFactory();
+				$clf->getById( $config_vars['other']['primary_company_id'] );
+				if ( $clf->getRecordCount() == 1 ) {
 
-				$file_data_arr = $upload->get_file();
-				$license_data = trim( file_get_contents( $dir.'/'.$upload_result ) );
+					$ttsc = new TimeTrexSoapClient();
+					if ( $ttsc->Ping() == TRUE ) {
 
-				$license = new TTLicense();
-				$retval = $license->getLicenseFile( TRUE, $license_data ); //Download updated license file if one exists.
-				if ( $retval === FALSE ) {
-					$error = TTi18n::gettext('Invalid license file or unable to activate license');
+						Debug::Text( 'Rename', __FILE__, __LINE__, __METHOD__, 10 );
+
+
+						$file_data_arr = $upload->get_file();
+						$license_data = trim( file_get_contents( $dir . '/' . $upload_result ) );
+
+						$license = new TTLicense();
+						$retval = $license->getLicenseFile( TRUE, $license_data ); //Download updated license file if one exists.
+						if ( $retval === FALSE ) {
+							$error = TTi18n::gettext( 'Invalid license file or unable to activate license' );
+							unset( $success );
+						}
+					} else {
+						$error = TTi18n::gettext('ERROR: Unable to communicate with license server, please check your internet connection.');
+						unset($success);
+					}
+				} else {
+					$error = TTi18n::gettext('ERROR: Invalid PRIMARY_COMPANY_ID defined in timetrex.ini.php file.');
 					unset($success);
 				}
 			}

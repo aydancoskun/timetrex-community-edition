@@ -1982,8 +1982,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							sum(a.total_time) as total_time,
 							sum(a.actual_total_time) as actual_total_time,
 							sum(a.total_time_amount) as total_time_amount,
-							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden,
-							'. $this->getSQLStringAggregate( 'a.note', ' -- ' ) .' as udt_note
+							sum(a.total_time_amount_with_burden) as total_time_amount_with_burden
 					FROM	'. $this->getTable() .' as a
 					LEFT JOIN '. $uf->getTable() .' as uf ON a.user_id = uf.id
 					LEFT JOIN '. $bf->getTable() .' as bf ON a.branch_id = bf.id

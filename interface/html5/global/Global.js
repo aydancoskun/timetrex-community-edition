@@ -92,16 +92,27 @@ Global.sendErrorReport = function() {
 		script_name = LocalCacheData.current_open_primary_controller.script_name;
 	}
 
-	if ( login_user ) {
-		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + login_user.user_name + ' ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
+	if ( login_user && Debug.varDump ) {
+		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' +
+			script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' +
+			'\n\nUser: ' + login_user.user_name + ' ' +
+			'\n\nURL: ' + window.location.href + ' ' +
+			'\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie +
+			'\n\nCurrent User Object: \n' + Debug.varDump(login_user) + ' ' +
+			'\n\nCurrent Company Object: \n' + Debug.varDump(LocalCacheData.getCurrentCompany()) + ' ';
 	} else {
 		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
+	}
 
+
+	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
+		ga( 'send', 'exception', { 'exDescription': error_string + ' in ' + from_file + ' line ' + line, 'exFatal': false } ); // Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
 	}
 
 	//Don't send error report if exception not happens in our codes.
 	//from_file should always contains the root url
-	if ( from_file.indexOf( ServiceCaller.rootURL ) < 0 ) {
+	//If URL is not sent by IE, assume its our own code and report the error still.
+	if ( from_file && from_file.indexOf( ServiceCaller.rootURL ) < 0 ) {
         Debug.Text( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.rootURL + '" Script: ' + from_file, 'Global.js', '', 'sendErrorReport', 1 );
 		return;
 	}
@@ -128,26 +139,28 @@ Global.sendErrorReport = function() {
 				api_authentication.sendErrorReport( error, image_string, {
 					onResult: function( result ) {
 						if ( !Global.dont_check_browser_cache && APIGlobal.pre_login_data.production === true && result.getResult() !== APIGlobal.pre_login_data.application_build ) {
-							var message = $.i18n._( 'Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.' ) + '<br><br>' + $.i18n._( 'Local Version' ) + ':  ' + result.getResult() + '<br>' + $.i18n._( 'Remote Version' ) + ': ' + APIGlobal.pre_login_data.application_build;
+							result = result.getResult();
+							var message = $.i18n._('Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.') + '<br><br>' + $.i18n._('Local Version') + ':  ' + result + '<br>' + $.i18n._('Remote Version') + ': ' + APIGlobal.pre_login_data.application_build;
 							Global.dont_check_browser_cache = true;
-							Global.sendErrorReport( 'Your web browser is caching incorrect data. Local Version' + ':  ' + result.getResult() + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '' );
-							TAlertManager.showAlert( message, '', function() {
-								window.location.reload( true );
-							} );
+							Global.sendErrorReport('Your web browser is caching incorrect data. Local Version' + ':  ' + result + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '');
+
+							TAlertManager.showAlert(message, '', function () {
+								LocalCacheData.loadedScriptNames = {};
+								Debug.Text('Incorrect cache... Forcing reload after JS exception...','Global.js','Global','cachingIncorrectData',10);
+								window.location.reload(true);
+							});
 						} else if ( Global.dont_check_browser_cache ) {
 							Global.dont_check_browser_cache = false;
 						}
 
-					}
+					},
 				} );
 
 			}
 		} );
 	} else {
-
 		api_authentication.sendErrorReport( error, '', {
 			onResult: function( result ) {
-
 			}
 		} );
 	}
@@ -1307,6 +1320,7 @@ Global.loadScript = function( scriptPath, onResult ) {
 		async = false;
 	}
 
+	//Ensures that the js cached scripts are not loaded twice
 	if ( async ) {
 		if ( LocalCacheData.loadedScriptNames[scriptPath] ) {
 			onResult();
@@ -1339,8 +1353,8 @@ Global.loadScript = function( scriptPath, onResult ) {
 				onResult();
 			}
 		},
-		error: function(error){
-			TAlertManager.showNetworkErrorAlert( error );
+		error: function( jqXHR, textStatus, errorThrown ) {
+			TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
 		},
 		dataType: 'script'
 	} );
@@ -1793,8 +1807,8 @@ Global.loadWidget = function( url ) {
 		success: function() {
 			successflag = true;
 		},
-		error: function(error){
-			TAlertManager.showNetworkErrorAlert( error );
+		error: function( jqXHR, textStatus, errorThrown ) {
+			TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
 		}
 	} );
 
@@ -2311,6 +2325,9 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'ReportViewWizard':
 			path = 'views/wizard/report_view/';
 			break;
+		case 'DeveloperTools':
+			path = 'views/developer_tools/';
+			break;
 	}
 
 	return path;
@@ -2385,8 +2402,9 @@ Global.loadPageSync = function( url ) {
 		success: function() {
 			successflag = true;
 		},
-		error: function(error){
-			TAlertManager.showNetworkErrorAlert( error );
+
+		error: function( jqXHR, textStatus, errorThrown ) {
+			TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
 		}
 	} );
 
@@ -2414,10 +2432,9 @@ Global.loadPage = function( url, onResult ) {
 		success: function( result ) {
 			ProgressBar.removeProgressBar();
 			onResult( result );
-
 		},
-		error: function(error){
-			TAlertManager.showNetworkErrorAlert( error );
+		error: function( jqXHR, textStatus, errorThrown ) {
+			TAlertManager.showNetworkErrorAlert( jqXHR, textStatus, errorThrown );
 		}
 	} );
 
@@ -2945,6 +2962,17 @@ RightClickMenuType.NORESULTBOX = '3';
 RightClickMenuType.ABSENCE_GRID = '4';
 RightClickMenuType.VIEW_ICON = '5';
 
+/**
+ * decoding encoded html enitities (ex &gt;)
+ * to avoid xss vulnerabilities do not eval anything that has gone through this function
+ *
+ * @param str
+ * @returns {*|jQuery}
+ */
+Global.htmlDecode = function( str ) {
+	return 	$('<textarea />').html(str).text();
+};
+
 Global.htmlEncode = function( str ) {
 	var encodedStr = str;
 	if ( encodedStr ) {
@@ -3096,19 +3124,20 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 		ga( 'set', 'dimension3', APIGlobal.pre_login_data.product_edition_name );
 		ga( 'set', 'dimension4', APIGlobal.pre_login_data.registration_key );
 		ga( 'set', 'dimension5', APIGlobal.pre_login_data.primary_company_name );
+		Debug.Text('Application Version: '+ APIGlobal.pre_login_data.application_version +' Host: '+ APIGlobal.pre_login_data.http_host +' Edition: '+ APIGlobal.pre_login_data.product_edition_name +' Registration Key: '+ APIGlobal.pre_login_data.registration_key +' Primary Company: '+ APIGlobal.pre_login_data.primary_company_name, 'Global.js', '', 'setAnalyticDimensions', 10 );
 
-		if ( user_name !== 'undefined' && user_name !== null ) {
-			if ( APIGlobal.pre_login_data.production !== true ) {
-                Debug.Text('Analytics User: ' + user_name , 'Global.js', '', 'doPing', 1 );
-			}
+		if ( user_name && user_name !== 'undefined' ) {
+			Debug.Text('Analytics User: ' + user_name , 'Global.js', '', 'setAnalyticDimensions', 10 );
 			ga( 'set', 'dimension6', user_name );
+		} else {
+			ga( 'set', 'dimension6', null );
 		}
 
-		if ( company_name !== 'undefined' && company_name !== null ) {
-			if ( APIGlobal.pre_login_data.production !== true ) {
-                Debug.Text('Analytics Company: ' + company_name , 'Global.js', '', 'setAnalyticDimensions', 1 );
-			}
+		if ( company_name && company_name !== 'undefined' ) {
+			Debug.Text('Analytics Company: ' + company_name , 'Global.js', '', 'setAnalyticDimensions', 10 );
 			ga( 'set', 'dimension7', company_name );
+		} else {
+			ga( 'set', 'dimension7', null );
 		}
 	}
 };
@@ -3118,6 +3147,7 @@ Global.sendAnalytics = function( track_address ) {
 		// Call this delay so view load goes first
 		setTimeout( function() {
 			ga( 'send', 'pageview', track_address );
+			Debug.Text('View: '+ track_address, 'Global.js', '', 'sendAnalytics', 10 );
 		}, 500 )
 
 	}
@@ -3194,10 +3224,10 @@ Global.compareMenuItems = function(a,b) {
 	return 0;
 };
 
-
 Global.getDaysInSpan = function (start_date, end_date, sun, mon, tue, wed, thu, fri, sat) {
-	var start_date_obj = new Date(start_date);
-	var end_date_obj = new Date(end_date);
+	var start_date_obj = Global.strToDate(start_date);
+	var end_date_obj = Global.strToDate(end_date);
+
 	var days = Math.round(Math.abs((start_date_obj.getTime() - end_date_obj.getTime())/(86400*1000)))+1;
 
 	//Need to loop over the whole range to ensure proper counting of effective days on ranges that span multiple weeks.
@@ -3305,4 +3335,18 @@ Global.moveCookiesToNewPath = function() {
 Global.clearSessionCookie = function() {
 	Global.moveCookiesToNewPath();
 	$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
+};
+
+
+Global.array_unique = function (arr) {
+    if ( Global.isArray(arr) == false) {
+        return arr;
+    }
+    var clean_arr = [];
+    for ( var n in arr) {
+        if ( clean_arr.indexOf(arr[n]) == -1 ) {
+            clean_arr.push(arr[n]);
+        }
+    }
+    return clean_arr;
 };

@@ -50,7 +50,7 @@ AboutViewController = BaseViewController.extend( {
 		} );
 
 		var check = new RibbonSubMenu( {
-			label: $.i18n._( 'Check For Updates' ),
+			label: $.i18n._( 'Check For<br>Updates' ),
 			id: ContextMenuIconName.check_updates,
 			group: editor_group,
 			icon: Icons.check_updates,
@@ -459,12 +459,19 @@ AboutViewController = BaseViewController.extend( {
 		var $this = this;
 		var file = this.edit_view_ui_dic['license_browser'].getValue();
 		$this.api.uploadFile( file, 'object_type=license&object_id=', {onResult: function( res ) {
+			//file upload returns a "TRUE" string on success
+			if ( res == "TRUE" ) {
+				//$this.openEditView();
 
-			if ( res ) {
-				$this.openEditView();
+				ProgressBar.showProgressBar();
 				IndexViewController.setNotificationBar( 'login' );
+				window.setTimeout(function(){
+					window.location.reload();
+				},3000);
 			} else {
-				TAlertManager.showAlert( $.i18n._( 'Invalid license file' ) )
+				//TAlertManager.showAlert( $.i18n._( 'Invalid license file' ) )
+				TAlertManager.showAlert( res );
+				$this.edit_view_ui_dic.license_browser.clearForm();
 			}
 
 		}} );

@@ -338,8 +338,10 @@ class APIPunch extends APIFactory {
 		}
 
 		$message = '';
+
 		$plf = TTnew('PunchListFactory');
 		if ( isset($current_punch_id) ) {
+			$request_type_id = 20;
 			$pf_arr = $this->stripReturnHandler( $this->getPunch( array('filter_data' => array('user_id' => $user_id, 'id' => $current_punch_id) ), TRUE ) );
 			if ( !is_array( $pf_arr ) OR count($pf_arr) == 0 ) {
 				return array( 'message' => TTi18n::getText('Due to <specify reason here>, please correct the <Normal/Lunch/Break> <In/Out> punch at <X::XX AM/PM> to be a <Normal/Lunch/Break> <In/Out> punch at <X:XX AM/PM> instead.') );
@@ -353,6 +355,7 @@ class APIPunch extends APIFactory {
 			$status_text = Option::getByKey( $status_id, $plf->getOptions( 'status' ) );
 			$message = TTi18n::getText('Due to <specify reason here>, please correct the %1 %2 punch at %3 to be a %1 %2 punch at <X:XX AM/PM> instead.', array($type_text, $status_text, $current_punch_time_text) );
 		} else {
+			$request_type_id = 10;
 			//missing punch
 			$punch_data = $this->getPunchDefaultData($user_id, $date, $punch_control_id, $previous_punch_id, $status_id, $type_id);
 			$type_text = Option::getByKey( $punch_data['api_retval']['type_id'], $plf->getOptions( 'type' ) );
@@ -366,7 +369,7 @@ class APIPunch extends APIFactory {
 		$data = array(
 				'date_stamp' => TTDate::getDATE('DATE', $date ),
 				//'status_id' => $status_id, sets the wrong status if set.
-				'type_id' => $type_id,
+				'type_id' => $request_type_id,
 				'user_id' => $this->getCurrentUserObject()->getId(),
 				'message' => $message
 		);

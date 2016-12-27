@@ -50,13 +50,14 @@ class ImportUser extends Import {
 	public $branch_manual_id_options = FALSE;
 	public $department_options = FALSE;
 	public $department_manual_id_options = FALSE;
-	
+
 	public $job_options = FALSE;
 	public $job_manual_id_options = FALSE;
 	public $job_item_options = FALSE;
 	public $job_item_manual_id_options = FALSE;
 
 	public $user_group_options = FALSE;
+	public $ethnic_group_options = FALSE;
 
 	public $permission_control_options = FALSE;
 	public $policy_group_options = FALSE;
@@ -112,6 +113,7 @@ class ImportUser extends Import {
 								'title' => 'title_id',
 								'user_group' => 'group_id',
 								'group' => 'group_id',
+								'ethnic_group' => 'ethnic_group_id',
 								'sex' => 'sex_id',
 								'permission_control' => 'permission_control_id',
 								'pay_period_schedule' => 'pay_period_schedule_id',
@@ -127,6 +129,7 @@ class ImportUser extends Import {
 								//'-1020-create_branch' => TTi18n::getText('Create branches that don\'t exist.'),
 								//'-1030-create_department' => TTi18n::getText('Create departments that don\'t exist.'),
 								'-1040-create_group' => TTi18n::getText('Create groups that don\'t already exist.'),
+								'-1045-create_ethnic_group' => TTi18n::getText('Create ethnic groups that don\'t already exist.'),
 								'-1050-create_title' => TTi18n::getText('Create titles that don\'t already exist.'),
 								);
 				break;
@@ -451,7 +454,7 @@ class ImportUser extends Import {
 		} else {
 			$retval = $this->findClosestMatch( $input, $this->branch_options );
 		}
-		
+
 		if ( $retval === FALSE ) {
 			$retval = -1; //Make sure this fails.
 		}
@@ -603,7 +606,7 @@ class ImportUser extends Import {
 		if ( $retval === FALSE ) {
 			if ( $this->getImportOptions('create_group') == TRUE ) {
 				$ugf = TTnew('UserGroupFactory');
-				$ugf->setCompany(  $this->company_id );
+				$ugf->setCompany( $this->company_id );
 				$ugf->setParent( 0 );
 				$ugf->setName( $input );
 
@@ -615,6 +618,49 @@ class ImportUser extends Import {
 					return $new_group_id;
 				}
 				unset($ugf, $new_group_id);
+			}
+
+			$retval = -1; //Make sure this fails.
+		}
+
+		return $retval;
+	}
+
+	function getEthnicGroupOptions() {
+		//Get groups
+		$uglf = TTNew('EthnicGroupListFactory');
+		$uglf->getByCompanyId( $this->company_id );
+		$this->ethnic_group_options = (array)$uglf->getArrayByListFactory( $uglf, FALSE, TRUE );
+		unset($uglf);
+
+		return TRUE;
+	}
+
+	function parse_ethnic_group( $input, $default_value = NULL, $parse_hint = NULL ) {
+		if ( trim($input) == '' ) {
+			return 0; //No group
+		}
+
+		if ( !is_array( $this->user_group_options ) ) {
+			$this->getEthnicGroupOptions();
+		}
+
+		$retval = $this->findClosestMatch( $input, $this->ethnic_group_options );
+
+		if ( $retval === FALSE ) {
+			if ( $this->getImportOptions('create_ethnic_group') == TRUE ) {
+				$egf = TTnew('EthnicGroupFactory');
+				$egf->setCompany( $this->company_id );
+				$egf->setName( $input );
+
+				if ( $egf->isValid() ) {
+					$new_group_id = $egf->Save();
+					$this->getEthnicGroupOptions(); //Update group records after we've added a new one.
+					Debug::Text('Created new ethnic group name: '. $input .' ID: '. $new_group_id, __FILE__, __LINE__, __METHOD__, 10);
+
+					return $new_group_id;
+				}
+				unset($egf, $new_group_id);
 			}
 
 			$retval = -1; //Make sure this fails.

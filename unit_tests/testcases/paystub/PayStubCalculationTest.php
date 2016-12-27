@@ -34,8 +34,6 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('PHPUnit/Framework/TestCase.php');
-
 class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 	protected $company_id = NULL;
 	protected $user_id = NULL;
@@ -46,7 +44,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 	public function setUp() {
 		global $dd;
 		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		TTDate::setTimeZone('PST8PDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 
 		$dd = new DemoData();
@@ -160,7 +158,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		}
 		return TRUE;
 	}
-	
+
 	function createUserSalaryWage( $user_id, $rate, $effective_date, $wage_group_id = 0 ) {
 		$uwf = TTnew( 'UserWageFactory' );
 
@@ -199,8 +197,8 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 			'advanced_percent_1' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Advanced Percent 1'),
 			'other2' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Other2'),
 			'other' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'Other'),
-			
-			
+
+
 			);
 
 		return TRUE;
@@ -230,7 +228,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
-		
+
 		Debug::text('Saving.... Employee Deduction - Custom1', __FILE__, __LINE__, __METHOD__, 10);
 		$pseaf = new PayStubEntryAccountFactory();
 		$pseaf->setCompany( $this->company_id );
@@ -242,7 +240,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
-		
+
 		Debug::text('Saving.... Employee Deduction - Custom2', __FILE__, __LINE__, __METHOD__, 10);
 		$pseaf = new PayStubEntryAccountFactory();
 		$pseaf->setCompany( $this->company_id );
@@ -254,7 +252,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		if ( $pseaf->isValid() ) {
 			$pseaf->Save();
 		}
-		
+
 
 		Debug::text('Saving.... Employee Deduction - Advanced Percent 1', __FILE__, __LINE__, __METHOD__, 10);
 		$pseaf = new PayStubEntryAccountFactory();
@@ -411,7 +409,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 				$cdf->Save();
 			}
 		}
-		
+
 		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			$cdf = new CompanyDeductionFactory();
 			$cdf->setCompany( $this->company_id );
@@ -619,7 +617,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
-				
+
 				$pps_obj->createNextPayPeriod( $end_date, (86400 * 3600), FALSE ); //Don't import punches, as that causes deadlocks when running tests in parallel.
 			}
 
@@ -1410,7 +1408,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 							'employer_fica' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 30, 'Social Security (FICA)'),
 							'vacation_accrual' => CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 50, 'Vacation Accrual'),
 							);
-		
+
 		$pay_stub_id = $this->getPayStub( $this->pay_period_objs[1]->getId() );
 
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
@@ -1504,7 +1502,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( count($pse_arr[$pse_accounts['regular_time']]), 1 );
 
-		
+
 		$pay_stub_id = $this->getPayStub( $this->pay_period_objs[1]->getId() );
 		$pse_arr = $this->getPayStubEntryArray( $pay_stub_id );
 		//var_dump($pse_arr);
@@ -1570,7 +1568,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $pse_arr[$pse_accounts['regular_time']][0]['ytd_amount'], '1671.41' );
 
 		$this->assertEquals( count($pse_arr[$pse_accounts['regular_time']]), 1 );
-		
+
 		return TRUE;
 	}
 
@@ -1775,8 +1773,8 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2016') ), TRUE );
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2016') ), TRUE );
 
-		
-		
+
+
 		$birth_date = strtotime('15-Jun-1945'); //70yrs old
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2011') ), TRUE );
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2011') ), TRUE );
@@ -1820,7 +1818,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-May-2019') ), FALSE );
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jun-2019') ), FALSE );
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('30-Jul-2019') ), FALSE );
-		
+
 		return TRUE;
 	}
 
@@ -1845,7 +1843,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		//	}
 		//}
 
-		
+
 		$udf = new UserDeductionFactory();
 		$udf->setUser( $this->user_id );
 		$udf->setStartDate( strtotime( '16-Oct-2015' ) );

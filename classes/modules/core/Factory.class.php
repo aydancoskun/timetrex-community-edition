@@ -805,7 +805,7 @@ abstract class Factory {
 	protected function getListSQL($array, &$ph = NULL, $cast = FALSE ) {
 		//Debug::Arr($array, 'List Values:', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ph === NULL ) {
-			if ( is_array( $array ) AND count($array) > 0) {
+			if ( is_array( $array ) AND count($array) > 0 ) {
 				return '\''.implode('\', \'', $array).'\'';
 			} elseif ( is_array($array) ) {
 				//Return NULL, because this is an empty array.
@@ -1046,10 +1046,12 @@ abstract class Factory {
 	}
 
 	protected function getSQLStringAggregate( $sql, $glue ) {
+		//See Group.class.php aggegate() function with 'concat' argument, that is used in most reports instead.
 		if ( $this->getDatabaseType() == 'mysql' ) {
 			$agg_sql = 'group_concat('. $sql .', \''. $glue .'\')';
 		} else {
-			$agg_sql = 'string_agg('. $sql .', \''. $glue .'\')';
+			$agg_sql = 'array_to_string( array_agg( '. $sql .' ), \''. $glue .'\')'; //Works with PGSQL 8.4+
+			//$agg_sql = 'string_agg('. $sql .', \''. $glue .'\')'; //Works with PGSQL 9.1+
 		}
 
 		return $agg_sql;

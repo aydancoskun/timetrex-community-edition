@@ -41,6 +41,26 @@
 class PayrollDeduction_US_OK extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20170101 => array(
+															10 => array(
+																	array( 'income' => 6350,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 7350,	'rate' => 0.5,	'constant' => 0 ),
+																	array( 'income' => 8850,	'rate' => 1.0,	'constant' => 5 ),
+																	array( 'income' => 10100,	'rate' => 2.0,	'constant' => 20 ),
+																	array( 'income' => 11250,	'rate' => 3.0,	'constant' => 45 ),
+																	array( 'income' => 13550,	'rate' => 4.0,	'constant' => 79.50 ),
+																	array( 'income' => 13550,	'rate' => 5.0,	'constant' => 171.50 ),
+																	),
+															20 => array(
+																	array( 'income' => 12700,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 14700,	'rate' => 0.5,	'constant' => 0 ),
+																	array( 'income' => 17700,	'rate' => 1.0,	'constant' => 10 ),
+																	array( 'income' => 20200,	'rate' => 2.0,	'constant' => 40 ),
+																	array( 'income' => 22500,	'rate' => 3.0,	'constant' => 90 ),
+																	array( 'income' => 24900,	'rate' => 4.0,	'constant' => 159 ),
+																	array( 'income' => 24900,	'rate' => 5.0,	'constant' => 255 ),
+																	),
+															),
 												20160101 => array(
 															10 => array(
 																	array( 'income' => 6300,	'rate' => 0,	'constant' => 0 ),
@@ -251,7 +271,7 @@ class PayrollDeduction_US_OK extends PayrollDeduction_US {
 	function getStatePayPeriodDeductionRoundedValue( $amount ) {
 		return $this->RoundNearestDollar( $amount );
 	}
-								
+
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
 		$state_allowance = $this->getStateAllowanceAmount();

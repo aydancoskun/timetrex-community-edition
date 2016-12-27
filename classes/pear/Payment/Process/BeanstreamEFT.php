@@ -234,6 +234,7 @@ class Payment_Process_BeanstreamEFT extends Payment_Process_Common
 
         //Must use GET for login information.
         $curl = new Net_Curl($this->_options['authorizeUri'].'?'.$fields);
+        $curl->timeout = 300;
         if (PEAR::isError($curl)) {
             PEAR::popErrorHandling();
             return $curl;
@@ -246,9 +247,12 @@ class Payment_Process_BeanstreamEFT extends Payment_Process_Common
         $temp_file = tempnam( sys_get_temp_dir(), $temp_file_prefix ).'.csv';
         file_put_contents( $temp_file, $this->batchFile);
 
-        //$curl->type = 'get';
-        //$curl->fields = $fields;
-        $curl->fields = array('batchFile' => '@'.$temp_file);
+        if ( class_exists('\CURLFile') ) {
+            $curl->fields = array('batchFile' => new \CURLFile( $temp_file ) ); //PHP v5.5+ method.
+        } else {
+            $curl->fields = array('batchFile' => '@'.$temp_file); //Pre PHP v5.5 method.
+        }
+
         $curl->userAgent = 'PEAR Payment_Process_Beanstream 0.1';
 
         //$curl->verboseAll();

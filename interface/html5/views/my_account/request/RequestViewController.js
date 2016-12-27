@@ -1001,21 +1001,7 @@ RequestViewController = RequestViewCommonController.extend( {
 		if ( this.is_add ) {
 			records = this.buildDataForAPI(records);
 		} else if ( this.is_edit ) {
-			var msg = {};
-			msg.body = this.current_edit_record['body'];
-
-			msg.from_user_id = this.current_edit_record['user_id'];
-			msg.to_user_id = this.current_edit_record['user_id'];
-
-			msg.object_id = this.current_edit_record['id'];
-
-			msg.object_type_id = 50;
-
-			if ( Global.isFalseOrNull( this.current_edit_record['subject'] ) ) {
-				msg.subject = this.edit_view_ui_dic['subject'].getValue();
-			} else {
-				msg.subject = this.current_edit_record['subject'];
-			}
+			var msg = this.uniformMessageVariable(records);
 
 			if (records && records.request_schedule) {
 				msg.request_schedule = records.request_schedule;
@@ -1191,11 +1177,13 @@ RequestViewController = RequestViewCommonController.extend( {
 
 	onFormItemChange: function( target, doNotValidate ) {
 		var $this = this;
+		this.collectUIDataToCurrentEditRecord();
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
 		var c_value = target.getValue();
 		this.current_edit_record[key] = c_value;
+		var needs_callback = false;
 
 		switch ( key ) {
 			case 'job_id':
@@ -1221,7 +1209,6 @@ RequestViewController = RequestViewCommonController.extend( {
 				doNotValidate = true;
 				this.onTypeChanged();
 				break;
-
 			case 'date_stamp':
 				this.onDateStampChanged();
 				break;
@@ -1229,16 +1216,22 @@ RequestViewController = RequestViewCommonController.extend( {
 				this.onWorkingStatusChanged();
 				break;
 			case 'start_date':
-				$this.onStartDateChanged();
-				$this.onAvailableBalanceChange();
-				$this.setRequestFormDefaultData();
-				$this.current_edit_record.start_date = $this.edit_view_ui_dic.start_date.getValue();
-				$this.current_edit_record.date_stamp = $this.edit_view_ui_dic.start_date.getValue();
+				this.onStartDateChanged();
+				this.onAvailableBalanceChange();
+				this.setRequestFormDefaultData( null, function() {
+					finishFormItemChange()
+				});
+				needs_callback = true;
+				this.current_edit_record.start_date = this.edit_view_ui_dic.start_date.getValue();
+				this.current_edit_record.date_stamp = this.edit_view_ui_dic.start_date.getValue();
 				break;
 			case 'end_date':
-				$this.onAvailableBalanceChange();
-				$this.setRequestFormDefaultData();
-				$this.current_edit_record.end_date = $this.edit_view_ui_dic.end_date.getValue();
+				this.onAvailableBalanceChange();
+				this.setRequestFormDefaultData( null, function() {
+					finishFormItemChange()
+				});
+				needs_callback = true;
+				this.current_edit_record.end_date = this.edit_view_ui_dic.end_date.getValue();
 				break;
 			case 'start_time':
 			case 'end_time':
@@ -1248,65 +1241,45 @@ RequestViewController = RequestViewCommonController.extend( {
 			case 'thu':
 			case 'fri':
 			case 'sat':
-				$this.getScheduleTotalTime();
-				break
+				this.getScheduleTotalTime();
+				break;
 			case'absence_policy_id':
-				$this.onAvailableBalanceChange();
-				break
-
+				this.selected_absence_policy_record = this.edit_view_ui_dic.absence_policy_id.getValue();
+				this.onAvailableBalanceChange();
+				break;
 		}
 
-		if ( key === 'date_stamp' ||
-			key === 'start_date_stamps' ||
-			key === 'start_date_stamp' ||
-			key === 'start_time' ||
-			key === 'end_time' ||
-			key === 'schedule_policy_id' ||
-			key === 'absence_policy_id' ) {
+		if ( !needs_callback ) {
+			finishFormItemChange();
+		}
 
-			if ( this.current_edit_record['date_stamp'] !== '' &&
-				this.current_edit_record['start_time'] !== '' &&
-				this.current_edit_record['end_time'] !== '' ) {
+		function finishFormItemChange() {
+			if (key === 'date_stamp' ||
+				key === 'start_date_stamps' ||
+				key === 'start_date' ||
+				key === 'end_date' ||
+				key === 'start_date_stamp' ||
+				key === 'start_time' ||
+				key === 'end_time' ||
+				key === 'schedule_policy_id' ||
+				key === 'absence_policy_id') {
 
-				var startTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['start_time'];
-				var endTime = this.current_edit_record['date_stamp'] + ' ' + this.current_edit_record['end_time'];
-				var schedulePolicyId = this.current_edit_record['schedule_policy_id'];
-				var user_id = this.current_edit_record.user_id;
+				if ($this.current_edit_record['date_stamp'] !== '' &&
+					$this.current_edit_record['start_time'] !== '' &&
+					$this.current_edit_record['end_time'] !== '') {
 
-				this.api_schedule.getScheduleTotalTime( startTime, endTime, schedulePolicyId, user_id, {
-					onResult: function( total_time ) {
-						//Uncaught TypeError: Cannot set property 'total_time' of null
-						//Error: Uncaught TypeError: Cannot read property 'setValue' of undefined in interface/html5/#!m=Schedule&date=20160202&mode=week&a=new&tab=Schedule line 1799
-						if ( !$this.edit_view || !$this.current_edit_record || !$this.edit_view_ui_dic['total_time'] ) {
-							return;
-						}
+					$this.getScheduleTotalTime();
+				} else {
+					$this.onAvailableBalanceChange();
+				}
 
-						//Fixed exception that total_time is null
-						if ( total_time ) {
-							total_time = total_time.getResult();
-						} else {
-							total_time = $this.current_edit_record.total_time ? $this.current_edit_record.total_time : 0;
-						}
-
-						$this.current_edit_record.total_time = total_time;
-						total_time = Global.secondToHHMMSS( total_time );
-						$this.edit_view_ui_dic['total_time'].setValue( total_time );
-
-						$this.onAvailableBalanceChange();
-
-					}
-				} );
-			} else {
-				this.onAvailableBalanceChange();
 			}
 
+			if ( !doNotValidate ) {
+				$this.validate();
+			}
+			$this.setEditMenu();
 		}
-
-		if ( !doNotValidate ) {
-			this.validate();
-		}
-		this.setEditMenu();
-
 	},
 
 	validate: function() {

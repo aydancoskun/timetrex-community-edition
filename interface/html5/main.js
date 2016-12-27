@@ -391,18 +391,29 @@ require( [
 					a = s.createElement( o ),
 						m = s.getElementsByTagName( o )[0];
 					a.async = 1;
+					a.crossorigin = 1;
 					a.src = g;
 					m.parentNode.insertBefore( a, m );
 				})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
-				ga( 'create', 'UA-333702-3', 'auto' );
+				//ga('set', 'sendHitTask', null); //disables sending hit data to Google. uncoment when debugging GA.
+
+				ga( 'create', APIGlobal.pre_login_data.analytics_tracking_code, 'auto' );
+
+				//Do not check exitstance of LocalCacheData with if(LocalCacheData) or JS will execute the unnamed function it uses as a constructor
+				if ( LocalCacheData.loginUser ) {
+					var current_company = LocalCacheData.getCurrentCompany();
+					Global.setAnalyticDimensions(LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name);
+				} else {
+					Global.setAnalyticDimensions();
+				}
+				ga('send', 'pageview', {'sessionControl': 'start'});
 			}
 			/* jshint ignore:end */
 		}
 
 		function initApps() {
-			if ( ie <= 8 ) {
+			if ( ie <= 10 ) {
 				TAlertManager.showBrowserTopBanner();
-				return;
 			}
 			loadViewRequiredJS();
 			//Optimization: Only change locale if its *not* en_US or enable_default_language_translation = TRUE

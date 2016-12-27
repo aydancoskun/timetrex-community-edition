@@ -186,6 +186,7 @@ class Payment_Process_Beanstream extends Payment_Process_Common
             return $curl;
         }
 
+        $curl->timeout = 300;
         $curl->type = 'post';
         $curl->fields = $fields;
         $curl->userAgent = 'PEAR Payment_Process_Beanstream 0.1';

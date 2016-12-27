@@ -2403,7 +2403,7 @@ TimeSheetViewController = BaseViewController.extend( {
 	checkIsSelectedPunchCell: function( row_id, cell_index ) {
 		for ( var i = 0, m = this.select_cells_Array.length; i < m; i++ ) {
 			var cell = this.select_cells_Array[i];
-			if ( cell.row_id.toString() === row_id.toString() && cell.cell_index.toString() === cell_index.toString() ) {
+			if ( cell.row_id === row_id && cell.cell_index === cell_index ) {
 				return true;
 			}
 		}
@@ -4160,19 +4160,21 @@ TimeSheetViewController = BaseViewController.extend( {
 				break;
 			case 'punch_note_grid':
 				len = this.punch_note_grid_source.length;
+				var grid_width = grid.width();
+				var accumulated_grid_width = this.accumulated_total_grid.width();
+				var verification_grid_width = this.verification_grid.width();
 
 				if ( this.verification_grid_source.length !== 0 ) {
-					if ( this.wage_btn.getValue( true ) ) {
-						grid.setGridWidth( Global.bodyWidth() - 14 - 620 - 400 );
-					} else {
-						grid.setGridWidth( Global.bodyWidth() - this.accumulated_total_grid.width() - 418 );
-					}
+					grid_width = Math.floor( Global.bodyWidth() - (accumulated_grid_width + verification_grid_width + 25) );
 				} else {
-					if ( this.wage_btn.getValue( true ) ) {
-						grid.setGridWidth( Global.bodyWidth() - 14 - 635 );
-					} else {
-						grid.setGridWidth( Global.bodyWidth()  - 518 );
-					}
+					grid_width = Math.floor( Global.bodyWidth() - (25 + accumulated_grid_width) ) ;
+				}
+				grid_width = Math.abs(grid_width);
+
+				if ( grid_width != grid.width() ) {
+					//Debug.Text("Setting punch note grid width to " + grid_width, 'TimesheetViewConroller.js', 'TimesheetViewConroller', 'setGridHeight', 10);
+					grid.setGridWidth( grid_width );
+					$('td.notes_grid_td_container').css('width', (grid_width+2)+'px');
 				}
 
 				break;
@@ -4212,14 +4214,16 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		for ( var key in this.grid_dic ) {
 			var grid = this.grid_dic[key];
-			if ( Global.bodyWidth() > Global.app_min_width ) {
-				grid.setGridWidth( Global.bodyWidth() - 14 );
-			} else if ( key !== 'punch_note_grid' ) {
-				grid.setGridWidth( Global.app_min_width - 14 );
+			if( key != 'punch_note_grid' ) {
+				if (Global.bodyWidth() > Global.app_min_width) {
+					grid.setGridWidth(Global.bodyWidth() - 14);
+				}
 			}
+			this.setGridHeight(key);
 
-			this.setGridHeight( key );
 		}
+		//force punch note grid to be last, so that it is drawn after the grids it is dependant on to infer its size.
+		this.setGridHeight('punch_note_grid');
 
 		if ( this.search_panel.is( ':visible' ) ) {
 			this.grid_div.height( $( this.el ).height() - this.search_panel.height() - 72 );
@@ -4672,6 +4676,11 @@ TimeSheetViewController = BaseViewController.extend( {
 			return;
 		}
 
+		// BUG#2149 row_id is stored within jqgrid as a string.
+		// We need an int here for numeric comparisons to figure out the range of selected cells.
+		row_id = parseInt(row_id);
+		cell_index = parseInt(cell_index);
+
 		var $this = this;
 		var len = 0;
 		var row;
@@ -4685,26 +4694,55 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( grid_id === 'timesheet_grid' ) {
 
 			cells_array = $this.select_cells_Array;
-
 			len = $this.select_cells_Array.length;
-
 			row = $this.timesheet_data_source[row_id - 1];
+			colModel = $this.grid.getGridParam( 'colModel' );
+			data_field = colModel[cell_index].name;
 
 			if ( row.type === TimeSheetViewController.REQUEST_ROW ) {
-
 				var filter = {filter_data: {}};
 				filter.filter_data.user_id = this.getSelectEmployee();
 				filter.filter_data.start_date = $this.full_timesheet_data.timesheet_dates.start_display_date;
 				filter.filter_data.end_date = $this.full_timesheet_data.timesheet_dates.end_display_date;
+				filter.filter_data.id = [];
+
+				var pending_requests = 0;
+				var total_requests = 0;
+				if ( Global.isArray(row[data_field+'_request']) ) {
+					for ( var n in row[data_field + '_request'] ) {
+						var obj = row[data_field + '_request'][n];
+						filter.filter_data.id.push( obj.id );
+						if ( obj.status == 'PENDING' ) {
+							pending_requests += 1;
+						}
+						total_requests += 1;
+					}
+				} else if ( row[data_field + '_request'] ) {
+					//is object;
+					filter.filter_data.id.push( row[data_field + '_request'].id );
+					if ( row[data_field + '_request'].status == 'PENDING' ) {
+						pending_requests = 1;
+					}
+					total_requests = 1;
+				} else {
+					return;
+				}
 
 				Global.addViewTab( this.viewId, 'TimeSheet', window.location.href );
-				IndexViewController.goToView( 'RequestAuthorization', filter );
+
+				if ( total_requests > 0 ) {
+					if (this.getSelectEmployee() != LocalCacheData.getLoginUser().id && pending_requests > 0) {
+						if (this.ownerOrChildPermissionValidate('request', 'view_child', filter.filter_data.id)) {
+							IndexViewController.goToView('RequestAuthorization', filter);
+						}
+					} else {
+						if (this.viewPermissionValidate('request', filter.filter_data.id)) {
+							IndexViewController.goToView('Request', filter);
+						}
+					}
+				}
 				return;
 			}
-
-			colModel = $this.grid.getGridParam( 'colModel' );
-
-			data_field = colModel[cell_index].name;
 
 			if ( row ) {
 				punch = row[data_field + '_data'];
@@ -4872,8 +4910,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			var end_row_index = row_id;
 			var end_cell_index = cell_index;
 
-
-
 			for ( i = 0; i < len; i++ ) {
 				info = cells_array[i];
 
@@ -4900,8 +4936,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 			cells_array = [];
-
-			for ( i = start_row_index; i <= end_row_index; i++ ) {
+			for ( var i = start_row_index; i <= end_row_index; i++ ) {
 				var r_index = i;
 				for ( var j = start_cell_index; j <= end_cell_index; j++ ) {
 					var c_index = j;
@@ -4930,7 +4965,8 @@ TimeSheetViewController = BaseViewController.extend( {
 						time_stamp_num = date.getTime();
 
 						cells_array.push( {
-							row_id: r_index.toString(),
+							row_id: r_index, //see bug #2149
+							//row_id: r_index.toString(),
 							cell_index: c_index,
 							cell_val: cell_val,
 							punch: punch,
@@ -4955,7 +4991,8 @@ TimeSheetViewController = BaseViewController.extend( {
 						time_stamp_num = date.getTime();
 
 						cells_array.push( {
-							row_id: r_index.toString(),
+							row_id: r_index, //see bug #2149
+							//row_id: r_index.toString(),
 							cell_index: c_index,
 							cell_val: cell_val,
 							punch: punch,
@@ -6738,6 +6775,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
+		this.is_add = false;
+		this.is_changed = false;
+
 		var current_api = this.getCurrentAPI();
 		LocalCacheData.current_doing_context_action = 'save_and_next';
 		current_api['set' + current_api.key_name]( this.current_edit_record, false, ignoreWarning, {
@@ -7181,7 +7221,7 @@ TimeSheetViewController = BaseViewController.extend( {
             var punch_control_id = this.select_cells_Array[0].punch.punch_control_id;
             var current_punch_id = this.select_cells_Array[0].punch.id;
             var current_punch_status_id = this.select_cells_Array[0].punch.status_id;
-            var type_id = 20;
+            var type_id = this.select_cells_Array[0].punch.type_id;
             var user_id = this.select_cells_Array[0].punch.user_id
         } else {
             var user_id = this.getSelectEmployee();
@@ -7903,6 +7943,10 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 			this.navigation.setValue( this.current_edit_record );
+
+			// #2122 - Fixes navigation errors including: "Cannot read property 'current_page' of null" & "Cannot read property 'has' of null"
+			// Prevents user clicking on drop-down to navigate to the first record then immediately clicking the left arrow which triggers the errors.
+			this.setNavigation();
 
 		} else {
 			navigation_div.css( 'display', 'none' );

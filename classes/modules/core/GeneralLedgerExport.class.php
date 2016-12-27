@@ -648,7 +648,7 @@ class GeneralLedgerExport_File_Format_QuickBooks Extends GeneralLedgerExport {
 			$i = 0;
 			foreach ($records as $record) {
 				if( $i == 0 ) {
-					$line[] = 'TRANS';
+					$line[] = 'TRNS';
 				} else {
 					$line[] = 'SPL';
 				}

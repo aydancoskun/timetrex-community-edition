@@ -51,6 +51,40 @@ Used to be:
 */
 
 	var $district_income_tax_rate_options = array(
+												20170101 => array(
+															10 => array(
+																	array( 'income' => 8500,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 11700,	'rate' => 4.5,	'constant' => 340 ),
+																	array( 'income' => 13900,	'rate' => 5.25,	'constant' => 484 ),
+																	array( 'income' => 21400,	'rate' => 5.90,	'constant' => 600 ),
+																	array( 'income' => 80650,	'rate' => 6.45,	'constant' => 1042 ),
+																	array( 'income' => 96800,	'rate' => 6.65,	'constant' => 4864 ),
+																	array( 'income' => 107650,	'rate' => 7.58,	'constant' => 5938 ),
+																	array( 'income' => 161550,	'rate' => 8.08,	'constant' => 6760 ),
+																	array( 'income' => 215400,	'rate' => 7.15,	'constant' => 11115 ),
+																	array( 'income' => 269300,	'rate' => 8.15,	'constant' => 14965 ),
+																	array( 'income' => 1077550,	'rate' => 7.35,	'constant' => 19358 ),
+																	array( 'income' => 1131500,	'rate' => 49.02,'constant' => 78765 ),
+																	array( 'income' => 1131500,	'rate' => 9.62,	'constant' => 105211 ),
+																	),
+															20 => array(
+																	array( 'income' => 8500,	'rate' => 4.0,	'constant' => 0 ),
+																	array( 'income' => 11700,	'rate' => 4.5,	'constant' => 340 ),
+																	array( 'income' => 13900,	'rate' => 5.25,	'constant' => 484 ),
+																	array( 'income' => 21400,	'rate' => 5.90,	'constant' => 600 ),
+																	array( 'income' => 80650,	'rate' => 6.45,	'constant' => 1042 ),
+																	array( 'income' => 96800,	'rate' => 6.65,	'constant' => 4864 ),
+																	array( 'income' => 107650,	'rate' => 7.28,	'constant' => 5938 ),
+																	array( 'income' => 161550,	'rate' => 7.78,	'constant' => 6727 ),
+																	array( 'income' => 215400,	'rate' => 8.08,	'constant' => 10921 ),
+																	array( 'income' => 323200,	'rate' => 7.15,	'constant' => 15272 ),
+																	array( 'income' => 377100,	'rate' => 8.15,	'constant' => 22980 ),
+																	array( 'income' => 1077550,	'rate' => 7.35,	'constant' => 27373 ),
+																	array( 'income' => 2155350,	'rate' => 7.65,	'constant' => 78856 ),
+																	array( 'income' => 2209300,	'rate' => 88.42,'constant' => 161307 ),
+																	array( 'income' => 2209300,	'rate' => 9.62,	'constant' => 209010 ),
+																	),
+															),
 												20160101 => array(
 															10 => array(
 																	array( 'income' => 8450,	'rate' => 4.0,	'constant' => 0 ),
@@ -116,7 +150,7 @@ Used to be:
 																	array( 'income' => 1062650,	'rate' => 7.35,	'constant' => 26994 ),
 																	array( 'income' => 2125450,	'rate' => 7.65,	'constant' => 77764 ),
 																	array( 'income' => 2178650,	'rate' => 88.42,'constant' => 159068 ),
-																	array( 'income' => 2178650,	'rate' => 9.62,	'constant' => 206107 ),																	
+																	array( 'income' => 2178650,	'rate' => 9.62,	'constant' => 206107 ),
 																	),
 															),
 												20140101 => array(
@@ -133,7 +167,7 @@ Used to be:
 																	array( 'income' => 261550,	'rate' => 8.15,	'constant' => 14535 ),
 																	array( 'income' => 1046350,	'rate' => 7.35,	'constant' => 18798 ),
 																	array( 'income' => 1098700,	'rate' => 49.02,'constant' => 76481 ),
-																	array( 'income' => 1098700,	'rate' => 9.62,	'constant' => 102143 ),																	
+																	array( 'income' => 1098700,	'rate' => 9.62,	'constant' => 102143 ),
 																	),
 															20 => array(
 																	array( 'income' => 8300,	'rate' => 4.0,	'constant' => 0 ),
@@ -150,7 +184,7 @@ Used to be:
 																	array( 'income' => 1046350,	'rate' => 7.35,	'constant' => 26579 ),
 																	array( 'income' => 2092800,	'rate' => 7.65,	'constant' => 76570 ),
 																	array( 'income' => 2145150,	'rate' => 88.42,'constant' => 156624 ),
-																	array( 'income' => 2145150,	'rate' => 9.62,	'constant' => 202912 ),																	
+																	array( 'income' => 2145150,	'rate' => 9.62,	'constant' => 202912 ),
 																	),
 															),
 												20130101 => array(
@@ -167,7 +201,7 @@ Used to be:
 																	array( 'income' => 257300,	'rate' => 8.15,	'constant' => 14298 ),
 																	array( 'income' => 1029250,	'rate' => 7.35,	'constant' => 18491 ),
 																	array( 'income' => 1080750,	'rate' => 49.02,'constant' => 75230 ),
-																	array( 'income' => 1080750,	'rate' => 9.62,	'constant' => 100475 ),																	
+																	array( 'income' => 1080750,	'rate' => 9.62,	'constant' => 100475 ),
 																	),
 															20 => array(
 																	array( 'income' => 8200,	'rate' => 4.0,	'constant' => 0 ),
@@ -184,7 +218,7 @@ Used to be:
 																	array( 'income' => 1029250,	'rate' => 7.35,	'constant' => 26147 ),
 																	array( 'income' => 2058550,	'rate' => 7.65,	'constant' => 75318 ),
 																	array( 'income' => 2110050,	'rate' => 88.42,'constant' => 154059 ),
-																	array( 'income' => 2110050,	'rate' => 9.62,	'constant' => 199596 ),																	
+																	array( 'income' => 2110050,	'rate' => 9.62,	'constant' => 199596 ),
 																	),
 															),
 												20100101 => array(
@@ -201,7 +235,7 @@ Used to be:
 																	array( 'income' => 350000,	'rate' => 12.35,'constant' => 22627 ),
 																	array( 'income' => 500000,	'rate' => 8.35,	'constant' => 28802 ),
 																	array( 'income' => 550000,	'rate' => 20.67,'constant' => 41327 ),
-																	array( 'income' => 550000,	'rate' => 9.77,	'constant' => 51662 ),																	
+																	array( 'income' => 550000,	'rate' => 9.77,	'constant' => 51662 ),
 																	),
 															20 => array(
 																	array( 'income' => 8000,	'rate' => 4.0,	'constant' => 0 ),
@@ -215,7 +249,7 @@ Used to be:
 																	array( 'income' => 350000,	'rate' => 14.35,'constant' => 21627 ),
 																	array( 'income' => 500000,	'rate' => 8.35,	'constant' => 28802 ),
 																	array( 'income' => 550000,	'rate' => 20.67,'constant' => 41327 ),
-																	array( 'income' => 550000,	'rate' => 9.77,	'constant' => 51662 ),																	
+																	array( 'income' => 550000,	'rate' => 9.77,	'constant' => 51662 ),
 																	),
 															),
 												20090501 => array(
@@ -232,7 +266,7 @@ Used to be:
 																	array( 'income' => 350000,	'rate' => 14.85,'constant' => 23127 ),
 																	array( 'income' => 500000,	'rate' => 8.85,	'constant' => 30552 ),
 																	array( 'income' => 550000,	'rate' => 27.33,'constant' => 43827 ),
-																	array( 'income' => 550000,	'rate' => 11.03,'constant' => 57492 ),																	
+																	array( 'income' => 550000,	'rate' => 11.03,'constant' => 57492 ),
 																	),
 															20 => array(
 																	array( 'income' => 8000,	'rate' => 4.0,	'constant' => 0 ),
@@ -246,7 +280,7 @@ Used to be:
 																	array( 'income' => 350000,	'rate' => 17.85,'constant' => 21627 ),
 																	array( 'income' => 500000,	'rate' => 8.85,	'constant' => 30552 ),
 																	array( 'income' => 550000,	'rate' => 27.33,'constant' => 43827 ),
-																	array( 'income' => 550000,	'rate' => 11.03,'constant' => 57492 ),																	
+																	array( 'income' => 550000,	'rate' => 11.03,'constant' => 57492 ),
 																	),
 															),
 												20060101 => array(
@@ -258,7 +292,7 @@ Used to be:
 																	array( 'income' => 90000,	'rate' => 6.85,	'constant' => 973 ),
 																	array( 'income' => 100000,	'rate' => 7.64,	'constant' => 5768 ),
 																	array( 'income' => 150000,	'rate' => 8.14,	'constant' => 6532 ),
-																	array( 'income' => 150000,	'rate' => 7.35,	'constant' => 10604 ),																	
+																	array( 'income' => 150000,	'rate' => 7.35,	'constant' => 10604 ),
 																	),
 															20 => array(
 																	array( 'income' => 8000,	'rate' => 4.0,	'constant' => 0 ),
@@ -268,12 +302,26 @@ Used to be:
 																	array( 'income' => 90000,	'rate' => 6.85,	'constant' => 973 ),
 																	array( 'income' => 100000,	'rate' => 7.64,	'constant' => 5768 ),
 																	array( 'income' => 150000,	'rate' => 8.14,	'constant' => 6532 ),
-																	array( 'income' => 150000,	'rate' => 7.35,	'constant' => 10604 ),																	
+																	array( 'income' => 150000,	'rate' => 7.35,	'constant' => 10604 ),
 																),
 															),
-												);		
+												);
 
 	var $district_options = array(
+								20170101 => array( // 01-Jan-2017
+													'standard_deduction' => array(
+																				'10' => 7400.00,
+																				'20' => 7950.00,
+																				'30' => 7950.00,
+																				'40' => 7400.00,
+																				),
+													'allowance' => array(
+																				'10' => 1000,
+																				'20' => 1000,
+																				'30' => 1000,
+																				'40' => 1000,
+																				),
+													),
 								20160101 => array( // 01-Jan-2016
 													'standard_deduction' => array(
 																				'10' => 7400.00,
