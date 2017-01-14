@@ -3435,7 +3435,7 @@ class Report {
 			$this->html .= '</td>';
 
 			// center
-			$this->html .= '<td class="print-icon"><img onclick="'. "this.style.display='none';" .'window.print();' . "this.style.display='inline-block';" . '" src="data:image/x-icon;base64,' .base64_encode( file_get_contents( Environment::getBasePath(). '/interface/'. $config_vars['other']['default_interface'] . '/theme/default/css/global/widgets/ribbon/icons/print-35x35.png' ) ). '"></td>';
+			$this->html .= '<td class="print-icon"><img onclick="'. "this.style.display='none';" .'window.print();' . "this.style.display='inline-block';" . '" src="data:image/x-icon;base64,' .base64_encode( file_get_contents( Environment::getBasePath(). '/interface/html5/theme/default/css/global/widgets/ribbon/icons/print-35x35.png' ) ). '"></td>';
 
 			// right
 			$this->html .= '<td class="generated">';

@@ -44,7 +44,7 @@ class CompanyGenericTagMapFactory extends Factory {
 
 	protected $tag_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

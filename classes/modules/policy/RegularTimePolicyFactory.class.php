@@ -46,7 +46,7 @@ class RegularTimePolicyFactory extends Factory {
 	protected $contributing_shift_policy_obj = NULL;
 	protected $pay_code_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'branch_selection_type':

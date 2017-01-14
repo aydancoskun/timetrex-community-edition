@@ -48,7 +48,7 @@ class UserGenericStatusFactory extends Factory {
 	static protected $static_queue = NULL;
 
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

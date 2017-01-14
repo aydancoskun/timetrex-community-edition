@@ -68,10 +68,10 @@ CHANGED:18-Dec-16				'ME' => 'Maine',		- http://www.state.me.us/revenue/forms/wi
 CHANGED:18-Dec-16				'NC' => 'North Carolina'- http://www.dornc.com/taxes/wh_tax/index.html *Income Tax Withholding Tables & Instructions for Employers, NC30
 CHANGED-18-Dec-16				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
 NOCHANGE:16-Dec-16				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
+CHANGED:27-Dec-16				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
 
 *CHECKAGAIN:16-Dec-16			'AL' => 'Alabama' 		- http://www.ador.state.al.us/Withholding/index.html *Withholding Tax Tables and Instructions
 *CHECKAGAIN:16-Dec-16			'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
-*CHECKAGAIN:16-Dec-16			'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Employers Tax Guide, Withholding Formula
 *CHECKAGAIN:16-Dec-16			'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
 *CHECKAGAIN:18-Dec-16			'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
 *CHECKAGAIN:18-Dec-16			'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098

@@ -45,7 +45,7 @@ class CronJobFactory extends Factory {
 	protected $temp_time = NULL;
 	protected $execute_flag = FALSE;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

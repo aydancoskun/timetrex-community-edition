@@ -45,7 +45,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	protected $schedule_policy_obj = NULL;
 	protected $recurring_schedule_template_control_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

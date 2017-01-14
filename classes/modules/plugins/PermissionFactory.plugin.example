@@ -13,7 +13,7 @@ class PermissionFactoryPlugin extends PermissionListFactoryPlugin {
 								'user' => array('edit_own_bank', 'edit_child_bank'), //Disable specific permission in user section
 								);
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retarr = parent::_getFactoryOptions( $name );
 
 		switch( $name ) {

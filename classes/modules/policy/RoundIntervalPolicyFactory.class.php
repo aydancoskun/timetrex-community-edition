@@ -45,7 +45,7 @@ class RoundIntervalPolicyFactory extends Factory {
 	protected $company_obj = NULL;
 
 	//Just need relations for each actual Punch Type
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

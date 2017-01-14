@@ -49,7 +49,7 @@ class RecurringScheduleFactory extends Factory {
 	protected $department_obj = NULL;
 	protected $pay_period_schedule_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
 		$product_edition_id = Misc::getCurrentCompanyProductEdition();

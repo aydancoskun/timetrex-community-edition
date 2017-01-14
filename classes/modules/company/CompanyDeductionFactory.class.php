@@ -217,7 +217,7 @@ class CompanyDeductionFactory extends Factory {
 										40 => 'previous+ytd_adjustment',
 									);
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'status':

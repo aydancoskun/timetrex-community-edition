@@ -53,7 +53,7 @@ class APIBranch extends APIFactory {
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return array
 	 */
-	function getOptions( $name, $parent = NULL ) {
+	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
 				AND ( !$this->getPermissionObject()->Check('branch', 'enabled')
 					OR !( $this->getPermissionObject()->Check('branch', 'view') OR $this->getPermissionObject()->Check('branch', 'view_own') OR $this->getPermissionObject()->Check('branch', 'view_child') ) ) ) {

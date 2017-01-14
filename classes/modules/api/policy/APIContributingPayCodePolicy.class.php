@@ -53,7 +53,7 @@ class APIContributingPayCodePolicy extends APIFactory {
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return array
 	 */
-	function getOptions( $name, $parent = NULL ) {
+	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
 				AND ( !$this->getPermissionObject()->Check('contributing_pay_code_policy', 'enabled')
 					OR !( $this->getPermissionObject()->Check('contributing_pay_code_policy', 'view') OR $this->getPermissionObject()->Check('contributing_pay_code_policy', 'view_own') OR $this->getPermissionObject()->Check('contributing_pay_code_policy', 'view_child') ) ) ) {

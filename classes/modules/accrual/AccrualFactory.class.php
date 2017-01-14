@@ -46,7 +46,7 @@ class AccrualFactory extends Factory {
 
 	protected $system_type_ids = array(10, 20, 75, 76); //These all special types reserved for system use only.
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'type':

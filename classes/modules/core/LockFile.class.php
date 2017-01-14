@@ -85,10 +85,30 @@ class LockFile {
 				Debug::Text( '  PID IS running!', __FILE__, __LINE__, __METHOD__, 10 );
 				return TRUE;
 			}
+		} else {
+			//Debug::Text( 'PID is invalid or POSIX functions dont exist: ' . $pid, __FILE__, __LINE__, __METHOD__, 10 );
+			if ( OPERATING_SYSTEM == 'WIN' ) {
+				Debug::Text( 'Checking if PID is running on Windows: ' . $pid, __FILE__, __LINE__, __METHOD__, 10 );
+				$processes = explode( "\n", shell_exec( 'tasklist.exe' ) );
+				if ( is_array($processes) ) {
+					foreach ( $processes as $process ) {
+						if ( trim($process) == '' OR strpos( "Image Name", $process ) === 0 OR strpos( "===", $process ) === 0 ) {
+							continue;
+						}
+
+						$matches = FALSE;
+						preg_match( "/(.*?)\s+(\d+).*$/", $process, $matches );
+						if ( isset($matches[2]) AND $pid == trim( $matches[2] ) ) {
+							Debug::Text( '  PID IS running!', __FILE__, __LINE__, __METHOD__, 10 );
+							return TRUE;
+						}
+					}
+
+					Debug::Text( '  PID is NOT running!', __FILE__, __LINE__, __METHOD__, 10 );
+					return FALSE;
+				}
+			}
 		}
-		//else {
-		//	Debug::Text( 'PID is invalid or POSIX functions dont exist: ' . $pid, __FILE__, __LINE__, __METHOD__, 10 );
-		//}
 
 		return NULL; //Assuming the process is still running if the file exists and PID is invalid.
 	}

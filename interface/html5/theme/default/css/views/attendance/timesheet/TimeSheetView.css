@@ -351,10 +351,6 @@
     padding-right: 14px;
 }
 
-.timesheet-manual-mode .sub-grid td:nth-child(-n + 4) {
-    border-right: none !important;
-}
-
 .manual-timesheet-size-tr > td {
     height: 0;
     padding-top: 0;

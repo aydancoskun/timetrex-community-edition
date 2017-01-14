@@ -41,7 +41,7 @@ class BrowserTest extends PHPUnit_Framework_TestCase {
 	public function setUp() {
 		Debug::text('Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( !class_exists('Browser') ) {
+		if ( !class_exists('Browser', FALSE ) ) {
 			require_once( Environment::getBasePath().'/classes/other/Browser.php');
 		}
 

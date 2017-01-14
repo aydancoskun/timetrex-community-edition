@@ -1489,7 +1489,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( str );
 								edit_view_form_item_dic.hide();
 							} else if ( stepData[key].check_php_memory_limit == 1 ) {
-								widget.html( stepData[key].memory_limit + 'M' + ' (' + $.i18n._( 'Set this to 128M or higher' ) + ')' );
+								widget.html( stepData[key].memory_limit + 'M' + ' (' + $.i18n._( 'Set this to 512M or higher' ) + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;

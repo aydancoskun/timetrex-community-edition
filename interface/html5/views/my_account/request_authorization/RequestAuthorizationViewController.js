@@ -598,6 +598,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 								if ( $.type(return_value) !== 'array' || return_value.length < 1 ) {
 									$this.onCancelClick(true);
 								} else {
+									$this.is_changed = false;
 									$this.onRightArrowClick();
 								}
 							});

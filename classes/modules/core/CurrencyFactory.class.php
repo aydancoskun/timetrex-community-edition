@@ -42,7 +42,7 @@ class CurrencyFactory extends Factory {
 	protected $table = 'currency';
 	protected $pk_sequence_name = 'currency_id_seq'; //PK Sequence name
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

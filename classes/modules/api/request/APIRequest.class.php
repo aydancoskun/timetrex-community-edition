@@ -53,7 +53,7 @@ class APIRequest extends APIFactory {
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return array
 	 */
-	function getOptions( $name, $parent = NULL ) {
+	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
 				AND ( !$this->getPermissionObject()->Check('request', 'enabled')
 					OR !( $this->getPermissionObject()->Check('request', 'view') OR $this->getPermissionObject()->Check('request', 'view_child') ) ) ) {
@@ -313,9 +313,9 @@ class APIRequest extends APIFactory {
 						if ( $is_valid == TRUE ) {
 							Debug::Text( 'Saving data...', __FILE__, __LINE__, __METHOD__, 10 );
 							if ( $validate_only == TRUE ) {
-								$save_result[ $key ] = TRUE;
+								$save_result[$key] = TRUE;
 							} else {
-								$save_result[ $key ] = $lf->Save( TRUE, TRUE );
+								$save_result[$key] = $lf->Save( TRUE, TRUE );
 							}
 							$validator_stats['valid_records']++;
 						}
@@ -327,7 +327,7 @@ class APIRequest extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-					$validator[ $key ] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
+					$validator[$key] = $this->setValidationArray( $primary_validator, $lf, $tertiary_validator );
 				} elseif ( $validate_only == TRUE ) {
 					$lf->FailTransaction();
 				}

@@ -51,7 +51,7 @@ class APIDashboard extends APIFactory {
 	 * Get all possible dashlets
 	 * @return array
 	 */
-	function getOptions( $name ) {
+	function getOptions( $name = FALSE, $parent = NULL) {
 		$product_edition = $this->getCurrentCompanyObject()->getProductEdition();
 
 		switch ( $name ) {

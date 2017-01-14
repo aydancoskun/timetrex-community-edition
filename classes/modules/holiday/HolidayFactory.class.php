@@ -44,7 +44,7 @@ class HolidayFactory extends Factory {
 
 	protected $holiday_policy_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

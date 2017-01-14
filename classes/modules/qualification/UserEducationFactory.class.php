@@ -43,7 +43,7 @@ class UserEducationFactory extends Factory {
 	protected $pk_sequence_name = 'user_education_id_seq'; //PK Sequence name
 	protected $qualification_obj = NULL;
 	//protected $grade_score_validator_regex = '/^[0-9]{1,250}$/i';
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

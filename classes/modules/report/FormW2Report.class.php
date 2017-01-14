@@ -545,7 +545,7 @@ class FormW2Report extends Report {
 		$user_deduction_data = array();
 		$form_data = $this->formatFormConfig();
 
-		
+
 		//
 		//Figure out state/locality wages/taxes.
 		//  Make sure state tax/deduction records come before district so they can be matched.
@@ -652,7 +652,7 @@ class FormW2Report extends Report {
 									if ( empty($user_deduction_data) == FALSE AND isset($user_deduction_data[$tax_deduction_id]) AND isset($user_deduction_data[$tax_deduction_id][$user_id]) ) {
 										$is_active_date = $cdlf->isActiveDate( $user_deduction_data[$tax_deduction_id][$user_id], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] );
 										Debug::Text('  Date Restrictions Found... Is Active: '. (int)$is_active_date .' Date: '. TTDate::getDate('DATE', $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
-									} 
+									}
 
 									//State records must come before district, so they can be matched up.
 								if ( $tax_deduction_arr['calculation_id'] == 200 AND $tax_deduction_arr['province'] != '' ) {
@@ -709,7 +709,7 @@ class FormW2Report extends Report {
 											Debug::Text('  District ID not set, skipping...', __FILE__, __LINE__, __METHOD__, 10);
 											continue;
 										}
-										
+
 										//State
 										if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l15'. $district_id .'_state']) ) {
 											$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['l15'. $district_id .'_state'] = $tax_deduction_arr['province'];
@@ -772,18 +772,19 @@ class FormW2Report extends Report {
 
 		//Merge time data with user data
 		$key = 0;
-		if ( isset($this->tmp_data['pay_stub_entry']) ) {
+		if ( isset($this->tmp_data['pay_stub_entry']) AND  isset($this->tmp_data['user']) ) {
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
-				foreach( $level_1 as $date_stamp => $row ) {
-					$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
-					$processed_data	 = array(
-											//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-											);
+				if ( isset($this->tmp_data['user'][$user_id]) ) {
+					foreach ( $level_1 as $date_stamp => $row ) {
+						$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+						$processed_data = array(//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
+						);
 
-					$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $row, $date_columns, $processed_data );
+						$this->data[] = array_merge( $this->tmp_data['user'][ $user_id ], $row, $date_columns, $processed_data );
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-					$key++;
+						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+						$key++;
+					}
 				}
 			}
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1);
@@ -794,7 +795,7 @@ class FormW2Report extends Report {
 				foreach( $this->data as $row ) {
 					if ( !isset($this->form_data[$row['user_id']]) ) {
 						$this->form_data[$row['user_id']] = array( 'user_id' => $row['user_id'] );
-		}
+					}
 
 					foreach( $row as $key => $value ) {
 						if ( preg_match( '/^l[0-9]{1,2}[a-z]?_(state|district)$/i', $key ) == TRUE ) { //Static keys
@@ -816,7 +817,7 @@ class FormW2Report extends Report {
 	}
 
 	function _outputPDFForm( $format = NULL ) {
-	
+
 		$show_background = TRUE;
 		if ( $format == 'pdf_form_print' OR $format == 'pdf_form_print_government' OR $format == 'efile' ) {
 			$show_background = FALSE;
@@ -904,7 +905,7 @@ class FormW2Report extends Report {
 		$fw2->contact_phone = $current_user->getWorkPhone();
 		$fw2->contact_phone_ext = $current_user->getWorkPhoneExt();
 		$fw2->contact_email = $current_user->getWorkEmail();
-		
+
 		if ( isset($this->form_data) AND count($this->form_data) > 0 ) {
 			$i = 0;
 			$n = 1;
@@ -1003,7 +1004,7 @@ class FormW2Report extends Report {
 							$ee_data['l15'.$z.'_state_id'] = NULL;
 							$ee_data['l15'.$z.'_state'] = NULL;
 						}
-						
+
 						//State income tax
 						if ( isset($row['l16'.$z]) ) {
 							//$ee_data['l15'.$z.'_state'] = $row['l15'.$z.'_state'];

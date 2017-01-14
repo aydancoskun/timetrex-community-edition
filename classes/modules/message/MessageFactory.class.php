@@ -43,7 +43,7 @@ class MessageFactory extends Factory {
 	protected $pk_sequence_name = 'message_id_seq'; //PK Sequence name
 	protected $obj_handler = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

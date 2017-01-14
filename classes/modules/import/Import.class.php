@@ -114,7 +114,7 @@ class Import {
 
 		return FALSE;
 	}
-	protected function _getFactoryOptions( $name ) {
+	protected function _getFactoryOptions( $name, $parent = NULL ) {
 		return FALSE;
 	}
 
@@ -401,7 +401,12 @@ class Import {
 		}
 
 		//Debug::Arr($retarr, 'bRaw Row: ', __FILE__, __LINE__, __METHOD__, 10);
-		return $retarr;
+		if ( isset($retarr) ) {
+			return $retarr;
+		}
+
+		Debug::Text('ERROR: Unable to map row!', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
 	}
 
 	function preParseRow( $row_number, $raw_row ) {
@@ -479,13 +484,16 @@ class Import {
 //					unset($parsed_data[$x][$import_data['map_column_name']]);
 //				}
 //			}
-			foreach( $raw_row as $import_column => $import_data ) {
-				//Debug::Arr($import_data, 'Import Data X: '. $x .' Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
-				$parsed_data[$x][$import_column] = $this->callInputParseFunction( $import_column, $column_map, $raw_row );
-				//Debug::Arr($parsed_data[$x][$import_column], 'Import Column: '. $import_column .' Value: ', __FILE__, __LINE__, __METHOD__, 10);
-			}
 
-			$parsed_data[$x] = $this->postParseRow( $x, $parsed_data[$x] ); //This needs to run for each row so things like manual_ids can get updated automatically.
+			if ( is_array($raw_row) ) {
+				foreach( $raw_row as $import_column => $import_data ) {
+					//Debug::Arr($import_data, 'Import Data X: '. $x .' Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
+					$parsed_data[$x][$import_column] = $this->callInputParseFunction( $import_column, $column_map, $raw_row );
+					//Debug::Arr($parsed_data[$x][$import_column], 'Import Column: '. $import_column .' Value: ', __FILE__, __LINE__, __METHOD__, 10);
+				}
+
+				$parsed_data[$x] = $this->postParseRow( $x, $parsed_data[$x] ); //This needs to run for each row so things like manual_ids can get updated automatically.
+			}
 
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
 
@@ -496,7 +504,6 @@ class Import {
 		//$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 		Debug::Arr($parsed_data, 'Parsed Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
 		return $this->setParsedData( $parsed_data );
 	}
 

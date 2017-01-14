@@ -48,7 +48,7 @@ class HolidayPolicyFactory extends Factory {
 	protected $contributing_shift_policy_obj = NULL;
 	protected $eligible_contributing_shift_policy_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

@@ -46,7 +46,7 @@ class PayPeriodScheduleFactory extends Factory {
 	protected $enable_create_initial_pay_periods = TRUE;
 
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

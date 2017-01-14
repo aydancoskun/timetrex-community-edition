@@ -47,7 +47,7 @@ class PunchFactory extends Factory {
 	protected $schedule_obj = NULL;
 	var $tmp_data = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

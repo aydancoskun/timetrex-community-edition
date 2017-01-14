@@ -48,7 +48,7 @@ class SchedulePolicyFactory extends Factory {
 	protected $full_shift_absence_policy_obj = NULL;
 	protected $partial_shift_absence_policy_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

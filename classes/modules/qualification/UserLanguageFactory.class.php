@@ -42,7 +42,7 @@ class UserLanguageFactory extends Factory {
 	protected $table = 'user_language';
 	protected $pk_sequence_name = 'user_language_id_seq'; //PK Sequence name
 	protected $qualification_obj = NULL;
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

@@ -53,7 +53,7 @@ class APIMessageControl extends APIFactory {
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return array
 	 */
-	function getOptions( $name, $parent = NULL ) {
+	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'user_columns' ) {
 			$uf = TTnew('UserFactory');
 			if	( $this->getPermissionObject()->Check('user', 'enabled') AND $this->getPermissionObject()->Check('user', 'view') ) {

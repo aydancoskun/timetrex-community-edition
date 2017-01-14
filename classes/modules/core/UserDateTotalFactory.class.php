@@ -55,7 +55,7 @@ class UserDateTotalFactory extends Factory {
 	protected $timesheet_verification_check = FALSE;
 	static $calc_future_week = FALSE; //Used for BiWeekly overtime policies to schedule future week recalculating.
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
 		$product_edition_id = Misc::getCurrentCompanyProductEdition();
 

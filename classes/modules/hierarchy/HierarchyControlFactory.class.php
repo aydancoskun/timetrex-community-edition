@@ -42,7 +42,7 @@ class HierarchyControlFactory extends Factory {
 	protected $table = 'hierarchy_control';
 	protected $pk_sequence_name = 'hierarchy_control_id_seq'; //PK Sequence name
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

@@ -2769,9 +2769,9 @@ TimeSheetViewController = BaseViewController.extend( {
 					viewrecords: true,
 
 					//FIXME: ucomment when fixing the selection clearing code
-					// onCellSelect: function( row_id, cell_index, cell_val, e ) {
-					// 	$this.onCellSelect( grid_id, row_id, cell_index, cell_val, this, e );
-					// },
+					onCellSelect: function( row_id, cell_index, cell_val, e ) {
+						$this.onCellSelect( grid_id, row_id, cell_index, cell_val, this, e );
+					},
 				} );
 
 			} else {
@@ -2795,9 +2795,9 @@ TimeSheetViewController = BaseViewController.extend( {
 					viewrecords: true,
 
 					//FIXME: ucomment when fixing the selection clearing code
-					// onCellSelect: function( row_id, cell_index, cell_val, e ) {
-					// 	$this.onCellSelect( grid_id, row_id, cell_index, cell_val, this, e );
-					// },
+					onCellSelect: function( row_id, cell_index, cell_val, e ) {
+						$this.onCellSelect( grid_id, row_id, cell_index, cell_val, this, e );
+					},
 				} );
 
 			}
@@ -2951,7 +2951,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		} );
 	},
 
-	buildManualTImeSheetData: function() {
+	buildManualTimeSheetData: function() {
 		this.time_sheet_data_overrode_true_map = {};
 		this.time_sheet_data_overrode_false_map = {};
 		var sort_by_fields = ['branch_id', 'department_id', 'job_id', 'job_item_id'],
@@ -3048,7 +3048,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			if ( !updateExistedCell ) {
 				$this.editor.removeAllRows();
 				if ( $this.manual_timesheet_data.length > 0 ) {
-					$this.buildManualTImeSheetData();
+					$this.buildManualTimeSheetData();
 					_.map( $this.time_sheet_data_overrode_false_map, function( data ) {
 						$this.editor.addRow( data );
 					} );
@@ -3063,7 +3063,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				}
 			} else {
 				if ( $this.manual_timesheet_data.length > 0 ) {
-					$this.buildManualTImeSheetData();
+					$this.buildManualTimeSheetData();
 					for ( var map_key in $this.time_sheet_data_overrode_true_map ) {
 						var data = $this.time_sheet_data_overrode_true_map[map_key];
 						for ( var map_key_2 in data ) {
@@ -3628,7 +3628,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( this.is_auto_switch ) {
 			this.getManualTimeSheetData( function() {
 				if ( $this.manual_timesheet_data.length > 0 ) {
-					$this.buildManualTImeSheetData();
+					$this.buildManualTimeSheetData();
 					var is_no_manual = _.isEmpty( $this.time_sheet_data_overrode_true_map );
 					var is_no_punch = _.isEmpty( $this.time_sheet_data_overrode_false_map );
 					if ( is_no_manual && !is_no_punch ) {
@@ -3767,6 +3767,13 @@ TimeSheetViewController = BaseViewController.extend( {
 			$this.initRightClickMenu( RightClickMenuType.ABSENCE_GRID );
 			$this.showWarningMessageIfAny();
 			$this.setPunchModeClass();
+
+			if ( $this.getPunchMode() != 'punch' ) {
+				var cols = $this.getManualPayPeriodDefaultTrColspan()
+				for ( var i = 1; i < cols; i++ ) {
+					$('.sub-grid td:nth-child(' + i + ')').css('border-right', 'none');
+				}
+			}
 		}
 
 		//Manual punch grid
@@ -3944,11 +3951,22 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	getManualPayPeriodDefaultTrColspan: function() {
-		var colspan = 6;
-		!this.show_branch_ui && colspan--;
-		!this.show_department_ui && colspan--;
-		!this.show_job_ui && colspan--;
-		!this.show_job_item_ui && colspan--;
+		var colspan = 2;
+		if (this.show_branch_ui) {
+			colspan++;
+		}
+
+		if (this.show_department_ui) {
+			colspan++;
+		}
+
+		if (this.show_job_ui) {
+			colspan++;
+		}
+
+		if (this.show_job_item_ui) {
+			colspan++;
+		}
 
 		return colspan;
 	},
@@ -4627,52 +4645,29 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.setDefaultMenu();
 	},
 
-	unsetSelectedCells: function(grid_id) {
-		//required to be asynchronous or this breaks double-click for all grids
-		if ( grid_id != 'absence_grid' ) {
-			this.resetGridCells(this.absence_grid);
+	unsetSelectedCells: function( grid_id ) {
+		if( grid_id == 'accumulated_grid' ) {
+			grid_id = 'accumulated_time_grid';
 		}
 
-		if ( grid_id != 'timesheet_grid' ) {
-			this.resetGridCells(this.grid);
+		if ( this.last_clicked_grid_id && grid_id != this.last_clicked_grid_id ) {
+			//Use window setTimeout to make this code asyncchronous for speed, it's the fastest way.
+			//web worker : 850ms
+			//inline code : 700ms
+			//setTimeout: 400ms
+			window.setTimeout( function ( t, n ) {
+				t.grid_dic[n].trigger('reloadGrid');
+			}, 0, this, this.last_clicked_grid_id);
 		}
 
-		if ( grid_id != 'accumulated_time_grid' ) {
-			this.resetGridCells(this.accumulated_time_grid);
-		}
-
-		if ( grid_id != 'branch_grid' ) {
-			this.resetGridCells(this.branch_grid);
-		}
-
-		if ( grid_id != 'department_grid' ) {
-			this.resetGridCells(this.department_grid);
-		}
-
-		if ( grid_id != 'premium_grid' ) {
-			this.resetGridCells(this.premium_grid);
-		}
-
-		if ( grid_id != 'job_grid' ) {
-			this.resetGridCells(this.job_grid);
-		}
-
-		if ( grid_id != 'job_item_grid' ) {
-			this.resetGridCells(this.job_item_grid);
-		}
-	},
-
-	resetGridCells: function(grid){
-		return true;
-		//FIXME: reload grid is too slow to load. find a faster way.
-		//setselection, null doesn't work
-		//resetSelection doesn't work.
-		//find documentation for the currently installed version of jqgrid.
-		//grid.trigger('reloadGrid');
+		this.setDefaultMenu();
+		this.last_clicked_grid_id = grid_id;
 	},
 
 	onCellSelect: function( grid_id, row_id, cell_index, cell_val, target, e ) {
 		if ( cell_index < 0 ) {
+
+			this.unsetSelectedCells(grid_id);
 			return;
 		}
 
@@ -4706,6 +4701,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				filter.filter_data.end_date = $this.full_timesheet_data.timesheet_dates.end_display_date;
 				filter.filter_data.id = [];
 
+				$this.unsetSelectedCells(grid_id);
 				var pending_requests = 0;
 				var total_requests = 0;
 				if ( Global.isArray(row[data_field+'_request']) ) {
@@ -4754,9 +4750,6 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			date = Global.strToDate( data_field, this.full_format );
 
-			//FIXME: pull this out when fixing the selection clearing code
-			$this.absence_grid.trigger( 'reloadGrid' );
-
 			$this.setTimesheetGridDragAble();
 
 		} else if ( grid_id === 'absence_grid' ) {
@@ -4780,9 +4773,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			date = Global.strToDate( data_field, this.full_format );
 
 			$this.absence_model = true;
-
-			//FIXME: pull this out when fixing the selection clearing code
-			$this.grid.trigger( 'reloadGrid' );
 
 		} else if ( grid_id === 'accumulated_grid' ) {
 
@@ -4825,10 +4815,9 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		}
 
-		//FIXME: uncomment this when fixing the selection clearing code
-		//$this.unsetSelectedCells(grid_id);
 
 		if ( date == null ) {
+			$this.unsetSelectedCells(grid_id);
 			return false;
 		}
 		var info;
@@ -5126,6 +5115,7 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.highLightSelectDay();
 				this.reLoadSubGridsSource();
 			}
+			$this.unsetSelectedCells(grid_id);
 
 		}
 
@@ -5519,7 +5509,13 @@ TimeSheetViewController = BaseViewController.extend( {
 		accumulated_time = {total: {label: $.i18n._( 'Total Time' ), total_time: '0'}};
 		var date_string;
 		var date;
-		var start = this.getPunchMode() === 'punch' ? 1 : 6;
+
+		var start = 1;
+		//#2160 - subgrid column offset must be dynamic to parallel existence of dynamic columns (job, task, branch, department)
+		if ( this.getPunchMode() != 'punch' ) {
+			var start = this.getManualPayPeriodDefaultTrColspan();
+		}
+
 		for ( var i = start; i < column_len; i++ ) {
 			date_string = this.timesheet_columns[i].name;
 			if ( date_string.indexOf( 'empty_cell' ) >= 0 ) continue;
@@ -5614,7 +5610,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 
 		}
-
 	},
 
 	buildBreakAndLunchData: function( array, date_string ) {

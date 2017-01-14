@@ -64,7 +64,7 @@ class PayrollDeduction_US_SC extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
-								20060101 => array(
+								20170101 => array(
 													'standard_deduction_rate' => 10,
 													'standard_deduction_maximum' => 2860,
 													'allowance' => 2370

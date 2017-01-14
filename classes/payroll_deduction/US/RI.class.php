@@ -236,9 +236,13 @@ class PayrollDeduction_US_RI extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
+								20170101 => array( //01-Jan-17
+												   'allowance' => 1000,
+												   'allowance_threshold' => 217350, //If annual income more than this, allowance is 0.
+								),
 								//01-Jan-12: No Change
 								20110101 => array( //01-Jan-11
-													'allowance' => 1000
+													'allowance' => 1000,
 													),
 								//01-Jan-10: No Change
 								20090101 => array( //01-Jan-09
@@ -273,13 +277,17 @@ class PayrollDeduction_US_RI extends PayrollDeduction_US {
 		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
 		if ( $retarr == FALSE ) {
 			return FALSE;
-
 		}
 
-		$allowance_arr = $retarr['allowance'];
+		$annual_income = $this->getAnnualTaxableIncome();
 
+		$allowance_arr = $retarr['allowance'];
 		$retval = bcmul( $this->getStateAllowance(), $allowance_arr );
 
+		if ( isset($retarr['allowance_threshold']) AND $annual_income > $retarr['allowance_threshold'] ) {
+			Debug::text('Annual income exceeds threshold, setting allowance amount to 0 from: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+			$retval = 0;
+		}
 		Debug::text('State Allowance Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $retval;

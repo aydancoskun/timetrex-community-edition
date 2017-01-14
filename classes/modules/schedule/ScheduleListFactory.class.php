@@ -421,7 +421,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							OR
 							( a.start_time = ? AND a.end_time = ? )
 						)
-						AND ( a.deleted = 0 )
+						AND ( ( a.replaced_id IS NULL OR a.replaced_id = 0 ) AND a.deleted = 0 )
 					ORDER BY start_time';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -558,7 +558,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query = '
 					SELECT	a.*
 					FROM	'. $this->getTable() .' as a
-					LEFT JOIN '. $this->getTable() .' as b ON ( a.id = b.replaced_id )
+					LEFT JOIN '. $this->getTable() .' as b ON ( a.id = b.replaced_id AND b.deleted = 0 )
 					WHERE	( 	a.company_id = ?
 								AND a.user_id = ?
 								AND a.start_time = ?
@@ -1116,8 +1116,18 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id )
 								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date )
 								LEFT JOIN schedule as sf_b ON (
-																( sf_b.user_id != 0 AND sf_b.user_id = rsf.user_id )
-																AND
+																( sf_b.user_id != 0 AND sf_b.user_id = rsf.user_id ) ';
+
+					if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
+						$ph[] = $this->db->BindTimeStamp( ( (int)$filter_data['start_date'] - 86400 ) );
+						$query	.=	' AND sf_b.date_stamp >= ?';
+					}
+					if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
+						$ph[] = $this->db->BindTimeStamp( ( (int)$filter_data['end_date'] + 86400 ) );
+						$query	.=	' AND sf_b.date_stamp <= ?';
+					}
+
+					$query .= '									AND
 																(
 																sf_b.start_time >= rsf.start_time AND sf_b.end_time <= rsf.end_time
 																OR
@@ -1166,7 +1176,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$query .= '
 						LEFT JOIN '. $jf->getTable() .' as jfb ON uf.default_job_id = jfb.id
 						LEFT JOIN '. $jif->getTable() .' as jifb ON uf.default_job_item_id = jifb.id
-			
+
 						LEFT JOIN '. $jf->getTable() .' as jf ON a.job_id = jf.id
 						LEFT JOIN '. $jif->getTable() .' as jif ON a.job_item_id = jif.id
 						LEFT JOIN '. $bf->getTable() .' as jbf ON jf.branch_id = jbf.id
@@ -1191,6 +1201,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'uf.default_branch_id', $filter_data['default_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'uf.default_department_id', $filter_data['default_department_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['title_id']) ) ? $this->getWhereClauseSQL( 'uf.title_id', $filter_data['title_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'uf.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
+		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'uf.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
+
 		$query .= ( isset($filter_data['recurring_schedule_template_control_id']) ) ? $this->getWhereClauseSQL( 'a.recurring_schedule_template_control_id', $filter_data['recurring_schedule_template_control_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['schedule_branch_id']) ) ? $this->getWhereClauseSQL( 'a.branch_id', $filter_data['schedule_branch_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['schedule_department_id']) ) ? $this->getWhereClauseSQL( 'a.department_id', $filter_data['schedule_department_id'], 'numeric_list', $ph ) : NULL;

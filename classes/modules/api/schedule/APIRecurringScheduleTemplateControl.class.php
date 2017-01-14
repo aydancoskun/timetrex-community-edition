@@ -53,7 +53,7 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return array
 	 */
-	function getOptions( $name, $parent = NULL ) {
+	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
 				AND ( !$this->getPermissionObject()->Check('recurring_schedule_template', 'enabled')
 					OR !( $this->getPermissionObject()->Check('recurring_schedule_template', 'view') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'view_own') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'view_child') ) ) ) {

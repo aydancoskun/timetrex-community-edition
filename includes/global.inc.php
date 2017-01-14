@@ -56,10 +56,14 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '10.0.2' );
-define('APPLICATION_VERSION_DATE', @strtotime('21-Dec-2016') ); // Release date of version.
+define('APPLICATION_VERSION', '10.0.3' );
+define('APPLICATION_VERSION_DATE', 1482825600 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("27-Dec-2016")."\n\n";'
 
-if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) { define('OPERATING_SYSTEM', 'WIN' ); } else { define('OPERATING_SYSTEM', 'LINUX' ); }
+if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
+	define('OPERATING_SYSTEM', 'WIN' );
+} else {
+	define('OPERATING_SYSTEM', 'LINUX' );
+}
 
 /*
 	Find Config file.
@@ -78,7 +82,6 @@ if ( isset($_SERVER['TT_CONFIG_FILE']) AND $_SERVER['TT_CONFIG_FILE'] != '' ) {
 /*
 	Config file outside webroot.
 */
-
 if ( file_exists(CONFIG_FILE) ) {
 	$config_vars = parse_ini_file( CONFIG_FILE, TRUE);
 	if ( $config_vars === FALSE ) {
@@ -119,59 +122,6 @@ if ( PRODUCTION == TRUE ) {
 	define('APPLICATION_BUILD', APPLICATION_VERSION .'-'. date('Ymd', APPLICATION_VERSION_DATE ) .'-'. date('His', filemtime( __FILE__ ) ) );
 } else {
 	define('APPLICATION_BUILD', APPLICATION_VERSION .'-'. date('Ymd-Hi00') ); //Dont show seconds, as they will never match across multiple API calls.
-}
-
-//Try to dynamically load required PHP extensions if they aren't already.
-//This saves people from having to modify php.ini if possible.
-//v5.3 of PHP deprecates DL().
-if ( version_compare(PHP_VERSION, '5.3.0', '<') AND function_exists('dl') == TRUE AND (bool)ini_get( 'enable_dl' ) == TRUE AND (bool)ini_get( 'safe_mode' ) == FALSE ) {
-	$prefix = (PHP_SHLIB_SUFFIX === 'dll') ? 'php_' : '';
-
-	//This quite possibly breaks PEAR's Cache_Lite <= v1.7.2 because
-	//it uses strlen() on binary data to write the cache file?
-	//http://pear.php.net/bugs/bug.php?id=8361
-	/*
-	if ( extension_loaded('mbstring') == FALSE ) {
-		@dl($prefix . 'mbstring.' . PHP_SHLIB_SUFFIX);
-		ini_set('mbstring.func_overload', 7); //Overload all string functions.
-	}
-	*/
-
-	if ( extension_loaded('gettext') == FALSE ) {
-		@dl($prefix . 'gettext.' . PHP_SHLIB_SUFFIX);
-	}
-	if ( extension_loaded('bcmath') == FALSE ) {
-		@dl($prefix . 'bcmath.' . PHP_SHLIB_SUFFIX);
-	}
-	if ( extension_loaded('soap') == FALSE ) {
-		@dl($prefix . 'soap.' . PHP_SHLIB_SUFFIX);
-	}
-	if ( extension_loaded('mcrypt') == FALSE ) {
-		@dl($prefix . 'mcrypt.' . PHP_SHLIB_SUFFIX);
-	}
-	if ( extension_loaded('calendar') == FALSE ) {
-		@dl($prefix . 'calendar.' . PHP_SHLIB_SUFFIX);
-	}
-	if ( extension_loaded('gd') == FALSE ) {
-		@dl($prefix . 'gd.' . PHP_SHLIB_SUFFIX);
-	}
-	if ( extension_loaded('gd') == FALSE AND extension_loaded('gd2') == FALSE ) {
-		@dl($prefix . 'gd2.' . PHP_SHLIB_SUFFIX);
-	}
-	if ( extension_loaded('ldap') == FALSE ) {
-		@dl($prefix . 'ldap.' . PHP_SHLIB_SUFFIX);
-	}
-
-	//Load database extension based on config file.
-	if ( isset($config_vars['database']['type']) ) {
-		if ( stristr($config_vars['database']['type'], 'postgres') AND extension_loaded('pgsql') == FALSE ) {
-			@dl($prefix . 'pgsql.' . PHP_SHLIB_SUFFIX);
-		} elseif ( stristr($config_vars['database']['type'], 'mysqlt') AND extension_loaded('mysql') == FALSE ) {
-			@dl($prefix . 'mysql.' . PHP_SHLIB_SUFFIX);
-		} elseif ( stristr($config_vars['database']['type'], 'mysqli') AND extension_loaded('mysqli') == FALSE ) {
-			@dl($prefix . 'mysqli.' . PHP_SHLIB_SUFFIX);
-		}
-	}
 }
 
 //Windows doesn't define LC_MESSAGES, so lets do it manually here.
@@ -232,7 +182,11 @@ function __autoload( $name ) {
 	//Debug::Text('Autoloading Class: '. $name .' File: '. $file_name, __FILE__, __LINE__, __METHOD__,10);
 	//Debug::Arr(Debug::BackTrace(), 'Backtrace: ', __FILE__, __LINE__, __METHOD__,10);
 	//Remove the following @ symbol to help in debugging parse errors.
-	@include( $file_name );
+	if ( file_exists( $file_name ) === TRUE ) {
+		include( $file_name );
+	} else {
+		return FALSE; //File doesn't exist, could be external library or just incorrect name.
+	}
 
 	if ( isset($profiler) ) {
 		$profiler->stopTimer( '__autoload' );
@@ -440,9 +394,7 @@ if ( isset($_SERVER['REQUEST_URI']) ) {
 	Debug::Text('URI: '. $_SERVER['REQUEST_URI'] .' IP Address: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
 }
 Debug::Text('USER-AGENT: '. ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
-
-//Supress PHP errors on this, mainly if $config_vars['database'] is not set.
-@Debug::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' Database: Type: '. $config_vars['database']['type']  .' Name: '. $config_vars['database']['database_name'] .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
+Debug::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' Database: Type: '. ( isset($config_vars['database']['type']) ? $config_vars['database']['type'] : 'N/A' ) .' Name: '. ( isset($config_vars['database']['database_name']) ? $config_vars['database']['database_name'] : 'N/A' ) .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
 
 if ( function_exists('bcscale') ) {
 	bcscale(10);

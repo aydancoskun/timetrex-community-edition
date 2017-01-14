@@ -46,7 +46,7 @@ class UserGroupFactory extends Factory {
 
 	protected $tmp_data = array();
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

@@ -42,7 +42,7 @@ class CompanyGenericMapFactory extends Factory {
 	protected $table = 'company_generic_map';
 	protected $pk_sequence_name = 'company_generic_map_id_seq'; //PK Sequence name
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

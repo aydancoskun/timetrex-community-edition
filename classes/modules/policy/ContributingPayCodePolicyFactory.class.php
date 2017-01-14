@@ -44,7 +44,7 @@ class ContributingPayCodePolicyFactory extends Factory {
 
 	protected $company_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'columns':

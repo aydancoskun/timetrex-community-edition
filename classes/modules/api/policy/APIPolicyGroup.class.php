@@ -53,7 +53,7 @@ class APIPolicyGroup extends APIFactory {
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return array
 	 */
-	function getOptions( $name, $parent = NULL ) {
+	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
 				AND ( !$this->getPermissionObject()->Check('policy_group', 'enabled')
 					OR !( $this->getPermissionObject()->Check('policy_group', 'view') OR $this->getPermissionObject()->Check('policy_group', 'view_own') OR $this->getPermissionObject()->Check('policy_group', 'view_child') ) ) ) {

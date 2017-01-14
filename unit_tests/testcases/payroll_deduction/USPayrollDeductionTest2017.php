@@ -214,7 +214,7 @@ class USPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 					}
 
 					Debug::text($i.'. Amount: This Year: '. $row['provincial_deduction'] .' Last Year: '. $pd_obj->getStatePayPeriodDeductions() .' Diff Amount: '. $amount_diff .' Percent: '. $amount_diff_percent .'%', __FILE__, __LINE__, __METHOD__, 10);
-					if ( $row['province'] != 'ME' AND $amount_diff > 5 ) { //ME had significant changes.
+					if ( $row['province'] != 'ME' AND $row['province'] != 'NE' AND $amount_diff > 5 ) { //ME had significant changes.
 						$this->assertLessThan( 31, $amount_diff_percent ); //Reasonable margin of error.
 						$this->assertGreaterThan( 0, $amount_diff_percent );
 					}

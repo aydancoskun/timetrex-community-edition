@@ -67,6 +67,12 @@ class DBError extends Exception {
 				$code = 'DBInvalidByteSequence';
 			} elseif ( stristr( $e->getMessage(), 'could not serialize' ) !== FALSE) {
 				$code = 'DBSerialize';
+			} elseif ( stristr( $e->getMessage(), 'deadlock' ) !== FALSE OR stristr( $e->getMessage(), 'concurrent' ) !== FALSE ) {
+				$code = 'DBDeadLock';
+			} elseif ( stristr( $e->getMessage(), 'server has gone away' ) !== FALSE OR stristr( $e->getMessage(), 'closed the connection unexpectedly' ) !== FALSE ) {
+				$code = 'DBConnectionLost';
+			} elseif ( stristr( $e->getMessage(), 'No space left on device' ) !== FALSE) { //Unrecoverable error, set down_for_maintenance so server admin can investigate?
+				$code = 'DBNoSpaceOnDevice';
 			}
 			Debug::Text( 'Code: '. $code .'('. $e->getCode() .') Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -99,6 +105,7 @@ class DBError extends Exception {
 							$description = TTi18n::getText('%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.', array( APPLICATION_NAME ) );
 							break;
 						case 'dbuniqueconstraint':
+						case 'dbdeadlock':
 							$description = TTi18n::getText('%1 has detected a duplicate request, this may be due to double-clicking a button or a poor internet connection.', array( APPLICATION_NAME ) );
 							break;
 						case 'dbinvalidbytesequence':
@@ -117,6 +124,7 @@ class DBError extends Exception {
 							$description = TTi18n::getText('%1 database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.', array( APPLICATION_NAME ) );
 							break;
 						case 'dbuniqueconstraint':
+						case 'dbdeadlock':
 							$description = TTi18n::getText('%1 has detected a duplicate request, this may be due to double-clicking a button or a poor internet connection.', array( APPLICATION_NAME ) );
 							break;
 						case 'dbinvalidbytesequence':
@@ -124,6 +132,9 @@ class DBError extends Exception {
 							break;
 						case 'dbserialize':
 							$description = TTi18n::getText('%1 has detected a duplicate request running at the exact same time, please try your request again in a couple minutes.', array( APPLICATION_NAME ) );
+							break;
+						case 'dbnospaceondevice':
+							$description = TTi18n::getText('%1 has detected a database error, please contact technical support immediately.', array( APPLICATION_NAME ) );
 							break;
 						case 'dberror':
 							$description = TTi18n::getText('%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server.', array( APPLICATION_NAME ));

@@ -271,7 +271,7 @@ class APIAuthentication extends APIFactory {
 	}
 	function getCurrentUser() {
 		if ( is_object( $this->getCurrentUserObject() ) ) {
-			return $this->returnHandler( $this->getCurrentUserObject()->getObjectAsArray() );
+			return $this->returnHandler( $this->getCurrentUserObject()->getObjectAsArray( array( 'id' => TRUE, 'company_id' => TRUE, 'currency_id' => TRUE, 'permission_control_id' => TRUE, 'pay_period_schedule_id' => TRUE, 'policy_group_id' => TRUE, 'employee_number' => TRUE, 'user_name' => TRUE, 'phone_id' => TRUE, 'first_name' => TRUE, 'middle_name' => TRUE, 'last_name' => TRUE, 'full_name' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'longitude' => TRUE, 'latitude' => TRUE, 'work_phone' => TRUE, 'home_phone' => TRUE, 'work_email' => TRUE, 'home_email' => TRUE, 'feedback_rating' => TRUE, 'last_login_date' => TRUE, 'created_date' => TRUE ) ) );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -279,7 +279,7 @@ class APIAuthentication extends APIFactory {
 
 	function getCurrentCompany() {
 		if ( is_object( $this->getCurrentCompanyObject() ) ) {
-			return $this->returnHandler( $this->getCurrentCompanyObject()->getObjectAsArray() );
+			return $this->returnHandler( $this->getCurrentCompanyObject()->getObjectAsArray( array('id' => TRUE, 'product_edition_id' => TRUE, 'name' => TRUE, 'industry' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'work_phone' => TRUE, 'application_build' => TRUE, 'is_setup_complete' => TRUE, 'total_active_days' => TRUE, 'created_date' => TRUE ) ) );
 		}
 
 		return $this->returnHandler( FALSE );

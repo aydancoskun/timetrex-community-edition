@@ -47,7 +47,7 @@ class UserDeductionFactory extends Factory {
 	var $company_deduction_obj = NULL;
 	var $pay_stub_entry_account_link_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

@@ -50,7 +50,7 @@ class PayStubAmendmentFactory extends Factory {
 	var $percent_amount_entry_name_obj = NULL;
 
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

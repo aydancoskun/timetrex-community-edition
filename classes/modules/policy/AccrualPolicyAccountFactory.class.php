@@ -45,7 +45,7 @@ class AccrualPolicyAccountFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $milestone_objs = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

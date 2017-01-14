@@ -175,7 +175,7 @@ class UserPreferenceFactory extends Factory {
 											'g:i:s A T' => TTi18n::gettext( 'HH:MM:SS AM TZ' ),
 											'G:i:s T'   => TTi18n::gettext( 'HH:MM:SS TZ' ),
 									);
-				break;			
+				break;
 			case 'moment_time_format':
 				$retval = array(
 											'g:i A'		=> 'hh:mm A',
@@ -459,6 +459,7 @@ class UserPreferenceFactory extends Factory {
 											'Asia/Karachi' => 'Asia/Karachi',
 											'Asia/Kashgar' => 'Asia/Kashgar',
 											'Asia/Katmandu' => 'Asia/Katmandu',
+											'Asia/Kolkata' => 'Asia/Kolkata',
 											'Asia/Krasnoyarsk' => 'Asia/Krasnoyarsk',
 											'Asia/Kuala_Lumpur' => 'Asia/Kuala_Lumpur',
 											'Asia/Kuching' => 'Asia/Kuching',
@@ -1953,7 +1954,7 @@ class UserPreferenceFactory extends Factory {
 		if ( $type_id == '' ) {
 			$type_id = $this->getScheduleIcalendarType();
 		}
-		
+
 		$retval = Environment::getBaseURL().'ical/ical.php';
 		if ( $type_id == 2 ) {
 			$retval .= '?u='. $user_name .'&k='. $this->getScheduleIcalendarKey();
@@ -1972,7 +1973,7 @@ class UserPreferenceFactory extends Factory {
 	function getScheduleIcalendarKey() {
 		$salt = $this->getUserObject()->getPasswordSalt();
 		$user_id = $this->getUserObject()->getID();
-		
+
 		return substr( md5( $this->getScheduleIcalendarEventName().$salt.$user_id ), 0, 12);
 	}
 
@@ -2144,7 +2145,7 @@ class UserPreferenceFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getUser() == '' ) {
 			$this->Validator->isTRUE(	'user',
@@ -2298,10 +2299,10 @@ class UserPreferenceFactory extends Factory {
 								$data[$variable.'_display'] = Option::getByKey( $this->$function(), Misc::trimSortPrefix( $this->getOptions( $variable ) ) );
 							}
 							break;
-						case 'date_format_display':						
+						case 'date_format_display':
 							$data[$variable] = $this->getDateFormatExample();
 							break;
-						case 'time_format_display':						
+						case 'time_format_display':
 							$data[$variable] = $this->getTimeFormatExample();
 							break;
 						default:

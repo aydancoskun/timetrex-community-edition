@@ -1533,7 +1533,7 @@ class Install {
 		return 1;
 	}
 
-	function cleanCacheDirectory( $exclude_regex_filter = '\.ZIP|upgrade_staging' ) {
+	function cleanCacheDirectory( $exclude_regex_filter = '\.ZIP|\.lock|upgrade_staging' ) {
 		global $smarty;
 
 		if ( isset($smarty) ) {
@@ -1627,7 +1627,7 @@ class Install {
 	}
 
 	function checkPHPMemoryLimit() {
-		if ( $this->getMemoryLimit() == NULL OR $this->getMemoryLimit() >= 128 ) {
+		if ( $this->getMemoryLimit() == NULL OR $this->getMemoryLimit() >= 512 ) {
 			return 0;
 		}
 

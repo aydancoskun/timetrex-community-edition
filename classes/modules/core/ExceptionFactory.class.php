@@ -45,7 +45,7 @@ class ExceptionFactory extends Factory {
 	protected $user_obj = NULL;
 	protected $exception_policy_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

@@ -42,7 +42,7 @@ class CompanySettingFactory extends Factory {
 	protected $table = 'company_setting';
 	protected $pk_sequence_name = 'company_setting_id_seq'; //PK Sequence name
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

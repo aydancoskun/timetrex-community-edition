@@ -44,7 +44,7 @@ class UserLicenseFactory extends Factory {
 	protected $qualification_obj = NULL;
 
 	protected $license_number_validator_regex = '/^[A-Z_\/:;\-\.\ 0-9]{1,250}$/i';
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

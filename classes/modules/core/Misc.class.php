@@ -1506,18 +1506,22 @@ class Misc {
 
 			$curl = curl_init();
 			curl_setopt( $curl, CURLOPT_URL, $url );
+			curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
 			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, FALSE ); // Set return transfer to false
 			curl_setopt( $curl, CURLOPT_BINARYTRANSFER, TRUE );
 			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
-			curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 10 ); // Increase timeout to download big file
+			curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 10 );
+			curl_setopt( $curl, CURLOPT_TIMEOUT, 0); //Never timeout
 			curl_setopt( $curl, CURLOPT_FILE, $fp ); // Write data to local file
 			curl_exec( $curl );
 			curl_close( $curl );
 			fclose( $fp );
 
-			$file_size = filesize( $file_name );
-			if ( $file_size > 0 ) {
-				return (int)$file_size;
+			if ( file_exists( $file_name ) ) {
+				$file_size = filesize( $file_name );
+				if ( $file_size > 0 ) {
+					return (int)$file_size;
+				}
 			}
 
 			return FALSE;
@@ -1918,7 +1922,7 @@ class Misc {
 
 		Debug::Text('Cleaning: '. $path .' Exclude Regex: '. $exclude_regex_filter, __FILE__, __LINE__, __METHOD__, 10);
 		while( $file = $dir->read() ) {
-			if( $file === '.' OR $file === '..' ) {
+			if ( $file === '.' OR $file === '..' ) {
 				continue;
 			}
 
@@ -1930,9 +1934,11 @@ class Misc {
 
 			if ( is_dir($full) AND $recursive == TRUE ) {
 				$result = self::cleanDir( $full, $recursive, $del_dirs, $del_dirs, $exclude_regex_filter );
-			} elseif( is_file($full) ) {
+			} elseif ( is_file($full) ) {
 				$result = @unlink($full);
-				//Debug::Text('Deleting: '. $full, __FILE__, __LINE__, __METHOD__, 10);
+				if ( $result == FALSE ) {
+					Debug::Text('  Failed Deleting: '. $full, __FILE__, __LINE__, __METHOD__, 10);
+				}
 			}
 
 		}
@@ -1943,7 +1949,26 @@ class Misc {
 			$result = @rmdir($dir->path);
 		}
 
+		clearstatcache(); //Clear any stat cache when done.
 		return $result;
+	}
+
+	//If rename fails for some reason, attempt a copy instead as that might work, specifically on windows where if the file is in use.
+	//  Might fix possible "Access is denied. (code: 5)" errors on Windows when using PHP v5.2 (https://bugs.php.net/bug.php?id=43817)
+	static function rename( $oldname, $newname ) {
+		if ( @rename( $oldname, $newname ) == FALSE ) {
+			Debug::Text('ERROR: Unable to rename: '. $oldname .' to: '. $newname, __FILE__, __LINE__, __METHOD__, 10);
+			if ( is_dir( $oldname ) == FALSE AND copy( $oldname, $newname ) == TRUE ) {
+				@unlink( $oldname );
+				return TRUE;
+			} else {
+				Debug::Text('ERROR: Unable to copy after rename failure: '. $oldname .' to: '. $newname, __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			return FALSE;
+		}
+
+		return TRUE;
 	}
 
 	static function getFileList( $start_dir, $regex_filter = NULL, $recurse = FALSE ) {
@@ -2393,23 +2418,29 @@ class Misc {
 
 		//Check for dictionary word, if its just a dictionary word make it the lowest strength.
 		if ( function_exists( 'pspell_new' ) ) {
-			$pspell_link = pspell_new('en');
-
-			if ( pspell_check($pspell_link, $password ) !== FALSE ) {
-				Debug::Text('Matches dictionary word exactly: '. $password, __FILE__, __LINE__, __METHOD__, 10);
-				$strength = 1;
-			}
-			if ( pspell_check($pspell_link, substr( $password, 1 ) ) !== FALSE ) {
-				Debug::Text('Matches dictionary word after 1st char is dropped: '. $password, __FILE__, __LINE__, __METHOD__, 10);
-				$strength = 1;
-			}
-			if ( pspell_check($pspell_link, substr( $password, 0, -1 ) ) !== FALSE ) {
-				Debug::Text('Matches dictionary word after last char is dropped: '. $password, __FILE__, __LINE__, __METHOD__, 10);
-				$strength = 1;
-			}
-			if ( pspell_check($pspell_link, substr( substr( $password, 1 ), 0, -1 ) ) !== FALSE ) {
-				Debug::Text('Matches dictionary word after first and last char is dropped: '. $password, __FILE__, __LINE__, __METHOD__, 10);
-				$strength = 1;
+			//If no aspell dictionary is installed, you might see: WARNING(2): pspell_new(): PSPELL couldn't open the dictionary. reason: No word lists can be found for the language "en".
+			//  On Centos this can fixed by: yum install aspell-en
+			$pspell_config = @pspell_config_create( 'en' );
+			$pspell_link = @pspell_new_config( $pspell_config );
+			if ( $pspell_link != FALSE ) {
+				if ( pspell_check( $pspell_link, $password ) !== FALSE ) {
+					Debug::Text( 'Matches dictionary word exactly: ' . $password, __FILE__, __LINE__, __METHOD__, 10 );
+					$strength = 1;
+				}
+				if ( pspell_check( $pspell_link, substr( $password, 1 ) ) !== FALSE ) {
+					Debug::Text( 'Matches dictionary word after 1st char is dropped: ' . $password, __FILE__, __LINE__, __METHOD__, 10 );
+					$strength = 1;
+				}
+				if ( pspell_check( $pspell_link, substr( $password, 0, -1 ) ) !== FALSE ) {
+					Debug::Text( 'Matches dictionary word after last char is dropped: ' . $password, __FILE__, __LINE__, __METHOD__, 10 );
+					$strength = 1;
+				}
+				if ( pspell_check( $pspell_link, substr( substr( $password, 1 ), 0, -1 ) ) !== FALSE ) {
+					Debug::Text( 'Matches dictionary word after first and last char is dropped: ' . $password, __FILE__, __LINE__, __METHOD__, 10 );
+					$strength = 1;
+				}
+			} else {
+				Debug::Text('WARNING: pspell extension is installed but not functioning, is a dictionary installed?', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		} else {
 			Debug::Text('WARNING: pspell extension is not enabled...', __FILE__, __LINE__, __METHOD__, 10);
@@ -2474,7 +2505,7 @@ class Misc {
 
 		$retval = FALSE;
 
-		if ( !class_exists('Browser') ) {
+		if ( !class_exists('Browser', FALSE ) ) {
 			require_once( Environment::getBasePath().'/classes/other/Browser.php');
 		}
 

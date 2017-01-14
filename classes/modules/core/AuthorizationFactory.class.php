@@ -46,7 +46,7 @@ class AuthorizationFactory extends Factory {
 	protected $obj_handler_obj = NULL;
 	protected $hierarchy_arr = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

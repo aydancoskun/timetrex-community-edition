@@ -45,7 +45,7 @@ class PayFormulaPolicyFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $accrual_policy_account_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
 		$product_edition_id = Misc::getCurrentCompanyProductEdition();
 

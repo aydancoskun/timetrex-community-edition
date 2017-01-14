@@ -52,7 +52,7 @@ class ExceptionPolicyFactory extends Factory {
 
 	protected $exception_policy_control_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'type':

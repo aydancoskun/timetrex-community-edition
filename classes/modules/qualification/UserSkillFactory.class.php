@@ -43,7 +43,7 @@ class UserSkillFactory extends Factory {
 	protected $pk_sequence_name = 'user_skill_id_seq'; //PK Sequence name
 	protected $qualification_obj = NULL;
 	//protected $experience_validator_regex = '/^[0-9]{1,250}$/i';
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

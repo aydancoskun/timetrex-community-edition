@@ -53,7 +53,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 										50 => 0.04166666666666666667, // 1/24th of a day.
 									);
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

@@ -50,7 +50,7 @@ class CompanyFactory extends Factory {
 	var $user_obj = NULL;
 	var $base_currency_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

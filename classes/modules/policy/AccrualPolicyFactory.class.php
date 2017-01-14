@@ -48,7 +48,7 @@ class AccrualPolicyFactory extends Factory {
 	protected $user_modifier_obj = NULL;
 	protected $length_of_service_contributing_pay_code_policy_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'type':

@@ -42,7 +42,7 @@ class EthnicGroupFactory extends Factory {
 	protected $table = 'ethnic_group';
 	protected $pk_sequence_name = 'ethnic_group_id_seq'; //PK Sequence name
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

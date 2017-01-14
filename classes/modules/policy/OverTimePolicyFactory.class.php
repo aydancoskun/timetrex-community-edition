@@ -52,7 +52,7 @@ class OverTimePolicyFactory extends Factory {
 	//Then Weekly time
 	//Then Bi Weekly
 	//Then Day Of Week
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'type':

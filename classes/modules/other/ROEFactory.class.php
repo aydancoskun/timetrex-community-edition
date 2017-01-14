@@ -47,7 +47,7 @@ class ROEFactory extends Factory {
 	var $initial_pay_period_earnings = NULL;
 	var $pay_period_earnings = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

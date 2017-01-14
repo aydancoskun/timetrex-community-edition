@@ -201,6 +201,7 @@ class Form941Report extends Report {
 										'-2030-social_security_wages' => TTi18n::gettext('Taxable Social Security Wages'), //Line 5a
 										'-2040-social_security_tips' => TTi18n::gettext('Taxable Social Security Tips'), //Line 5b
 										'-2050-medicare_wages' => TTi18n::gettext('Taxable Medicare Wages'), //Line 5c
+										'-2051-medicare_additional_wages' => TTi18n::gettext('Taxable Medicare Additional Wages'), //Line 5d
 										'-2060-sick_wages' => TTi18n::gettext('Sick Pay'), //Line 7b
 										'-2070-eic' => TTi18n::gettext('Earned Income Credit (EIC)'), //Line 9
 							);
@@ -496,12 +497,13 @@ class Form941Report extends Report {
 		$medicare_additional_threshold_limit = $pd_obj->getMedicareAdditionalEmployerThreshold();
 		Debug::Text('Social Security Wage Limit: '. $social_security_wage_limit .' Medicare Threshold: '. $medicare_additional_threshold_limit .' Date: '. TTDate::getDate('DATE', $filter_data['end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 
-		//Need to get totals up to the beginning of this quarter so we can determine if any employees have exceeded the social security limit.
+		//Need to get totals up to the beginning of this quarter so we can determine if any employees have exceeded the social security/additional medicare limit.
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$ytd_filter_data = $filter_data;
 		$ytd_filter_data['end_date'] = ( $ytd_filter_data['start_date'] - 1 );
 		$ytd_filter_data['start_date'] = TTDate::getBeginYearEpoch( $ytd_filter_data['start_date'] );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $ytd_filter_data );
+		Debug::Text('YTD Filter Data: Start Date: '. TTDate::getDate('DATE', $ytd_filter_data['start_date'] ) .' End Date: '. TTDate::getDate('DATE', $ytd_filter_data['end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($ytd_filter_data, 'YTD Filter Data: Row Count: '.	$pself->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $pself->getRecordCount() > 0 ) {
 			foreach( $pself as $pse_obj ) {
@@ -546,7 +548,6 @@ class Form941Report extends Report {
 					}
 				}
 			}
-
 			//Debug::Arr($this->tmp_data['ytd_pay_stub_entry'], 'YTD Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 		unset($pse_obj, $user_id, $date_stamp, $branch, $department, $pay_stub_entry_name_id, $this->tmp_data['pay_stub_entry']);
@@ -628,12 +629,13 @@ class Form941Report extends Report {
 						} else {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] = 0;
 						}
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = 0;
 
 						//Handle medicare additional wage limit, only consider wages earned above the threshold to be "medicare_additional_wages"
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = 0;
 						if ( !isset($this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages']) ) {
 							$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = 0;
 						}
+
 						if ( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] > $medicare_additional_threshold_limit ) {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'];
 						} else {
@@ -644,7 +646,8 @@ class Form941Report extends Report {
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = 0;
 							}
 						}
-						//Debug::Text('User ID: '. $user_id .' DateStamp: '. $date_stamp .' YTD Medicare Additional Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] .' This Pay Stub: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'], __FILE__, __LINE__, __METHOD__, 10);
+						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] );
+						//Debug::Text('User ID: '. $user_id .' DateStamp: '. TTDate::getDate('DATE', $date_stamp ) .' YTD Medicare Additional Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] .' This Pay Stub: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'], __FILE__, __LINE__, __METHOD__, 10);
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['sick_wages']				= ( isset($form_data['sick_wages']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['sick_wages']['include_pay_stub_entry_account'], $form_data['sick_wages']['exclude_pay_stub_entry_account'] ) : 0;
 						//$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['eic']						= ( isset($form_data['eic']) ) ? Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['eic']['include_pay_stub_entry_account'], $form_data['eic']['exclude_pay_stub_entry_account'] ) : 0;

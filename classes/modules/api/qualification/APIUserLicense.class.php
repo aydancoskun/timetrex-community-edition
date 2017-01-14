@@ -53,7 +53,7 @@ class APIUserLicense extends APIFactory {
 	 * @param mixed $parent Parent name/ID of options to return if data is in hierarchical format. (ie: Province)
 	 * @return array
 	 */
-	function getOptions( $name, $parent = NULL ) {
+	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
 				AND ( !$this->getPermissionObject()->Check('user_license', 'enabled')
 					OR !( $this->getPermissionObject()->Check('user_license', 'view') OR $this->getPermissionObject()->Check('user_license', 'view_own') OR $this->getPermissionObject()->Check('user_license', 'view_child') ) ) ) {

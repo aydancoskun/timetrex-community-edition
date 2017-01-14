@@ -45,7 +45,7 @@ class HierarchyLevelFactory extends Factory {
 	var $hierarchy_control_obj = NULL;
 	var $user_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

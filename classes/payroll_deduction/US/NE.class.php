@@ -240,6 +240,10 @@ class PayrollDeduction_US_NE extends PayrollDeduction_US {
 			$income = $annual_income;
 		}
 
+		//Make sure income never drops into the negatives, as that will prevent getStateTaxPayable() from calculating the special threshold.
+		if ( $income < 0 ) {
+			$income = 0;
+		}
 		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $income;
@@ -265,7 +269,7 @@ class PayrollDeduction_US_NE extends PayrollDeduction_US {
 
 		$retval = 0;
 
-		if ( $annual_income > 0 ) {
+		if ( $annual_income >= 0 ) {
 			$rate = $this->getData()->getStateRate($annual_income);
 			$state_constant = $this->getData()->getStateConstant($annual_income);
 			$state_rate_income = $this->getData()->getStateRatePreviousIncome($annual_income);
@@ -275,6 +279,16 @@ class PayrollDeduction_US_NE extends PayrollDeduction_US {
 
 			if ( $this->getDate() < 20130101 ) {
 				$retval = bcsub( $retval, $this->getStateAllowanceAmount() );
+			}
+
+			if ( $this->getDate() >= 20170101 ) { //Not 100% sure when this came into play.
+				//Special income tax withholding procedures.
+				//Ensure that the tax amount is at least 1.5% of the taxable income.
+				$special_threshold = bcmul( $this->getAnnualTaxableIncome(), 0.015 ); //1.5% -- Use gross annual income, not state annual income after allowances come off.
+				Debug::text('  Special Threshold: '. $special_threshold, __FILE__, __LINE__, __METHOD__, 10);
+				if ( $retval < $special_threshold ) {
+					$retval = $special_threshold;
+				}
 			}
 		}
 

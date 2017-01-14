@@ -45,7 +45,7 @@ class PayCodeFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $pay_stub_entry_account_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'type': //Should this be status? This could be useful for overtime/premium and such as well, so it needs to stay here.

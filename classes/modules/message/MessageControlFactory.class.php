@@ -45,7 +45,7 @@ class MessageControlFactory extends Factory {
 	protected $obj_handler = NULL;
 	protected $tmp_data = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

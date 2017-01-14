@@ -42,7 +42,7 @@ class WageGroupFactory extends Factory {
 	protected $table = 'wage_group';
 	protected $pk_sequence_name = 'wage_group_id_seq'; //PK Sequence name
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

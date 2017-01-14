@@ -4098,7 +4098,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 	 * @group OvertimePolicy_testBiWeeklyOverTimeDates
 	 */
 	function testBiWeeklyOverTimeDates() {
-		$cp = new CalculatePolicy();
+		$cp = TTnew( 'CalculatePolicy' );
 
 		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('22-Dec-2013'), strtotime('22-Dec-2013'), 0 ), FALSE ); //Sun
 		$this->assertEquals(  $cp->isSecondBiWeeklyOverTimeWeek( strtotime('29-Dec-2013'), strtotime('22-Dec-2013'), 0 ), TRUE ); //Sun
@@ -4195,7 +4195,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 	 * @group OvertimePolicy_testBiWeeklyOverTimePeriodDates
 	 */
 	function testBiWeeklyOverTimePeriodDates() {
-		$cp = new CalculatePolicy();
+		$cp = TTnew( 'CalculatePolicy' );
 
 		$ot_period_dates = $cp->getOverTimePeriodDates( strtotime('22-Dec-2013'), 2, strtotime('22-Dec-2013'), 0 );
 		$this->assertEquals( $ot_period_dates['start_date'], TTDate::getBeginDayEpoch( strtotime('22-Dec-2013') ) ); //Sun
@@ -14257,7 +14257,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 	 * @group OvertimePolicy_testBiWeeklyOverTimeWeekModifierA
 	 */
 	function testBiWeeklyOverTimeWeekModifierA() {
-		$cp = new CalculatePolicy();
+		$cp = TTnew( 'CalculatePolicy' );
 
 		/*
 		 *
@@ -14302,7 +14302,7 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 	 * @group OvertimePolicy_testBiWeeklyOverTimeWeekModifierB
 	 */
 	function testBiWeeklyOverTimeWeekModifierB() {
-		$cp = new CalculatePolicy();
+		$cp = TTnew( 'CalculatePolicy' );
 
 		$start_date = $first_pay_period_start_date = TTDate::getMiddleDayEpoch( strtotime('30-Jun-2010') ); //Wed - Must span at least 5yrs for a full test.
 		$end_date = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (365 * 86400) );

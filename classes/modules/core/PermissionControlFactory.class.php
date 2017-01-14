@@ -45,7 +45,7 @@ class PermissionControlFactory extends Factory {
 	protected $company_obj = NULL;
 	protected $tmp_previous_user_ids = array();
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		$retval = NULL;
 		switch( $name ) {

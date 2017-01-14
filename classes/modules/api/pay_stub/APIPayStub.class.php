@@ -54,7 +54,7 @@ class APIPayStub extends APIFactory {
 	 * @param null $parent
 	 * @return object
 	 */
-	function getOptions( $name, $parent = NULL ) {
+	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
 				AND ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
 						OR !( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_child') ) ) ) {
@@ -106,7 +106,7 @@ class APIPayStub extends APIFactory {
 
 		return $this->returnHandler( $data );
 	}
-	
+
 	/**
 	 * Get pay_stub data for one or more pay_stubes.
 	 * @param array $data filter data
@@ -325,7 +325,7 @@ class APIPayStub extends APIFactory {
 
 					//Because this class has sub-classes that depend on it, when adding a new record we need to make sure the ID is set first,
 					//so the sub-classes can depend on it. We also need to call Save( TRUE, TRUE ) to force a lookup on isNew()
-					$row['id'] = $lf->getNextInsertId();					
+					$row['id'] = $lf->getNextInsertId();
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -598,7 +598,10 @@ class APIPayStub extends APIFactory {
 		} elseif ( is_array($user_ids) AND isset($user_ids[0]) AND $user_ids[0] == 0 ) {
 			$user_ids = NULL;
 		}
-		$user_ids = array_unique( $user_ids );
+
+		if ( is_array($user_ids) ) {
+			$user_ids = array_unique( $user_ids );
+		}
 
 		if ( $type_id == 5 ) { //Post-Adjustment Carry-Forward, enable correction and force type to Normal.
 			$enable_correction = TRUE;
@@ -616,7 +619,7 @@ class APIPayStub extends APIFactory {
 				Debug::text('Pay Period Schedule ID: '. $pay_period_obj->getPayPeriodSchedule(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $pay_period_obj->isPreviousPayPeriodClosed() == TRUE ) {
 					$pslf = TTnew( 'PayStubListFactory' );
-					
+
 					if ( (int)$run_id == 0 ) {
 						$run_id = PayStubListFactory::getCurrentPayRun( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getId() );
 					}

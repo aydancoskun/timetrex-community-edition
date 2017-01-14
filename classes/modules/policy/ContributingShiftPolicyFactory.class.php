@@ -51,7 +51,7 @@ class ContributingShiftPolicyFactory extends Factory {
 	protected $job_item_group_map = NULL;
 	protected $job_item_map = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
 			case 'include_schedule_shift_type':

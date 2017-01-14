@@ -49,7 +49,7 @@ class ScheduleFactory extends Factory {
 	protected $department_obj = NULL;
 	protected $pay_period_schedule_obj = NULL;
 
-	function _getFactoryOptions( $name ) {
+	function _getFactoryOptions( $name, $parent = NULL ) {
 
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
 		$product_edition_id = Misc::getCurrentCompanyProductEdition();
@@ -1232,6 +1232,7 @@ class ScheduleFactory extends Factory {
 				$iso_date_stamp = TTDate::getISODateStamp( $s_obj->getDateStamp() );
 				$schedule_shifts[$iso_date_stamp][$i] = array(
 													'id' => (int)$s_obj->getID(),
+													'replaced_id' => (int)$s_obj->getReplacedID(),
 													'recurring_schedule_id' => (int)$s_obj->getColumn('recurring_schedule_id'),
 													'pay_period_id' => (int)$s_obj->getColumn('pay_period_id'),
 													'user_id' => (int)$s_obj->getUser(),
@@ -2264,7 +2265,7 @@ class ScheduleFactory extends Factory {
 		//  So instead of deleting or overwriting the original OPEN shift, simply set "replaced_id" of the current shift to the OPEN shift ID, so we know it was replaced and therefore won't be displayed anymore.
 		//    Now if the shift is deleted, the original OPEN shift will reappear, just like what would happen if it was a OPEN recurring schedule.
 		//However, there is still the case of the user editing an OPEN shift and simply changing the employee to someone else, in this case the original OPEN shift would not be preseverd.
-		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getUser() > 0 ) { //Don't check for conflicting OPEN shifts when editing/saving an OPEN shift.
+		if ( $this->getDeleted() == FALSE AND $this->Validator->getValidateOnly() == FALSE AND $this->getUser() > 0 ) { //Don't check for conflicting OPEN shifts when editing/saving an OPEN shift.
 			$slf = TTnew( 'ScheduleListFactory' );
 			$slf->getConflictingOpenShiftSchedule( $this->getCompany(), $this->getStartTime(), $this->getEndTime(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), $this->getReplacedId(), 1 ); //Limit 1;
 			if ( $slf->getRecordCount() > 0 ) {
@@ -2280,7 +2281,7 @@ class ScheduleFactory extends Factory {
 		} elseif ( $this->getUser() == 0 ) {
 			$this->setReplacedId( 0 ); //Force this whenever its an OPEN shift.
 		}
-		
+
 		return TRUE;
 	}
 
