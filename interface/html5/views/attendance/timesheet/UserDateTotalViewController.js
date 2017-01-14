@@ -13,7 +13,12 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.navigation_label = $.i18n._( 'Accumulated Time' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIUserDateTotal' ))();
 		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
-		$( this.el ).find( '.warning-message' ).text( $.i18n._( 'WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative.' ) )
+
+		if ( PermissionManager.validate( this.permission_id, 'add' ) || PermissionManager.validate( this.permission_id, 'edit' ) ) {
+			$(this.el).find('.warning-message').text($.i18n._('WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative.'));
+		} else {
+			$(this.el).find('.warning-message').hide();
+		}
 
 		this.initPermission();
 		this.render();
@@ -214,7 +219,8 @@ UserDateTotalViewController = BaseViewController.extend( {
 			group: other_group,
 			icon: Icons.import_icon,
 			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVUserDateTotal' ),
-			permission: null
+			permission: null,
+			sort_order: 8000
 		} );
 
 		return [menu];

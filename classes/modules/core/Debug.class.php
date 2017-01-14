@@ -363,10 +363,10 @@ class Debug {
 
 			self::$php_errors++;
 
-			if ( function_exists('apache_request_headers') ) {
+			if ( PHP_SAPI != 'cli' AND function_exists('apache_request_headers') ) {
 				self::Arr( apache_request_headers(), 'Raw Request Headers: ', $error_file, $error_line, __METHOD__, 1 );
 			}
-			
+
 			global $HTTP_RAW_POST_DATA;
 			if ( $HTTP_RAW_POST_DATA != '' ) {
 				self::Arr( $HTTP_RAW_POST_DATA, 'Raw POST Request: ', $error_file, $error_line, __METHOD__, 1 );
@@ -451,7 +451,7 @@ class Debug {
 						$output .= $arr[1];
 					}
 				}
-				
+
 				$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '.getmypid().') ]---------------'.$eol;
 
 				if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {

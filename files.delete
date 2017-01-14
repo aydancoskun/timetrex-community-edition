@@ -997,3 +997,8 @@
 /templates/install/Requirements.tpl
 /templates/install/SystemSettings.tpl
 /templates/install/User.tpl
+
+
+/interface/ForgotPassword.php
+/templates/ForgotPassword.tpl
+/interface/html5/services/core/APIAuthentication.js

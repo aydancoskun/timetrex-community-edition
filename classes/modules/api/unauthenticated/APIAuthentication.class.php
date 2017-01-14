@@ -271,7 +271,7 @@ class APIAuthentication extends APIFactory {
 	}
 	function getCurrentUser() {
 		if ( is_object( $this->getCurrentUserObject() ) ) {
-			return $this->returnHandler( $this->getCurrentUserObject()->getObjectAsArray( array( 'id' => TRUE, 'company_id' => TRUE, 'currency_id' => TRUE, 'permission_control_id' => TRUE, 'pay_period_schedule_id' => TRUE, 'policy_group_id' => TRUE, 'employee_number' => TRUE, 'user_name' => TRUE, 'phone_id' => TRUE, 'first_name' => TRUE, 'middle_name' => TRUE, 'last_name' => TRUE, 'full_name' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'longitude' => TRUE, 'latitude' => TRUE, 'work_phone' => TRUE, 'home_phone' => TRUE, 'work_email' => TRUE, 'home_email' => TRUE, 'feedback_rating' => TRUE, 'last_login_date' => TRUE, 'created_date' => TRUE ) ) );
+			return $this->returnHandler( $this->getCurrentUserObject()->getObjectAsArray( array( 'id' => TRUE, 'company_id' => TRUE, 'currency_id' => TRUE, 'permission_control_id' => TRUE, 'pay_period_schedule_id' => TRUE, 'policy_group_id' => TRUE, 'employee_number' => TRUE, 'user_name' => TRUE, 'phone_id' => TRUE, 'first_name' => TRUE, 'middle_name' => TRUE, 'last_name' => TRUE, 'full_name' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'longitude' => TRUE, 'latitude' => TRUE, 'work_phone' => TRUE, 'home_phone' => TRUE, 'work_email' => TRUE, 'home_email' => TRUE, 'feedback_rating' => TRUE, 'last_login_date' => TRUE, 'created_date' => TRUE, 'is_owner' => TRUE, 'is_child' => TRUE ) ) );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -279,7 +279,7 @@ class APIAuthentication extends APIFactory {
 
 	function getCurrentCompany() {
 		if ( is_object( $this->getCurrentCompanyObject() ) ) {
-			return $this->returnHandler( $this->getCurrentCompanyObject()->getObjectAsArray( array('id' => TRUE, 'product_edition_id' => TRUE, 'name' => TRUE, 'industry' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'work_phone' => TRUE, 'application_build' => TRUE, 'is_setup_complete' => TRUE, 'total_active_days' => TRUE, 'created_date' => TRUE ) ) );
+			return $this->returnHandler( $this->getCurrentCompanyObject()->getObjectAsArray( array('id' => TRUE, 'product_edition_id' => TRUE, 'name' => TRUE, 'industry' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'work_phone' => TRUE, 'application_build' => TRUE, 'is_setup_complete' => TRUE, 'total_active_days' => TRUE, 'created_date' => TRUE, 'latitude' => TRUE, 'longitude' => TRUE ) ) );
 		}
 
 		return $this->returnHandler( FALSE );
@@ -500,6 +500,8 @@ class APIAuthentication extends APIFactory {
 
 				'map_api_key' => ( isset($config_vars['map']['api_key']) AND $config_vars['map']['api_key'] != '' ) ? $config_vars['map']['map_api_key'] : '',
 				'map_provider' => isset($config_vars['map']['provider'] ) ? $config_vars['map']['provider'] : 'timetrex',
+
+				//registration key for the map servers must be added in JS because of the url formats
 				'map_tile_url' => isset( $config_vars['map']['tile_url'] ) ? rtrim($config_vars['map']['tile_url'], '/') : '//map-tiles.timetrex.com',
 				'map_routing_url' => isset( $config_vars['map']['routing_url'] ) ? rtrim($config_vars['map']['routing_url'], '/') : '//map-routing.timetrex.com',
 				'map_geocode_url' => isset( $config_vars['map']['geocode_url'] ) ? rtrim($config_vars['map']['geocode_url'], '/') : '//map-geocode.timetrex.com',
@@ -547,19 +549,32 @@ class APIAuthentication extends APIFactory {
 	 * @return bool
 	 */
 	function changePassword( $user_name, $current_password, $new_password, $new_password2 ) {
+		$rl = TTNew('RateLimit');
+		$rl->setID( 'authentication_'. Misc::getRemoteIPAddress() );
+		$rl->setAllowedCalls( 20 );
+		$rl->setTimeFrame( 900 ); //15 minutes
+
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByUserName( $user_name );
-		if ( $ulf->getRecordCount() > 0 ) {
-			foreach( $ulf as $u_obj ) {
+		if ( $ulf->getRecordCount() == 1 ) {
+			$u_obj = $ulf->getCurrent();
+			if ( $rl->check() == FALSE ) {
+				Debug::Text('Excessive failed password attempts... Preventing password change from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
+				sleep(5); //Excessive password attempts, sleep longer.
+				$u_obj->Validator->isTrue(		'current_password',
+										   		FALSE,
+										   		TTi18n::gettext('Current password is incorrect') .' (z)' );
+			} else {
 				if ( $u_obj->getCompanyObject()->getStatus() == 10 ) {
 					Debug::text('Attempting to change password for: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
 
 					if ( $current_password != '' ) {
 						if ( $u_obj->checkPassword($current_password, FALSE) !== TRUE ) { //Disable password policy checking on current password.
-							Debug::Text('Password check failed!', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text('Password check failed! Attempt: '. $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
+							sleep( ($rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
 							$u_obj->Validator->isTrue(	'current_password',
-													FALSE,
-													TTi18n::gettext('Current password is incorrect') );
+														FALSE,
+														TTi18n::gettext('Current password is incorrect') );
 						}
 					} else {
 						Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
@@ -587,6 +602,8 @@ class APIAuthentication extends APIFactory {
 													TTi18n::gettext('Passwords don\'t match') );
 						}
 					}
+				}
+			}
 
 					if ( $u_obj->isValid() ) {
 						if ( DEMO_MODE == TRUE ) {
@@ -599,6 +616,8 @@ class APIAuthentication extends APIFactory {
 							$current_user = $u_obj;
 
 							TTLog::addEntry( $u_obj->getID(), 20, TTi18n::getText('Password - Web (Password Policy)'), NULL, $u_obj->getTable() );
+					$rl->delete(); //Clear failed password rate limit upon successful login.
+
 							$retval = $u_obj->Save();
 
 							unset($current_user);
@@ -609,10 +628,117 @@ class APIAuthentication extends APIFactory {
 						return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $u_obj->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
 					}
 				}
-			}
-		}
 
 		return $this->returnHandler( FALSE );
+	}
+
+	function resetPassword( $email ) {
+		//Debug::setVerbosity( 11 );
+		$rl = TTNew('RateLimit');
+		$rl->setID( 'password_reset_'. Misc::getRemoteIPAddress() );
+		$rl->setAllowedCalls( 10 );
+		$rl->setTimeFrame( 900 ); //15 minutes
+
+		$validator = new Validator();
+
+		Debug::Text('Email: '. $email, __FILE__, __LINE__, __METHOD__, 10);
+		if ( $rl->check() == FALSE ) {
+			Debug::Text('Excessive reset password attempts... Preventing resets from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
+			sleep(5); //Excessive password attempts, sleep longer.
+			$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (z)') );
+		} else {
+			$ulf = TTnew( 'UserListFactory' );
+			$ulf->getByHomeEmailOrWorkEmail( $email );
+			if ( $ulf->getRecordCount() == 1 ) {
+				$user_obj = $ulf->getCurrent();
+				if ( $user_obj->getStatus() == 10 ) { //Only allow password resets on active employees.
+					//Check if company is using LDAP authentication, if so deny password reset.
+					if ( $user_obj->getCompanyObject()->getLDAPAuthenticationType() == 0 ) {
+						$user_obj->sendPasswordResetEmail();
+						Debug::Text('Found USER! ', __FILE__, __LINE__, __METHOD__, 10);
+						$rl->delete(); //Clear password reset rate limit upon successful login.
+						return $this->returnHandler( array('email_sent' => 1, 'email' => $email ) );
+					} else {
+						Debug::Text('LDAP Authentication is enabled, password reset is disabled! ', __FILE__, __LINE__, __METHOD__, 10);
+						$validator->isTrue('email', FALSE, TTi18n::getText('Please contact your administrator for instructions on changing your password.'). ' (LDAP)' );
+					}
+				} else {
+					$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (b)') );
+				}
+			} else {
+				//Error
+				Debug::Text('DID NOT FIND USER! Returned: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+				$validator->isTrue('email', FALSE, TTi18n::getText('Email address was not found in our database (a)') );
+			}
+
+			Debug::text('Reset Password Failed! Attempt: '. $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
+			sleep( ($rl->getAttempts() * 0.5) ); //If email is incorrect, sleep for some time to slow down brute force attacks.
+		}
+
+		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), array('error' => $validator->getErrorsArray()), array('total_records' => 1, 'valid_records' => 0) );
+	}
+
+	/*
+	 * Reset the password if users forgotten their password
+	 * @param string $key
+	 * @param string $password
+	 * @param string $password2
+	 * */
+	function passwordReset( $key, $password, $password2 ) {
+		$rl = TTNew('RateLimit');
+		$rl->setID( 'password_reset_'. Misc::getRemoteIPAddress() );
+		$rl->setAllowedCalls( 10 );
+		$rl->setTimeFrame( 900 ); //15 minutes
+
+		$validator = new Validator();
+		if ( $rl->check() == FALSE ) {
+			Debug::Text('Excessive password reset attempts... Preventing resets from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
+			sleep(5); //Excessive password attempts, sleep longer.
+		} else {
+			$ulf = TTnew( 'UserListFactory' );
+			Debug::Text('Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
+			$ulf->getByPasswordResetKey( $key );
+			if ( $ulf->getRecordCount() == 1 ) {
+				Debug::Text('FOUND Password reset key! ', __FILE__, __LINE__, __METHOD__, 10);
+				$user_obj = $ulf->getCurrent();
+				if ( $user_obj->checkPasswordResetKey( $key ) == TRUE ) {
+					//Make sure passwords match
+					Debug::Text('Change Password Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
+					if ( $password != '' AND trim($password) === trim($password2) ) {
+						//Change password
+						$user_obj->setPassword( $password ); //Password reset key is cleared when password is changed.
+						if ( $user_obj->isValid() ) {
+							$user_obj->Save(FALSE);
+							Debug::Text('Password Change succesful!', __FILE__, __LINE__, __METHOD__, 10);
+
+							//Logout all sessions for this user when password is successfully reset.
+							$authentication = TTNew('Authentication');
+							$authentication->logoutUser( $user_obj->getId() );
+							unset($user_obj);
+
+							return $this->returnHandler( TRUE );
+						} else {
+							$validator->merge( $user_obj->Validator ); //Make sure we display any validation errors like password too weak.
+						}
+					} else {
+						$validator->isTrue('password', FALSE, TTi18n::getText('Passwords do not match') );
+					}
+					//Do this once a successful key is found, so the user can get as many password change attempts as needed.
+					$rl->delete(); //Clear password reset rate limit upon successful reset.
+				} else {
+					Debug::Text('DID NOT FIND Valid Password reset key!', __FILE__, __LINE__, __METHOD__, 10);
+					$validator->isTrue('password', FALSE, TTi18n::getText('Password reset key is invalid, please try resetting your password again.') );
+				}
+			} else {
+				Debug::Text('DID NOT FIND Valid Password reset key! (b)', __FILE__, __LINE__, __METHOD__, 10);
+				$validator->isTrue('password', FALSE, TTi18n::getText('Password reset key is invalid, please try resetting your password again.') .' (b)' );
+			}
+
+			Debug::text('Password Reset Failed! Attempt: '. $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
+			sleep( ($rl->getAttempts() * 0.5) ); //If email is incorrect, sleep for some time to slow down brute force attacks.
+		}
+
+		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), array('error' => $validator->getErrorsArray()), array('total_records' => 1, 'valid_records' => 0) );
 	}
 
 	//Ping function is also in APIMisc for when the session timesout is valid.

@@ -41,6 +41,16 @@
 class PayrollDeduction_US_CO extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+												20170101 => array(
+															10 => array(
+																	array( 'income' => 2300,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 2300,	'rate' => 4.63,	'constant' => 0 ),
+																	),
+															20 => array(
+																	array( 'income' => 8650,	'rate' => 0,	'constant' => 0 ),
+																	array( 'income' => 8650,	'rate' => 4.63,	'constant' => 0 ),
+																	),
+															),
 												20150101 => array(
 															10 => array(
 																	array( 'income' => 2300,	'rate' => 0,	'constant' => 0 ),
@@ -104,6 +114,9 @@ class PayrollDeduction_US_CO extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
+								20170101 => array( //2017
+													'allowance' => 4050,
+													),
 								20150101 => array( //2015
 													'allowance' => 4000,
 													),

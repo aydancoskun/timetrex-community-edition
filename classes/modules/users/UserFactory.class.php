@@ -2729,12 +2729,11 @@ class UserFactory extends Factory {
 			$this->setPasswordResetDate( time() );
 			if (  $this->isValid() ) {
 				$this->Save( FALSE );
-
 				$subject = APPLICATION_NAME .' '. TTi18n::gettext('password reset requested at') .' '. TTDate::getDate('DATE+TIME', time() ) .' '. TTi18n::gettext('from') .' '. Misc::getRemoteIPAddress();
-
 				$body = '<html><body>';
 				$body .= TTi18n::gettext('A password reset has been requested for') .' "'. $this->getUserName() .'", ';
-				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ForgotPassword.php?action:password_reset=1&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
+				//			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ForgotPassword.php?action:password_reset=1&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
+				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'html5/#!sm=ResetPassword&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
 				$body .= '<br><br>';
 				$body .= TTi18n::gettext('If you did not request your password to be reset, you may ignore this email.');
 				$body .= '<br><br>';
@@ -2759,7 +2758,6 @@ class UserFactory extends Factory {
 
 				$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
 				$retval = $mail->Send();
-
 				return $retval;
 			}
 		}
@@ -3344,12 +3342,7 @@ class UserFactory extends Factory {
 			Debug::text('Setting Tags...', __FILE__, __LINE__, __METHOD__, 10);
 			CompanyGenericTagMapFactory::setTags( $this->getCompany(), 200, $this->getID(), $this->getTag() );
 
-			if ( is_array($data_diff) AND ( isset($data_diff['address1']) OR isset($data_diff['address2']) OR isset($data_diff['city']) OR isset($data_diff['province']) OR isset($data_diff['country']) OR isset($data_diff['postal_code']) ) ) {
-				//Run a separate custom query to clear the geocordinates. Do we really want to do this for so many objects though...
-				Debug::text('Address has changed, clear geocordinates!', __FILE__, __LINE__, __METHOD__, 10);
-				$query = 'UPDATE '. $this->getTable() .' SET longitude = NULL, latitude = NULL where id = ?';
-				$this->db->Execute( $query, array( 'id' => $this->getID() ) );
-			}
+			$this->clearGeoCode( $data_diff ); //Clear Lon/Lat coordinates when address has changed.
 
 			if ( is_array($data_diff) AND ( isset($data_diff['hire_date']) OR isset($data_diff['termination_date']) ) ) {
 				Debug::text('Hire Date or Termination date have changed!', __FILE__, __LINE__, __METHOD__, 10);

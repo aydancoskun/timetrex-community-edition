@@ -576,7 +576,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			id: ContextMenuIconName.in_out,
 			group: navigation_group,
 			icon: Icons.in_out,
-			permission_result: true,
+			permission_result: PermissionManager.checkTopLevelPermission( 'InOut' ),
 			permission: null
 		} );
 
@@ -7922,19 +7922,25 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		if ( Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
 			navigation_div.css('display', 'block');
-			//Set Navigation Awesomebox
-			if (!this.absence_model) {
-				this.navigation.AComboBox({
-					id: this.script_name + '_navigation',
-					layout_name: ALayoutIDs.TIMESHEET
-				});
-				this.navigation.setSourceData(this.full_timesheet_data.punch_data);
-			} else {
-				this.navigation.AComboBox({
-					id: this.script_name + '_navigation',
-					layout_name: ALayoutIDs.ABSENCE
-				});
-				this.navigation.setSourceData(this.absence_original_source);
+
+			// Do not re-instantiate this.navigation on every click as it can cause "TypeError: Cannot read property 'has' of null"
+			if( !this.navigation.getSourceData || (( this.navigation.is_punch_nav === true && this.absence_model ) || ( this.navigation.is_punch_nav === false && !this.absence_model )) ) {
+				//Set Navigation Awesomebox
+				if ( !this.absence_model ) {
+					this.navigation.AComboBox({
+						id: this.script_name + '_navigation',
+						layout_name: ALayoutIDs.TIMESHEET
+					});
+					this.navigation.setSourceData(this.full_timesheet_data.punch_data);
+					this.navigation.is_punch_nav = true;
+				} else {
+					this.navigation.AComboBox({
+						id: this.script_name + '_navigation',
+						layout_name: ALayoutIDs.ABSENCE
+					});
+					this.navigation.setSourceData(this.absence_original_source);
+					this.navigation.is_punch_nav = false;
+				}
 			}
 
 			this.navigation.setValue( this.current_edit_record );

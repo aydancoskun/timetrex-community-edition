@@ -97,17 +97,7 @@ var TAlertManager = (function() {
 		var error_string = '';
 
 		if ( Global.isArray( details ) || typeof details === 'object' ) {
-
-			$.each( details, function( index, val ) {
-
-				if ( val.hasOwnProperty( 'error' ) ) {
-					val = val.error;
-				}
-
-				for ( var key in val ) {
-					error_string = error_string + val[key] + "<br>";
-				}
-			} );
+			error_string = Global.convertValidationErrorToString( details );
 		} else {
 
 			error_string = details;

@@ -165,7 +165,8 @@ DepartmentViewController = BaseViewController.extend( {
 			group: this.getContextMenuGroupByName(menu,'other'),
 			icon: Icons.import_icon,
 			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVDepartment' ),
-			permission: null
+			permission: null,
+			sort_order: 8000
 		} );
 
 		return [menu];

@@ -601,6 +601,17 @@ class RoundIntervalPolicyFactory extends Factory {
 			}
 		}
 
+		if ( $this->getDeleted() == TRUE ) {
+			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
+			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('round_interval_policy' => $this->getId() ), 1 );
+			if ( $pglf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by policy groups' ) );
+			}
+		}
+
 		return TRUE;
 	}
 

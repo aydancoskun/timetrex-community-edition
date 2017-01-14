@@ -63,19 +63,19 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 													),
 								20140101 => array( //01-Jan-14
 													'rate' => 5.20,
-													'allowance' => array( 3400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
+													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
 													'federal_tax_maximum' => 2000,
 													'minimum_income' => 8000,
 													),
 								20120101 => array( //01-Jan-12
 													'rate' => 5.25,
-													'allowance' => array( 3400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
+													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
 													'federal_tax_maximum' => 2000,
 													'minimum_income' => 8000,
 													),
 								20090101 => array( //01-Jan-09
 													'rate' => 5.30,
-													'allowance' => array( 3400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
+													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
 													'federal_tax_maximum' => 2000,
 													'minimum_income' => 8000,
 													),
@@ -154,7 +154,7 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 			if ( $this->getStateAllowance() == 0 ) {
 				$retval = 0;
 			} else {
-				$retval = bcadd($allowance_arr[0], bcmul( $this->getStateAllowance(), $allowance_arr[1] ) );
+				$retval = bcadd( bcsub( $allowance_arr[0], $allowance_arr[1] ), bcmul( $this->getStateAllowance(), $allowance_arr[1] ) );
 			}
 		} else {
 			if ( $this->getStateAllowance() == 0 ) {

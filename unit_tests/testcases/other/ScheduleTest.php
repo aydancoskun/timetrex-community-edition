@@ -61,6 +61,8 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$dd->createCurrency( $this->company_id, 10 );
 
 		$this->branch_id = $dd->createBranch( $this->company_id, 10 ); //NY
+		$this->department_id = $dd->createDepartment( $this->company_id, 10 );
+
 
 		$dd->createPayStubAccount( $this->company_id );
 		$this->createPayStubAccounts();
@@ -71,6 +73,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$dd->createUserWageGroups( $this->company_id );
 
 		$this->user_id = $dd->createUser( $this->company_id, 100 );
+		$this->user_id2 = $dd->createUser( $this->company_id, 10 );
 
 		$this->policy_ids['accrual_policy_account'][20] = $dd->createAccrualPolicyAccount( $this->company_id, 20 ); //Vacation
 		$this->policy_ids['accrual_policy_account'][30] = $dd->createAccrualPolicyAccount( $this->company_id, 30 ); //Sick
@@ -313,6 +316,10 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$sf->setCompany( $this->company_id );
 		$sf->setUser( $user_id );
 		//$sf->setUserDateId( UserDateFactory::findOrInsertUserDate( $user_id, $date_stamp) );
+
+		if ( isset($data['replaced_id'] ) ) {
+			$sf->setReplacedId( $data['replaced_id'] );
+		}
 
 		if ( isset($data['status_id']) ) {
 			$sf->setStatus( $data['status_id'] );
@@ -624,9 +631,9 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$slf->getByID( $schedule_id );
 		if ( $slf->getRecordCount() == 1 ) {
 			$s_obj = $slf->getCurrent();
-			$this->assertEquals( '05-Nov-16',  TTDate::getDate('DATE', $s_obj->getStartTime() ) );
-			$this->assertEquals( '06-Nov-16',  TTDate::getDate('DATE', $s_obj->getEndTime() ) );
-			$this->assertEquals( (13*3600),  $s_obj->getTotalTime() ); //6PM -> 6AM = 12hrs, plus 1hr DST.
+			$this->assertEquals( '05-Nov-16', TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( '06-Nov-16', TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (13 * 3600), $s_obj->getTotalTime() ); //6PM -> 6AM = 12hrs, plus 1hr DST.
 		} else {
 			$this->assertEquals( TRUE, FALSE );
 		}
@@ -979,5 +986,515 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	function testScheduleConflictA() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array( $this->policy_ids['absence_policy'][10], $this->policy_ids['absence_policy'][30] ), //Absence
+								   array($this->policy_ids['regular'][10]) //Regular
+		);
+
+		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => ' 8:30AM',
+				'end_time'           => '4:30PM',
+		) );
+
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $schedule_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:30AM',
+				'end_time' => '4:30PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:35AM',
+				'end_time' => '4:30PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:30AM',
+				'end_time' => '4:35PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:25AM',
+				'end_time' => '4:30PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:30AM',
+				'end_time' => '4:25PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:25AM',
+				'end_time' => '4:25PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:35AM',
+				'end_time' => '4:35PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:25AM',
+				'end_time' => '4:35PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 1:00PM',
+				'end_time' => '1:05PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 1:25AM',
+				'end_time' => '11:35PM',
+		) );
+		$this->assertEquals( $schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+		return TRUE;
+	}
+
+	function testOpenScheduleConflictA() {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
+			return TRUE;
+		}
+
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array( $this->policy_ids['absence_policy'][10], $this->policy_ids['absence_policy'][30] ), //Absence
+								   array($this->policy_ids['regular'][10]) //Regular
+		);
+
+		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$iso_date_stamp = date('Ymd', $date_epoch );
+
+		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
+
+		//Create OPEN shift.
+		$open_schedule_id = $this->createSchedule( 0, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => '8:30AM',
+				'end_time'           => '4:30PM',
+		) );
+
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $open_schedule_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => '8:30AM',
+				'end_time'           => '4:30PM',
+		) );
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $schedule_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		//Populate global variables for current_user.
+		$ulf = TTnew('UserListFactory');
+		$user_obj = $ulf->getById( $this->user_id )->getCurrent();
+		global $current_user, $current_company;
+		$current_user = $user_obj;
+		$current_company = $user_obj->getCompanyObject();
+
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 0, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
+			$this->assertEquals( 1, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
+			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		$tmp_schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:30AM',
+				'end_time' => '4:30PM',
+		) );
+		$this->assertEquals( $tmp_schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+
+		$tmp_schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:30AM',
+				'end_time' => '4:30PM',
+				'replaced_id' => $schedule_id,
+		) );
+		$this->assertEquals( $tmp_schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+
+		//Attempt to "fill" a shift already assigned to a user to someone else.
+		$schedule_id2 = $this->createSchedule( $this->user_id2, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:30AM',
+				'end_time' => '4:30PM',
+				'replaced_id' => $schedule_id,
+		) );
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $schedule_id2 );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		$tmp_schedule_id = $this->createSchedule( $this->user_id2, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time' => ' 8:30AM',
+				'end_time' => '4:30PM',
+				'replaced_id' => $schedule_id,
+		) );
+		$this->assertEquals( $tmp_schedule_id, FALSE ); //Validation error should occur, conflicting start/end time.
+
+
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 0, $schedule_arr[$iso_date_stamp] );
+		$this->assertArrayHasKey( 1, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
+			$this->assertEquals( 2, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
+			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+
+			$this->assertEquals( $schedule_id2, $schedule_arr[$iso_date_stamp][1]['id'] );
+			$this->assertEquals( $this->user_id2, $schedule_arr[$iso_date_stamp][1]['user_id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][1]['date_stamp'] );
+			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		//Now delete the schedules and make sure the original open shift reappears.
+		$dd->deleteSchedule( $schedule_id );
+		$dd->deleteSchedule( $schedule_id2 );
+		$sf = TTNew('ScheduleFactory');
+
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 0, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
+			$this->assertEquals( 1, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
+			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][0]['user_id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
+			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		return TRUE;
+	}
+
+	function testOpenScheduleConflictB() {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
+			return TRUE;
+		}
+
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   NULL, //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   array( $this->policy_ids['absence_policy'][10], $this->policy_ids['absence_policy'][30] ), //Absence
+								   array($this->policy_ids['regular'][10]) //Regular
+		);
+
+		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+		$iso_date_stamp = date('Ymd', $date_epoch );
+
+		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
+
+		//Create OPEN shift.
+		$open_schedule_id = $this->createSchedule( 0, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => '8:30AM',
+				'end_time'           => '4:30PM',
+		) );
+
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $open_schedule_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		$schedule_id = $this->createSchedule( $this->user_id, $date_epoch, array(
+				'schedule_policy_id' => $schedule_policy_id,
+				'start_time'         => '8:30AM',
+				'end_time'           => '4:30PM',
+		) );
+		$slf = TTNew('ScheduleListFactory');
+		$slf->getByID( $schedule_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$s_obj = $slf->getCurrent();
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getStartTime() ) );
+			$this->assertEquals( $date_stamp, TTDate::getDate('DATE', $s_obj->getEndTime() ) );
+			$this->assertEquals( (8 * 3600), $s_obj->getTotalTime() );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		//Populate global variables for current_user.
+		$ulf = TTnew('UserListFactory');
+		$user_obj = $ulf->getById( $this->user_id )->getCurrent();
+		global $current_user, $current_company;
+		$current_user = $user_obj;
+		$current_company = $user_obj->getCompanyObject();
+
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 0, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
+			$this->assertEquals( 1, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
+			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		//Now edit the filled shift and change just the note, make sure the open shift does not reappear.
+		$dd->editSchedule( $schedule_id, array('note' => 'Test1') );
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 0, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
+			$this->assertEquals( 1, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
+			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][0]['note'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		//Now change the start/end time and confirm that the original open shift reappears since it no longer matches.
+		$dd->editSchedule( $schedule_id, array('start_time' => strtotime( '8:35AM', $date_epoch ) ) );
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 1, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][1]) ) {
+			$this->assertEquals( 2, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][1]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][1]['date_stamp'] );
+			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
+			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][1]['note'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		//Now change the start/end time back and confirm that the original open shift is filled again.
+		$dd->editSchedule( $schedule_id, array('start_time' => strtotime( '8:30AM', $date_epoch ) ) );
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 0, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
+			$this->assertEquals( 1, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
+			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][0]['note'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		//Now change the branch and confirm that the original open shift reappears since it no longer matches.
+		$dd->editSchedule( $schedule_id, array('branch_id' => $this->branch_id ) );
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 1, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][1]) ) {
+			$this->assertEquals( 2, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][1]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][1]['date_stamp'] );
+			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
+			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][1]['note'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		//Now change the branch back and confirm that the original open shift is filled again.
+		$dd->editSchedule( $schedule_id, array('branch_id' => 0 ) );
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 0, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
+			$this->assertEquals( 1, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
+			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][0]['note'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		//Now change the department and confirm that the original open shift reappears since it no longer matches.
+		$dd->editSchedule( $schedule_id, array('department_id' => $this->department_id ) );
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 1, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][1]) ) {
+			$this->assertEquals( 2, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][1]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][1]['date_stamp'] );
+			$this->assertEquals( 0, $schedule_arr[$iso_date_stamp][1]['replaced_id'] );
+			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][1]['note'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+
+		//Now change the department back and confirm that the original open shift is filled again.
+		$dd->editSchedule( $schedule_id, array('department_id' => 0 ) );
+		$sf = TTNew('ScheduleFactory');
+		$schedule_arr = $sf->getScheduleArray( array('start_date' => $date_epoch, 'end_date' => $date_epoch ) );
+		//var_dump($schedule_arr);
+		$this->assertArrayHasKey( $iso_date_stamp, $schedule_arr );
+		$this->assertArrayHasKey( 0, $schedule_arr[$iso_date_stamp] );
+		if ( isset($schedule_arr[$iso_date_stamp][0]) ) {
+			$this->assertEquals( 1, count($schedule_arr[$iso_date_stamp]) );
+			$this->assertEquals( $schedule_id, $schedule_arr[$iso_date_stamp][0]['id'] );
+			$this->assertEquals( $date_stamp, $schedule_arr[$iso_date_stamp][0]['date_stamp'] );
+			$this->assertEquals( $open_schedule_id, $schedule_arr[$iso_date_stamp][0]['replaced_id'] );
+			$this->assertEquals( 'Test1', $schedule_arr[$iso_date_stamp][0]['note'] );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
+		}
+
+		return TRUE;
+	}
 }
 ?>

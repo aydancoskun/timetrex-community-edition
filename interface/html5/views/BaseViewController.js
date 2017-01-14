@@ -2265,17 +2265,9 @@ BaseViewController = Backbone.View.extend( {
 		var background_color = isError ? '#cb2e2e' : '#ffff00';
 		var color = isError ? '#fff' : '#000';
 		var border_color = isError ? '#CB2E2E' : '#e7be00';
-		$.each( details, function( index, val ) {
-			for ( var key in val ) {
-				if ( Global.isArray( val[key] ) ) {
-					for ( var i = 0, ii = val[key].length; i < ii; i++ ) {
-						error_string = error_string + val[key][i] + "<br>";
-					}
-				} else {
-					error_string = error_string + val[key] + "<br>";
-				}
-			}
-		} );
+
+		error_string = Global.convertValidationErrorToString( details );
+
 		this.removeEditViewErrorTip();
 		this.edit_view_error_tip = this.edit_view.children().eq( 0 ).children().eq( 2 ).qtip(
 			{
@@ -6943,6 +6935,47 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 	},
+
+	/**
+	 * gets default coordinates object for maps.
+	 */
+	startMapCoordinates: function() {
+		var lat = 39.50;
+		var lng = -98.35;
+
+		if ( typeof(LocalCacheData.getCurrentCompany().latitude) == 'number' && typeof(LocalCacheData.getCurrentCompany().longitude) == 'number' && LocalCacheData.getCurrentCompany().latitude != 0 && LocalCacheData.getCurrentCompany().longitude != 0 ) {
+			lat = LocalCacheData.getCurrentCompany().latitude;
+			lng = LocalCacheData.getCurrentCompany().longitude;
+			Debug.Text('Using company coordinates.', 'BaseViewController.js', 'BaseViewController', 'startMapCoordinates',10);
+		} else if ( typeof(LocalCacheData.getLoginUser().latitude) == 'number' && typeof(LocalCacheData.getLoginUser().longitude) == 'number' && LocalCacheData.getLoginUser().latitude != 0 && LocalCacheData.getLoginUser().longitude != 0 ) {
+			lat = LocalCacheData.getLoginUser().latitude;
+			lng = LocalCacheData.getLoginUser().longitude;
+			Debug.Text('Using user coordinates.', 'BaseViewController.js', 'BaseViewController', 'startMapCoordinates', 10);
+		} else {
+			var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
+			var country_arr = company_api.getOptions('country', {async:false}).getResult();
+			var province_arr = company_api.getOptions('province', LocalCacheData.getCurrentCompany().country, {async:false}).getResult();
+
+			if ( province_arr && country_arr && province_arr[LocalCacheData.getCurrentCompany().province] && country_arr[LocalCacheData.getCurrentCompany().country] ) {
+				var query = LocalCacheData.getCurrentCompany().city + ' ' + province_arr[LocalCacheData.getCurrentCompany().province] + ', ' + country_arr[LocalCacheData.getCurrentCompany().country];
+				var url = APIGlobal.pre_login_data.map_geocode_url + '?q=' + query + '&format=json&tt_key=' + APIGlobal.pre_login_data.registration_key;
+				var result = jQuery.ajax({url: url, async: false});
+				Debug.Arr('Geocoding address: ' + query, result, 'BaseViewController.js', 'BaseViewController', 'startMapCoordinates', 10);
+			}
+
+			if ( result && result.responseJSON && result.responseJSON[0] && result.responseJSON[0].lat && result.responseJSON[0].lon ) {
+				lat = result.responseJSON[0].lat;
+				lng = result.responseJSON[0].lon;
+				Debug.Text('Using company address coordinates.', 'BaseViewController.js', 'BaseViewController', 'startMapCoordinates', 10);
+			} else {
+				Debug.Text('Using default coordinates.', 'BaseViewController.js', 'BaseViewController', 'startMapCoordinates', 10);
+			}
+		}
+
+		Debug.Text('Coordinates (lat,long): '+ lat +','+ lng, 'BaseViewController.js', 'BaseViewController', 'startMapCoordinates',10);
+		return new L.LatLng(lat, lng);
+	},
+
 } );
 //Don't check the file for now. Too many issues
 /* jshint ignore:end */

@@ -263,7 +263,9 @@ RibbonViewController = Backbone.View.extend( {
 				} );
 				break;
 			case 'QuickStartWizard':
-				IndexViewController.openWizard( 'QuickStartWizard' );
+				if ( !LocalCacheData.getCurrentCompany().is_setup_complete && PermissionManager.validate('user_preference', 'edit') && PermissionManager.validate('pay_period_schedule', 'add') && PermissionManager.validate('policy_group', 'edit')) {
+					IndexViewController.openWizard('QuickStartWizard');
+				}
 				break;
 			case 'InOut':
 			case 'UserDefault':
@@ -380,27 +382,28 @@ RibbonViewController = Backbone.View.extend( {
 	},
 
 	doLogout: function() {
-
+		//Don't wait for result of logout in case of slow or disconnected internet. Just clear local cookies and move on.
 		var current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
+		current_user_api.Logout({onResult:function(){}})
 
-		current_user_api.Logout( {
-			onResult: function( result ) {
-				ga('send', 'pageview', {'sessionControl': 'end'});
-				Global.setAnalyticDimensions();
+		Global.setAnalyticDimensions();
+		if ( typeof(ga) != "undefined" && APIGlobal.pre_login_data.analytics_enabled === true ) {
+			ga('send', 'pageview', {'sessionControl': 'end'});
+		}
 
-				Global.clearSessionCookie();
-				//$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
+		//A bare "if" wrapped around lh_inst doesn't work here for some reason.
+		if ( typeof(lh_inst) != "undefined" ) {
+			//stop the update loop for live chat with support
+			clearTimeout(lh_inst.timeoutStatuscheck);
+		}
 
-				LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
-				TopMenuManager.goToView( 'Login' );
-
-				LocalCacheData.setLoginUser(null);
-				LocalCacheData.setCurrentCompany(null);
-				sessionStorage.clear();
-			}
-		} )
+		Global.clearSessionCookie();
+		LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
+		LocalCacheData.setLoginUser(null);
+		LocalCacheData.setCurrentCompany(null);
+		sessionStorage.clear();
+		TopMenuManager.goToView( 'Login' );
 	}
-
 } );
 
 RibbonViewController.loadView = function() {

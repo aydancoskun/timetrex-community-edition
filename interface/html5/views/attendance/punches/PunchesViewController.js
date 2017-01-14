@@ -1318,7 +1318,8 @@ PunchesViewController = BaseViewController.extend( {
 			group: other_group,
 			icon: Icons.import_icon,
 			permission_result: true,
-			permission: null
+			permission: null,
+			sort_order: 8000
 		} );
 
 		var export_csv = new RibbonSubMenu( {

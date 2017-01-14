@@ -1844,6 +1844,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				ksort($setup_data['sage_50']['columns']);
 				$setup_data['sage_50']['columns'] = Misc::trimSortPrefix( $setup_data['sage_50']['columns'] );
 
+				if ( !isset($setup_data['sage_50']['customer_name']) ) {
+					$setup_data['sage_50']['customer_name'] = NULL;
+				}
+
 				if ( !isset($setup_data['sage_50']['customer_name_value']) ) {
 					$setup_data['sage_50']['customer_name_value'] = NULL;
 				}

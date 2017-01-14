@@ -306,7 +306,7 @@ class PunchFactory extends Factory {
 		return FALSE;
 	}
 	function setUser($id) {
-		$this->data['user_id'] = $id;
+		$this->data['user_id'] = (int)$id; //Make sure this isn't an array.
 
 		return TRUE;
 	}

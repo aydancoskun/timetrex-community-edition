@@ -2112,6 +2112,19 @@ abstract class Factory {
 		return FALSE;
 	}
 
+	function clearGeoCode( $data_diff = NULL ) {
+		if ( is_array($data_diff) AND ( isset($data_diff['address1']) OR isset($data_diff['address2']) OR isset($data_diff['city']) OR isset($data_diff['province']) OR isset($data_diff['country']) OR isset($data_diff['postal_code']) ) ) {
+			//Run a separate custom query to clear the geocordinates. Do we really want to do this for so many objects though...
+			Debug::text('Address has changed, clear geocordinates!', __FILE__, __LINE__, __METHOD__, 10);
+			$query = 'UPDATE '. $this->getTable() .' SET longitude = NULL, latitude = NULL where id = ?';
+			$this->db->Execute( $query, array( 'id' => $this->getID() ) );
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function clearData() {
 		$this->data = $this->tmp_data = $this->old_data = array();
 		$this->next_insert_id = NULL;

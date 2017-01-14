@@ -1,5 +1,5 @@
 
-<div id='tt_debug_console' style='width:250pt; background-color:#fff; border:1px solid #000; padding:2em; position:absolute; bottom:0px; right:0px; z-index:1000; border-radius-top-left:10px; border-radius-top-right:10px;'>
+<div id='tt_debug_console' style='width:300pt; background-color:#fff; border:1px solid #000; padding:2em; position:absolute; bottom:0px; right:0px; z-index:1000; border-radius-top-left:10px; border-radius-top-right:10px;'>
     <a style='float:right; padding:10px; text-align:center; color:red; font-weight:bolder; height:10px; width:10px;' class='tt_debug_close_btn' href='#'>x</a>
     <h3>Developer Tools (<span>v</span><span class='tt_version'></span>)</h3>
     <hr>
@@ -41,6 +41,40 @@
     </div>
     <hr>
     <div class='row' id='trigger_login_timeout_row'style='"+rowstyle+"'>
+        <p>Note: To trigger idle, must also clear the session at the db</p>
         <div class='t-button' id='trigger_js_timeout_button'>Trigger Idle</div>
+    </div>
+    <hr>
+    <b>Unit Testing</b>
+    <div class='row' id='qunit_row'style='"+rowstyle+"'>
+        <p>Note: Replace runUnitTests() in console</p>
+        <div class='t-button' id='qunit_test_button'>Run Unit Tests</div>
+        <div id="qunit"></div>
+        <div id="qunit-fixture"></div>
+    </div>
+    <hr>
+
+    <div class='row' id='set_verbosity_row' style='"+rowstyle+"'>
+        <span>Show Data:
+            <select id="tt_output_variable_select">
+                <option value="-1">-- Select one --</option>
+                <option value="0">Primary controller->current_edit_record</option>
+                <option value="1">Report controller->current_edit_record</option>
+                <option value="2">Sub controller->current_edit_record</option>
+                <option value="3">Edit Only controller->current_edit_record</option>
+                <option value="4">Wizard controller->current_edit_record</option>
+            </select>
+        </span>
+        <span>
+            <div class='t-button' id='trigger_output_variable_select'>Show</div>
+        </span>
+    </div>
+
+    <!-- keep order -->
+    <hr>
+    <div class='row' id='execute_script_row'style='"+rowstyle+"'>
+        <b>Script Executor</b>
+        <textarea id='arbitrary_script' style="width:100%;" rows="5"></textarea>
+        <div class='t-button' id='trigger_arbitrary_script'>Run Js</div>
     </div>
 </div>

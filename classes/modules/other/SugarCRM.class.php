@@ -56,6 +56,7 @@ class SugarCRM {
 											'uri' => 'urn:http://www.sugarcrm.com/sugarcrm',
 											'style' => SOAP_RPC,
 											'use' => SOAP_ENCODED,
+											'encoding' => 'UTF-8',
 											'connection_timeout' => 30,
 											'keep_alive' => FALSE, //This prevents "Error fetching HTTP headers" SOAP error.
 											'trace' => 1,

@@ -2138,7 +2138,8 @@ PayStubViewController = BaseViewController.extend( {
 			}
 
 			if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
-				widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) );
+				//widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) );
+				widget_amount.setValue( Global.MoneyRound( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ) ) );
 				this.onFormItemChange( widget_amount, true );
 			} else {
 				widget_amount.setValue( '0.00' );

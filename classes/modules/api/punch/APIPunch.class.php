@@ -520,7 +520,7 @@ class APIPunch extends APIFactory {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
 			$lf = TTnew( 'PunchListFactory' );
-			$lf->StartTransaction();
+			$lf->StartTransaction(); //Wrap the entire batch of records in an array because we do lazy CalculatePolicy at the end. However during import, if one record fails, all records are rolled back.
 
 			$recalculate_user_date_stamp = FALSE;
 			foreach( $data as $key => $row ) {

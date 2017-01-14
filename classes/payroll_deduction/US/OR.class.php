@@ -47,6 +47,20 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	var $original_filing_status = NULL;
 
 	var $state_income_tax_rate_options = array(
+													20170101 => array(
+																10 => array(
+																		array( 'income' => 3400,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 8500,	'rate' => 7,	'constant' => 170 ),
+																		array( 'income' => 125000,	'rate' => 9,	'constant' => 527 ),
+																		array( 'income' => 125000,	'rate' => 9.9,	'constant' => 11012 ),
+																		),
+																20 => array(
+																		array( 'income' => 6800,	'rate' => 5,	'constant' => 0 ),
+																		array( 'income' => 17000,	'rate' => 7,	'constant' => 340 ),
+																		array( 'income' => 250000,	'rate' => 9,	'constant' => 1054 ),
+																		array( 'income' => 250000,	'rate' => 9.9,	'constant' => 22024 ),
+																		),
+																),
 													20160101 => array(
 																10 => array(
 																		array( 'income' => 3350,	'rate' => 5,	'constant' => 0 ),
@@ -146,6 +160,34 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 												);
 
 	var $state_options = array(
+								20170101 => array( //01-Jan-17
+												'standard_deduction' => array(
+																			'10' => 2175,
+																			'20' => 4350,
+																			),
+												'allowance' => 197,
+												'federal_tax_maximum' => 6550,
+												'phase_out' => array(
+																		'10' => array(
+																						50000  => 6550,
+																						125000 => 6550,
+																						130000 => 5200,
+																						135000 => 3900,
+																						140000 => 2600,
+																						145000 => 1300,
+																						145000 => 0,
+																					 ),
+																		'20' => array(
+																						 50000 => 6550,
+																						250000 => 6550,
+																						260000 => 5200,
+																						270000 => 3900,
+																						280000 => 2600,
+																						290000 => 1300,
+																						290000 => 0,
+																					 ),
+																	),
+												),
 								20160101 => array( //01-Jan-16
 												'standard_deduction' => array(
 																			'10' => 2155,
@@ -427,6 +469,11 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 
 		$annual_income = $this->getStateAnnualTaxableIncome();
 
+		if ( $this->getDate() >= 20170101 AND ( ( $this->original_filing_status == 10 AND $annual_income > 100000 ) OR ( $this->original_filing_status == 20 AND $annual_income > 200000 ) ) ) {
+			Debug::text('Income over the 100,000 or 200,000 threshold, forcing allowances to 0.', __FILE__, __LINE__, __METHOD__, 10);
+			$this->setStateAllowance( 0 );
+		}
+
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
@@ -439,7 +486,6 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 			$state_rate_income = $this->getData()->getStateRatePreviousIncome($annual_income);
 
 			$retval = bcadd( bcmul( bcsub( $annual_income, $state_rate_income ), $rate ), $state_constant );
-			//$retval = bcadd( bcmul( $annual_income, $rate ), $state_constant );
 		}
 
 		$retval = bcsub( $retval, $this->getStateAllowanceAmount() );

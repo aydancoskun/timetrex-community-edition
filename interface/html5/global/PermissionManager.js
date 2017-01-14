@@ -242,6 +242,9 @@ var PermissionManager = (function() {
 					result = false;
 				}
 				break;
+			case 'ImportCSVSchedule':
+				result = importValidateFor( 'schedule' );
+				break;
 			case 'ImportCSVBranch':
 				result = importValidateFor( 'branch' );
 				break;
@@ -664,6 +667,8 @@ var PermissionManager = (function() {
 		var result = false;
 
 		if ( importValidateFor( 'branch' ) ||
+			importValidateFor( 'payperiod' ) ||
+			importValidateFor( 'schedule' ) ||
 			importValidateFor( 'user' ) ||
 			importValidateFor( 'department' ) ||
 			importValidateFor( 'client' ) ||
@@ -682,7 +687,7 @@ var PermissionManager = (function() {
 
 	var importValidateFor = function( key ) {
 		if ( PermissionManager.validate( key, 'add' ) &&
-			PermissionManager.validate( key, 'edit' ) ) {
+			(PermissionManager.validate( key, 'edit' ) || PermissionManager.validate( key, 'edit_child' ) ) ) {
 			return true;
 		}
 

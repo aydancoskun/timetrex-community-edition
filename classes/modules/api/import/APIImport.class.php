@@ -64,31 +64,52 @@ class APIImport extends APIFactory {
 	}
 
 	function getImportObjects() {
-		$retarr = array(
-						'-1010-user' => TTi18n::getText('Employees'),
-						'-1015-bank_account' => TTi18n::getText('Employee Bank Accounts'),
-						'-1020-branch' => TTi18n::getText('Branches'),
-						'-1030-department' => TTi18n::getText('Departments'),
-						'-1050-userwage' => TTi18n::getText('Employee Wages'),
-						'-1060-payperiod' => TTi18n::getText('Pay Periods'),
-						'-1200-paystubamendment' => TTi18n::getText('Pay Stub Amendments'),
-						'-1300-accrual' => TTi18n::getText('Accruals'),
-					);
+		$retarr = array();
 
-		//Get company data so we know if its professional edition or not.
+		if ( $this->getPermissionObject()->Check('user', 'add') AND ($this->getPermissionObject()->Check('user', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_child') ) ) {
+			$retarr['-1010-user'] = TTi18n::getText('Employees');
+		}
+		if ( $this->getPermissionObject()->Check('user', 'edit_bank') AND $this->getPermissionObject()->Check('user', 'edit_child_bank')) {
+			$retarr['-1015-bank_account'] = TTi18n::getText('Employee Bank Accounts');
+		}
+		if ( $this->getPermissionObject()->Check('branch', 'add') AND $this->getPermissionObject()->Check('branch', 'edit') ) {
+			$retarr['-1020-branch'] = TTi18n::getText('Branches');
+		}
+		if ( $this->getPermissionObject()->Check('department', 'add') AND $this->getPermissionObject()->Check('department', 'edit') ) {
+			$retarr['-1030-department'] = TTi18n::getText('Departments');
+		}
+		if ( $this->getPermissionObject()->Check('wage', 'add') AND ($this->getPermissionObject()->Check('wage', 'edit') OR $this->getPermissionObject()->Check('wage', 'edit_child'))) {
+			$retarr['-1050-userwage'] = TTi18n::getText('Employee Wages');
+		}
+		if ( $this->getPermissionObject()->Check('pay_period_schedule', 'add') AND $this->getPermissionObject()->Check('pay_period_schedule', 'edit') ) {
+			$retarr['-1060-payperiod'] = TTi18n::getText('Pay Periods');
+		}
+		if (  $this->getPermissionObject()->Check('pay_stub_amendment', 'add') AND $this->getPermissionObject()->Check('pay_stub_amendment', 'edit') ) {
+			$retarr['-1200-paystubamendment'] = TTi18n::getText('Pay Stub Amendments');
+		}
+		if ( $this->getPermissionObject()->Check('accrual', 'add') AND ($this->getPermissionObject()->Check('accrual', 'edit') OR $this->getPermissionObject()->Check('accrual', 'edit_child') )) {
+			$retarr['-1300-accrual'] = TTi18n::getText('Accruals');
+		}
+
 		if ( $this->getCurrentCompanyObject()->getProductEdition() >= 15 ) {
-			$retarr += array(
-							'-1100-punch' => TTi18n::getText('Punches'),
-							'-1150-schedule' => TTi18n::getText('Scheduled Shifts'),
-					);
+			if (  $this->getPermissionObject()->Check('punch', 'add') AND ($this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_child')) ) {
+				$retarr['-1100-punch'] = TTi18n::getText('Punches');
+			}
+			if ( $this->getPermissionObject()->Check('schedule', 'add') AND ($this->getPermissionObject()->Check('schedule', 'edit') OR $this->getPermissionObject()->Check('schedule', 'edit_child')) ) {
+				$retarr['-1150-schedule'] = TTi18n::getText('Scheduled Shifts');
+			}
 		}
 
 		if ( $this->getCurrentCompanyObject()->getProductEdition() >= 20 ) {
-			$retarr += array(
-							'-1500-client' => TTi18n::getText('Clients'),
-							'-1600-job' => TTi18n::getText('Jobs'),
-							'-1605-jobitem' => TTi18n::getText('Tasks'),
-					);
+			if ( $this->getPermissionObject()->Check('client', 'add') AND $this->getPermissionObject()->Check('client', 'edit') ) {
+				$retarr['-1500-client'] = TTi18n::getText('Clients');
+			}
+			if ( $this->getPermissionObject()->Check('job', 'add') AND $this->getPermissionObject()->Check('job', 'edit') ) {
+				$retarr['-1600-job'] = TTi18n::getText('Jobs');
+			}
+			if ( $this->getPermissionObject()->Check('job_item', 'add') AND $this->getPermissionObject()->Check('job_item', 'edit') ) {
+				$retarr['-1605-jobitem'] = TTi18n::getText('Tasks');
+			}
 		}
 
 		return $this->returnHandler( $retarr );

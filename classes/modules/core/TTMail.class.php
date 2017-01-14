@@ -105,6 +105,10 @@ class TTMail {
 					$mail_config['auth'] = TRUE;
 				}
 
+				//Allow self-signed TLS certificates by default, which were disabled by default in PHP v5.6 -- See comments here: http://php.net/manual/en/migration56.openssl.php
+				//This should fix error messages like: authentication failure [SMTP: STARTTLS failed (code: 220, response: 2.0.0 SMTP server ready)
+				$mail_config['socket_options'] = array( 'ssl' => array( 'verify_peer' => FALSE, 'verify_peer_name' => FALSE, 'allow_self_signed' => TRUE ) );
+
 				$this->mail_obj = Mail::factory('smtp', $mail_config );
 				Debug::Arr($mail_config, 'SMTP Config: ', __FILE__, __LINE__, __METHOD__, 10);
 			}
@@ -210,10 +214,12 @@ class TTMail {
 	//Extracts just the email address part from a string that may contain the name part, etc...
 	function parseEmailAddress( $address ) {
 		if ( preg_match('/(?<=[<\[]).*?(?=[>\]]$)/', $address, $match) ) {
-			return $match[0];
+			$retval = $match[0];
+		} else {
+			$retval = $address;
 		}
 
-		return $address;
+		return filter_var($retval, FILTER_VALIDATE_EMAIL); //Make sure we filter the email address here, so if using -f params, we aren't exploitable, for example an email address like: "Attacker -Param2 -Param3"@test.com
 	}
 
 	function Send( $force = FALSE ) {
@@ -247,42 +253,70 @@ class TTMail {
 		//	$this->data['headers']['Date'] = date( 'D, d M Y H:i:s O');
 		//}
 
+		$this->data['headers']['X-TimeTrex-Version'] = APPLICATION_VERSION;
+		$this->data['headers']['X-TimeTrex-Edition'] = getTTProductEditionName();
+
 		if ( !is_array( $this->getTo() ) ) {
 			$to = array( $this->getTo() );
 		} else {
 			$to = $this->getTo();
 		}
 
+		//When using SMTP, we have to manually send to each envelope-to, but make sure the original TO header is set.
+		$secondary_to = array();
+		if ( $this->getDeliveryMethod() == 'smtp' AND isset($this->data['headers']['Cc']) AND $this->data['headers']['Cc'] != '' ) {
+			$secondary_to = array_merge( $secondary_to, array_map('trim', explode(',', $this->data['headers']['Cc'] ) ) );
+		}
+		if ( $this->getDeliveryMethod() == 'smtp' AND isset($this->data['headers']['Bcc']) AND $this->data['headers']['Bcc'] != '' ) {
+			$secondary_to = array_merge( $secondary_to, array_map('trim', explode(',', $this->data['headers']['Bcc'] ) ) );
+		}
+		$secondary_to = array_diff( $secondary_to, $to ); //Make sure the CC/BCC doesn't contain any of the TO addresses, so we don't send duplicate emails.
+
+		$i = 0;
 		foreach( $to as $recipient ) {
-			//$this->data['headers']['To'] = $recipient; //Always set the TO header to the recipient.
+			Debug::Text($i .'. Recipient: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
+			$this->data['headers']['To'] = $recipient; //Always set the TO header to the primary recipient. When using SMTP method it won't do that automatically. We shouldn't be setting this in the case of a Bcc, then its not blind anymore.
+
+			//Check to see if they want to force a return-path for better bounce handling.
+			//However if the envelope from header does not match the From header
+			//It may trigger spam filtering due to email mismatch/forgery (EDT_SDHA_ADR_FRG)
+			if ( !isset($this->data['headers']['Return-Path']) AND isset($config_vars['other']['email_return_path_local_part']) AND $config_vars['other']['email_return_path_local_part'] != '' ) {
+				$this->data['headers']['Return-Path'] = Misc::getEmailReturnPathLocalPart( $recipient ) .'@'. Misc::getEmailDomain();
+			}
+
 			//Debug::Arr($this->getMIMEHeaders(), 'Sending Email To: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
 			switch ( $this->getDeliveryMethod() ) {
 				case 'smtp':
 				case 'sendmail':
 				case 'mail':
 					if ( $this->getDeliveryMethod() == 'mail' ) {
-						$headers = $this->getMIMEHeaders();
-
-						//Check to see if they want to force a return-path for better bounce handling.
-						//However if the envelope from header does not match the From header
-						//It may trigger spam filtering due to email mismatch/forgery (EDT_SDHA_ADR_FRG)
-						if ( !isset($headers['Return-Path']) AND isset($config_vars['other']['email_return_path_local_part']) AND $config_vars['other']['email_return_path_local_part'] != '' ) {
-							$headers['Return-Path'] = Misc::getEmailReturnPathLocalPart( $recipient ) .'@'. Misc::getEmailDomain();
+						$this->getMailObject()->_params = '-t'; //The -t option specifies that exim should build the recipients list from the 'To', 'Cc', and 'Bcc' headers rather than from the arguments list.
+						if ( isset($this->data['headers']['Return-Path']) ) {
+							$this->getMailObject()->_params .= ' -f'. $this->parseEmailAddress( $this->data['headers']['Return-Path'] );
+						} elseif ( isset($this->data['headers']['From']) ) {
+							$this->getMailObject()->_params .= ' -f'. $this->parseEmailAddress( $this->data['headers']['From'] );
 						}
-
-						if ( isset($headers['Return-Path']) ) {
-							$this->getMailObject()->_params = '-f'. $this->parseEmailAddress( $headers['Return-Path'] );
-						} elseif ( isset($headers['From']) ) {
-							$this->getMailObject()->_params = '-f'. $this->parseEmailAddress( $headers['From'] );
-						}
-						
-						unset($headers);
 					}
 
 					$send_retval = $this->getMailObject()->send( $recipient, $this->getMIMEHeaders(), $this->getBody() );
 					if ( PEAR::isError($send_retval) ) {
 						Debug::Text('Send Email Failed... Error: '. $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
 						$send_retval = FALSE;
+					}
+
+					//When using SMTP, we have to manually send to each envelope-to, but make sure the original TO header is set.
+					if ( $this->getDeliveryMethod() == 'smtp' AND isset($secondary_to) AND is_array($secondary_to) AND count($secondary_to) > 0 ) {
+						$x = 0;
+						foreach( $secondary_to as $cc_key => $cc_recipient ) {
+							Debug::Text('  '. $x .'. CC Recipient: '. $cc_recipient, __FILE__, __LINE__, __METHOD__, 10);
+							$send_retval = $this->getMailObject()->send( $cc_recipient, $this->getMIMEHeaders(), $this->getBody() );
+							if ( PEAR::isError( $send_retval ) ) {
+								Debug::Text( 'Send Email Failed... Error: ' . $send_retval->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+								$send_retval = FALSE;
+							}
+							unset($secondary_to[$cc_key]); //Remove CC recipient from array so we don't send it multiple times if there are multiple recipients.
+							$x++;
+						}
 					}
 					break;
 				case 'soap':
@@ -294,6 +328,8 @@ class TTMail {
 			if ( $send_retval != TRUE ) {
 				Debug::Arr($send_retval, 'Send Email Failed To: '. $recipient, __FILE__, __LINE__, __METHOD__, 10);
 			}
+
+			$i++;
 		}
 
 		if ( $send_retval == TRUE ) {

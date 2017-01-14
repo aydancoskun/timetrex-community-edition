@@ -65,9 +65,9 @@ var ApplicationRouter = Backbone.Router.extend( {
 		LocalCacheData.all_url_args = args;
 		if ( view_id == 'Install' ) {
 			if ( LocalCacheData.loadViewRequiredJSReady ) {
-			IndexViewController.openWizard( 'InstallWizard', null, function() {
-				// need to link to the login interface.
-			} );
+				IndexViewController.openWizard( 'InstallWizard', null, function() {
+					// need to link to the login interface.
+				} );
 			} else {
 				auto_login_timer = setInterval( function() {
 					if ( timeout_count == 100 ) {
@@ -82,6 +82,17 @@ var ApplicationRouter = Backbone.Router.extend( {
 					}
 				}, 600 );
 			}
+			return;
+		}
+
+		if ( LocalCacheData.all_url_args.sm === 'ResetPassword' && LocalCacheData.all_url_args.key ) {
+			IndexViewController.openWizard('ResetForgotPasswordWizard', null, function () {
+				delete LocalCacheData.all_url_args.sm, LocalCacheData.all_url_args.key;
+				TAlertManager.showAlert( $.i18n._( 'Password has been changed successfully, you may now login.' ) );
+				var new_url = Global.getBaseURL().split( '#' )[0];
+				Global.setURLToBrowser( new_url + '#!m=Login' );
+				return;
+			});
 			return;
 		}
 
@@ -247,7 +258,22 @@ var ApplicationRouter = Backbone.Router.extend( {
 				if ( view_id === 'Login' || view_id === 'Home' || PermissionManager.checkTopLevelPermission( permission_id ) ) {
 					BaseViewController.loadView( view_id );
 				} else {
-					TAlertManager.showAlert( 'Permission denied' );
+					if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView' ) {
+						if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+							TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+						} else {
+							TopMenuManager.goToView( 'Home' );
+						}
+					} else {
+						TAlertManager.showAlert('Permission denied', 'ERROR', function() {
+							if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+								TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+							} else {
+								TopMenuManager.goToView( 'Home' );
+							}
+						});
+					}
+					Debug.Text('Navigation permission denied. Permission: '+ permission_id, 'IndexController.js', 'IndexController', 'showRibbonMenuAndLoadView', 10);
 				}
 
 			} );
@@ -636,7 +662,22 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 	var view_controller = null;
 
 	if ( !PermissionManager.checkTopLevelPermission( view_name ) && view_name !== 'Map' ) {
-		TAlertManager.showAlert( 'Permission denied' );
+		if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView' ) {
+			if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+				TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+			} else {
+				TopMenuManager.goToView( 'Home' );
+			}
+		} else {
+			TAlertManager.showAlert('Permission denied', 'ERROR', function() {
+				if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+					TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+				} else {
+					TopMenuManager.goToView( 'Home' );
+				}
+			});
+		}
+		Debug.Text('Navigation permission denied. View: '+ view_name, 'IndexController.js', 'IndexController', 'openEditView', 10);
 		return;
 	}
 

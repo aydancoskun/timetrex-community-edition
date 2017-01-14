@@ -1078,7 +1078,7 @@ class AccrualPolicyFactory extends Factory {
 				}
 			}
 		}
-		unset($apmlf, $apm_obj);
+		unset($apm_obj);
 
 		return $milestone_obj;
 	}
@@ -1557,6 +1557,17 @@ class AccrualPolicyFactory extends Factory {
 		}
 		*/
 
+		if ( $this->getDeleted() == TRUE ) {
+			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
+			$pglf = TTnew( 'PolicyGroupListFactory' );
+			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array('accrual_policy' => $this->getId() ), 1 );
+			if ( $pglf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by policy groups' ) );
+			}
+		}
+
 		return TRUE;
 	}
 
@@ -1604,6 +1615,7 @@ class AccrualPolicyFactory extends Factory {
 	}
 
 	function getObjectAsArray( $include_columns = NULL ) {
+		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
 			foreach( $variable_function_map as $variable => $function_stub ) {

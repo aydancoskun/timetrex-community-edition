@@ -211,15 +211,6 @@ PayPeriodsViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		var import_data = new RibbonSubMenu( {
-			label: $.i18n._( 'Import<br>Data' ),
-			id: ContextMenuIconName.import_icon,
-			group: other_group,
-			icon: Icons.import_icon,
-			permission_result: true,
-			permission: null
-		} );
-
 		var delete_data = new RibbonSubMenu( {
 			label: $.i18n._( 'Delete<br>Data' ),
 			id: ContextMenuIconName.delete_data,
@@ -227,6 +218,16 @@ PayPeriodsViewController = BaseViewController.extend( {
 			icon: Icons.delete_icon,
 			permission_result: true,
 			permission: null
+		} );
+
+		var import_data = new RibbonSubMenu( {
+			label: $.i18n._( 'Import<br>Data' ),
+			id: ContextMenuIconName.import_icon,
+			group: other_group,
+			icon: Icons.import_icon,
+			permission_result: true,
+			permission: null,
+			sort_order: 8000
 		} );
 
 		var export_data = new RibbonSubMenu( {

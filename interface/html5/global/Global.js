@@ -68,101 +68,117 @@ Global.needReloadBrowser = false; // Need reload browser after set new cookie. T
 Global.block_ui = false;
 
 Global.sendErrorReport = function() {
-	var api_authentication = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 	var error_string = arguments[0];
 	var from_file = arguments[1];
 	var line = arguments[2];
 	var error_stack = arguments[4];
 
-	var login_user = LocalCacheData.getLoginUser();
-	/*
-	 * JavaScript exception ignore list
-	 */
-	if ( error_string.indexOf( "TypeError: 'null' is not an object" ) >= 0 ||
-		error_string.indexOf( "NS_ERROR_" ) >= 0 ||
-		error_string.indexOf( "NS_ERROR_OUT_OF_MEMORY" ) >= 0 ||
-		error_string.indexOf( "NPObject" ) >= 0 ) { //Error calling method on NPObject - likely caused by an extension or plugin in the browser
-		return;
-	}
-	var error;
-
-	//BUG#2066 - allow this function to be called earlier.
-	var script_name = "~unknown~";
-	if ( Global.isSet(LocalCacheData) && Global.isSet(LocalCacheData.current_open_primary_controller) && Global.isSet(LocalCacheData.current_open_primary_controller.script_name) ) {
-		script_name = LocalCacheData.current_open_primary_controller.script_name;
-	}
-
-	if ( login_user && Debug.varDump ) {
-		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' +
-			script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' +
-			'\n\nUser: ' + login_user.user_name + ' ' +
-			'\n\nURL: ' + window.location.href + ' ' +
-			'\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie +
-			'\n\nCurrent User Object: \n' + Debug.varDump(login_user) + ' ' +
-			'\n\nCurrent Company Object: \n' + Debug.varDump(LocalCacheData.getCurrentCompany()) + ' ';
-	} else {
-		error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
-	}
-
-
-	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
-		ga( 'send', 'exception', { 'exDescription': error_string + ' in ' + from_file + ' line ' + line, 'exFatal': false } ); // Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
-	}
-
-	//Don't send error report if exception not happens in our codes.
-	//from_file should always contains the root url
-	//If URL is not sent by IE, assume its our own code and report the error still.
-	if ( from_file && from_file.indexOf( ServiceCaller.rootURL ) < 0 ) {
-        Debug.Text( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.rootURL + '" Script: ' + from_file, 'Global.js', '', 'sendErrorReport', 1 );
+	if ( Global.idle_time > 15 ) {
+		Debug.Text( 'User inactive more than 15 mins, not sending error report.', 'Global.js', '', 'sendErrorReport', 1 );
 		return;
 	}
 
-	if ( LocalCacheData.getCurrentCompany() ) {
-		error = error + '\n\n' + 'Product Edition: ' + LocalCacheData.getCurrentCompany().product_edition_id;
-	}
+	RateLimit.setID( 'sendErrorReport' );
+	RateLimit.setAllowedCalls( 6 );
+	RateLimit.setTimeFrame( 7200 ); //2hrs
 
-	error = error + '\n\n\n' + 'Clicked target stacks: ' + JSON.stringify( LocalCacheData.ui_click_stack, undefined, 2 );
-	error = error + '\n\n\n' + 'API stacks: ' + JSON.stringify( LocalCacheData.api_stack, undefined, 2 );
+	if ( RateLimit.check() ) {
+		var api_authentication = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
+		var login_user = LocalCacheData.getLoginUser();
+		/*
+		 * JavaScript exception ignore list
+		 */
+		if ( error_string.indexOf( "TypeError: 'null' is not an object" ) >= 0 ||
+			error_string.indexOf( "NS_ERROR_" ) >= 0 ||
+			error_string.indexOf( "NS_ERROR_OUT_OF_MEMORY" ) >= 0 ||
+			error_string.indexOf( "NPObject" ) >= 0 ) { //Error calling method on NPObject - likely caused by an extension or plugin in the browser
+			return;
+		}
+		var error;
 
-	if ( error_stack ) {
-		var trace = error_stack.stack;
-		error = error + '\n\n\n' + 'Function called stacks: ' + trace;
-	}
+		//BUG#2066 - allow this function to be called earlier.
+		var script_name = "~unknown~";
+		if ( Global.isSet(LocalCacheData) && Global.isSet(LocalCacheData.current_open_primary_controller) && Global.isSet(LocalCacheData.current_open_primary_controller.script_name) ) {
+			script_name = LocalCacheData.current_open_primary_controller.script_name;
+		}
 
-    Debug.Text( 'ERROR: '+ error, 'Global.js', '', 'sendErrorReport', 1 );
+		if ( login_user && Debug.varDump ) {
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' +
+				script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' +
+				'\n\nUser: ' + login_user.user_name + ' ' +
+				'\n\nURL: ' + window.location.href + ' ' +
+				'\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie +
+				'\n\nCurrent User Object: \n' + Debug.varDump(login_user) + ' ' +
+				'\n\nCurrent Company Object: \n' + Debug.varDump(LocalCacheData.getCurrentCompany()) + ' ';
+		} else {
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
+		}
 
-	if ( Global.isCanvasSupported() && ie > 9 ) {
-		html2canvas( [document.body], {
-			onrendered: function( canvas ) {
 
-				var image_string = canvas.toDataURL().split( ',' )[1];
-				api_authentication.sendErrorReport( error, image_string, {
-					onResult: function( result ) {
-						if ( !Global.dont_check_browser_cache && APIGlobal.pre_login_data.production === true && result.getResult() !== APIGlobal.pre_login_data.application_build ) {
-							result = result.getResult();
-							var message = $.i18n._('Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.') + '<br><br>' + $.i18n._('Local Version') + ':  ' + result + '<br>' + $.i18n._('Remote Version') + ': ' + APIGlobal.pre_login_data.application_build;
-							Global.dont_check_browser_cache = true;
-							Global.sendErrorReport('Your web browser is caching incorrect data. Local Version' + ':  ' + result + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '');
+		if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
+			ga( 'send', 'exception', { 'exDescription': error_string + ' in ' + from_file + ' line ' + line, 'exFatal': false } ); // Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
+		}
 
-							TAlertManager.showAlert(message, '', function () {
-								LocalCacheData.loadedScriptNames = {};
-								Debug.Text('Incorrect cache... Forcing reload after JS exception...','Global.js','Global','cachingIncorrectData',10);
-								window.location.reload(true);
-							});
-						} else if ( Global.dont_check_browser_cache ) {
-							Global.dont_check_browser_cache = false;
-						}
+		//Don't send error report if exception not happens in our codes.
+		//from_file should always contains the root url
+		//If URL is not sent by IE, assume its our own code and report the error still.
+		if ( from_file && from_file.indexOf( ServiceCaller.rootURL ) < 0 ) {
+			Debug.Text( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.rootURL + '" Script: ' + from_file, 'Global.js', '', 'sendErrorReport', 1 );
+			return;
+		}
 
-					},
-				} );
+		if ( LocalCacheData.getCurrentCompany() ) {
+			error = error + '\n\n' + 'Product Edition: ' + LocalCacheData.getCurrentCompany().product_edition_id;
+		}
 
-			}
-		} );
-	} else {
-		api_authentication.sendErrorReport( error, '', {
-			onResult: function( result ) {
-			}
-		} );
+		error = error + '\n\n\n' + 'Clicked target stacks: ' + JSON.stringify( LocalCacheData.ui_click_stack, undefined, 2 );
+		error = error + '\n\n\n' + 'API stacks: ' + JSON.stringify( LocalCacheData.api_stack, undefined, 2 );
+
+		if ( error_stack ) {
+			var trace = error_stack.stack;
+			error = error + '\n\n\n' + 'Function called stacks: ' + trace;
+		}
+
+		Debug.Text( 'ERROR: '+ error, 'Global.js', '', 'sendErrorReport', 1 );
+
+		if ( Global.isCanvasSupported() && ie > 9 ) {
+			html2canvas( [document.body], {
+				onrendered: function( canvas ) {
+
+					var image_string = canvas.toDataURL().split( ',' )[1];
+					api_authentication.sendErrorReport( error, image_string, {
+						onResult: function( result ) {
+							if ( !Global.dont_check_browser_cache && APIGlobal.pre_login_data.production === true && result.getResult() !== APIGlobal.pre_login_data.application_build ) {
+								result = result.getResult();
+								var message = $.i18n._('Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.') + '<br><br>' + $.i18n._('Local Version') + ':  ' + result + '<br>' + $.i18n._('Remote Version') + ': ' + APIGlobal.pre_login_data.application_build;
+								Global.dont_check_browser_cache = true;
+								Global.sendErrorReport('Your web browser is caching incorrect data. Local Version' + ':  ' + result + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '');
+
+								var timeout_handler = window.setTimeout( function(){
+									window.location.reload(true);
+								}, 120000 );
+
+								TAlertManager.showAlert(message, '', function () {
+									LocalCacheData.loadedScriptNames = {};
+									Debug.Text('Incorrect cache... Forcing reload after JS exception...','Global.js','Global','cachingIncorrectData',10);
+									window.clearTimeout(timeout_handler);
+									window.location.reload(true);
+								});
+							} else if ( Global.dont_check_browser_cache ) {
+								Global.dont_check_browser_cache = false;
+							}
+
+						},
+					} );
+
+				}
+			} );
+		} else {
+			api_authentication.sendErrorReport( error, '', {
+				onResult: function( result ) {
+				}
+			} );
+		}
 	}
 };
 
@@ -2325,6 +2341,12 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'ReportViewWizard':
 			path = 'views/wizard/report_view/';
 			break;
+		case 'ForgotPasswordWizard':
+			path = 'views/wizard/forgot_password/';
+			break;
+		case 'ResetForgotPasswordWizard':
+			path = 'views/wizard/reset_forgot_password/';
+			break;
 		case 'DeveloperTools':
 			path = 'views/developer_tools/';
 			break;
@@ -3336,9 +3358,7 @@ Global.clearSessionCookie = function() {
 	Global.moveCookiesToNewPath();
 	$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
 };
-
-
-Global.array_unique = function (arr) {
+Global.array_unique = function(arr) {
     if ( Global.isArray(arr) == false) {
         return arr;
     }
@@ -3350,3 +3370,48 @@ Global.array_unique = function (arr) {
     }
     return clean_arr;
 };
+
+//Special rounding function that handles values like 1.005 or 1.0049999999999999 properly, see: http://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places
+Global.MoneyRound = function(number, decimals) {
+	if ( !decimals ) {
+		decimals = 2;
+	}
+
+	retval = +(Math.round(number + "e+" + decimals) + "e-" + decimals);
+
+	return retval.toFixed( decimals );
+};
+
+Global.convertValidationErrorToString = function(object) {
+	//Debug.Arr(object,'Converting Error to String: ','Global.js', 'Global', 'convertValidationErrorToString', 10);
+	var retval = '';
+
+	if ( object[0] ) {
+		object = object[0];
+	}
+
+	var error_strings = [];
+	for ( var index in object ) {
+		for ( var key in  object[index] ) {
+			if ( Global.isArray(  object[index][key]) || typeof( object[index][key]) == 'object' ) {
+				for ( var i in  object[index][key] ) {
+					error_strings.push( object[index][key][i] );
+				}
+			} else {
+				error_strings.push( object[index][key] );
+			}
+		}
+	}
+
+	if ( error_strings.length > 1 ) {
+		var error_count = 1;
+		for (var index in error_strings) {
+			retval += error_count +'. '+ error_strings[index] +'.<br>';
+			error_count++;
+		}
+	} else if ( typeof error_strings[0] == "string" ) {
+		retval = error_strings[0] +'.';
+	}
+
+	return retval;
+}

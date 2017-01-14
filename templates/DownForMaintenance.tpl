@@ -27,7 +27,7 @@
 				{$APPLICATION_NAME} {t}is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try back later.{/t}
 			{/if}
 		{else}
-			{if strtolower($exception) == 'dberror'}
+			{if strtolower($exception) == 'dberror' OR strtolower($exception) == 'dbconnectionfailed'}
 				{$APPLICATION_NAME} {t}is unable to connect to its database, please make sure that the database service on your own local {$APPLICATION_NAME} server has been started and is running. If you are unsure, try rebooting your server.{/t}
 			{elseif strtolower($exception) == 'dbtimeout'}
 				{$APPLICATION_NAME} {t}database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again.{/t}

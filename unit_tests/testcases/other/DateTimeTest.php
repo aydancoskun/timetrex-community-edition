@@ -1848,5 +1848,42 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTDate::getDate('DATE+TIME', ( $time_stamp ) ), '08-Nov-16 12:00 PM PST'); //normal operation
 	}
 
+	function testGetDateArray() {
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016') ); //No DayOfWeek filter.
+		$this->assertEquals( count($date_arr), 31 );
+
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016'), FALSE ); //No DayOfWeek filter.
+		$this->assertEquals( count($date_arr), 31 );
+
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016'), 0 ); //Filter Sundays
+		$this->assertEquals( count($date_arr), 4 );
+		$this->assertEquals( $date_arr[0], strtotime('04-Dec-2016'));
+		$this->assertEquals( $date_arr[1], strtotime('11-Dec-2016'));
+		$this->assertEquals( $date_arr[2], strtotime('18-Dec-2016'));
+		$this->assertEquals( $date_arr[3], strtotime('25-Dec-2016'));
+
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016'), 1 ); //Filter Mondays
+		$this->assertEquals( count($date_arr), 4 );
+
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016'), 2 ); //Filter Tuesdays
+		$this->assertEquals( count($date_arr), 4 );
+
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016'), 3 ); //Filter Wednesday
+		$this->assertEquals( count($date_arr), 4 );
+
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016'), 4 ); //Filter Thursdays
+		$this->assertEquals( count($date_arr), 5 );
+
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016'), 5 ); //Filter Fridays
+		$this->assertEquals( count($date_arr), 5 );
+
+		$date_arr = TTDate::getDateArray( strtotime('01-Dec-2016'), strtotime('31-Dec-2016'), 6 ); //Filter Saturdays
+		$this->assertEquals( count($date_arr), 5 );
+		$this->assertEquals( $date_arr[0], strtotime('03-Dec-2016'));
+		$this->assertEquals( $date_arr[1], strtotime('10-Dec-2016'));
+		$this->assertEquals( $date_arr[2], strtotime('17-Dec-2016'));
+		$this->assertEquals( $date_arr[3], strtotime('24-Dec-2016'));
+		$this->assertEquals( $date_arr[4], strtotime('31-Dec-2016'));
+	}
 }
 ?>

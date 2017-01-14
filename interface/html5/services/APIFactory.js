@@ -164,7 +164,7 @@ var APIFactory = (function() {
 		'APIPayrollExportReport': 'services/reports/APIPayrollExportReport',
 		'APIImport': 'services/core/APIImport',
 		'APIAuthorization': 'services/core/APIAuthorization',
-		'APIAuthentication': 'services/core/APIAuthentication',
+		'APIAuthentication': 'services/unauthenticated/APIAuthentication',
 		'APICurrentUser': 'services/APICurrentUser',
 		'APIRoundIntervalPolicy': 'services/policy/APIRoundIntervalPolicy',
 		'APIException': 'services/attendance/APIException',

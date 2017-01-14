@@ -3188,12 +3188,14 @@ class CompanyFactory extends Factory {
 		return TRUE;
 	}
 
-	function postSave() {
+	function postSave( $data_diff = NULL ) {
 		$this->removeCache( $this->getId() );
 
 		$this->remoteSave();
 
 		if ( $this->getDeleted() == FALSE ) {
+			$this->clearGeoCode( $data_diff ); //Clear Lon/Lat coordinates when address has changed.
+
 			//Add base currency for this new company.
 			if ( $this->getEnableAddCurrency() == TRUE ) {
 				$clf = TTnew( 'CurrencyListFactory' );

@@ -860,14 +860,14 @@ class DemoData {
 
 	}
 
-	function createStation( $company_id ) {
+	function createStation( $company_id, $source = 'ANY', $station = 'ANY' ) {
 		$sf = TTnew( 'StationFactory' );
 		$sf->setCompany( $company_id );
 
 		$sf->setStatus( 20 );
 		$sf->setType( 10 );
-		$sf->setSource( 'ANY' );
-		$sf->setStation( 'ANY' );
+		$sf->setSource( $source );
+		$sf->setStation( $station );
 		$sf->setDescription( 'All stations' );
 
 		$sf->setGroupSelectionType( 10 );
@@ -876,30 +876,6 @@ class DemoData {
 
 		if ( $sf->isValid() ) {
 			$insert_id = $sf->Save();
-
-			Debug::Text('Station ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
-		}
-
-
-		$sf = TTnew( 'StationFactory' );
-		$sf->setCompany( $company_id );
-
-		$sf->setStatus( 20 );
-		$sf->setType( 25 );
-		$sf->setSource( 'ANY' );
-		$sf->setStation( 'ANY' );
-		$sf->setDescription( 'All stations' );
-
-		$sf->setGroupSelectionType( 10 );
-		$sf->setBranchSelectionType( 10 );
-		$sf->setDepartmentSelectionType( 10 );
-
-		if ( $sf->isValid() ) {
-			//$insert_id = $sf->Save(FALSE);
-			//$sf->setUser( array(-1) );
-
-			$insert_id = $sf->Save();
-
 			Debug::Text('Station ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
 
 			return $insert_id;
@@ -908,7 +884,6 @@ class DemoData {
 		Debug::Text('Failed Creating Station!', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
-
 	}
 
 	function createPayStubAccount( $company_id ) {
@@ -6440,7 +6415,7 @@ class DemoData {
 		}
 
 		if ( $data['start_time'] != '') {
-			$start_time = strtotime( $data['start_time'], $date_stamp ) ;
+			$start_time = strtotime( $data['start_time'], $date_stamp );
 		}
 		if ( $data['end_time'] != '') {
 			Debug::Text('End Time: '. $data['end_time'] .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
@@ -6461,6 +6436,69 @@ class DemoData {
 
 		Debug::Text('Failed Creating Schedule!', __FILE__, __LINE__, __METHOD__, 10);
 
+		return FALSE;
+	}
+
+	function editSchedule( $id, $data = NULL ) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		$slf = TTnew( 'ScheduleListFactory' );
+		$slf->StartTransaction();
+		$slf->getById( $id );
+		if ( $slf->getRecordCount() == 1 ) {
+			//var_dump($data);
+			$s_obj = $slf->getCurrent();
+
+			if ( isset($data['status_id']) ) {
+				$s_obj->setStatus( $data['status_id'] );
+			}
+
+			if ( isset($data['schedule_policy_id']) ) {
+				$s_obj->setSchedulePolicyID( $data['schedule_policy_id'] );
+			}
+
+			if ( isset($data['absence_policy_id']) ) {
+				$s_obj->setAbsencePolicyID( $data['absence_policy_id'] );
+			}
+
+			if ( isset($data['branch_id']) ) {
+				$s_obj->setBranch( $data['branch_id'] );
+			}
+			if ( isset($data['department_id']) ) {
+				$s_obj->setDepartment( $data['department_id'] );
+			}
+
+			if ( isset($data['job_id']) ) {
+				$s_obj->setJob( $data['job_id'] );
+			}
+			if ( isset($data['job_item_id'] ) ) {
+				$s_obj->setJobItem( $data['job_item_id'] );
+			}
+
+			if ( isset($data['start_time'] ) ) {
+				$s_obj->setStartTime( $data['start_time'] );
+			}
+			if ( isset($data['end_time'] ) ) {
+				$s_obj->setEndTime( $data['end_time'] );
+			}
+
+			if ( isset($data['note'] ) ) {
+				$s_obj->setNote( $data['note'] );
+			}
+
+			if ( $s_obj->isValid() ) {
+				$s_obj->setEnableReCalculateDay(FALSE);
+				$s_obj->Save();
+
+				return TRUE;
+			}
+		}
+
+		Debug::Text('Failed Editing Schedule!', __FILE__, __LINE__, __METHOD__, 10);
+		$slf->FailTransaction();
+		$slf->CommitTransaction();
 		return FALSE;
 	}
 

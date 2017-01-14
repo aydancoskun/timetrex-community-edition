@@ -61,8 +61,10 @@ class TimeTrexSoapClient {
 											'uri' => 'urn:test',
 											'style' => SOAP_RPC,
 											'use' => SOAP_ENCODED,
-											'trace' => 1,
 											'encoding' => 'UTF-8',
+											'connection_timeout' => 30,
+											'keep_alive' => FALSE, //This should prevent "Error fetching HTTP headers" or "errno=10054 An existing connection was forcibly closed by the remote host." SOAP errors.
+											'trace' => 1,
 											'exceptions' => 0
 											)
 									);

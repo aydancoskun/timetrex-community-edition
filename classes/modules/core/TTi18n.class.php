@@ -1166,8 +1166,13 @@ class TTi18n {
 			}
 
 			if ( $show_code == 0 ) {
+				//Since currency formatting can be different in different locale/currency pairs, we need get the symbol ($US) in the current locale and the current currency pair so it can be stripped and replaced with just an actual symbol ($)
+				//For example, USD could be $US, US$, $ depending on the exact locale. Though the exact formatting seems to vary depending on Linux distro's too.
+				$tmp_formatter = new NumberFormatter( self::getLocale() .'@currency='. $currency_code, NumberFormatter::CURRENCY );
+
+				//Debug::text('INTL Currency Symbol: '. $tmp_formatter->getSymbol( NumberFormatter::CURRENCY_SYMBOL ) .'('. self::$currency_formatter->getSymbol( NumberFormatter::CURRENCY_SYMBOL ) .') TTi18n Symbol: '. self::getCurrencySymbol( $currency_code ) .' Raw Currency Format: '. self::$currency_formatter->formatCurrency( $amount, $currency_code ), __FILE__, __LINE__, __METHOD__, 10);
 				//self::$currency_formatter->setPattern( str_replace('¤', '', self::$currency_formatter->getPattern() ) ); //Strip currency code off pattern. This seems to strip currency symbol too though.
-				return str_replace( self::$currency_formatter->getSymbol( NumberFormatter::CURRENCY_SYMBOL ), self::getCurrencySymbol( $currency_code ), self::$currency_formatter->formatCurrency( $amount, $currency_code ) );
+				return str_replace( array( self::$currency_formatter->getSymbol( NumberFormatter::CURRENCY_SYMBOL ), $tmp_formatter->getSymbol( NumberFormatter::CURRENCY_SYMBOL ) ), self::getCurrencySymbol( $currency_code ), self::$currency_formatter->formatCurrency( $amount, $currency_code ) ); //This seemed to always show US$1.23, or CA$1.23
 			} else {
 				return $currency_code_left_str . self::$currency_formatter->formatCurrency( $amount, $currency_code ) . $currency_code_right_str;
 			}

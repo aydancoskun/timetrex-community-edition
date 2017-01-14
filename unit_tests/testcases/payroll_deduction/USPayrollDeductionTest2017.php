@@ -250,7 +250,7 @@ class USPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '576.92' );
 		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '55.34' );
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '37.91' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '37.84' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeSocialSecurity() ), '35.77' );
 	}
 

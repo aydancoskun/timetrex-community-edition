@@ -162,7 +162,7 @@ LoginViewController = BaseViewController.extend( {
 					user_name: user_name.val(),
 					message: e.getDetailsAsString()
 				}, function() {
-					TAlertManager.showAlert( $.i18n._( 'Password has been changed successfully, you may now login' ), '', function() {
+					TAlertManager.showAlert( $.i18n._( 'Password has been changed successfully, you may now login.' ), '', function() {
 						password.focus();
 					} );
 				} );
@@ -232,6 +232,7 @@ LoginViewController = BaseViewController.extend( {
 
 		var result = e.getResult();
 		var login_view_this = e.get( 'delegate' );
+
 		if ( result.date_format ) {
 			next( result );
 		} else {
@@ -297,6 +298,7 @@ LoginViewController = BaseViewController.extend( {
 															login_view_this.authentication_api.getCurrentCompany( {
 																onResult: function( current_company_result ) {
 																	var com_result = current_company_result.getResult();
+
 																	if ( com_result.is_setup_complete === '1' || com_result.is_setup_complete === 1 ) {
 																		com_result.is_setup_complete = true;
 																	} else {
@@ -340,7 +342,6 @@ LoginViewController = BaseViewController.extend( {
 	goToView: function() {
 		TAlertManager.closeBrowserBanner();
 		this.doing_login = false;
-
 		TopMenuManager.ribbon_view_controller = null;
 		TopMenuManager.ribbon_menus = null;
 		Global.topContainer().empty();
@@ -352,9 +353,9 @@ LoginViewController = BaseViewController.extend( {
 		if ( result ) {
 			login_language = result.getResult();
 		}
-
+		var message_id = UUID.guid();
 		if ( LocalCacheData.getLoginData().locale != null && login_language !== LocalCacheData.getLoginData().locale ) {
-			ProgressBar.showProgressBar();
+			ProgressBar.showProgressBar(message_id);
 			ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
 
 			Global.setLanguageCookie(login_language);
@@ -382,7 +383,7 @@ LoginViewController = BaseViewController.extend( {
 			}
 		}
 
-		if ( !LocalCacheData.getCurrentCompany().is_setup_complete ) {
+		if ( !LocalCacheData.getCurrentCompany().is_setup_complete && PermissionManager.validate('user_preference', 'edit') && PermissionManager.validate('pay_period_schedule', 'add') && PermissionManager.validate('policy_group', 'edit')) {
 			IndexViewController.openWizard( 'QuickStartWizard' );
 		}
 
@@ -393,7 +394,10 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	forgotPasswordClick: function() {
-		window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'ForgotPassword.php' );
+		//window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'ForgotPassword.php' );
+		IndexViewController.openWizard('ForgotPasswordWizard', null, function () {
+			TAlertManager.showAlert( $.i18n._( 'An email has been sent to you with instructions on how to change your password.' ) );
+		});
 	},
 
 	autoLogin: function() {
@@ -410,7 +414,7 @@ LoginViewController = BaseViewController.extend( {
 	render: function() {
 
 		var $this = this;
-
+		var message_id = UUID.guid();
 		LocalCacheData.setSessionID( '' );
 		$( '#login_copy_right_info' ).hide();
 		$( '#powered_by' ).hide();
@@ -556,7 +560,7 @@ LoginViewController = BaseViewController.extend( {
 			Global.setLanguageCookie($this.lan_selector.getValue());
 			LocalCacheData.setI18nDic( null );
 
-			ProgressBar.showProgressBar();
+			ProgressBar.showProgressBar( message_id );
 			ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
 
 			setTimeout( function() {

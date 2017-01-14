@@ -172,6 +172,7 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 
 		$uf = new UserFactory();
 		$apf = new AbsencePolicyFactory();
+		$cgmf = new CompanyGenericMapFactory();
 
 		$ph = array(
 					'company_id' => (int)$company_id,
@@ -200,6 +201,9 @@ class SchedulePolicyListFactory extends SchedulePolicyFactory implements Iterato
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['meal_policy_id']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as k WHERE a.id = k.object_id AND k.company_id = a.company_id AND k.object_type_id = 155 '. $this->getWhereClauseSQL( 'k.map_id', $filter_data['meal_policy_id'], 'numeric_list', $ph ) .' ) ) ' : NULL;
+		$query .= ( isset($filter_data['break_policy_id']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as l WHERE a.id = l.object_id AND l.company_id = a.company_id AND l.object_type_id = 165 '. $this->getWhereClauseSQL( 'l.map_id', $filter_data['break_policy_id'], 'numeric_list', $ph ) .' ) ) ' : NULL;
 
 		$query .= ( isset($filter_data['full_shift_absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.full_shift_absence_policy_id', $filter_data['full_shift_absence_policy_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['partial_shift_absence_policy_id']) ) ? $this->getWhereClauseSQL( 'a.partial_shift_absence_policy_id', $filter_data['partial_shift_absence_policy_id'], 'numeric_list', $ph ) : NULL;

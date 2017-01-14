@@ -1878,9 +1878,9 @@ class StationFactory extends Factory {
 					OR
 						( $current_station_id == $this->getSource() )
 					OR
-						( Net_IPv4::ipInNetwork( $remote_addr, $source) )
+						( Net_IPv4::validateIP( $remote_addr ) AND Net_IPv4::ipInNetwork( $remote_addr, $source) )
 					OR
-						( Net_IPv6::isInNetmask( $remote_addr, $source) )
+						( Net_IPv6::checkIPv6( $remote_addr ) AND strpos( $source, '/') !== FALSE AND Net_IPv6::isInNetmask( $remote_addr, $source) ) //isInNetMask requires a netmask to be specified, otherwise it always returns TRUE.
 					OR
 						in_array( $this->getType(), array(100, 110, 120, 200) )
 				)

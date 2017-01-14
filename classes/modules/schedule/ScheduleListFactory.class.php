@@ -403,9 +403,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		//Add filter on date_stamp for optimization
 		$query = '
-					select	a.*
-					from	'. $this->getTable() .' as a
-					where a.user_id = ?
+					SELECT	a.*
+					FROM	'. $this->getTable() .' as a
+					WHERE a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
 						AND a.id != ?
@@ -421,7 +421,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							OR
 							( a.start_time = ? AND a.end_time = ? )
 						)
-						AND ( ( a.replaced_id IS NULL OR a.replaced_id = 0 ) AND a.deleted = 0 )
+						AND ( a.deleted = 0 )
 					ORDER BY start_time';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
@@ -573,7 +573,17 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					';
 
 		if ( $replaced_id > 0 ) {
-			$query .= ' OR ( a.id = '. (int)$replaced_id .' AND a.deleted = 0 ) ';
+			//Make sure when passed a $replaced_id, we also make sure that record still matches all necessary items to fill the original open shift.
+			$ph += array(
+					'user_id2' => (int)0, //Open Shift
+					'start_time2' => $this->db->BindTimeStamp( $start_time ),
+					'end_time2' => $this->db->BindTimeStamp( $end_time ),
+					'branch_id2' => (int)$branch_id,
+					'department_id2' => (int)$department_id,
+					'job_id2' => (int)$job_id,
+					'job_item_id2' => (int)$job_item_id );
+
+			$query .= ' OR ( a.id = '. (int)$replaced_id .' AND a.user_id = ? AND a.start_time = ? AND a.end_time = ? AND a.branch_id = ? AND a.department_id = ? AND a.job_id = ? AND a.job_item_id = ? AND a.deleted = 0 ) ';
 			$order = ( array('a.id' => ' = '. $replaced_id .' desc') + $order );
 		}
 
@@ -1352,6 +1362,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					select
 							a.id as id,
 							a.id as schedule_id,
+							a.replaced_id as replaced_id,
 							a.status_id as status_id,
 							a.start_time as start_time,
 							a.end_time as end_time,

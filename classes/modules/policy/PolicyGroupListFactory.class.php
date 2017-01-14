@@ -289,7 +289,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$pglf = new PolicyGroupListFactory();
 		$pglf->getByCompanyId($company_id);
 
-		
+
 		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
@@ -406,17 +406,20 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		$query .= ( isset($filter_data['exception_policy_control']) ) ? $this->getWhereClauseSQL( 'a.exception_policy_control_id', $filter_data['exception_policy_control'], 'numeric_list', $ph ) : NULL;
-
 		//Optmize query using subselects rather than LEFT JOIN as that results in hundreds of thousands of records being returned and having to use DISTINCT.
 		$query .= ( isset($filter_data['user_id']) ) ? ' AND ( a.id in ( SELECT policy_group_id FROM '. $pguf->getTable() .' as b WHERE a.id = b.policy_group_id '. $this->getWhereClauseSQL( 'b.user_id', $filter_data['user_id'], 'numeric_list', $ph ) .' ) ) ' : NULL;
 
+		$query .= ( isset($filter_data['exception_policy_control']) ) ? $this->getWhereClauseSQL( 'a.exception_policy_control_id', $filter_data['exception_policy_control'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['over_time_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as d WHERE a.id = d.object_id AND d.company_id = a.company_id AND d.object_type_id = 110 '. $this->getWhereClauseSQL( 'd.map_id', $filter_data['over_time_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
 		$query .= ( isset($filter_data['holiday_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as g WHERE a.id = g.object_id AND g.company_id = a.company_id AND g.object_type_id = 180 '. $this->getWhereClauseSQL( 'g.map_id', $filter_data['holiday_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
 		$query .= ( isset($filter_data['round_interval_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as c WHERE a.id = c.object_id AND c.company_id = a.company_id AND c.object_type_id = 130 '. $this->getWhereClauseSQL( 'c.map_id', $filter_data['round_interval_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
 		$query .= ( isset($filter_data['premium_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as e WHERE a.id = e.object_id AND e.company_id = a.company_id AND e.object_type_id = 120 '. $this->getWhereClauseSQL( 'e.map_id', $filter_data['premium_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
 		$query .= ( isset($filter_data['accrual_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as f WHERE a.id = f.object_id AND f.company_id = a.company_id AND f.object_type_id = 140 '. $this->getWhereClauseSQL( 'f.map_id', $filter_data['accrual_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
 		$query .= ( isset($filter_data['absence_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as h WHERE a.id = h.object_id AND h.company_id = a.company_id AND h.object_type_id = 170 '. $this->getWhereClauseSQL( 'h.map_id', $filter_data['absence_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
+		$query .= ( isset($filter_data['expense_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as i WHERE a.id = i.object_id AND i.company_id = a.company_id AND i.object_type_id = 200 '. $this->getWhereClauseSQL( 'i.map_id', $filter_data['expense_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
+		$query .= ( isset($filter_data['regular_time_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as j WHERE a.id = j.object_id AND j.company_id = a.company_id AND j.object_type_id = 100 '. $this->getWhereClauseSQL( 'j.map_id', $filter_data['regular_time_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
+		$query .= ( isset($filter_data['break_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as k WHERE a.id = k.object_id AND k.company_id = a.company_id AND k.object_type_id = 160 '. $this->getWhereClauseSQL( 'k.map_id', $filter_data['break_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
+		$query .= ( isset($filter_data['meal_policy']) ) ? ' AND ( a.id in ( SELECT object_id FROM '. $cgmf->getTable() .' as l WHERE a.id = l.object_id AND l.company_id = a.company_id AND l.object_type_id = 150 '. $this->getWhereClauseSQL( 'l.map_id', $filter_data['meal_policy'], 'numeric_list', $ph ) .' ) ) ' : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 
@@ -428,7 +431,7 @@ class PolicyGroupListFactory extends PolicyGroupFactory implements IteratorAggre
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
-		
+
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);

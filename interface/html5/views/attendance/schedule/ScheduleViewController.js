@@ -985,6 +985,15 @@ ScheduleViewController = BaseViewController.extend( {
 
 		}
 
+		var import_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Import' ),
+			id: ContextMenuIconName.import_icon,
+			group: other_group,
+			icon: Icons.import_icon,
+			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVSchedule' ),
+			permission: null,
+			sort_order: 8000
+		} );
 		return [menu];
 
 	},
@@ -1011,6 +1020,10 @@ ScheduleViewController = BaseViewController.extend( {
 		}
 
 		switch ( id ) {
+			case ContextMenuIconName.import_icon:
+				ProgressBar.showOverlay();
+				this.onImportClick();
+				break;
 			case ContextMenuIconName.add:
 				this.absence_model = false;
 				ProgressBar.showOverlay();
@@ -1315,6 +1328,14 @@ ScheduleViewController = BaseViewController.extend( {
 				}
 				$this.search();
 			}
+		} );
+	},
+
+	onImportClick: function() {
+
+		var $this = this;
+		IndexViewController.openWizard( 'ImportCSVWizard', 'schedule', function() {
+			$this.search();
 		} );
 	},
 
@@ -3514,6 +3535,9 @@ ScheduleViewController = BaseViewController.extend( {
 					break;
 				case ContextMenuIconName.edit_employee:
 					this.setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length );
+					break;
+				case ContextMenuIconName.import_icon:
+					this.setDefaultMenuImportIcon( context_btn, grid_selected_length );
 					break;
 				case ContextMenuIconName.timesheet:
 					this.setDefaultMenuEditTimesheetIcon( context_btn, grid_selected_length );

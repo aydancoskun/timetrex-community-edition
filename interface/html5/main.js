@@ -98,6 +98,7 @@ require.config( {
 		'interact': 'framework/interact.min',
 		'jquery.sortable': 'framework/jquery.sortable',
 		'Global': 'global/Global',
+		'RateLimiter': 'global/RateLimiter',
 		'LocalCacheData': 'global/LocalCacheData',
 		'nanobar': 'framework/nanobar.min',
 

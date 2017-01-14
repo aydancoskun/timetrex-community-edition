@@ -56,8 +56,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '10.0.3' );
-define('APPLICATION_VERSION_DATE', 1482825600 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("27-Dec-2016")."\n\n";'
+define('APPLICATION_VERSION', '10.0.5' );
+define('APPLICATION_VERSION_DATE', 1484294400 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("13-Jan-2017")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -128,6 +128,13 @@ if ( PRODUCTION == TRUE ) {
 if ( defined('LC_MESSAGES') == FALSE) {
 	define('LC_MESSAGES', 6);
 }
+
+//If memory limit is set below the minimum required, just bump it up to that minimum. If its higher, keep the higher value.
+$memory_limit = str_ireplace( array('G', 'M', 'K'), array('000000000', '000000', '000'), ini_get('memory_limit') );
+if ( $memory_limit >= 0 AND $memory_limit < 512000000 ) { //Use * 1000 rather than * 1024 for easier parsing of G, M, K -- Make sure we consider -1 as the limit.
+	ini_set('memory_limit', '512000000');
+};
+unset($memory_limit);
 
 //IIS 5 doesn't seem to set REQUEST_URI, so attempt to build one on our own
 //This also appears to fix CGI mode.
@@ -394,14 +401,14 @@ if ( isset($_SERVER['REQUEST_URI']) ) {
 	Debug::Text('URI: '. $_SERVER['REQUEST_URI'] .' IP Address: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
 }
 Debug::Text('USER-AGENT: '. ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
-Debug::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' Database: Type: '. ( isset($config_vars['database']['type']) ? $config_vars['database']['type'] : 'N/A' ) .' Name: '. ( isset($config_vars['database']['database_name']) ? $config_vars['database']['database_name'] : 'N/A' ) .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
+Debug::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' OS: '. OPERATING_SYSTEM .' Database: Type: '. ( isset($config_vars['database']['type']) ? $config_vars['database']['type'] : 'N/A' ) .' Name: '. ( isset($config_vars['database']['database_name']) ? $config_vars['database']['database_name'] : 'N/A' ) .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
 
 if ( function_exists('bcscale') ) {
 	bcscale(10);
 }
 
 //Make sure we are using SSL if required.
-if ( $config_vars['other']['force_ssl'] == 1 AND Misc::isSSL( TRUE ) == FALSE AND isset( $_SERVER['HTTP_HOST'] ) AND isset( $_SERVER['REQUEST_URI'] ) AND !isset( $disable_https ) AND php_sapi_name() != 'cli' ) {
+if ( ( isset($config_vars['other']['force_ssl']) AND $config_vars['other']['force_ssl'] == TRUE ) AND Misc::isSSL( TRUE ) == FALSE AND isset( $_SERVER['HTTP_HOST'] ) AND isset( $_SERVER['REQUEST_URI'] ) AND !isset( $disable_https ) AND php_sapi_name() != 'cli' ) {
 	Redirect::Page( 'https://'. $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'] );
 	exit;
 }

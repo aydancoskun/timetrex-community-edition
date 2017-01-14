@@ -69,10 +69,12 @@ class DBError extends Exception {
 				$code = 'DBSerialize';
 			} elseif ( stristr( $e->getMessage(), 'deadlock' ) !== FALSE OR stristr( $e->getMessage(), 'concurrent' ) !== FALSE ) {
 				$code = 'DBDeadLock';
-			} elseif ( stristr( $e->getMessage(), 'server has gone away' ) !== FALSE OR stristr( $e->getMessage(), 'closed the connection unexpectedly' ) !== FALSE ) {
+			} elseif ( stristr( $e->getMessage(), 'server has gone away' ) !== FALSE OR stristr( $e->getMessage(), 'closed the connection unexpectedly' ) !== FALSE OR stristr( $e->getMessage(), 'execution was interrupted' ) !== FALSE ) { //Connection was lost after it was initially made.
 				$code = 'DBConnectionLost';
 			} elseif ( stristr( $e->getMessage(), 'No space left on device' ) !== FALSE) { //Unrecoverable error, set down_for_maintenance so server admin can investigate?
 				$code = 'DBNoSpaceOnDevice';
+			} elseif ( stristr( $e->getMessage(), 'connection failed' ) !== FALSE ) { //Connection could not be established to begin with.
+				$code = 'DBConnectionFailed';
 			}
 			Debug::Text( 'Code: '. $code .'('. $e->getCode() .') Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -90,7 +92,10 @@ class DBError extends Exception {
 			//Dump debug buffer.
 			Debug::Display();
 			Debug::writeToLog();
-			Debug::emailLog();
+
+			if ( DEPLOYMENT_ON_DEMAND == TRUE OR ( DEPLOYMENT_ON_DEMAND == FALSE AND in_array( $code, array( 'DBConnectionFailed', 'DBNoSpaceOnDevice', 'DBConnectionLost' ) ) == FALSE ) ) {
+				Debug::emailLog();
+			}
 
 			//Prevent PHP error by checking to make sure output buffer exists before clearing it.
 			if ( ob_get_level() > 0 ) {
@@ -137,6 +142,7 @@ class DBError extends Exception {
 							$description = TTi18n::getText('%1 has detected a database error, please contact technical support immediately.', array( APPLICATION_NAME ) );
 							break;
 						case 'dberror':
+						case 'dbconnectionfailed':
 							$description = TTi18n::getText('%1 is unable to connect to its database, please make sure that the database service on your own local %1 server has been started and is running. If you are unsure, try rebooting your server.', array( APPLICATION_NAME ));
 							break;
 						case 'dbinitialize':

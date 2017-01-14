@@ -2816,6 +2816,7 @@ class SetupPresets extends Factory {
 											);
 			}
 
+			//State UI wage base list: http://www.americanpayroll.org/members/stateui/state-ui-2/
 			//Default to unemployment rates to 0.
 			$company_state_unemployment_rate = 0;
 			$company_state_unemployment_wage_base = 0;
@@ -2855,7 +2856,7 @@ class SetupPresets extends Factory {
 				case 'ak': //alaska
 					//Unemployment Insurance - Employee
 					//Unemployment Insurance - Employer
-					$company_state_unemployment_wage_base =	$state_unemployment_wage_base = 39700;
+					$company_state_unemployment_wage_base =	$state_unemployment_wage_base = 39800;
 					break;
 				case 'az': //arizona
 					//Unemployment Insurance - Employee
@@ -3013,7 +3014,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'hi': //hawaii
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 42200;
+					$state_unemployment_wage_base = 44000;
 
 					//E&T Assessment
 					$this->createCompanyDeduction(
@@ -3087,7 +3088,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'id': //idaho
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 37200;
+					$state_unemployment_wage_base = 37800;
 
 					//Administrative Reserve
 					$this->createCompanyDeduction(
@@ -3158,7 +3159,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'ia': //iowa
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 28300;
+					$state_unemployment_wage_base = 29300;
 
 					//Reserve Fund
 					$this->createCompanyDeduction(
@@ -3301,11 +3302,11 @@ class SetupPresets extends Factory {
 					break;
 				case 'mi': //michigan
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 9500;
+					$state_unemployment_wage_base = 9000;
 					break;
 				case 'mn': //minnesota
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 31000;
+					$state_unemployment_wage_base = 32000;
 
 					//Workforce Enhancement Fee
 					$this->createCompanyDeduction(
@@ -3363,7 +3364,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'mt': //montana
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 30500;
+					$state_unemployment_wage_base = 31400;
 
 					//Administrative Fund
 					$this->createCompanyDeduction(
@@ -3417,7 +3418,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'nv': //nevada
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 28200;
+					$state_unemployment_wage_base = 29500;
 
 					//Career Enhancement
 					$this->createCompanyDeduction(
@@ -3472,7 +3473,7 @@ class SetupPresets extends Factory {
 				case 'nj': //new jersey
 					//Unemployment Insurance - Employee
 					//Unemployment Insurance - Employer
-					$state_unemployment_wage_base = 32600;
+					$state_unemployment_wage_base = 33500;
 
 					//Disability Insurance - Employee
 					$this->createCompanyDeduction(
@@ -3638,7 +3639,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'nm': //new mexico
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 24100;
+					$state_unemployment_wage_base = 24300;
 
 					//State Trust Fund
 					$this->createCompanyDeduction(
@@ -3837,11 +3838,11 @@ class SetupPresets extends Factory {
 					break;
 				case 'nc': //north carolina
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 22300;
+					$state_unemployment_wage_base = 23100;
 					break;
 				case 'nd': //north dakota
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 37200;
+					$state_unemployment_wage_base = 35100;
 					break;
 				case 'oh': //ohio
 					//Unemployment Insurance - Employee
@@ -3849,7 +3850,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'ok': //oklahoma
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 17500;
+					$state_unemployment_wage_base = 17700;
 					break;
 				case 'or': //oregon
 					//Unemployment Insurance - Employee
@@ -3974,9 +3975,11 @@ class SetupPresets extends Factory {
 					//Unemployment Insurance - Employee
 					//Unemployment Insurance - Employer
 					$state_unemployment_wage_base = 0;
-					$company_state_unemployment_wage_base = 9500;
+					$company_state_unemployment_wage_base = 9750;
 					break;
 				case 'ri': //rhode island
+					//**Unemployement is called "Job Development Fund, enter wage base for it.**
+
 					//Employment Security
 					$this->createCompanyDeduction(
 													array(
@@ -4202,11 +4205,11 @@ class SetupPresets extends Factory {
 					break;
 				case 'ut': //utah
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 32200;
+					$state_unemployment_wage_base = 33100;
 					break;
 				case 'vt': //vermont
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 16800;
+					$state_unemployment_wage_base = 17300;
 					break;
 				case 'va': //virginia
 					//Unemployment Insurance - Employee
@@ -4214,7 +4217,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'wa': //washington
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 44000;
+					$state_unemployment_wage_base = 45000;
 
 					//Industrial Insurance - Employee
 					$this->createCompanyDeduction(
@@ -4295,7 +4298,7 @@ class SetupPresets extends Factory {
 					break;
 				case 'wy': //wyoming
 					//Unemployment Insurance - Employee
-					$state_unemployment_wage_base = 24700;
+					$state_unemployment_wage_base = 25400;
 
 					//Employment Support Fund
 					$this->createCompanyDeduction(

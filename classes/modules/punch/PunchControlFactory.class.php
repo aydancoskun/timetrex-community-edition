@@ -174,7 +174,7 @@ class PunchControlFactory extends Factory {
 		return FALSE;
 	}
 	function setUser($id) {
-		$id = trim($id);
+		$id = (int)$id;
 
 		$ulf = TTnew( 'UserListFactory' );
 

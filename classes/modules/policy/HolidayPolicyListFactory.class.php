@@ -350,6 +350,8 @@ class HolidayPolicyListFactory extends HolidayPolicyFactory implements IteratorA
 		$query .= ( isset($filter_data['contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.contributing_shift_policy_id', $filter_data['contributing_shift_policy_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['eligible_contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.eligible_contributing_shift_policy_id', $filter_data['eligible_contributing_shift_policy_id'], 'numeric_list', $ph ) : NULL;
 
+		$query .= ( isset($filter_data['absence_policy']) ) ? $this->getWhereClauseSQL( 'a.absence_policy_id', $filter_data['absence_policy'], 'numeric_list', $ph ) : NULL;
+
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 

@@ -912,7 +912,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			case 'date_stamp':
 				this.onDateStampChanged();
 				break;
-			case 'status_id':
+			case 'request_schedule_status_id':
 				this.onWorkingStatusChanged();
 				this.onAvailableBalanceChange();
 				break;

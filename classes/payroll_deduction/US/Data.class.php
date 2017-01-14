@@ -53,6 +53,9 @@
 //***Update PayrollDeduction.class.php with updated date/version
 //
 
+
+//State UI wage base rates: http://www.americanpayroll.org/members/stateui/state-ui-2/
+
 //CHANGED-* means document was updated and did change.
 //NOCHANGE-* means document was updated for the year, but no changes affected the formulas.
 //*CHECKAGAIN-* means document hasn't been updated and needs to be rechecked.
@@ -67,30 +70,31 @@ CHANGED:18-Dec-16				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages
 CHANGED:18-Dec-16				'ME' => 'Maine',		- http://www.state.me.us/revenue/forms/with/2017.htm -- Check each year on the right of the page.
 CHANGED:18-Dec-16				'NC' => 'North Carolina'- http://www.dornc.com/taxes/wh_tax/index.html *Income Tax Withholding Tables & Instructions for Employers, NC30
 CHANGED-18-Dec-16				'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
-NOCHANGE:16-Dec-16				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
 CHANGED:27-Dec-16				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/ *Click on Withholding Formula to see update for each year.
+CHANGED:04-Jan-17				'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
+CHANGED:04-Jan-17				'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
+CHANGED:04-Jan-17				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
+CHANGED:04-Jan-17				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
+NOCHANGE:16-Dec-16				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
+NOCHANGE:04-Dec-17				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
+NOCHANGE:04-Jan-17				'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
+NOCHANGE:04-Jan-17				'MI' => 'Michigan',		- http://www.michigan.gov/taxes/0,4676,7-238-43519_43531---,00.html *Michigan Income Tax Withholding Guide 446-I
+NOCHANGE:04-Jan-17				'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
 
-*CHECKAGAIN:16-Dec-16			'AL' => 'Alabama' 		- http://www.ador.state.al.us/Withholding/index.html *Withholding Tax Tables and Instructions
-*CHECKAGAIN:16-Dec-16			'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
-*CHECKAGAIN:16-Dec-16			'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
-*CHECKAGAIN:18-Dec-16			'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
-*CHECKAGAIN:18-Dec-16			'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
-*CHECKAGAIN:18-Dec-16			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
-*CHECKAGAIN:18-Dec-16*NYC NOCHG 'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
-*CHECKAGAIN:18-Dec-16			'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
-*CHECKAGAIN:18-Dec-16			'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
-*CHECKAGAIN:18-Dec-16			'MI' => 'Michigan',		- http://www.michigan.gov/taxes/0,4676,7-238-43519_43531---,00.html *Michigan Income Tax Withholding Guide 446-I
-*CHECKAGAIN:18-Dec-16			'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
-*CHECKAGAIN:18-Dec-16			'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
+
+CHECKAGAIN:04-Jan-17			'AL' => 'Alabama' 		- http://www.ador.state.al.us/Withholding/index.html *Withholding Tax Tables and Instructions
+CHECKAGAIN:04-Jan-17			'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
+CHECKAGAIN:04-Jan-17*NYC NOCHG 'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
+CHECKAGAIN:04-Jan-17			'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
 
 //Change less often
 NOCHANGE:16-Dec-16				'MD' => 'Maryland',		- http://business.marylandtaxes.com/taxinfo/withholding/default.asp *Maryland Withholding Guide* - Use 1.25% LOCAL INCOME TAX tables, *minus 1.25%*, manually calculate each bracket.  **PAY ATTENTION TO FILING STATUS AND WHICH SIDE ITS ON** Use tax_table_bracket_calculator.ods. See MD.class.php for more information.
-CHECKAGAIN::16-Dec-16			'DE' => 'Delaware',		- http://revenue.delaware.gov/services/WITBk.shtml *http://revenue.delaware.gov/services/wit_folder/section17.shtml
-CHECKAGAIN:18-Dec-16			'GA' => 'Georgia',		- http://dor.georgia.gov/withholding-tax-information or http://dor.georgia.gov/documents/2016-employer-tax-guide *Employers Tax Guide
-CHECKAGAIN:18-Dec-16			'HI' => 'Hawaii',		- http://tax.hawaii.gov/forms/a1_b1_5whhold/ *Employers Tax Guide (Booklet A)
+NOCHANGE:04-Jan-17				'DE' => 'Delaware',		- http://revenue.delaware.gov/services/WITBk.shtml *http://revenue.delaware.gov/services/wit_folder/section17.shtml
+NOCHANGE:04-Jan-17				'GA' => 'Georgia',		- http://dor.georgia.gov/withholding-tax-information or http://dor.georgia.gov/documents/2016-employer-tax-guide *Employers Tax Guide
+CHECKAGAIN:04-Jan-17			'HI' => 'Hawaii',		- http://tax.hawaii.gov/forms/a1_b1_5whhold/ *Employers Tax Guide (Booklet A)
 CHANGED:18-Dec-16				'NE' => 'Nebraska',		- http://www.revenue.nebraska.gov/withhold.html *Nebraska  Circular EN, Income Tax Withholding on Wages
-CHECKAGAIN:18-Dec-16			'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation
-CHECKAGAIN:18-Dec-16			'DC' => 'D.C.', 		- http://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables *Form: FR-230
+NOCHANGE:04-Jan-17				'WI' => 'Wisconsin',	- http://www.revenue.wi.gov/forms/with/index.html *Pub W-166, Method "B" calculation
+NOCHANGE:04-Jan-17				'DC' => 'D.C.', 		- http://otr.cfo.dc.gov/page/income-tax-withholding-instructions-and-tables *Form: FR-230
 
 //Rarely change
 CHECKAGAIN:18-Dec-16			'UT' => 'Utah',			- http://tax.utah.gov/withholding *PUB 14, Withholding Tax Guide

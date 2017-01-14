@@ -109,7 +109,6 @@ unset($authentication);
 ?>
 	<!DOCTYPE html>
 	<html>
-	<head>
 		<title><?php echo APPLICATION_NAME .' Workforce Management';?></title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<meta name="Keywords" content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system" />
@@ -117,6 +116,7 @@ unset($authentication);
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<link rel="shortcut icon" type="image/ico" href="<?php echo Environment::getBaseURL();?>../favicon.ico">
 		<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
+		<script src="global/RateLimit.js?v=<?php echo APPLICATION_BUILD?>"></script>
 		<?php if ( file_exists('theme/default/css/login.composite.css') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
 			<link rel="stylesheet" type="text/css" href="theme/default/css/login.composite.css?v=<?php echo APPLICATION_BUILD?>">
 			<script>
@@ -141,6 +141,7 @@ unset($authentication);
 				<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-draw/leaflet.draw.css?v=<?php echo APPLICATION_BUILD?>">
 				<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.css?v=<?php echo APPLICATION_BUILD?>">
 			<?php } ?>
+
 			<script>
 				use_composite_css_files = false;
 			</script>
@@ -195,6 +196,8 @@ unset($authentication);
 	*/
 	?>
 	<body class="login-bg" oncontextmenu="return true;">
+
+
 	<div class="need-hidden-element" ><a href="http://www.timetrex.com">Workforce Management</a><a href="http://www.timetrex.com/time_and_attendance.php">Time and Attendance</a></div>
 	<div id="topContainer" class="top-container"></div>
 	<div id="contentContainer" class="content-container">

@@ -17,7 +17,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			var item = data[i];
 
 			if ( item.status_id === 30 ) {
-				$( "tr[id='" + item.id + "']" ).addClass( 'bolder-request' );
+				$( "tr#" + item.id ).addClass( 'bolder-request' );
 			}
 		}
 	},
@@ -76,7 +76,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		if ( Global.isSet(this.current_edit_record.user_id) ) {
 			user_id = this.current_edit_record.user_id;
 		}
-		var data_to_ship = { 'user_id': user_id };
+		var data_for_api = { 'user_id': user_id };
 		var request_schedule = {};
 
 		var request_schedule_keys = '';
@@ -84,25 +84,30 @@ RequestViewCommonController = BaseViewController.extend( {
 		var afn = this.getAdvancedFieldNames();
 
 		for ( var key in this.current_edit_record ) {
-			if ( key == 'start_date' ) {
-				data_to_ship.date_stamp = this.edit_view_ui_dic[key].getValue();
+			if ( key == 'start_date' && this.edit_view_ui_dic[key] ) {
+				data_for_api.date_stamp = this.edit_view_ui_dic[key].getValue();
 			}
 
-			if ( afn.indexOf(key) > -1 && this.edit_view_ui_dic[key]) {
-				request_schedule[key] = this.edit_view_ui_dic[key].getValue();
+			if ( afn.indexOf(key) > -1 ) {
+				if ( key == 'request_schedule_id' ) {
+					request_schedule['id'] = this.current_edit_record.request_schedule_id;
+				} else if ( key == 'request_schedule_status_id' ) {
+					//this case is for when asking for default data
+					request_schedule['status_id'] = this.edit_view_ui_dic.request_schedule_status_id.getValue();
+				} else if ( this.edit_view_ui_dic[key] ) {
+					request_schedule[key] = this.edit_view_ui_dic[key].getValue();
+				}
 			} else if (key == 'available_balance' || key == 'job_item_quick_search' || key == 'job_quick_search') {
 				//ignore. these fields do not need to be saved and break the insert sql.
-			} else if (key == 'request_schedule_id'){
-				request_schedule['id'] = this.current_edit_record[key];
 			} else {
-				data_to_ship[key] = this.current_edit_record[key];
+				data_for_api[key] = this.current_edit_record[key];
 			}
 		}
-		data_to_ship['status_id'] = 30; //manually set pending status
+		data_for_api['status_id'] = 30; //manually set pending status
 		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 )  ) {
-			data_to_ship.request_schedule = {0: request_schedule};
+			data_for_api.request_schedule = {0: request_schedule};
 		}
-		return data_to_ship;
+		return data_for_api;
 	},
 
 	buildDataFromAPI: function (data) {
@@ -110,9 +115,14 @@ RequestViewCommonController = BaseViewController.extend( {
 			for ( var key in data.request_schedule ) {
 				if ( key == 'id' ) {
 					data['request_schedule_id'] = data.request_schedule.id;
-				} else {
+				} else if ( key == 'status_id' ) {
+					data['request_schedule_status_id'] = data.request_schedule.status_id;
+				} else if ( typeof(data[key]) == 'undefined' ) {
 					data[key] = data.request_schedule[key];
+				} else {
+					//Debug.Text('Not overwriting: '+key+' request_schedule: '+data.request_schedule[key]+' request: '+data[key], 'RequestViewCommonController.js', 'RequestViewCommonController','buildDataFromAPI' ,10)
 				}
+
 			}
 			delete data.request_schedule;
 			this.pre_request_schedule = false;
@@ -129,7 +139,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			var advanced_field_names = this.getAdvancedFieldNames();
 			if ( this.edit_view_ui_dic ) {
 				for ( var i = 0; i < advanced_field_names.length; i++ ) {
-					if( advanced_field_names[i] == 'absence_policy_id' && this.edit_view_ui_dic.status_id.getValue() != 20 ){
+					if( advanced_field_names[i] == 'absence_policy_id' && this.edit_view_ui_dic.request_schedule_status_id.getValue() != 20 ){
 						this.edit_view_ui_dic[advanced_field_names[i]].parents('.edit-view-form-item-div').hide();
 						continue;
 					}
@@ -157,6 +167,14 @@ RequestViewCommonController = BaseViewController.extend( {
 				if ( this.edit_view_ui_dic.available_balance && this.is_viewing ){
 					this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
 				}
+
+				if ( (!this.edit_view_ui_dic.total_time && !this.current_edit_record.absence_policy_id) || (this.current_edit_record.type_id != 30 && this.current_edit_record.type_id != 40 )) {
+					if (this.edit_view_ui_dic.total_time) {
+						this.edit_view_ui_dic.total_time.parents('.edit-view-form-item-div').hide();
+					}
+				} else {
+					this.getScheduleTotalTime();
+				}
 			}
 		} else{
 			this.edit_view_ui_dic.date_stamp.parents('.edit-view-form-item-div').show();
@@ -180,7 +198,9 @@ RequestViewCommonController = BaseViewController.extend( {
 
 	getAdvancedFieldNames: function(){
 		return [
-			'status_id',
+			'request_id',
+			'request_schedule_status_id',
+			'request_schedule_id',
 			'start_date',
 			'end_date',
 
@@ -245,15 +265,15 @@ RequestViewCommonController = BaseViewController.extend( {
 
 	onWorkingStatusChanged: function() {
 		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-			if ( this.edit_view_ui_dic.status_id && this.edit_view_ui_dic.absence_policy_id ) {
+			if ( this.edit_view_ui_dic.request_schedule_status_id && this.edit_view_ui_dic.absence_policy_id ) {
 				var type_id = this.edit_view_ui_dic.type_id ? this.edit_view_ui_dic.type_id.getValue() : this.current_edit_record.type_id;
-				this.showAbsencePolicyField(type_id, this.edit_view_ui_dic.status_id.getValue(), this.edit_view_ui_dic.absence_policy_id);
+				this.showAbsencePolicyField(type_id, this.edit_view_ui_dic.request_schedule_status_id.getValue(), this.edit_view_ui_dic.absence_policy_id);
 			}
 		}
 	},
 
-	showAbsencePolicyField: function(type_id, status_id, ui_field){
-		if (status_id == 20 && ( type_id == 30 || type_id == 40)) {
+	showAbsencePolicyField: function(type_id, request_schedule_status_id, ui_field){
+		if (request_schedule_status_id == 20 && ( type_id == 30 || type_id == 40)) {
 			ui_field.parents('.edit-view-form-item-div').show();
 			if ((this.viewId == 'Request' && this.is_viewing) == false) {
 				this.onAvailableBalanceChange();
@@ -282,8 +302,8 @@ RequestViewCommonController = BaseViewController.extend( {
 		}
 
 		if ( ((this.viewId == 'Request' && !this.is_viewing) || this.viewId == 'RequestAuthorization' ) &&
-			this.current_edit_record.status_id &&
-			this.current_edit_record.status_id == 20 &&
+			this.current_edit_record.request_schedule_id &&
+			this.current_edit_record.request_schedule_id == 20 &&
 			this.current_edit_record.absence_policy_id &&
 			this.current_edit_record.absence_policy_id > 0 &&
 			LocalCacheData.loginUser.id &&
@@ -440,7 +460,7 @@ RequestViewCommonController = BaseViewController.extend( {
 
 				$this.initEditView();
 				$this.initViewingView();
-				$this.navigation.setValue(result_data.id)
+				$this.navigation.setValue(result_data);
 
 				//This line is required to avoid problems with the absence policy box not showing properly on initial load.
 				$this.onWorkingStatusChanged();
@@ -459,18 +479,7 @@ RequestViewCommonController = BaseViewController.extend( {
 	 * stuff differently in view mode than in edit mode.
 	 */
 	initViewingView: function(){
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-			if ( (!this.edit_view_ui_dic.total_time && !this.current_edit_record.absence_policy_id) || (this.current_edit_record.type_id != 30 && this.current_edit_record.type_id != 40 )) {
-				this.hideAdvancedFields();
-
-				if (this.edit_view_ui_dic.total_time) {
-					this.edit_view_ui_dic.total_time.parents('.edit-view-form-item-div').hide();
-				}
-			} else {
-				this.showAdvancedFields();
-				this.getScheduleTotalTime();
-			}
-		}
+		this.showAdvancedFields();
 	},
 
 	initEditViewUI: function( view_id, edit_view_file_name ) {
@@ -566,7 +575,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		if (LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate('request', 'add_advanced') || this.viewId == 'RequestAuthorization' || this.current_edit_record.request_schedule_id > 0 ) {
 			//Working Status
 			var form_item_input = Global.loadWidgetByName(FormItemType.COMBO_BOX);
-			form_item_input.TComboBox({field: 'status_id', set_empty: false});
+			form_item_input.TComboBox({field: 'request_schedule_status_id', set_empty: false});
 			form_item_input.setSourceData(Global.addFirstItemToArray({10: 'Working', 20: 'Absent'}));
 			this.addEditFieldToColumn($.i18n._('Status'), form_item_input, tab_request_column1);
 			form_item_input.bind('change', function (e) {

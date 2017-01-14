@@ -537,3 +537,76 @@ progress::-moz-progress-bar {
     height: 100%;
     z-index: 49;
 }
+
+/*forgot-password*/
+.forgot-password {
+    height: 90px;
+    margin: 0;
+    padding: 0;
+    top: 45%;
+    width: 500px;
+}
+
+.forgot-password .wizard-form-item-div {
+    clear: both;
+    float: left;
+    /*margin-left: 280px;*/
+    /*margin-bottom: 10px;*/
+    text-align: right;
+    margin: 0;
+    width: 100%;
+}
+
+.forgot-password .wizard-form-item-div .form-item-label {
+    float: left;
+    min-width: 180px;
+    margin-right: 10px;
+    line-height: 20px;
+}
+
+.forgot-password .wizard-form-item-div .form-item-input-div {
+    float: left;
+}
+
+
+/*reset forgot password wizard*/
+.reset-forgot-password {
+    height: 180px;
+    margin: 0;
+    padding: 0;
+    top:40%;
+    width: 500px;
+}
+
+/*.reset-forgot-password .content {*/
+/*position: absolute;*/
+/*top: 101px;*/
+/*width: 100%;*/
+/*overflow: auto;*/
+/*overflow-x: hidden;*/
+/*}*/
+
+.reset-forgot-password .wizard-form-item-div {
+    clear: both;
+    float: left;
+    margin-left: 0;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+/*.reset-forgot-password .wizard-form-item-div {*/
+/*clear: both;*/
+/*float: left;*/
+/*margin-left: 280px;*/
+/*margin-bottom: 10px;*/
+/*text-align: right;*/
+/*margin: 0;*/
+/*width: 100%;*/
+/*}*/
+
+/*.reset-forgot-password .wizard-form-item-div .form-item-label {*/
+/*float: left;*/
+/*min-width: 180px;*/
+/*margin-right: 10px;*/
+/*line-height: 20px;*/
+/*}*/

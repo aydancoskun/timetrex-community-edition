@@ -804,11 +804,13 @@ class BranchFactory extends Factory {
 
 		return TRUE;
 	}
-	function postSave() {
+	function postSave( $data_diff = NULL ) {
 		$this->removeCache( $this->getId() );
 
 		if ( $this->getDeleted() == FALSE ) {
 			CompanyGenericTagMapFactory::setTags( $this->getCompany(), 110, $this->getID(), $this->getTag() );
+
+			$this->clearGeoCode( $data_diff ); //Clear Lon/Lat coordinates when address has changed.
 		}
 
 		if ( $this->getDeleted() == TRUE ) {

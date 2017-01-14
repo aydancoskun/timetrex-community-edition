@@ -186,6 +186,10 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 		$full_force = FALSE;
 	}
 
+	if ( isset($argv) AND in_array('--upgrade_file', $argv) ) { //Allow forcing a specific file to use for upgrading instead of downloading one.
+		$manual_upgrade_file_name = trim($argv[(array_search('--upgrade_file', $argv) + 1)]);
+	}
+
 	if ( in_array('--pre_requirements_update', $argv) ) {
 		Debug::Text('Running pre-requirements update only...', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $force == TRUE OR version_compare( APPLICATION_VERSION, '10.0.0', '>=') == TRUE ) {
@@ -516,24 +520,29 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 					$handle = @fopen('http://www.timetrex.com/'. URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_download' ), 'pre_install.php'), 'r');
 					@fclose($handle);
 
-					if ( file_exists( $upgrade_file_name ) == FALSE OR ( isset($file_url_size) AND filesize( $upgrade_file_name ) != $file_url_size ) ) {
-						Debug::Text('Attempting to download latest version...', __FILE__, __LINE__, __METHOD__, 10);
-						echo "Attempting to download latest version...\n";
-						sleep(5); //Sleep for 5 seconds so it can be cancelled easy if needed.
-
-						//$bytes_downloaded = @file_put_contents( $upgrade_file_name, fopen( $file_url, 'r') );
-						$bytes_downloaded = Misc::downloadHTTPFile( $file_url, $upgrade_file_name );
-						Debug::Text('Downloaded file: '. $upgrade_file_name .' Size: '. @filesize( $upgrade_file_name ) .' Bytes downloaded: '. $bytes_downloaded .' Remote Size: '. $file_url_size, __FILE__, __LINE__, __METHOD__, 10);
-						if ( $bytes_downloaded != $file_url_size OR @filesize( $upgrade_file_name ) <= 0 ) {
-							Debug::Text('ERROR: File did not download correctly...', __FILE__, __LINE__, __METHOD__, 10);
-							echo 'ERROR: File did not download correctly...'."\n";
-							setAutoUpgradeFailed();
-						} else {
-							echo 'Downloaded file: '. $upgrade_file_name .' Size: '. filesize( $upgrade_file_name ) ."\n";
-						}
+					if ( isset($manual_upgrade_file_name) AND $manual_upgrade_file_name != '' AND file_exists( $manual_upgrade_file_name ) AND filesize( $manual_upgrade_file_name ) > 0 ) {
+						Debug::Text( 'Using manual upgrade file: '. $manual_upgrade_file_name .' Current Size: ' . filesize( $manual_upgrade_file_name ), __FILE__, __LINE__, __METHOD__, 10 );
+						$upgrade_file_name = $manual_upgrade_file_name;
 					} else {
-						Debug::Text('Upgrade file already exists... Current Size: '. filesize( $upgrade_file_name ) .' Remote Size: '. ( isset($file_url_size) ? $file_url_size : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
-						echo "Upgrade file already exists...\n";
+						if ( file_exists( $upgrade_file_name ) == FALSE OR ( isset( $file_url_size ) AND filesize( $upgrade_file_name ) != $file_url_size ) ) {
+							Debug::Text( 'Attempting to download latest version...', __FILE__, __LINE__, __METHOD__, 10 );
+							echo "Attempting to download latest version...\n";
+							sleep( 5 ); //Sleep for 5 seconds so it can be cancelled easy if needed.
+
+							//$bytes_downloaded = @file_put_contents( $upgrade_file_name, fopen( $file_url, 'r') );
+							$bytes_downloaded = Misc::downloadHTTPFile( $file_url, $upgrade_file_name );
+							Debug::Text( 'Downloaded file: ' . $upgrade_file_name . ' Size: ' . @filesize( $upgrade_file_name ) . ' Bytes downloaded: ' . $bytes_downloaded . ' Remote Size: ' . $file_url_size, __FILE__, __LINE__, __METHOD__, 10 );
+							if ( $bytes_downloaded != $file_url_size OR @filesize( $upgrade_file_name ) <= 0 ) {
+								Debug::Text( 'ERROR: File did not download correctly...', __FILE__, __LINE__, __METHOD__, 10 );
+								echo 'ERROR: File did not download correctly...' . "\n";
+								setAutoUpgradeFailed();
+							} else {
+								echo 'Downloaded file: ' . $upgrade_file_name . ' Size: ' . filesize( $upgrade_file_name ) . "\n";
+							}
+						} else {
+							Debug::Text( 'Upgrade file already exists... Current Size: ' . filesize( $upgrade_file_name ) . ' Remote Size: ' . ( isset( $file_url_size ) ? $file_url_size : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10 );
+							echo "Upgrade file already exists...\n";
+						}
 					}
 
 					if ( file_exists( $upgrade_file_name ) AND filesize( $upgrade_file_name ) > 0 ) {

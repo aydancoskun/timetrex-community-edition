@@ -178,7 +178,7 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 
 		return $this;
 	}
-	
+
 	function getByPolicyGroupUserIdOrId($user_id, $id = NULL, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -358,7 +358,7 @@ class MealPolicyListFactory extends MealPolicyFactory implements IteratorAggrega
 								CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $pgf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 150 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
 									THEN 1
 									ELSE
-										CASE WHEN EXISTS ( select 1 from '. $spf->getTable() .' as w where w.company_id = a.company_id AND w.meal_policy_id = a.id AND w.deleted = 0 )
+										CASE WHEN EXISTS ( select 1 from '. $cgmf->getTable() .' as w, '. $spf->getTable() .' as v where w.company_id = a.company_id AND w.object_type_id = 155 AND w.map_id = a.id AND w.object_id = v.id AND v.deleted = 0 )
 										THEN 1 ELSE 0
 										END
 								END

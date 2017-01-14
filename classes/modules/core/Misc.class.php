@@ -2183,7 +2183,7 @@ class Misc {
 		}
 
 		if ( getTTProductEdition() > TT_PRODUCT_COMMUNITY AND DEPLOYMENT_ON_DEMAND == TRUE ) {
-			$allowed_calls = 1000;
+			$allowed_calls = 500;
 		} elseif( getTTProductEdition() > TT_PRODUCT_COMMUNITY ) {
 			$allowed_calls = 100;
 		} else {
@@ -2222,7 +2222,7 @@ class Misc {
 		$headers = array(
 							'From'	  => $from,
 							'Subject' => $subject,
-							'cc'	  => $cc,
+							//'Cc'	  => $cc,
 							'X-Relay-For-Key' => $registration_key,
 						);
 

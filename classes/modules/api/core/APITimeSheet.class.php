@@ -614,7 +614,6 @@ class APITimeSheet extends APIFactory {
 		$pplf = TTnew( 'PayPeriodListFactory' );
 		$pplf->getByIdList( $pay_period_ids, NULL, array( 'start_date' => 'asc' ) );
 		if ( $pplf->getRecordCount() > 0 ) {
-			$pp_obj = $pplf->getCurrent();//
 			foreach( $pplf as $pp_obj ) {
 				Debug::Text('Recalculating Pay Period: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE', $pp_obj->getStartDate() ), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $pp_obj->getStatus() != 20 ) {
@@ -675,7 +674,7 @@ class APITimeSheet extends APIFactory {
 										$cp->calculate(); //This sets timezone itself.
 										$cp->Save();
 									} catch (Exception $e) {
-										Debug::text('WARNING: SQL query failed, likely due to transaction isolotion: Retry Attempt: '. $retry_attempts .' Sleep: '. $sleep, __FILE__, __LINE__, __METHOD__, 10);
+										Debug::text('WARNING: SQL query failed, likely due to transaction isolation: Retry Attempt: '. $retry_attempts .' Sleep: '. $sleep, __FILE__, __LINE__, __METHOD__, 10);
 										$retry_attempts++;
 										sleep( $sleep );
 										continue;

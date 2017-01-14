@@ -634,7 +634,15 @@ class RequestListFactory extends RequestFactory implements IteratorAggregate {
 							e.id as user_group_id,
 							e.name as user_group,
 							f.id as title_id,
-							f.name as title
+							f.name as title,
+
+							y.first_name as created_by_first_name,
+							y.middle_name as created_by_middle_name,
+							y.last_name as created_by_last_name,
+							z.first_name as updated_by_first_name,
+							z.middle_name as updated_by_middle_name,
+							z.last_name as updated_by_last_name
+
 							_ADODB_COUNT
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id AND b.deleted = 0 )

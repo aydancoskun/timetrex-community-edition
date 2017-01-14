@@ -177,7 +177,7 @@ RequestViewController = RequestViewCommonController.extend( {
 		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
 			//Working Status
 			form_item_input = Global.loadWidgetByName(FormItemType.COMBO_BOX);
-			form_item_input.TComboBox({field: 'status_id', set_empty: false});
+			form_item_input.TComboBox({field: 'request_schedule_status_id', set_empty: false});
 			form_item_input.setSourceData(Global.addFirstItemToArray({10: 'Working', 20: 'Absent'}));
 			this.addEditFieldToColumn($.i18n._('Status'), form_item_input, tab_request_column1);
 
@@ -458,7 +458,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			new SearchField( {
 				label: $.i18n._( 'Status' ),
 				in_column: 2,
-				field: 'status_id',
+				field: 'request_schedule_status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -920,9 +920,9 @@ RequestViewController = RequestViewCommonController.extend( {
 			this.showAdvancedFields();
 
 			if ( this.edit_view_ui_dic.type_id.getValue() == 30  ) {
-				this.edit_view_ui_dic.status_id.setValue(20);
+				this.edit_view_ui_dic.request_schedule_status_id.setValue(20);
 			} else if ( this.edit_view_ui_dic.type_id.getValue()  == 40 ) {
-				this.edit_view_ui_dic.status_id.setValue(10);
+				this.edit_view_ui_dic.request_schedule_status_id.setValue(10);
 			}
 			this.onWorkingStatusChanged();
 
@@ -949,9 +949,15 @@ RequestViewController = RequestViewCommonController.extend( {
 			if ( data == undefined) {
 				var $this = this;
 				this.enable_validation = false;
-				this.api_request_schedule.getRequestScheduleDefaultData(this.uniformVariable(this.current_edit_record), {onResult: function(res){
-					var data = res.getResult();
+				this.setUIWidgetFieldsToCurrentEditRecord();
+				var filter = this.uniformVariable(this.buildDataForAPI(this.current_edit_record));
+
+				this.api_request_schedule.getRequestScheduleDefaultData(filter, {onResult: function(res){
+
+					data = res.getResult();
+					data.request_schedule_status_id = data.status_id
 					data.date_stamp = data.start_date;
+
 					//force = true is required to set the current_edit_record and populate edit_view_ui_dic
 					$this.setDefaultData(data, true);
 					if (callback_function) {
@@ -960,6 +966,7 @@ RequestViewController = RequestViewCommonController.extend( {
 				}});
 			}else{
 				data.date_stamp = data.start_date;
+				data = $this.buildDataFromAPI(res.getResult());
 				//force = true is required to set the current_edit_record and populate edit_view_ui_dic
 				this.setDefaultData(data, true);
 				if (callback_function) {
@@ -1212,7 +1219,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			case 'date_stamp':
 				this.onDateStampChanged();
 				break;
-			case 'status_id':
+			case 'request_schedule_status_id':
 				this.onWorkingStatusChanged();
 				break;
 			case 'start_date':

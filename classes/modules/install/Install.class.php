@@ -821,7 +821,9 @@ class Install {
 
 		$raw_limit = ini_get('memory_limit');
 		//Debug::text('RAW Limit: '. $raw_limit, __FILE__, __LINE__, __METHOD__, 9);
-		$limit = (int)rtrim($raw_limit, 'M');
+
+		$limit = str_ireplace( array('G', 'M', 'K'), array('000000000', '000000', '000'), $raw_limit ); //Use * 1000 rather * 1024 for easier parsing of G, M, K -- Make sure we consider -1 as the limit.
+		//$limit = (int)rtrim($raw_limit, 'M');
 		//Debug::text('Limit: '. $limit, __FILE__, __LINE__, __METHOD__, 9);
 
 		if ( $raw_limit == '' OR $raw_limit <= 0 ) {
@@ -1627,7 +1629,8 @@ class Install {
 	}
 
 	function checkPHPMemoryLimit() {
-		if ( $this->getMemoryLimit() == NULL OR $this->getMemoryLimit() >= 512 ) {
+		//If changing the minimum memory limit, update Global.inc.php as well, because it always tries to force the memory limit to this value.
+		if ( $this->getMemoryLimit() == NULL OR $this->getMemoryLimit() >= (512 * 1000 * 1000) ) { //512Mbytes - Use * 1000 rather than * 1024 so its easier to determine the limit in Global.inc.php and increase it.
 			return 0;
 		}
 

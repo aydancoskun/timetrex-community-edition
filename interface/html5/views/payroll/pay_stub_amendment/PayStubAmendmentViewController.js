@@ -350,7 +350,8 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			group: other_group,
 			icon: Icons.import_icon,
 			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVPayStubAmendment' ),
-			permission: null
+			permission: null,
+			sort_order: 8000
 		} );
 		var export_csv = new RibbonSubMenu( {
 			label: $.i18n._( 'Export' ),
@@ -749,12 +750,15 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		}
 
 		if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
-			widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) );
+			//widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) ); //This fails on 17.07 * 9.50 as it rounds to 162.16 rather than 162.17
+			calc_amount = ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) );
+			Debug.Text('Calculate Amount before rounding: '+ calc_amount, 'PayStubAmendmentViewController.js', 'PayStubAmendmentViewController', 'onFormItemKeyUp', 10);
+			widget_amount.setValue( Global.MoneyRound( calc_amount ) );
 		} else {
 			widget_amount.setValue( '0.00' );
 		}
-
 	},
+
 	/* jshint ignore:start */
 	onFormItemKeyDown: function( target ) {
 		var widget = this.edit_view_ui_dic['amount'];

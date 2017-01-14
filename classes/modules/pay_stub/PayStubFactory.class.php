@@ -3548,7 +3548,7 @@ class PayStubFactory extends Factory {
 				}
 
 				//
-				//Accrual Policy Balances
+				//Accrual Account Balances
 				//
 				if ( $ablf->getRecordCount() > 0 ) {
 					//Accrual Header
@@ -3578,7 +3578,7 @@ class PayStubFactory extends Factory {
 
 						$pdf->setXY( Misc::AdjustXY(40, $adjust_x), Misc::AdjustXY( $block_adjust_y, $adjust_y) );
 						$pdf->Cell(70, $cell_height, $ab_obj->getColumn('name'), $border, 0, 'L', FALSE, '', 1);
-						$pdf->Cell(25, $cell_height, TTi18n::formatNumber( TTDate::getHours( $balance ) ), $border, 0, 'R', FALSE, '', 1);
+						$pdf->Cell(25, $cell_height, TTi18n::formatNumber( TTDate::getHours( $balance ), TRUE, 2, 2), $border, 0, 'R', FALSE, '', 1);
 
 						$block_adjust_y = ($block_adjust_y + $cell_height);
 						$box_height = ($box_height + $cell_height);

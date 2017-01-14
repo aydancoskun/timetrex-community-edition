@@ -309,7 +309,7 @@ class TTDate {
 			if ( strpos($seconds, '.') !== FALSE ) {
 				$seconds = bcadd( $seconds, 0, 0); //Using scale(0), drop everything after the decimal, as that is fractions of a second. Could try rounding this instead, but its difficult with large values.
 			}
-			
+
 			if ( $include_seconds == TRUE ) {
 				$retval = sprintf( '%02d:%02d:%02d', bcdiv( $seconds, 3600 ), bcmod( bcdiv( $seconds, 60 ), 60 ), bcmod( $seconds, 60 ) );
 			} else {
@@ -515,7 +515,7 @@ class TTDate {
 			Debug::Arr($str, 'Date is array or object, unable to parse...', __FILE__, __LINE__, __METHOD__, 10);
 			return FALSE;
 		}
-		
+
 		//List of all formats that require custom parsing.
 		$custom_parse_formats = array(
 									'd-M-y',
@@ -710,7 +710,7 @@ class TTDate {
 				break;
 		}
 		//Debug::text('Format Name: '. $format .' Epoch: '. $epoch .' Format: '. $php_format, __FILE__, __LINE__, __METHOD__, 10);
-		
+
 
 		if ($epoch == '' OR $epoch == '-1') {
 			//$epoch = TTDate::getTime();
@@ -1126,7 +1126,7 @@ class TTDate {
 
 		return $day_with_most_time;
 	}
-	
+
 	public static function getDayDifference($start_epoch, $end_epoch, $round = TRUE) {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
@@ -1180,7 +1180,7 @@ class TTDate {
 		if ( $start_epoch == '' OR $end_epoch == '' ) {
 			return FALSE;
 		}
-		
+
 		if ( function_exists('date_diff') ) {
 			//If available, try to be as accurate as possible.
 			$diff = date_diff( new DateTime( '@'.$start_epoch ), new DateTime( '@'.$end_epoch ), FALSE );
@@ -1314,12 +1314,12 @@ class TTDate {
 		}
 		$adjusted_epoch = strtotime( $offset_str, $epoch );
 
-		$retval = date('Y', $adjusted_epoch);		
+		$retval = date('Y', $adjusted_epoch);
 		//Debug::text('Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Adjusted Epoch: '. TTDate::getDate('DATE+TIME', $adjusted_epoch)  .' Retval: '. $retval .' Offset: '. $offset_str, __FILE__, __LINE__, __METHOD__, 10);
 
-		return $retval;		
+		return $retval;
 	}
-	
+
 	public static function getBeginYearEpoch($epoch = NULL) {
 		if ($epoch == NULL OR $epoch == '' OR !is_numeric($epoch) ) {
 			$epoch = self::getTime();
@@ -1796,18 +1796,19 @@ class TTDate {
 	public static function getDateArray( $start_date, $end_date, $day_of_week = FALSE ) {
 		$start_date = TTDate::getMiddleDayEpoch( $start_date );
 		$end_date = TTDate::getMiddleDayEpoch( $end_date );
-		
+
 		$retarr = array();
 		for( $x = $start_date; $x <= $end_date; $x += 93600 ) {
 			$x = TTDate::getBeginDayEpoch($x);
-			if ( $day_of_week == FALSE OR TTDate::getDayOfWeek( $x ) == $day_of_week ) {
+			//Make sure we use $day_of_week === FALSE check here, because it could come through as (int)0 for Sunday.
+			if ( $day_of_week === FALSE OR TTDate::getDayOfWeek( $x ) == $day_of_week ) {
 				$retarr[] = $x;
 			}
 		}
 
 		return $retarr;
 	}
-	
+
 	//Loop from filter start date to end date. Creating an array entry for each day.
 	public static function getCalendarArray($start_date, $end_date, $start_day_of_week = 0, $force_weeks = TRUE) {
 		if ( $start_date == '' OR $end_date == '' ) {
@@ -1902,7 +1903,7 @@ class TTDate {
 	}
 
 	//Date pair1
-	public static function getTimeOverLapDifference($start_date1, $end_date1, $start_date2, $end_date2) {		
+	public static function getTimeOverLapDifference($start_date1, $end_date1, $start_date2, $end_date2) {
 		$overlap_result = self::getTimeOverlap( $start_date1, $end_date1, $start_date2, $end_date2 );
 		if ( is_array($overlap_result) ) {
 			$retval = ( $overlap_result['end_date'] - $overlap_result['start_date'] );
@@ -1932,7 +1933,7 @@ class TTDate {
 		3. |-----------------------|
 		4. |------------------------------------------|
 		*/
-		
+
 		if	( ($start_date2 >= $start_date1 AND $end_date2 <= $end_date1) ) { //Case #1
 			//Debug::text(' Overlap on Case #1: ', __FILE__, __LINE__, __METHOD__, 10);
 			//$retval = ( $end_date2 - $start_date2 );
@@ -2142,7 +2143,7 @@ class TTDate {
 			sort($date_array);
 
 			$retval = FALSE;
-			
+
 			$prev_date = FALSE;
 			foreach( $date_array as $date ) {
 				if ( $prev_date != FALSE ) {
@@ -2172,13 +2173,13 @@ class TTDate {
 
 		return strtotime( $age.' years', $birth_date );
 	}
-	
+
 	public static function getTimeLockedDate($time_epoch, $date_epoch) {
 		//This causes unit tests to fail.
 		//if ( $time_epoch == '' OR $date_epoch == '' ) {
 			//return FALSE;
 		//}
-		
+
 		$time_arr = getdate($time_epoch);
 		$date_arr = getdate($date_epoch);
 
@@ -2421,7 +2422,7 @@ class TTDate {
 									'-1210-last_pay_period' => TTi18n::getText('Last Pay Period'), //Select one or more pay period schedules
 									'-1212-no_pay_period' => TTi18n::getText('No Pay Period'), //Data assigned to no pay periods or pay_period_id = 0
 									);
-			
+
 			$retarr = array_merge( $retarr, $pay_period_arr );
 			ksort($retarr);
 		}
@@ -3120,7 +3121,7 @@ class TTDate {
 		if ( $epoch === NULL ) {
 			return array();
 		}
-		
+
 		$column = Misc::trimSortPrefix( $column );
 
 		//Trim off a column_name_prefix, or everything before the "-"

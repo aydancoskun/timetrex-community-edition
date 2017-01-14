@@ -701,7 +701,8 @@ AccrualViewController = BaseViewController.extend( {
 				group: other_group,
 				icon: Icons.import_icon,
 				permission_result: true,
-				permission: null
+				permission: null,
+				sort_order: 8000
 			} );
 			var export_csv = new RibbonSubMenu( {
 				label: $.i18n._( 'Export' ),
@@ -952,7 +953,8 @@ AccrualViewController = BaseViewController.extend( {
 				case ContextMenuIconName.cancel:
 					break;
 				case ContextMenuIconName.timesheet:
-					this.setEditMenuNavViewIcon( context_btn, 'punch' );
+					// Prevent user clicking timesheet from new accrual page by disabling the icon
+					this.setDefaultMenuViewIcon( context_btn, 'punch' );
 					break;
 				case ContextMenuIconName.export_excel:
 					this.setDefaultMenuExportIcon( context_btn);

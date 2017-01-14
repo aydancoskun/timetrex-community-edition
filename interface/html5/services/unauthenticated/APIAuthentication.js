@@ -51,9 +51,30 @@ var APIAuthentication = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'getOrganizationURL', arguments );
 
 	},
+	
 
-	getAuthentication: function() {
-		return this.argumentsHandler( this.className, 'Authentication', arguments );
-	}
+	passwordReset: function() {
+
+		return this.argumentsHandler( this.className, 'passwordReset', arguments );
+
+	},
+
+	resetPassword: function() {
+
+		return this.argumentsHandler( this.className, 'resetPassword', arguments );
+
+	},
+
+	changePassword: function() {
+
+		return this.argumentsHandler( this.className, 'changePassword', arguments );
+
+	},
+
+	getLocale: function() {
+
+		return this.argumentsHandler( this.className, 'getLocale', arguments );
+
+	},
 
 } );

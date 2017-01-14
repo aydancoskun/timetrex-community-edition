@@ -112,7 +112,6 @@ Debug.varDump = function (obj) {
     return result.replace(/,\n$/, "");
 };
 
-
 window.addEventListener('keydown',function(e){
     var evt = e ? e:event;
     var keyCode = evt.keyCode;
@@ -121,9 +120,6 @@ window.addEventListener('keydown',function(e){
         Debug.showPanel();
     }
 });
-
-
-
 
 //on load get cookie data
 {

@@ -6871,5 +6871,202 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$pf->FailTransaction();
 		$pf->CommitTransaction();
 	}
+
+	function testStationCheckSourceNetMask() {
+		global $dd;
+
+		include_once( 'Net/IPv4.php' );
+		include_once( 'Net/IPv6.php' );
+
+		$ipv4 = '75.157.242.71';
+		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
+		$this->assertEquals( Net_IPv4::validateIP( $ipv4 ), TRUE );
+		$this->assertEquals( Net_IPv4::validateIP( $ipv6 ), FALSE );
+		$this->assertEquals( Net_IPv4::ipInNetwork( $ipv4, $ipv4 ), FALSE );
+		$this->assertEquals( Net_IPv4::ipInNetwork( $ipv4, '75.157.242.71/32' ), TRUE );
+		$this->assertEquals( Net_IPv4::ipInNetwork( $ipv4, '75.157.242.0/24' ), TRUE );
+
+
+		$this->assertEquals( Net_IPv6::checkIPv6( $ipv6 ), TRUE );
+		$this->assertEquals( Net_IPv6::checkIPv6( $ipv4 ), FALSE );
+
+
+		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, $ipv6, 128 ), TRUE );
+		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61', 128 ), FALSE );
+		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61/128' ), FALSE );
+		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e:bd61/128', 4 ), TRUE ); //The specified bits overrides any netmask in the string.
+
+		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e::', 112 ), TRUE );
+		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4e::/112' ), TRUE );
+		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4f::', 112 ), FALSE );
+		$this->assertEquals( Net_IPv6::isInNetmask( $ipv6, '2001:569:f9f0:d900:218:f3ff:fe4f::/112' ), FALSE );
+	}
+
+
+	function testStationCheckSourceANY() {
+		global $dd;
+
+		$ipv4 = '75.157.242.71';
+		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
+
+		$station_id = $dd->createStation( $this->company_id, 'ANY', 'ANY' );
+		Debug::Text( 'Station ID: ' . $station_id . ' User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
+		$slf = new StationListFactory();
+		$slf->getById( $station_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$current_station = $slf->getCurrent();
+			$station_type = $current_station->getType();
+		}
+		unset( $slf );
+		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+	}
+
+	function testStationCheckSourceIPv4() {
+		global $dd;
+
+		$ipv4 = '75.157.242.71';
+		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
+
+		$station_id = $dd->createStation( $this->company_id, $ipv4, 'ANY' );
+		Debug::Text('Station ID: '. $station_id .' User ID: '. $this->user_id, __FILE__, __LINE__, __METHOD__, 10);
+		$slf = new StationListFactory();
+		$slf->getById( $station_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$current_station = $slf->getCurrent();
+			$station_type = $current_station->getType();
+		}
+		unset($slf);
+		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
+	}
+
+	function testStationCheckSourceIPv4NetMaskA() {
+		global $dd;
+
+		$ipv4 = '75.157.242.71';
+		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
+
+		$station_id = $dd->createStation( $this->company_id, '75.157.242.0/24', 'ANY' );
+		Debug::Text('Station ID: '. $station_id .' User ID: '. $this->user_id, __FILE__, __LINE__, __METHOD__, 10);
+		$slf = new StationListFactory();
+		$slf->getById( $station_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$current_station = $slf->getCurrent();
+			$station_type = $current_station->getType();
+		}
+		unset($slf);
+		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
+	}
+
+	function testStationCheckSourceIPv4NetMaskB() {
+		global $dd;
+
+		$ipv4 = '75.157.242.71';
+		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
+
+		$station_id = $dd->createStation( $this->company_id, '127.0.0.0/8,75.157.242.0/24', 'ANY' );
+		Debug::Text('Station ID: '. $station_id .' User ID: '. $this->user_id, __FILE__, __LINE__, __METHOD__, 10);
+		$slf = new StationListFactory();
+		$slf->getById( $station_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$current_station = $slf->getCurrent();
+			$station_type = $current_station->getType();
+		}
+		unset($slf);
+		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+		$_SERVER['REMOTE_ADDR'] = '127.0.0.1'; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+
+		$_SERVER['REMOTE_ADDR'] = '76.1.1.1'; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
+
+		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
+	}
+
+	function testStationCheckSourceIPv6() {
+		global $dd;
+
+		$ipv4 = '75.157.242.71';
+		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
+
+		$station_id = $dd->createStation( $this->company_id, $ipv6, 'ANY' );
+		Debug::Text('Station ID: '. $station_id .' User ID: '. $this->user_id, __FILE__, __LINE__, __METHOD__, 10);
+		$slf = new StationListFactory();
+		$slf->getById( $station_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$current_station = $slf->getCurrent();
+			$station_type = $current_station->getType();
+		}
+		unset($slf);
+		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
+		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+	}
+
+	function testStationCheckSourceIPv6NetMaskA() {
+		global $dd;
+
+		$ipv4 = '75.157.242.71';
+		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
+
+		$station_id = $dd->createStation( $this->company_id, '2001:569:f9f0:d900:218:f3ff:fe4e:/112', 'ANY' );
+		Debug::Text('Station ID: '. $station_id .' User ID: '. $this->user_id, __FILE__, __LINE__, __METHOD__, 10);
+		$slf = new StationListFactory();
+		$slf->getById( $station_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$current_station = $slf->getCurrent();
+			$station_type = $current_station->getType();
+		}
+		unset($slf);
+		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
+
+		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+
+		$_SERVER['REMOTE_ADDR'] = '2001:569:f9f0:d900:218:f3ff:fe4f:3333'; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE);
+	}
+
+	function testStationCheckSourceIPv6NetMaskB() {
+		global $dd;
+
+		$ipv4 = '75.157.242.71';
+		$ipv6 = '2001:569:f9f0:d900:218:f3ff:fe4e:bd60';
+
+		$station_id = $dd->createStation( $this->company_id, '2005::/20,2001:569:f9f0:d900:218:f3ff:fe4e:/112', 'ANY' );
+		Debug::Text('Station ID: '. $station_id .' User ID: '. $this->user_id, __FILE__, __LINE__, __METHOD__, 10);
+		$slf = new StationListFactory();
+		$slf->getById( $station_id );
+		if ( $slf->getRecordCount() == 1 ) {
+			$current_station = $slf->getCurrent();
+			$station_type = $current_station->getType();
+		}
+		unset($slf);
+		$_SERVER['REMOTE_ADDR'] = $ipv4; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE );
+
+		$_SERVER['REMOTE_ADDR'] = $ipv6; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+		$_SERVER['REMOTE_ADDR'] = '2005:569:f9f0:d900:218:f3ff:fe4e:bd60'; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), TRUE );
+
+		$_SERVER['REMOTE_ADDR'] = '2001:569:f9f0:d900:218:f3ff:fe4f:3333'; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE);
+		$_SERVER['REMOTE_ADDR'] = '2004:569:f9f0:d900:218:f3ff:fe4f:3333'; //Fake remote IP address for testing.
+		$this->assertEquals( $current_station->checkAllowed( $this->user_id, $station_id, $station_type ), FALSE);
+
+	}
 }
 ?>

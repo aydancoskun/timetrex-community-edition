@@ -2265,14 +2265,20 @@ class ScheduleFactory extends Factory {
 		//  So instead of deleting or overwriting the original OPEN shift, simply set "replaced_id" of the current shift to the OPEN shift ID, so we know it was replaced and therefore won't be displayed anymore.
 		//    Now if the shift is deleted, the original OPEN shift will reappear, just like what would happen if it was a OPEN recurring schedule.
 		//However, there is still the case of the user editing an OPEN shift and simply changing the employee to someone else, in this case the original OPEN shift would not be preseverd.
+		//  Also need to handle the case of filling an OPEN shift, then editing the filled shift to change the start/end times or branch/department/job/task, that should no longer fill the OPEN shift.
+		// 		But if they are changed back, it should refill the shift, because this acts the most similar to existing recurring schedule open shifts.
 		if ( $this->getDeleted() == FALSE AND $this->Validator->getValidateOnly() == FALSE AND $this->getUser() > 0 ) { //Don't check for conflicting OPEN shifts when editing/saving an OPEN shift.
 			$slf = TTnew( 'ScheduleListFactory' );
 			$slf->getConflictingOpenShiftSchedule( $this->getCompany(), $this->getStartTime(), $this->getEndTime(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), $this->getReplacedId(), 1 ); //Limit 1;
 			if ( $slf->getRecordCount() > 0 ) {
 				Debug::Text( 'Found Conflicting OPEN Shift!!', __FILE__, __LINE__, __METHOD__, 10 );
 				foreach ( $slf as $s_obj ) {
-					Debug::Text( 'Replacing Schedule OPEN Shift ID: ' . $s_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
-					$this->setReplacedId( $s_obj->getId() );
+					if ( $s_obj->getUser() == 0 ) {
+						Debug::Text( 'Replacing Schedule OPEN Shift ID: ' . $s_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+						$this->setReplacedId( $s_obj->getId() );
+					} else {
+						Debug::Text( 'ERROR: Returned conflicting shift that is not OPEN! ID: ' . $s_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+					}
 				}
 			} else {
 				Debug::Text( 'NO Conflicting OPEN Shift found...', __FILE__, __LINE__, __METHOD__, 10 );
