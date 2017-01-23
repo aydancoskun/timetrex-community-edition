@@ -263,7 +263,7 @@ RibbonViewController = Backbone.View.extend( {
 				} );
 				break;
 			case 'QuickStartWizard':
-				if ( !LocalCacheData.getCurrentCompany().is_setup_complete && PermissionManager.validate('user_preference', 'edit') && PermissionManager.validate('pay_period_schedule', 'add') && PermissionManager.validate('policy_group', 'edit')) {
+				if ( PermissionManager.checkTopLevelPermission( 'QuickStartWizard' ) ) {
 					IndexViewController.openWizard('QuickStartWizard');
 				}
 				break;

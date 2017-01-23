@@ -4,7 +4,7 @@ TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 		this.__super( 'initialize', options );
 		this.script_name = 'TimesheetDetailReport';
 		this.viewId = 'TimesheetDetailReport';
-		this.context_menu_name = $.i18n._( 'Timesheet Detail' );
+		this.context_menu_name = $.i18n._( 'TimeSheet Detail' );
 		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
 		this.view_file = 'TimesheetDetailReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APITimesheetDetailReport' ))();
@@ -39,8 +39,8 @@ TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 
 		//menu group
 		var timesheet_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Timesheet' ),
-			id: this.viewId + 'Timesheet',
+			label: $.i18n._( 'TimeSheet' ),
+			id: this.viewId + 'TimeSheet',
 			ribbon_menu: menu,
 			sub_menus: []
 		} );
@@ -100,7 +100,7 @@ TimesheetDetailReportViewController = ReportBaseViewController.extend( {
 		} );
 
 		var print = new RibbonSubMenu( {
-			label: $.i18n._( 'Print Timesheet' ),
+			label: $.i18n._( 'Print TimeSheet' ),
 			id: ContextMenuIconName.print_timesheet,
 			group: timesheet_group,
 			icon: Icons.print,

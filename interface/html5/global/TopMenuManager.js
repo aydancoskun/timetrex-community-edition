@@ -1583,7 +1583,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 
 	if ( PermissionManager.checkTopLevelPermission( 'TimesheetSummaryReport' ) ) {
 		var timesheet_summary = new RibbonSubMenuNavItem( {
-			label: $.i18n._( 'Timesheet Summary' ),
+			label: $.i18n._( 'TimeSheet Summary' ),
 			id: 'TimesheetSummaryReport',
 			nav: timesheet_reports
 		} );

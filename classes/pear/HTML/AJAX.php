@@ -95,7 +95,7 @@ class HTML_AJAX
             'XML'   => 'application/xml',
             'Null'  => 'text/plain',
             'Error' => 'application/error',
-            'PHP'   => 'application/php-serialized',
+            //'PHP'   => 'application/php-serialized', //Possible security vulnerability here due to PHP object injection: https://www.owasp.org/index.php/PHP_Object_Injection
             'Urlencoded' => 'application/x-www-form-urlencoded'
         );
     

@@ -262,6 +262,10 @@ AboutViewController = BaseViewController.extend( {
 					break;
 			}
 
+			if ( Global.isSet( widget ) && this.current_edit_record[key] == false ) {
+				widget.parents('.edit-view-form-item-div').detach();
+			}
+
 		}
 
 		this.collectUIDataToCurrentEditRecord();
@@ -346,6 +350,21 @@ AboutViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 		form_item_input.TText( {field: 'system_version' } );
 		this.addEditFieldToColumn( $.i18n._( 'Version' ), form_item_input, tab_about_column1 );
+
+		// Operating System
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input.TText( {
+			field: 'operating_system'
+
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Operating System' ), form_item_input, tab_about_column1 );
+
+		// PHP Version
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+		form_item_input.TText( {
+			field: 'php_version'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'PHP Version' ), form_item_input, tab_about_column1 );
 
 		// Tax Engine Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );

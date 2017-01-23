@@ -747,6 +747,12 @@ class Install {
 		// 1 = Invalid
 		// 2 = UnSupported
 
+		/*
+		 *
+		 *  *** UPDATE APINotification.class.php when minimum PHP version changes, as it gives early warning to users. ***
+		 *
+		 */
+
 		if ( $php_version == NULL ) {
 			$php_version = $this->getPHPVersion();
 		}

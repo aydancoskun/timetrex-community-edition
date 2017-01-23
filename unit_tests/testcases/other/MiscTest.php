@@ -984,5 +984,73 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( filesize($temp_file_name), (int)$size ); //30 Bytes.
 		unlink($temp_file_name);
 	}
+
+	function testgetAmountUpToLimit() {
+		//Positive Amount and Positive Limit, should return amount up to the limit.
+		$this->assertEquals( Misc::getAmountUpToLimit( 0, 100 ), 0 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 1, 100 ), 1 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 50, 100 ), 50 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 98, 100 ), 98 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 99, 100 ), 99 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 100, 100 ), 100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 101, 100 ), 100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 200, 100 ), 100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 201, 100 ), 100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 1001, 100 ), 100 );
+
+		//Positive Amount and Negative Limit should always return 0
+		$this->assertEquals( Misc::getAmountUpToLimit( 101, -100 ), 0 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 100, -100 ), 0 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 99, -100 ), 0 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 99, -100 ), 0 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 0, -100 ), 0 );
+
+		//Negative amounts, but positive limits should always return the amount.
+		$this->assertEquals( Misc::getAmountUpToLimit( -100, 100 ), -100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -99, 100 ), -99 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -98, 100 ), -98 );
+
+		//Negative amounts and negative limits should be treated as "getAmountDownToLimit".
+		$this->assertEquals( Misc::getAmountUpToLimit( -1001, -100 ), -100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -200, -100 ), -100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -101, -100 ), -100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -100, -100 ), -100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -99, -100 ), -99 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -98, -100 ), -98 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -50, -100 ), -50 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -1, -100 ), -1 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -0, -100 ), -0 );
+
+		//Test no limit
+		$this->assertEquals( Misc::getAmountUpToLimit( 100, FALSE ), 100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 100, TRUE ), 100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 100, NULL ), 100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( 100, '' ), 100 );
+		$this->assertEquals( Misc::getAmountUpToLimit( -100, '' ), -100 );
+
+
+		//Amount DIff. - Positive Amount and Positive Limit, should return amount up to the limit.
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 0, 100 ), 100 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 1, 100 ), 99 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 50, 100 ), 50 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 98, 100 ), 2 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 99, 100 ), 1 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 100, 100 ), 0 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 101, 100 ), 0 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 200, 100 ), 0 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 201, 100 ), 0 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( 1001, 100 ), 0 );
+
+		//Amount Diff Negative amounts and negative limits should be treated as "getAmountDownToLimit".
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -1001, -100 ), 0 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -200, -100 ), 0 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -101, -100 ), 0 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -100, -100 ), 0 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -99, -100 ), -1 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -98, -100 ), -2 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -50, -100 ), -50 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -1, -100 ), -99 );
+		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -0, -100 ), -100 );
+	}
 }
 ?>

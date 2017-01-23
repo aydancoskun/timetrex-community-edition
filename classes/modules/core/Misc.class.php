@@ -2895,5 +2895,60 @@ class Misc {
 			return $ret_arr;
 		}
 	}
+
+	static function getAmountUpToLimit( $amount, $limit ) {
+		if ( $amount == 0 ) {
+			return 0;
+		}
+
+		//If no limit is specified, just return the amount.
+		if ( $limit == '' OR $limit === NULL OR $limit === FALSE OR $limit === TRUE ) {
+			return $amount;
+		}
+
+		//Cases:
+		// Positive Amount, Positive Limit -- Handle up to limit
+		// Positive Amount, Negative Limit -- Always return 0 as its above limit
+		// Negative Amount, Positive Limit -- Always return negative amount as its below the limit
+		// Negative Amount, Negative Limit -- Handle down to limit
+
+		$retval = 0;
+		if ( $amount > 0 AND $limit <= 0 ) {
+			$retval = 0;
+		} elseif ( $amount < 0 AND $limit >= 0 ) {
+			$retval = $amount;
+		} else {
+			if ( $amount >= 0 ) {
+				if ( $amount >= $limit ) {
+					//Amount is greater than limit, just use limit.
+					$retval = $limit;
+				} else {
+					$retval = $amount;
+				}
+			} else {
+				if ( $amount <= $limit ) {
+					//Amount is less than limit, just use limit.
+					$retval = $limit;
+				} else {
+					$retval = $amount;
+				}
+			}
+		}
+
+		return $retval;
+	}
+
+	//This is can be used to handle YTD amounts.
+	static function getAmountDifferenceUpToLimit( $amount, $limit ) {
+		//If no limit is specified, just return the amount.
+		if ( $limit == '' OR $limit === NULL OR $limit === FALSE OR $limit === TRUE ) {
+			return $amount;
+		}
+
+		$tmp_amount = self::getAmountUpToLimit( $amount, $limit );
+
+		$retval = bcsub( $limit, $tmp_amount );
+		return $retval;
+	}
 }
 ?>

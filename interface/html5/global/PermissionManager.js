@@ -280,7 +280,7 @@ var PermissionManager = (function() {
 			case 'QuickStartWizard':
 				if ( PermissionManager.validate( 'pay_period_schedule', 'add' ) &&
 					PermissionManager.validate( 'user_preference', 'edit' ) &&
-					PermissionManager.validate( 'policy_group', 'add' ) ) {
+					PermissionManager.validate( 'policy_group', 'edit' ) ) {
 					result = true;
 				} else {
 					result = false;

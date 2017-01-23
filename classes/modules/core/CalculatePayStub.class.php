@@ -440,7 +440,7 @@ class CalculatePayStub extends PayStubFactory {
 		$profiler->startTimer( 'Calculate Dependency Tree');
 		$sorted_deduction_ids = $dependency_tree->getAllNodesInOrder();
 		$profiler->stopTimer( 'Calculate Dependency Tree');
-		
+
 		$retarr = array();
 		//Debug::Arr($sorted_deduction_ids , 'Sorted Deduction IDs Array: ', __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($sorted_deduction_ids) ) {
@@ -541,7 +541,7 @@ class CalculatePayStub extends PayStubFactory {
 
 		if ( $is_termination_pay_period == TRUE OR $is_post_termination_pay_period == TRUE ) {
 			Debug::text('User is Terminated, assuming final pay, setting End Date to terminated date: '. TTDate::getDate('DATE+TIME', $this->getUserObject()->getTerminationDate() ), __FILE__, __LINE__, __METHOD__, 10);
-			
+
 			$pay_stub->setStartDate( $pay_stub->getPayPeriodObject()->getStartDate() );
 
 			//If the termination date falls within this pay period, use the termination date as the end date.
@@ -670,7 +670,7 @@ class CalculatePayStub extends PayStubFactory {
 						//Determine if this deduction is valid based on min/max user age.
 						//Determine if the Payroll Run Type matches.
 						if ( $ud_obj->getCompanyDeductionObject()->isActiveDate( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
-								AND $ud_obj->getCompanyDeductionObject()->isActiveLengthOfService( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate() ) == TRUE
+								AND $ud_obj->getCompanyDeductionObject()->isActiveLengthOfService( $ud_obj, $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getPayPeriodObject()->getStartDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->isActiveUserAge( $this->getUserObject()->getBirthDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $pay_stub->getTransactionDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->inApplyFrequencyWindow( $pay_stub->getPayPeriodObject()->getStartDate(), $pay_stub->getPayPeriodObject()->getEndDate(), $this->getUserObject()->getHireDate(), $this->getUserObject()->getTerminationDate(), $this->getUserObject()->getBirthDate() ) == TRUE
 								AND $ud_obj->getCompanyDeductionObject()->inApplyPayrollRunType( $this->getType() ) ) {
@@ -730,7 +730,7 @@ class CalculatePayStub extends PayStubFactory {
 
 			$pay_stub->Save( FALSE );
 			//$pay_stub->Save( FALSE ) could have validation errors in the postSave() function, we want to try and capture those as well.
-			//Usually it has to do with pay stub amendments being after the employees termination date. 
+			//Usually it has to do with pay stub amendments being after the employees termination date.
 			if ( $pay_stub->isValid() == TRUE  ) {
 				if ( $this->getEnableCorrection() == TRUE ) {
 					Debug::text('bCorrection Enabled - Doing Comparison here', __FILE__, __LINE__, __METHOD__, 10);
@@ -761,7 +761,7 @@ class CalculatePayStub extends PayStubFactory {
 					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 20, TTi18n::gettext('Employee is terminated, but accrual balances haven\'t been released'), NULL );
 				} elseif ( $psalf->getRecordCount() > 0 ) {
 					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 20, TTi18n::gettext('Employee has %1 active pay stub amendments before this pay period that have not been paid', array($psalf->getRecordCount()) ), NULL );
-				} else {				
+				} else {
 					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 30, TTi18n::gettext('Total Gross') .': '. Misc::MoneyFormat( $pay_stub->getGrossPay() ) .' '. TTi18n::gettext('Net Pay') .': '. Misc::MoneyFormat( $pay_stub->getNetPay() ), NULL );
 				}
 

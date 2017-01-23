@@ -326,7 +326,7 @@ HomeViewController = Backbone.View.extend( {
 		} );
 
 		var timesheet_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Timesheet' ),
+			label: $.i18n._( 'TimeSheet' ),
 			id: ContextMenuIconName.timesheet,
 			group: navigation_group,
 			icon: Icons.timesheet,

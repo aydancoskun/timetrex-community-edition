@@ -907,7 +907,7 @@ ScheduleViewController = BaseViewController.extend( {
 		} );
 
 		var timesheet_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Timesheet' ),
+			label: $.i18n._( 'TimeSheet' ),
 			id: ContextMenuIconName.timesheet,
 			group: navigation_group,
 			icon: Icons.timesheet,
@@ -916,7 +916,7 @@ ScheduleViewController = BaseViewController.extend( {
 		} );
 
 		var find_available = new RibbonSubMenu( {
-			label: $.i18n._( 'Find Available' ),
+			label: $.i18n._( 'Find<br>Available' ),
 			id: ContextMenuIconName.find_available,
 			group: other_group,
 			icon: Icons.find_available,

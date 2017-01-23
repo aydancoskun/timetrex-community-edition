@@ -2171,7 +2171,7 @@ PayStubViewController = BaseViewController.extend( {
 				var original_amount = parseFloat( this.rows_widgets_array[index]['ytd_amount'].attr( 'original_amount' ) );
 //				var new_ytd_amount = (original_ytd_amount - original_amount + c_value).toFixed( 4 );
 				var new_ytd_amount = Global.removeTrailingZeros( (original_ytd_amount - original_amount + c_value) );
-				this.rows_widgets_array[index]['ytd_amount'].setValue( new_ytd_amount > 0 ? new_ytd_amount : '-' );
+				this.rows_widgets_array[index]['ytd_amount'].setValue( new_ytd_amount != 0 ? new_ytd_amount : '-' );
 				this.rows_widgets_array[index]['ytd_amount'].attr( 'original_ytd_amount', new_ytd_amount );
 				this.rows_widgets_array[index]['ytd_amount'].attr( 'original_amount', c_value );
 			}
@@ -2206,13 +2206,13 @@ PayStubViewController = BaseViewController.extend( {
 					row['amount'].setValue( Global.removeTrailingZeros( total_amount) );
 					row['ytd_amount'].setValue( Global.removeTrailingZeros( total_ytd_amount) );
 
-					if ( net_pay_amount > 0 ) {
+					if ( net_pay_amount != 0 ) {
 						net_pay_amount = net_pay_amount - total_amount;
 					} else {
 						net_pay_amount = total_amount;
 					}
 
-					if ( net_pay_ytd_amount > 0 ) {
+					if ( net_pay_ytd_amount != 0 ) {
 						net_pay_ytd_amount = net_pay_ytd_amount - total_ytd_amount;
 					} else {
 						net_pay_ytd_amount = total_ytd_amount;

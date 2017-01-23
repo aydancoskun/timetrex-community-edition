@@ -1270,6 +1270,43 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				};
 				column_info_array.push( column_info );
 				break;
+			case '16':
+				column_info = {
+					name: 'user_value1',
+					index: 'user_value1',
+					label: $.i18n._( 'Percent' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
+				column_info_array.push( column_info );
+
+				column_info = {
+					name: 'user_value2',
+					index: 'user_value2',
+					label: $.i18n._( 'Target Amount Limit' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
+				column_info_array.push( column_info );
+
+				column_info = {
+					name: 'user_value3',
+					index: 'user_value3',
+					label: $.i18n._( 'Target YTD Limit/Balance' ),
+					width: 100,
+					sortable: false,
+					title: false,
+					editable: true,
+					edittype: 'text'
+				};
+				column_info_array.push( column_info );
+				break;
 			case '17':
 				column_info = {
 					name: 'user_value1',
@@ -1508,7 +1545,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				column_info = {
 					name: 'user_value2',
 					index: 'user_value2',
-					label: $.i18n._( 'Target Balance/Limit' ),
+					label: $.i18n._( 'Target YTD Limit/Balance' ),
 					width: 100,
 					sortable: false,
 					title: false,
@@ -2974,6 +3011,23 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value3 );
 
 					break;
+				case '16':
+					$this.attachElement( 'df_0' );
+					$this.edit_view_form_item_dic.df_0.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Percent' ) + ": " );
+					$this.edit_view_ui_dic.df_0.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_0.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Target Amount Limit' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+
+					$this.attachElement( 'df_2' );
+					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Target YTD Limit/Balance' ) + ": " );
+					$this.edit_view_ui_dic.df_2.setField( 'user_value3' );
+					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value3 );
+
+					break;
 				case '17':
 					$this.attachElement( 'df_0' );
 					$this.edit_view_form_item_dic.df_0.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Percent' ) + ": " );
@@ -3020,9 +3074,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_form_item_dic.df_3.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Annual Deduction Amount' ) + ": " );
 					$this.edit_view_ui_dic.df_3.setField( 'user_value4' );
 					$this.edit_view_ui_dic.df_3.setValue( $this.current_edit_record.user_value4 );
-
 					break;
-
 				case '19':  //Advanced Percent (Tax Bracket Alt)
 					$this.attachElement( 'df_0' );
 					$this.edit_view_form_item_dic.df_0.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Percent' ) + ": " );
@@ -3075,9 +3127,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_form_item_dic.df_4.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Annual Deduction Amount' ) + ": " );
 					$this.edit_view_ui_dic.df_4.setField( 'user_value4' );
 					$this.edit_view_ui_dic.df_4.setValue( $this.current_edit_record.user_value4 );
-
 					break;
-
 				case '52': //Fixed Amount (w/target)
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Amount' ) + ": " );
@@ -3085,7 +3135,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value1 );
 
 					$this.attachElement( 'df_2' );
-					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Target Balance/Limit' ) + ": " );
+					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Target YTD Limit/Balance' ) + ": " );
 					$this.edit_view_ui_dic.df_2.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value2 );
 					break;
@@ -3159,7 +3209,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 						$this.edit_view_ui_dic.df_100.html( Global.getUpgradeMessage() );
 					}
 					break;
-
 				case '80': //US - Advanced EIC Formula
 				case '82':
 					$this.attachElement( 'df_14' );
@@ -3229,7 +3278,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-
 					break;
 				case '200-US-DE': //Province/State Income TaxFormula -- CA-AB
 					$this.attachElement( 'df_14' );

@@ -1,4 +1,4 @@
-Version: 10.0.5 Generated: Fri Jan 13 14:56:56 PST 2017
+Version: 10.1.0 Generated: Fri Jan 20 13:43:50 PST 2017
 6cbf232b27b656f37027eea596274f89ad61e25a  ./install_cron.sh
 e403c92805939a49ddb6d386bb38c4285a0a0812  ./templates/sm_header.tpl
 55018f3544114e3dbe1cc648ed3230e202abfaa5  ./templates/ConfirmEmail.tpl
@@ -698,7 +698,7 @@ e9f877f32da8c6792c97ff3b0d38d4c7a8dc5a66  ./classes/pear/Services/ExchangeRates/
 c5d1be9730c4ff8e43bfd01c7e1d0d8905e9139e  ./classes/pear/Services/ExchangeRates/Rates_ECB.php
 90dbb1b45d28728d2b0773694d25d62ae3199824  ./classes/pear/Services/ExchangeRates.php
 9b864b42cfb06359c98b01f32ace5cc563cd3cd9  ./classes/pear/HTML/Common.php
-5723ddc655ec2f0894b9e19802f11c67687a303b  ./classes/pear/HTML/AJAX.php
+8234575f65317dc0b975188a270d84583f646480  ./classes/pear/HTML/AJAX.php
 35c9128f474ded62addb28f89467298e4a29b5a3  ./classes/pear/HTML/AJAX/Response.php
 cba1178af9547b780569193f8e4a7478d992d450  ./classes/pear/HTML/AJAX/Debug.php
 2585a64e0f197f376d1943f24cf4673b2ebbe5fb  ./classes/pear/HTML/AJAX/JSON.php
@@ -1332,7 +1332,7 @@ f1822b2ba3ac37e986123a8530b24cee8e3c84a5  ./classes/modules/install/InstallSchem
 4d841420c2adbf5f4dd2d8dcd806b5ce6513aea9  ./classes/modules/install/InstallSchema_1042A.class.php
 fde157af57eb542c07a059b7f5aa16641e8520d1  ./classes/modules/install/InstallSchema_1032A.class.php
 06bd0c300faf9abd520b21beaa37b0dce9280829  ./classes/modules/install/InstallSchema_1026A.class.php
-c10ce6b75ff1a7aca69477fc42ee3978c824ef43  ./classes/modules/install/Install.class.php
+1b47d92817fe27cd52958b9d04a6b1954ab752aa  ./classes/modules/install/Install.class.php
 bcb5b4d4360db0ddfd584e498386b3db09c89c63  ./classes/modules/install/InstallSchema_1035A.class.php
 f0ff84f333aca0aa9640399d96a8a12863467115  ./classes/modules/install/InstallSchema_1014A.class.php
 c89a53427252272c7f5ef8337cb2130028a0b6ba  ./classes/modules/install/InstallSchema_1001A.class.php
@@ -1414,7 +1414,7 @@ cc23e4179b98c4608347fc7389f357117bdbed53  ./classes/modules/company/CompanyFacto
 da284dbd47b2a4bce3bb8e8ec53847925ac3952e  ./classes/modules/company/CompanyUserCountListFactory.class.php
 aa01f57db6fa990335f8ea126a734592e46f7837  ./classes/modules/company/CompanyGenericTagMapListFactory.class.php
 4c399733c8ef1d575ea947d85a74546be0106741  ./classes/modules/company/CompanySettingListFactory.class.php
-3163a22464deaa3ea6c4b62ef6f514f479dee078  ./classes/modules/company/CompanyDeductionFactory.class.php
+af9adc502c27b20d08e552a538be7caf27d56bef  ./classes/modules/company/CompanyDeductionFactory.class.php
 6e00d43971ec18feaf6b79f5a38b3ec4af492f7d  ./classes/modules/company/CompanyGenericTagFactory.class.php
 cd0dc7a3fa01d2a0d72e6dcca9fe09699ae99a10  ./classes/modules/company/CompanyUserCountFactory.class.php
 10e8f2be6588a48d681c09b93233838523080f71  ./classes/modules/company/CompanyListFactory.class.php
@@ -1490,7 +1490,7 @@ bb69fd5898ccbcc86a8761d9c552b1f9af78c185  ./classes/modules/policy/PremiumPolicy
 9a2262f16c969460d8a5ca6cc761342fa3e0d0e9  ./classes/modules/policy/AccrualPolicyListFactory.class.php
 b98498d83dae9e0441dabd42d4fa7153414df07f  ./classes/modules/import/ImportDepartment.class.php
 a9901e647745b51da0c0cbc2e04b0fe9f59995a6  ./classes/modules/import/ImportUser.class.php
-093e93082655320629c21b1358cb4bd6c4bb73f4  ./classes/modules/import/Import.class.php
+fc6a95b946b679182df34505fc2ca34c2a12e762  ./classes/modules/import/Import.class.php
 1d9e871f367cbb3e3863531729631086c3d7c953  ./classes/modules/import/ImportPayPeriod.class.php
 da5f8545867861d4b8219be695e31ea34498ca76  ./classes/modules/import/ImportBranch.class.php
 10703bdd078808078fa1fd5718dacc16435d6bb1  ./classes/modules/import/ImportPayStubAmendment.class.php
@@ -1558,7 +1558,7 @@ f8101d2e4c42bf7c6068aa90b034dc9f4985174c  ./classes/modules/users/UserIdentifica
 af244ff591e2d1d2898d6e8400eee8879821a4d1  ./classes/modules/users/UserPreferenceFactory.class.php
 2ddac261c1098c5dbc0826dd95cd48e414976283  ./classes/modules/users/EthnicGroupFactory.class.php
 4a4ae6aa5549e003971a7b734ac05acc9862d2ff  ./classes/modules/users/UserDefaultCompanyDeductionFactory.class.php
-b665d19f305f7e49a2beb3bff81236e35a11e6a5  ./classes/modules/users/UserDeductionFactory.class.php
+6a2e69ab3cc25f1a862e56741c15f42a0e500b74  ./classes/modules/users/UserDeductionFactory.class.php
 743260c623f5cd476a1b0fd748b272603dbd2153  ./classes/modules/users/UserDefaultCompanyDeductionListFactory.class.php
 4be5bc8db4572ac5448ab67a73b8eb1ed9710ff4  ./classes/modules/users/BankAccountFactory.class.php
 b232721477079fa14066aa95d268d4a4f098bcd5  ./classes/modules/core/PermissionUserListFactory.class.php
@@ -1611,7 +1611,7 @@ a99dc2a290890ca58995024184904b2eb0793aa0  ./classes/modules/core/ProgressBar.cla
 e57c8336775a5bf25516fbd63a6bb472fc7ff2d1  ./classes/modules/core/GeneralLedgerExport.class.php
 03983c77ebd1e1d7a0eca6efa2fbe0646e44fd20  ./classes/modules/core/PermissionUserFactory.class.php
 7756f2a62144426a9391c3fd2aa1e26e09ae5d4a  ./classes/modules/core/Option.class.php
-ab084cacda46f713ccb1126b293a8f8e5f5feb0e  ./classes/modules/core/Misc.class.php
+8a254f5e1429b907691c736c754d18f61431a279  ./classes/modules/core/Misc.class.php
 3ff7d96cffd43bbe83e8cf972c53f7d7bfee059a  ./classes/modules/core/SharedMemory.class.php
 21fa1f36c5b81d8145dc4b995b96f28055dd95ff  ./classes/modules/core/BreadCrumb.class.php
 22846c6523c060ca09a49f727aa459819f944018  ./classes/modules/core/TTPDF.class.php
@@ -1635,7 +1635,7 @@ adb3d03af618577470d8aa9b3c3d7c251fb39714  ./classes/modules/core/ExceptionListFa
 e2248e03ff199f5b1f8069a40a257a51caaf8ca0  ./classes/modules/core/OtherFieldFactory.class.php
 712dc96a85f37706f0b469f0516bf01fe1fd3eb1  ./classes/modules/core/StationUserGroupListFactory.class.php
 cf41d593e7da5976e142ad6b39a8aeb8a035a9ac  ./classes/modules/core/PermissionListFactory.class.php
-28ffb5f5709891db30defeed6f0d834c341ae473  ./classes/modules/core/CalculatePayStub.class.php
+d8ce27b072a41e13fc2499de45bd8605b444ab35  ./classes/modules/core/CalculatePayStub.class.php
 8fa46674cdfb364807840d68d18bcc13391b12e3  ./classes/modules/core/SystemSettingListFactory.class.php
 b84a92030fe1e85941c40f4e862e942799ece727  ./classes/modules/core/DependencyTree.class.php
 2d9d807ea95e61de66742c8d5aca745317367f53  ./classes/modules/core/StationExcludeUserListFactory.class.php
@@ -1754,7 +1754,7 @@ d55120134a905326af6b060713ddd79f45a600f6  ./classes/modules/api/users/APIUserTit
 0278e36893971996fc3348a1ac820adf6a79bb7f  ./classes/modules/api/users/APIUserDeduction.class.php
 acb13515c365a81aae43e2da7a78656ecde84631  ./classes/modules/api/client/TimeTrexClientAPI.class.php
 46cd6376b2a7922e105ac68411a846f58377060f  ./classes/modules/api/core/APIMisc.class.php
-8a218ea682f71193d642a1714a57df1fe12eea75  ./classes/modules/api/core/APINotification.class.php
+e6db88b602870548b3f7533b915f4bd0fe867b86  ./classes/modules/api/core/APINotification.class.php
 2d94b1b8b6c34797b25ed29e5aa5b0f7aa3772dc  ./classes/modules/api/core/APIException.class.php
 538236b9a5cf6fefd3207f05f1d2cd407d7c4d3c  ./classes/modules/api/core/APITimeSheet.class.php
 35fb5a0851c1e8c8d58bd20ded3c0a379a5d98f0  ./classes/modules/api/core/APITest.class.php
@@ -1768,7 +1768,7 @@ ea8af4a5e4b8a094e4af6e8acf53c08951218108  ./classes/modules/api/core/APICurrency
 05ae469924c83a72cb78badd94af37a41d41abd4  ./classes/modules/api/core/APIUserDateTotal.class.php
 521551eb03835cc109c4ff93e6a8e144fa9e30c1  ./classes/modules/api/core/APILog.class.php
 256c7c25145a7983d92b1059a9c3fda731045061  ./classes/modules/api/core/APIOtherField.class.php
-15b0e7713265f0274a00e51c238808c8a8e7f95d  ./classes/modules/api/core/APIAbout.class.php
+6e5b4524723b892e427fc3d679e6e351fa1390dd  ./classes/modules/api/core/APIAbout.class.php
 b6463bec15bea67dc1f84c15b921b735ab85ad51  ./classes/modules/api/core/APIAuthorization.class.php
 1bbf2f6ec5ae17d29d5428e0d48fd5e85df3cd10  ./classes/modules/api/core/APICurrencyRate.class.php
 91db76692f1ef19e304ae336033b6adeebf0ce2e  ./classes/modules/api/core/APIInstall.class.php
@@ -2032,7 +2032,7 @@ ede152a0778af55cb0b5cab6a35401c1c69e0ff0  ./interface/html5/framework/qunit/quni
 aada3192ecb030c9498d298eac0ddff33d00602d  ./interface/html5/global/Debug.js
 1d35767b2895fd115b23437ce8bb0c6e741aa1a5  ./interface/html5/global/ProgressBarManager.js
 543c674a3b31532faa8b6d357c7b71e4c4cdd314  ./interface/html5/global/APIGlobal.js.php
-939a81851c697d322d82e4c7a1f4e6400942fa33  ./interface/html5/global/PermissionManager.js
+9e2f06076105750db16b590a9154a4fe7a1b9bf9  ./interface/html5/global/PermissionManager.js
 93f9d121d7164298e1d4bed483b9693442fff1ac  ./interface/html5/global/LocalCacheData.js
 239d8077c43d3f7bfad9ddb751181449dbdb93dc  ./interface/html5/global/RateLimit.js
 25ea038bd468a0d2b7be78d8b4af16207c8ad139  ./interface/html5/global/widgets/checkbox/TCheckbox.html
@@ -2050,7 +2050,7 @@ adcdcac7ab429106ca905e95a2288f583710ed37  ./interface/html5/global/widgets/aweso
 b696aaa68fa6747b1a8d382feb5e036a67d9e78d  ./interface/html5/global/widgets/awesomebox/ALayoutIDs.js
 4f427107a913be68eedaa000e9463906a3725e65  ./interface/html5/global/widgets/awesomebox/AComboBox.html
 67c8f4ec85972b2fef55d29d13119af4e40fffeb  ./interface/html5/global/widgets/awesomebox/AComboBox.js
-d847509afb1260efe603347f864444ac3c9494a6  ./interface/html5/global/widgets/ribbon/RibbonViewController.js
+5f17f163174bb2f696dcbf84135261be4ff6b28d  ./interface/html5/global/widgets/ribbon/RibbonViewController.js
 1d0f3ab0fb3b7d632637e57f205369b03f9c61d0  ./interface/html5/global/widgets/ribbon/RibbonView.html
 d1c68dd350b96956d20bb37104523779d6f8b481  ./interface/html5/global/widgets/ribbon/RibbonSubMenuNavWidget.js
 ef56c7fb372dfc2c607cb7482deb924b7f027e06  ./interface/html5/global/widgets/combobox/TComboBox.html
@@ -2127,12 +2127,12 @@ d396f28d6847b60ad2e632a843a0e72074f86e36  ./interface/html5/global/widgets/texta
 e6806b9940d79119f3314b31abd393f75e1eaa54  ./interface/html5/global/TAlertManager.js
 dd723e5c4db36998ea7e3c4188bc00eb5de9705a  ./interface/html5/global/CookieSetting.js
 233cdffe5216bf9492de0690531c42e498e7cc4f  ./interface/html5/global/ContextMenuConstant.js
-d30897c7dd8251cc4b6a3449c9a0c2d78cd2cafa  ./interface/html5/global/TopMenuManager.js
+01537d290afc4de959609a7c425d357ea14c2562  ./interface/html5/global/TopMenuManager.js
 9093d51af7d6a8f5ad0bf733334c65b8644aa954  ./interface/html5/phpinfo.php
 d2a40c318176690fa6a96cd612568fe0b9f2a29c  ./interface/html5/index.php
 9b0ad5ad80cb2db6e8aa0e0f948b7d47ff0354ac  ./interface/html5/views/payperiod/PayPeriodScheduleView.html
 f7e4c45c3d89020ed431984b12e9ab34b1ce2fc6  ./interface/html5/views/payperiod/PayPeriodScheduleEditView.html
-82b28c8a21c22d2dab62ed00b058c3dd843b2c64  ./interface/html5/views/payperiod/PayPeriodScheduleViewController.js
+a5140ed781e848cb0857b72f5db20140d8e63af5  ./interface/html5/views/payperiod/PayPeriodScheduleViewController.js
 8c8dcbbed0aa004ac644f718e517513c8a9f4a83  ./interface/html5/views/payroll/pay_stub_entry_account/PayStubEntryAccountEditView.html
 dd8a34abe59b647c927076b732c55467deabe717  ./interface/html5/views/payroll/pay_stub_entry_account/PayStubEntryAccountViewController.js
 4d25a3ffc0e7ac8e698311b3fb160868e9b71f2a  ./interface/html5/views/payroll/pay_stub_entry_account/PayStubEntryAccountView.html
@@ -2143,7 +2143,7 @@ f38bdad0d683168bf6666c6815ce56250c4d607e  ./interface/html5/views/payroll/recurr
 4445e9e598ea7f281c866d578b8b14eb7cb42e10  ./interface/html5/views/payroll/pay_periods/PayPeriodsView.html
 03d52020d98dc31feabde64a1f6f1c0f34ee5fdc  ./interface/html5/views/payroll/pay_periods/SubPayPeriodsView.html
 18673367b3bfd1a1338d6347a02c96a8a649b930  ./interface/html5/views/payroll/pay_periods/PayPeriodsEditView.html
-e8739507c9ebb43766ba6a740af4a904aa8a1efc  ./interface/html5/views/payroll/company_tax_deduction/CompanyTaxDeductionViewController.js
+284d285df467da453cef8f29e238e4b2cd7372ff  ./interface/html5/views/payroll/company_tax_deduction/CompanyTaxDeductionViewController.js
 1c7ef54381da259aafd491217b67d21cb1642490  ./interface/html5/views/payroll/company_tax_deduction/CompanyTaxDeductionEditView.html
 c2155704665603c0dbfdc96a57808d494d7f2d45  ./interface/html5/views/payroll/company_tax_deduction/SubCompanyTaxDeductionView.html
 be43bf911ecf8f78b8fdd1f6a3d4a675b6cbcd78  ./interface/html5/views/payroll/company_tax_deduction/CompanyTaxDeductionView.html
@@ -2156,7 +2156,7 @@ b0709702110cd21a25e777ea72aa5ba61e9f62c0  ./interface/html5/views/payroll/pay_st
 71bbe7e4a4f389f3d91f91c8a68a39462ea0ae1a  ./interface/html5/views/payroll/pay_stub/PayStubEntryViewInsideEditorFiveColumnRow.html
 9dab97c49269e48a5fe23ac6153f4f34479a5b4e  ./interface/html5/views/payroll/pay_stub/PayStubEntryViewInsideEditorThreeColumnHeader.html
 7d172ba843fb40f32aa221741b85cbe296132eda  ./interface/html5/views/payroll/pay_stub/PayStubEntryViewInsideEditorRender.html
-a684a5481c64c324150735819c9ca97294d016c6  ./interface/html5/views/payroll/pay_stub/PayStubViewController.js
+dc3b49ecb6967ab85c6a7898bfb30d773d2af6b6  ./interface/html5/views/payroll/pay_stub/PayStubViewController.js
 cc2ffa78da147a4d0875d19bd60bc94c7bad3b99  ./interface/html5/views/payroll/pay_stub/PayStubEntryViewInsideEditorFiveColumnHeader.html
 8f610518a287c932742748371cd51d543bb506f9  ./interface/html5/views/payroll/pay_stub/PayStubEntryViewInsideEditorRow.html
 a4938082270af73fb2607cdab9d76d45895b3d81  ./interface/html5/views/wizard/re_calculate_accrual/ReCalculateAccrualWizardController.js
@@ -2404,7 +2404,7 @@ c9126fcba8b9a3ba0237eeaf59b5c89b607c2664  ./interface/html5/views/my_account/mes
 21eeebe2620d40cde456a375828dade37e916f8d  ./interface/html5/views/my_account/request_authorization/RequestAuthorizationView.html
 ee9064927d13779ba05c04ba1dea1fe2651cc9d3  ./interface/html5/views/my_account/request_authorization/RequestAuthorizationEditView.html
 7bccfc70016041ff98508f4df35d48d173cebdb2  ./interface/html5/views/home/dashboard/HomeView.html
-e77c81cdba73d2fd3523da7c485b409d1375ec70  ./interface/html5/views/home/dashboard/HomeViewController.js
+1f40f45fb31c6acfb0cd31d626d81320f086c4d8  ./interface/html5/views/home/dashboard/HomeViewController.js
 be78f1a9620e54b2a944660455c5d5e2409fa805  ./interface/html5/views/home/dashlet/DashletController.js
 15bf3e3ce60e433256390c8dcd3306861bfc6702  ./interface/html5/views/home/dashlet/Dashlet.html
 01bb7529966be752474b8b4385fd36acedfbebaa  ./interface/html5/views/attendance/exceptions/ExceptionEditView.html
@@ -2442,7 +2442,7 @@ f79f50f66d80d82dda6389a1b98a1c87c03a0c22  ./interface/html5/views/attendance/sch
 5fd60175b84af262510c06064e70e1d65a4eff47  ./interface/html5/views/attendance/schedule/ScheduleShiftEditView.html
 6e6a85a62c3d953cd29b8a827603386311bd6de1  ./interface/html5/views/attendance/schedule/ScheduleShiftView.html
 f9e25d6810cf9c7f5956235970c9fb0ea4b5ec53  ./interface/html5/views/attendance/schedule/ScheduleEditView.html
-fa18bece0f942e8dbf53c6a37b4e4029f2f3e51c  ./interface/html5/views/attendance/schedule/ScheduleViewController.js
+56cce29678b3c0b32c1599819f768d5715d5fe12  ./interface/html5/views/attendance/schedule/ScheduleViewController.js
 d9e659f544595b594c694fb311458fcb2dd24350  ./interface/html5/views/attendance/schedule/ScheduleShiftViewController.js
 572c5a5d1b4b8718bf3c21af10f570bbbeba19a0  ./interface/html5/views/attendance/punches/PunchesEditView.html
 17138595250aa2ab9e183c9951e5c8c9a0815c35  ./interface/html5/views/attendance/punches/PunchesView.html
@@ -2453,9 +2453,9 @@ da39a3ee5e6b4b0d3255bfef95601890afd80709  ./interface/html5/views/attendance/in_
 08bc0b94ae39c408eb961392e2fce84ff3c5d46c  ./interface/html5/views/attendance/accrual_balance/AccrualBalanceEditView.html
 85ef0bd589bb5b073da0bb0d16ff8cd251e11753  ./interface/html5/views/attendance/accrual_balance/AccrualBalanceViewController.js
 9b39c3a7430e89cd0ca2c878d37e53ae258bdce5  ./interface/html5/views/attendance/accrual_balance/AccrualBalanceView.html
-d21ce8d65ddbe04789e9f690b1ee4b3cf05a0295  ./interface/html5/views/help/AboutViewController.js
+1eda1b2735096222d390f95db140fd9331f3482c  ./interface/html5/views/help/AboutViewController.js
 9241c89c03619457cfe2b7d3416894232b4b6a29  ./interface/html5/views/help/AboutEditView.html
-792b3e4a2986189ae57a2e93dce0beb20c65c0c5  ./interface/html5/views/login/LoginViewController.js
+019531e32a02333268d603a55215e91a3c1c99b4  ./interface/html5/views/login/LoginViewController.js
 199f6b6f66cbccee2b8a292f36ebce79b0ddb836  ./interface/html5/views/login/LoginView.html
 a31f5bbca3f7b4bfdf809c8b24667a0df3ef4a41  ./interface/html5/views/BaseViewController.js
 c345e2b13d5eba10b6f9a8ffa81a7ee861ee404f  ./interface/html5/views/developer_tools/triggerParserError.js
@@ -2510,7 +2510,7 @@ bd4c08d005c7c8600d2e783eee5bc46fb8195e77  ./interface/html5/views/reports/timesh
 d995efece11e719533177aff77bfee0afaf32c8b  ./interface/html5/views/reports/exception_summary/ExceptionSummaryReportViewController.js
 89b97716c232a252ef2e4b6f7a547fe6a924042b  ./interface/html5/views/reports/t4a_summary/T4ASummaryReportView.html
 1dde84083447e0d2f0abc4b4730d293b777df5d3  ./interface/html5/views/reports/t4a_summary/T4ASummaryReportViewController.js
-c5fa6fb86338fea091d77cd519422b473f8b0931  ./interface/html5/views/reports/timesheet_detail/TimesheetDetailReportViewController.js
+8cfa0f9a009680414d7f5089f2ccab981990b1b8  ./interface/html5/views/reports/timesheet_detail/TimesheetDetailReportViewController.js
 5040cb5ccaef5e8884582e035ace97c1c9ef0cdc  ./interface/html5/views/reports/timesheet_detail/TimesheetDetailReportView.html
 39da92992f89641a8f56164bb14665859fc5b5f9  ./interface/html5/views/reports/tax_summary/TaxSummaryReportViewController.js
 d8d02407079df2942033b565c4ee4963da8ccced  ./interface/html5/views/reports/tax_summary/TaxSummaryReportView.html
@@ -3105,7 +3105,7 @@ a38ee0feb2ab83997e946c808e015cce56cee6dd  ./unit_tests/testcases/other/PunchDete
 e570262224e4f3a7e70bbb63fb441476c0dec31f  ./unit_tests/testcases/other/DateTimeTest.php
 7c86bd5c33441e56c4981da55781443601091fbc  ./unit_tests/testcases/other/ExceptionTest.php
 94fef4f40bb70957d30beec73700b57d1e3eb739  ./unit_tests/testcases/other/PermissionTest.php
-819c40fe45cc7c7f11c379e530938140791f3afe  ./unit_tests/testcases/other/MiscTest.php
+f91394058e8308c8cd8702850b29d10535ee04de  ./unit_tests/testcases/other/MiscTest.php
 f2ad799a4cb9f31d0c23bc19a2e2cb43dddf35f2  ./unit_tests/testcases/other/PunchTest.php
 07c2a05d8d8607dabc854f408cd8fd255c1c0aa7  ./unit_tests/testcases/other/SQLTest.php
 c68ce0ac1b17be6acbb3cd5829f5f013ee496c77  ./unit_tests/testcases/other/BrowserTest.php
@@ -3128,7 +3128,7 @@ b22a5ab879c9621649d7e3c0b06b1da2e98836c7  ./index.html
 3b5aa25fdf1992bd2ddfd83cde8dffdbbbfc2cf7  ./UPGRADE.txt
 917c71e9755aadd62f75f84b215eaaecbb62a867  ./includes/Database.inc.php
 a9876882e44025c88ce5e92c9709c8817b4ff3fa  ./includes/CLI.inc.php
-e97810b7a59226a4bc7c1ff5880bc5928d0e013a  ./includes/global.inc.php
+bc856c3fcfc742f220e489f6e5e7b46279ce71ad  ./includes/global.inc.php
 3e6193a901b2ae6af58dc788b70a117f4521be69  ./includes/ClassMap.inc.php
 c2f264ce24342c98fa50147ddb144fe1879f2ba7  ./includes/Interface.inc.php
 bdda1e3d17757215c8aec9974fc068601ff79dfb  ./includes/TableMap.inc.php

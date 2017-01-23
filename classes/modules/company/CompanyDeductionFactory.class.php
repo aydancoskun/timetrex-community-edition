@@ -54,6 +54,7 @@ class CompanyDeductionFactory extends Factory {
 	var $calculation_id_fields = array(
 										'10' => '10',
 										'15' => '15',
+										'16' => '16',
 										'17' => '17',
 										'18' => '18',
 										'19' => '19',
@@ -236,7 +237,9 @@ class CompanyDeductionFactory extends Factory {
 			case 'calculation':
 				$retval = array(
 										10 => TTi18n::gettext('Percent'),
+
 										15 => TTi18n::gettext('Advanced Percent'),
+										16 => TTi18n::gettext('Advanced Percent (w/Target)'), //Use two variables, one for Amount Target, and one for YTD Amount Target.
 										17 => TTi18n::gettext('Advanced Percent (Range Bracket)'),
 										18 => TTi18n::gettext('Advanced Percent (Tax Bracket)'),
 										19 => TTi18n::gettext('Advanced Percent (Tax Bracket Alt.)'),
@@ -1044,8 +1047,10 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('aLength of Service Days: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if	(	$int >= 0
-				AND
+		//Allow negative values which are calculated from the termination date.
+		if	(
+				//$int >= 0
+				//AND
 				$this->Validator->isFloat(			'maximum_length_of_service',
 													$int,
 													TTi18n::gettext('Maximum length of service is invalid')) ) {
@@ -1070,8 +1075,10 @@ class CompanyDeductionFactory extends Factory {
 
 		Debug::text('bLength of Service: '. $int, __FILE__, __LINE__, __METHOD__, 10);
 
-		if	(	$int >= 0
-				AND
+		//Allow negative values which are calculated from the termination date.
+		if	(
+				//$int >= 0
+				//AND
 				$this->Validator->isFloat(			'maximum_length_of_service',
 													$int,
 													TTi18n::gettext('Maximum length of service is invalid')) ) {
@@ -1421,7 +1428,9 @@ class CompanyDeductionFactory extends Factory {
 		return $retval;
 	}
 
-	function isActiveLengthOfService( $ud_obj, $epoch ) {
+	function isActiveLengthOfService( $ud_obj, $epoch, $pay_period_start_date = FALSE  ) {
+		//Epoch will normally be pay period end date.
+
 		$worked_time = 0;
 		if ( ( $this->getMinimumLengthOfServiceUnit() == 50 AND $this->getMinimumLengthOfService() > 0 )
 				OR ( $this->getMaximumLengthOfServiceUnit() == 50 AND $this->getMaximumLengthOfService() > 0 ) ) {
@@ -1442,15 +1451,36 @@ class CompanyDeductionFactory extends Factory {
 			$minimum_length_of_service_result = TRUE;
 		}
 
-		//Check maximum length of service.
-		if ( $this->getMaximumLengthOfService() == 0
-				OR ( $this->getMaximumLengthOfServiceUnit() == 50 AND $worked_time <= $this->getMaximumLengthOfService() )
-				OR ( $this->getMaximumLengthOfServiceUnit() != 50 AND $employed_days <= $this->getMaximumLengthOfServiceDays() ) ) {
-			$maximum_length_of_service_result = TRUE;
+
+		if ( $this->getMaximumLengthOfServiceDays() < 0 ) {
+			if ( $ud_obj->getEndDate()!= '' ) {
+				$length_of_service_date = $ud_obj->getEndDate();
+			} else {
+				$length_of_service_date = $ud_obj->getUserObject()->getTerminationDate();
+			}
+
+			if ( $length_of_service_date != '' ) {
+				//Disable when the length of service date falls within the pay period, or if its before the start the of the pay period (so it doesn't trigger on post-termination pay stubs)
+				//This is useful for disabling a Tax/Deduction record on the employees final pay stub.
+				if ( ( $length_of_service_date >= $pay_period_start_date AND $length_of_service_date <= $epoch ) OR $length_of_service_date <= $pay_period_start_date ) {
+					Debug::Text('   Final Pay Stub, disabling due to negative maximum length of service. Based On: '. TTDate::getDate('DATE+TIME', $ud_obj->getLengthOfServiceDate() ), __FILE__, __LINE__, __METHOD__, 10);
+					$maximum_length_of_service_result = FALSE;
+				} else {
+					$maximum_length_of_service_result = TRUE;
+				}
+			} else {
+				$maximum_length_of_service_result = TRUE; //No end date specified, so assume its always valid.
+			}
+		} else {
+			//Check maximum length of service.
+			if ( $this->getMaximumLengthOfService() == 0
+					OR ( $this->getMaximumLengthOfServiceUnit() == 50 AND $worked_time <= $this->getMaximumLengthOfService() )
+					OR ( $this->getMaximumLengthOfServiceUnit() != 50 AND $employed_days <= $this->getMaximumLengthOfServiceDays() ) ) {
+				$maximum_length_of_service_result = TRUE;
+			}
 		}
 
 		//Debug::Text('   Min Result: '. (int)$minimum_length_of_service_result .' Max Result: '. (int)$maximum_length_of_service_result, __FILE__, __LINE__, __METHOD__, 10);
-
 		if ( $minimum_length_of_service_result == TRUE AND $maximum_length_of_service_result == TRUE ) {
 			return TRUE;
 		}

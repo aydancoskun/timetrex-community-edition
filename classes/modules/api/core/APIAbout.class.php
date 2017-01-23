@@ -78,10 +78,16 @@ class APIAbout extends APIFactory {
 		}
 
 		$data['product_edition'] = Option::getByKey( ( DEPLOYMENT_ON_DEMAND == TRUE ) ? $current_company->getProductEdition() : getTTProductEdition(), $current_company->getOptions('product_edition') );
-
 		$data['application_name'] = APPLICATION_NAME;
-
 		$data['organization_url'] = ORGANIZATION_URL;
+
+		if ( DEPLOYMENT_ON_DEMAND == FALSE ) {
+			$data['operating_system'] = PHP_OS;
+			$data['php_version'] = PHP_VERSION;
+		} else {
+			$data['operating_system'] = FALSE;
+			$data['php_version'] = FALSE;
+		}
 
 		//Get Employee counts for this month, and last month
 		$month_of_year_arr = TTDate::getMonthOfYearArray();

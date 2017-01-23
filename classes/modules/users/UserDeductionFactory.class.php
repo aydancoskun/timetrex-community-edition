@@ -268,7 +268,7 @@ class UserDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getStartDate( $raw = FALSE ) {
 		$retval = FALSE;
 		if ( isset($this->data['start_date']) ) {
@@ -352,7 +352,7 @@ class UserDeductionFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getUserValue1() {
 		if ( isset($this->data['user_value1']) ) {
 			return $this->data['user_value1'];
@@ -773,7 +773,7 @@ class UserDeductionFactory extends Factory {
 
 		if ( in_array( $cd_obj->getCalculation(), array(100,200,300) ) AND (int)$cd_obj->getCompanyValue1() > 0 ) {
 			Debug::Text('Overriding Formula Type to: '. (int)$cd_obj->getCompanyValue1() .' From: '. $formula_type_id, __FILE__, __LINE__, __METHOD__, 10);
-			$formula_type_id = (int)$cd_obj->getCompanyValue1();			
+			$formula_type_id = (int)$cd_obj->getCompanyValue1();
 		}
 
 		require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
@@ -823,7 +823,7 @@ class UserDeductionFactory extends Factory {
 				Debug::Text('Percent: '. $percent .' Wage Base: '. $wage_base .' Exempt Amount: '. $exempt_amount, __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $percent != 0 ) {
-				
+
 					if ( $exempt_amount > 0 ) {
 						$amount = bcsub( $cd_obj->getCalculationPayStubAmount( $pay_stub_obj ), bcdiv( $exempt_amount, $annual_pay_periods ) );
 						Debug::Text('Amount After Exemption: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
@@ -877,6 +877,64 @@ class UserDeductionFactory extends Factory {
 
 				unset($amount, $ytd_amount, $percent, $wage_base);
 
+				break;
+			case 16: //Advanced Percent (w/Target)
+				if ( $this->getUserValue1() == '' ) {
+					$percent = $cd_obj->getUserValue1();
+				} else {
+					$percent = $this->getUserValue1();
+				}
+				$percent = $this->Validator->stripNonFloat( $percent );
+
+				if ( $this->getUserValue2() == '' ) {
+					$target_amount = $cd_obj->getUserValue2();
+				} else {
+					$target_amount = $this->getUserValue2();
+				}
+				$target_amount = $this->Validator->stripNonFloat( $target_amount );
+
+				if ( $this->getUserValue3() == '' ) {
+					$target_ytd_amount = $cd_obj->getUserValue3();
+				} else {
+					$target_ytd_amount = $this->getUserValue3();
+				}
+				$target_ytd_amount = $this->Validator->stripNonFloat( $target_ytd_amount );
+
+				Debug::Text('Percent: '. $percent .' Target Amount: '. $target_amount .' YTD Amount: '. $target_ytd_amount, __FILE__, __LINE__, __METHOD__, 10);
+				if ( $percent != 0 ) {
+					$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
+
+					//Make sure YTD amount includes any other amounts on the current pay stub, incase they have two calculations or PS amendments that affect the same account.
+					$ytd_amount = bcadd( $cd_obj->getPayStubEntryAmountSum( $pay_stub_obj, array( $cd_obj->getPayStubEntryAccount() ), 'current', 'amount' ), $cd_obj->getPayStubEntryAmountSum( $pay_stub_obj, array( $cd_obj->getPayStubEntryAccount() ), 'previous+ytd_adjustment', 'ytd_amount' ) );
+					Debug::Text('Amount: '. $amount .' YTD Amount: '. $ytd_amount, __FILE__, __LINE__, __METHOD__, 10);
+
+					$percent_amount = bcmul($amount, bcdiv($percent, 100) );
+
+					if ( $percent_amount != 0 ) {
+						$filtered_amount = Misc::getAmountUpToLimit( $percent_amount, $target_amount );
+						Debug::Text('  Filtered Amount: '. $filtered_amount .' YTD Amount: '. $ytd_amount, __FILE__, __LINE__, __METHOD__, 10);
+
+						$filtered_ytd_amount = Misc::getAmountDifferenceUpToLimit( $ytd_amount, $target_ytd_amount );
+						Debug::Text('  Filtered YTD Amount: '. $filtered_ytd_amount .' YTD Amount: '. $ytd_amount, __FILE__, __LINE__, __METHOD__, 10);
+
+						//Choose whichever filtered amount is lower.
+						if ( $filtered_ytd_amount < $filtered_amount ) {
+							$retval = $filtered_ytd_amount;
+						} else {
+							$retval = $filtered_amount;
+						}
+					} else {
+						$retval = 0;
+					}
+				} else {
+					$retval = 0;
+				}
+
+				if ( $percent >= 0 AND $retval < 0 ) {
+					$retval = 0;
+				}
+
+				unset($amount, $ytd_amount, $percent, $percent_amount, $filtered_amount, $filtered_ytd_amount, $target_amount, $target_ytd_amount);
 				break;
 			case 17: //Advanced Percent (Range Bracket)
 				if ( $this->getUserValue1() == '' ) {
@@ -1280,7 +1338,7 @@ class UserDeductionFactory extends Factory {
 					if ( in_array('pay_period_worked_days', $formula_variables) OR in_array('pay_period_paid_days', $formula_variables ) ) {
 						$pay_period_days_worked = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUser(), $pay_period_obj->getStartDate(), $pay_period_obj->getEndDate() );
 						$pay_period_days_absence = (array)$udtlf->getDaysPaidAbsenceByUserIDAndStartDateAndEndDate( $this->getUser(), $pay_period_obj->getStartDate(), $pay_period_obj->getEndDate() );
-					}					
+					}
 					if ( in_array('pay_period_worked_time', $formula_variables) OR in_array('pay_period_paid_time', $formula_variables ) ) {
 						$pay_period_worked_time = $udtlf->getWorkedTimeSumByUserIDAndStartDateAndEndDate( $this->getUser(), $pay_period_obj->getStartDate(), $pay_period_obj->getEndDate() );
 						$pay_period_absence_time = $udtlf->getPaidAbsenceTimeSumByUserIDAndStartDateAndEndDate( $this->getUser(), $pay_period_obj->getStartDate(), $pay_period_obj->getEndDate() );
@@ -1688,14 +1746,14 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
-				$pd_obj->setFormulaType( $formula_type_id );				
+				$pd_obj->setFormulaType( $formula_type_id );
 
 				$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
 				if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() != '' ) {
 					Debug::Text('Found Employee EI account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
-					$pd_obj->setYearToDateEIContribution(  $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
+					$pd_obj->setYearToDateEIContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
 					/*
 					$previous_ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
 					$current_ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
@@ -1715,7 +1773,7 @@ class UserDeductionFactory extends Factory {
 				}
 
 				break;
-			case 100: //Federal Income Tax				
+			case 100: //Federal Income Tax
 				if ( $this->getUserValue1() == '' ) {
 					$user_value1 = $cd_obj->getUserValue1();
 				} else {
@@ -1743,7 +1801,7 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
-				$pd_obj->setFormulaType( $formula_type_id );				
+				$pd_obj->setFormulaType( $formula_type_id );
 
 				if ( is_object( $this->getUserObject() ) ) {
 					$currency_id = $this->getUserObject()->getCurrency();
@@ -1852,8 +1910,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
-				$pd_obj->setFormulaType( $formula_type_id );				
-				
+				$pd_obj->setFormulaType( $formula_type_id );
+
 				if ( is_object( $this->getUserObject() ) ) {
 					$currency_id = $this->getUserObject()->getCurrency();
 					$pd_obj->setUserCurrency( $currency_id );
@@ -1861,7 +1919,7 @@ class UserDeductionFactory extends Factory {
 				}
 
 				$pd_obj->setYearToDateGrossIncome( $cd_obj->getCalculationYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
-				$pd_obj->setYearToDateDeduction( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.			
+				$pd_obj->setYearToDateDeduction( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
 				$pd_obj->setGrossPayPeriodIncome( $amount );
 
 				if ( $this->getCompanyDeductionObject()->getCountry() == 'CA' ) {
@@ -1995,8 +2053,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
-				$pd_obj->setFormulaType( $formula_type_id );				
-				
+				$pd_obj->setFormulaType( $formula_type_id );
+
 				$pd_obj->setDistrictFilingStatus( $user_value1 );
 				$pd_obj->setDistrictAllowance( $user_value2 );
 
@@ -2005,7 +2063,7 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setUserValue3( $user_value3 );
 
 				$pd_obj->setYearToDateGrossIncome( $cd_obj->getCalculationYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
-				$pd_obj->setYearToDateDeduction( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.				
+				$pd_obj->setYearToDateDeduction( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) ); //Make sure YTD amount is specified for all calculation types.
 				$pd_obj->setGrossPayPeriodIncome( $amount );
 
 				$retval = $pd_obj->getDistrictPayPeriodDeductions();
@@ -2046,6 +2104,8 @@ class UserDeductionFactory extends Factory {
 					}
 					$retval = $this->Validator->stripNonFloat( $wage_base );
 					break;
+				case 16: //Advanced Percent (w/Target) -- No maximum
+					break;
 				case 17: //Advanced Percent (Range Bracket)
 					if ( $this->getUserValue3() == '' ) {
 						$max_wage = $cd_obj->getUserValue3();
@@ -2076,6 +2136,7 @@ class UserDeductionFactory extends Factory {
 		if ( is_object( $cd_obj ) ) {
 			switch ( $cd_obj->getCalculation() ) {
 				case 15: //Advanced Percent
+				case 16: //Advanced Percent (w/Target)
 				case 17: //Advanced Percent (Range Bracket)
 				case 18: //Advanced Percent (Tax Bracket)
 					if ( $this->getUserValue1() == '' ) {
@@ -2195,7 +2256,7 @@ class UserDeductionFactory extends Factory {
 						case 'start_date':
 						case 'end_date':
 							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->$function() );
-							break;						
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$data[$variable] = $this->$function();

@@ -632,7 +632,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		form_item_input.TComboBox( {field: 'timesheet_verify_type_id'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.timesheet_verify_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Timesheet Verification' ), form_item_input, tab_advanced_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'TimeSheet Verification' ), form_item_input, tab_advanced_column1 );
 
 		// Verification Window Starts
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );

@@ -119,6 +119,23 @@ class APINotification extends APIFactory {
 										);
 				}
 
+				//Give early warning to installs using older stack components before the next version is released that forces the upgrade.
+				if ( version_compare( PHP_VERSION, '5.4.0', '<' ) == TRUE ) {
+					if ( OPERATING_SYSTEM == 'WIN' ) {
+						$message = TTi18n::getText( 'WARNING: System stack components are out-of-date and not supported with this version of %1! Please perform a manual upgrade to the latest version of %1 immediately!', APPLICATION_NAME );
+					} else {
+						$message = TTi18n::getText( 'WARNING: System stack components (PHP/%2) are out-of-date and not supported with this version of %1! Please upgrade them immediately!', array( APPLICATION_NAME, strtoupper($config_vars['database']['type']) ) );
+					}
+
+					$retarr[] = array(
+							'delay'       => -1, //0= Show until clicked, -1 = Show until next getNotifications call.
+							'bg_color'    => '#FF0000', //Red
+							'message'     => $message,
+							'destination' => NULL,
+					);
+					unset($message);
+				}
+
 				//System Requirements not being met.
 				if ( isset($system_settings['valid_install_requirements']) AND DEPLOYMENT_ON_DEMAND == FALSE AND (int)$system_settings['valid_install_requirements'] == 0 ) {
 					$retarr[] = array(
