@@ -53,6 +53,13 @@ extract	(FormVariables::GetVariables(
 												'parent_id',
 												'SessionID'
 												) ) );
+
+if ( Misc::checkValidReferer() == FALSE ) { //Help prevent CSRF attacks with this.
+	echo TTi18n::getText( 'Invalid referrer, possible CSRF.' );
+	Debug::writeToLog();
+	exit;
+}
+
 $object_type = trim( strtolower($object_type) );
 Debug::Text('Object Type: '. $object_type .' ID: '. $object_id .' Parent ID: '. $parent_id .' POST SessionID: '. $SessionID, __FILE__, __LINE__, __METHOD__, 10);
 

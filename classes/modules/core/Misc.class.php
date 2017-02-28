@@ -886,6 +886,22 @@ class Misc {
 		return ($asString ? "{$rgb[0]} {$rgb[1]} {$rgb[2]}" : $rgb);
 	}
 
+	//Mititage CSV Injection attacks: See below links for more information:
+	//[1] https://www.owasp.org/index.php/CSV_Excel_Macro_Injection
+	//[2] https://hackerone.com/reports/72785
+	//[3] https://hackerone.com/reports/90131
+	static function escapeCSVTriggerChars( $input ) {
+		$first_char = substr( trim($input), 0, 1 );
+		$trigger_chars = array( '=', '-','+', '|');
+		if ( in_array( $first_char, $trigger_chars ) ) {
+			$retval = '\''. $input; //Prepend with single quote "'" to force it to text.
+		} else {
+			$retval =  $input;
+		}
+
+		return str_replace('|', '\|', $retval ); //Make sure pipes are escaped anywhere in the string.
+	}
+
 	static function Array2CSV( $data, $columns = NULL, $ignore_last_row = TRUE, $include_header = TRUE, $eol = "\n" ) {
 		if ( is_array($data) AND count($data) > 0
 				AND is_array($columns) AND count($columns) > 0 ) {
@@ -909,7 +925,7 @@ class Misc {
 				$row_values = array();
 				foreach ($columns as $column_key => $column_name ) {
 					if ( isset($rows[$column_key]) ) {
-						$row_values[] = str_replace("\"", "\"\"", $rows[$column_key]);
+						$row_values[] = str_replace("\"", "\"\"", Misc::escapeCSVTriggerChars( $rows[$column_key] ) );
 					} else {
 						//Make sure we insert blank columns to keep proper order of values.
 						$row_values[] = NULL;
@@ -1464,9 +1480,14 @@ class Misc {
 	static function getRemoteHTTPFileSize( $url ) {
 		if ( function_exists('curl_exec') ) {
 			Debug::Text( 'Using CURL for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
-			$result = FALSE; // Assume failure.
 
-			$curl = curl_init( $url );
+			$curl = curl_init();
+
+			//Don't require SSL verification, as the SSL certs may be out-of-date: http://stackoverflow.com/questions/316099/cant-connect-to-https-site-using-curl-returns-0-length-content-instead-what-c
+			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
+			curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, FALSE );
+
+			curl_setopt( $curl, CURLOPT_URL, $url );
 
 			// Issue a HEAD request and follow any redirects.
 			curl_setopt( $curl, CURLOPT_NOBODY, TRUE );
@@ -1505,6 +1526,11 @@ class Misc {
 			$fp = fopen( $file_name, 'w+' );
 
 			$curl = curl_init();
+
+			//Don't require SSL verification, as the SSL certs may be out-of-date: http://stackoverflow.com/questions/316099/cant-connect-to-https-site-using-curl-returns-0-length-content-instead-what-c
+			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
+			curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, FALSE );
+
 			curl_setopt( $curl, CURLOPT_URL, $url );
 			curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
 			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, FALSE ); // Set return transfer to false
@@ -2199,8 +2225,14 @@ class Misc {
 			return FALSE;
 		}
 
+		$registration_key = 'N/A';
 		try {
-			$registration_key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
+			//If during an install/schema upgrade a SQL error has occurred, the transaction will be aborted and cause the below select to fail.
+			//To avoid an infinite loop, always check that the transaction hasn't already failed.
+			global $db;
+			if ( $db->hasFailedTrans() == FALSE ) {
+				$registration_key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
+			}
 		} catch (Exception $e) {
 			Debug::Text( 'Error getting registration key!', __FILE__, __LINE__, __METHOD__, 1);
 		}

@@ -557,8 +557,10 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			EmbeddedMessage.reply( record, ignoreWarning, function(result) {
 				if (result.isValid()) {
 					var id = $this.current_edit_record.id;
-					$this.onViewClick(id, true);
-					//$this.initAuthorizationHistoryLayout();
+
+					//see #2224 - Unable to get property 'find' of undefined 
+					$this.removeEditView();
+					$this.onViewClick( id );
 				} else {
 					$this.setErrorTips(result);
 					$this.setErrorMenu();

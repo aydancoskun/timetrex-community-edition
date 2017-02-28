@@ -254,14 +254,14 @@ class Debug {
 					foreach( $trace_line['args'] as $arg ) {
 						if ( is_array($arg) ) {
 							if ( self::getVerbosity() == 11 ) {
-								$args[] = self::varDump( $arg );
+								$args[] = self::varDump( $arg ); //NOTE: If this contains an exception object from ADODB and is triggered from a SQL error, it could cause a circular reference and exhaust all memory.
 							} else {
 								//Don't display the entire array is it polutes the log and is too large for syslog anyways.
 								$args[] = 'Array('. count($arg) .')';
 							}
 						} elseif ( is_object($arg) ) {
 							if ( self::getVerbosity() == 11 ) {
-								$args[] = self::varDump( $arg );
+								$args[] = self::varDump( $arg ); //NOTE: If this contains an exception object from ADODB and is triggered from a SQL error, it could cause a circular reference and exhaust all memory.
 							} else {
 								//Don't display the entire array is it polutes the log and is too large for syslog anyways.
 								$args[] = 'Object('. get_class( $arg ) .')';

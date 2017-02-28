@@ -120,7 +120,9 @@ function CLIExit( $code = 0, $delete_lock_file = TRUE ) {
 
 	if ( $delete_lock_file == TRUE ) {
 		global $lock_file;
-		$lock_file->delete();
+		if ( is_object( $lock_file ) ) {
+			$lock_file->delete();
+		}
 	}
 
 	exit($code);
@@ -507,7 +509,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 							Debug::Text('Got File Upgrade URL and size, breaking retry loop...'. $i, __FILE__, __LINE__, __METHOD__, 10);
 							break;
 						} else {
-							Debug::Text('Unable to remote File Upgrade URL size, retrying: '. $i, __FILE__, __LINE__, __METHOD__, 10);
+							Debug::Text('Unable to get remote File Upgrade URL size, retrying: '. $i, __FILE__, __LINE__, __METHOD__, 10);
 						}
 					}
 
@@ -536,6 +538,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 								Debug::Text( 'ERROR: File did not download correctly...', __FILE__, __LINE__, __METHOD__, 10 );
 								echo 'ERROR: File did not download correctly...' . "\n";
 								setAutoUpgradeFailed();
+								CLIExit(1);
 							} else {
 								echo 'Downloaded file: ' . $upgrade_file_name . ' Size: ' . filesize( $upgrade_file_name ) . "\n";
 							}

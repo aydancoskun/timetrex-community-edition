@@ -19,8 +19,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA *
  * ------------------------------------------------------------------------- *
  *
- * This command line script rips gettext strings from smarty file, 
- * and prints them to stdout in C format, that can later be used with the 
+ * This command line script rips gettext strings from smarty file,
+ * and prints them to stdout in C format, that can later be used with the
  * standard gettext tools.
  *
  * Usage:
@@ -34,6 +34,12 @@
  * @author	Sagi Bashari <sagi@boom.org.il>
  * @copyright 2004-2005 Sagi Bashari
  */
+
+if ( PHP_SAPI != 'cli' ) {
+	echo "This script can only be called from the Command Line.\n";
+	exit;
+}
+
 
 // smarty open tag
 $ldq = preg_quote('{');
@@ -72,11 +78,11 @@ function do_file($file)
 			$content,
 			$matches
 	);
-	
+
 	for ($i=0; $i < count($matches[0]); $i++) {
 		// TODO: add line number
 		echo "/* $file */\n"; // credit: Mike van Lammeren 2005-02-14
-		
+
 		if (preg_match('/plural\s*=\s*["\']?\s*(.[^\"\']*)\s*["\']?/', $matches[2][$i], $match)) {
 			echo 'ngettext("'.fs($matches[3][$i]).'","'.fs($match[1]).'",x);'."\n";
 		} else {
@@ -103,7 +109,7 @@ function do_dir($dir)
 			do_dir($entry);
 		} else { // if file, parse only if extension is matched
 			$pi = pathinfo($entry);
-			
+
 			if (isset($pi['extension']) && in_array($pi['extension'], $GLOBALS['extensions'])) {
 				do_file($entry);
 			}

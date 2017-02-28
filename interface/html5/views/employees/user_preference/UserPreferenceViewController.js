@@ -732,13 +732,13 @@ UserPreferenceViewController = BaseViewController.extend( {
 	},
 
 	onSaveDone: function( result ) {
-		var user_id = '';
-		user_id = this.current_edit_record.id;
+		// #2224 - Don't use current_edit_record here, use getSelectedItem() instead, or it causes:
+		// Uncaught Error From: UserPreferenceView Error: Unable to get property 'id' of undefined or null reference
+		var user_id = this.getSelectedItem().id;
 
 		if ( user_id === LocalCacheData.getLoginUser().id ) {
 			Global.updateUserPreference();
 		}
-
 	},
 
 	onSaveAndContinueDone: function( result ) {

@@ -1425,6 +1425,20 @@ abstract class Factory {
 	private function parseColumnName($column) {
 		$column = trim($column);
 
+		//Make sure there isn't a SQL injection attack here, but still allow things like: "order by a.column = 1 asc"
+		//  Example attack vectors:
+		// 		'(SELECT 1)-- .id.' => 1
+		//  This may cause problems if we want to use a function in sorting though.
+		if ( preg_match('/^([a-z0-9_\=\.\ ]+)$/i', $column ) !== 1 ) {
+			if ( !defined( 'UNIT_TEST_MODE' ) OR UNIT_TEST_MODE === FALSE ) {
+				trigger_error('ERROR: Invalid column name: '. $column); //Trigger error so we can get feedback of any problems or potential attacks.
+			} else {
+				Debug::Text('ERROR: Invalid column name: '. $column, __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			return FALSE;
+		}
+
 		if ( strstr($column, '=') ) {
 			$tmp_column = explode('=', $column);
 			$retval = trim($tmp_column[0]);
@@ -1451,21 +1465,21 @@ abstract class Factory {
 			$rs = $this->getEmptyRecordSet();
 			$fields = $this->getRecordSetColumnList($rs);
 
-			if ( is_array($fields) ) {
+			if ( is_array( $fields ) ) {
 				foreach ( $array as $orig_column => $expression ) {
-				if ( is_array( $expression ) ) { //Handle nested arrays, so we the same column can be specified multiple times.
+					if ( is_array( $expression ) ) { //Handle nested arrays, so we the same column can be specified multiple times.
 						foreach ( $expression as $orig_column => $expression ) {
 							$orig_column = trim( $orig_column );
-						$column = $this->parseColumnName( $orig_column );
+							$column = $this->parseColumnName( $orig_column );
 							$expression = trim( $expression );
 
 							if ( in_array( $column, $fields ) ) {
 								$sql_chunks[] = $orig_column . ' ' . $expression;
+							}
 						}
-					}
-				} else {
+					} else {
 						$orig_column = trim( $orig_column );
-					$column = $this->parseColumnName( $orig_column );
+						$column = $this->parseColumnName( $orig_column );
 						$expression = trim( $expression );
 
 						if ( in_array( $column, $fields ) ) {
@@ -1550,60 +1564,75 @@ abstract class Factory {
 		return $array;
 	}
 
+	public function getValidSQLColumns( $array, $strict = TRUE, $additional_fields = NULL ) {
+		$retarr = array();
+
+		$fields = $this->getRecordSetColumnList( $this->getEmptyRecordSet() );
+
+		//Merge additional fields
+		if ( is_array($additional_fields) ) {
+			$fields = array_merge( $fields, $additional_fields);
+		}
+		//Debug::Arr($fields, 'Column List:', __FILE__, __LINE__, __METHOD__, 10);
+
+		foreach ( $array as $orig_column => $expression ) {
+			$orig_column = trim($orig_column);
+
+			if ( $strict == FALSE ) {
+				$retarr[$orig_column] = $expression;
+			} else  {
+				if ( in_array( $orig_column, $fields ) ) {
+					$retarr[$orig_column] = $expression;
+				} else {
+					$column = $this->parseColumnName( $orig_column );
+					if ( in_array( $column, $fields ) ) {
+						$retarr[$orig_column] = $expression;
+					} else {
+						Debug::text('Invalid Column: '. $orig_column, __FILE__, __LINE__, __METHOD__, 10);
+						if ( defined( 'UNIT_TEST_MODE' ) AND UNIT_TEST_MODE === TRUE ) {
+							throw new Exception( 'Invalid column: ' . $orig_column );
+						}
+					}
+				}
+			}
+		}
+
+		//Debug::Arr($retarr, 'Valid Columns: ', __FILE__, __LINE__, __METHOD__, 10);
+		return $retarr;
+	}
+
 	protected function getSortSQL($array, $strict = TRUE, $additional_fields = NULL) {
 		if ( is_array($array) ) {
 			//Disabled in v10 to start migrating away from FlexArray formats.
 			//  This is still needed, as clicking on a column header to sort by that seems to use the wrong format.
 			$array = $this->convertFlexArray( $array );
 
-			$alt_order_options = array( 1 => 'asc', -1 => 'desc');
-			$order_options = array('asc', 'desc');
+			$alt_order_options = array( 1 => 'ASC', -1 => 'DESC');
+			$order_options = array('ASC', 'DESC');
 
-			$rs = $this->getEmptyRecordSet();
-			$fields = $this->getRecordSetColumnList($rs);
-
-			//Merge additional fields
-			if ( is_array($additional_fields) ) {
-				$fields = array_merge( $fields, $additional_fields);
-			}
-			//Debug::Arr($fields, 'Column List:', __FILE__, __LINE__, __METHOD__, 10);
-
-			foreach ( $array as $orig_column => $order ) {
-				$orig_column = trim($orig_column);
-
-				$column = $this->parseColumnName( $orig_column );
-				$order = trim($order);
-				//Handle both order types.
-				if ( is_numeric($order) ) {
-					if ( isset($alt_order_options[$order]) ) {
-						$order = $alt_order_options[$order];
+			$valid_columns = $this->getValidSQLColumns( $array, $strict, $additional_fields );
+			if ( is_array($valid_columns) ) {
+				foreach( $valid_columns as $orig_column => $order ) {
+					$order = trim( strtoupper($order) );
+					//Handle both order types.
+					if ( is_numeric($order) ) {
+						if ( isset($alt_order_options[$order]) ) {
+							$order = $alt_order_options[$order];
+						}
 					}
-				}
 
-				if ( $strict == FALSE
-						OR (	(
-									in_array($column, $fields)
-									OR
-									in_array($orig_column, $fields)
-								)
-								AND in_array( strtolower($order), $order_options)
-							)
-						) {
-					//Make sure ';' does not appear in the resulting order string, to help prevent attacks in non-strict mode.
-					if ( $strict == TRUE OR ( $strict == FALSE AND strpos( $orig_column, ';') === FALSE AND strpos( $order, ';') === FALSE ) ) {
-						$sql_chunks[] = $orig_column.' '.$order;
+					if ( $strict == FALSE OR in_array( $order, $order_options ) ) {
+						$sql_chunks[] = $orig_column .' '. $order;
 					} else {
-						Debug::text('ERROR: Found ";" in SQL order string: '. $orig_column .' Order: '. $order, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('Invalid Sort Order: '. $orig_column .' Order: '. $order, __FILE__, __LINE__, __METHOD__, 10);
 					}
-				} else {
-					Debug::text('Invalid Sort Column/Order: '. $column .' Order: '. $order, __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
 
 			if ( isset($sql_chunks) ) {
 				$sql = implode(',', $sql_chunks);
 
-				return ' order by '. $this->db->escape( $sql );
+				return ' ORDER BY ' . $this->db->escape( $sql );
 			}
 		}
 

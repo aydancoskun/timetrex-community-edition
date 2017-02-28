@@ -2949,7 +2949,6 @@ class CalculatePolicy {
 		//Loop over each overtime policy that applies to this day.
 		$over_time_policies = $this->filterOverTimePolicy( $date_stamp );
 		if ( is_array( $over_time_policies ) ) {
-			//$weekly_over_time_pay_code_ids = $this->getWeeklyOverTimePolicyPayCodes();
 			$weekly_over_time_src_object_ids = array( 30 => $this->getWeeklyOverTimePolicyIDs() ); //Force to only include other OverTime ObjectTypeIDs.
 
 			$date_stamp = TTDate::getMiddleDayEpoch( $date_stamp ); //Optimization - Move outside loop.
@@ -3157,10 +3156,9 @@ class CalculatePolicy {
 								$minimum_days_worked = 7;
 								break;
 						}
+						$weekly_over_time_src_object_ids[30][] = $otp_obj->getID(); //Always include ourselves when calculating policies that span multiple days, otherwise the contributing shift/pay codes has to be updated to include ourselves.
 
 						//This always resets on the week boundary.
-						//$days_worked_arr = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUserObject()->getId(), TTDate::getBeginWeekEpoch($date_stamp, $start_week_day_id), $date_stamp );
-						//$days_worked_arr = (array)$this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( TTDate::getBeginWeekEpoch( $date_stamp, $this->start_week_day_id ), $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], NULL, $weekly_over_time_pay_code_ids ) );
 						$days_worked_arr = (array)$this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( TTDate::getBeginWeekEpoch( $date_stamp, $this->start_week_day_id ), $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], NULL, NULL, $weekly_over_time_src_object_ids ) );
 
 						$weekly_days_worked = count($days_worked_arr);
@@ -3204,10 +3202,15 @@ class CalculatePolicy {
 								break;
 						}
 
+						$weekly_over_time_src_object_ids[30][] = $otp_obj->getID(); //Always include ourselves when calculating policies that span multiple days, otherwise the contributing shift/pay codes has to be updated to include ourselves.
+
+						//Make sure we pull in data from previous weeks if needed.
+						$filter_start_date = ( $date_stamp - (86400 * $minimum_days_worked) );
+						Debug::text('   Getting data for first week: Start: '. TTDate::getDate('DATE', $filter_start_date ) .' End: '. TTDate::getDate('DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+						$this->getRequiredData( $filter_start_date, FALSE ); //Optimization: Prevents holidays in the first week from causing the first week to be calculated fully.
+
 						//This does not reset on the week boundary.
-						//$days_worked_arr = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUserObject()->getId(), ( $date_stamp - (86400 * $minimum_days_worked) ), $date_stamp );
-						//$days_worked_arr = (array)$this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( ( $date_stamp - (86400 * $minimum_days_worked) ), $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], NULL, $weekly_over_time_pay_code_ids ) );
-						$days_worked_arr = (array)$this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( ( $date_stamp - (86400 * $minimum_days_worked) ), $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], NULL, NULL, $weekly_over_time_src_object_ids ) );
+						$days_worked_arr = (array)$this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $filter_start_date, $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], NULL, NULL, $weekly_over_time_src_object_ids ) );
 
 						$weekly_days_worked = count($days_worked_arr);
 						Debug::text('   Weekly Days Worked: '. $weekly_days_worked .' Minimum Required: '. $minimum_days_worked, __FILE__, __LINE__, __METHOD__, 10);
@@ -3223,7 +3226,7 @@ class CalculatePolicy {
 							Debug::text('   NOT After Days Consecutive Worked...', __FILE__, __LINE__, __METHOD__, 10);
 							continue;
 						}
-						unset($days_worked_arr, $weekly_days_worked, $minimum_days_worked);
+						unset($days_worked_arr, $weekly_days_worked, $minimum_days_worked, $filter_start_date);
 						break;
 					case 350: //2nd Consecutive Day
 					case 351: //3rd Consecutive Day
@@ -3270,8 +3273,6 @@ class CalculatePolicy {
 						}
 
 						//This does not reset on the week boundary.
-						//$days_worked_arr = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUserObject()->getId(), $range_start_date, $date_stamp );
-						//$days_worked_arr = (array)$this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $range_start_date, $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], NULL, $weekly_over_time_pay_code_ids ) );
 						$days_worked_arr = (array)$this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $range_start_date, $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], NULL, NULL, $weekly_over_time_src_object_ids ) );
 						sort($days_worked_arr);
 
@@ -3321,6 +3322,8 @@ class CalculatePolicy {
 								$minimum_days_worked = 7;
 								break;
 						}
+
+						$weekly_over_time_src_object_ids[30][] = $otp_obj->getID(); //Always include ourselves when calculating policies that span multiple days, otherwise the contributing shift/pay codes has to be updated to include ourselves.
 
 						//This always resets on the week boundary.
 						//$days_worked_arr = (array)$udtlf->getDaysWorkedByUserIDAndStartDateAndEndDate( $this->getUserObject()->getId(), TTDate::getBeginWeekEpoch($date_stamp, $start_week_day_id), $date_stamp );
@@ -6028,8 +6031,9 @@ class CalculatePolicy {
 
 										Debug::text(' Maximum Daily: '. $maximum_daily_trigger_time .' Weekly: '. $maximum_weekly_trigger_time .' Daily Total Time Used: '. $total_daily_time_used .' Daily Trigger Time: '. $daily_trigger_time, __FILE__, __LINE__, __METHOD__, 10);
 										if ( $maximum_daily_trigger_time > 0 AND ( $maximum_weekly_trigger_time === FALSE OR $maximum_daily_trigger_time < $maximum_weekly_trigger_time ) ) {
-											$pp_obj->setMaximumTime( $maximum_daily_trigger_time ); //Temporarily set the maximum time in memory so it doesn't exceed the maximum daily trigger time.
-											Debug::text(' Set Daily Maximum Time to: '. $pp_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
+											//$pp_obj->setMaximumTime( $maximum_daily_trigger_time );
+											$tmp_maximum_time = $maximum_daily_trigger_time; //Temporarily set the maximum time in memory so it doesn't exceed the maximum daily trigger time.
+											Debug::text(' Set Daily Maximum Time to: '. $tmp_maximum_time, __FILE__, __LINE__, __METHOD__, 10);
 										} else {
 											if ( $maximum_weekly_trigger_time !== FALSE AND ( $maximum_weekly_trigger_time <= 0 OR ( $maximum_weekly_trigger_time < $daily_trigger_time ) ) ) {
 												Debug::text(' Exceeded Weekly Maximum Time to: '. $pp_obj->getMaximumTime() .' Skipping...', __FILE__, __LINE__, __METHOD__, 10);
@@ -6037,12 +6041,21 @@ class CalculatePolicy {
 											}
 
 											if ( $maximum_weekly_trigger_time < $pp_obj->getMaximumTime() ) {
-												$pp_obj->setMaximumTime( $maximum_weekly_trigger_time ); //Temporarily set the maximum time in memory so it doesn't exceed the maximum daily trigger time.
+												//$pp_obj->setMaximumTime( $maximum_weekly_trigger_time );
+												$tmp_maximum_time = $maximum_daily_trigger_time; //Temporarily set the maximum time in memory so it doesn't exceed the maximum daily trigger time.
+												Debug::text(' Set Weekly Maximum Time to: '. $tmp_maximum_time, __FILE__, __LINE__, __METHOD__, 10);
 											}
-											Debug::text(' Set Weekly Maximum Time to: '. $pp_obj->getMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
 											$maximum_daily_trigger_time = $maximum_weekly_trigger_time;
 										}
-										unset($maximum_weekly_trigger_time);
+
+										//Make sure we don't change the maximum time if its less than whats calculated above. Otherwise if its set to say 1hr and its calculated to 4hrs above, it should stay at 1hr.
+										if ( isset($tmp_maximum_time) AND ( $pp_obj->getMaximumTime() == 0 OR $pp_obj->getMaximumTime() > $tmp_maximum_time ) ) {
+											$pp_obj->setMaximumTime( $tmp_maximum_time );
+											Debug::text(' Setting temporary Maximum Time to: '. $tmp_maximum_time, __FILE__, __LINE__, __METHOD__, 10);
+										} else {
+											Debug::text(' NOT Setting temporary Maximum Time...', __FILE__, __LINE__, __METHOD__, 10);
+										}
+										unset($maximum_weekly_trigger_time, $tmnp_maximum_time);
 									}
 								}
 								Debug::text(' Daily Trigger Time: '. $daily_trigger_time .' Max: '. $maximum_daily_trigger_time, __FILE__, __LINE__, __METHOD__, 10);

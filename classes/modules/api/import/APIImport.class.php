@@ -69,7 +69,7 @@ class APIImport extends APIFactory {
 		if ( $this->getPermissionObject()->Check('user', 'add') AND ($this->getPermissionObject()->Check('user', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_child') ) ) {
 			$retarr['-1010-user'] = TTi18n::getText('Employees');
 		}
-		if ( $this->getPermissionObject()->Check('user', 'edit_bank') AND $this->getPermissionObject()->Check('user', 'edit_child_bank')) {
+		if ( $this->getPermissionObject()->Check('user', 'edit_bank') OR $this->getPermissionObject()->Check('user', 'edit_child_bank')) {
 			$retarr['-1015-bank_account'] = TTi18n::getText('Employee Bank Accounts');
 		}
 		if ( $this->getPermissionObject()->Check('branch', 'add') AND $this->getPermissionObject()->Check('branch', 'edit') ) {

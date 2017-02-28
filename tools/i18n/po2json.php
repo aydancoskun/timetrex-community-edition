@@ -1,4 +1,8 @@
 <?php
+if ( PHP_SAPI != 'cli' ) {
+	echo "This script can only be called from the Command Line.\n";
+	exit;
+}
 
 /**
  * String object
@@ -63,9 +67,9 @@ class PoeditParser {
 			preg_match_all('# ^ (msgid|msgstr)\ " ( (?: (?>[^"\\\\]++) | \\\\\\\\ | (?<!\\\\)\\\\(?!\\\\) | \\\\" )* ) (?<!\\\\)" $ #ixm', $part, $matches2, PREG_SET_ORDER);
 			$k = NULL;
             if(isset($matches2[0][2])){
-                $k = $this->_fixQuotes($matches2[0][2]);	
+                $k = $this->_fixQuotes($matches2[0][2]);
             }
-			
+
 			$v = !empty($matches2[1][2]) ? $this->_fixQuotes($matches2[1][2]) : '';
 
 			$this->strings[$k] = new PoeditString($k, $v, $isFuzzy, $comments);
@@ -97,7 +101,7 @@ class PoeditParser {
 				$str[$s->key] = $s->value;
 			} else {
 				//$str[$s->key] = $s->key; //Don't export strings that haven't been translated to save space.
-			}		
+			}
 		}
 		return json_encode($str);
 	}
@@ -117,7 +121,7 @@ class PoeditParser {
 }
 
 /**
- * 
+ *
  * @param unknown_type $args
  */
 function buildOptions($args) {
@@ -143,11 +147,11 @@ function buildOptions($args) {
 
 /**
  * Script entry point
- * 
+ *
  * Usage :
- * ======= 
+ * =======
  * php po2json -i <path/to/file.po> -o <path/to/file.json> {optional} -n <variable name (default is l10n)>
- * 
+ *
  * This script is based on the project jsgettext : http://code.google.com/p/jsgettext/
  * I've updated it slightly to meet my need
  */

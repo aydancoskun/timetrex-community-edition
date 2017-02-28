@@ -1104,18 +1104,22 @@ EmployeeViewController = BaseViewController.extend( {
 			case 'first_name':
 				var widget = this.edit_view_ui_dic['first_name_1'];
 				widget.setValue( target.getValue() );
+				this.current_edit_record.first_name_1 = target.getValue();
 				break;
 			case 'last_name':
 				widget = this.edit_view_ui_dic['last_name_1'];
 				widget.setValue( target.getValue() );
+				this.current_edit_record.last_name_1 = target.getValue();
 				break;
 			case 'first_name_1':
 				widget = this.edit_view_ui_dic['first_name'];
 				widget.setValue( target.getValue() );
+				this.current_edit_record.first_name = target.getValue();
 				break;
 			case 'last_name_1':
 				widget = this.edit_view_ui_dic['last_name'];
 				widget.setValue( target.getValue() );
+				this.current_edit_record.last_name = target.getValue();
 				break;
 			case 'country':
 				widget = this.edit_view_ui_dic['province'];

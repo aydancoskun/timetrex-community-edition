@@ -584,7 +584,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					'job_item_id2' => (int)$job_item_id );
 
 			$query .= ' OR ( a.id = '. (int)$replaced_id .' AND a.user_id = ? AND a.start_time = ? AND a.end_time = ? AND a.branch_id = ? AND a.department_id = ? AND a.job_id = ? AND a.job_item_id = ? AND a.deleted = 0 ) ';
-			$order = ( array('a.id' => ' = '. $replaced_id .' desc') + $order );
+			$order = ( array('a.id' => ' = '. (int)$replaced_id .' desc') + $order );
 		}
 
 		$query .= $this->getWhereSQL( $where );
@@ -676,6 +676,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		$ph = array();
 
+		//Check for committed OPEN schedules that override open recurring schedules.
 		$query = '
 					SELECT
 							a.id as id,
@@ -705,6 +706,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								LEFT JOIN schedule as sf_c ON 			(
 																			rsf_b.company_id = sf_c.company_id
 																			AND rsf_b.user_id = 0
+																			AND rsf_b.date_stamp = sf_c.date_stamp 
 																			AND ( rsf_b.branch_id = sf_c.branch_id OR rsf_b.branch_id = -1 )
 																			AND ( rsf_b.department_id = sf_c.department_id OR rsf_b.department_id = -1 )
 																			AND ( rsf_b.job_id = sf_c.job_id OR rsf_b.job_id = -1 )
@@ -715,7 +717,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['start_date'], 'start_timestamp', $ph ) : NULL;
 		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'sf_c.start_time', $filter_data['end_date'], 'end_timestamp', $ph ) : NULL;
 		$ph['company_id'] = (int)$company_id;
+		$ph['company_id4'] = (int)$company_id; //Needs to be twice.
 
+		//Check for NON-OPEN recurring schedules that override other open recurring schedules.
 		$query .= '
 																			AND sf_c.deleted = 0
 																		)
@@ -745,13 +749,23 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 										rsf_c.id as recurring_schedule_id
 								FROM '. $rsf->getTable() .' as rsf_b
 								LEFT JOIN '. $rscf->getTable() .' as rscf_b ON rsf_b.recurring_schedule_control_id = rscf_b.id
-								LEFT JOIN '. $rsf->getTable() .' as rsf_c ON 	(
+								LEFT JOIN 	( 
+												SELECT  rsf_d.*, 
+														uf_c.default_branch_id as default_branch_id,
+														uf_c.default_department_id as default_department_id,
+														uf_c.default_job_id as default_job_id,
+														uf_c.default_job_item_id as default_job_item_id
+												FROM '. $rsf->getTable() .' as rsf_d
+												LEFT JOIN users as uf_c ON ( rsf_d.user_id = uf_c.id )
+												WHERE 	rsf_d.company_id = ? 
+														AND rsf_d.user_id != 0 
+											) as rsf_c ON 	(
 																			rsf_b.company_id = rsf_c.company_id
 																			AND ( rsf_b.user_id = 0 AND rsf_c.user_id != 0 )
-																			AND ( rsf_b.branch_id = rsf_c.branch_id OR rsf_c.branch_id = -1 )
-																			AND ( rsf_b.department_id = rsf_c.department_id OR rsf_c.department_id = -1 )
-																			AND ( rsf_b.job_id = rsf_c.job_id OR rsf_c.job_id = -1 )
-																			AND ( rsf_b.job_item_id = rsf_c.job_item_id OR rsf_c.job_item_id = -1 )
+																			AND ( rsf_b.branch_id = rsf_c.branch_id OR ( rsf_c.branch_id = -1 AND rsf_b.branch_id = rsf_c.default_branch_id ) )
+																			AND ( rsf_b.department_id = rsf_c.department_id OR ( rsf_c.department_id = -1 AND rsf_b.department_id = rsf_c.default_department_id ) )
+																			AND ( rsf_b.job_id = rsf_c.job_id OR ( rsf_c.job_id = -1 AND rsf_b.job_id = rsf_c.default_job_id ) )
+																			AND ( rsf_b.job_item_id = rsf_c.job_item_id OR ( rsf_c.job_item_id = -1 AND rsf_b.job_item_id = rsf_c.default_job_item_id ) )
 																			AND rsf_b.start_time = rsf_c.start_time
 																			AND rsf_b.end_time = rsf_c.end_time ';
 

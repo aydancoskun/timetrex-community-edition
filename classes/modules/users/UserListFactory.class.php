@@ -2129,6 +2129,14 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			$query .= ' AND ( a.termination_date IS NULL OR a.termination_date >= '. (int)$filter_data['employed_end_date'].' ) ';
 		}
 
+		//employed_[start|end]_date requires the employee to be employed the entire time. This just requires them to be employed for any part of the range.
+		if ( isset($filter_data['partial_employed_end_date']) AND (int)$filter_data['partial_employed_end_date'] != 0 ) {
+			$query .= ' AND ( a.hire_date IS NULL OR a.hire_date <= '. (int)$filter_data['partial_employed_end_date'].' ) ';
+		}
+		if ( isset($filter_data['partial_employed_start_date']) AND (int)$filter_data['partial_employed_start_date'] != 0 ) {
+			$query .= ' AND ( a.termination_date IS NULL OR a.termination_date >= '. (int)$filter_data['partial_employed_start_date'].' ) ';
+		}
+
 		if ( isset($filter_data['hire_start_date']) AND (int)$filter_data['hire_start_date'] != 0 AND isset($filter_data['hire_end_date']) AND (int)$filter_data['hire_end_date'] != 0 ) {
 			$query .= ' AND ( a.hire_date >= '. (int)$filter_data['hire_start_date'].' AND a.hire_date <= '. (int)$filter_data['hire_end_date'].' ) ';
 		}

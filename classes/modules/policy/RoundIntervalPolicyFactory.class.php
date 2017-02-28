@@ -445,7 +445,9 @@ class RoundIntervalPolicyFactory extends Factory {
 				}
 				break;
 			case 30: //Static Time
-				if ( $this->inConditionWindow( $epoch, TTDate::getTimeLockedDate( $this->getConditionStaticTime(), $epoch) ) == TRUE ) {
+				//If static time after start/stop window is near midnight, due to using TimeLockedDate we need check the current day and the day after when evaluating this condition.
+				if ( $this->inConditionWindow( $epoch, TTDate::getTimeLockedDate( $this->getConditionStaticTime(), $epoch) ) == TRUE
+					OR ( $this->inConditionWindow( $epoch, TTDate::getTimeLockedDate( $this->getConditionStaticTime(), ( $epoch + 86400 ) ) ) == TRUE ) ) {
 					$retval = TRUE;
 				}
 				break;

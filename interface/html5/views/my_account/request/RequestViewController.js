@@ -5,7 +5,6 @@ RequestViewController = RequestViewCommonController.extend( {
 
 	api_request_schedule:null,
 	authorization_api:null,
-	navigation:null,
 	hierarchy_type_id:false,
 	messages: null,
 
@@ -68,30 +67,6 @@ RequestViewController = RequestViewCommonController.extend( {
 
 		} );
 
-	},
-
-	buildNavigation: function(){
-		// var pager_data = this.navigation && this.navigation.getPagerData && this.navigation.getPagerData();
-		// var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
-		this._super( 'buildEditViewUI' );
-
-		var $this = this;
-
-		this.setTabLabels( {
-			'tab_request': $.i18n._( 'Request' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
-		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIRequest' )),
-			id: this.script_name + '_navigation',
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.REQUESRT,
-			navigation_mode: true,
-			show_search_inputs: true
-		} );
-
-		this.setNavigation();
 	},
 
 	buildEditViewUI: function() {
@@ -458,7 +433,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			new SearchField( {
 				label: $.i18n._( 'Status' ),
 				in_column: 2,
-				field: 'request_schedule_status_id',
+				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
@@ -668,6 +643,12 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 
 		this.collectUIDataToCurrentEditRecord();
+
+		//a new request comes from the current user.
+		if ( this.is_add ) {
+			this.current_edit_record.user_id = LocalCacheData.loginUser.id
+		}
+
 		this.setEditViewDataDone();
 	},
 
@@ -1050,8 +1031,9 @@ RequestViewController = RequestViewCommonController.extend( {
 			EmbeddedMessage.reply( [record], ignoreWarning, function( result ) {
                     if ( result.isValid() ) {
 						var id = $this.current_edit_record.id;
-						//$this.removeEditView();
-						$this.onViewClick( id, true );
+						//see #2224 - Unable to get property 'find' of undefined
+						$this.removeEditView();
+						$this.onViewClick( id );
                     } else {
                         $this.setErrorTips( result );
                         $this.setErrorMenu();
@@ -1134,9 +1116,6 @@ RequestViewController = RequestViewCommonController.extend( {
 			case ContextMenuIconName.delete_icon:
 				ProgressBar.showOverlay();
 				this.onDeleteClick();
-				if (this.edit_view) {
-					this.buildNavigation();
-				}
 				break;
 			case ContextMenuIconName.delete_and_next:
 				ProgressBar.showOverlay();

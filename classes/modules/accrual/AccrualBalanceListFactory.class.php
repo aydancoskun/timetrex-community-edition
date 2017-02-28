@@ -264,7 +264,7 @@ class AccrualBalanceListFactory extends AccrualBalanceFactory implements Iterato
 			}
 		}
 
-		$additional_order_fields = array( 'accrual_policy_account', 'first_name', 'last_name', 'name', 'default_branch', 'default_department' );
+		$additional_order_fields = array( 'accrual_policy_account', 'first_name', 'last_name', 'name', 'default_branch', 'default_department', 'title' );
 		$sort_column_aliases = array(
 									//'accrual_policy_type' => 'accrual_policy_type_id',
 									'group' => 'e.name',

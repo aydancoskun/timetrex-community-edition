@@ -168,7 +168,7 @@ class EFT {
 
 		return TRUE;
 	}
-	
+
 	function getFileFormat() {
 		if ( isset($this->file_format) ) {
 			return $this->file_format;
@@ -497,7 +497,7 @@ class EFT {
 
 		//Always sort records based on type, so debits come first, then credits (when offset records exist)
 		$this->sortRecords();
-		
+
 		switch ( strtoupper( $this->getFileFormat() ) )	 {
 			case 1464:
 				$file_format_obj = new EFT_File_Format_1464($this->header_data, $this->data);
@@ -947,7 +947,7 @@ class EFT_File_Format_1464 Extends EFT {
 			return FALSE;
 		}
 		unset($sanity_check_1);
-		
+
 		if ( $this->getOtherData('cibc_settlement_account') !== FALSE ) {
 			//FIXME: The settlement account series (01) needs to be in each record between 252 and 253 (N) as well
 			//Some banks, specifically CIBC require a mandatory Settlement Account Series that is the return bank account.
@@ -1476,7 +1476,7 @@ class EFT_File_Format_ACH Extends EFT {
 		} else {
 			$line[] = '220'; //Credits Only
 		}
-		
+
 		$line[] = $this->padRecord( strtoupper( $this->getOriginatorShortName() ), 16, 'AN'); //Company Short Name
 		$line[] = $this->padRecord( '', 20, 'AN'); //Discretionary Data
 		$line[] = $this->padRecord( $business_number, 10, 'N'); //Company Identification - Recommend IRS Federal Tax ID Number
@@ -1486,7 +1486,7 @@ class EFT_File_Format_ACH Extends EFT {
 		$line[] = $this->padRecord( date('ymd', $due_date ), 6, 'N'); //Date to post funds.
 		$line[] = $this->padRecord( '', 3, 'AN'); //Blank
 		$line[] = '1'; //Originator Status Code
-		$line[] = $this->padRecord( $this->getOriginatorID(), 8, 'N' ); //First 8 digits of Originating ID or Originating Bank Transit
+		$line[] = $this->padRecord( $this->getInitialEntryNumber(), 8, 'N' ); //First 8 digits of InitialEntryNumber, which needs to match the beginning part of InitialEntry column of '6' records below. Used to be Originating ID or Originating Bank Transit
 		$line[] = $this->padRecord( $this->batch_number, 7, 'N'); //Batch Number
 
 		$retval = $this->padLine( implode('', $line), 94 );
@@ -1514,7 +1514,7 @@ class EFT_File_Format_ACH Extends EFT {
 		$line[] = $this->padRecord( $this->getBusinessNumber(), 10, 'N'); //Company Identification - Recommend IRS Federal Tax ID Number
 		$line[] = $this->padRecord( '', 19, 'AN'); //Blank
 		$line[] = $this->padRecord( '', 6, 'AN'); //Blank
-		$line[] = $this->padRecord( $this->getOriginatorID(), 8, 'N' ); //First 8 digits of Originating ID or Originating Bank Transit
+		$line[] = $this->padRecord( $this->getInitialEntryNumber(), 8, 'N' ); //First 8 digits of InitialEntryNumber, which needs to match the beginning part of InitialEntry column of '6' records below. Used to be Originating ID or Originating Bank Transit
 		$line[] = $this->padRecord( $this->batch_number, 7, 'N'); //Batch Number
 
 		$retval = $this->padLine( implode('', $line), 94 );
@@ -1525,7 +1525,7 @@ class EFT_File_Format_ACH Extends EFT {
 
 		return $retval;
 	}
-	
+
 	private function getRecordTypes( $records ) {
 		$retval = FALSE;
 		foreach( $records as $key => $record ) {
@@ -1538,7 +1538,7 @@ class EFT_File_Format_ACH Extends EFT {
 
 		return $retval;
 	}
-	
+
 	private function compileRecords() {
 		//gets all Detail records.
 
@@ -1571,11 +1571,11 @@ class EFT_File_Format_ACH Extends EFT {
 			$batch_credit_amount = 0;
 			$batch_record_count = 0;
 			$batch_hash = 0;
-			
+
 			$batch_record_types = $this->getRecordTypes( $batch_records );
 
 			$retval[] = $this->compileBatchHeader( $batch_record_types, $batch_records[0]->getBusinessNumber(), $batch_records[0]->getServiceCode(), $batch_records[0]->getEntryDescription(), $batch_records[0]->getDueDate() );
-			
+
 			foreach( $batch_records as $key => $record ) {
 				//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
 				Debug::Text('Institution: '. $record->getInstitution() .' Transit: '.$record->getTransit().' Bank Account Number: '. $record->getAccount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1672,7 +1672,7 @@ class EFT_File_Format_ACH Extends EFT {
 		*/
 		$block_count = ( ( ( $c_record_count + $d_record_count + ( ( $this->batch_number - 1 ) * 2 ) ) + 2 ) / 10 );
 		Debug::Text('File Hash:'. $hash_total .' Batch Number: '. $this->batch_number .' Block Count: '. $block_count, __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		$line[] = $this->padRecord( ceil( $block_count ), 6, 'N'); //Block count?!?!
 
 		$line[] = $this->padRecord( ($c_record_count + $d_record_count), 8, 'N'); //Total entry count

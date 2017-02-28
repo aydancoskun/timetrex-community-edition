@@ -391,9 +391,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 			}
 		}
 
-		$additional_order_fields = array(
-										'type_id'
-										);
+		$additional_order_fields = array( 'type_id', 'in_use' );
 
 		$sort_column_aliases = array(
 									'type' => 'type_id',
@@ -545,7 +543,7 @@ class PayStubEntryAccountListFactory extends PayStubEntryAccountFactory implemen
 
 		$psealf = new PayStubEntryAccountListFactory();
 		$psealf->getById($id);
-		
+
 		$entry_name_list = array();
 		if ( $include_blank == TRUE ) {
 			$entry_name_list[0] = '--';

@@ -1386,6 +1386,10 @@ PunchesViewController = BaseViewController.extend( {
 			if ( ids.length > 0 ) {
 				data.filter_data.id =  ids;
 			}
+			data.filter_columns = this.getFilterColumnsFromDisplayColumns();
+			data.filter_columns.user_id = true;
+			data.filter_columns.punch_date = true;
+			data.filter_columns.punch_time = true;
 			cells = this.api.getPunch(data, {async: false}).getResult();
 			for ( var u in cells ) {
 				if ( tmp_cells[cells[u].punch_date+'-'+cells[u].user_id] == undefined ) {

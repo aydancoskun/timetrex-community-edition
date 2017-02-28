@@ -95,7 +95,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
-						
+
 		return $this;
 	}
 
@@ -512,7 +512,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 
 		//
 		// getOrphansByUserIdAndDate() AND getOrphansByUserId() are similar, may need to modify both!
-		// Also check UserDateTotalListFactory->getAccrualOrphansByPayCodeIdAndStartDateAndEndDate()		
+		// Also check UserDateTotalListFactory->getAccrualOrphansByPayCodeIdAndStartDateAndEndDate()
 		//
 
 		$ph = array(
@@ -528,7 +528,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 					'date_stamp1' => $this->db->BindTimeStamp( TTDate::getBeginDayEpoch( $date_stamp )  ),
 					'date_stamp2' => $this->db->BindTimeStamp( TTDate::getEndDayEpoch( $date_stamp ) ),
 					);
-					
+
 		//*Also consider UDT records assigned to object_type_id=25,50 records to be orphans. As they should only be assigned to object_type_id=25,50.
 		$query = '
 					select	a.*
@@ -747,7 +747,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 			$filter_data['type_id'] = $filter_data['accrual_type_id'];
 		}
 
-		$additional_order_fields = array( 'accrual_policy_account', 'accrual_policy', 'accrual_policy_type_id', 'date_stamp' );
+		$additional_order_fields = array( 'accrual_policy_account', 'accrual_policy', 'accrual_policy_type_id', 'date_stamp', 'first_name', 'last_name', 'title', 'user_group', 'default_branch', 'default_department' );
 		$sort_column_aliases = array(
 									'accrual_policy_type' => 'accrual_policy_type_id',
 									'type' => 'type_id',

@@ -43,6 +43,20 @@ class InstallSchema_1065A extends InstallSchema_Base {
 	function preInstall() {
 		Debug::text('preInstall: '. $this->getVersion(), __FILE__, __LINE__, __METHOD__, 9);
 
+		// If a Community/Professional Edition upgrades to latest version (10.1.1) then upgrade to Corporate edition,
+		// user_date_total_job_id index will try to be created twice, in 2023C and in 1065A.
+		// We will remove it from 1023C so its just created here instead, but we have to drop it first if it exists just in case it was already created.
+		$user_date_total_indexes = array_keys( $this->db->MetaIndexes('user_date_total') );
+		if ( is_array($user_date_total_indexes) ) {
+			if ( array_search( 'user_date_total_job_id', $user_date_total_indexes ) !== FALSE ) {
+				Debug::text('Dropping already existing index: user_date_total_job_id', __FILE__, __LINE__, __METHOD__, 9);
+				$this->db->Execute('DROP INDEX user_date_total_job_id ON user_date_total');
+			} else {
+				Debug::text('NOT Dropping already existing index: user_date_total_job_id', __FILE__, __LINE__, __METHOD__, 9);
+			}
+		}
+		unset($user_date_total_indexes);
+
 		return TRUE;
 	}
 
@@ -60,7 +74,7 @@ class InstallSchema_1065A extends InstallSchema_Base {
 				}
 			}
 		}
-		
+
 		return TRUE;
 	}
 }

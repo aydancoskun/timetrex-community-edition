@@ -1484,6 +1484,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			var select_date = Global.strToDate( $this.timesheet_columns[start].index, $this.full_format );
 			var new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() - 6 ) ).format();
 			continueChangeDate( new_date );
+
+			//see #2224 Cannot read property 'date' of undefined
+			$this.setDefaultMenu();
 		} );
 
 		date_right_arrow.bind( 'click', function() {
@@ -1496,6 +1499,9 @@ TimeSheetViewController = BaseViewController.extend( {
 			var new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() + 1 ) ).format();
 
 			continueChangeDate( new_date );
+
+			//see #2224 Cannot read property 'date' of undefined
+			$this.setDefaultMenu();
 
 		} );
 
@@ -7913,38 +7919,45 @@ TimeSheetViewController = BaseViewController.extend( {
 		return res;
 	},
 
+	/**
+	 * This function is special as it handles an edit view that deals with both absences and punches.
+	 * This is the only place where 2 different data layouts need to be handled by the same navigation without a change of view.
+	 */
 	setEditViewData: function() {
 		var $this = this;
+		var navigation_div = this.edit_view.find('.navigation-div');
+		var navigation_widget_div = navigation_div.find('.navigation-widget-div');
 
 		this.is_changed = false;
 
-		var navigation_div = this.edit_view.find( '.navigation-div' );
-
 		if ( Global.isSet( this.current_edit_record.id ) && this.current_edit_record.id ) {
+			//fixing both #2171 and #2227
+			//preventing unclickable navigation and "cannot find property or function has of undefined."
 			navigation_div.css('display', 'block');
+			this.navigation = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
 
-			// Do not re-instantiate this.navigation on every click as it can cause "TypeError: Cannot read property 'has' of null"
-			if( !this.navigation.getSourceData || (( this.navigation.is_punch_nav === true && this.absence_model ) || ( this.navigation.is_punch_nav === false && !this.absence_model )) ) {
-				//Set Navigation Awesomebox
-				if ( !this.absence_model ) {
-					this.navigation.AComboBox({
-						id: this.script_name + '_navigation',
-						layout_name: ALayoutIDs.TIMESHEET
-					});
-					this.navigation.setSourceData(this.full_timesheet_data.punch_data);
-					this.navigation.is_punch_nav = true;
-				} else {
-					this.navigation.AComboBox({
-						id: this.script_name + '_navigation',
-						layout_name: ALayoutIDs.ABSENCE
-					});
-					this.navigation.setSourceData(this.absence_original_source);
-					this.navigation.is_punch_nav = false;
-				}
+			//Set Navigation Awesomebox
+			if ( !this.absence_model ) {
+				this.navigation.AComboBox({
+					navigation_mode: true,
+					id: this.script_name + '_navigation',
+					layout_name: ALayoutIDs.TIMESHEET
+				});
+				this.navigation.setSourceData(this.full_timesheet_data.punch_data);
+				this.navigation.is_punch_nav = true;
+			} else {
+				this.navigation.AComboBox({
+					navigation_mode: true,
+					id: this.script_name + '_navigation',
+					layout_name: ALayoutIDs.ABSENCE
+				});
+				this.navigation.setSourceData(this.absence_original_source);
+				this.navigation.is_punch_nav = false;
 			}
 
 			this.navigation.setValue( this.current_edit_record );
 
+			navigation_widget_div.html( this.navigation );
 			// #2122 - Fixes navigation errors including: "Cannot read property 'current_page' of null" & "Cannot read property 'has' of null"
 			// Prevents user clicking on drop-down to navigate to the first record then immediately clicking the left arrow which triggers the errors.
 			this.setNavigation();

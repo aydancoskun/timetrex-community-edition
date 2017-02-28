@@ -548,88 +548,94 @@ class APIAuthentication extends APIFactory {
 	 * @param string $type
 	 * @return bool
 	 */
-	function changePassword( $user_name, $current_password, $new_password, $new_password2 ) {
-		$rl = TTNew('RateLimit');
-		$rl->setID( 'authentication_'. Misc::getRemoteIPAddress() );
+	function changePassword( $user_name, $current_password = NULL, $new_password = NULL, $new_password2 = NULL ) {
+		$rl = TTNew( 'RateLimit' );
+		$rl->setID( 'authentication_' . Misc::getRemoteIPAddress() );
 		$rl->setAllowedCalls( 20 );
 		$rl->setTimeFrame( 900 ); //15 minutes
+
+		if ( $rl->check() == FALSE ) {
+			Debug::Text( 'Excessive failed password attempts... Preventing password change from: ' . Misc::getRemoteIPAddress() . ' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10 );
+			sleep( 5 ); //Excessive password attempts, sleep longer.
+			$u_obj = TTnew( 'UserListFactory' );
+			$u_obj->Validator->isTrue( 'current_password', FALSE, TTi18n::gettext( 'Current User Name or Password is incorrect' ) );
+
+			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), $u_obj->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
+		}
 
 		$ulf = TTnew( 'UserListFactory' );
 		$ulf->getByUserName( $user_name );
 		if ( $ulf->getRecordCount() == 1 ) {
 			$u_obj = $ulf->getCurrent();
-			if ( $rl->check() == FALSE ) {
-				Debug::Text('Excessive failed password attempts... Preventing password change from: '. Misc::getRemoteIPAddress() .' for up to 15 minutes...', __FILE__, __LINE__, __METHOD__, 10);
-				sleep(5); //Excessive password attempts, sleep longer.
-				$u_obj->Validator->isTrue(		'current_password',
-										   		FALSE,
-										   		TTi18n::gettext('Current password is incorrect') .' (z)' );
-			} else {
-				if ( $u_obj->getCompanyObject()->getStatus() == 10 ) {
-					Debug::text('Attempting to change password for: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
+			if ( $u_obj->getCompanyObject()->getStatus() == 10 ) {
+				Debug::text( 'Attempting to change password for: ' . $user_name, __FILE__, __LINE__, __METHOD__, 10 );
 
-					if ( $current_password != '' ) {
-						if ( $u_obj->checkPassword($current_password, FALSE) !== TRUE ) { //Disable password policy checking on current password.
-							Debug::text('Password check failed! Attempt: '. $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10);
-							sleep( ($rl->getAttempts() * 0.5) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
-							$u_obj->Validator->isTrue(	'current_password',
-														FALSE,
-														TTi18n::gettext('Current password is incorrect') );
-						}
-					} else {
-						Debug::Text('Current password not specified', __FILE__, __LINE__, __METHOD__, 10);
-						$u_obj->Validator->isTrue(	'current_password',
-												FALSE,
-												TTi18n::gettext('Current password is incorrect') );
+				if ( $current_password != '' ) {
+					if ( $u_obj->checkPassword( $current_password, FALSE ) !== TRUE ) { //Disable password policy checking on current password.
+						Debug::text( 'Password check failed! Attempt: ' . $rl->getAttempts(), __FILE__, __LINE__, __METHOD__, 10 );
+						//sleep( ( $rl->getAttempts() * 0.5 ) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+						$u_obj->Validator->isTrue( 'current_password',
+												   FALSE,
+												   TTi18n::gettext( 'Current User Name or Password is incorrect' ) );
 					}
+				} else {
+					Debug::Text( 'Current password not specified', __FILE__, __LINE__, __METHOD__, 10 );
+					$u_obj->Validator->isTrue( 'current_password',
+											   FALSE,
+											   TTi18n::gettext( 'Current User Name or Password is incorrect' ) );
+				}
 
-					if ( $current_password == $new_password ) {
-						$u_obj->Validator->isTrue(	'password',
-												FALSE,
-												TTi18n::gettext('New password must be different than current password') );
-					} else {
-						if ( $new_password != '' OR $new_password2 != ''  ) {
-							if ( $new_password == $new_password2 ) {
-								$u_obj->setPassword($new_password);
-							} else {
-								$u_obj->Validator->isTrue(	'password',
-														FALSE,
-														TTi18n::gettext('Passwords don\'t match') );
-							}
+				if ( $current_password == $new_password ) {
+					$u_obj->Validator->isTrue( 'password',
+											   FALSE,
+											   TTi18n::gettext( 'New password must be different than current password' ) );
+				} else {
+					if ( $new_password != '' OR $new_password2 != '' ) {
+						if ( $new_password == $new_password2 ) {
+							$u_obj->setPassword( $new_password );
 						} else {
-							$u_obj->Validator->isTrue(	'password',
-													FALSE,
-													TTi18n::gettext('Passwords don\'t match') );
+							$u_obj->Validator->isTrue( 'password',
+													   FALSE,
+													   TTi18n::gettext( 'Passwords don\'t match' ) );
 						}
+					} else {
+						$u_obj->Validator->isTrue( 'password',
+												   FALSE,
+												   TTi18n::gettext( 'Passwords don\'t match' ) );
 					}
 				}
 			}
 
-					if ( $u_obj->isValid() ) {
-						if ( DEMO_MODE == TRUE ) {
-							//Return TRUE even in demo mode, but nothing happens.
-							return $this->returnHandler( TRUE );
-						} else {
-							//This should force the updated_by field to match the user changing their password,
-							//  so we know now to ask the user to change their password again, since they were the last ones to do so.
-							global $current_user;
-							$current_user = $u_obj;
+			if ( $u_obj->isValid() ) {
+				if ( DEMO_MODE == TRUE ) {
+					//Return TRUE even in demo mode, but nothing happens.
+					return $this->returnHandler( TRUE );
+				} else {
+					//This should force the updated_by field to match the user changing their password,
+					//  so we know now to ask the user to change their password again, since they were the last ones to do so.
+					global $current_user;
+					$current_user = $u_obj;
 
-							TTLog::addEntry( $u_obj->getID(), 20, TTi18n::getText('Password - Web (Password Policy)'), NULL, $u_obj->getTable() );
+					TTLog::addEntry( $u_obj->getID(), 20, TTi18n::getText( 'Password - Web (Password Policy)' ), NULL, $u_obj->getTable() );
 					$rl->delete(); //Clear failed password rate limit upon successful login.
 
-							$retval = $u_obj->Save();
+					$retval = $u_obj->Save();
 
-							unset($current_user);
+					unset( $current_user );
 
-							return $this->returnHandler( $retval ); //Single valid record
-						}
-					} else {
-						return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $u_obj->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
-					}
+					return $this->returnHandler( $retval ); //Single valid record
 				}
+			}
+		} else {
+			//Issue #2225 - Be sure to return the same error message even if username is not valid to avoid user enumeration attacks.
+			$u_obj = TTnew( 'UserListFactory' );
+			$u_obj->Validator->isTrue( 'current_password', FALSE, TTi18n::gettext( 'Current User Name or Password is incorrect' ) );
+		}
 
-		return $this->returnHandler( FALSE );
+		sleep( ( $rl->getAttempts() * 0.5 ) ); //If password is incorrect, sleep for some time to slow down brute force attacks.
+		Debug::Text( 'Failed username/password... Attempt: '. $rl->getAttempts() .' Sleeping...', __FILE__, __LINE__, __METHOD__, 10 );
+
+		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), $u_obj->Validator->getErrorsArray(), array('total_records' => 1, 'valid_records' => 0) );
 	}
 
 	function resetPassword( $email ) {

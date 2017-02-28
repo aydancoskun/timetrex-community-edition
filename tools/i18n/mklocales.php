@@ -39,7 +39,13 @@
  * http://osc.co.cr
  */
 
-// creates the locale directories for use with gettext 
+if ( PHP_SAPI != 'cli' ) {
+	echo "This script can only be called from the Command Line.\n";
+	exit;
+}
+
+
+// creates the locale directories for use with gettext
 // and also initializes each with a messages.po file.
 // Must be run from the i18n tools directory
 //

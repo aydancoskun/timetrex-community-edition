@@ -33,6 +33,10 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
+if ( PHP_SAPI != 'cli' ) {
+	echo "This script can only be called from the Command Line.\n";
+	exit;
+}
 
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'api'. DIRECTORY_SEPARATOR .'client'. DIRECTORY_SEPARATOR .'TimeTrexClientAPI.class.php');
 
@@ -276,11 +280,11 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			$retval = $result->getResult();
 			if ( is_array($retval) AND isset($retval[0]['data']) ) {
 				$output = array();
-				
+
 				$i = 0;
 				foreach( $retval[0]['data'] as $column_map ) {
 					unset($column_map['row_1'], $column_map['id']); //Strip unneeded columns.
-					
+
 					if ( $i == 0 ) {
 						$columns = array(
 										'field' => 'import_column',

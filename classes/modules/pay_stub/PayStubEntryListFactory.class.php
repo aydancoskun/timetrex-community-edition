@@ -191,11 +191,14 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 			return FALSE;
 		}
 
-		$strict = TRUE;
+
+		$additional_order_fields = array( 'ps_order' );
 		if ( $order == NULL ) {
 			$strict = FALSE;
 
 			$order = array( 'b.ps_order' => 'asc', 'abs(a.ytd_amount)' => 'asc', 'a.id' => 'asc' );
+		} else {
+			$strict = TRUE;
 		}
 
 		//This is needed to ensure the proper order of entries for pay stubs
@@ -231,7 +234,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					';
 
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order, $strict );
+		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -349,7 +352,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
-		
+
 		$row = $this->db->GetRow($query, $ph);
 
 		if ( $row['amount'] === NULL ) {
@@ -879,7 +882,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 					'pay_stub_id' => (int)$pay_stub_id,
 					'entry_name_id' => (int)$entry_name_id,
 					);
-		
+
 		$query = '
 					select	sum(amount) as amount, sum(units) as units, sum(ytd_amount) as ytd_amount, sum(ytd_units) as ytd_units
 					from (
@@ -1155,7 +1158,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		}
 
 		$psealf = new PayStubEntryAccountListFactory();
-		
+
 		$ph = array(
 					'name' => $name,
 					);
@@ -1321,19 +1324,19 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		if ( $end_date == '') {
 			$end_date = TTDate::getTime();
 		}
-		
+
 		$psaf = new PayStubAmendmentFactory();
 		$ppf = new PayPeriodFactory();
 		$psf = new PayStubFactory();
 		$uf = new UserFactory();
-		
+
 		$ph = array(
 					'start_date' => $this->db->BindTimeStamp( $start_date ),
 					'end_date' => $this->db->BindTimeStamp( $end_date ),
 					'user_id' => (int)$id,
 					'exclude_id' => (int)$exclude_id,
 					);
-		
+
 		//Include pay periods with no pay stubs for ROEs.
 		//If the company has multiple pay period schedules, this will include pay periods from all schedules, even if the employee was never assigned
 		//to a different one. Therefore only include pay periods that have at least one user_date entry assigned to it.

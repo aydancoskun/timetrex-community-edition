@@ -1153,8 +1153,9 @@ class PayStubFactory extends Factory {
 		}
 
 		//Make sure transaction date is not earlier than a pay stub in the same pay period but having an high payroll run.
+		// However ignore these checks if its a temporary pay stub and we're just doing a post-adjustment carry-forward, otherwise it will fail everytime if the transaction date of the original pay stub was moved ahead by 1+ days.
 		$pslf = TTNew('PayStubListFactory');
-		if ( $this->getUser() > 0 AND is_object( $this->getUserObject() ) ) {
+		if ( $this->getUser() > 0 AND is_object( $this->getUserObject() ) AND $this->getTemp() == FALSE ) {
 			$pslf->getByUserIdAndCompanyIdAndPayPeriodId( $this->getUser(), $this->getUserObject()->getCompany(), array( $this->getPayPeriod() ) );
 			if ( $pslf->getRecordCount() > 0 ) {
 				foreach( $pslf as $ps_obj ) {

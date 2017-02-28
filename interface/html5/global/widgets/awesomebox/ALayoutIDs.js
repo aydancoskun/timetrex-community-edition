@@ -154,7 +154,7 @@ ALayoutIDs.RECURRING_TEMPLATE_CONTROL = 'global_recurring_template_control';
 
 ALayoutIDs.REPORT_SCHEDULE = 'global_report_schedule';
 
-ALayoutIDs.REQUESRT = 'global_requets';
+ALayoutIDs.REQUEST = 'global_request';
 
 ALayoutIDs.ROUND_INTERVAL_POLICY = 'global_round_interval';
 

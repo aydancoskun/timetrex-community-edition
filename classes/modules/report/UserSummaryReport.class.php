@@ -75,7 +75,8 @@ class UserSummaryReport extends Report {
 				$retval = array(
 										//Static Columns - Aggregate functions can't be used on these.
 										'-1000-template' => TTi18n::gettext('Template'),
-										'-1010-time_period' => TTi18n::gettext('Employed Time Period'), //Employed within this start/end date.
+										'-1010-time_period' => TTi18n::gettext('Employed Time Period (Full)'), //Employed within the entire start/end date.
+										'-1015-partial_employed_time_period' => TTi18n::gettext('Employed Time Period (Partial)'), //Employed within part of the start/end date.
 										'-1020-hire_time_period' => TTi18n::gettext('Hired Time Period'), //Hired within this start/end date.
 										'-1030-termination_time_period' => TTi18n::gettext('Terminated Time Period'), //Terminated within this start/end date.
 										'-1040-birth_time_period' => TTi18n::gettext('Birth Date Time Period'), //Born within this start/end date
@@ -249,7 +250,7 @@ class UserSummaryReport extends Report {
 					$retval['-1120-default_job'] = TTi18n::gettext('Job');
 					$retval['-1121-default_job_manual_id'] = TTi18n::gettext('Job Code');
 					$retval['-1125-default_job_item'] = TTi18n::gettext('Task');
-					$retval['-1126-default_job_item_manual_id'] = TTi18n::gettext('Task Code');									
+					$retval['-1126-default_job_item_manual_id'] = TTi18n::gettext('Task Code');
 				}
 
 				$retval = array_merge( $retval, (array)$this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column')  );
@@ -837,17 +838,17 @@ class UserSummaryReport extends Report {
 			if ( $currency_convert_to_base == TRUE AND is_object( $base_currency_obj ) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['currency_rate'] = $u_obj->getColumn('currency_rate');
 			}
-			
+
 			$this->tmp_data['user'][$u_obj->getId()]['employee_number'] = isset($columns['employee_number']) ? $this->tmp_data['user'][$u_obj->getId()]['employee_number'] : $u_obj->getEmployeeNumber();
 			if ( isset($columns['employee_number_barcode']) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['employee_number_barcode'] = new ReportCellBarcode( $this, 'U'.$this->tmp_data['user'][$u_obj->getId()]['employee_number'] );
 			}
 			if ( isset($columns['employee_number_qrcode']) ) {
 				$this->tmp_data['user'][$u_obj->getId()]['employee_number_qrcode'] = new ReportCellQRcode( $this, 'U'.$this->tmp_data['user'][$u_obj->getId()]['employee_number'] );
-			}						
+			}
 			if ( isset($columns['user_photo']) AND $u_obj->isPhotoExists() ) {
 				$this->tmp_data['user'][$u_obj->getId()]['user_photo'] = new ReportCellImage( $this, $u_obj->getPhotoFileName( $u_obj->getCompany(), $u_obj->getID(), FALSE ) );
-			}						
+			}
 
 			$this->tmp_data['user_preference'][$u_obj->getId()] = array();
 			$this->tmp_data['user_wage'][$u_obj->getId()] = array();
@@ -930,7 +931,7 @@ class UserSummaryReport extends Report {
 			$this->tmp_data['job_item'][0] = array( 'name' => TTi18n::getText('No Task'), 'description' => TTi18n::getText('No Task'), 'job_item_manual_id' => 0 );
 			foreach ( $jilf as $key => $ji_obj ) {
 				$this->tmp_data['job_item'][$ji_obj->getId()] = (array)Misc::addKeyPrefix( 'job_item_', (array)$ji_obj->getObjectAsArray( $job_item_column_config ) );
-	
+
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
 			unset($jilf, $ji_obj, $key);
@@ -944,7 +945,7 @@ class UserSummaryReport extends Report {
 		Debug::Text(' User Wage Rows: '. $uwlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		unset($columns['note']); //Prevent wage note from overwriting user note.
-		foreach ( $uwlf as $key => $uw_obj ) {			
+		foreach ( $uwlf as $key => $uw_obj ) {
 			if ( $this->getPermissionObject()->isPermissionChild( $uw_obj->getUser(), $wage_permission_children_ids ) ) { //This is required in cases where they have 'view'(all) wage permisisons, but only view_child user permissions. As the SQL will return all employees wages, which then need to be filtered out here.
 				$this->tmp_data['user_wage'][$uw_obj->getUser()] = (array)$uw_obj->getObjectAsArray( $columns );
 
@@ -960,7 +961,7 @@ class UserSummaryReport extends Report {
 			}
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
-		
+
 		//Debug::Arr($this->tmp_data['user_preference'], 'TMP Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}
@@ -1045,7 +1046,7 @@ class UserSummaryReport extends Report {
 				if ( isset($this->tmp_data['user_title'][$row['title_id']]) ) {
 					$processed_data = array_merge( $processed_data, $this->tmp_data['user_title'][$row['title_id']] );
 				}
-				
+
 				$this->data[] = array_merge( $row, $hire_date_columns, $termination_date_columns, $birth_date_columns, $created_date_columns, $updated_date_columns, $processed_data );
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );

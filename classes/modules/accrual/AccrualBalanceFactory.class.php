@@ -61,11 +61,6 @@ class AccrualBalanceFactory extends Factory {
 										'-1099-group' => TTi18n::gettext('Group'),
 										'-1100-default_branch' => TTi18n::gettext('Branch'),
 										'-1110-default_department' => TTi18n::gettext('Department'),
-
-										'-2000-created_by' => TTi18n::gettext('Created By'),
-										'-2010-created_date' => TTi18n::gettext('Created Date'),
-										'-2020-updated_by' => TTi18n::gettext('Updated By'),
-										'-2030-updated_date' => TTi18n::gettext('Updated Date'),
 							);
 				break;
 			case 'list_columns':
@@ -266,12 +261,12 @@ class AccrualBalanceFactory extends Factory {
 				Debug::text('Setting new balance failed for User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
-		
+
 		$alf->CommitTransaction();
 		//$alf->db->SetTransactionMode(''); //Restore default transaction mode.
-		
+
 		$profiler->stopTimer( "AccrualBalanceFactory::calcBalance()");
-		
+
 		return $retval;
 	}
 

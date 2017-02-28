@@ -2,7 +2,7 @@
 /*
  * This script when passed a gettext *.POT, or *.PO file will
  * attempt to use a free online service to translate each string
- * to the specified language. 
+ * to the specified language.
  *
  * This should hopefully serve as a good STARTING point for further
  * human transation.
@@ -17,6 +17,10 @@
  * php translate.php -t ../../interface/locale/fr_FR/LC_MESSAGES/messages.po ./tr_batches.html1 fr.po
  *
  */
+if ( PHP_SAPI != 'cli' ) {
+	echo "This script can only be called from the Command Line.\n";
+	exit;
+}
 
 set_include_path( '../../classes'. DIRECTORY_SEPARATOR . 'pear' . PATH_SEPARATOR . get_include_path() );
 require_once('../../classes/pear/File/Gettext.php');
@@ -39,13 +43,13 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 } else {
 	//Handle command line arguments
 	$last_arg = count($argv)-1;
-	
+
 	if ( in_array('-s', $argv) ) {
 		$create_source = TRUE;
 	} else {
 		$create_source = FALSE;
 	}
-	
+
 	if ( isset($argv[$last_arg-2]) AND $argv[2] != '' ) {
 		if ( !file_exists( $argv[2] ) OR !is_readable( $argv[2] ) ) {
 			echo ".POT or .PO File: ". $argv[2] ." does not exists or is not readable!\n";
@@ -62,8 +66,8 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		}
 		echo "In File: $infile\n";
 		echo "Out File: $outfile\n";
-		
-		//Use Pears FILE_GetText package		
+
+		//Use Pears FILE_GetText package
 		$gtFile = File_Gettext::factory('PO');
 		$gtFile->load($source_file);
 
@@ -77,51 +81,51 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 			echo "Max: $max\n";
 			foreach ($gtFile->strings as $msgid => $msgstr ) {
 				//echo "$i. $msgid\n";
-				
+
 				if ( $i == 0 OR $out == NULL ) {
-					echo "I = 0 OR Batch = 0\n"; 
+					echo "I = 0 OR Batch = 0\n";
 					$out  = "<html>\n";
-					$out .= "<body><pre>\n";					
+					$out .= "<body><pre>\n";
 				}
-								
+
 				if ( $i > 0 AND ( $i % $batch_size == 0 OR $i == $max ) ) {
 					$batch++;
-					echo "New Batch = $batch\n"; 					
+					echo "New Batch = $batch\n";
 				}
-				
+
 				$out .= '<span class="'.$i.'">'. $msgid ."</span><br>\n";
 				//$out .= $i.': '. str_replace('<br>', '(11)', $msgid) ."<br>\n";
-				
+
 				if ( $batch != $prev_batch ) {
 					echo "Writing...\n";
 					$out .= "</pre></body>\n";
-					$out .= "</html>\n";					
-					
+					$out .= "</html>\n";
+
 					//Write the file.
 					file_put_contents( $outfile.$batch, $out );
-					
-					$out = NULL;					
+
+					$out = NULL;
 				}
-				
-							
+
+
 				if ( $i > 20 ) {
 					//break;
 				}
-				
+
 				$prev_batch = $batch;
 				$i++;
 			}
 		} else {
 			//Load translated HTML files.
 			echo "Loading Translated File\n";
-			
+
 			$file_contents = file_get_contents( $infile );
 			$file_contents = preg_replace('/<head>.*<\/head>/iu', '', $file_contents);
 			$file_contents = preg_replace('/<base.*>/iu', '', $file_contents);
 			$file_contents = preg_replace('/<\/span>([\s]*)<br>/iu', '</span>', $file_contents);
 			$file_contents = preg_replace('/ :/iu', ':', $file_contents);
 			$file_contents = str_replace( array('<html>', '</html>', '<body>', '</body>', '<pre>','</pre>') , '', $file_contents);
-			
+
 			$lines = explode('</span>', $file_contents);
 			//var_dump($lines);
 			if ( is_array($lines) ) {
@@ -135,7 +139,7 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 				}
 				unset($msgid, $msgstr);
 				//var_dump($line_mapping);
-				
+
 				foreach( $lines as $line ) {
 					//Parse the string number
 					//if ( preg_match('/\(([0-9]{1,6})\)\s(.*)/i', trim($line), $matches) == TRUE ) {
@@ -159,10 +163,10 @@ if ( $argc < 3 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 					//break;
 				}
 			}
-			
+
 			$gtFile->Save( $outfile );
-				
-		}		
+
+		}
 	}
 }
 ?>

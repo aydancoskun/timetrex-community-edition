@@ -369,9 +369,10 @@ class AccrualFactory extends Factory {
 													$int,
 													TTi18n::gettext('Incorrect Amount'))
 				AND
-				$this->Validator->isTrue(		'amount',
-													$this->isValidAmount($int),
-													TTi18n::gettext('Amount does not match type, try using a negative or positive value instead'))
+				$this->Validator->isTrue(			'amount',
+											 		$this->isValidAmount($int),
+											 		TTi18n::gettext('Amounts of type "%1" must be a %2 value instead', array( Option::getByKey( $this->getType(), $this->getOptions('type') ), ( ( $int < 0 AND $this->isValidAmount($int) == FALSE ) ? TTi18n::getText('positive') : TTi18n::getText('negative') ) ) ) )
+
 				) {
 			$this->data['amount'] = $int;
 
@@ -406,7 +407,7 @@ class AccrualFactory extends Factory {
 
 		return FALSE;
 	}
-	
+
 	function getEnableCalcBalance() {
 		if ( isset($this->calc_balance) ) {
 			return $this->calc_balance;
@@ -481,7 +482,7 @@ class AccrualFactory extends Factory {
 		//Remove orphaned entries
 		$alf = TTnew( 'AccrualListFactory' );
 		$alf->getOrphansByUserIdAndDate( $user_id, $date_stamp );
-		Debug::text('Found Orphaned Records: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);	
+		Debug::text('Found Orphaned Records: '. $alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $alf->getRecordCount() > 0 ) {
 			$accrual_policy_ids = array();
 			foreach( $alf as $a_obj ) {

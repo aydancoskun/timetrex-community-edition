@@ -405,6 +405,46 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 		return FALSE;
 	}
 
+	function runSQLSortTestOnListFactory( $factory_name ) {
+		if ( class_exists( $factory_name ) ) {
+			$reflectionClass = new ReflectionClass( $factory_name );
+			$class_file_name = $reflectionClass->getFileName();
+
+			Debug::text( 'Checking Class: ' . $factory_name . ' File: ' . $class_file_name, __FILE__, __LINE__, __METHOD__, 10 );
+
+			$lf = TTNew( $factory_name );
+			if ( method_exists( $lf, 'getOptions') ) {
+				if ( method_exists( $lf, 'getAPISearchByCompanyIdAndArrayCriteria' ) ) {
+					$columns = array_fill_keys( array_keys( array_flip( array_keys( Misc::trimSortPrefix( $lf->getOptions('columns') ) ) ) ), 'asc'); //Set sort order to ASC for all columns.
+					if ( is_array($columns) ) {
+						try {
+							//$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, array('a.zzz' => 'asc') );
+							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, $columns );
+							$this->assertNotEquals( $retarr, FALSE );
+							$this->assertTrue( is_object( $retarr ), TRUE );
+						} catch ( Exception $e ) {
+							Debug::Arr( $columns,  'Columns: ', __FILE__, __LINE__, __METHOD__, 10 );
+
+							$this->assertTrue( FALSE );
+						}
+					} else {
+						Debug::text( 'getOptions(\'columns\') does not return any data, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+				}
+			} else {
+				Debug::text( 'getOptions() method does not exist, skipping...', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+
+			Debug::text( 'Done...', __FILE__, __LINE__, __METHOD__, 10 );
+
+			return TRUE;
+		} else {
+			Debug::text( 'Class does not exist: ' . $factory_name, __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
+		return FALSE;
+	}
+
 	function runSQLTestOnEdition( $product_edition = TT_PRODUCT_ENTERPRISE, $class_list ) {
 		global $TT_PRODUCT_EDITION, $db;
 
@@ -420,6 +460,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			//Run tests with count rows enabled, then with it disabled as well.
 			$db->pageExecuteCountRows = FALSE;
 			foreach ( $class_list as $class_name ) {
+				//$this->runSQLSortTestOnListFactory( $class_name );  //FIXME: Re-enable when we have time and make sure all sorting works.
 				$this->runSQLTestOnListFactoryMethods( $class_name );
 				$this->runSQLTestOnListFactory( $class_name );
 			}
@@ -653,4 +694,125 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 	}
+
+	/**
+	 * @group SQL_SQLInjectionA
+	 */
+	function testSQLInjectionA() {
+		//Test SQL injection with SORT SQL.
+		//Test SQL injection with WHERE SQL.
+
+		$utlf = new UserTitleListFactory();
+
+		//Test standard case that should work.
+		$sort_arr = array(
+				'a.name' => 'asc'
+		);
+		$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+
+		//var_dump( $utlf->rs->sql );
+		if ( stripos( $utlf->rs->sql, 'a.name' ) !== FALSE ) {
+			$this->assertTrue( TRUE );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+
+
+		//Test advanced case that should work.
+		$sort_arr = array(
+				//'a.name = \'test\'' => 'asc'
+				'a.created_date = 0' => 'asc'
+		);
+		$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+
+		//var_dump( $utlf->rs->sql );
+		if ( stripos( $utlf->rs->sql, 'a.created_date = 0' ) !== FALSE ) {
+			$this->assertTrue( TRUE );
+		} else {
+			$this->assertTrue( FALSE );
+		}
+
+
+
+		//Test advanced case that does not work currently, but we may need to get to work.
+		try {
+			$pself = new PayStubEntryListFactory();
+			$sort_arr = array(
+					'abs(a.created_date)' => 'asc'
+			);
+
+			$pself->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+			//var_dump( $pself->rs->sql );
+			if ( stripos( $pself->rs->sql, 'abs(a.created_date)' ) !== FALSE ) {
+				$this->assertTrue( FALSE );
+			} else {
+				$this->assertTrue( TRUE );
+			}
+		} catch ( Exception $e ) {
+			$this->assertTrue( TRUE );
+		}
+
+
+		//Test SQL injection in the ORDER BY clause.
+		try {
+			$sort_arr = array(
+								'created_by' => '(SELECT 1)-- .id.'
+								);
+			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+
+			//var_dump( $utlf->rs->sql );
+			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== FALSE ) {
+				$this->assertTrue( FALSE );
+			} else {
+				$this->assertTrue( TRUE );
+			}
+		} catch ( Exception $e ) {
+			$this->assertTrue( TRUE );
+		}
+
+
+		//Test SQL injection with brackets and "--"
+		try {
+			$sort_arr = array(
+								'(SELECT 1)-- .id.' => 1
+								);
+			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+
+			//var_dump( $utlf->rs->sql );
+			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== FALSE ) {
+				$this->assertTrue( FALSE );
+			} else {
+				$this->assertTrue( TRUE );
+			}
+		} catch ( Exception $e ) {
+			$this->assertTrue( TRUE );
+		}
+
+
+		//Test SQL injection with ";" and "--"
+		try {
+			$sort_arr = array(
+					'; (SELECT 1)-- .id.' => 1
+			);
+			$utlf->getAPISearchByCompanyIdAndArrayCriteria( 1, array(), NULL, NULL, NULL, $sort_arr );
+
+			//var_dump( $utlf->rs->sql );
+			if ( stripos( $utlf->rs->sql, '(SELECT 1)' ) !== FALSE ) {
+				$this->assertTrue( FALSE );
+			} else {
+				$this->assertTrue( TRUE );
+			}
+		} catch ( Exception $e ) {
+			$this->assertTrue( TRUE );
+		}
+
+
+		//FIXME: Test around the WHERE clause, even though no user input should ever get to it.
+//		$pslf = TTnew('PayStubListFactory');
+//		//$pslf->getByCompanyId( 1, 1, NULL, ( array('a.start_date' => ">= '". $pslf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) )."'") ) );
+//		$pslf->getByCompanyId( 1, 1, NULL, ( array('a.start_date >=' => $pslf->db->BindTimeStamp( TTDate::getBeginDayEpoch( time() - (86400 * 30) ) ) ) ) );
+//		//$pslf->getByCompanyId( 1, 1, NULL, ( array('a.created_date' => "=1-- (SELECT 1)--") ) );
+//		var_dump( $pslf->rs->sql );
+	}
+
 }

@@ -1631,7 +1631,7 @@ class TTDate {
 			$retval = date('W', ( $epoch - ( 86400 * ( $start_week_day - 1 ) ) ) );
 		}
 
-		return $retval;
+		return (int)$retval;
 	}
 
 	public static function getYear($epoch = NULL) {
@@ -2139,10 +2139,9 @@ class TTDate {
 
 	public static function isConsecutiveDays( $date_array ) {
 		if ( is_array($date_array) AND count($date_array) > 1 ) {
-			$retval = array();
-			sort($date_array);
-
 			$retval = FALSE;
+
+			sort($date_array);
 
 			$prev_date = FALSE;
 			foreach( $date_array as $date ) {
