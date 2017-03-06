@@ -264,16 +264,22 @@ class Permission {
 		return $query;
 	}
 	static function getPermissionIsChildIsOwnerFilterSQL( $filter_data, $outer_column_name ) {
-		$query = array();
-		if ( isset($filter_data['permission_is_own']) AND $filter_data['permission_is_own'] == TRUE AND isset($filter_data['permission_current_user_id']) ) {
-			$query[] = $outer_column_name .' = '. (int)$filter_data['permission_current_user_id'];
-		}
-		if ( isset($filter_data['permission_is_child']) AND $filter_data['permission_is_child'] == TRUE ) {
-			$query[] = 'phc.is_child = 1';
-		}
+		if ( isset($filter_data['permission_invalid']) ) {
+			Debug::Text('  Potential security bypass, permission invalid...', __FILE__, __LINE__, __METHOD__, 10);
+			$query = ' AND '. $outer_column_name . ' = -1'; //Bogus permissions, don't return any data.
+			return $query;
+		} else {
+			$query = array();
+			if ( isset( $filter_data['permission_is_own'] ) AND $filter_data['permission_is_own'] == TRUE AND isset( $filter_data['permission_current_user_id'] ) ) {
+				$query[] = $outer_column_name . ' = ' . (int)$filter_data['permission_current_user_id'];
+			}
+			if ( isset( $filter_data['permission_is_child'] ) AND $filter_data['permission_is_child'] == TRUE ) {
+				$query[] = 'phc.is_child = 1';
+			}
 
-		if ( empty($query) == FALSE ) {
-			return ' AND ( '. implode(' OR ', $query ) .') ';
+			if ( empty( $query ) == FALSE ) {
+				return ' AND ( ' . implode( ' OR ', $query ) . ') ';
+			}
 		}
 
 		return FALSE;
@@ -309,6 +315,14 @@ class Permission {
 			}
 			if ( $this->Check( $section, $name.'_own') ) {
 				$retarr['permission_is_own'] = TRUE; //Return user_id so we can match that specifically
+			}
+
+			//#2242 - If a invalid/bogus $section is passed in from the user, be sure to default to no permissions.
+			// With permission checks we shouldnt ever get here unless at least one of the three
+			// permissions ( view, view_own, view_child ) are TRUE otherwise treat it as bogus/invalid and don't return anything.
+			if ( !isset($retarr['permission_is_child']) AND !isset($retarr['permission_is_own']) ) {
+				Debug::Text('ERROR: Potential security bypass, permission section/name is invalid: Section: '. $section .' Name: '. $name .' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+				$retarr = array( 'permission_invalid' => TRUE );
 			}
 		}
 

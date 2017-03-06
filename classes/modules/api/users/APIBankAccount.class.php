@@ -82,6 +82,7 @@ class APIBankAccount extends APIFactory {
 			//Don't set permission_children_ids.
 			$data['filter_data']['permission_children_ids'] = NULL;
 		} else {
+			$data['filter_data']['permission_children_ids'] = array(); //#2243 - Make sure permission_children_ids is overwritten entirely to avoid security issues of appending to an array partially passed by user and partially set here.
 			if ( $this->getPermissionObject()->Check('user', 'edit_child_bank') == TRUE ) {
 				//Manually handle the permission checks here because edit_child_bank doesn't fit with getPermissionChildren() appending "_own" or "_child" on the end.
 				$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionHierarchyChildren( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId() );
@@ -90,6 +91,7 @@ class APIBankAccount extends APIFactory {
 			if ( $this->getPermissionObject()->Check('user', 'edit_own_bank') == TRUE  ) {
 				$data['filter_data']['permission_children_ids'][] = $this->getCurrentUserObject()->getId();
 			}
+
 			Debug::Arr($data['filter_data']['permission_children_ids'], 'Permission Children: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
@@ -303,7 +305,7 @@ class APIBankAccount extends APIFactory {
 				OR !( $this->getPermissionObject()->Check('user', 'edit_bank') OR $this->getPermissionObject()->Check('user', 'edit_own_bank') OR $this->getPermissionObject()->Check('user', 'edit_child_bank') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
-		
+
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$permission_children_ids = $this->getPermissionChildren();
 

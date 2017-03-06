@@ -282,7 +282,7 @@ class Authentication {
 
 		$ph = array(
 					'object_id' => (int)$object_id,
-					'session_id' => $this->getSessionID(),
+					'session_id' => $this->encryptSessionID( $this->getSessionID() ),
 					);
 
 		$query = 'UPDATE authentication SET object_id = ? WHERE session_id = ?';
@@ -365,6 +365,23 @@ class Authentication {
 		return substr_replace( $this->getSessionID(), '...', (int)( strlen( $this->getSessionID() ) / 3 ), (int)( strlen( $this->getSessionID() ) / 3 ) );
 	}
 
+	//#2238 - Encrypt SessionID with private SALT before writing/reading SessionID in database.
+	// This adds an additional protection layer against session stealing if a SQL injection attack is ever discovered.
+	// It prevents someone from being able to enumerate over the SessionIDs in the table and use them for nafarious purposes.
+	function encryptSessionID( $session_id ) {
+		global $config_vars;
+
+		if ( isset($config_vars['other']['salt']) AND $config_vars['other']['salt'] != '' ) {
+			$salt = $config_vars['other']['salt'];
+		} else {
+			$salt = 'ttsalt045489274';
+		}
+
+		$retval = sha1( $session_id . $salt );
+
+		return $retval;
+	}
+
 	function getSessionID() {
 		return $this->session_id;
 	}
@@ -382,11 +399,12 @@ class Authentication {
 	}
 
 	private function genSessionID() {
-		return sha1( uniqid( dechex( mt_rand() ), TRUE ) );
+		//return sha1( uniqid( dechex( mt_rand() ), TRUE ) );
+		return sha1( Misc::getUniqueID() );
 	}
 
 	private function setCookie( $type_id = FALSE ) {
-		if ( $this->getSessionID() ) {
+		if ( $this->getSessionID() != '' ) {
 			$cookie_expires = ( time() + 7776000 ); //90 Days
 			if ( $this->getEnableExpireSession() === TRUE ) {
 				$cookie_expires = 0; //Expire when browser closes.
@@ -436,7 +454,7 @@ class Authentication {
 	private function Update() {
 		$ph = array(
 					'updated_date' => TTDate::getTime(),
-					'session_id' => $this->getSessionID(),
+					'session_id' => $this->encryptSessionID( $this->getSessionID() ),
 					);
 
 		$query = 'UPDATE authentication SET updated_date = ? WHERE session_id = ?';
@@ -454,7 +472,7 @@ class Authentication {
 
 	private function Delete() {
 		$ph = array(
-					'session_id' => $this->getSessionID(),
+					'session_id' => $this->encryptSessionID( $this->getSessionID() ),
 					);
 
 		//Can't use IdleTime here, as some users have different idle times.
@@ -472,7 +490,7 @@ class Authentication {
 
 	private function Write() {
 		$ph = array(
-					'session_id' => $this->getSessionID(),
+					'session_id' => $this->encryptSessionID( $this->getSessionID() ),
 					'type_id' => (int)$this->getType(),
 					'object_id' => $this->getObjectID(),
 					'ip_address' => $this->getIPAddress(),
@@ -492,7 +510,7 @@ class Authentication {
 
 	private function Read() {
 		$ph = array(
-					'session_id' => $this->getSessionID(),
+					'session_id' => $this->encryptSessionID( $this->getSessionID() ),
 					//'ip_address' => $this->getIPAddress(),
 					'type_id' => (int)$this->getType(),
 					'updated_date' => ( TTDate::getTime() - $this->getIdle() ),

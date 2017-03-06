@@ -101,13 +101,17 @@ AccrualBalanceViewController = BaseViewController.extend( {
 	},
 
 	buildSearchFields: function() {
-
 		this._super( 'buildSearchFields' );
+
+		var default_args = {};
+		default_args.permission_section = 'accrual';
+
 		this.search_fields = [
 
 			new SearchField( {
 				label: $.i18n._( 'Employee' ),
 				in_column: 1,
+				default_args: default_args,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),

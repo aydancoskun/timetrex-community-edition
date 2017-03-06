@@ -105,30 +105,11 @@ class APIUserContact extends APIFactory {
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		//We need to take into account different permissions, ie: punch->view, view_child, view_own when displaying the dropdown
-		//box in the TimeSheet view and other views as well. Allow the caller of this function to pass a "permission_section"
-		//that can be used to determine this.
-		if ( isset($data['permission_section']) AND $data['permission_section'] != '' ) {
-			$permission_section = trim(strtolower($data['permission_section']));
-		} else {
-			$permission_section = 'user_contact';
-		}
-
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		//$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view' );
-		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( $permission_section, 'view' );
-		Debug::Arr($data['filter_data']['permission_children_ids'], 'Permission Section: '. $permission_section .' Child IDs: ', __FILE__, __LINE__, __METHOD__, 10);
+		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_contact', 'view' );
 
-		//Allow getting users from other companies, so we can change admin contacts when using the master company.
-		if ( isset($data['filter_data']['company_id'])
-				AND $data['filter_data']['company_id'] > 0
-				AND ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'edit') ) ) {
-			$company_id = $data['filter_data']['company_id'];
-		} else {
-			$company_id = $this->getCurrentCompanyObject()->getId();
-		}
 		$uclf = TTnew( 'UserContactListFactory' );
-		$uclf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+		$uclf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $uclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $uclf->getRecordCount() > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $uclf->getRecordCount() );

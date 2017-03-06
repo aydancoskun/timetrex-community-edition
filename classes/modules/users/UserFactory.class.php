@@ -2638,17 +2638,6 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
-	function checkPasswordResetKey($key) {
-		if ( $this->getPasswordResetDate() != ''
-				AND $this->getPasswordResetDate() > (time() - 7200)
-				AND $this->getPasswordResetKey() == $key ) {
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
 	function sendValidateEmail( $type = 'work' ) {
 		if ( $this->getHomeEmail() != FALSE
 				OR $this->getWorkEmail() != FALSE ) {
@@ -2709,6 +2698,31 @@ class UserFactory extends Factory {
 		return FALSE;
 	}
 
+	function encryptPasswordResetKey( $key ) {
+		global $config_vars;
+
+		if ( isset($config_vars['other']['salt']) AND $config_vars['other']['salt'] != '' ) {
+			$salt = $config_vars['other']['salt'];
+		} else {
+			$salt = 'ttsalt93854624';
+		}
+
+		$retval = sha1( $key . $salt );
+
+		return $retval;
+	}
+
+	function checkPasswordResetKey($key) {
+		if ( $this->getPasswordResetDate() != ''
+				AND $this->getPasswordResetDate() > (time() - 7200)
+				AND $this->getPasswordResetKey() == $this->encryptPasswordResetKey( $key ) ) {
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function sendPasswordResetEmail() {
 		if ( $this->getHomeEmail() != FALSE
 				OR $this->getWorkEmail() != FALSE ) {
@@ -2725,15 +2739,15 @@ class UserFactory extends Factory {
 				$secondary_email = NULL;
 			}
 
-			$this->setPasswordResetKey( md5( Misc::getUniqueID() ) );
+			$password_reset_key = sha1( Misc::getUniqueID() );
+			$this->setPasswordResetKey( $this->encryptPasswordResetKey( $password_reset_key ) ); //Encrypt the password reset key in the database so if it every gets compromised through SQL injection or other methods, it can be used directly to a reset password.
 			$this->setPasswordResetDate( time() );
 			if (  $this->isValid() ) {
 				$this->Save( FALSE );
 				$subject = APPLICATION_NAME .' '. TTi18n::gettext('password reset requested at') .' '. TTDate::getDate('DATE+TIME', time() ) .' '. TTi18n::gettext('from') .' '. Misc::getRemoteIPAddress();
 				$body = '<html><body>';
 				$body .= TTi18n::gettext('A password reset has been requested for') .' "'. $this->getUserName() .'", ';
-				//			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ForgotPassword.php?action:password_reset=1&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
-				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'html5/#!sm=ResetPassword&key='. $this->getPasswordResetKey().'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
+				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'html5/#!sm=ResetPassword&key='. $password_reset_key .'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
 				$body .= '<br><br>';
 				$body .= TTi18n::gettext('If you did not request your password to be reset, you may ignore this email.');
 				$body .= '<br><br>';
@@ -3579,7 +3593,6 @@ class UserFactory extends Factory {
 						case 'password_reset_date': //Password columns must not be changed from the API.
 						case 'password_reset_key':
 						case 'password_updated_date':
-						case 'work_email_is_valid':
 						case 'work_email_is_valid': //EMail validation fields must not be changed from API.
 						case 'work_email_is_valid_key':
 						case 'work_email_is_valid_date':
@@ -3727,6 +3740,9 @@ class UserFactory extends Factory {
 							//Staffing agencies may have employees for only a few days, so need to show partial years.
 							$data[$variable] = number_format( TTDate::getYearDifference( TTDate::getBeginDayEpoch( $this->getHireDate() ), TTDate::getEndDayEpoch( $end_epoch ) ), 2 ); //Years (two decimals)
 							unset($end_epoch);
+							break;
+						case 'password_reset_key': //Must not be returned to the API ever due to security risks.
+						case 'password':
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

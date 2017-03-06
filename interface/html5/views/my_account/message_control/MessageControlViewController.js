@@ -57,7 +57,7 @@ MessageControlViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 
 		var default_args = {};
-		default_args.permission_section = 'message_control';
+		default_args.permission_section = 'message';
 		this.search_fields = [
 
 			new SearchField( {
@@ -1364,7 +1364,7 @@ MessageControlViewController = BaseViewController.extend( {
 			field: 'to_user_id'
 		} );
 		var default_args = {};
-		default_args.permission_section = 'message_control';
+		default_args.permission_section = 'message';
 		form_item_input.setDefaultArgs( default_args );
 		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_message_column1, '' );
 

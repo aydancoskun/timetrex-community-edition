@@ -319,12 +319,12 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	function getByPasswordResetKey( $key ) {
 		$key = trim($key);
 
-		if ( $this->Validator->isRegEx('email', $key, NULL, '/^[a-z0-9]{32}$/i' ) == FALSE ) {
+		if ( $this->Validator->isRegEx('email', $key, NULL, '/^[a-z0-9]{40}$/i' ) == FALSE ) {
 			return FALSE;
 		}
 
 		$ph = array(
-					'key' => $key,
+					'key' => $this->encryptPasswordResetKey( $key ),
 					);
 
 		$query = '

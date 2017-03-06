@@ -1,4 +1,4 @@
-Version: 10.1.1 Generated: Fri Feb 24 16:08:15 PST 2017
+Version: 10.1.2 Generated: Tue Feb 28 07:26:42 PST 2017
 6cbf232b27b656f37027eea596274f89ad61e25a  ./install_cron.sh
 e403c92805939a49ddb6d386bb38c4285a0a0812  ./templates/sm_header.tpl
 55018f3544114e3dbe1cc648ed3230e202abfaa5  ./templates/ConfirmEmail.tpl
@@ -1537,13 +1537,13 @@ e725eac9cb1250ca1a6e7c80270123b9535b58ef  ./classes/modules/users/UserGenericDat
 065876b8918b44361ba81e20889d87d8180698f0  ./classes/modules/users/UserSettingFactory.class.php
 17b8320a5b274d3203198e1d719e15a75465741e  ./classes/modules/users/UserSettingListFactory.class.php
 a5820bf9fe88384e6e9d48bfb6a0262394e26f50  ./classes/modules/users/UserGenericStatusListFactory.class.php
-cbfee3bfcb6cb84881a0683f53bbbe8df4922bdf  ./classes/modules/users/UserListFactory.class.php
+0728c7d2608302b5becc0d47fe5d2630b9f7c09a  ./classes/modules/users/UserListFactory.class.php
 34316e13c2a42a22110001e17919d06f864e48f7  ./classes/modules/users/UserDefaultListFactory.class.php
 5a29b979d00b52dd3531df685b85635b3b168f51  ./classes/modules/users/UserContactFactory.class.php
 0c19ac5344f246d6e654607004c4d324654dd36e  ./classes/modules/users/UserWageListFactory.class.php
 b7c47c8b5dec6c7276fb32f845128cb6efed4168  ./classes/modules/users/UserReportDataListFactory.class.php
 0d2ba1aff9f20272c41573612823dc055783f933  ./classes/modules/users/UserReportDataFactory.class.php
-cae7e973b4b603852a0a5b068ae1ed71317eb3f4  ./classes/modules/users/UserFactory.class.php
+e717905462a4a2cd735b784c6acacc9a99dab479  ./classes/modules/users/UserFactory.class.php
 f8d775ec9cbe3389022a9cd5dc8fa3a8b10b0412  ./classes/modules/users/UserGenericDataListFactory.class.php
 2b36cf458da7966cdbd3d1ced9ceaf14ce9f35eb  ./classes/modules/users/UserWageFactory.class.php
 4d976ae6d13b769a06629b8f76e0dc3d190f887d  ./classes/modules/users/UserGenericStatusFactory.class.php
@@ -1563,7 +1563,7 @@ af244ff591e2d1d2898d6e8400eee8879821a4d1  ./classes/modules/users/UserPreference
 4be5bc8db4572ac5448ab67a73b8eb1ed9710ff4  ./classes/modules/users/BankAccountFactory.class.php
 b232721477079fa14066aa95d268d4a4f098bcd5  ./classes/modules/core/PermissionUserListFactory.class.php
 b2706131760c61aad440b15be537f1937a292994  ./classes/modules/core/CalculatePolicy.class.php
-b91fddb9d2601b32d1e1e6bc6440b2d7a1a52c0e  ./classes/modules/core/Authentication.class.php
+372f83ef7db8a22dc35e34ea7352b92302ef836f  ./classes/modules/core/Authentication.class.php
 41a239c5675703bd37b931e5cfc2b955508c75ab  ./classes/modules/core/StationUserGroupFactory.class.php
 4144e826ef0133832c580526b05b87e6e82b8655  ./classes/modules/core/Group.class.php
 7289dbb8ab7c52311be2a1ae3a10d7947b761212  ./classes/modules/core/LogDetailListFactory.class.php
@@ -1619,7 +1619,7 @@ e87bb30400e0e62640587eada54225045ebb1c4d  ./classes/modules/core/StationFactory.
 bbbcd8238b82e361c0a6b231c1361b7d5a8fde3c  ./classes/modules/core/BackgroundProcess.class.php
 dcdd2fe5bc36502fe0f66db2a7a97d996b10048e  ./classes/modules/core/Debug.class.php
 2bd63ca5e144fc81ca7d98d92441aed9b1419390  ./classes/modules/core/StationUserFactory.class.php
-00b4c313df26e3db7fbe514aea07af6c9a62415f  ./classes/modules/core/Permission.class.php
+7211862f2fdf22755a05ecd9ee4656aa3c10617b  ./classes/modules/core/Permission.class.php
 7963d4f4fb470caad6d1276c4e5806b54933ac2f  ./classes/modules/core/OtherFieldListFactory.class.php
 4da7eec197f0d6ba248c82f43c6eb2d6ce98fcd3  ./classes/modules/core/TTLDAP.class.php
 24c7fc6ff918a8483fbd98a2ca8e12196db53325  ./classes/modules/core/TTMail.class.php
@@ -1738,15 +1738,15 @@ a15b97da704e9e153cfa9cc3f21061da8bbe4277  ./classes/modules/api/schedule/APISche
 b69fdafb82a6f54ae57f8d8db41645054da6360e  ./classes/modules/api/schedule/APIRecurringScheduleTemplateControl.class.php
 c4833a069cc6306c4fae2433ed977f23a2db7c75  ./classes/modules/api/pay_stub_amendment/APIRecurringPayStubAmendment.class.php
 3c3cd675284c7cf6a80b30370cc6a702f272b81b  ./classes/modules/api/pay_stub_amendment/APIPayStubAmendment.class.php
-1a982a9a9322e5d1699f9e0bd3a6e198936b4207  ./classes/modules/api/users/APIBankAccount.class.php
+8be84fcc750ca220f2ecf2e48553131e35601803  ./classes/modules/api/users/APIBankAccount.class.php
 6e98810424d56814572b6017f6c480b485739e69  ./classes/modules/api/users/APIUserGroup.class.php
 1e83b3089073c72c30c0f90950d437cc902cc304  ./classes/modules/api/users/APIUserPreference.class.php
-443363bb4ebb7e78bd73557841071e1c96070668  ./classes/modules/api/users/APIUserContact.class.php
+50b63ead0a25b5dc51f7332fb7339350457e783f  ./classes/modules/api/users/APIUserContact.class.php
 55a099e8ddaf5453814db1d83b06ce77e411a68f  ./classes/modules/api/users/APIUserGenericData.class.php
 bbda7f72ac1fe5fe106d4da29fdd3dcf6c885454  ./classes/modules/api/users/APIUserSetting.class.php
 14231a311a1608d874a9da530937ec32d59fbf96  ./classes/modules/api/users/APIUserDefault.class.php
 d55120134a905326af6b060713ddd79f45a600f6  ./classes/modules/api/users/APIUserTitle.class.php
-7a4755850d368a650253807d4ed5ec41f23f67ba  ./classes/modules/api/users/APIUser.class.php
+99622cf8bd42054c0d5e55060169335d20a1d509  ./classes/modules/api/users/APIUser.class.php
 208aa069f511d355bdee1e0bcfdea41db7b86cad  ./classes/modules/api/users/APIEthnicGroup.class.php
 602d524a3ac9833ae5ae3f86923f9dc90c8121ba  ./classes/modules/api/users/APIUserGenericStatus.class.php
 0681829e429b7c0e223128a2ed56b8778720859c  ./classes/modules/api/users/APIUserWage.class.php
@@ -2241,7 +2241,7 @@ f510d5228aa7616b889dd696993e276aabe34184  ./interface/html5/views/hr/kpi/UserRev
 df3670e8230dcbbf2510eaf29c7e019330625ed8  ./interface/html5/views/hr/kpi/KPIEditView.html
 276825ab090fd086094cb0b6d5655a46aef2c1d4  ./interface/html5/views/hr/kpi/KPIView.html
 db07a61b5610efd660262e02a5dfc51dafd14477  ./interface/html5/views/hr/kpi/SubUserReviewControlView.html
-77b5e0bc800b9ce6fb5c2fd57d0d38f38d930624  ./interface/html5/views/hr/kpi/UserReviewControlViewController.js
+72e60e693ab797935e6929af1446afcfe5bc8c38  ./interface/html5/views/hr/kpi/UserReviewControlViewController.js
 2e6ff22ad04c9928e2d6de09a312f6cf30a2602a  ./interface/html5/views/hr/kpi/KPIGroupView.html
 b9a9a97b0b3de6e3737882727d9c2c92d0a45110  ./interface/html5/views/hr/kpi/UserReviewControlEditView.html
 d5644fee2684d4f2486a98d319349ac8fa2aa3a7  ./interface/html5/views/hr/kpi/KPIGroupEditView.html
@@ -2287,7 +2287,7 @@ a1797b983905afc858b6e4e144a6fca47ced700b  ./interface/html5/views/company/permis
 99200f39e8cd81ee3c14bd9450e3719465d14b69  ./interface/html5/views/company/wage/SubWageView.html
 1936fd268b6694b1badb2a06d4c8562a158f3768  ./interface/html5/views/company/wage/WageView.html
 ee910a62df012ac4301ec50a3fbde499cc1344d5  ./interface/html5/views/company/wage/WageEditView.html
-0b6aecc43027a641eb09a6c8ab0811ffe01b4b24  ./interface/html5/views/company/wage/WageViewController.js
+3efb7eca4af9ad45a00ab98e30ded3545a27f3c1  ./interface/html5/views/company/wage/WageViewController.js
 5fd08a85e5897da876b58d8916937a578b34f94b  ./interface/html5/views/company/ethnic_group/EthnicGroupView.html
 def5a92ba3e7e003c0e6c5db6bec7db3c3f1abc6  ./interface/html5/views/company/ethnic_group/EthnicGroupEditView.html
 d0624eae42b248ce68de7501c5a2abd7f26d36ef  ./interface/html5/views/company/ethnic_group/EthnicGroupViewController.js
@@ -2399,7 +2399,7 @@ da39a3ee5e6b4b0d3255bfef95601890afd80709  ./interface/html5/views/my_account/use
 776ea32255493d5a3fa260f91a949d44518195eb  ./interface/html5/views/my_account/user_contact/LoginUserContactViewController.js
 358cf429350741a36872357526bb9825d79a05de  ./interface/html5/views/my_account/message_control/MessageControlView.html
 c9126fcba8b9a3ba0237eeaf59b5c89b607c2664  ./interface/html5/views/my_account/message_control/MessageControlEditView.html
-0f83a37511238171d82d3ce6bcb7777234597bb1  ./interface/html5/views/my_account/message_control/MessageControlViewController.js
+fb65f907fe4ac6ee3a3abb6914a150d7bec25c6a  ./interface/html5/views/my_account/message_control/MessageControlViewController.js
 380c2afd413ad0f8b35544505fd75d28ee07395b  ./interface/html5/views/my_account/request_authorization/RequestAuthorizationViewController.js
 21eeebe2620d40cde456a375828dade37e916f8d  ./interface/html5/views/my_account/request_authorization/RequestAuthorizationView.html
 ee9064927d13779ba05c04ba1dea1fe2651cc9d3  ./interface/html5/views/my_account/request_authorization/RequestAuthorizationEditView.html
@@ -2433,7 +2433,7 @@ dd2ec1e4cac41748fb2f5a2fedcea1b638ad2f85  ./interface/html5/views/attendance/rec
 e2ad66e1b88f4e9cbd99d0893f1d4a4f6a5680ac  ./interface/html5/views/attendance/recurring_schedule_control/RecurringScheduleControlViewController.js
 1ca70ee91e4c7ed8b1dc012555eae5f34b8f56c4  ./interface/html5/views/attendance/accrual/AccrualEditView.html
 8478efb1cf0a30a0ae4c97157997c71abc5a833d  ./interface/html5/views/attendance/accrual/SubAccrualView.html
-d3df324cdd4b3a22f92f679197099c78a8f2daf6  ./interface/html5/views/attendance/accrual/AccrualViewController.js
+fa6224e31a2c96ba7ae3dcc825e4a1b632530c6c  ./interface/html5/views/attendance/accrual/AccrualViewController.js
 c905cf461222a467b309f0fe18046fa5920e2fc7  ./interface/html5/views/attendance/accrual/AccrualView.html
 3de2d0054f805479b02950c70c9fc25432ded136  ./interface/html5/views/attendance/job_item_amendment/JobItemAmendmentEditView.html
 4800ad6953c95842efd9154885821200037bc91b  ./interface/html5/views/attendance/job_item_amendment/SubJobItemAmendmentView.html
@@ -2451,7 +2451,7 @@ c599bd1f795dcba14b20fdc6ce5772b9b238e2c9  ./interface/html5/views/attendance/pun
 2f693be23fe1479d26ba53d68beb473c8f481007  ./interface/html5/views/attendance/in_out/InOutEditView.html
 da39a3ee5e6b4b0d3255bfef95601890afd80709  ./interface/html5/views/attendance/in_out/InOutView.html
 08bc0b94ae39c408eb961392e2fce84ff3c5d46c  ./interface/html5/views/attendance/accrual_balance/AccrualBalanceEditView.html
-85ef0bd589bb5b073da0bb0d16ff8cd251e11753  ./interface/html5/views/attendance/accrual_balance/AccrualBalanceViewController.js
+fd23e171489ec52080240e812e96f985115a9845  ./interface/html5/views/attendance/accrual_balance/AccrualBalanceViewController.js
 9b39c3a7430e89cd0ca2c878d37e53ae258bdce5  ./interface/html5/views/attendance/accrual_balance/AccrualBalanceView.html
 1eda1b2735096222d390f95db140fd9331f3482c  ./interface/html5/views/help/AboutViewController.js
 9241c89c03619457cfe2b7d3416894232b4b6a29  ./interface/html5/views/help/AboutEditView.html
@@ -3128,7 +3128,7 @@ b22a5ab879c9621649d7e3c0b06b1da2e98836c7  ./index.html
 3b5aa25fdf1992bd2ddfd83cde8dffdbbbfc2cf7  ./UPGRADE.txt
 917c71e9755aadd62f75f84b215eaaecbb62a867  ./includes/Database.inc.php
 a9876882e44025c88ce5e92c9709c8817b4ff3fa  ./includes/CLI.inc.php
-84d22e2fbf3659e986799ff8c010e5a7780ea0f7  ./includes/global.inc.php
+98c75fe07440c9efd0f529badcbde5d7465c1bd6  ./includes/global.inc.php
 3e6193a901b2ae6af58dc788b70a117f4521be69  ./includes/ClassMap.inc.php
 c2f264ce24342c98fa50147ddb144fe1879f2ba7  ./includes/Interface.inc.php
 bdda1e3d17757215c8aec9974fc068601ff79dfb  ./includes/TableMap.inc.php

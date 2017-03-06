@@ -155,11 +155,16 @@ class APIUser extends APIFactory {
 		//We need to take into account different permissions, ie: punch->view, view_child, view_own when displaying the dropdown
 		//box in the TimeSheet view and other views as well. Allow the caller of this function to pass a "permission_section"
 		//that can be used to determine this.
+		$permission_section = 'user';
+		$valid_permission_sections = array( 'user', 'wage', 'user_contact', 'accrual', 'roe', 'punch', 'schedule', 'recurring_schedule', 'message', 'user_expense', 'pay_stub_amendment', 'policy_group', 'user_membership', 'user_skill', 'user_education', 'user_license', 'user_language', 'user_review', 'job_application' ); //#2242 - Make sure we limit the sections to a specific list to avoid security bypasses.
 		if ( isset($data['permission_section']) AND $data['permission_section'] != '' ) {
-			$permission_section = trim(strtolower($data['permission_section']));
-		} else {
-			$permission_section = 'user';
+			if ( in_array( trim( strtolower( $data['permission_section'] ) ), $valid_permission_sections ) ) {
+				$permission_section = trim( strtolower( $data['permission_section'] ) );
+			} else {
+				Debug::Text('ERROR: NOT ALLOWED: permission_section: '. $data['permission_section'], __FILE__, __LINE__, __METHOD__, 10);
+			}
 		}
+		Debug::Text('Permission Section: '. $permission_section, __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		//$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( $permission_section, 'view' );

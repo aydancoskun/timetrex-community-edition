@@ -164,7 +164,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		} );
 
 		var default_args = {};
-		default_args.permission_section = 'user_review_control';
+		default_args.permission_section = 'user_review';
 		form_item_input.setDefaultArgs( default_args );
 
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_review_column1, '' );
@@ -430,7 +430,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 
 		var default_args = {};
-		default_args.permission_section = 'user_review_control';
+		default_args.permission_section = 'user_review';
 		this.search_fields = [
 
 			new SearchField( {

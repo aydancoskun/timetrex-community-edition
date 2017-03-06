@@ -144,12 +144,10 @@ AccrualViewController = BaseViewController.extend( {
 		// Employee
 
 		if ( this.sub_view_mode ) {
-
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 			form_item_input.TText( {field: 'full_name'} );
 			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_accrual_column1, '' );
 		} else {
-
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
@@ -214,8 +212,10 @@ AccrualViewController = BaseViewController.extend( {
 	},
 
 	buildSearchFields: function() {
-
 		this._super( 'buildSearchFields' );
+
+		var default_args = {};
+		default_args.permission_section = 'accrual';
 
 		this.search_fields = [
 
@@ -223,6 +223,7 @@ AccrualViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Employee' ),
 				field: 'user_id',
 				in_column: 1,
+				default_args: default_args,
 				layout_name: ALayoutIDs.USER,
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				multiple: true,

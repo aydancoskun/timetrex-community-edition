@@ -658,7 +658,7 @@ WageViewController = BaseViewController.extend( {
 			} );
 
 			var default_args = {};
-			default_args.permission_section = 'user_wage';
+			default_args.permission_section = 'wage';
 			form_item_input.setDefaultArgs( default_args );
 			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_wage_column1, '' );
 		}
@@ -843,7 +843,7 @@ WageViewController = BaseViewController.extend( {
 
 		this._super( 'buildSearchFields' );
 
-		var default_args = {permission_section: 'user_wage'};
+		var default_args = {permission_section: 'wage'};
 		this.search_fields = [
 			new SearchField( {
 				label: $.i18n._( 'Employee' ),
