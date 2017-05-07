@@ -416,7 +416,7 @@ class PayCodeFactory extends Factory {
 			if ( $csplf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
 											 FALSE,
-											 TTi18n::gettext('This pay code is currently in use')  .' '. TTi18n::gettext('by contributing shift policies') );
+											 TTi18n::gettext('This pay code is currently in use')  .' '. TTi18n::gettext('by contributing pay code policies') );
 			}
 		} else {
 			if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.

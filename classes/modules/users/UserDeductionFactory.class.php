@@ -1714,14 +1714,6 @@ class UserDeductionFactory extends Factory {
 					Debug::Text('Found Employee CPP account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
 					$pd_obj->setYearToDateCPPContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
-					/*
-					$previous_ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
-					$current_ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
-					Debug::text('YTD CPP Contribution: Previous Amount: '. $previous_ytd_cpp_arr['ytd_amount'] .' Current Amount: '. $current_ytd_cpp_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
-
-					$pd_obj->setYearToDateCPPContribution( bcadd($previous_ytd_cpp_arr['ytd_amount'], $current_ytd_cpp_arr['ytd_amount'] ) );
-					unset($previous_ytd_cpp_arr, $current_ytd_cpp_arr);
-					*/
 				}
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );
@@ -1754,14 +1746,6 @@ class UserDeductionFactory extends Factory {
 					Debug::Text('Found Employee EI account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
 					$pd_obj->setYearToDateEIContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
-					/*
-					$previous_ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
-					$current_ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
-					Debug::text('YTD EI Contribution: Previous Amount: '. $previous_ytd_ei_arr['ytd_amount'] .' Current Amount: '. $current_ytd_ei_arr['amount'], __FILE__, __LINE__, __METHOD__, 10);
-
-					$pd_obj->setYearToDateEIContribution( bcadd($previous_ytd_ei_arr['ytd_amount'], $current_ytd_ei_arr['ytd_amount'] ) );
-					unset($previous_ytd_ei_arr, $current_ytd_ei_arr);
-					*/
 				}
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );
@@ -1819,7 +1803,6 @@ class UserDeductionFactory extends Factory {
 
 					$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
-					//$pself = TTnew( 'PayStubEntryListFactory' );
 					if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() != '' ) {
 						Debug::Text('Found Employee CPP account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1831,6 +1814,8 @@ class UserDeductionFactory extends Factory {
 						if ( isset($current_cpp['amount']) AND $current_cpp['amount'] == 0 ) {
 							Debug::Text('Current CPP: '. $current_cpp['amount'] .' Setting CPP exempt in Federal Income Tax calculation...', __FILE__, __LINE__, __METHOD__, 10);
 							$pd_obj->setCPPExempt( TRUE );
+						} elseif ( isset($current_cpp['amount']) AND $current_cpp['amount'] != 0 )  {
+							$pd_obj->setEmployeeCPPForPayPeriod( $current_cpp['amount'] ); //Make sure we pass in the amount that was calculated, as it may have different include/exclude accounts than this.
 						}
 
 						$ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
@@ -1849,6 +1834,8 @@ class UserDeductionFactory extends Factory {
 						if ( isset($current_ei['amount']) AND $current_ei['amount'] == 0 ) {
 							Debug::Text('Current EI: '. $current_ei['amount'] .' Setting EI exempt in Federal Income Tax calculation...', __FILE__, __LINE__, __METHOD__, 10);
 							$pd_obj->setEIExempt( TRUE );
+						} elseif ( isset($current_ei['amount']) AND $current_ei['amount'] != 0 ) {
+							$pd_obj->setEmployeeEIForPayPeriod( $current_ei['amount'] ); //Make sure we pass in the amount that was calculated, as it may have different include/exclude accounts than this.
 						}
 
 						$ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
@@ -1928,7 +1915,6 @@ class UserDeductionFactory extends Factory {
 
 					$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
-					//$pself = TTnew( 'PayStubEntryListFactory' );
 					if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() != '' ) {
 						Debug::Text('Found Employee CPP account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1940,6 +1926,8 @@ class UserDeductionFactory extends Factory {
 						if ( isset($current_cpp['amount']) AND $current_cpp['amount'] == 0 ) {
 							Debug::Text('Current CPP: '. $current_cpp['amount'] .' Setting CPP exempt in Provincial Income Tax calculation...', __FILE__, __LINE__, __METHOD__, 10);
 							$pd_obj->setCPPExempt( TRUE );
+						} elseif ( isset($current_cpp['amount']) AND $current_cpp['amount'] != 0 )  {
+							$pd_obj->setEmployeeCPPForPayPeriod( $current_cpp['amount'] ); //Make sure we pass in the amount that was calculated, as it may have different include/exclude accounts than this.
 						}
 
 						$ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
@@ -1958,6 +1946,8 @@ class UserDeductionFactory extends Factory {
 						if ( isset($current_ei['amount']) AND $current_ei['amount'] == 0 ) {
 							Debug::Text('Current EI: '. $current_ei['amount'] .' Setting EI exempt in Provincial Income Tax calculation...', __FILE__, __LINE__, __METHOD__, 10);
 							$pd_obj->setEIExempt( TRUE );
+						} elseif ( isset($current_ei['amount']) AND $current_ei['amount'] != 0 ) {
+							$pd_obj->setEmployeeEIForPayPeriod( $current_ei['amount'] ); //Make sure we pass in the amount that was calculated, as it may have different include/exclude accounts than this.
 						}
 
 						$ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );

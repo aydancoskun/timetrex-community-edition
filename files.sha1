@@ -1,4 +1,4 @@
-Version: 10.1.2 Generated: Tue Feb 28 07:26:42 PST 2017
+Version: 10.1.3 Generated: Thu Mar 16 16:13:14 PDT 2017
 6cbf232b27b656f37027eea596274f89ad61e25a  ./install_cron.sh
 e403c92805939a49ddb6d386bb38c4285a0a0812  ./templates/sm_header.tpl
 55018f3544114e3dbe1cc648ed3230e202abfaa5  ./templates/ConfirmEmail.tpl
@@ -600,7 +600,7 @@ b9815645cc18a0071254b6150f1cbcf6143756c4  ./classes/fpdf/font/helveticabi.php
 0e2cf5e4047dae1cc68b3298a1dbd865b73e2d8d  ./classes/fpdf/font/zapfdingbats.php
 91581e97bedf22651bc1ea1d0715ea440f64a75d  ./classes/fpdf/font/timesbi.php
 63e938968861ef0444bddebde52c80a34fbd9c64  ./classes/fpdf/fpdf.css
-833727c46cb1066f61f06b6bc34324272b0356d9  ./classes/payroll_deduction/CA.class.php
+01b02f222443a879a4b86d9bed03f12746638f80  ./classes/payroll_deduction/CA.class.php
 05e8d8bc957eda838eaead887acea3f63b517306  ./classes/payroll_deduction/CR/Data.class.php
 42b1be63dd80e4e214a53ab706b149afbd431d95  ./classes/payroll_deduction/US.class.php
 0b3cd03b98336f6a79db1ec9da085dee85461d62  ./classes/payroll_deduction/PayrollDeduction_Base.class.php
@@ -1442,7 +1442,7 @@ a808d861857baca7d4f791c5a027a05c6a71e7aa  ./classes/modules/policy/RegularTimePo
 86d137e67d1de2488091042628acd562247f77b8  ./classes/modules/policy/BreakPolicyListFactory.class.php
 1eccdb3a913b1473eeeb9b24806298afd513acc1  ./classes/modules/policy/RoundIntervalPolicyFactory.class.php
 71eb1a67fbc5bf51adcd5f1536d78892969203a8  ./classes/modules/policy/PolicyGroupOverTimePolicyFactory.class.php
-76eb391710d960348df8095496164ed6a2c1832f  ./classes/modules/policy/PayCodeFactory.class.php
+3095b62c872f10c73d6c7d735dc2e0a45585e329  ./classes/modules/policy/PayCodeFactory.class.php
 4e3e0929a5271b6ba195285636cc3a885c31e8e3  ./classes/modules/policy/AccrualPolicyMilestoneFactory.class.php
 f08219c38e3f6ac8244909b9f30b1532367b118c  ./classes/modules/policy/OverTimePolicyFactory.class.php
 aa3f633dd0130ac53a015b24fa84fb5486ba8d97  ./classes/modules/policy/PremiumPolicyListFactory.class.php
@@ -1558,12 +1558,12 @@ f8101d2e4c42bf7c6068aa90b034dc9f4985174c  ./classes/modules/users/UserIdentifica
 af244ff591e2d1d2898d6e8400eee8879821a4d1  ./classes/modules/users/UserPreferenceFactory.class.php
 2ddac261c1098c5dbc0826dd95cd48e414976283  ./classes/modules/users/EthnicGroupFactory.class.php
 4a4ae6aa5549e003971a7b734ac05acc9862d2ff  ./classes/modules/users/UserDefaultCompanyDeductionFactory.class.php
-6a2e69ab3cc25f1a862e56741c15f42a0e500b74  ./classes/modules/users/UserDeductionFactory.class.php
+bfc6c4bad56b1f2e8e1e290df19cb885252a0081  ./classes/modules/users/UserDeductionFactory.class.php
 743260c623f5cd476a1b0fd748b272603dbd2153  ./classes/modules/users/UserDefaultCompanyDeductionListFactory.class.php
 4be5bc8db4572ac5448ab67a73b8eb1ed9710ff4  ./classes/modules/users/BankAccountFactory.class.php
 b232721477079fa14066aa95d268d4a4f098bcd5  ./classes/modules/core/PermissionUserListFactory.class.php
-b2706131760c61aad440b15be537f1937a292994  ./classes/modules/core/CalculatePolicy.class.php
-372f83ef7db8a22dc35e34ea7352b92302ef836f  ./classes/modules/core/Authentication.class.php
+e59f3a5399044226f34d65aa74e9155f20519bf1  ./classes/modules/core/CalculatePolicy.class.php
+e15f79d016c2cb14a2f5554336b3a55a323ae621  ./classes/modules/core/Authentication.class.php
 41a239c5675703bd37b931e5cfc2b955508c75ab  ./classes/modules/core/StationUserGroupFactory.class.php
 4144e826ef0133832c580526b05b87e6e82b8655  ./classes/modules/core/Group.class.php
 7289dbb8ab7c52311be2a1ae3a10d7947b761212  ./classes/modules/core/LogDetailListFactory.class.php
@@ -1574,7 +1574,7 @@ a63e5ee4b3be37e0f5a991b06e3de341edbb41db  ./classes/modules/core/Validator.class
 26d9d75e5f829ba43037fe177d86aadac989b07e  ./classes/modules/core/StationBranchListFactory.class.php
 6508b4a1d93e29f785e4ea1699d6c5dd6fe8eb96  ./classes/modules/core/CurrencyRateListFactory.class.php
 6ab70c93f2fe2daaf5dd0cb547e98b7b45b59993  ./classes/modules/core/StationListFactory.class.php
-f7714e8c9087b3045f8c08bb85461c43ab6923b5  ./classes/modules/core/PermissionFactory.class.php
+61c57e336ba529000935b6ffc942e798728f18f7  ./classes/modules/core/PermissionFactory.class.php
 985ef9d6622867dfc24e84d425a2971006b5bb80  ./classes/modules/core/Serializer.class.php
 ab718cce69b0247b839b1e3952beb561c210869c  ./classes/modules/core/FastTree.class.php
 ff9b3aa62be3aacca33d83fb4528d429d476929f  ./classes/modules/core/LockFile.class.php
@@ -2274,7 +2274,7 @@ da39a3ee5e6b4b0d3255bfef95601890afd80709  ./interface/html5/views/employees/user
 cbdd8c5ea74c504d71a6407a45fc1984e5815689  ./interface/html5/views/employees/user_default/UserDefaultViewController.js
 7cf954e1ee942cdd2b10a04d576ef821de9dd5b8  ./interface/html5/views/common/AuthorizationHistoryCommon.js
 ac93cfd6d121a5336b0b4cd79fee694d7f38f9a7  ./interface/html5/views/common/EmbeddedMessageCommon.js
-488f4ee3a3127b5d2c2a43b878c8678926f06a18  ./interface/html5/views/common/RequestViewCommonController.js
+6695466c8e468516b2a6984cc99c0514689cf74b  ./interface/html5/views/common/RequestViewCommonController.js
 aab9eb0e98ed1d99a7465f6841362f54411a02c1  ./interface/html5/views/company/branch/BranchEditView.html
 afb4ab9fbb8295c29ffe7901e8cfb3d8484da3ab  ./interface/html5/views/company/branch/BranchView.html
 75b399391b6ce74f0ff6ed2a41cab63fdd58a948  ./interface/html5/views/company/branch/BranchViewController.js
@@ -2422,7 +2422,7 @@ c5dcbdb6e1ea404417760bc3efc687743767bc35  ./interface/html5/views/attendance/rec
 fc6caa459475d97e0e0e95e0efb79383312e9429  ./interface/html5/views/attendance/timesheet/UserDateTotalParentEditView.html
 307dcd0dfff7a62b1277704f3a615f9d9ab26871  ./interface/html5/views/attendance/timesheet/TimeSheetEditView.html
 360e843d43a5ca1b2681aac56a16c5be8933c16a  ./interface/html5/views/attendance/timesheet/UserDateTotalEditView.html
-f83b7058c0bd1e5ab18a8f721a9caae36abc105d  ./interface/html5/views/attendance/timesheet/TimeSheetViewController.js
+b0815c9cbad65114915add265290869c4f2f0b55  ./interface/html5/views/attendance/timesheet/TimeSheetViewController.js
 6741eabf0ed2d7c0f6fd8c3cd9a18011787fbc0d  ./interface/html5/views/attendance/timesheet/UserDateTotalParentView.html
 8047b834372f2a4cf62f31d9f4cb7124ea7da417  ./interface/html5/views/attendance/timesheet/TimeSheetView.html
 71139a4d7bf21ff06d88c25509d7b6a145b3e06d  ./interface/html5/views/attendance/timesheet/UserDateTotalViewController.js
@@ -3068,7 +3068,7 @@ b45ca72e4e196e4e684eb9e93f7126a763e97a93  ./unit_tests/testcases/payroll_deducti
 0fe9e642493d17f2318d2805f1cf379763778b6b  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2011.php
 f7a7cc37d0db21b89f27afa222822e8e0fba5e12  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2009.csv
 5eb81ae3d70365f28085a4f79fbb5dd204eda4ac  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2007.php
-735a8117f4192bf1e42e3b912bd15e0b323aa4f5  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2017.php
+b83aa2b132375fa15b4655e4d00909b1ea1ee811  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2017.php
 7b92bcfdcef5369171e8972d22f8cc7bc703e127  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2016.csv
 a794910699782ff281b2225b841abcfa8e29bc19  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2011.csv
 4ce61e25736cc579cacf29625d3a2402295d37b2  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2011.csv
@@ -3128,7 +3128,7 @@ b22a5ab879c9621649d7e3c0b06b1da2e98836c7  ./index.html
 3b5aa25fdf1992bd2ddfd83cde8dffdbbbfc2cf7  ./UPGRADE.txt
 917c71e9755aadd62f75f84b215eaaecbb62a867  ./includes/Database.inc.php
 a9876882e44025c88ce5e92c9709c8817b4ff3fa  ./includes/CLI.inc.php
-98c75fe07440c9efd0f529badcbde5d7465c1bd6  ./includes/global.inc.php
+c6984d4ff037e79dce02e7f90582286314ea7307  ./includes/global.inc.php
 3e6193a901b2ae6af58dc788b70a117f4521be69  ./includes/ClassMap.inc.php
 c2f264ce24342c98fa50147ddb144fe1879f2ba7  ./includes/Interface.inc.php
 bdda1e3d17757215c8aec9974fc068601ff79dfb  ./includes/TableMap.inc.php

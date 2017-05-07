@@ -135,7 +135,11 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	showAdvancedFields: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && (this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) && !this.pre_request_schedule ) {
+		if (
+			LocalCacheData.getCurrentCompany().product_edition_id > 10 &&
+			( PermissionManager.validate('request', 'add_advanced') || this.current_edit_record.request_schedule_id > 0 ) &&
+			( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) && !this.pre_request_schedule
+		) {
 			var advanced_field_names = this.getAdvancedFieldNames();
 			if ( this.edit_view_ui_dic ) {
 				for ( var i = 0; i < advanced_field_names.length; i++ ) {
@@ -579,10 +583,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		form_item_input.TText({field: 'date_stamp'});
 		this.addEditFieldToColumn($.i18n._('Date'), form_item_input, tab_request_column1);
 
-		//see #2224 Cannot read property 'request_schedule_id' of undefined
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 &&
-			(PermissionManager.validate('request', 'add_advanced') || this.viewId == 'RequestAuthorization' || this.current_edit_record.request_schedule_id > 0 )
-			) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 			
 			//Working Status
 			var form_item_input = Global.loadWidgetByName(FormItemType.COMBO_BOX);

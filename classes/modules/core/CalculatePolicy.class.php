@@ -2153,7 +2153,10 @@ class CalculatePolicy {
 
 					//Do we include just Worked Time in the calculation, or do we somehow handle Contributing Shift Policies?
 					//Regular Time should be exclusive to itself, so we can't calculate regular time on top of regular time.
-					//Only include worked time in regular time calculation, then overtime and premium will not include regular time.
+					//Only include worked time in regular time calculation, then overtime and premium will include regular time.
+					//  **FIXME: However both Premium and now OT policies include themselves in filter so we can nest policies.
+					//  For example maybe we want one Reg. policy that include just a subset of time (based on a differential filter or contributing shift policy),
+					//  then another regular time policy that just includes time from that previous reg. policy. We are doing something similar with OT policies.
 					$user_date_total_rows = $this->compactMealAndBreakUserDateTotalObjects( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, $date_stamp, $this->contributing_shift_policy[$rtp_obj->getContributingShiftPolicy()], array( 10, 25, 100, 110 ) ) );
 				}
 				Debug::text('I: '. $i .' Regular Time Policy: '. $rtp_obj->getName() .' Pay Code: '. $rtp_obj->getPayCode(), __FILE__, __LINE__, __METHOD__, 10);
@@ -2435,8 +2438,10 @@ class CalculatePolicy {
 				return FALSE;
 			}
 
-			$user_date_total_rows = $this->compactMealAndBreakUserDateTotalObjects( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], array( 20, 25, 100, 110 ) ) );
-			//$user_date_total_rows = $this->sortUserDateTotalData( $user_date_total_rows ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+			//Make sure we include type_id=30 (overtime) as well, so we can chain overtime policies on top of overtime policies during the calculation.
+			//  For example, if a customer has a per diem that applies only after working X consecutive days in a specific department, we will need a OT policy that triggers and applies the time to a "Regular Time" pay code.
+			//  Then however we may need another OT policy like Daily >8 to apply on just time triggered above. Without including type_id=30 here, we wouldn't be able to do that.
+			$user_date_total_rows = $this->compactMealAndBreakUserDateTotalObjects( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, $date_stamp, $this->contributing_shift_policy[$otp_obj->getContributingShiftPolicy()], array( 20, 25, 30, 100, 110 ) ) );
 
 			//Because some overtime policies may or may not include absence time, we need to recalculate the "maximum" time
 			//As the maximum time passed into this function always includes absence time.
@@ -3436,7 +3441,6 @@ class CalculatePolicy {
 
 		//Sort trigger_time array by calculation order before looping over it.
 		//  'is_differential_criteria' => SORT_ASC helps calculate OT policies with differential criterias first, so the "catch all" OT policy doesn't need to explicity have exclude criteria set on it. This greatly simplifies OT policies with differential criteria.
-		//$trigger_time_arr = Sort::multiSort( $trigger_time_arr, 'calculation_order', 'trigger_time', 'asc', 'desc' );
 		$trigger_time_arr = Sort::arrayMultiSort( $trigger_time_arr, array( 'calculation_order' => SORT_ASC, 'trigger_time' => SORT_DESC, 'is_differential_criteria' => SORT_ASC, 'combined_rate' => SORT_DESC )  );
 		//Debug::Arr($trigger_time_arr, 'Source Trigger Arr After Calculation Order Sort: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -8121,7 +8125,7 @@ class CalculatePolicy {
 									)
 								) {
 
-								//Debug::text('Found: UDT ID: '. $udt_obj->getID() .' Date Stamp: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ) .' Start Time: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ) .' End Time: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .'($'. (float)$udt_obj->getTotalTimeAmount().' Base Rate: '.(float)$udt_obj->getBaseHourlyRate().') Object Type ID: '. $udt_obj->getObjectType() .' SRC Object ID: '. $udt_obj->getSourceObject() .' ID: '. $udt_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
+								//Debug::text('Found: UDT ID: '. $udt_obj->getID() .' Key: '. $udt_key .' Date Stamp: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ) .' Start Time: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ) .' End Time: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .'($'. (float)$udt_obj->getTotalTimeAmount().' Base Rate: '.(float)$udt_obj->getBaseHourlyRate().') Object Type ID: '. $udt_obj->getObjectType() .' SRC Object ID: '. $udt_obj->getSourceObject() .' ID: '. $udt_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
 								//Handle partial shifts here.
 								if ( !isset($already_split_key[$udt_key]) AND $contributing_shift_policy_obj->getIncludeShiftType() == 100 ) {
 									//Handle partial shifts here.
@@ -8140,19 +8144,19 @@ class CalculatePolicy {
 									$retarr[$udt_key] = $udt_obj;
 								}
 							} else {
-								Debug::text('Skipping, due to filter date,dow,time,differential... UDT ID: '. $udt_obj->getID() .' Date Stamp: '. TTDate::getDate('DATE', $udt_obj_date_stamp ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' Filter: Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('  Skipping, due to filter date,dow,time,differential... UDT ID: '. $udt_obj->getID() .' Key: '. $udt_key .' Date Stamp: '. TTDate::getDate('DATE', $udt_obj_date_stamp ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' Filter: Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 						//else {
-						//	Debug::text('Skipping, due to date. UDT Date Stamp: '. TTDate::getDate('DATE', $udt_obj_date_stamp ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' Object Type: '. $udt_obj->getObjectType() .' Filter: Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
+						//	Debug::text('  Skipping, due to date. UDT ID: '. $udt_obj->getID() .' Key: '. $udt_key .' Date Stamp: '. TTDate::getDate('DATE', $udt_obj_date_stamp ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' Object Type: '. $udt_obj->getObjectType() .' Filter: Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
 						//}
 					}
 					//else {
-					//	Debug::Text('Skipping, due to pay_code_id. UDT Date Stamp: '. TTDate::getDate('DATE', $udt_obj_date_stamp ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' Object Type: '. $udt_obj->getObjectType() .' Filter: Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ) .' Object Type ID: '. $udt_obj->getObjectType() .' SRC Object ID: '. $udt_obj->getSourceObject(), __FILE__, __LINE__, __METHOD__, 10);
+					//	Debug::Text('  Skipping, due to pay_code_id. UDT ID: '. $udt_obj->getID() .' Key: '. $udt_key .' Date Stamp: '. TTDate::getDate('DATE', $udt_obj_date_stamp ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' Object Type: '. $udt_obj->getObjectType() .' Filter: Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ) .' Object Type ID: '. $udt_obj->getObjectType() .' SRC Object ID: '. $udt_obj->getSourceObject(), __FILE__, __LINE__, __METHOD__, 10);
 					//}
 				}
 				//else {
-				//	Debug::Text('Skipping, due to object_type_id. UDT Date Stamp: '. TTDate::getDate('DATE', $udt_obj_date_stamp ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' Object Type: '. $udt_obj->getObjectType() .' Filter: Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
+				//	Debug::Text('  Skipping, due to object_type_id. UDT ID: '. $udt_obj->getID() .' Key: '. $udt_key .' Date Stamp: '. TTDate::getDate('DATE', $udt_obj_date_stamp ) .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' Object Type: '. $udt_obj->getObjectType() .' Filter: Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
 				//}
 			}
 

@@ -661,6 +661,13 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return $K2P;
 	}
 
+	//Since CPP/EI amounts do not take into account deductions like RRSP/Child support and such and because we calculate them separately from Federal/Provincial income tax
+	// we need to be able to pass their amounts in from a previous calculation rather than recalculating them based on different information.
+	function setEmployeeCPPForPayPeriod($value) {
+		$this->data['employee_cpp_for_pp'] = $value;
+
+		return TRUE;
+	}
 	function getEmployeeCPPForPayPeriod() {
 		/*
 				ii) 0.495 * [I - (3500 / P)
@@ -686,6 +693,11 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		Debug::text('I: '. $I, __FILE__, __LINE__, __METHOD__, 10);
 
 		$tmp2_C = bcmul( $this->getCPPEmployeeRate(), bcsub($I, $exemption ) );
+		if ( isset($this->data['employee_cpp_for_pp']) AND $this->data['employee_cpp_for_pp'] != NULL ) {
+			Debug::text('Using manually passed in Employee CPP for PP: '. $this->data['employee_cpp_for_pp'], __FILE__, __LINE__, __METHOD__, 10);
+			$tmp2_C = $this->data['employee_cpp_for_pp'];
+		}
+
 		if ($tmp2_C > $this->getCPPEmployeeMaximumContribution() ) {
 			$tmp2_C = $this->getCPPEmployeeMaximumContribution();
 		}
@@ -709,15 +721,9 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		}
 
 		$D = $this->getYearToDateCPPContribution();
-		$P = $this->getAnnualPayPeriods();
-		$I = $this->getGrossPayPeriodIncome();
-
 		Debug::text('D: '. $D, __FILE__, __LINE__, __METHOD__, 10);
-		Debug::text('P: '. $P, __FILE__, __LINE__, __METHOD__, 10);
-		Debug::text('I: '. $I, __FILE__, __LINE__, __METHOD__, 10);
 
 		$tmp1_C = bcsub( $this->getCPPEmployeeMaximumContribution(), $D);
-		//$tmp2_C = bcmul( $this->getCPPEmployeeRate(), bcsub($I, $exemption ) );
 		$tmp2_C = $this->getEmployeeCPPForPayPeriod();
 
 		Debug::text('Tmp1_C: '. $tmp1_C, __FILE__, __LINE__, __METHOD__, 10);
@@ -743,6 +749,13 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return $this->getEmployeeCPP();
 	}
 
+	//Since CPP/EI amounts do not take into account deductions like RRSP/Child support and such and because we calculate them separately from Federal/Provincial income tax
+	// we need to be able to pass their amounts in from a previous calculation rather than recalculating them based on different information.
+	function setEmployeeEIForPayPeriod($value) {
+		$this->data['employee_ei_for_pp'] = $value;
+
+		return TRUE;
+	}
 	function getEmployeeEIForPayPeriod() {
 		/*
                 ii) 0.021 * I, maximum of 819
@@ -757,6 +770,11 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 
 		Debug::text('Employee EI Rate: '. $this->getEIEmployeeRate() .' I: '. $I, __FILE__, __LINE__, __METHOD__, 10);
 		$tmp2_EI = bcmul( $this->getEIEmployeeRate(), $I);
+		if ( isset($this->data['employee_ei_for_pp']) AND $this->data['employee_ei_for_pp'] != NULL ) {
+			Debug::text('Using manually passed in Employee EI for PP: '. $this->data['employee_ei_for_pp'], __FILE__, __LINE__, __METHOD__, 10);
+			$tmp2_EI = $this->data['employee_ei_for_pp'];
+		}
+
 		if ( $tmp2_EI > $this->getEIEmployeeMaximumContribution() ) {
 			$tmp2_EI = $this->getEIEmployeeMaximumContribution();
 		}
@@ -778,14 +796,8 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		}
 
 		$D = $this->getYearToDateEIContribution();
-		$I = $this->getGrossPayPeriodIncome();
-
-		Debug::text('Employee EI Rate: '. $this->getEIEmployeeRate() .' I: '. $I, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('Employee EI Rate: '. $this->getEIEmployeeRate() .' D: '. $D, __FILE__, __LINE__, __METHOD__, 10);
 		$tmp1_EI = bcsub( $this->getEIEmployeeMaximumContribution(), $D);
-//		$tmp2_EI = bcmul( $this->getEIEmployeeRate(), $I);
-//		if ($tmp2_EI > $this->getEIEmployeeMaximumContribution() ) {
-//			$tmp2_EI = $this->getEIEmployeeMaximumContribution();
-//		}
 		$tmp2_EI = $this->getEmployeeEIForPayPeriod();
 
 		if ($tmp1_EI < $tmp2_EI) {
@@ -804,8 +816,6 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 	}
 
 	function getEmployerEI() {
-		//$EI = $this->getEmployeeEI() * $this->ei_employer_rate;
-		//$EI = $this->getEmployeeEI() * $this->getEIEmployerRate();
 		$EI = bcmul( $this->getEmployeeEI(), $this->getEIEmployerRate() );
 
 		Debug::text('Employer EI: '. $EI .' Rate: '. $this->getEIEmployerRate(), __FILE__, __LINE__, __METHOD__, 10);

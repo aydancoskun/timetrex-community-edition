@@ -571,7 +571,7 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2017a_MAXEI_LowIncome() {
-		Debug::text('CA - MAXEI - Beginning of 2006 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('CA - MAXEI - Beginning of 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('01-Jan-2017'));
@@ -602,7 +602,7 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 
 
 	function testCA_2017a_MAXEI_MAXCPPa() {
-		Debug::text('CA - MAXEI/MAXCPP - Beginning of 2006 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('10-Nov-2017'));
@@ -636,7 +636,7 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2017a_MAXEI_MAXCPPb() {
-		Debug::text('CA - MAXEI/MAXCPP - Beginning of 2006 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('10-Nov-2017'));
@@ -670,7 +670,7 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2017a_MAXEI_MAXCPPc() {
-		Debug::text('CA - MAXEI/MAXCPP - Beginning of 2006 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('10-Nov-2017'));
@@ -704,7 +704,7 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 	}
 
 	function testCA_2017a_MAXEI_MAXCPPd() {
-		Debug::text('CA - MAXEI/MAXCPP - Beginning of 2006 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text('CA - MAXEI/MAXCPP - Beginning of 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		$pd_obj = new PayrollDeduction('CA', 'BC');
 		$pd_obj->setDate(strtotime('10-Nov-2017'));
@@ -735,6 +735,41 @@ class CAPayrollDeductionTest2017 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getEmployerEI() ), '43.36' );
 		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '200.71' );
 		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '80.94' );
+	}
+
+	function testCA_2017a_RRSP() {
+		Debug::text('CA - RRSP Contribution - Beginning of 01-Jan-2017: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('CA', 'ON');
+		$pd_obj->setDate(strtotime('01-Jan-2017'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+
+		$pd_obj->setFederalTotalClaimAmount( 11635 );
+		$pd_obj->setProvincialTotalClaimAmount( 10171 );
+		//$pd_obj->setWCBRate( 0.18 );
+
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+
+		//Gross=1600, RRSP=32.00
+		$pd_obj->setGrossPayPeriodIncome( 1568 ); //Less the RRSP deduction of $32.
+
+		$pd_obj->setEmployeeCPPForPayPeriod( 72.54 ); //Force CPP amount based on $1600 gross
+		$pd_obj->setEmployeeEIForPayPeriod( 26.08 ); //Force EI amount based on $1600 gross
+
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1568' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '72.54' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeEI() ), '26.08' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '146.49' );
+		$this->assertEquals( $this->mf( $pd_obj->getProvincialPayPeriodDeductions() ), '71.76' );
 	}
 }
 ?>

@@ -537,7 +537,7 @@ class Authentication {
 				}
 			}
 			$this->setType($result['type_id']);
-			$this->setSessionID($result['session_id']);
+			$this->setSessionID( $this->getSessionID() ); //Make sure this is *not* the encrypted session_id
 			$this->setIPAddress($result['ip_address']);
 			$this->setCreatedDate($result['created_date']);
 			$this->setUpdatedDate($result['updated_date']);

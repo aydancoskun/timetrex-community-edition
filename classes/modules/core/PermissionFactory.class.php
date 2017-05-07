@@ -2517,9 +2517,10 @@ class PermissionFactory extends Factory {
 															'user_date_total' =>	array(
 																				'enabled' => TRUE,
 																				'view' => TRUE,
-																				'add' => TRUE,
-																				'edit' => TRUE,
-																				'delete' => TRUE,
+																				//By default allow them to view Accumulated Time, but not add/edit/delete because they likely don't understand the implications.
+																				//'add' => TRUE,
+																				//'edit' => TRUE,
+																				//'delete' => TRUE,
 																			),
 															'policy_group' =>	array(
 																				'enabled' => TRUE,

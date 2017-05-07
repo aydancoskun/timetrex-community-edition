@@ -7939,7 +7939,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			//Set Navigation Awesomebox
 			if ( !this.absence_model ) {
 				this.navigation.AComboBox({
-					navigation_mode: true,
 					id: this.script_name + '_navigation',
 					layout_name: ALayoutIDs.TIMESHEET
 				});
@@ -7947,7 +7946,6 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.navigation.is_punch_nav = true;
 			} else {
 				this.navigation.AComboBox({
-					navigation_mode: true,
 					id: this.script_name + '_navigation',
 					layout_name: ALayoutIDs.ABSENCE
 				});
