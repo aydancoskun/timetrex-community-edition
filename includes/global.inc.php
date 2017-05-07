@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -56,8 +56,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '10.1.3' );
-define('APPLICATION_VERSION_DATE', 1489734000 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("20-Jan-2017")."\n\n";'
+define('APPLICATION_VERSION', '10.5.0' );
+define('APPLICATION_VERSION_DATE', 1490943600 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("28-Mar-2017")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -264,7 +264,7 @@ function forceNoCacheHeaders() {
 
 	//CSP headers break many things at this stage, unless "unsafe" is used for almost everything.
 	//Header('Content-Security-Policy: default-src *; script-src \'self\' *.google-analytics.com *.google.com');
-	header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com; img-src \'self\' map.timetrex.com:3128 *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com data:');
+	header('Content-Security-Policy: default-src * \'unsafe-inline\'; script-src \'unsafe-eval\' \'unsafe-inline\' \'self\' *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com; img-src \'self\' map.timetrex.com:3128 *.timetrex.com *.google-analytics.com *.doubleclick.net *.googleapis.com *.gstatic.com *.google.com data: blob:');
 
 	//Help prevent XSS or frame clickjacking.
 	header('X-XSS-Protection: 1; mode=block');

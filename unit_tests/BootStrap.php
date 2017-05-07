@@ -32,10 +32,12 @@ Debug::setVerbosity(10);
 define('ENABLE_SELENIUM_TESTS', FALSE );
 define('ENABLE_SELENIUM_REMOTE_TESTS', FALSE );
 $selenium_config = array(
-							'host' => '10.7.5.31',
+							//'host' => '10.7.5.72', //josh
+							'host' => '10.7.5.31', //dev1
 							//'host' => '10.7.5.9',
 							'browser' => 'chrome',
 							'default_url' => 'http://mikeb.dev1.office.timetrex.com/timetrex/trunk/interface/html5/',
+							//'default_url' => 'http://joshr.dev1.office.timetrex.com/timetrex/trunk/interface/html5/',
 							'default_timeout' => 30,
 						);
 
@@ -52,7 +54,7 @@ if ( PRODUCTION != FALSE ) {
 	exit;
 }
 
-require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'vendor/'. DIRECTORY_SEPARATOR .'autoload.php');
+//require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'vendor/'. DIRECTORY_SEPARATOR .'autoload.php');
 //set_include_path( get_include_path() . PATH_SEPARATOR . '/usr/share/php'  );
 
 echo "Include Path: ". get_include_path() ."\n";

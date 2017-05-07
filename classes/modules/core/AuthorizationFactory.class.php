@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -832,7 +832,7 @@ class AuthorizationFactory extends Factory {
 		} else {
 			$authorized = TTi18n::getText('False');
 		}
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Authorization Object Type').': '.$this->getObjectType() .' '. TTi18n::getText('Authorized').': '. $authorized, NULL, $this->getTable() );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Authorization Object Type').': '. ucwords( str_replace('_', ' ', Option::getByKey( $this->getObjectType(), $this->getOptions('object_type') ) ) ) .' '. TTi18n::getText('Authorized').': '. $authorized, NULL, $this->getTable() );
 	}
 }
 ?>

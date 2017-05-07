@@ -224,6 +224,7 @@ ALayoutIDs.JOB_APPLICANT_LANGUAGE = 'global_job_applicant_language';
 ALayoutIDs.MESSAGE_USER = 'global_message_user';
 
 ALayoutIDs.PAYMENT_GATEWAY = 'global_payment_gateway';
+ALayoutIDs.SIMPLE_NAME = 'global_simple_name';
 
 var ALayoutType = function() {
 

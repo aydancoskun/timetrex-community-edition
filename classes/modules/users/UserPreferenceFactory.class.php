@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -123,6 +123,7 @@ class UserPreferenceFactory extends Factory {
 				}
 				break;
 			case 'moment_date_format':
+				//NOTICE: When changing these, we may need to update the mobile app as it has them hardcoded there too.
 				$retval = array(
 											'D, F d Y'   => 'ddd, MMMM DD YYYY',
 											'D, M d Y'   => 'ddd, MMM DD YYYY',
@@ -1328,7 +1329,6 @@ class UserPreferenceFactory extends Factory {
 										'-1010-title' => TTi18n::gettext('Title'),
 										'-1020-user_group' => TTi18n::gettext('Group'),
 										'-1030-default_branch' => TTi18n::gettext('Default Branch'),
-										'-1040-default_department' => TTi18n::gettext('Default Department'),
 										'-1040-default_department' => TTi18n::gettext('Default Department'),
 
 										'-1150-city' => TTi18n::gettext('City'),

@@ -36,6 +36,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 	},
 
 	openEditView: function( id ) {
+		Global.setUINotready();
+		TTPromise.add('init','init');
+		TTPromise.wait();
 
 		var $this = this;
 

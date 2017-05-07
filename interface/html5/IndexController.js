@@ -231,52 +231,73 @@ var ApplicationRouter = Backbone.Router.extend( {
 			//Show ribbon menu UI
 			if ( view_id && view_id !== 'Login' && !TopMenuManager.ribbon_view_controller ) {
 				$this.addTopMenu();
-				$( 'body' ).removeClass( 'login-bg' );
-				$( 'body' ).addClass( 'application-bg' );
-				$this.setContentDivHeight();
-				$this.setLoginInformationLabelAndChat();
 
 			} else if ( view_id && view_id !== 'Login' && TopMenuManager.ribbon_view_controller ) {
 				Global.topContainer().css( 'display', 'block' );
 				$( 'body' ).removeClass( 'login-bg' );
 				$( 'body' ).addClass( 'application-bg' );
 			}
-			Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
-
-				var permission_id = view_id;
-
-				switch ( view_id ) {
-					case 'ClientGroup':
-						permission_id = 'Client';
-						break;
-					case 'ProductGroup':
-						permission_id = 'Product';
-						break;
-
-				}
-
-				if ( view_id === 'Login' || view_id === 'Home' || PermissionManager.checkTopLevelPermission( permission_id ) ) {
-					BaseViewController.loadView( view_id );
-				} else {
-					if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView' ) {
-						if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
-							TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
-						} else {
-							TopMenuManager.goToView( 'Home' );
-						}
-					} else {
-						TAlertManager.showAlert('Permission denied', 'ERROR', function() {
-							if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
-								TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+			switch ( view_id ) {
+				case 'JobApplication':
+					require(['autolinker/Autolinker.min','pdfjs/compatibility','pdfjs/pdf.min','pdfjs/ui_utils','pdfjs/text_layer_builder'], function( autolinker ) {
+						window.Autolinker = autolinker;
+						Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
+							var permission_id = view_id;
+							if ( PermissionManager.checkTopLevelPermission( permission_id ) ) {
+								BaseViewController.loadView( view_id );
 							} else {
-								TopMenuManager.goToView( 'Home' );
+								TAlertManager.showAlert('Permission denied', 'ERROR', function() {
+									if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+										TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+									} else {
+										TopMenuManager.goToView( 'Home' );
+									}
+								});
+								Debug.Text('Navigation permission denied. Permission: '+ permission_id, 'IndexController.js', 'IndexController', 'showRibbonMenuAndLoadView', 10);
 							}
-						});
-					}
-					Debug.Text('Navigation permission denied. Permission: '+ permission_id, 'IndexController.js', 'IndexController', 'showRibbonMenuAndLoadView', 10);
-				}
+						} );
+					} );
+					break;
+				default:
+					Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
 
-			} );
+						var permission_id = view_id;
+
+						switch ( view_id ) {
+							case 'ClientGroup':
+								permission_id = 'Client';
+								break;
+							case 'ProductGroup':
+								permission_id = 'Product';
+								break;
+
+						}
+
+						if ( view_id === 'Login' || view_id === 'Home' || PermissionManager.checkTopLevelPermission( permission_id ) ) {
+							BaseViewController.loadView( view_id );
+						} else {
+							if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView' ) {
+								if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+									TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+								} else {
+									TopMenuManager.goToView( 'Home' );
+								}
+							} else {
+								TAlertManager.showAlert('Permission denied', 'ERROR', function() {
+									if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+										TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+									} else {
+										TopMenuManager.goToView( 'Home' );
+									}
+								});
+							}
+							Debug.Text('Navigation permission denied. Permission: '+ permission_id, 'IndexController.js', 'IndexController', 'showRibbonMenuAndLoadView', 10);
+						}
+
+					} );
+					break;
+			}
+
 		}
 
 		function initRibbonMenuAndCopyRight() {
@@ -493,13 +514,17 @@ var ApplicationRouter = Backbone.Router.extend( {
 	},
 
 	addTopMenu: function() {
-
-		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js' );
-
-		//Error: ReferenceError: Can't find variable: RibbonViewController in /interface/html5/IndexController.js?v=8.0.0-20141117-091433 line 346
-		if ( Global.isSet( RibbonViewController ) ) {
+		var $this = this;
+		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js', function(){
+			// #2235 - ReferenceError: RibbonViewController is not defined
+			//Error: ReferenceError: Can't find variable: RibbonViewController
 			RibbonViewController.loadView();
-		}
+
+			$( 'body' ).removeClass( 'login-bg' );
+			$( 'body' ).addClass( 'application-bg' );
+			$this.setContentDivHeight();
+			$this.setLoginInformationLabelAndChat();
+		} );
 
 	},
 
@@ -608,6 +633,7 @@ IndexViewController.goToViewByViewLabel = function( view_label ) {
 };
 
 IndexViewController.openWizard = function( wizardName, defaultData, callBack ) {
+	Global.setUINotready();
 	BaseWizardController.default_data = defaultData;
 	BaseWizardController.call_back = callBack;
 	switch ( wizardName ) {

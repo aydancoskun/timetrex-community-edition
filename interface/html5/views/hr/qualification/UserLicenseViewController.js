@@ -2,11 +2,16 @@ UserLicenseViewController = BaseViewController.extend( {
 	el: '#user_license_view_container',
 
 	document_object_type_id: null,
+
+	qualification_group_array: null,
+	source_type_array: null,
+	qualification_array: null,
+
 	qualification_group_api: null,
 	qualification_api: null,
-	qualification_group_array: null,
 
-	qualification_array: null,
+	sub_view_grid_autosize: true,
+
 	initialize: function( options ) {
 		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserLicenseEditView.html';
@@ -93,11 +98,6 @@ UserLicenseViewController = BaseViewController.extend( {
 		this._super( 'onAddClick' );
 	},
 
-	resizeSubGridHeight: function( length ) {
-		var height = ( length * 26 >= 200 ) ? 200 : length * 26;
-		this.grid.setGridHeight( height );
-	},
-
 	onMassEditClick: function() {
 
 		var $this = this;
@@ -144,6 +144,8 @@ UserLicenseViewController = BaseViewController.extend( {
 
 	initOptions: function() {
 		var $this = this;
+
+		this.initDropDownOption( 'source_type' );
 
 		this.qualification_group_api.getQualificationGroup( '', false, false, {
 			onResult: function( res ) {
@@ -313,7 +315,7 @@ UserLicenseViewController = BaseViewController.extend( {
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				multiple: true,
 				basic_search: true,
-				adv_search: false,
+				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -325,7 +327,7 @@ UserLicenseViewController = BaseViewController.extend( {
 				api_class: (APIFactory.getAPIClass( 'APIQualification' )),
 				multiple: true,
 				basic_search: true,
-				adv_search: false,
+				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -337,28 +339,38 @@ UserLicenseViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.TREE_COLUMN,
 				tree_mode: true,
 				basic_search: true,
-				adv_search: false,
+				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Source' ),
+				in_column: 2,
+				multiple: true,
+				field: 'source_type_id',
+				basic_search: true,
+				adv_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+
+			new SearchField( {
+				label: $.i18n._( 'License Number' ),
+				in_column: 1,
+				field: 'license_number',
+				multiple: true,
+				basic_search: true,
+				adv_search: true,
+				form_item_type: FormItemType.TEXT_INPUT
 			} ),
 
 			new SearchField( {
 				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
-				adv_search: false,
+				adv_search: true,
 				in_column: 1,
 				object_type_id: 253,
 				form_item_type: FormItemType.TAG_INPUT
-			} ),
-
-			new SearchField( {
-				label: $.i18n._( 'License Number' ),
-				in_column: 2,
-				field: 'license_number',
-				multiple: true,
-				basic_search: true,
-				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT
 			} ),
 
 			new SearchField( {
@@ -366,8 +378,8 @@ UserLicenseViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'license_issued_date',
 				tree_mode: true,
-				basic_search: true,
-				adv_search: false,
+				basic_search: false,
+				adv_search: true,
 				form_item_type: FormItemType.DATE_PICKER
 			} ),
 
@@ -376,8 +388,8 @@ UserLicenseViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'license_expiry_date',
 				tree_mode: true,
-				basic_search: true,
-				adv_search: false,
+				basic_search: false,
+				adv_search: true,
 				form_item_type: FormItemType.DATE_PICKER
 			} ),
 
@@ -388,8 +400,8 @@ UserLicenseViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.USER,
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				multiple: true,
-				basic_search: true,
-				adv_search: false,
+				basic_search: false,
+				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -400,8 +412,8 @@ UserLicenseViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.USER,
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				multiple: true,
-				basic_search: true,
-				adv_search: false,
+				basic_search: false,
+				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];

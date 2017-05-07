@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -306,6 +306,14 @@ class Authentication {
 			$ulf->getByID( $id );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$retval = $ulf->getCurrent();
+			}
+		}
+
+		if ( $this->getType() === 100 ) {
+			$jalf = TTnew( 'JobApplicantListFactory' );
+			$jalf->getByID( $id );
+			if ( $jalf->getRecordCount() == 1 ) {
+				$retval = $jalf->getCurrent();
 			}
 		}
 
@@ -665,6 +673,9 @@ class Authentication {
 						$password_result = FALSE; //No company by that user name.
 					}
 					break;
+				case 'job_applicant':
+					$password_result = $this->checkApplicantPassword($user_name, $password);
+					break;
 				default:
 					return FALSE;
 			}
@@ -903,6 +914,25 @@ class Authentication {
 
 		foreach ($ulf as $user) {
 			if ( $user->checkPhonePassword($password) ) {
+				$this->setObjectID( $user->getID() );
+				$this->setObject( $user );
+
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	function checkApplicantPassword($user_name, $password) {
+		$ulf = TTnew( 'JobApplicantListFactory' );
+
+		$ulf->getByUserName( $user_name );
+
+		foreach ($ulf as $user) {
+			if ( $user->checkPassword( $password ) ) {
 				$this->setObjectID( $user->getID() );
 				$this->setObject( $user );
 

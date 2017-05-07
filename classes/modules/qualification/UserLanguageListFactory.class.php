@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -251,7 +251,7 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 			$order = array( 'qualification' => 'asc', 'qgf.name' => 'asc' );
 			$strict = FALSE;
 		} else {
-		
+
 			if ( isset($order['group']) ) {
 				$order['qgf.name'] = $order['group'];
 				unset($order['group']);
@@ -332,7 +332,8 @@ class UserLanguageListFactory extends UserLanguageFactory implements IteratorAgg
 		$query .= ( isset($filter_data['competency_id']) ) ? $this->getWhereClauseSQL( 'a.competency_id', $filter_data['competency_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;
-		
+
+		$query .= ( isset($filter_data['source_type_id']) ) ? $this->getWhereClauseSQL( 'qf.source_type_id', $filter_data['source_type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'qf.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['group']) ) ? $this->getWhereClauseSQL( 'qgf.name', $filter_data['group'], 'text', $ph ) : NULL;
 

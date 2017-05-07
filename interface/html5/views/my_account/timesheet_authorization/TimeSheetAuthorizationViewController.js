@@ -1178,7 +1178,9 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 	},
 
 	initEditViewUI: function( view_id, edit_view_file_name ) {
-
+		Global.setUINotready();
+		TTPromise.add('init','init');
+		TTPromise.wait();
 		var $this = this;
 
 		if ( this.edit_view ) {

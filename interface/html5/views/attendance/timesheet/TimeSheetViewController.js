@@ -127,6 +127,11 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.setSelectRibbonMenuIfNecessary();
 	},
 
+	initEditView: function() {
+		TTPromise.resolve('TimeSheetViewController','addclick');
+		this._super('initEditView');
+	},
+
 	onSubViewRemoved: function() {
 		this.search();
 
@@ -695,6 +700,9 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	openEditView: function() {
+		Global.setUINotready();
+		TTPromise.add('init','init');
+		TTPromise.wait();
 		if ( !this.edit_view ) {
 			this.is_edit = true;
 			this.initEditViewUI( 'TimeSheet', 'TimeSheetEditView.html' );
@@ -1847,6 +1855,9 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	onSearch: function() {
+		Global.setUINotready();
+		TTPromise.add('init','init');
+		TTPromise.wait();
 
 		this.temp_adv_filter_data = null;
 		this.temp_basic_filter_data = null;
@@ -3790,12 +3801,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		//the rotate icon from search panel
 		var $this = this;
 		$( '.button-rotate' ).removeClass( 'button-rotate' );
-		$( this.el ).attr( 'init_complete', true );
-		setTimeout( function() {
-			if ( $this.search_panel && typeof $this.search_panel.attr( 'search_complete' ) !== 'undefined' ) {
-				$this.search_panel.attr( 'search_complete', true );
-			}
-		}, 4000 );
+
+		TTPromise.resolve('init','init');
+		TTPromise.wait();
 	},
 
 	showWarningMessageIfAny: function() {
@@ -7460,7 +7468,8 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	onAddClick: function( doing_save_and_new ) {
-
+		TTPromise.add('TimeSheetViewController','addclick');
+		TTPromise.wait();
 		var $this = this;
 		this.is_viewing = false;
 		this.is_mass_adding = true;

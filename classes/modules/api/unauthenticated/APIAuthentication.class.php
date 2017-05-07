@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -279,7 +279,7 @@ class APIAuthentication extends APIFactory {
 
 	function getCurrentCompany() {
 		if ( is_object( $this->getCurrentCompanyObject() ) ) {
-			return $this->returnHandler( $this->getCurrentCompanyObject()->getObjectAsArray( array('id' => TRUE, 'product_edition_id' => TRUE, 'name' => TRUE, 'industry' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'work_phone' => TRUE, 'application_build' => TRUE, 'is_setup_complete' => TRUE, 'total_active_days' => TRUE, 'created_date' => TRUE, 'latitude' => TRUE, 'longitude' => TRUE ) ) );
+			return $this->returnHandler( $this->getCurrentCompanyObject()->getObjectAsArray( array('id' => TRUE, 'product_edition_id' => TRUE, 'name' => TRUE, 'short_name' => TRUE, 'industry' => TRUE, 'city' => TRUE, 'province' => TRUE, 'country' => TRUE, 'work_phone' => TRUE, 'application_build' => TRUE, 'is_setup_complete' => TRUE, 'total_active_days' => TRUE, 'created_date' => TRUE, 'latitude' => TRUE, 'longitude' => TRUE ) ) );
 		}
 
 		return $this->returnHandler( FALSE );

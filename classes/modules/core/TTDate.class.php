@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -985,6 +985,8 @@ class TTDate {
 		if ( empty($epoch) OR empty($round_value) OR empty($round_type) ) {
 			return $epoch;
 		}
+
+		$epoch = (int)$epoch; //Make sure we aren't dealing with floating point values, as they won't get rounded off. ie: TTDate::roundTime(90.12345, 60, 10)
 
 		switch ($round_type) {
 			case 10: //Down

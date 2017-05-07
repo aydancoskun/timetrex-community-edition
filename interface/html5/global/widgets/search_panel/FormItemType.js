@@ -14,6 +14,7 @@ FormItemType.FEEDBACK_BOX = 'feedbackBox';
 FormItemType.TEXT_INPUT_NO_AUTO = 'textInputNoAuto';
 FormItemType.PASSWORD_INPUT = 'passwordInput';
 FormItemType.TEXT_AREA = 'textArea';
+FormItemType.TINYMCE_TEXT_AREA = 'tinymceTextArea';
 FormItemType.TAG_INPUT = 'tagInput';
 FormItemType.DATE_PICKER = 'datePicker';
 FormItemType.RANGE_PICKER = 'range_date_picker';

@@ -2919,8 +2919,8 @@ ReportBaseViewController = BaseViewController.extend( {
 //		}
 		if ( key === 'html' ) {
 			var url = ServiceCaller.getURLWithSessionId( 'Class=' + this.api.className + '&Method=' + 'get' + this.api.key_name + '&v=2' );
-			if ( LocalCacheData.getStationID() ) {
-				url = url + '&StationID=' + LocalCacheData.getStationID();
+			if ( Global.getStationID() ) {
+				url = url + '&StationID=' + Global.getStationID();
 			}
 			var message_id = UUID.guid();
 			url = url + '&MessageID=' + message_id;

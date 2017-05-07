@@ -249,8 +249,18 @@ LocalCacheData.getLoginUser = function() {
 	return LocalCacheData.getLocalCache( 'loginUser', 'JSON' );
 };
 
+LocalCacheData.getPortalLoginUser = function() {
+	//Can't be set to required as the data is chekced for null to trigger cache load.
+	//See loginViewController.onLoginSuccess()
+	return LocalCacheData.getLocalCache( 'portalLoginUser', 'JSON' );
+};
+
 LocalCacheData.setLoginUser = function( val ) {
 	LocalCacheData.setLocalCache( 'loginUser', val, 'JSON' );
+};
+
+LocalCacheData.setPortalLoginUser = function( val ) {
+	LocalCacheData.setLocalCache( 'portalLoginUser', val, 'JSON' );
 };
 
 LocalCacheData.getCurrentCurrencySymbol = function() {
@@ -285,23 +295,9 @@ LocalCacheData.setUniqueCountryArray = function( val ) {
 	LocalCacheData.setLocalCache( 'uniqueCountryArray', val, 'JSON' );
 };
 
-LocalCacheData.getStationID = function() {
-
-	var result = LocalCacheData.getLocalCache( 'StationID' );
-	if ( !result ) {
-		result = ''
-	}
-
-	return result;
-};
-
-LocalCacheData.setStationID = function( val ) {
-	LocalCacheData.setLocalCache( 'StationID', val );
-};
-
 LocalCacheData.getSessionID = function() {
 
-	var result = LocalCacheData.getLocalCache( 'SessionID' );
+	var result = LocalCacheData.getLocalCache( Global.getSessionIDKey() );
 	if ( !result ) {
 		result = ''
 	}
@@ -311,7 +307,7 @@ LocalCacheData.getSessionID = function() {
 
 LocalCacheData.setSessionID = function( val ) {
 
-	LocalCacheData.setLocalCache( 'SessionID', val );
+	LocalCacheData.setLocalCache( Global.getSessionIDKey(), val );
 };
 
 LocalCacheData.getLoginData = function() {

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -412,11 +412,13 @@ class CalculatePolicy {
 				//  However rows with total_time=0 account for about 40% of all rows, so removing them will save a lot of space.
 				//  We also need to re-save UDT rows that have override=TRUE, so we can handle overtime exclusivity and such.
 				//     This allows the user to override Regular Time to 10hrs, and have 2hrs still go into OT.
+				//     Make sure we confirm when saving existing override records they actually occurred on one of the dates we actually calculated.
+				// 		  Otherwise override records can be pulled in from calculating holiday or long overtime policies and it will try to save them, even if the pay period is closed/locked.
 				//  Don't resave override absence entries, this caused a bug where UDT rows would switch to different dates when calcExceptions was run.
 				//  *If a note is specified, always insert the record, this way we can give the user notes as to why they arent eligible for holiday time for example.
 				//  Since we implemented getPartialUserDateTotalObject() to split UDT records, it might split records of ObjectTypeID=10, which causes the KEY to be < 0 introducing a bug where this was inserting it into the DB and corrupting the data. Added check for this: $udt_obj->getObjectType() != 10 (5 must still be allowed)
 				if ( ( $key < 0 AND $udt_obj->getObjectType() != 10 AND ( $udt_obj->getTotalTime() != 0 OR $udt_obj->getTotalTimeAmount() != 0 OR $udt_obj->getNote() != '' ) )
-						OR ( $key > 0 AND $udt_obj->getObjectType() != 50 AND $udt_obj->getOverride() == TRUE ) ) {
+						OR ( $key > 0 AND $udt_obj->getObjectType() != 50 AND $udt_obj->getOverride() == TRUE AND isset($this->dates['calculated'][TTDate::getBeginDayEpoch($udt_obj->getDateStamp())]) ) ) {
 					//Debug::text('    Currency ID: '. $this->getUserObject()->getCurrency() .' Rate: '. $this->filterCurrencyRate( $udt_obj->getDateStamp() )->getReverseConversionRate(), __FILE__, __LINE__, __METHOD__, 10);
 					//Handle currency rates here, just before the record is saved.
 					$udt_obj->setCurrency( (int)$this->getUserObject()->getCurrency(), TRUE ); //Disable automatic rate lookup.
@@ -442,7 +444,10 @@ class CalculatePolicy {
 							$this->new_system_user_date_total_id[TTDate::getMiddleDayEpoch($udt_obj->getDateStamp())] = $udt_obj->getId();
 						}
 					} else {
-						Debug::text('ERROR: Invalid UserDateTotal Entry!', __FILE__, __LINE__, __METHOD__, 10);
+						//Fail the transaction if there are any validation errors such as locked pay periods for example.
+						//If we don't fail the entire transaction, things like absence records may not get saved but the now a incorrect total record does.
+						$this->getUserObject()->FailTransaction();
+						Debug::text('ERROR: Invalid UserDateTotal Entry! Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 					}
 				}
 				//else {
@@ -536,6 +541,7 @@ class CalculatePolicy {
 						$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $s_obj->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 						$udtf->setEnableCalcSystemTotalTime(FALSE);
+						$udtf->setEnableCalculatePolicy(TRUE);
 						$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 						if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -625,11 +631,18 @@ class CalculatePolicy {
 			}
 
 			$pivot_date = TTDate::getMiddleDayEpoch( $pivot_date ); //Optimization - Move outside loop.
+			$i = 1;
 			foreach( $slf as $s_obj ) {
-				$s_obj_date_stamp = TTDate::getMiddleDayEpoch( $s_obj->getDateStamp() ); //Optimization - Move outside loop.
+				$s_obj_date_stamp = TTDate::getMiddleDayEpoch( $s_obj->getDateStamp() );
 				if ( ( $direction == 'desc' AND $s_obj_date_stamp < $pivot_date )
 						OR ( $direction == 'asc' AND $s_obj_date_stamp > $pivot_date ) ) {
 					$retarr[$s_obj->getId()] = $s_obj;
+
+					//Stop the loop once the limit is reached on the returned values.
+					if ( $limit !== NULL AND $i >= $limit ) {
+						break;
+					}
+					$i++;
 				} else {
 					Debug::text('Scheduled shift does not match filter: '. $s_obj->getID() .' DateStamp: '. TTDate::getDate('DATE', $s_obj->getDateStamp() ) .' Status: '. $s_obj->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
 				}
@@ -990,6 +1003,7 @@ class CalculatePolicy {
 			}
 
 			$udtf->setEnableCalcSystemTotalTime(FALSE);
+			$udtf->setEnableCalculatePolicy(TRUE);
 			$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 			//Don't save the record, just add it to the existing array, so it can be included in other calculations.
@@ -1067,6 +1081,7 @@ class CalculatePolicy {
 							$udtf->setTotalTime( bcsub($time_stamp_arr[10], $time_stamp_arr[20] ) );
 
 							$udtf->setEnableCalcSystemTotalTime(FALSE);
+							$udtf->setEnableCalculatePolicy(TRUE);
 							$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 							//Don't save the record, just add it to the existing array, so it can be included in other calculations.
@@ -1250,6 +1265,7 @@ class CalculatePolicy {
 									$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $bp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 									$udtf->setEnableCalcSystemTotalTime(FALSE);
+									$udtf->setEnableCalculatePolicy(TRUE);
 									$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 									if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -1453,6 +1469,7 @@ class CalculatePolicy {
 							$udtf->setTotalTime( ( $time_stamp_arr[10] - $time_stamp_arr[20] ));
 
 							$udtf->setEnableCalcSystemTotalTime(FALSE);
+							$udtf->setEnableCalculatePolicy(TRUE);
 							$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 							//Don't save the record, just add it to the existing array, so it can be included in other calculations.
@@ -1607,6 +1624,7 @@ class CalculatePolicy {
 									$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $mp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 									$udtf->setEnableCalcSystemTotalTime(FALSE);
+									$udtf->setEnableCalculatePolicy(TRUE);
 									$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 									if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -1791,6 +1809,7 @@ class CalculatePolicy {
 					$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 					$udtf->setEnableCalcSystemTotalTime(FALSE);
+					$udtf->setEnableCalculatePolicy(TRUE);
 					$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 					if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -1888,6 +1907,7 @@ class CalculatePolicy {
 							$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $ap_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 							$udtf->setEnableCalcSystemTotalTime(FALSE);
+							$udtf->setEnableCalculatePolicy(TRUE);
 							$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 							if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -2262,6 +2282,7 @@ class CalculatePolicy {
 								$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $rtp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 								$udtf->setEnableCalcSystemTotalTime(FALSE);
+								$udtf->setEnableCalculatePolicy(TRUE);
 								$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 								if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -2469,7 +2490,9 @@ class CalculatePolicy {
 					if ( isset($prev_udt_obj)
 							AND $udt_obj->getStartTimeStamp() != ''
 							AND $prev_udt_obj->getStartTimeStamp() != $udt_obj->getStartTimeStamp() //Make sure its not the same record.
-							AND $prev_udt_obj->getEndTimeStamp() != $udt_obj->getStartTimeStamp() ) {
+							AND $prev_udt_obj->getEndTimeStamp() != $udt_obj->getStartTimeStamp()
+							AND $prev_udt_obj->getTotalTime() > 0 //If the previous UDT record has been reduced to TotalTime=0, ignore it when it comes to this gap adjustment. This helps with overlapping OT policies that have differential criteria. 
+						) {
 						$current_trigger_time_arr['start_time_stamp'] += ( $udt_obj->getStartTimeStamp() - $prev_udt_obj->getEndTimeStamp() );
 						Debug::text('    Found gap between UDT records, either a split shift, lunch or break, adjusting next start time... Prev End: '. TTDate::getDate('DATE+TIME', $prev_udt_obj->getEndTimeStamp() ) .' Current Start: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 					}
@@ -2587,6 +2610,7 @@ class CalculatePolicy {
 										$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $otp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 										$udtf->setEnableCalcSystemTotalTime(FALSE);
+										$udtf->setEnableCalculatePolicy(TRUE);
 										$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 										if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -5121,7 +5145,8 @@ class CalculatePolicy {
 
 										$pay_period_verified = FALSE;
 										if ( $pptsvlf->getRecordCount() > 0 ) {
-											$pay_period_verified = $pptsvlf->getCurrent()->getAuthorized();
+											//$pay_period_verified = $pptsvlf->getCurrent()->getAuthorized();
+											$pay_period_verified = ( $pptsvlf->getCurrent()->getStatus() == 50 ) ? TRUE : FALSE; //If setup as such, make sure both supervisor AND employee have verified before this goes away.
 										}
 
 										if ( $pay_period_verified == FALSE ) {
@@ -6285,6 +6310,7 @@ class CalculatePolicy {
 													$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 													$udtf->setEnableCalcSystemTotalTime(FALSE);
+													$udtf->setEnableCalculatePolicy(TRUE);
 													$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 													if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -6396,6 +6422,7 @@ class CalculatePolicy {
 																$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 																$udtf->setEnableCalcSystemTotalTime(FALSE);
+																$udtf->setEnableCalculatePolicy(TRUE);
 																$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 																if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -6489,6 +6516,7 @@ class CalculatePolicy {
 												$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 												$udtf->setEnableCalcSystemTotalTime(FALSE);
+												$udtf->setEnableCalculatePolicy(TRUE);
 												$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 												if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -6642,6 +6670,7 @@ class CalculatePolicy {
 															$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 															$udtf->setEnableCalcSystemTotalTime(FALSE);
+															$udtf->setEnableCalculatePolicy(TRUE);
 															$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 															if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
@@ -6791,6 +6820,7 @@ class CalculatePolicy {
 													$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $pp_obj->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
 
 													$udtf->setEnableCalcSystemTotalTime(FALSE);
+													$udtf->setEnableCalculatePolicy(TRUE);
 													$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 													//Don't save the record, just add it to the existing array, so it can be included in other calculations.
@@ -7400,12 +7430,13 @@ class CalculatePolicy {
 				$avg_seconds_worked_per_day = TTDate::roundTime($avg_seconds_worked_per_day, $holiday_policy_obj->getRoundIntervalPolicyObject()->getInterval(), $holiday_policy_obj->getRoundIntervalPolicyObject()->getRoundType() );
 				Debug::text('Rounding Stat Time To: '. $avg_seconds_worked_per_day, __FILE__, __LINE__, __METHOD__, 10);
 			} else {
+				$avg_seconds_worked_per_day = TTDate::roundTime($avg_seconds_worked_per_day, 60, 10); //Always round down to the previous minute if no other rounding policy is specified. Ensure we don't return parital seconds.
 				Debug::text('NOT Rounding Stat Time!', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			return $avg_seconds_worked_per_day;
 		} else {
-			return $holiday_policy_obj->getMinimumTime();
+			return round( $holiday_policy_obj->getMinimumTime() ); //Make sure there are no partial seconds, as they can fail validation checks.
 		}
 	}
 
@@ -7420,6 +7451,13 @@ class CalculatePolicy {
 					AND $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() != FALSE
 					AND is_object( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject() )
 					AND $this->isConflictingUserDateTotal( $date_stamp, array(25, 50), (int)$holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayCode() ) == FALSE ) {
+
+				//Skip calculating holidays before the employees hire date, as in some cases if they were hired the day after the holiday it would try to put a 0hr absence on the holiday before their hire date.
+				//  We considered just not calculating any policies before the hire date, however that may cause problems with re-hires.
+				if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $date_stamp ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
+					Debug::Text('Skip calculation of holidays before the hire date: '. TTDate::getDate('DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
+					return TRUE;
+				}
 
 				$holiday_time = 0;
 				if ( $this->isEligibleForHoliday( $date_stamp, $holiday_obj->getHolidayPolicyObject() ) ) {
@@ -7485,6 +7523,7 @@ class CalculatePolicy {
 						}
 
 						$udtf->setEnableCalcSystemTotalTime(FALSE);
+						$udtf->setEnableCalculatePolicy(TRUE);
 						$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
 
 						if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {

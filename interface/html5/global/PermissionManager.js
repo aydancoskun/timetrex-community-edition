@@ -66,6 +66,17 @@ var PermissionManager = (function() {
 		}
 
 		switch ( viewId ) {
+			case 'JobInvoice':
+				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+					result = false;
+				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
+					result = false;
+				} else if (  PermissionManager.validate( permission_section, 'add' ) ||
+					PermissionManager.validate( permission_section, 'edit' ) ||
+					PermissionManager.validate( permission_section, 'edit_own' ) ) {
+					result = true;
+				}
+				break;
 			case 'PaymentGateway':
 				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					result = false;
@@ -823,6 +834,7 @@ var PermissionManager = (function() {
 				permission_section = 'job_application';
 				break;
 			case 'JobApplicant':
+			case 'RecruitmentPortalConfig':
 				permission_section = 'job_applicant';
 				break;
 			case 'UserLicense':
@@ -954,6 +966,7 @@ var PermissionManager = (function() {
 				permission_section = 'import_csv';
 				break;
 			case 'Invoice':
+			case 'JobInvoice':
 				permission_section = 'invoice';
 				break;
 		}

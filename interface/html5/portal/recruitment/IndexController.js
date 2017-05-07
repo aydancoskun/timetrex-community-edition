@@ -1,6 +1,6 @@
 var ApplicationRouter = Backbone.Router.extend( {
 	controller: null,
-
+	headerView: null,
 	routes: {
 		'': 'onViewChange',
 		'!:viewName': 'onViewChange',
@@ -20,19 +20,23 @@ var ApplicationRouter = Backbone.Router.extend( {
 	},
 
 	reloadView: function( view_id ) {
-		TopMenuManager.selected_sub_menu_id = ''; // clear select ribbon menu, set in view init;
-		BaseViewController.loadView( view_id );
+		//error: Uncaught ReferenceError: XXXXViewController is not defined ininterface/html5/#!m=TimeSheet line 3
+		// Happens when quickly click on context menu and network is slow.
+		if ( window[view_id + 'ViewController'] ) {
+			TopMenuManager.selected_sub_menu_id = ''; // clear select ribbon menu, set in view init;
+			PortalBaseViewController.loadView( view_id );
+		}
 	},
 
 	notFound: function( url ) {
-
 		var new_url = Global.getBaseURL().split( '#' )[0];
 
-		Global.setURLToBrowser( new_url + '#!m=PortalLogin' );
+		Global.setURLToBrowser( new_url + '#!m=PortalJobVacancy' );
 	},
 
 	/* jshint ignore:start */
 	onViewChange: function( viewName ) {
+		var $this = this;
 		var args = {};
 		var view_id;
 		var edit_id;
@@ -50,13 +54,20 @@ var ApplicationRouter = Backbone.Router.extend( {
 		if ( viewName && viewName.indexOf( 'm=' ) >= 0 ) {
 			view_id = args.m;
 		} else {
-			view_id = 'PortalLogin';
+			view_id = 'PortalJobVacancy';
 		}
 
 		LocalCacheData.fullUrlParameterStr = viewName;
 
 		LocalCacheData.all_url_args = args;
 
+		if ( LocalCacheData.all_url_args ) {
+			if ( !LocalCacheData.all_url_args.hasOwnProperty('company_id') ) {
+				// TAlertManager.showAlert( 'Invalid Company' );
+				IndexViewController.instance.router.showTipModal( $.i18n._('Invalid Company') );
+				return;
+			}
+		}
 		var reg = new RegExp( '^[0-9]*$' );
 
 		if ( reg.test( args.id ) ) {
@@ -74,8 +85,11 @@ var ApplicationRouter = Backbone.Router.extend( {
 				if ( action ) {
 					switch ( action ) {
 						case 'edit':
+
+							//Error: Unable to get property 'id' of undefined or null reference in /interface/html5/IndexController.js?v=8.0.0-20141230-125406 line 87
 							if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-								(LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
+								(LocalCacheData.current_open_primary_controller.current_edit_record &&
+								LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
 
 								//Makes ure when doing copy_as_new, don't open this
 								if ( LocalCacheData.current_doing_context_action === 'edit' ) {
@@ -156,67 +170,112 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		}
 
-		if ( view_id !== 'PortalLogin' && !LocalCacheData.getLoginUser() ) {
-			Global.setURLToBrowser( Global.getBaseURL() + '#!m=PortalLogin' );
-			return;
-		} else if ( view_id !== 'PortalLogin' && Global.isSet( view_id ) ) {
-
-			if ( !TopMenuManager.ribbon_menus ) {
-				TopMenuManager.initPortalRibbonMenu();
-				TopMenuManager.selected_sub_menu_id = view_id;
-				TopMenuManager.selected_menu_id = TopMenuManager.menus_quick_map[view_id];
-
-			}
-
-			//Add copy right
-			Global.bottomContainer().css( 'display', 'block' );
-
-			$( '#copy_right_info_1' ).css( 'display', 'inline' );
-
-			$( '#copy_right_logo_link' ).attr( 'href', 'http://' + LocalCacheData.getLoginData().organization_url );
-
-			if ( !$( '#copy_right_logo' ).attr( 'src' ) ) {
-				$( '#copy_right_logo' ).attr( 'src', ServiceCaller.poweredByLogo + '&t=' + new Date().getTime() );
-
-			}
-
+		var timeout_count;
+		timeout_count = 0;
+		$('link[title="application css"]').prop('disabled', true);
+		if (LocalCacheData.loadViewRequiredJSReady) {
+			initRibbonMenuAndCopyRight();
+		} else {
+			var auto_login_timer = setInterval(function () {
+				if (timeout_count == 100) {
+					clearInterval(auto_login_timer);
+				}
+				timeout_count = timeout_count + 1;
+				if (LocalCacheData.loadViewRequiredJSReady) {
+					initRibbonMenuAndCopyRight();
+					clearInterval(auto_login_timer);
+				}
+			}, 600);
 		}
-		//Show ribbon menu UI
-		if ( view_id && view_id !== 'PortalLogin' && !TopMenuManager.ribbon_view_controller ) {
-			this.addTopMenu();
+		// if ( Global.isSet( view_id ) ) {
+		// 	$('link[title="application css"]').prop('disabled', true);
+		// 	if (LocalCacheData.loadViewRequiredJSReady) {
+		// 		initRibbonMenuAndCopyRight();
+		// 	} else {
+		// 		var auto_login_timer = setInterval(function () {
+		// 			if (timeout_count == 100) {
+		// 				clearInterval(auto_login_timer);
+		// 			}
+		// 			timeout_count = timeout_count + 1;
+		// 			if (LocalCacheData.loadViewRequiredJSReady) {
+		// 				initRibbonMenuAndCopyRight();
+		// 				clearInterval(auto_login_timer);
+		// 			}
+		// 		}, 600);
+		// 	}
+		// }
+		// } else {
+		// 	$('link[title="application css"]').prop('disabled', false);
+		// 	showRibbonMenuAndLoadView();
+		// }
+
+		function showRibbonMenuAndLoadView() {
+			//Show ribbon menu UI
+			// if ( view_id ) {
+			// 	$( 'body' ).removeClass( 'login-bg' );
+			// 	Global.loadStyleSheet( '../../theme/default/css/portal.css' + '?v=' + APIGlobal.pre_login_data.application_build );
+			// 	$this.headerView = new HeaderViewController();
+			// 	$('#topContainer').html($this.headerView.el);
+			// 	setTimeout(function(  ) {
+			// 		Global.topContainer().css('display', 'block');
+			// 		Global.bottomContainer().css( 'display', 'block' );
+			// 	}, 50);
+			// }
 			$( 'body' ).removeClass( 'login-bg' );
-			$( 'body' ).addClass( 'application-bg' );
-			this.setContentDivHeight();
-			this.setLoginInformationLabel();
-
-		} else if ( view_id && view_id !== 'PortalLogin' && TopMenuManager.ribbon_view_controller ) {
-			Global.topContainer().css( 'display', 'block' );
-			$( 'body' ).removeClass( 'login-bg' );
-			$( 'body' ).addClass( 'application-bg' );
-		}
-
-		Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
-
-			var permission_id = view_id;
-
-			switch ( view_id ) {
-				case 'ClientGroup':
-					permission_id = 'Client';
-					break;
-				case 'ProductGroup':
-					permission_id = 'Product';
-					break;
-
-			}
-
-			if ( view_id === 'PortalLogin' || PermissionManager.checkTopLevelPermission( permission_id ) ) {
-				BaseViewController.loadView( view_id );
+			Global.loadStyleSheet( '../../theme/default/portal/css/portal.css' + '?v=' + APIGlobal.pre_login_data.application_build );
+			if ( !$this.headerView ) {
+				$this.headerView = new HeaderViewController();
+				$('#topContainer').html($this.headerView.el);
+				loadViewController();
 			} else {
-				this.removeCurrentView();
-				TAlertManager.showAlert( 'Permission denied' );
+				if ( $this.headerView.profileView && $this.headerView.profileView.is_changed ) {
+					$this.showConfirmModal( $.i18n._('You have modified data without saving, are you sure you want to continue and lose your changes'), {
+						title: '',
+						actions: [
+							{label: "No", isClose: true, callBack: function ( e ) {
+								$this.navigate('#!m=MyProfile&company_id=' + LocalCacheData.all_url_args.company_id, {trigger: false, replace: true} );
+								return;
+							}},
+							{label: 'Yes', callBack: function( e ) {
+								$this.hideConfirmModal();
+								headerRender();
+								loadViewController();
+							}}
+						]
+					} );
+					return;
+				} else {
+					headerRender();
+					loadViewController();
+				}
 			}
+		}
 
-		} );
+		function headerRender() {
+			$this.headerView.jobVacancyViewController = null;
+			$this.headerView.profileView = null;
+			$this.headerView.render();
+		}
+
+		function loadViewController() {
+			setTimeout(function(  ) {
+				Global.topContainer().css('display', 'block');
+				Global.bottomContainer().css( 'display', 'block' );
+			}, 50);
+			Global.loadViewSource( view_id, view_id + 'ViewController.js', function() {
+				PortalBaseViewController.loadView( view_id );
+			} );
+		}
+
+		function initRibbonMenuAndCopyRight() {
+			//Start check signal
+			// Global.setSignalStrength();
+			Global.loadPage( 'views/portal/footer/FooterView.html', function( result ) {
+				$('#bottomContainer').html( _.template( result )() );
+			} )
+
+			showRibbonMenuAndLoadView();
+		}
 
 		function checkIds() {
 
@@ -313,46 +372,195 @@ var ApplicationRouter = Backbone.Router.extend( {
 		}
 	},
 
-	//CompanyName - User name at top left
-	setLoginInformationLabel: function() {
-
-		var current_company = LocalCacheData.getCurrentCompany();
-		var current_user = LocalCacheData.getLoginUser();
-
-		var label = current_company.name + ' - ' + current_user.first_name + ' ' + current_user.last_name;
-		var label_container = $( "<div class='login-information-div'><span class='login-information'></span></div>" );
-
-		label_container.children().eq( 0 ).text( label );
-
-		Global.topContainer().append( label_container );
-	},
-
 	setContentDivHeight: function() {
-		Global.contentContainer().css( 'height', (Global.bodyHeight() - Global.topContainer().height() - 5) );
-
-		$( window ).resize( function() {
-			Global.contentContainer().css( 'height', (Global.bodyHeight() - Global.topContainer().height() - 5) );
-		} );
-
 		Global.contentContainer().removeClass( 'content-container' );
 		Global.contentContainer().addClass( 'content-container-after-login' );
+		Global.topContainer().addClass( 'top-container-after-login' );
 
 	},
 
 	addTopMenu: function() {
-
-		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js' );
-
-		//Error: ReferenceError: Can't find variable: RibbonViewController in /interface/html5/IndexController.js?v=8.0.0-20141117-091433 line 346
-		if ( RibbonViewController ) {
-			RibbonViewController.loadView();
+		Global.loadScript( 'global/widgets/top_menu/TopMenuController.js' );
+		if ( TopMenuController ) {
+			TopMenuController.loadView();
 		}
 
 	},
 
+	showFormModal: function (element, options) {
+		var $this = this;
+		if ($('#formModal').is(':visible')) {
+			this.hideFormModal();
+			setTimeout(function () {
+				doNext()
+			}, 500)
+		} else {
+			doNext();
+		}
+		function doNext() {
+			!options && (options = {title: '...', actions: []});
+			if ($('#formModal').length > 0) {
+				$('#formModal').modal({
+					backdrop: 'static',
+					show: true
+				});
+			}
+			$('#formModalLabel').text(options.title);
+			$('#formModalBody').html(element);
+			if (options.actions.length > 0) {
+				$('#formModalFooter').empty();
+				_.each(options.actions, function (item) {
+					var button = $('<button type="button" class="btn"></button>');
+					item.isClose && button.attr('data-dismiss', 'modal');
+					button.text(item.label);
+					item.class && (button.addClass(item.class));
+					!item.class && button.addClass('btn-primary');
+					if (item.callBack) {
+						if ( item.isClose ) {
+							$('#formModal').find('button.close').unbind('click').bind('click', item.callBack.bind(self));
+						}
+						button.unbind('click').bind('click', item.callBack.bind(self));
+					}
+					$('#formModalFooter').append(button);
+				})
+			}
+		}
+
+	},
+
+	showTipModal: function (element, options) {
+		var $this = this;
+		if ($('#tipModal').is(':visible')) {
+			this.hideTipModal();
+			setTimeout(function () {
+				doNext();
+			}, 500)
+		} else {
+			doNext();
+		}
+		function doNext() {
+			!options && (options = {title: '...', actions:[], style: {}});
+			$('#tipModal').find('.modal-content').css( options.style );
+ 			if ($('#tipModal').length > 0) {
+				$('#tipModal').modal('show');
+			}
+			$('#tipModalBody').html(element);
+			$this.autoHideTipModal();
+		}
+	},
+
+	showConfirmModal: function (element, options) {
+		var $this = this;
+		if ($('#confirmModal').is(':visible')) {
+			this.hideConfirmModal();
+			setTimeout(function () {
+				doNext()
+			}, 500)
+		} else {
+			doNext();
+		}
+		function doNext() {
+			!options && (options = {title: '...', actions: []});
+			if ($('#confirmModal').length > 0) {
+				$('#confirmModal').modal({
+					backdrop: 'static',
+					show: true
+				});
+			}
+			$('#confirmModalLabel').text(options.title);
+			$('#confirmModalBody').html(element);
+			if (options.actions.length > 0) {
+				$('#confirmModalFooter').empty();
+				_.each(options.actions, function (item) {
+					var button = $('<button type="button" class="btn"></button>');
+					item.isClose && button.attr('data-dismiss', 'modal');
+					button.text(item.label);
+					item.class && (button.addClass(item.class));
+					!item.class && button.addClass('btn-primary');
+					if (item.callBack) {
+						button.unbind('click').bind('click', item.callBack.bind(self));
+					}
+					$('#confirmModalFooter').append(button);
+				})
+			}
+		}
+
+	},
+
+	showSignInModal: function (element, options) {
+		var $this = this;
+		if ($('#signinModal').is(':visible')) {
+			this.hideSignInModal();
+			setTimeout(function () {
+				doNext()
+			}, 500)
+		} else {
+			doNext();
+		}
+		function doNext() {
+			!options && (options = {title: '...', actions: []});
+			if ($('#signinModal').length > 0) {
+				$('#signinModal').modal({
+					backdrop: 'static',
+					show: true
+				});
+			}
+			$('#signinModalLabel').text(options.title);
+			$('#signinModalBody').html(element);
+			if (options.actions.length > 0) {
+				$('#signinModalFooter').empty();
+				_.each(options.actions, function (item) {
+					var button = $('<button type="button" class="btn"></button>');
+					item.isClose && button.attr('data-dismiss', 'modal');
+					button.text(item.label);
+					item.class && (button.addClass(item.class));
+					!item.class && button.addClass('btn-primary');
+					if (item.callBack) {
+						if ( item.isClose ) {
+							$('#signinModal').find('button.close').unbind('click').bind('click', item.callBack.bind(self));
+						}
+						button.unbind('click').bind('click', item.callBack.bind(self));
+					}
+					$('#signinModalFooter').append(button);
+				})
+			}
+		}
+
+	},
+
+	autoHideTipModal: function(  ) {
+		var $this = this;
+		setTimeout(  function(  ) {
+			$this.hideTipModal();
+		}, 5000);
+	},
+
+	hideTipModal: function(  ) {
+		$('#tipModal').modal('hide');
+	},
+
+	hideFormModal: function(  ) {
+		$('#formModal').modal('hide');
+	},
+
+	hideSignInModal: function() {
+		$('#signinModal').modal('hide');
+	},
+
+	hideConfirmModal: function(  ) {
+		$('#confirmModal').modal('hide');
+	},
+
 	removeCurrentView: function( callBack ) {
+		if ( LocalCacheData.current_open_edit_only_controller ) {
+			clean( LocalCacheData.current_open_edit_only_controller );
+			LocalCacheData.current_open_edit_only_controller = null;
+		}
 
 		if ( LocalCacheData.current_open_primary_controller ) {
+			if ( LocalCacheData.current_open_primary_controller.edit_view ) {
+				clean( LocalCacheData.current_open_primary_controller );
+			}
 			Global.contentContainer().empty();
 			LocalCacheData.current_open_primary_controller.cleanWhenUnloadView( callBack );
 		} else {
@@ -360,6 +568,20 @@ var ApplicationRouter = Backbone.Router.extend( {
 			if ( Global.isSet( callBack ) ) {
 				callBack();
 			}
+		}
+
+		function clean( viewController ) {
+			viewController.clearErrorTips();
+			// Cannot read property 'remove' of null in interface/html5/IndexController.js?v=9.0.0-20151016-153057 line 439
+			if ( viewController.edit_view ) {
+				viewController.edit_view.remove();
+			}
+			viewController.sub_log_view_controller = null;
+			viewController.edit_view_ui_dic = {};
+			viewController.edit_view_ui_validation_field_dic = {};
+			viewController.edit_view_form_item_dic = {};
+			viewController.edit_view_error_ui_dic = {};
+			LocalCacheData.current_doing_context_action = '';
 		}
 	}
 
@@ -376,7 +598,10 @@ IndexViewController = Backbone.View.extend( {
 		//$( 'title' ).html( '' );
 
 		this.router.controller = this;
-		Backbone.history.start();
+		//Error: Backbone.history has already been started in interface/html5/framework/backbone/backbone-min.js?v=9.0.1-20151022-162110 line 28
+		if ( !Backbone.History.started ) {
+			Backbone.history.start();
+		}
 
 		IndexViewController.instance = this;
 
@@ -470,7 +695,6 @@ IndexViewController.openReport = function( parent_view_controller, view_name, id
 				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
 					current_url = current_url + '&sid=' + LocalCacheData.default_edit_id_for_next_open_edit_view;
 				}
-
 				Global.setURLToBrowser( current_url );
 
 			} );
@@ -484,9 +708,14 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 	var view_controller = null;
 
 	if ( !PermissionManager.checkTopLevelPermission( view_name ) && view_name !== 'map' ) {
-		TAlertManager.showAlert( 'Permission denied' );
+		TAlertManager.showAlert('Permission denied');
 		return;
 	}
+	
+	//Merge conflict from RecruitmentPortal. This seemed to have removed the permission check, but that would break the application UI?
+	//if ( LocalCacheData.current_open_edit_only_controller ) {
+	//	LocalCacheData.current_open_edit_only_controller.onCancelClick();
+	//}
 
 	// track edit view only view
 	Global.trackView( view_name );

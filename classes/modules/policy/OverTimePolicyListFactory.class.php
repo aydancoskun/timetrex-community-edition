@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -114,7 +114,7 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 
 		return $this;
 	}
-	
+
 	function getByCompanyId($id, $where = NULL, $order = NULL) {
 		if ( $id == '') {
 			return FALSE;
@@ -257,7 +257,7 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 
 		return $this;
 	}
-	
+
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -308,7 +308,7 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'type_id' => 'asc', 'trigger_time' => 'desc' );
+			$order = array( 'type_id' => 'asc', 'trigger_time' => 'desc', 'is_policy_group' => 'asc', 'id' => 'asc' ); //Order by is_policy_group last so policies coming from the policy group are returned last and therefore override duplicate policies from the schedule policy.
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;
@@ -435,7 +435,7 @@ class OverTimePolicyListFactory extends OverTimePolicyFactory implements Iterato
 		$query .= ( isset($filter_data['contributing_shift_policy_id']) ) ? $this->getWhereClauseSQL( 'a.contributing_shift_policy_id', $filter_data['contributing_shift_policy_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_code_id']) ) ? $this->getWhereClauseSQL( 'a.pay_code_id', $filter_data['pay_code_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_formula_policy_id']) ) ? $this->getWhereClauseSQL( 'a.pay_formula_policy_id', $filter_data['pay_formula_policy_id'], 'numeric_list', $ph ) : NULL;
-					
+
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
 

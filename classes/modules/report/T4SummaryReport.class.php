@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -615,7 +615,7 @@ class T4SummaryReport extends Report {
 										Debug::Text('  NOT Eligible... Date: '. TTDate::getDate('DATE', $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 									}
 								}
-							}							
+							}
 						}
 
 						for( $n = 0; $n <= 5; $n++) {
@@ -654,7 +654,7 @@ class T4SummaryReport extends Report {
 
 		//Merge time data with user data
 		$key = 0;
-		if ( isset($this->tmp_data['pay_stub_entry']) ) {
+		if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				foreach( $level_1 as $date_stamp => $row ) {
 					$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
@@ -669,7 +669,7 @@ class T4SummaryReport extends Report {
 				}
 			}
 			unset($this->tmp_data, $row, $date_columns, $processed_data, $level_1);
-			
+
 			//Total data per employee for the T4 forms. Just include the columns that are necessary for the form.
 			if ( is_array($this->data) AND !($format == 'html' OR $format == 'pdf') ) {
 				$t4_dollar_columns = array('income', 'tax', 'employee_cpp', 'ei_earnings', 'cpp_earnings', 'employee_ei', 'union_dues', 'rpp', 'charity', 'pension_adjustment', 'employer_ei', 'employer_cpp', 'other_box_0', 'other_box_1', 'other_box_2', 'other_box_3', 'other_box_4' );
@@ -678,7 +678,7 @@ class T4SummaryReport extends Report {
 				foreach( $this->data as $row ) {
 					if ( !isset($this->form_data[$row['user_id']]) ) {
 						$this->form_data[$row['user_id']] = array( 'user_id' => $row['user_id'] );
-		}
+					}
 
 					foreach( $row as $key => $value ) {
 						if ( in_array( $key, $t4_dollar_columns) ) {
@@ -691,7 +691,7 @@ class T4SummaryReport extends Report {
 						}
 					}
 				}
-			}			
+			}
 		}
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->form_data, 'Form Data: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -700,7 +700,7 @@ class T4SummaryReport extends Report {
 	}
 
 	function _outputPDFForm( $format = NULL ) {
-		
+
 		Debug::Text('Generating Form... Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 
 		$setup_data = $this->getFormConfig();
@@ -918,7 +918,7 @@ class T4SummaryReport extends Report {
 				$user_generic_status_batch_id = GovernmentDocumentFactory::saveUserGenericStatus( $this->getUserObject()->getId() );
 				return $user_generic_status_batch_id;
 			}
-	
+
 			//Handle T4Summary
 			$t4s = $this->getT4SumObject();
 			$t4s->setStatus( $setup_data['status_id'] );
@@ -930,10 +930,10 @@ class T4SummaryReport extends Report {
 				$t4s->company_city = ( isset( $setup_data['city'] ) AND $setup_data['city'] != '' ) ? $setup_data['city'] : $current_company->getCity();
 				$t4s->company_province = ( isset( $setup_data['province'] ) AND ( $setup_data['province'] != '' AND $setup_data['province'] != 0 ) ) ? $setup_data['province'] : $current_company->getProvince();
 				$t4s->company_postal_code = ( isset( $setup_data['postal_code'] ) AND $setup_data['postal_code'] != '' ) ? $setup_data['postal_code'] : $current_company->getPostalCode();
-	
+
 			$t4s->l76 = $this->getUserObject()->getFullName(); //Contact name.
 			$t4s->l78 = $current_company->getWorkPhone();
-	
+
 			$t4->sumRecords();
 			$total_row = $t4->getRecordsTotal();
 			//$total_row = Misc::ArrayAssocSum( $this->form_data );
@@ -946,7 +946,7 @@ class T4SummaryReport extends Report {
 				$t4s->l19 = ( isset( $total_row['l19'] ) ) ? $total_row['l19'] : NULL;
 				$t4s->l20 = ( isset( $total_row['l20'] ) ) ? $total_row['l20'] : NULL;
 				$t4s->l52 = ( isset( $total_row['l52'] ) ) ? $total_row['l52'] : NULL;
-	
+
 				if ( isset( $setup_data['remittances_paid'] ) AND $setup_data['remittances_paid'] != '' ) {
 				$t4s->l82 = (float)$setup_data['remittances_paid'];
 			} else {
@@ -970,7 +970,7 @@ class T4SummaryReport extends Report {
 		if ( !is_array($output) ) {
 			return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output );
 		}
-		
+
 		return $output;
 	}
 

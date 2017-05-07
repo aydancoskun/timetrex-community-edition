@@ -182,12 +182,17 @@
 		};
 
 		this.autoResize = function() {
-			var content_width, example_width;
+			var content_width, example_width, example_display;
+			if ( LocalCacheData.getLoginUserPreference() ) {
+				example_display = LocalCacheData.getLoginUserPreference().date_format_display;
+			} else {
+				example_display = 'dd-mmm-yy';
+			}
 			if ( !is_static_width ) {
 				if ( mode === 'date' ) {
-					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().date_format_display, 12 );
+					example_width = Global.calculateTextWidth( example_display, 12 );
 				} else if ( mode === 'date_time' ) {
-					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().date_format_display + ' ' + LocalCacheData.getLoginUserPreference().time_format_displa, 12 );
+					example_width = Global.calculateTextWidth( example_display + ' ' + LocalCacheData.getLoginUserPreference().time_format_displa, 12 );
 				}
 				content_width = Global.calculateTextWidth( date_picker_input.val(), 12, example_width, (example_width + 100), 28 );
 				$this.width( content_width + 'px' );
@@ -227,8 +232,13 @@
 
 			} );
 
-			var format = LocalCacheData.getLoginUserPreference().date_format_1;
-			var time_format = LocalCacheData.getLoginUserPreference().time_format_1;
+			var time_format = 'h:mm TT';
+			var format = 'dd-M-y';
+			// When portal mode, no user preference.
+			if ( LocalCacheData.getLoginUserPreference() ) {
+				format = LocalCacheData.getLoginUserPreference().date_format_1;
+				time_format = LocalCacheData.getLoginUserPreference().time_format_1;
+			}
 			var day_name_min = [$.i18n._( "Sun" ), $.i18n._( "Mon" ), $.i18n._( "Tue" ),
 				$.i18n._( "Wed" ), $.i18n._( "Thu" ), $.i18n._( "Fri" ), $.i18n._( "Sat" )];
 			var month_name_short = [$.i18n._( "Jan" ), $.i18n._( "Feb" ),
@@ -274,7 +284,12 @@
 
 				} );
 
-				$this.setPlaceHolder( LocalCacheData.loginUserPreference.date_format_display );
+				// Portal mode, no user preference.
+				if ( LocalCacheData.getLoginUserPreference() ) {
+					$this.setPlaceHolder( LocalCacheData.getLoginUserPreference().date_format_display );
+				} else {
+					$this.setPlaceHolder( 'dd-mmm-yy' );
+				}
 
 			} else if ( mode === 'date_time' ) {
 				date_picker_input = date_picker_input.datetimepicker( {

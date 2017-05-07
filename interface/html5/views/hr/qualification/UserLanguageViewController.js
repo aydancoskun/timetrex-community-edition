@@ -1,16 +1,18 @@
 UserLanguageViewController = BaseViewController.extend( {
 	el: '#user_language_view_container',
 
-	fluency_array: null,
-
-	competency_array: null,
-
 	document_object_type_id: null,
+
+	fluency_array: null,
+	competency_array: null,
+	source_type_array: null,
+	qualification_group_array: null,
+	qualification_array: null,
+
 	qualification_group_api: null,
 	qualification_api: null,
-	qualification_group_array: null,
 
-	qualification_array: null,
+	sub_view_grid_autosize: true,
 	initialize: function( options ) {
 		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserLanguageEditView.html';
@@ -33,11 +35,6 @@ UserLanguageViewController = BaseViewController.extend( {
 			this.setSelectRibbonMenuIfNecessary();
 		}
 
-	},
-
-	resizeSubGridHeight: function( length ) {
-		var height = ( length * 26 >= 200 ) ? 200 : length * 26;
-		this.grid.setGridHeight( height );
 	},
 
 	showNoResultCover: function( show_new_btn ) {
@@ -151,6 +148,8 @@ UserLanguageViewController = BaseViewController.extend( {
 
 		this.initDropDownOption( 'fluency' );
 		this.initDropDownOption( 'competency' );
+		this.initDropDownOption( 'source_type' );
+
 		this.qualification_group_api.getQualificationGroup( '', false, false, {
 			onResult: function( res ) {
 				res = res.getResult();
@@ -349,6 +348,16 @@ UserLanguageViewController = BaseViewController.extend( {
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Source' ),
+				in_column: 2,
+				multiple: true,
+				field: 'source_type_id',
+				basic_search: true,
+				adv_search: false,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX} ),
 
 			new SearchField( {
 				label: $.i18n._( 'Tags' ),

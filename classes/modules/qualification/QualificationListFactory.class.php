@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -105,6 +105,44 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+
+
+	function getByCompanyIdAndTypeIdAndName($company_id, $type_id, $name, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $type_id == '') {
+			return FALSE;
+		}
+
+		if ( $name == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+			'company_id' => (int)$company_id,
+			'type_id' => (int)$type_id,
+			'name' => (string)$name,
+		);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where	company_id = ?
+						AND type_id = ?
+						AND lower(name) LIKE lower(?)
+						AND deleted = 0
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
 	}
@@ -216,10 +254,11 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 			}
 		}
 
-		$additional_order_fields = array('type_id', 'group');
+		$additional_order_fields = array('type_id', 'source_type_id', 'group');
 
 		$sort_column_aliases = array(
 									'type' => 'type_id',
+									'source_type' => 'source_type_id',
 									'group' => 'd.name',
 									);
 
@@ -263,10 +302,9 @@ class QualificationListFactory extends QualificationFactory implements IteratorA
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['id'], 'numeric_list', $ph ) : NULL;
 		//$query .= ( isset($filter_data['exclude_id']) ) ? $this->getWhereClauseSQL( 'a.id', $filter_data['exclude_id'], 'not_numeric_list', $ph ) : NULL;
 
-		if ( isset($filter_data['type']) AND !is_array($filter_data['type']) AND trim($filter_data['type']) != '' AND !isset($filter_data['type_id']) ) {
-			$filter_data['type_id'] = Option::getByFuzzyValue( $filter_data['type'], $this->getOptions('type') );
-		}
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['source_type_id']) ) ? $this->getWhereClauseSQL( 'a.source_type_id', $filter_data['source_type_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['visibility_type_id']) ) ? $this->getWhereClauseSQL( 'a.visibility_type_id', $filter_data['visibility_type_id'], 'numeric_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['description']) ) ? $this->getWhereClauseSQL( 'a.description', $filter_data['description'], 'text', $ph ) : NULL;

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -73,7 +73,9 @@ class APIQualification extends APIFactory {
 		Debug::Text('Getting qualification default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$data = array(
-						'company_id' => $company_obj->getId()
+						'company_id' => $company_obj->getId(),
+						'source_type_id' => 10, //Internal
+						'visibility_type_id' => 10, //Internal Only
 					);
 
 		return $this->returnHandler( $data );
@@ -106,7 +108,7 @@ class APIQualification extends APIFactory {
 
 			$retarr = array();
 			foreach( $qlf as $q_obj ) {
-			
+
 				$retarr[] = $q_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids']	);
 
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $qlf->getCurrentRow() );
@@ -226,6 +228,7 @@ class APIQualification extends APIFactory {
 
 					//Force Company ID to current company.
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
+					$row['source_type_id'] = 10; // Internal. force all new qualifications set from the main application UI to 10.
 					$lf->setObjectFromArray( $row );
 					$is_valid = $lf->isValid( $ignore_warning );
 

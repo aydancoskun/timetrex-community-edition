@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -40,8 +40,46 @@ forceNoCacheHeaders(); //Send headers to disable caching.
 //Break out of any domain masking that may exist for security reasons.
 Misc::checkValidDomain();
 
-Misc::redirectMobileBrowser(); //Redirect mobile browsers automatically.
-Misc::redirectUnSupportedBrowser(); //Redirect unsupported web browsers automatically.
+//Skip this step if disable_database_connection is enabled or the user is going through the installer still
+$system_settings = array();
+$primary_company = FALSE;
+$clf = new CompanyListFactory();
+if ( ( !isset($disable_database_connection) OR ( isset($disable_database_connection) AND $disable_database_connection != TRUE ) )
+		AND ( !isset($config_vars['other']['installer_enabled']) OR ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] != TRUE ) )) {
+	//Get all system settings, so they can be used even if the user isn't logged in, such as the login page.
+	try {
+		$sslf = new SystemSettingListFactory();
+		$system_settings = $sslf->getAllArray();
+		unset($sslf);
+
+		//Get primary company data needs to be used when user isn't logged in as well.
+		$clf->getByID( PRIMARY_COMPANY_ID );
+		if ( $clf->getRecordCount() == 1 ) {
+			$primary_company = $clf->getCurrent();
+		}
+	} catch (Exception $e) {
+		//Database not initialized, or some error, redirect to Install page.
+		throw new DBError($e, 'DBInitialize');
+	}
+}
+
+//Some sites have problems with links with hash in them, so redirect by using "?" instead. ie: /interface/html5/portal/recruitment/?m=PortalJobVacancyDetail&id=403&company_id=ABC
+if ( isset($_GET['company_id']) AND $_GET['company_id'] != '' ) {
+	$url = Environment::getBaseURL().'html5/portal/recruitment/';
+	if ( isset($_GET['m']) AND $_GET['m'] != '' ) {
+		$url .= '#!m='. $_GET['m'];
+	} else {
+		$url .= '#!m=PortalJobVacancy';
+	}
+
+	if ( isset($_GET['id']) AND $_GET['id'] != '' ) {
+		$url .= '&id='. (int)$_GET['id'];
+	}
+
+	$url .= '&company_id='. $_GET['company_id'];
+	Redirect::Page( $url );
+	exit;
+}
 
 //Handle HTTPAuthentication after all redirects may have finished.
 $authentication = new Authentication();
@@ -54,158 +92,228 @@ if ( $authentication->getHTTPAuthenticationUsername() == FALSE ) {
 }
 unset($authentication);
 ?>
-	<!DOCTYPE html>
-	<html>
-	<head>
-		<title><?php echo APPLICATION_NAME .' '. TTi18n::getText('Workforce Management');?></title>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-		<meta name="Keywords"
-			  content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system"/>
-		<meta name="Description"
-			  content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-		<script async src="../../framework/stacktrace.js"></script>
-		<link rel="stylesheet" type="text/css"
-			  href="../../theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css"
-			  href="../../theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css"
-			  href="../../theme/default/css/ui.jqgrid.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css"
-			  href="../../theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css"
-			  href="../../theme/default/css/global/widgets/ribbon/RibbonView.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css"
-			  href="../../theme/default/css/global/widgets/search_panel/SearchPanel.css?v=<?php echo APPLICATION_BUILD?>">
-		<link rel="stylesheet" type="text/css"
-			  href="../../theme/default/css/views/attendance/timesheet/TimeSheetView.css?v=<?php echo APPLICATION_BUILD?>">
-		<script src="../../framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="../../framework/jquery.form.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="../../framework/jqueryui/js/jquery-ui.custom.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="../../framework/jquery.i18n.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="../../framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="../../framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="../../global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="../../global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script async src="../../framework/rightclickmenu/rightclickmenu.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script async src="../../framework/rightclickmenu/jquery.ui.position.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script async src="../../services/APIFactory.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script src="../../global/LocalCacheData.js?v=<?php echo APPLICATION_BUILD?>"></script>
-		<script>
-			Global.url_offset = '../../';
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title><?php echo APPLICATION_NAME .' '. TTi18n::getText('Workforce Management');?></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta name="Keywords"
+		  content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system"/>
+	<meta name="Description"
+		  content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
 
-			Global.addCss( "right_click_menu/rightclickmenu.css" );
-			Global.addCss( "views/wizard/Wizard.css" );
-			Global.addCss( "image_area_select/imgareaselect-default.css" );
-		</script>
-	</head>
+	<script async src="../../framework/stacktrace.js"></script>
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="../../framework/html5shiv.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/respond.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<![endif]-->
+	<link title="application css" rel="stylesheet" type="text/css" href="../../theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
+	<link rel="stylesheet" type="text/css" href="../../theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
+	<link rel="stylesheet" type="text/css" href="../../theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
+	<script src="../../framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/bootstrap/js/bootstrap.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/bootstrap-select/dist/js/bootstrap-select.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/bootstrap-toolkit.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/jquery.form.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/jquery.i18n.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/tinymce/tinymce.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../framework/tinymce/jquery.tinymce.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../global/RateLimit.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script async src="../../framework/rightclickmenu/rightclickmenu.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script async src="../../framework/rightclickmenu/jquery.ui.position.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script async src="../../services/APIFactory.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script src="../../global/LocalCacheData.js?v=<?php echo APPLICATION_BUILD?>"></script>
+	<script>
+		Global.url_offset = '../../';
 
-	<!--z-index
+		Global.addCss( "right_click_menu/rightclickmenu.css" );
+		Global.addCss( "views/wizard/Wizard.css" );
+		Global.addCss( "image_area_select/imgareaselect-default.css" );
+	</script>
+</head>
 
-	Alert: 100
-	DatePicker:100
-	Awesomebox: 100
-	Progressbar: 100
-	ribbon sub menu: 100
-	right click menu: 100
-	validation: 6000 set by plugin
+<!--z-index
+
+Alert: 100
+DatePicker:100
+Awesomebox: 100
+Progressbar: 100
+ribbon sub menu: 100
+right click menu: 100
+validation: 6000 set by plugin
 
 
-	Wizard: 50
-	camera shooter in wizard 51
+Wizard: 50
+camera shooter in wizard 51
 
 
-	EditView : 40
-	Bottom minimize tab: 39
+EditView : 40
+Bottom minimize tab: 39
 
-	Login view:10
+Login view:10
 
-	 -->
-	<body class="login-bg" oncontextmenu="return true;">
+ -->
+<body class="login-bg">
+<div id="topContainer" class="top-container need-hidden-element"></div>
 
-	<div class="need-hidden-element"><a href="http://www.timetrex.com">Workforce Management</a><a
-			href="http://www.timetrex.com/time_and_attendance.php">Time and Attendance</a></div>
+<div id="contentContainer" class="content-container">
+	<div class="loading-view">
+		<!--[if (gt IE 8)|!(IE)]><!-->
+		<div class="progress-bar-div">
+			<progress class="progress-bar" max="100" value="10">
+				<strong>Progress: 100% Complete.</strong>
+			</progress>
+			<span class="progress-label">Initializing...</span>
+		</div>
+		<!--<![endif]-->
+	</div>
+</div>
+<div id="bottomContainer" class="bottom-container need-hidden-element" ondragstart="return false;"></div>
 
-	<div id="topContainer" class="top-container"></div>
-
-	<div id="contentContainer" class="content-container">
-		<div class="loading-view">
-			<!--[if (gt IE 8)|!(IE)]><!-->
-			<div class="progress-bar-div">
-				<progress class="progress-bar" max="100" value="10">
-					<strong>Progress: 100% Complete.</strong>
-				</progress>
-				<span class="progress-label">Initializing...</span>
+<div id="overlay" class=""></div>
+<!-- Modal -->
+<div class="modal fade bs-example-modal-sm" id="signinModal" style="display: none" tabindex="-1" role="dialog" aria-describedby="using as sign in dialog" aria-labelledby="signinModalLabel">
+	<div class="modal-dialog modal-sm" aria-hidden="true" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+							aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="signinModalLabel"></h4>
 			</div>
-			<!--<![endif]-->
+			<div id="signinModalBody" class="modal-body">
+				...
+			</div>
+			<div id="signinModalFooter" class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-primary">Sign In</button>
+			</div>
 		</div>
 	</div>
-
-	<div class="need-hidden-element"><a href="http://www.timetrex.com/download.php">Download Time and Attendance Software</a></div>
-
-	<div id="bottomContainer" class="bottom-container" ondragstart="return false;">
-		<a id="copy_right_logo_link" class="copy-right-logo-link" target="_blank"><img id="copy_right_logo"
-																					   class="copy-right-logo"></a>
-		<a id="copy_right_info" class="copy-right-info" target="_blank" style="display: none"></a>
-			<span id="copy_right_info_1" class="copy-right-info" style="display: none">
-			&nbsp;&nbsp;<?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?>
-		</span>
+</div>
+<div class="modal fade bs-example-modal-lg" id="formModal" style="display: none" tabindex="-1" role="dialog" aria-describedby="using as form dialog" aria-labelledby="formModalLabel">
+	<div class="modal-dialog modal-lg" aria-hidden="true" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+						aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="formModalLabel"></h4>
+			</div>
+			<div id="formModalBody" class="modal-body">
+				...
+			</div>
+			<div id="formModalFooter" class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary">Save changes</button>
+			</div>
+		</div>
 	</div>
+</div>
+<div class="modal fade bs-example-modal-sm" id="tipModal" style="display: none" tabindex="-1" role="dialog" aria-describedby="using as tip dialog" aria-labelledby="tipModalLabel">
+	<div class="modal-dialog" style="max-width: 400px; width: auto;" aria-hidden="true" role="document">
+		<div class="modal-content">
+			<div id="tipModalBody" class="modal-body">
+				...
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="confirmModal" style="display: none" tabindex="-1" role="dialog" aria-describedby="using as confirm dialog" aria-labelledby="confirmModalLabel">
+	<div class="modal-dialog" aria-hidden="true" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+						aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="confirmModalLabel"></h4>
+			</div>
+			<div id="confirmModalBody" class="modal-body">
+				...
+			</div>
+			<div id="confirmModalFooter" class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary">Save changes</button>
+			</div>
+		</div>
+	</div>
+</div>
 
-	<div id="overlay" class=""></div>
-	</body>
+</body>
+<script>
+	//Hide elements that show hidden link for search friendly
+	hideElements();
+	//Don't not show loading bar if refresh
+	if ( Global.isSet( LocalCacheData.getPortalLoginUser() ) ) {
+		$( ".loading-view" ).hide();
+	} else {
+		setProgress()
+	}
 
-	<iframe style="display: none" id="hideReportIFrame" name="hideReportIFrame"></iframe>
+	function setProgress() {
+		loading_bar_time = setInterval( function() {
+			var progress_bar = $( ".progress-bar" )
+			var c_value = progress_bar.attr( "value" );
 
-	<script>
-		//Hide elements that show hidden link for search friendly
-		hideElements();
+			if ( c_value < 90 ) {
+				progress_bar.attr( "value", c_value + 10 );
+			}
+		}, 1000 );
+	}
 
-		//Don't not show loading bar if refresh
-		if ( Global.isSet( LocalCacheData.getLoginUser() ) ) {
-			$( ".loading-view" ).hide();
-		} else {
-			setProgress()
-		}
+	function cleanProgress() {
+		if ( $( ".loading-view" ).is( ":visible" ) ) {
 
-		function setProgress() {
+			var progress_bar = $( ".progress-bar" )
+			progress_bar.attr( "value", 100 );
+			clearInterval( loading_bar_time );
+
 			loading_bar_time = setInterval( function() {
-				var progress_bar = $( ".progress-bar" )
-				var c_value = progress_bar.attr( "value" );
-
-				if ( c_value < 90 ) {
-					progress_bar.attr( "value", c_value + 10 );
-				}
-			}, 1000 );
-		}
-
-		function cleanProgress() {
-			if ( $( ".loading-view" ).is( ":visible" ) ) {
-
-				var progress_bar = $( ".progress-bar" )
-				progress_bar.attr( "value", 100 );
+				$( ".progress-bar-div" ).hide();
 				clearInterval( loading_bar_time );
-
-				loading_bar_time = setInterval( function() {
-					$( ".progress-bar-div" ).hide();
-					clearInterval( loading_bar_time );
-				}, 50 );
-			}
+			}, 50 );
 		}
+	}
 
-		function hideElements() {
-			var elements = document.getElementsByClassName( 'need-hidden-element' );
+	function hideElements(){
+		var elements = document.getElementsByClassName( 'need-hidden-element' );
 
-			for ( var i = 0; i < elements.length; i++ ) {
-				elements[i].style.display = 'none';
-			}
+		for ( var i = 0; i < elements.length; i++ ) {
+			elements[i].style.display = 'none';
 		}
-	</script>
+	}
+</script>
+<script src="../../views/portal/PortalBaseViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantSubBaseViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/header/HeaderViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/sign_in/SignInController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/sign_in/PortalForgotPasswordController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/sign_in/PortalResetForgotPasswordController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/header/HeaderUploadResumeWidget.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/recruitment/PortalJobVacancyRowController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/recruitment/PortalJobVacancyDetailController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantEmploymentSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantReferenceSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantLocationSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantSkillSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantEducationSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantMembershipSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantLicenseSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicantLanguageSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/JobApplicationSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../views/portal/hr/my_profile/DocumentSubViewController.js?v=<?php echo APPLICATION_BUILD?>"></script>
+<script src="../../framework/require.js" data-main="main.js?v=<?php echo APPLICATION_BUILD?>"></script>
 
-	<script src="../../framework/require.js" data-main="main.js?v=<?php echo APPLICATION_BUILD?>"></script>
-
-	<!-- <?php echo Misc::getInstanceIdentificationString( $primary_company, $system_settings );?>  -->
-	</html>
+<!-- <?php echo Misc::getInstanceIdentificationString( $primary_company, $system_settings );?>  -->
+</html>
 <?php
 Debug::writeToLog();
 ?>

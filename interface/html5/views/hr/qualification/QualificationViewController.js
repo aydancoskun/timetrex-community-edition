@@ -2,6 +2,8 @@ QualificationViewController = BaseViewController.extend( {
 	el: '#qualification_view_container',
 
 	type_array: null,
+	visibility_type_array: null,
+	source_type_array: null,
 	qualification_group_array: null,
 
 	qualification_group_api: null,
@@ -32,6 +34,8 @@ QualificationViewController = BaseViewController.extend( {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
+		this.initDropDownOption( 'visibility_type' );
+		this.initDropDownOption( 'source_type' );
 
 		this.qualification_group_api.getQualificationGroup( '', false, false, {onResult: function( res ) {
 			res = res.getResult();
@@ -132,6 +136,12 @@ QualificationViewController = BaseViewController.extend( {
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.qualification_group_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Qualification Group' ), form_item_input, tab_qualification_column1 );
 
+		//Visibility Type
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {field: 'visibility_type_id'} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.visibility_type_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Visibility' ), form_item_input, tab_qualification_column1 );
+
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 		form_item_input.TTextArea( { field: 'description', width: '100%' } );
@@ -169,22 +179,32 @@ QualificationViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX} ),
 
-			new SearchField( {label: $.i18n._( 'Tags' ),
-				field: 'tag',
-				basic_search: true,
-				adv_search: false,
-				in_column: 1,
-				object_type_id: 250,
-				form_item_type: FormItemType.TAG_INPUT} ),
-
 			new SearchField( {label: $.i18n._( 'Group' ),
-				in_column: 2,
+				in_column: 1,
 				multiple: true,
 				field: 'group_id',
 				layout_name: ALayoutIDs.TREE_COLUMN,
 				tree_mode: true,
 				basic_search: true,
 				adv_search: false,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+
+			new SearchField( {label: $.i18n._( 'Source' ),
+				in_column: 2,
+				field: 'source_type_id',
+				multiple: true,
+				basic_search: true,
+				adv_search: false,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+
+			new SearchField( {label: $.i18n._( 'Visibility' ),
+				in_column: 2,
+				field: 'visibility_type_id',
+				multiple: true,
+				basic_search: true,
+				adv_search: false,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX} ),
 
 			new SearchField( {label: $.i18n._( 'Created By' ),

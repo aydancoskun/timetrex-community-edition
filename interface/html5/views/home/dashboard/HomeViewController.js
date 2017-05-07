@@ -11,6 +11,10 @@ HomeViewController = Backbone.View.extend( {
 	current_scroll_position: false,
 
 	initialize: function( options ) {
+		Global.setUINotready();
+		TTPromise.add('init','init');
+		TTPromise.wait();
+
 		this.viewId = 'Home';
 		LocalCacheData.current_open_primary_controller = this;
 		this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
@@ -607,6 +611,7 @@ HomeViewController = Backbone.View.extend( {
 
 		this.recoverCurrentScrollPosition()
 
+		TTPromise.resolve('init','init');
 	},
 
 	saveNewOrder: function( callBack ) {

@@ -10,6 +10,10 @@ function getCookie( cname ) {
 }
 
 function setCookie( cname, cvalue, exdays, path, domain ) {
+	if ( !path && LocalCacheData && LocalCacheData.cookie_path ) {
+		path = LocalCacheData.cookie_path;
+	}
+
 	var d = new Date();
 	d.setTime( d.getTime() + (exdays * 24 * 60 * 60 * 1000) );
 	var expires = "expires=" + d.toGMTString();
@@ -20,4 +24,11 @@ function setCookie( cname, cvalue, exdays, path, domain ) {
 		document.cookie = cname + "=" + cvalue + "; " + expires + "; path=" + path;
 	}
 
+}
+
+function deleteCookie(name, path) {
+	if ( !path && LocalCacheData && LocalCacheData.cookie_path ) {
+		path = LocalCacheData.cookie_path;
+	}
+	document.cookie= name+'; path='+ path +';expires=Thu, 01-Jan-1970 00:00:01 GMT';
 }

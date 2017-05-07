@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -257,7 +257,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 
 		return $this;
 	}
-	
+
 	function getByPolicyGroupUserId($user_id, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
@@ -308,7 +308,7 @@ class RegularTimePolicyListFactory extends RegularTimePolicyFactory implements I
 		}
 
 		if ( $order == NULL ) {
-			$order = array( 'calculation_order' => 'asc', 'name' => 'asc' );
+			$order = array( 'calculation_order' => 'asc', 'name' => 'asc', 'is_policy_group' => 'asc', 'id' => 'asc' ); //Order by is_policy_group last so policies coming from the policy group are returned last and therefore override duplicate policies from the schedule policy.
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;

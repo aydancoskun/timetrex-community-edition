@@ -399,7 +399,7 @@ InstallWizardController = BaseWizardController.extend( {
 					requirements_column2.addClass( 'all-ok' );
 				} else {
 					// php requirements
-
+					requirements_column2.removeClass( 'all-ok' );
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'database_engine'} );
 					this.addEditFieldToColumn( $.i18n._( 'Database Engine' ), form_item_input, requirements_column2, '', null, true, true );
@@ -506,14 +506,23 @@ InstallWizardController = BaseWizardController.extend( {
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'cache_dir'} );
 					this.addEditFieldToColumn( $.i18n._( 'Writable Cache Directory' ), form_item_input, requirements_column2, '', null, true, true );
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( {field: 'safe_cache_dir'} );
+					this.addEditFieldToColumn( $.i18n._( 'Secure Cache Directory' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'storage_dir'} );
 					this.addEditFieldToColumn( $.i18n._( 'Writable Storage Directory' ), form_item_input, requirements_column2, '', null, true, true );
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( {field: 'safe_storage_dir'} );
+					this.addEditFieldToColumn( $.i18n._( 'Secure Storage Directory' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'log_dir'} );
 					this.addEditFieldToColumn( $.i18n._( 'Writable Log Directory' ), form_item_input, requirements_column2, '', null, true, true );
+					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+					form_item_input.TText( {field: 'safe_log_dir'} );
+					this.addEditFieldToColumn( $.i18n._( 'Secure Log Directory' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'empty_cache_dir'} );
@@ -547,6 +556,8 @@ InstallWizardController = BaseWizardController.extend( {
 
 					requirements_column4.html( error_html );
 					requirements_column4.addClass( 'dataError' );
+				} else {
+					requirements_column4.removeClass( 'dataError' );
 				}
 
 				// fifth column
@@ -891,6 +902,10 @@ InstallWizardController = BaseWizardController.extend( {
 				postUpgrade.show();
 				break;
 			case 'installDone':
+				var loc = window.location;
+				var currentURL = loc.protocol + '//' + loc.host + loc.pathname;
+				login_url = currentURL + '#!m=Login';
+
 				step_title.empty();
 				this.title_1.text( $.i18n._( 'Done!' ) );
 				if ( stepData.upgrade == 1 ) {
@@ -899,7 +914,7 @@ InstallWizardController = BaseWizardController.extend( {
 						+ '<br>'
 						+ '<br>'
 						+ $.i18n._( 'You may now' ) + ' '
-						+ '<a href="/interface/html5/#!m=Login">' + $.i18n._( 'login' ) + '</a>' + ' '
+						+ '<a href="'+ login_url +'">' + $.i18n._( 'login' ) + '</a>' + ' '
 						+ $.i18n._( 'with the user name/password that you created earlier.' )
 					);
 				} else {
@@ -908,7 +923,7 @@ InstallWizardController = BaseWizardController.extend( {
 						+ '<br>'
 						+ '<br>'
 						+ $.i18n._( 'You may now' ) + ' '
-						+ '<a href="/interface/html5/#!m=Login">' + $.i18n._( 'login' ) + '</a>' + ' '
+						+ '<a href="'+ login_url +'">' + $.i18n._( 'login' ) + '</a>' + ' '
 						+ $.i18n._( 'with the user name/password that you created earlier.' )
 					);
 				}
@@ -1288,6 +1303,8 @@ InstallWizardController = BaseWizardController.extend( {
 					}
 					var widget = widgets[key];
 					widget.removeClass( 't-text' );
+					widget.removeClass( 'dataError' );
+					widget.removeClass( 'dataWarning' );
 					widget.addClass( 'custom-t-text' );
 					switch ( key ) {
 						case 'timetrex_version':
@@ -1328,7 +1345,7 @@ InstallWizardController = BaseWizardController.extend( {
 						case 'bcmath':
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
-							} else if ( setpData[key] == 1 ) {
+							} else if ( stepData[key] == 1 ) {
 								widget.html( $.i18n._( 'Not Installed. (BCMATH extension must be enabled)' ) );
 								widget.addClass( 'dataError' );
 							}
@@ -1549,6 +1566,15 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.addClass( 'dataError' );
 							}
 							break;
+						case 'safe_cache_dir':
+							if ( stepData[key].check_safe_cache_directory == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+								edit_view_form_item_dic.hide();
+							} else {
+								widget.html( $.i18n._( 'INSECURE, must not be a sub-directory of base path.' ) + ' (' + stepData[key].base_path + ')' );
+								widget.addClass( 'dataError' );
+							}
+							break;
 						case 'storage_dir':
 							if ( stepData[key].check_writable_storage_directory == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
@@ -1558,12 +1584,30 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.addClass( 'dataError' );
 							}
 							break;
+						case 'safe_storage_dir':
+							if ( stepData[key].check_safe_storage_directory == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+								edit_view_form_item_dic.hide();
+							} else {
+								widget.html( $.i18n._( 'INSECURE, must not be a sub-directory of base path.' ) + ' (' + stepData[key].base_path + ')' );
+								widget.addClass( 'dataError' );
+							}
+							break;
 						case 'log_dir':
 							if ( stepData[key].check_writable_log_directory == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
 								widget.html( $.i18n._( 'Not writable' ) + ' (' + stepData[key].log_path + ')' );
+								widget.addClass( 'dataError' );
+							}
+							break;
+						case 'safe_log_dir':
+							if ( stepData[key].check_safe_log_directory == 0 ) {
+								widget.html( $.i18n._( 'OK' ) );
+								edit_view_form_item_dic.hide();
+							} else {
+								widget.html( $.i18n._( 'INSECURE, must not be a sub-directory of base path.' ) + ' (' + stepData[key].base_path + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;

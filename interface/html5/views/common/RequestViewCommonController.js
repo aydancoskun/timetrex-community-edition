@@ -125,7 +125,7 @@ RequestViewCommonController = BaseViewController.extend( {
 
 			}
 			delete data.request_schedule;
-			this.pre_request_schedule = false;
+			this.pre_request_schedule = false; //is this a request from before request schedule was added? we need to know if this is an "old version" request
 		} else {
 			this.pre_request_schedule = true;
 		}
@@ -138,7 +138,7 @@ RequestViewCommonController = BaseViewController.extend( {
 		if (
 			LocalCacheData.getCurrentCompany().product_edition_id > 10 &&
 			( PermissionManager.validate('request', 'add_advanced') || this.current_edit_record.request_schedule_id > 0 ) &&
-			( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) && !this.pre_request_schedule
+			( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) && ( !this.pre_request_schedule || this.is_add )
 		) {
 			var advanced_field_names = this.getAdvancedFieldNames();
 			if ( this.edit_view_ui_dic ) {
@@ -494,6 +494,9 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	initEditViewUI: function( view_id, edit_view_file_name ) {
+		Global.setUINotready();
+		TTPromise.add('init','init');
+		TTPromise.wait();
 		var $this = this;
 
 		if ( this.edit_view ) {
@@ -979,6 +982,9 @@ RequestViewCommonController = BaseViewController.extend( {
 					}
 
 				}
+				break;
+			case ContextMenuIconName.export_excel:
+				this.onExportClick('export' + this.api.key_name );
 				break;
 		}
 

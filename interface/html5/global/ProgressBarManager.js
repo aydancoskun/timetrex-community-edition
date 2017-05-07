@@ -26,6 +26,8 @@ var ProgressBar = (function() {
 
 	var first_start_get_progress_timer = false;
 
+	var start_progress_timer = false;
+
 	var auto_clear_message_id_dic = {}; //for which api calls don't have return; for example all report view calls
 
 	var last_iteration = null;
@@ -44,15 +46,20 @@ var ProgressBar = (function() {
 
 	var showOverlay = function() {
 		Global.overlay().addClass( 'overlay' );
+		Global.setUINotready();
+		TTPromise.add('ProgressBar','overlay_visible');
 	};
 
 	var closeOverlay = function() {
 		Global.overlay().removeClass( 'overlay' );
+		Global.setUIReady();
+		TTPromise.resolve('ProgressBar','overlay_visible');
 	};
 
 	cancelProgressBar = function() {
 		if ( get_progress_timer ) {
 			clearInterval( get_progress_timer );
+			get_progress_timer = false;
 		}
 		removeProgressBar( current_process_id );
 		get_progress_timer = false;
@@ -62,6 +69,8 @@ var ProgressBar = (function() {
 	};
 
 	var showProgressBar = function( message_id, auto_clear ) {
+
+		TTPromise.add('ProgressBar', 'MASTER');
 		if ( no_progress_for_next_call ) {
 			no_progress_for_next_call = false;
 			return;
@@ -78,7 +87,6 @@ var ProgressBar = (function() {
 		}
 
 		if ( message_id ) {
-
 			message_id_dic[message_id] = true;
 
 			if ( auto_clear ) {
@@ -87,10 +95,10 @@ var ProgressBar = (function() {
 
 		}
 
-		if ( !get_progress_timer ) {
-			get_progress_timer = setInterval( function() {
-				getProgressBarProcess();
-			}, 3000 );
+		if ( message_id && start_progress_timer === false ) {
+			start_progress_timer = setInterval( function() {
+					getProgressBarProcess();
+				}, 3000 );
 			first_start_get_progress_timer = true;
 		}
 
@@ -277,7 +285,6 @@ var ProgressBar = (function() {
 	};
 
 	var getProgressBarProcess = function() {
-
 		if ( !LocalCacheData.getLoginData() ) {
 			return;
 		}
@@ -312,10 +319,17 @@ var ProgressBar = (function() {
 							updateProgressbar( res_data );
 							if ( first_start_get_progress_timer ) {
 								first_start_get_progress_timer = false;
-								clearInterval( get_progress_timer );
-								get_progress_timer = setInterval( function() {
-									getProgressBarProcess();
-								}, 2000 );
+
+								//prevent over-writing active handle. see bug #2196
+								if ( start_progress_timer != false && get_progress_timer == false ) {
+									//start interval needs to be reset to FALSE to trigger start code in showProgressBar
+									clearInterval(start_progress_timer);
+									start_progress_timer = false;
+
+									get_progress_timer = setInterval(function () {
+										getProgressBarProcess();
+									}, 2000);
+								}
 
 							}
 
@@ -327,7 +341,14 @@ var ProgressBar = (function() {
 		}
 
 		function stopProgress() {
-			clearInterval( get_progress_timer );
+			if ( start_progress_timer ) {
+				clearInterval(start_progress_timer);
+				start_progress_timer = false;
+			}
+			if (get_progress_timer) {
+				clearInterval(get_progress_timer);
+				get_progress_timer = false;
+			}
 
 			if ( auto_clear_message_id_dic[current_process_id] ) {
 				removeProgressBar( current_process_id );
@@ -342,7 +363,6 @@ var ProgressBar = (function() {
 	};
 
 	var removeProgressBar = function( message_id ) {
-
 		if ( message_id ) {
 			delete message_id_dic[message_id];
 			delete auto_clear_message_id_dic[message_id];
@@ -350,20 +370,23 @@ var ProgressBar = (function() {
 			if ( current_process_id === message_id ) {
 				current_process_id = false;
 			}
+
 		}
 
 		if ( process_number > 0 ) {
-
 			process_number = process_number - 1;
+
 			if ( process_number === 0 ) {
 				removeProgressBar();
 			}
 
 		} else {
-
 			if ( loading_box ) {
 				doing_close = true;
 				clearTimeout( close_time );
+
+				//shorten timeout in unit test mode.
+				var close_time_timeout = Global.UNIT_TEST_MODE ? 10 : 500;
 				close_time = setTimeout( function() {
 					closeOverlay();
 
@@ -371,19 +394,29 @@ var ProgressBar = (function() {
 						clearInterval( second_timer );
 						second_timer = null;
 					}
+
 					timer = null;
 					temp_message_until_close = '';
 					if ( loading_box ) {
 						loading_box.css( 'display', 'none' );
 
+						if ( get_progress_timer ) {
+							clearInterval(get_progress_timer);
+							get_progress_timer = false;
+						}
+
+						if ( start_progress_timer ) {
+							clearInterval(start_progress_timer);
+							start_progress_timer = false;
+						}
+
 						if ( circle ) {
 							circle.stop();
 						}
-
 					}
 
-				}, 500 );
-
+					TTPromise.resolve('ProgressBar', 'MASTER');
+				}, close_time_timeout );
 			}
 		}
 

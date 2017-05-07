@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -2154,6 +2154,10 @@ class ScheduleFactory extends Factory {
 				$this->Validator->isTRUE(	'date_stamp',
 											FALSE,
 											TTi18n::gettext('Shift is after employees termination date') );
+			} elseif ( $this->getUserObject()->getStatus() != 10 AND $this->getUserObject()->getTerminationDate() == '' ) {
+				$this->Validator->isTRUE(	'user_id',
+											 FALSE,
+											 TTi18n::gettext('Employee is not currently active') );
 			}
 
 			if ( $this->getStatus() == 20 AND $this->getAbsencePolicyID() != FALSE AND ( $this->getDateStamp() != FALSE AND $this->getUser() > 0 ) ) {
@@ -2165,6 +2169,14 @@ class ScheduleFactory extends Factory {
 												 TTi18n::gettext('This absence policy is not available for this employee'));
 				}
 			}
+		}
+
+		//Make sure we check if the pay period is locked when adding/editing/deleting scheduled shifts,
+		// as this can affect the timesheet and in cases where the we allow schedules to be adjusted but the timesheet is locked, things can get out of sync.
+		if ( $this->getDateStamp() != FALSE AND is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getIsLocked() == TRUE ) {
+			$this->Validator->isTRUE(	'date_stamp',
+										 FALSE,
+										 TTi18n::gettext('Pay Period is Currently Locked') );
 		}
 
 		//Ignore conflicting time check when EnableOverwrite is set, as we will just be deleting any conflicting shift anyways.

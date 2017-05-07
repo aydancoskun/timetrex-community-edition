@@ -59,9 +59,10 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 		this.content_div.empty();
 		switch ( this.current_step ) {
 			case 1:
+
+
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Select one or more pay periods to process payroll for' ) + ':' );
-
 				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayPeriod' )), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
 				var div = $( "<div class='wizard-acombobox-div'></div>" );
 				div.append( a_combobox );

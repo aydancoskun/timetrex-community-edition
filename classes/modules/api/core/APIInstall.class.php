@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -151,18 +151,38 @@ class APIInstall extends APIFactory {
 					'check_php_cli_requirements' => $install_obj->checkPHPCLIRequirements(),
 					'php_cli_requirements_command' => $install_obj->getPHPCLIRequirementsCommand()
 				);
+
 				$retval['config_file'] = $install_obj->checkWritableConfigFile();
+
 				$retval['cache_dir'] = array(
 					'check_writable_cache_directory' => $install_obj->checkWritableCacheDirectory(),
+					'check_safe_cache_directory' => $install_obj->checkSafeCacheDirectory(),
 					'cache_dir' => $install_obj->config_vars['cache']['dir']
 				);
+				$retval['safe_cache_dir'] = array(
+						'check_safe_cache_directory' => $install_obj->checkSafeCacheDirectory(),
+						'cache_dir' => $install_obj->config_vars['cache']['dir'],
+						'base_path' => Environment::getBasePath(),
+				);
+
 				$retval['storage_dir'] = array(
 					'check_writable_storage_directory' => $install_obj->checkWritableStorageDirectory(),
-					'storage_path' => $install_obj->config_vars['path']['storage']
+					'storage_path' => $install_obj->config_vars['path']['storage'],
 				);
+				$retval['safe_storage_dir'] = array(
+					'check_safe_storage_directory' => $install_obj->checkSafeStorageDirectory(),
+					'storage_path' => $install_obj->config_vars['path']['storage'],
+					'base_path' => Environment::getBasePath(),
+				);
+
 				$retval['log_dir'] = array(
-					'check_writable_log_directory' => $install_obj->checkWritableLogDirectory(),
-					'log_path' => $install_obj->config_vars['path']['log']
+					'check_safe_log_directory' => $install_obj->checkSafeLogDirectory(),
+					'log_path' => $install_obj->config_vars['path']['log'],
+				);
+				$retval['safe_log_dir'] = array(
+					'check_safe_log_directory' => $install_obj->checkSafeLogDirectory(),
+					'log_path' => $install_obj->config_vars['path']['log'],
+					'base_path' => Environment::getBasePath(),
 				);
 				$retval['empty_cache_dir'] = array(
 					'check_clean_cache_directory' => $install_obj->checkCleanCacheDirectory(),

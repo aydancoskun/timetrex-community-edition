@@ -308,7 +308,9 @@ LoginViewController = BaseViewController.extend( {
 																	LocalCacheData.setCurrentCompany( com_result );
 																	login_view_this.goToView();
 																	Debug.Text('Version: Client: '+APIGlobal.pre_login_data.application_build + " Server: "+com_result.application_build, 'LoginViewController.js', 'LoginViewController','onUserPreference:next',10);
-																	if ( APIGlobal.pre_login_data.application_build != com_result.application_build) {
+
+																	//avoid reloading in unit test mode.
+																	if ( APIGlobal.pre_login_data.application_build != com_result.application_build && !Global.UNIT_TEST_MODE ) {
 																		Debug.Text("Version mismatch on login: Reloading...", 'LoginViewController.js', 'LoginViewController','onUserPreference:next',10);
 																		window.location.reload(true);
 																	}
@@ -578,7 +580,7 @@ LoginViewController = BaseViewController.extend( {
 		}
 
 		Global.moveCookiesToNewPath();
-		$( this.el ).attr( 'init_complete', true )
+		Global.setUIInitComplete();
 
 	},
 

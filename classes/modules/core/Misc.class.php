@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1560,7 +1560,9 @@ class Misc {
 	static function getEmailDomain() {
 		global $config_vars;
 
-		if ( isset($config_vars['other']['email_domain']) AND $config_vars['other']['email_domain'] != '' ) {
+		if ( isset($config_vars['mail']['email_domain']) AND $config_vars['mail']['email_domain'] != '' ) {
+			$domain = $config_vars['mail']['email_domain'];
+		} elseif ( isset($config_vars['other']['email_domain']) AND $config_vars['other']['email_domain'] != '' ) {
 			$domain = $config_vars['other']['email_domain'];
 		} else {
 			Debug::Text( 'No From Email Domain set, falling back to regular hostname...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1573,7 +1575,9 @@ class Misc {
 	static function getEmailLocalPart() {
 		global $config_vars;
 
-		if ( isset($config_vars['other']['email_local_part']) AND $config_vars['other']['email_local_part'] != '' ) {
+		if ( isset($config_vars['mail']['email_local_part']) AND $config_vars['mail']['email_local_part'] != '' ) {
+			$local_part = $config_vars['mail']['email_local_part'];
+		} elseif ( isset($config_vars['other']['email_local_part']) AND $config_vars['other']['email_local_part'] != '' ) {
 			$local_part = $config_vars['other']['email_local_part'];
 		} else {
 			Debug::Text( 'No Email Local Part set, falling back to default...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1664,6 +1668,7 @@ class Misc {
 						return TRUE;
 					}
 				} elseif ( isset($_SERVER['HTTP_REFERER']) AND $_SERVER['HTTP_REFERER'] != '' ) {
+					Debug::Text( 'WARNING: CSRF check falling back for legacy browser... Referer: '. $referer, __FILE__, __LINE__, __METHOD__, 10);
 					$referer = $_SERVER['HTTP_REFERER'];
 				} else {
 					$referer = '';
@@ -2036,6 +2041,16 @@ class Misc {
 
 		//Debug::Arr( $files, 'Matching files: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $files;
+	}
+
+	static function isSubDirectory( $child_dir, $parent_dir ) {
+		if ( strpos( realpath( $child_dir ), realpath( $parent_dir ) ) === 0 ) {
+			return TRUE;
+		} elseif ( strpos( realpath( $child_dir ), realpath( $parent_dir ) ) === 0 ) { //Test realpaths incase they are relative or have "../" in them.
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 	static function convertObjectToArray( $obj ) {

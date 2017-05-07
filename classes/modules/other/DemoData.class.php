@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -3966,6 +3966,8 @@ class DemoData {
 		$jvf->setPositions(1);
 		$jvf->setPositionOpenDate( ( time() - ( 86400 * rand(30, 35) ) )  );
 		$jvf->setPositionExpireDate( ( time() - ( 86400 * rand(1, 5) ) ) );
+		$jvf->setSummaryDescription('Example job posting...');
+		$jvf->setDescription('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
 
 		if ( $jvf->isValid() ) {
 			$insert_id = $jvf->Save();

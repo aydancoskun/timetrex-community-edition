@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -751,6 +751,9 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( (int)TTDate::roundTime( (TTDate::parseTimeUnit('1:07:31') * -1), (60 * 15), 20), ( TTDate::parseTimeUnit('1:15') * -1 ) );
 		$this->assertEquals( (int)TTDate::roundTime( (TTDate::parseTimeUnit('1:07:59') * -1), (60 * 15), 20), ( TTDate::parseTimeUnit('1:15') * -1 ) );
 
+		$this->assertEquals( TTDate::roundTime(90.12345, 60, 10), (int)60 ); //Make sure partial seconds are stripped off.
+		$this->assertEquals( TTDate::roundTime(90.00001, 60, 10), (int)60 ); //Make sure partial seconds are stripped off.
+		$this->assertEquals( TTDate::roundTime(90.99999, 60, 10), (int)60 ); //Make sure partial seconds are stripped off.
 	}
 
 	function test_graceTime() {

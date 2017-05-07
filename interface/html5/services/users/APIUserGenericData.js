@@ -4,7 +4,6 @@ var APIUserGenericData = ServiceCaller.extend( {
 	className: 'APIUserGenericData',
 
 	getUserGenericData: function() {
-
 		return this.argumentsHandler( this.className, 'getUserGenericData', arguments );
 
 	},

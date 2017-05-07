@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1222,7 +1222,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	//This requires 'l7z' to be passed in as a total of all the amounts actually deducted from the employee.
 	//So we can compare that with the calculated amounts that should have been deducted, the result of which is l7.
 	function calcL7( $value, $schema ) {
-		$this->l7 = ( $this->l7z > 0 ) ? ( $this->l7z - $this->l5e ) : 0;
+		$this->l7 = ( $this->l7z > 0 ) ? ( bcsub($this->l7z, $this->l5e ) ) : 0;
 		Debug::Text('Raw: L7: '. $this->l7 .' L5e: '. $this->l5e .' L7z: '. $this->l7z, __FILE__, __LINE__, __METHOD__,10);
 
 		if ( abs($this->l7) > 100 ) { //As a precaution, check to see if cents adjustment exceeds $100, if it does assume its wrong and zero it out.

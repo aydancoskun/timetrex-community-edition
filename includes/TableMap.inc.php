@@ -9,6 +9,7 @@ $global_table_map = array(
     'client_group' => 'ClientGroupFactory',
     'client_contact' => 'ClientContactFactory',
     'company_generic_map' => 'CompanyGenericMapFactory',
+	'recruitment_portal_field_map' => 'PortalConfigFieldMapFactory',
     'branch' => 'BranchFactory',
     'company_deduction_pay_stub_entry_account' => 'CompanyDeductionPayStubEntryAccountFactory',
     'company_user_count' => 'CompanyUserCountFactory',
@@ -176,6 +177,7 @@ $global_table_map = array(
     'job_applicant_license' => 'JobApplicantLicenseFactory',
     'job_applicant_language' => 'JobApplicantLanguageFactory',
     'job_applicant_membership' => 'JobApplicantMembershipFactory',
+	'recruitment_portal_config' => 'RecruitmentPortalConfigFactory',
     'ethnic_group' => 'EthnicGroupFactory',
 	'geo_fence' => 'GEOFenceFactory'
 );

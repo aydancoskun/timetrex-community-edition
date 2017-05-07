@@ -1,10 +1,16 @@
 UserEducationViewController = BaseViewController.extend( {
 	el: '#user_education_view_container',
+
+	document_object_type_id: null,
+
 	qualification_group_array: null,
+	source_type_array: null,
+
 	qualification_group_api: null,
 	qualification_api: null,
 
-	document_object_type_id: null,
+	sub_view_grid_autosize: true,
+
 	initialize: function( options ) {
 		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserEducationEditView.html';
@@ -31,6 +37,8 @@ UserEducationViewController = BaseViewController.extend( {
 
 	initOptions: function() {
 		var $this = this;
+
+		this.initDropDownOption( 'source_type' );
 
 		this.qualification_group_api.getQualificationGroup( '', false, false, {
 			onResult: function( res ) {
@@ -167,11 +175,6 @@ UserEducationViewController = BaseViewController.extend( {
 			}
 		} );
 
-	},
-
-	resizeSubGridHeight: function( length ) {
-		var height = ( length * 26 >= 200 ) ? 200 : length * 26;
-		this.grid.setGridHeight( height );
 	},
 
 	setTabStatus: function() {
@@ -386,6 +389,16 @@ UserEducationViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
+			new SearchField( {
+				label: $.i18n._( 'Source' ),
+				in_column: 2,
+				multiple: true,
+				field: 'source_type_id',
+				basic_search: true,
+				adv_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+			
 			new SearchField( {
 				label: $.i18n._( 'Major/Specialization' ),
 				in_column: 2,

@@ -772,7 +772,8 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	onViewClick: function( next_selected_item, noRefreshUI ) {
-
+		TTPromise.add('MessageControllViewController','onViewClick');
+		TTPromise.wait();
 		var $this = this;
 		$this.is_viewing = true;
 		$this.is_edit = false;
@@ -792,6 +793,7 @@ MessageControlViewController = BaseViewController.extend( {
 		} else if ( grid_selected_length > 0 ) {
 			selected_item = this.getRecordFromGridById( parseInt( grid_selected_id_array[0] ) );
 		} else {
+			TTPromise.reject('MessageControllViewController','onViewClick');
 			return;
 		}
 
@@ -828,6 +830,7 @@ MessageControlViewController = BaseViewController.extend( {
 						if ( !$this.edit_view ) {
 							$this.onCancelClick();
 						}
+						TTPromise.reject('MessageControllViewController','onViewClick');
 						return;
 					}
 
@@ -848,7 +851,7 @@ MessageControlViewController = BaseViewController.extend( {
 					}
 
 					$this.initEditView();
-
+					TTPromise.resolve('MessageControllViewController','onViewClick');
 				}
 			} );
 
@@ -870,6 +873,7 @@ MessageControlViewController = BaseViewController.extend( {
 						if ( !$this.edit_view ) {
 							$this.onCancelClick();
 						}
+						TTPromise.reject('MessageControllViewController','onViewClick');
 						return;
 					}
 
@@ -890,6 +894,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 					$this.initEditView();
 
+					TTPromise.resolve('MessageControllViewController','onViewClick');
 				}
 			} );
 
@@ -1387,6 +1392,8 @@ MessageControlViewController = BaseViewController.extend( {
 
 	onAddClick: function() {
 
+		TTPromise.add('Message','add');
+		TTPromise.wait();
 		var $this = this;
 		this.is_viewing = false;
 		this.is_edit = false;
@@ -1399,6 +1406,11 @@ MessageControlViewController = BaseViewController.extend( {
 
 		$this.current_edit_record = result_data;
 		$this.initEditView();
+	},
+
+	initEditView: function() {
+		this._super( 'initEditView' );
+		TTPromise.resolve('Message','add');
 	},
 
 	setEditMenuAddIcon: function( context_btn, pId ) {

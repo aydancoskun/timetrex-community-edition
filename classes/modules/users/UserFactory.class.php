@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -52,7 +52,7 @@ class UserFactory extends Factory {
 	protected $group_obj = NULL;
 	protected $currency_obj = NULL;
 
-	public $username_validator_regex = '/^[a-z0-9-_\.@]{1,250}$/i'; //Authentication class needs to access this.
+	public $username_validator_regex = '/^[a-z0-9-_\.@\+]{1,250}$/i'; //Authentication class needs to access this.
 	public $phoneid_validator_regex = '/^[0-9]{1,250}$/i';
 	protected $phonepassword_validator_regex = '/^[0-9]{1,250}$/i';
 	protected $name_validator_regex = '/^[a-zA-Z- \.\'()\[\]|\x{0080}-\x{FFFF}]{1,250}$/iu'; //Allow ()/[] so nicknames can be specified.
@@ -1497,7 +1497,7 @@ class UserFactory extends Factory {
 	function setFirstNameMetaphone($first_name) {
 		$first_name = metaphone( trim($first_name) );
 
-		if	( $first_name != '' ) {
+		if	(	$first_name != '' ) {
 			$this->data['first_name_metaphone'] = $first_name;
 
 			return TRUE;
@@ -1589,7 +1589,7 @@ class UserFactory extends Factory {
 	function setLastNameMetaphone($last_name) {
 		$last_name = metaphone( trim($last_name) );
 
-		if ( $last_name != '' ) {
+		if	( $last_name != '' ) {
 			$this->data['last_name_metaphone'] = $last_name;
 
 			return TRUE;
@@ -2652,11 +2652,11 @@ class UserFactory extends Factory {
 			}
 
 			if ( $type == 'work' ) {
-				$this->setWorkEmailIsValidKey( md5( Misc::getUniqueID() ) );
+				$this->setWorkEmailIsValidKey( sha1( Misc::getUniqueID() ) );
 				$this->setWorkEmailIsValidDate( time() );
 				$email_is_valid_key = $this->getWorkEmailIsValidKey();
 			} else {
-				$this->setHomeEmailIsValidKey( md5( Misc::getUniqueID() ) );
+				$this->setHomeEmailIsValidKey( sha1( Misc::getUniqueID() ) );
 				$this->setHomeEmailIsValidDate( time() );
 				$email_is_valid_key = $this->getHomeEmailIsValidKey();
 			}
@@ -2664,35 +2664,35 @@ class UserFactory extends Factory {
 			if ( $this->isValid() ) {
 				$this->Save( FALSE );
 
-				$subject = APPLICATION_NAME .' - '. TTi18n::gettext('Confirm email address');
+			$subject = APPLICATION_NAME .' - '. TTi18n::gettext('Confirm email address');
 
-				$body = '<html><body>';
-				$body .= TTi18n::gettext('The email address %1 has been added to your %2 account', array($primary_email, APPLICATION_NAME) ).', ';
-				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ConfirmEmail.php?action:confirm_email=1&email='. $primary_email .'&key='. $email_is_valid_key .'">'. TTi18n::gettext('please click here to confirm and activate this email address') .'</a>.';
-				$body .= '<br><br>';
-				$body .= '--<br>';
-				$body .= APPLICATION_NAME;
-				$body .= '</body></html>';
+			$body = '<html><body>';
+			$body .= TTi18n::gettext('The email address %1 has been added to your %2 account', array($primary_email, APPLICATION_NAME) ).', ';
+			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ConfirmEmail.php?action:confirm_email=1&email='. $primary_email .'&key='. $email_is_valid_key .'">'. TTi18n::gettext('please click here to confirm and activate this email address') .'</a>.';
+			$body .= '<br><br>';
+			$body .= '--<br>';
+			$body .= APPLICATION_NAME;
+			$body .= '</body></html>';
 
-				TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee email confirmation sent for').': '. $primary_email, NULL, $this->getTable() );
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee email confirmation sent for').': '. $primary_email, NULL, $this->getTable() );
 
-				$headers = array(
-						'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Email Confirmation') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
-						'Subject' => $subject,
-						'X-TimeTrex-Email-Validate' => 'YES', //Help filter validation emails.
-				);
+			$headers = array(
+								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Email Confirmation') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
+								'Subject' => $subject,
+								'X-TimeTrex-Email-Validate' => 'YES', //Help filter validation emails.
+							);
 
-				$mail = new TTMail();
-				$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
-				$mail->setHeaders( $headers );
+			$mail = new TTMail();
+			$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
+			$mail->setHeaders( $headers );
 
-				@$mail->getMIMEObject()->setHTMLBody($body);
+			@$mail->getMIMEObject()->setHTMLBody($body);
 
-				$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
-				$retval = $mail->Send();
+			$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
+			$retval = $mail->Send();
 
-				return $retval;
-			}
+			return $retval;
+		}
 		}
 
 		return FALSE;
@@ -2755,25 +2755,26 @@ class UserFactory extends Factory {
 				$body .= APPLICATION_NAME;
 				$body .= '</body></html>';
 
-				//Don't record the reset key in the audit log for security reasons.
-				TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. Misc::getRemoteIPAddress(), NULL, $this->getTable() );
+			//Don't record the reset key in the audit log for security reasons.
+			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Employee Password Reset By').': '. Misc::getRemoteIPAddress(), NULL, $this->getTable() );
 
-				$headers = array(
-						'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
-						'Subject' => $subject,
-						'Cc'	  => Misc::formatEmailAddress( $secondary_email, $this ),
-				);
+			$headers = array(
+								'From'	  => '"'. APPLICATION_NAME .' - '. TTi18n::gettext('Password Reset') .'" <'. Misc::getEmailLocalPart() .'@'. Misc::getEmailDomain() .'>',
+								'Subject' => $subject,
+								'Cc'	  => Misc::formatEmailAddress( $secondary_email, $this ),
+							);
 
-				$mail = new TTMail();
-				$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
-				$mail->setHeaders( $headers );
+			$mail = new TTMail();
+			$mail->setTo( Misc::formatEmailAddress( $primary_email, $this ) );
+			$mail->setHeaders( $headers );
 
-				@$mail->getMIMEObject()->setHTMLBody($body);
+			@$mail->getMIMEObject()->setHTMLBody($body);
 
-				$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
-				$retval = $mail->Send();
-				return $retval;
-			}
+			$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
+			$retval = $mail->Send();
+
+			return $retval;
+		}
 		}
 
 		return FALSE;
@@ -3236,8 +3237,8 @@ class UserFactory extends Factory {
 					//Attempt to import data into currently open pay periods if its not a new user.
 					if ( !isset($this->is_new) OR ( isset($this->is_new) AND $this->is_new == FALSE ) AND is_object( $ppsuf->getPayPeriodScheduleObject() ) ) {
 						$ppsuf->getPayPeriodScheduleObject()->importData( $this->getID() );
-					}
 				}
+			}
 				unset($ppsuf);
 			}
 			unset($add_pay_period_schedule);

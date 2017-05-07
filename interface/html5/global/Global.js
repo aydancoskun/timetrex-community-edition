@@ -2,9 +2,21 @@
 var Global = function() {
 };
 
+Global.current_ping = -1;
+
+Global.UNIT_TEST_MODE = false;
+
 Global.app_min_width = 990;
 
 Global.theme = 'default';
+
+/**
+ * UIReadyStatus:
+ * 0 - Global.setUINotready() - the UI is not ready
+ * 1 - Global.setUIReady() - the overlay is out of the way but ui is not done rendering
+ * 2 - Global.setUIInitComplete() the overlay is done rendering
+ */
+Global.UIReadyStatus = 0;
 
 Global.signal_timer = null;
 
@@ -108,6 +120,8 @@ Global.sendErrorReport = function() {
 				'\n\nUser: ' + login_user.user_name + ' ' +
 				'\n\nURL: ' + window.location.href + ' ' +
 				'\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie +
+				'\n\nCurrent Ping: '+ Global.current_ping +
+				'\n\nIdle Time: '+ Global.idle_time +
 				'\n\nCurrent User Object: \n' + Debug.varDump(login_user) + ' ' +
 				'\n\nCurrent Company Object: \n' + Debug.varDump(LocalCacheData.getCurrentCompany()) + ' ';
 		} else {
@@ -1225,20 +1239,23 @@ Global.setSignalStrength = function() {
 			}
 			average_time = total_time / checking_array.length;
             Debug.Text(  'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + (new Date).toISOString().replace( /z|t/gi, ' ' ), 'Global.js', '', 'doPing', 1 );
-
+			Global.current_ping = average_time;
 			status = 'Good';
-			if ( average_time > 400 ) {
-				$( '.signal-strength-pretty-strong' ).addClass( 'signal-strength-empty' );
-				$( '.signal-strength-strong' ).addClass( 'signal-strength-empty' );
-				$( '.signal-strength-weak' ).addClass( 'signal-strength-empty' );
-				status = 'Poor'
-			} else if ( average_time > 250 ) {
-				$( '.signal-strength-pretty-strong' ).addClass( 'signal-strength-empty' );
-				$( '.signal-strength-strong' ).addClass( 'signal-strength-empty' );
-				status = 'Below Average'
-			} else if ( average_time > 150 ) {
-				$( '.signal-strength-pretty-strong' ).addClass( 'signal-strength-empty' );
-				status = 'Average'
+			//do not allow signal strength variation in unit test mode
+			if ( Global.UNIT_TEST_MODE == false ) {
+				if ( average_time > 400 ) {
+					$('.signal-strength-pretty-strong').addClass('signal-strength-empty');
+					$('.signal-strength-strong').addClass('signal-strength-empty');
+					$('.signal-strength-weak').addClass('signal-strength-empty');
+					status = 'Poor'
+				} else if ( average_time > 250 ) {
+					$('.signal-strength-pretty-strong').addClass('signal-strength-empty');
+					$('.signal-strength-strong').addClass('signal-strength-empty');
+					status = 'Below Average'
+				} else if ( average_time > 150 ) {
+					$('.signal-strength-pretty-strong').addClass('signal-strength-empty');
+					status = 'Average'
+				}
 			}
 
 			setTooltip();
@@ -1405,11 +1422,12 @@ Global.getRibbonIconRealPath = function( icon ) {
 
 Global.loadLanguage = function( name ) {
 	var successflag = false;
-	ProgressBar.showProgressBar();
+	var message_id = UUID.guid();
+	ProgressBar.showProgressBar( message_id );
 	var res_data = {};
 
 	if ( LocalCacheData.getI18nDic() ) {
-		ProgressBar.removeProgressBar();
+		ProgressBar.removeProgressBar( message_id );
 		return LocalCacheData.getI18nDic();
 	}
 	var realPath = '../locale/' + name + '/LC_MESSAGES/messages.json' + '?v=' + APIGlobal.pre_login_data.application_build;
@@ -1430,7 +1448,7 @@ Global.loadLanguage = function( name ) {
 		dataType: 'script'
 	} );
 
-	ProgressBar.removeProgressBar();
+	ProgressBar.removeProgressBar( message_id );
 
 	if ( successflag ) {
 		LocalCacheData.setI18nDic( i18n_dictionary );
@@ -1502,34 +1520,20 @@ Global.concatArraysUniqueWithSort = function( thisArray, otherArray ) {
 	} );
 };
 
-Global.addCss = function( path ) {
-
+Global.addCss = function( path, callback ) {
 	if ( LocalCacheData.loadedScriptNames[path] ) {
+		if ( callback ) {
+			callback();
+		}
 		return true;
 	}
-
 	LocalCacheData.loadedScriptNames[path] = true;
-
 	var realPath = 'theme/' + Global.theme + '/css/' + path;
-
 	if ( Global.url_offset ) {
 		realPath = Global.url_offset + realPath;
 	}
-
-	var style = $( "link[href='" + realPath + '?v=' + APIGlobal.pre_login_data.application_build + "']" );
-
-	if ( style.length < 1 ) {
-		$( "head" ).append( "<link>" );
-		css = $( 'head' ).children( ':last' );
-		css.attr( {
-			rel: 'stylesheet',
-			type: 'text/css',
-			href: realPath + '?v=' + APIGlobal.pre_login_data.application_build
-		} );
-	}
-
-	style = $( "link[href='" + realPath + '?v=' + APIGlobal.pre_login_data.application_build + "']" );
-
+	realPath = realPath + '?v=' + APIGlobal.pre_login_data.application_build;
+	Global.loadStyleSheet( realPath, callback );
 };
 
 //JS think 0 is false, so use this to get 0 correctly.
@@ -1724,6 +1728,10 @@ Global.loadWidgetByName = function( widgetName ) {
 			input = Global.loadWidget( 'global/widgets/textarea/TTextArea.html' );
 			input = $( input );
 			break;
+		case FormItemType.TINYMCE_TEXT_AREA:
+			input = Global.loadWidget( 'global/widgets/textarea/TinymceTextArea.html' );
+			// input = $( input );
+			break;
 		case FormItemType.SEPARATED_BOX:
 			input = Global.loadWidget( 'global/widgets/separated_box/SeparatedBox.html' );
 			input = $( input );
@@ -1813,7 +1821,8 @@ Global.loadWidget = function( url ) {
 		realPath = Global.url_offset + realPath;
 	}
 
-	ProgressBar.showProgressBar();
+	var message_id = UUID.guid();
+	ProgressBar.showProgressBar( message_id );
 	var responseData = $.ajax( {
 		async: false,
 		type: 'GET',
@@ -1828,7 +1837,7 @@ Global.loadWidget = function( url ) {
 		}
 	} );
 
-	ProgressBar.removeProgressBar();
+	ProgressBar.removeProgressBar( message_id );
 	//Error: Uncaught ReferenceError: responseText is not defined in interface/html5/global/Global.js?v=9.0.2-20151106-092147 line 1747
 	if ( !responseData ) {
 		return null;
@@ -1854,6 +1863,17 @@ Global.removeCss = function( path ) {
 Global.getViewPathByViewId = function( viewId ) {
 	var path;
 	switch ( viewId ) {
+	    //Recruitment Portal
+		case 'MyProfile':
+			path = 'views/portal/hr/my_profile/';
+			break;
+		case 'MyJobApplication':
+			path = 'views/portal/hr/my_jobapplication/';
+			break;
+		case 'MyProfileEmployment':
+			path = 'views/portal/hr/my_profile/';
+			break;
+
 		case 'Map':
 			path = 'views/attendance/map/';
 			break;
@@ -1863,11 +1883,9 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'Home':
 			path = 'views/home/dashboard/';
 			break;
+		case 'PortalJobVacancyDetail':
 		case 'PortalJobVacancy':
 			path = 'views/portal/hr/recruitment/';
-			break;
-		case 'PortalLogin':
-			path = 'views/portal/login/';
 			break;
 		case 'UserDateTotalParent':
 		case 'UserDateTotal':
@@ -2190,6 +2208,7 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'JobApplicantMembership':
 		case 'JobApplicantLicense':
 		case 'JobApplicantLanguage':
+		case 'RecruitmentPortalConfig':
 			path = 'views/hr/recruitment/';
 			break;
 		case 'PayrollExportReport':
@@ -2341,6 +2360,9 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'ReportViewWizard':
 			path = 'views/wizard/report_view/';
 			break;
+		case 'PortalApplyJobWizard':
+			path = 'views/wizard/portal_apply_job/';
+			break;
 		case 'ForgotPasswordWizard':
 			path = 'views/wizard/forgot_password/';
 			break;
@@ -2351,7 +2373,6 @@ Global.getViewPathByViewId = function( viewId ) {
 			path = 'views/developer_tools/';
 			break;
 	}
-
 	return path;
 };
 /* jshint ignore:end */
@@ -2413,8 +2434,8 @@ Global.loadPageSync = function( url ) {
 	if ( Global.url_offset ) {
 		realPath = Global.url_offset + realPath;
 	}
-
-	ProgressBar.showProgressBar();
+	var message_id = UUID.guid();
+	ProgressBar.showProgressBar( message_id );
 	var responseData = $.ajax( {
 		async: false,
 		type: 'GET',
@@ -2430,7 +2451,7 @@ Global.loadPageSync = function( url ) {
 		}
 	} );
 
-	ProgressBar.removeProgressBar();
+	ProgressBar.removeProgressBar( message_id );
 
 	return (responseData.responseText);
 
@@ -2439,12 +2460,12 @@ Global.loadPageSync = function( url ) {
 Global.loadPage = function( url, onResult ) {
 
 	var realPath = url + '?v=' + APIGlobal.pre_login_data.application_build;
-
+	var message_id = UUID.guid();
 	if ( Global.url_offset ) {
 		realPath = Global.url_offset + realPath;
 	}
 
-	ProgressBar.showProgressBar();
+	ProgressBar.showProgressBar( message_id );
 	$.ajax( {
 		async: true,
 		type: 'GET',
@@ -2452,7 +2473,7 @@ Global.loadPage = function( url, onResult ) {
 		data: null,
 		cache: true,
 		success: function( result ) {
-			ProgressBar.removeProgressBar();
+			ProgressBar.removeProgressBar( message_id );
 			onResult( result );
 		},
 		error: function( jqXHR, textStatus, errorThrown ) {
@@ -2465,32 +2486,10 @@ Global.loadPage = function( url, onResult ) {
 Global.getBaseURL = function() {
 
 	var url = location.href;  // entire url including querystring - also: window.location.href;
-
-	if ( url.indexOf( '#!m' ) !== -1 ) {
-		url = url.substring( 0, url.indexOf( '#!m' ) );
-	} else if ( url.indexOf( '#!user_name' ) !== -1 ) {
-		url = url.substring( 0, url.indexOf( '#!user_name' ) );
-	}
-
-//	else {
-//		var baseURL = url.substring( 0, url.indexOf( '/', 14 ) );
-//
-//		if ( baseURL.indexOf( 'http://localhost' ) !== -1 ) {
-//			// Base Url for localhost
-//			url = location.href;  // window.location.href;
-//			var pathname = location.pathname;  // window.location.pathname;
-//			var index1 = url.indexOf( pathname );
-//			var index2 = url.indexOf( '/', index1 + 1 );
-//			var baseLocalUrl = url.substr( 0, index2 );
-//
-//			return baseLocalUrl;
-//		}
-//		else {
-//			// Root Url for domain name
-//			return baseURL + window.location.pathname;
-//		}
-//	}
-
+	// if ( url.indexOf( '#!' ) !== -1 ) {
+	// 	url = url.substring( 0, url.indexOf( '#!' ) );
+	// }
+	url = url.substring( 0, url.indexOf( '#!' ) ) || url.substring( 0, url.indexOf( '#' ) );
 	return url;
 
 };
@@ -3141,25 +3140,26 @@ Global.trackView = function( name, action ) {
 
 Global.setAnalyticDimensions = function( user_name, company_name ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
-		ga( 'set', 'dimension1', APIGlobal.pre_login_data.application_version );
-		ga( 'set', 'dimension2', APIGlobal.pre_login_data.http_host );
-		ga( 'set', 'dimension3', APIGlobal.pre_login_data.product_edition_name );
-		ga( 'set', 'dimension4', APIGlobal.pre_login_data.registration_key );
-		ga( 'set', 'dimension5', APIGlobal.pre_login_data.primary_company_name );
-		Debug.Text('Application Version: '+ APIGlobal.pre_login_data.application_version +' Host: '+ APIGlobal.pre_login_data.http_host +' Edition: '+ APIGlobal.pre_login_data.product_edition_name +' Registration Key: '+ APIGlobal.pre_login_data.registration_key +' Primary Company: '+ APIGlobal.pre_login_data.primary_company_name, 'Global.js', '', 'setAnalyticDimensions', 10 );
+		if (typeof ga !== 'undefined') {
+			ga('set', 'dimension1', APIGlobal.pre_login_data.application_version);
+			ga('set', 'dimension2', APIGlobal.pre_login_data.http_host);
+			ga('set', 'dimension3', APIGlobal.pre_login_data.product_edition_name);
+			ga('set', 'dimension4', APIGlobal.pre_login_data.registration_key);
+			ga('set', 'dimension5', APIGlobal.pre_login_data.primary_company_name);
 
-		if ( user_name && user_name !== 'undefined' ) {
-			Debug.Text('Analytics User: ' + user_name , 'Global.js', '', 'setAnalyticDimensions', 10 );
-			ga( 'set', 'dimension6', user_name );
-		} else {
-			ga( 'set', 'dimension6', null );
+			if (user_name !== 'undefined' && user_name !== null) {
+				if (APIGlobal.pre_login_data.production !== true) {
+					Debug.Text('Analytics User: ' + user_name, 'Global.js', '', 'doPing', 1);
+				}
+				ga('set', 'dimension6', user_name);
 		}
 
-		if ( company_name && company_name !== 'undefined' ) {
-			Debug.Text('Analytics Company: ' + company_name , 'Global.js', '', 'setAnalyticDimensions', 10 );
-			ga( 'set', 'dimension7', company_name );
-		} else {
-			ga( 'set', 'dimension7', null );
+			if (company_name !== 'undefined' && company_name !== null) {
+				if (APIGlobal.pre_login_data.production !== true) {
+					Debug.Text('Analytics Company: ' + company_name, 'Global.js', '', 'setAnalyticDimensions', 1);
+				}
+				ga('set', 'dimension7', company_name);
+			}
 		}
 	}
 };
@@ -3167,12 +3167,58 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 Global.sendAnalytics = function( track_address ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
 		// Call this delay so view load goes first
-		setTimeout( function() {
-			ga( 'send', 'pageview', track_address );
-			Debug.Text('View: '+ track_address, 'Global.js', '', 'sendAnalytics', 10 );
-		}, 500 )
+		if ( typeof ga !== 'undefined' ) {
+			setTimeout( function() {
+				ga( 'send', 'pageview', track_address );
+			}, 500 )
+		}
 
 	}
+};
+
+
+Global.loadStyleSheet = function( path, fn, scope ) {
+	var head = document.getElementsByTagName( 'head' )[0], // reference to document.head for appending/ removing link nodes
+		link = document.createElement( 'link' );           // create the link node
+	link.setAttribute( 'href', path );
+	link.setAttribute( 'rel', 'stylesheet' );
+	link.setAttribute( 'type', 'text/css' );
+	var sheet, cssRules;
+// get the correct properties to check for depending on the browser
+	if ( 'sheet' in link ) {
+		sheet = 'sheet';
+		cssRules = 'cssRules';
+	}
+	else {
+		sheet = 'styleSheet';
+		cssRules = 'rules';
+	}
+	var interval_id = setInterval( function() {                     // start checking whether the style sheet has successfully loaded
+			try {
+				if ( link[sheet] && link[sheet][cssRules].length ) { // SUCCESS! our style sheet has loaded
+					clearInterval( interval_id );                      // clear the counters
+					clearTimeout( timeout_id );
+					fn.call( scope || window, true, link );           // fire the callback with success == true
+				}
+			} catch ( e ) {} finally {}
+		}, 10 ),                                                   // how often to check if the stylesheet is loaded
+		timeout_id = setTimeout( function() {       // start counting down till fail
+			clearInterval( timeout_id );             // clear the counters
+			clearTimeout( timeout_id );
+			head.removeChild( link );                // since the style sheet didn't load, remove the link node from the DOM
+			fn.call( scope || window, false, link ); // fire the callback with success == false
+		}, 15000 );                                 // how long to wait before failing
+	head.appendChild( link );  // insert the link node into the DOM and start loading the style sheet
+	return link; // return the link node;
+};
+
+Global.getSessionIDKey = function() {
+	if ( LocalCacheData.all_url_args ) {
+		if ( LocalCacheData.all_url_args.hasOwnProperty('company_id') ) {
+			return 'SessionID-JA';
+		}
+	}
+	return 'SessionID';
 };
 
 //don't let the user leave without clicking OK.
@@ -3356,7 +3402,7 @@ Global.moveCookiesToNewPath = function() {
 
 Global.clearSessionCookie = function() {
 	Global.moveCookiesToNewPath();
-	$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
+	$.cookie( Global.getSessionIDKey(), null, {expires: 30, path: LocalCacheData.cookie_path} );
 };
 Global.array_unique = function(arr) {
     if ( Global.isArray(arr) == false) {
@@ -3381,6 +3427,33 @@ Global.MoneyRound = function(number, decimals) {
 
 	return retval.toFixed( decimals );
 };
+
+
+Global.getUIReadyStatus = function() {
+	return Global.UIReadyStatus;
+}
+Global.setUINotready = function(){
+	Global.UIReadyStatus = 0;
+	Debug.Text('Global ready status changed: 0', 'Global.js', 'Global','setUIReadyStatus',10);
+}
+Global.setUIReady = function(){
+	//need to check the document isn't already complete and ready for a screenshot.'
+	if ( Global.UIReadyStatus == 0 ) {
+		Global.UIReadyStatus = 1;
+		Debug.Text('Global ready status changed: 1', 'Global.js', 'Global', 'setUIReady', 10);
+	}
+}
+Global.setUIInitComplete = function() {
+	Global.UIReadyStatus = 2;
+	Debug.Text('Global ready status changed: 2', 'Global.js', 'Global','setUIReadyStatus',10);
+}
+
+Global.setUnitTestMode = function() {
+	Global.UNIT_TEST_MODE = true;
+	$('body').addClass('UNIT_TEST_MODE');
+	Debug.setEnable(true);
+	Debug.setVerbosity(11);
+}
 
 Global.convertValidationErrorToString = function(object) {
 	//Debug.Arr(object,'Converting Error to String: ','Global.js', 'Global', 'convertValidationErrorToString', 10);
@@ -3414,4 +3487,12 @@ Global.convertValidationErrorToString = function(object) {
 	}
 
 	return retval;
+}
+
+Global.setStationID = function (val) {
+	setCookie('StationID', val, 10000);
+}
+
+Global.getStationID = function () {
+	return getCookie('StationID');
 }

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -588,6 +588,9 @@ abstract class Factory {
 			}
 		}
 
+		//Its possible that these are incorrect, especially if the user was created by a system or master administrator.
+		//Skip strict checks for now.
+		/*
 		$ulf = TTnew( 'UserListFactory' );
 
 		if ( $this->Validator->isResultSetWithRows(	'updated_by',
@@ -601,6 +604,11 @@ abstract class Factory {
 		}
 
 		return FALSE;
+		*/
+
+		$this->data['deleted_by'] = $id;
+
+		return $id;
 	}
 
 	function setCreatedAndUpdatedColumns( $data, $variable_to_function_map = array() ) {

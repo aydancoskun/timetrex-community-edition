@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -42,37 +42,6 @@ if ( isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 ) {
 require_once('../../includes/global.inc.php');
 require_once('../../includes/API.inc.php');
 Header('Content-Type: application/json; charset=UTF-8'); //Make sure content type is not text/HTML to help avoid XSS.
-
-function getJSONError() {
-	$retval = FALSE;
-
-	if ( function_exists('json_last_error') ) { //Handle PHP v5.3 and older.
-		switch( json_last_error() ) {
-			case JSON_ERROR_NONE:
-				break;
-			case JSON_ERROR_DEPTH:
-				$retval = 'Maximum stack depth exceeded';
-				break;
-			case JSON_ERROR_STATE_MISMATCH:
-				$retval = 'Underflow or the modes mismatch';
-				break;
-			case JSON_ERROR_CTRL_CHAR:
-				$retval = 'Unexpected control character found';
-				break;
-			case JSON_ERROR_SYNTAX:
-				$retval = 'Syntax error, malformed JSON';
-				break;
-			case JSON_ERROR_UTF8:
-				$retval = 'Malformed UTF-8 characters, possibly incorrectly encoded';
-				break;
-			default:
-				$retval = 'Unknown error';
-				break;
-		}
-	}
-
-	return $retval;
-}
 
 function unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth ) {
 	TTi18n::chooseBestLocale(); //Make sure we set the locale as best we can when not logged in
@@ -265,26 +234,26 @@ unset($argument_size);
 
 $api_auth = TTNew('APIAuthentication'); //Used to handle error cases and display error messages.
 $session_id = getSessionID();
-if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !isset($_GET['disable_db']) AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
-	$authentication = new Authentication();
+if ( Misc::checkValidReferer() == TRUE ) { //Help prevent CSRF attacks with this, run this check during and before the user is logged in.
+	if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == FALSE ) AND ( !isset($config_vars['other']['down_for_maintenance']) OR isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == '' ) AND $session_id != '' AND !isset($_GET['disable_db']) AND !in_array( strtolower($method), array('isloggedin', 'ping' ) ) ) { //When interface calls PING() on a regular basis we need to skip this check and pass it to APIAuthentication immediately to avoid updating the session time.
+		$authentication = new Authentication();
 
-	Debug::text('Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
-	if ( $class_name != 'APIProgressBar' AND $authentication->Check( $session_id ) === TRUE ) { //Always treat APIProgressBar as unauthenticated as an optimization to avoid causing uncessary SQL queries.
-		if ( Misc::checkValidReferer() == TRUE ) { //Help prevent CSRF attacks with this, but this is only needed when the user is already logged in.
+		Debug::text('Session ID: '. $session_id .' Source IP: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $class_name != 'APIProgressBar' AND $authentication->Check( $session_id ) === TRUE ) { //Always treat APIProgressBar as unauthenticated as an optimization to avoid causing uncessary SQL queries.
 			authenticatedInvokeService( $class_name, $method, $arguments, $message_id, $authentication, $api_auth );
 		} else {
-			echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Invalid referrer, possible CSRF.' ) ) );
+			Debug::text('SessionID set but user not authenticated!', __FILE__, __LINE__, __METHOD__, 10);
+			//echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User is not authenticated.' ) ) );
+
+			//Rather than fail with session error, switch over to using unauthenticated calls, which if its calling to authenticated method will cause a SESSION error at that time.
+			unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
 		}
 	} else {
-		Debug::text('SessionID set but user not authenticated!', __FILE__, __LINE__, __METHOD__, 10);
-		//echo json_encode( $api_auth->returnHandler( FALSE, 'SESSION', TTi18n::getText('User is not authenticated.' ) ) );
-
-		//Rather than fail with session error, switch over to using unauthenticated calls, which if its calling to authenticated method will cause a SESSION error at that time.
+		Debug::text('No SessionID or calling non-authenticated function...', __FILE__, __LINE__, __METHOD__, 10);
 		unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
 	}
 } else {
-	Debug::text('No SessionID or calling non-authenticated function...', __FILE__, __LINE__, __METHOD__, 10);
-	unauthenticatedInvokeService( $class_name, $method, $arguments, $message_id, $api_auth );
+	echo json_encode( $api_auth->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('Invalid referrer, possible CSRF.' ) ) );
 }
 
 Debug::text('Server Response Time: '. ((float)microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']), __FILE__, __LINE__, __METHOD__, 10);

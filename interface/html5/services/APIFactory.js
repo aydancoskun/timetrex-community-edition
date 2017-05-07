@@ -134,6 +134,7 @@ var APIFactory = (function() {
 		'APIUserQualificationReport': 'services/reports/APIUserQualificationReport',
 		'APIQualificationGroup': 'services/hr/APIQualificationGroup',
 		'APIQualification': 'services/hr/APIQualification',
+		'APIQualificationPortal': 'services/hr/APIQualificationPortal',
 		'APIUserSkill': 'services/hr/APIUserSkill',
 		'APIRequest': 'services/my_account/APIRequest',
 		'APIRequestSchedule': 'services/my_account/APIRequestSchedule',
@@ -155,6 +156,7 @@ var APIFactory = (function() {
 		'APIKPIGroup': 'services/hr/APIKPIGroup',
 		'APIKPI': 'services/hr/APIKPI',
 		'APIUserReview': 'services/hr/APIUserReview',
+		'APIRecruitmentPortalConfig': 'services/hr/APIRecruitmentPortalConfig',
 		'APIUserReviewControl': 'services/hr/APIUserReviewControl',
 		'APIUserRecruitmentSummaryReport': 'services/reports/APIUserRecruitmentSummaryReport',
 		'APIJobApplicant': 'services/hr/APIJobApplicant',
@@ -173,9 +175,15 @@ var APIFactory = (function() {
 		'APIMisc': 'services/core/APIMisc',
 		'APICompanyGenericTag': 'services/company/APICompanyGenericTag',
 		'APIDashboard': 'services/core/APIDashboard',
-		'APIInstall': 'services/install/APIInstall'
-
-
+		'APIInstall': 'services/install/APIInstall',
+		'APIJobVacancyPortal': 'services/hr/APIJobVacancyPortal',
+		'APIJobApplicantPortal': 'services/hr/APIJobApplicantPortal',
+		'APIRecruitmentAuthentication': 'services/core/APIRecruitmentAuthentication',
+		'APICompanyPortal': 'services/company/APICompanyPortal',
+		'APIEthnicGroupPortal': 'services/users/APIEthnicGroupPortal',
+		'APIUserDefaultPortal': 'services/users/APIUserDefaultPortal',
+		'APICurrencyPortal': 'services/core/APICurrencyPortal',
+		'APIDocumentPortal': 'services/document/APIDocumentPortal',
 	};
 
 	var getAPIClass = function( apiName ) {

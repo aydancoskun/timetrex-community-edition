@@ -287,7 +287,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-					'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -1369,13 +1369,13 @@
 				}
 			} else if ( e.keyCode === 39 ) { //right
 				if ( allow_multiple_selection && !$( e.target ).hasClass( 'search-input' ) ) {
-					e.preventDefault();
+				e.preventDefault();
 					a_dropdown.onUnSelectGridDoubleClick();
 					a_dropdown.setIsChanged( true );
 				}
 			} else if ( e.keyCode === 37 ) { //left
 				if ( allow_multiple_selection && !$( e.target ).hasClass( 'search-input' ) ) {
-					e.preventDefault();
+				e.preventDefault();
 					a_dropdown.onSelectGridDoubleClick();
 					a_dropdown.setIsChanged( true );
 				}
@@ -2001,7 +2001,10 @@
 				layout_name === ALayoutIDs.TREE_COLUMN || //Tree Mode
 				layout_name === ALayoutIDs.SORT_COLUMN ||
 				layout_name === ALayoutIDs.TIMESHEET ||
-				layout_name === ALayoutIDs.ABSENCE ) {
+				layout_name === ALayoutIDs.ABSENCE ||
+				layout_name === ALayoutIDs.SIMPLE_NAME ||
+				layout_name === ALayoutIDs.SIMPLE_NAME +'_navigation' ) {
+
 				return false;
 			}
 

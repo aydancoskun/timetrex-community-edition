@@ -1,6 +1,6 @@
 EmployeeViewController = BaseViewController.extend( {
-
 	el: '#employee_view_container', //Must set el here and can only set string, so events can work
+
 	user_api: null,
 	user_group_api: null,
 	company_api: null,
@@ -10,7 +10,6 @@ EmployeeViewController = BaseViewController.extend( {
 	user_group_array: null,
 	country_array: null,
 	province_array: null,
-
 	e_province_array: null,
 
 	sub_wage_view_controller: null,
@@ -18,27 +17,20 @@ EmployeeViewController = BaseViewController.extend( {
 	sub_accrual_policy_user_modifier_view_controller: null,
 	sub_log_view_controller: null,
 	sub_company_tax_view_controller: null,
-
 	sub_job_application_view_controller: null,
-
 	sub_user_skill_view_controller: null,
 	sub_user_education_view_controller: null,
-
 	sub_user_membership_view_controller: null,
-
 	sub_user_license_view_controller: null,
-
 	sub_user_language_view_controller: null,
-
 	sub_user_review_control_view_controller: null,
 
 	hierarchy_options_dic: null,
-
 	hierarchy_ui_model: null,
-
 	show_hierarchy: false,
-
 	select_company_id: null,
+
+	sub_view_grid_autosize: true,
 
 	initialize: function( options ) {
 		this._super( 'initialize', options );
@@ -746,6 +738,14 @@ EmployeeViewController = BaseViewController.extend( {
 	initSubQualificationView: function() {
 		var $this = this;
 
+		$('#tab_qualifications').hide();
+		TTPromise.add('Employee_Qualifications_Tab', 'initSubQualificationView');
+		TTPromise.wait( null, null, function() {
+			$('#tab_qualifications').show();
+		});
+
+
+		TTPromise.add('Employee_Qualifications_Tab', 'UserSkillViewController');
 		Global.loadScript( 'views/hr/qualification/UserSkillViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.first-sub-view' );
@@ -754,6 +754,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
+		TTPromise.add('Employee_Qualifications_Tab', 'UserEducationViewController');
 		Global.loadScript( 'views/hr/qualification/UserEducationViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.second-sub-view' );
@@ -762,6 +763,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
+		TTPromise.add('Employee_Qualifications_Tab', 'UserMembershipViewController');
 		Global.loadScript( 'views/hr/qualification/UserMembershipViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.third-sub-view' );
@@ -770,6 +772,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
+		TTPromise.add('Employee_Qualifications_Tab', 'UserLicenseViewController');
 		Global.loadScript( 'views/hr/qualification/UserLicenseViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.forth-sub-view' );
@@ -778,6 +781,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
+		TTPromise.add('Employee_Qualifications_Tab', 'UserLanguageViewController');
 		Global.loadScript( 'views/hr/qualification/UserLanguageViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.fifth-sub-view' );
@@ -798,6 +802,7 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_skill_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_skill_view_controller.parent_view_controller = $this;
 			$this.sub_user_skill_view_controller.initData();
+			TTPromise.resolve('Employee_Qualifications_Tab', 'UserSkillViewController');
 		}
 
 		function afterLoadUserLicenseView( subViewController ) {
@@ -808,6 +813,7 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_license_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_license_view_controller.parent_view_controller = $this;
 			$this.sub_user_license_view_controller.initData();
+			TTPromise.resolve('Employee_Qualifications_Tab', 'UserLicenseViewController');
 		}
 
 		function afterLoadUserLanguageView( subViewController ) {
@@ -818,6 +824,7 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_language_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_language_view_controller.parent_view_controller = $this;
 			$this.sub_user_language_view_controller.initData();
+			TTPromise.resolve('Employee_Qualifications_Tab', 'UserLanguageViewController');
 		}
 
 		function afterLoadUserEducationView( subViewController ) {
@@ -828,6 +835,7 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_education_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_education_view_controller.parent_view_controller = $this;
 			$this.sub_user_education_view_controller.initData();
+			TTPromise.resolve('Employee_Qualifications_Tab', 'UserEducationViewController');
 		}
 
 		function afterLoadUserMembershipView( subViewController ) {
@@ -838,8 +846,10 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_membership_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_membership_view_controller.parent_view_controller = $this;
 			$this.sub_user_membership_view_controller.initData();
+			TTPromise.resolve('Employee_Qualifications_Tab', 'UserMembershipViewController');
 		}
 
+		TTPromise.resolve('Employee_Qualifications_Tab', 'initSubQualificationView');
 	},
 
 	initSubCompanyTaxView: function() {
@@ -1941,7 +1951,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 	onMapClick: function() {
 		this.is_viewing = false;
-		ProgressBar.showProgressBar(true);
+		ProgressBar.showProgressBar();
 		var data = {filter_columns: {id:true, first_name:true, last_name:true, address1:true, address2:true, city:true, province:true, country:true, postal_code:true, latitude:true, longitude:true}};
 		var ids = this.getGridSelectIdArray();
 

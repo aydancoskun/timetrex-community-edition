@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -654,7 +654,7 @@ class Form941Report extends Report {
 
 						//Separate data used for reporting, grouping, sorting, from data specific used for the Form.
 						if ( !isset($this->form_data['pay_period'][$quarter_month][$date_stamp]) ) {
-							$this->form_data['pay_period'][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'medicare_tax', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
+							$this->form_data['pay_period'][$quarter_month][$date_stamp] = Misc::preSetArrayValues( array(), array('l2', 'l3', 'l5a', 'l5b', 'l5c', 'l5d', 'l7', 'l9', 'income_tax', 'medicare_tax', 'social_security_tax', 'l5a2', 'l5b2', 'l5c2', 'l5d', 'l8', 'l10' ), 0 );
 						}
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l2'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['wages'] );
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
@@ -678,6 +678,7 @@ class Form941Report extends Report {
 
 						//Total up Social Security / Medicare Taxes withheld from the employee only, then double them for the employer portion, this helps calculate l7 further down.
 						// The form setup for Medicare Taxes Witheld should only ever be setup for whatever the employee had withheld, now employee and employer.
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['income_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['income_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['social_security_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['social_security_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], 2) );
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], 2 ) );
 
@@ -846,7 +847,8 @@ class Form941Report extends Report {
 					if ( isset($this->form_data['pay_period'][$i]) ) {
 						foreach( $this->form_data['pay_period'][$i] as $pay_period_epoch => $data ) {
 							//Debug::Text('SB: Month: '. $i .' Pay Period Date: '. TTDate::getDate('DATE', $pay_period_epoch) .' DOM: '. TTDate::getDayOfMonth($pay_period_epoch) .' Amount: '. $data['l10'], __FILE__, __LINE__, __METHOD__, 10);
-							$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = $data['l10']; //Don't round this as it can cause mismatches in the totals.
+							//$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = $data['l10']; //Don't round this as it can cause mismatches in the totals.
+							$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = bcadd($data['income_tax'], bcadd( $data['social_security_tax'], $data['medicare_tax'] ) ); //This should be values that appeared on the actual pay stubs, which are already rounded of course.
 						}
 					}
 				}

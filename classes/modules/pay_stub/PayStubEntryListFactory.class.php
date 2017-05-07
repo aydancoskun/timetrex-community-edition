@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1661,6 +1661,10 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( isset($filter_data['user_group_id']) ) {
+			$filter_data['group_id'] = $filter_data['user_group_id'];
+		}
 
 		$ppf = new PayPeriodFactory();
 		$bf = new BranchFactory();

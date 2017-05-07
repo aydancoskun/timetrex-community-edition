@@ -100,11 +100,7 @@ ForgotPasswordWizardController = BaseWizardController.extend( {
 			this.api.resetPassword( email, {
 				onResult: function( result ) {
 					if ( !result.isValid() ) {
-						if( $this.default_data && Global.isSet( $this.default_data.is_portal ) && $this.default_data.is_portal ) {
-							$this.showErrorAlert( result );
-						} else {
-							TAlertManager.showErrorAlert( result );
-						}
+						TAlertManager.showErrorAlert( result );
 					} else {
 						$this.onCloseClick();
 						if ( $this.call_back ) {

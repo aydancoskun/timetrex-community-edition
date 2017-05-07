@@ -17,6 +17,7 @@ InOutViewController = BaseViewController.extend( {
 	show_node_ui: false,
 
 	initialize: function( options ) {
+		Global.setUINotready(true);
 		this._super( 'initialize', options );
 		this.permission_id = 'punch';
 		this.viewId = 'InOut';
@@ -240,11 +241,8 @@ InOutViewController = BaseViewController.extend( {
 	getUserPunch: function( callBack ) {
 		var $this = this;
 
-		var station_id = LocalCacheData.getStationID();
+		var station_id = Global.getStationID();
 
-		if ( !station_id ) {
-			station_id = $.cookie( 'StationID' );
-		}
 		var api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
 
 		if ( station_id ) {
@@ -269,12 +267,17 @@ InOutViewController = BaseViewController.extend( {
 			}
 
 			var res_data = result.getResult();
-			$.cookie( 'StationID', res_data, {expires: 10000, path: LocalCacheData.cookie_path} );
-			LocalCacheData.setStationID( res_data );
+			//$.cookie( 'StationID', res_data, {expires: 10000, path: LocalCacheData.cookie_path} );
+			Global.setStationID( res_data );
 
 			$this.api.getUserPunch( {
 				onResult: function( result ) {
 					var result_data = result.getResult();
+					//keep the inout view fields consistent for screenshots in unit test mode
+					if ( Global.UNIT_TEST_MODE === true ) {
+						result_data.punch_date = "UNITTEST";
+						result_data.punch_time = "UNITTEST";
+					}
 
 					if ( !result.isValid() ) {
 						TAlertManager.showErrorAlert( result );
@@ -284,11 +287,13 @@ InOutViewController = BaseViewController.extend( {
 
 					if ( Global.isSet( result_data ) ) {
 						callBack( result_data );
+
 					} else {
 						$this.onCancelClick();
 					}
-
 				}
+
+
 			} );
 
 		}
@@ -296,7 +301,6 @@ InOutViewController = BaseViewController.extend( {
 	},
 
 	openEditView: function() {
-
 		var $this = this;
 
 		if ( $this.edit_only_mode ) {
@@ -310,6 +314,12 @@ InOutViewController = BaseViewController.extend( {
 				$this.getUserPunch( function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
 					$this.current_edit_record = result;
+
+					//keep fields consistent in unit test mode for consistent screenshots
+					if ( Global.UNIT_TEST_MODE === true ) {
+						$this.current_edit_record.punch_date = "UNITTEST";
+						$this.current_edit_record.punch_time = "UNITTEST";
+					}
 
 					$this.initEditView();
 

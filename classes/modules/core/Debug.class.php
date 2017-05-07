@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -70,7 +70,7 @@ class Debug {
 	static function setVerbosity($level) {
 		global $db;
 
-		self::$verbosity = $level;
+		self::$verbosity = (int)$level;
 
 		if (is_object($db) AND $level == 11) {
 			$db->debug = TRUE;
@@ -233,7 +233,7 @@ class Debug {
 		$retval = '';
 		$trace_arr = debug_backtrace();
 		if ( is_array($trace_arr) ) {
-			$i = 0;
+			$i = 1;
 			foreach( $trace_arr as $trace_line ) {
 				if ( isset($trace_line['class']) AND isset($trace_line['type'])	 ) {
 					$class = $trace_line['class'].$trace_line['type'];
@@ -344,11 +344,6 @@ class Debug {
 					break;
 				case E_STRICT:
 					$error_name = 'STRICT';
-
-					//Don't show STRICT errors when using the legacy HTML interface with PHP v5.4
-					if ( defined( 'TIMETREX_AMF_API' ) == FALSE AND defined( 'TIMETREX_JSON_API' ) == FALSE AND defined( 'TIMETREX_SOAP_API' ) == FALSE ) {
-						return TRUE;
-					}
 					break;
 				case E_DEPRECATED:
 					$error_name = 'DEPRECATED';
@@ -361,19 +356,27 @@ class Debug {
 
 			$text = 'PHP ERROR - '. $error_name .': '. $error_str .' File: '. $error_file .' Line: '. $error_line;
 
+			//If this is the first PHP error, make sure debugging is enabled so it and any others can be captured.
+			if ( self::$php_errors == 0 ) {
+				self::setEnable(TRUE);
+				self::setBufferOutput(TRUE);
+			}
+
 			self::$php_errors++;
 
-			if ( PHP_SAPI != 'cli' AND function_exists('apache_request_headers') ) {
-				self::Arr( apache_request_headers(), 'Raw Request Headers: ', $error_file, $error_line, __METHOD__, 1 );
+			if ( self::$php_errors == 1 ) { //Only trigger this on the first error, so its not repeated over and over again.
+				if ( PHP_SAPI != 'cli' AND function_exists( 'apache_request_headers' ) ) {
+					self::Arr( apache_request_headers(), 'Raw Request Headers: ', $error_file, $error_line, __METHOD__, 0 );
+				}
+
+				global $HTTP_RAW_POST_DATA;
+				if ( $HTTP_RAW_POST_DATA != '' ) {
+					self::Arr( $HTTP_RAW_POST_DATA, 'Raw POST Request: ', $error_file, $error_line, __METHOD__, 0 );
+				}
 			}
 
-			global $HTTP_RAW_POST_DATA;
-			if ( $HTTP_RAW_POST_DATA != '' ) {
-				self::Arr( $HTTP_RAW_POST_DATA, 'Raw POST Request: ', $error_file, $error_line, __METHOD__, 1 );
-			}
-
-			self::Text( $text, $error_file, $error_line, __METHOD__, 1 );
-			self::Text( self::backTrace(), $error_file, $error_line, __METHOD__, 1 );
+			self::Text( '(E'. self::$php_errors .') '. $text, $error_file, $error_line, __METHOD__, 0 );
+			self::Text( self::backTrace(), $error_file, $error_line, __METHOD__, 0 );
 		}
 
 		return FALSE; //Let the standard PHP error handler work as well.
@@ -383,7 +386,7 @@ class Debug {
 		$error = error_get_last();
 		if ( $error !== NULL AND isset($error['type']) AND $error['type'] == 1 ) { //Only trigger fatal errors on shutdown.
 			self::$php_errors++;
-			self::Text('PHP ERROR - FATAL('. $error['type'] .'): '. $error['message'] .' File: '. $error['file'] .' Line: '. $error['line'], $error['file'], $error['line'], __METHOD__, 1 );
+			self::Text('PHP ERROR - FATAL('. $error['type'] .'): '. $error['message'] .' File: '. $error['file'] .' Line: '. $error['line'], $error['file'], $error['line'], __METHOD__, 0 );
 
 			if ( defined('TIMETREX_API') AND TIMETREX_API == TRUE ) { //Only when a fatal error occurs.
 				global $amf_message_id;
@@ -396,8 +399,8 @@ class Debug {
 		}
 
 		if ( self::$php_errors > 0 ) {
-			self::Text('Detected PHP errors ('. self::$php_errors .'), emailing log...');
-			self::Text('---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '.getmypid().') ]---------------');
+			self::Text('Detected PHP errors ('. self::$php_errors .'), emailing log...', __FILE__, __LINE__, __METHOD__, 0);
+			self::Text('---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '. getmypid() .') ]---------------', __FILE__, __LINE__, __METHOD__, 0);
 
 			self::emailLog();
 			if ( $error !== NULL ) { //Fatal error, write to log once more as this won't be called automatically.
@@ -444,7 +447,7 @@ class Debug {
 			$eol = "\n";
 
 			if ( is_array( self::$debug_buffer ) ) {
-				$output = $eol.'---------------[ '. @date('d-M-Y G:i:s O') .' ['. $_SERVER['REQUEST_TIME_FLOAT'] .'] (PID: '.getmypid().') ]---------------'.$eol;
+				$output = $eol.'---------------[ '. @date('d-M-Y G:i:s O') .' ['. $_SERVER['REQUEST_TIME_FLOAT'] .'] (PID: '. getmypid() .') ]---------------'.$eol;
 
 				foreach (self::$debug_buffer as $arr) {
 					if ( $arr[0] <= self::getVerbosity() ) {
@@ -452,7 +455,7 @@ class Debug {
 					}
 				}
 
-				$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '.getmypid().') ]---------------'.$eol;
+				$output .= '---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '. getmypid() .') ]---------------'.$eol;
 
 				if ( isset($config_vars['debug']['enable_syslog']) AND $config_vars['debug']['enable_syslog'] == TRUE AND OPERATING_SYSTEM != 'WIN' ) {
 					//If using rsyslog, need to set:

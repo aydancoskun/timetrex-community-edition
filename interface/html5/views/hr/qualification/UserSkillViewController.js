@@ -2,13 +2,15 @@ UserSkillViewController = BaseViewController.extend( {
 	el: '#user_skill_view_container',
 
 	proficiency_array: null,
-
 	document_object_type_id: null,
 	qualification_group_api: null,
 	qualification_api: null,
 	qualification_group_array: null,
-
+	source_type_array: null,
 	qualification_array: null,
+
+	sub_view_grid_autosize: true,
+
 	initialize: function( options ) {
 		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserSkillEditView.html';
@@ -31,11 +33,6 @@ UserSkillViewController = BaseViewController.extend( {
 			this.setSelectRibbonMenuIfNecessary( 'UserSkill' );
 		}
 
-	},
-
-	resizeSubGridHeight: function( length ) {
-		var height = ( length * 26 >= 200 ) ? 200 : length * 26;
-		this.grid.setGridHeight( height );
 	},
 
 	showNoResultCover: function( show_new_btn ) {
@@ -109,8 +106,10 @@ UserSkillViewController = BaseViewController.extend( {
 
 	initOptions: function() {
 		var $this = this;
-
+		
 		this.initDropDownOption( 'proficiency' );
+		this.initDropDownOption( 'source_type' );
+
 		this.qualification_group_api.getQualificationGroup( '', false, false, {
 			onResult: function( res ) {
 				res = res.getResult();
@@ -390,18 +389,8 @@ UserSkillViewController = BaseViewController.extend( {
 			} ),
 
 			new SearchField( {
-				label: $.i18n._( 'Tags' ),
-				field: 'tag',
-				basic_search: true,
-				adv_search: true,
-				in_column: 1,
-				object_type_id: 251,
-				form_item_type: FormItemType.TAG_INPUT
-			} ),
-
-			new SearchField( {
 				label: $.i18n._( 'Group' ),
-				in_column: 1,
+				in_column: 2,
 				multiple: true,
 				field: 'group_id',
 				layout_name: ALayoutIDs.TREE_COLUMN,
@@ -409,6 +398,36 @@ UserSkillViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Source' ),
+				in_column: 2,
+				multiple: true,
+				field: 'source_type_id',
+				basic_search: true,
+				adv_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Expiry Date' ),
+				in_column: 1,
+				field: 'expiry_date',
+				tree_mode: true,
+				basic_search: false,
+				adv_search: true,
+				form_item_type: FormItemType.DATE_PICKER
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
+				field: 'tag',
+				basic_search: true,
+				adv_search: true,
+				in_column: 1,
+				object_type_id: 251,
+				form_item_type: FormItemType.TAG_INPUT
 			} ),
 
 			new SearchField( {
@@ -425,16 +444,6 @@ UserSkillViewController = BaseViewController.extend( {
 				label: $.i18n._( 'Last Used Date' ),
 				in_column: 2,
 				field: 'last_used_date',
-				tree_mode: true,
-				basic_search: false,
-				adv_search: true,
-				form_item_type: FormItemType.DATE_PICKER
-			} ),
-
-			new SearchField( {
-				label: $.i18n._( 'Expiry Date' ),
-				in_column: 2,
-				field: 'expiry_date',
 				tree_mode: true,
 				basic_search: false,
 				adv_search: true,

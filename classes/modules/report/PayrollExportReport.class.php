@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -986,16 +986,20 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
 				$jar->setFilterConfig( $this->getFilterConfig() );
+				$jar->setCustomFilterConfig( $this->getCustomFilterConfig() );
+				$jar->setCustomColumnConfig( array_merge( (array)$this->getCustomFilterConfig(), (array)$this->getCustomColumnConfig() ) );
 				if ( isset($config['sort']) ) {
 					$jar->setSortConfig( $config['sort'] );
 				}
 				$jar->_getData();
 				$jar->_preProcess();
 				$jar->currencyConvertToBase();
-				$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
-				$jar->calculateCustomColumns( 20 ); //Pre-Group
+				//$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
+				//$jar->calculateCustomColumns( 20 ); //Pre-Group
+				$jar->calculateCustomColumnFilters( 30 ); //Pre-Group
 				$jar->group();
-				$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				//$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				$jar->calculateCustomColumnFilters( 31 ); //Pre-Group
 				$jar->sort();
 				$jar->_postProcess( 'csv' ); //Minor post-processing.
 				$rows = $jar->data;
@@ -1163,10 +1167,23 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
 				$jar->setFilterConfig( $this->getFilterConfig() );
+				$jar->setCustomFilterConfig( $this->getCustomFilterConfig() );
+				$jar->setCustomColumnConfig( array_merge( (array)$this->getCustomFilterConfig(), (array)$this->getCustomColumnConfig() ) );
 				$jar->setSortConfig( $config['sort'] );
+//				$jar->_getData();
+//				$jar->_preProcess();
+//				$jar->sort();
 				$jar->_getData();
 				$jar->_preProcess();
+				$jar->currencyConvertToBase();
+				//$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
+				//$jar->calculateCustomColumns( 20 ); //Pre-Group
+				$jar->calculateCustomColumnFilters( 21 ); //Pre-Group
+				//$jar->group();
+				//$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				$jar->calculateCustomColumnFilters( 31 ); //Since group() is not called above, this is unlikely to function as expected, but leave it here so it functions essentially like a pre-group
 				$jar->sort();
+
 				$rows = $jar->data;
 				//Debug::Arr($rows, 'Raw Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1599,10 +1616,22 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
 				$jar->setFilterConfig( $this->getFilterConfig() );
+				$jar->setCustomFilterConfig( $this->getCustomFilterConfig() );
+				$jar->setCustomColumnConfig( array_merge( (array)$this->getCustomFilterConfig(), (array)$this->getCustomColumnConfig() ) );
 				$jar->setSortConfig( $config['sort'] );
+//				$jar->_getData();
+//				$jar->_preProcess();
+//				$jar->group();
+//				$jar->sort();
 				$jar->_getData();
 				$jar->_preProcess();
-				$jar->group();
+				$jar->currencyConvertToBase();
+				//$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
+				//$jar->calculateCustomColumns( 20 ); //Pre-Group
+				$jar->calculateCustomColumnFilters( 21 ); //Pre-Group
+				//$jar->group();
+				//$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				$jar->calculateCustomColumnFilters( 31 );
 				$jar->sort();
 
 				$columns = Misc::trimSortPrefix( $jar->getOptions('columns') );
@@ -1958,16 +1987,20 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
 				$jar->setFilterConfig( $this->getFilterConfig() );
+				$jar->setCustomFilterConfig( $this->getCustomFilterConfig() );
+				$jar->setCustomColumnConfig( array_merge( (array)$this->getCustomFilterConfig(), (array)$this->getCustomColumnConfig() ) );
 				if ( isset($config['sort']) ) {
 					$jar->setSortConfig( $config['sort'] );
 				}
 				$jar->_getData();
 				$jar->_preProcess();
 				$jar->currencyConvertToBase();
-				$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
-				$jar->calculateCustomColumns( 20 ); //Pre-Group
+				//$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
+				//$jar->calculateCustomColumns( 20 ); //Pre-Group
+				$jar->calculateCustomColumnFilters( 21 ); //Pre-Group
 				$jar->group();
-				$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				//$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				$jar->calculateCustomColumnFilters( 31 );
 				$jar->sort();
 				//$jar->_postProcess( 'csv' ); //Minor post-processing.
 				$rows = $jar->data;
@@ -2055,11 +2088,13 @@ class PayrollExportReport extends TimesheetSummaryReport {
 						$pad--;
 					}
 
-					$retval = str_pad( Misc::removeDecimal( abs( $value ) ), $pad, 0, STR_PAD_LEFT);
+					//Replace decimal and negative ('-') with nothing. Can't use abs() here as it strips trailing zeros.
+					$retval = str_pad( str_replace(array('.','-'), '', $value ), $pad, 0, STR_PAD_LEFT);
 					if ( $negative == TRUE ) {
-						$retval = '-'.$retval;
+						$retval = '-'. substr($retval, 1);
 					}
 
+					//Debug::Text('Input: \''. $value .'\' Retval: \''. $retval .'\'', __FILE__, __LINE__, __METHOD__, 10);
 					return $retval;
 				}
 
@@ -2160,16 +2195,20 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
 				$jar->setFilterConfig( $this->getFilterConfig() );
+				$jar->setCustomFilterConfig( $this->getCustomFilterConfig() );
+				$jar->setCustomColumnConfig( array_merge( (array)$this->getCustomFilterConfig(), (array)$this->getCustomColumnConfig() ) );
 				if ( isset($config['sort']) ) {
 					$jar->setSortConfig( $config['sort'] );
 				}
 				$jar->_getData();
 				$jar->_preProcess();
 				$jar->currencyConvertToBase();
-				$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
-				$jar->calculateCustomColumns( 20 ); //Pre-Group
+				//$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
+				//$jar->calculateCustomColumns( 20 ); //Pre-Group
+				$jar->calculateCustomColumnFilters( 30 ); //Pre-Group
 				$jar->group();
-				$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				//$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				$jar->calculateCustomColumnFilters( 31 );
 				$jar->sort();
 				$jar->_postProcess( 'csv' ); //Minor post-processing.
 				$rows = $jar->data;
@@ -2223,12 +2262,12 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							$tmp_row['employee_number'] = str_pad( ( isset($row[$employee_number_column]) ) ? substr( $row[$employee_number_column], 0, 14) : NULL, 14, ' ', STR_PAD_RIGHT);
 
 							$tmp_row['earning_number'] = str_pad( substr( $column_data['hour_code'], 0, 8 ), 8, ' ', STR_PAD_RIGHT);
-							$tmp_row['hours'] = ( isset($row[$column_id.'_time']) ) ? meditechNumericFormat( TTDate::getHours( $row[$column_id.'_time'] ), 7 ) : '0000000';
+							$tmp_row['hours'] = ( isset($row[$column_id.'_time']) ) ? meditechNumericFormat( number_format( TTDate::getHours( $row[$column_id.'_time'] ), 3, '.', ''), 7 ) : '0000000'; //Hours are to three decimal places.
 
 							$tmp_row['department'] = str_pad( ( isset($row[$department_column]) ) ? substr( $row[$department_column], 0, 15) : ( ( isset($setup_data['meditech']['department_value']) ) ? $setup_data['meditech']['department_value'] : NULL ), 15, ' ', STR_PAD_RIGHT);
 							$tmp_row['job_code'] = str_pad( ( isset($row[$job_code_column]) ) ? substr( $row[$job_code_column], 0, 10) : ( ( isset($setup_data['meditech']['job_code_value']) ) ? $setup_data['meditech']['job_code_value'] : NULL ), 10, ' ', STR_PAD_RIGHT);
 
-							$tmp_row['base_rate'] = ( isset( $row[$column_id.'_hourly_rate'] ) ) ? meditechNumericFormat( Misc::removeDecimal( $row[$column_id.'_hourly_rate'] ), 5 ) : '00000';
+							$tmp_row['base_rate'] = ( isset( $row[$column_id.'_hourly_rate'] ) ) ? meditechNumericFormat( number_format( $row[$column_id.'_hourly_rate'], 2, '.', ''), 5 ) : '00000'; //Rate is two decimal places.
 
 							if ( isSecondBiWeeklyWeek( TTDate::parseDateTime( $row['date_week_start'] ), '', 0 ) == TRUE ) {
 								$tmp_row['week'] = 2;
@@ -2239,14 +2278,14 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							//Break out every column onto its own row, that way its easier to handle multiple columns of the same type.
 							$tmp_rows[] = array_merge( $static_columns, $tmp_row );
 
-							$total_hours += isset($row[$column_id.'_time']) ? $row[$column_id.'_time'] : 0;
+							$total_hours += isset($row[$column_id.'_time']) ? number_format( TTDate::getHours( $row[$column_id.'_time'] ), 3, '.', '' ) : 0; //Make sure we add up just to 3 decimal places.
 							$total_records++;
 
 							unset($tmp_row);
 						}
 					}
 				}
-				Debug::Text('Total Records: '. $total_records .' Hours: '. TTDate::getHours( $total_hours ), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text('Total Records: '. $total_records .' Hours: '. $total_hours, __FILE__, __LINE__, __METHOD__, 10);
 
 				//$file_name = 'meditech_payroll_export.csv';
 				$file_name = 'meditech_payroll_export.txt';
@@ -2257,7 +2296,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					foreach( $tmp_rows as $tmp_row ) {
 						$data .= implode($tmp_row, '')."\r\n";
 					}
-					$data .= '9 '. str_pad( $total_records, 6, 0, STR_PAD_LEFT ) . meditechNumericFormat( TTDate::getHours($total_hours), 11 ) . '0000000000' . '0000000000'; //Transmission Trailer
+					$data .= '9 '. str_pad( $total_records, 6, 0, STR_PAD_LEFT ) . meditechNumericFormat( $total_hours, 11 ) . '0000000000' . '0000000000'; //Transmission Trailer
 				}
 				unset($tmp_rows, $tmp_row, $export_column_map, $column_id, $column_data, $rows, $row);
 				break;
@@ -2373,6 +2412,8 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$jar->setPermissionObject( $this->getPermissionObject() );
 				$jar->setConfig( $config );
 				$jar->setFilterConfig( $this->getFilterConfig() );
+				$jar->setCustomFilterConfig( $this->getCustomFilterConfig() );
+				$jar->setCustomColumnConfig( array_merge( (array)$this->getCustomFilterConfig(), (array)$this->getCustomColumnConfig() ) );
 				if ( isset($config['sort']) ) {
 					$jar->setSortConfig( $config['sort'] );
 				}
@@ -2381,8 +2422,10 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				$jar->currencyConvertToBase();
 				$jar->calculateCustomColumns( 10 ); //Selections (these are pre-group)
 				$jar->calculateCustomColumns( 20 ); //Pre-Group
+				$jar->calculateCustomColumnFilters( 30 ); //Pre-Group
 				$jar->group();
 				$jar->calculateCustomColumns( 21 ); //Post-Group: things like round() functions normally need to be done post-group, otherwise they are rounding already rounded values.
+				$jar->calculateCustomColumnFilters( 31 );
 				$jar->sort();
 				$jar->_postProcess( 'csv' ); //Minor post-processing.
 

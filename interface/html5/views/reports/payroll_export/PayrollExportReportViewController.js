@@ -1998,9 +1998,8 @@ PayrollExportReportViewController = ReportBaseViewController.extend( {
 				data[form_data_key] = data[api_data_key];
 			}
 		}
-
 		//conversion for lower export grid data from old format
-		if ( data.export_columns != undefined && data.columns == undefined ) {
+		if ( data.export_columns != undefined && data.columns == undefined && data.export_type != 0) {
 			data.columns = {};
 			data.columns = data.export_columns[data.export_type].columns;
 		}

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -92,8 +92,11 @@ class APIImport extends APIFactory {
 		}
 
 		if ( $this->getCurrentCompanyObject()->getProductEdition() >= 15 ) {
-			if (  $this->getPermissionObject()->Check('punch', 'add') AND ($this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_child')) ) {
+			if ( $this->getPermissionObject()->Check('punch', 'add') AND ($this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_child')) ) {
 				$retarr['-1100-punch'] = TTi18n::getText('Punches');
+			}
+			if ( $this->getPermissionObject()->Check('punch', 'add') AND ($this->getPermissionObject()->Check('punch', 'edit') OR $this->getPermissionObject()->Check('punch', 'edit_child')) ) {
+				$retarr['-1110-userdatetotal'] = TTi18n::getText('Manual TimeSheet');
 			}
 			if ( $this->getPermissionObject()->Check('schedule', 'add') AND ($this->getPermissionObject()->Check('schedule', 'edit') OR $this->getPermissionObject()->Check('schedule', 'edit_child')) ) {
 				$retarr['-1150-schedule'] = TTi18n::getText('Scheduled Shifts');

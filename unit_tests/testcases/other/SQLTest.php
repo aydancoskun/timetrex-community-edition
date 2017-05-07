@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -284,12 +284,13 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 											break;
 										case 'UserListFactory':
 										case 'UserContactListFactory':
+										case 'JobApplicantListFactory':
 											switch ( $method_parameter->name ) {
 												case 'email':
 													$input_argument = 'hi@hi.com';
 													break;
 												case 'key':
-													$input_argument = '900d6136975e3a728051a62ed1191910';
+													$input_argument = '900d6136975e3a728051a62ed119191034568745';
 													break;
 											}
 											break;

@@ -174,7 +174,7 @@ RibbonViewController = Backbone.View.extend( {
 			}
 
 			if ( ribbon_menu_ui.find( '.ribbon-sub-menu' ).children().length > 0 ) {
-				ribbon_menu_label_node.append( $( '<li><a ref="' + ribbon_menu.get( 'id' ) + '" href="#' + ribbon_menu.get( 'id' ) + '">' + ribbon_menu.get( 'label' ) + '</a></li>' ) );
+				ribbon_menu_label_node.append( $( '<li><a id="menu:' + ribbon_menu.get( 'id' ) + '"  ref="' + ribbon_menu.get( 'id' ) + '" href="#' + ribbon_menu.get( 'id' ) + '">' + ribbon_menu.get( 'label' ) + '</a></li>' ) );
 				ribbon_menu_root_node.append( ribbon_menu_ui );
 			}
 
@@ -232,19 +232,22 @@ RibbonViewController = Backbone.View.extend( {
 			$( '#leftLogo' ).attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/images/logo.png' ) );
 		}
 		$( '#rightLogo' ).attr( 'src', ServiceCaller.companyLogo + '&t=' + new Date().getTime() );
-		$( '#leftLogo' ).unbind( 'click' ).bind( 'click', function() {
-			if ( LocalCacheData.current_open_primary_controller.viewId !== 'Home' ) {
-				TopMenuManager.goToView( 'Home' );
-			} else {
-				LocalCacheData.current_open_primary_controller.setDefaultMenu();
-				if ( LocalCacheData.current_open_edit_only_controller ) {
-					LocalCacheData.current_open_edit_only_controller.onCancelClick();
+
+		if ( LocalCacheData.getLoginUserPreference() ) {
+			$( '#leftLogo' ).unbind( 'click' ).bind( 'click', function() {
+				if ( LocalCacheData.current_open_primary_controller.viewId !== 'Home' ) {
+					TopMenuManager.goToView( 'Home' );
+				} else {
+					LocalCacheData.current_open_primary_controller.setDefaultMenu();
+					if ( LocalCacheData.current_open_edit_only_controller ) {
+						LocalCacheData.current_open_edit_only_controller.onCancelClick();
+					}
+					if ( LocalCacheData.current_open_report_controller ) {
+						LocalCacheData.current_open_report_controller.removeEditView();
+					}
 				}
-				if ( LocalCacheData.current_open_report_controller ) {
-					LocalCacheData.current_open_report_controller.removeEditView();
-				}
-			}
-		} );
+			} );
+		}
 	},
 
 	setSelectMenu: function( name ) {
@@ -253,6 +256,7 @@ RibbonViewController = Backbone.View.extend( {
 	},
 
 	openSelectView: function( name ) {
+		Global.setUINotready();
 		switch ( name ) {
 			case 'ImportCSV':
 				IndexViewController.openWizard( 'ImportCSVWizard', null, function() {
@@ -276,6 +280,7 @@ RibbonViewController = Backbone.View.extend( {
 			case 'LoginUserPreference':
 			case 'ChangePassword':
 			case 'InvoiceConfig':
+			case 'RecruitmentPortalConfig':
 			case 'About':
 				IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, name );
 				break;
@@ -333,6 +338,7 @@ RibbonViewController = Backbone.View.extend( {
 			case 'QuickStartWizard':
 			case 'InvoiceConfig':
 			case 'LoginUserPreference':
+			case 'RecruitmentPortalConfig':
 				break;
 			case 'Logout':
 				break;
@@ -367,20 +373,6 @@ RibbonViewController = Backbone.View.extend( {
 
 	},
 
-	doPortalLogout: function() {
-		var current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-
-		current_user_api.Logout( {
-			onResult: function( result ) {
-
-				$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
-				LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
-				TopMenuManager.goToView( 'PortalLogin' );
-
-			}
-		} )
-	},
-
 	doLogout: function() {
 		//Don't wait for result of logout in case of slow or disconnected internet. Just clear local cookies and move on.
 		var current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
@@ -412,4 +404,4 @@ RibbonViewController.loadView = function() {
 	var template = _.template( result );
 	Global.topContainer().html( template );
 
-}
+};

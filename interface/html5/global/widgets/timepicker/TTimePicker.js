@@ -167,7 +167,10 @@
 
 		this.each( function() {
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
-			var time_format = LocalCacheData.getLoginUserPreference().time_format_1;
+			var time_format = 'h:mm TT';
+			if(LocalCacheData.getLoginUserPreference()){
+				time_format = LocalCacheData.getLoginUserPreference().time_format_1;
+			}
 			field = o.field;
 			if( o.validation_field){
 				validation_field = o.validation_field;

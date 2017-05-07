@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -34,6 +34,36 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
+//Add custom soap client that automatically retries calls on network errors like "Could not connect to host"
+class TTSoapClient extends SoapClient {
+	public function __call( $function_name, $arguments ) {
+		$max_retries = 4;
+		$retry_count = 0;
+
+		while ( $retry_count < $max_retries ) {
+			if ( $retry_count == ( $max_retries - 1 ) ) {
+				//On last retry, attempt to fall back to HTTP rather than HTTPS
+				$this->__setLocation( str_replace('https://', 'http://', $this->location ) );
+				Debug::Text('WARNING: Due to failed connection attempts, falling back to non-SSL SOAP communication: '. $this->location, __FILE__, __LINE__, __METHOD__, 10);
+			}
+
+			$result = parent::__call( $function_name, $arguments );
+			if ( is_soap_fault( $result ) AND $result->faultstring == 'Could not connect to host' ) {
+				Debug::Text('SOAP connection failed, retrying...', __FILE__, __LINE__, __METHOD__, 10);
+				sleep( 2 );
+				$retry_count++;
+			} else {
+				break;
+			}
+		}
+
+		if ( $retry_count == $max_retries ) {
+			return new SoapFault( 'HTTP', 'Could not connect to host after maximum retry attempts.' );
+		}
+
+		return $result;
+	}
+}
 
 /**
  * @package Modules\SOAP
@@ -56,7 +86,7 @@ class TimeTrexSoapClient {
 			}
 			$location .= 'www.timetrex.com/ext_soap/server.php';
 
-			$this->soap_client_obj = new SoapClient(NULL, array(
+			$this->soap_client_obj = new TTSoapClient(NULL, array(
 											'location' => $location,
 											'uri' => 'urn:test',
 											'style' => SOAP_RPC,
@@ -72,6 +102,25 @@ class TimeTrexSoapClient {
 
 		return $this->soap_client_obj;
 	}
+
+	function convertDocument( $data, $format = 'pdf' ) {
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) ) {
+			return $this->getSoapObject()->convertDocument( $data, $format, $company_data );
+		}
+
+		return NULL; //Return NULL when no data available, and FALSE to try again later.
+	}
+
+	function parseResume( $resume_data, $file_name ) {
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) ) {
+			return $this->getSoapObject()->parseResume( $resume_data, $file_name, $company_data );
+		}
+
+		return NULL; //Return NULL when no data available, and FALSE to try again later.
+	}
+
 
 	function printSoapDebug() {
 		echo "<pre>\n";
@@ -576,7 +625,6 @@ class TimeTrexSoapClient {
 		return FALSE;
 	}
 
-
 	function isNewVersionReadyForUpgrade( $force = FALSE ) {
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) ) {
@@ -592,7 +640,6 @@ class TimeTrexSoapClient {
 	}
 
 	function getUpgradeFileURL( $force = FALSE ) {
-
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) ) {
 			$company_data['force'] = $force;
@@ -608,7 +655,6 @@ class TimeTrexSoapClient {
 	// Email relay through SOAP
 	//
 	function validateEmail( $email ) {
-
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) AND $email != '' ) {
 			return $this->getSoapObject()->validateEmail( $email, $company_data );
@@ -618,7 +664,6 @@ class TimeTrexSoapClient {
 	}
 
 	function sendEmail( $to, $headers, $body ) {
-
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) AND $to != '' AND $body != '' ) {
 			$retval = $this->getSoapObject()->sendEmail( $to, $headers, $body, $company_data );
@@ -632,8 +677,10 @@ class TimeTrexSoapClient {
 		return FALSE;
 	}
 
+	//
+	// GEO Coding
+	//
 	function getGeoCodeByAddress( $address1, $address2, $city, $province, $country, $postal_code ) {
-
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) AND $city != '' AND $country != '' ) {
 			return $this->getSoapObject()->getGeoCodeByAddress( $address1, $address2, $city, $province, $country, $postal_code, $company_data );
@@ -642,8 +689,16 @@ class TimeTrexSoapClient {
 		return NULL; //Return NULL when no data available, and FALSE to try again later.
 	}
 
-	function sendUserFeedback( $rating, $message, $u_obj ) {
+	function getGeoIPData( $ip_address ) {
+		$company_data = $this->getPrimaryCompanyData();
+		if ( is_array( $company_data ) AND $ip_address != '' ) {
+			return $this->getSoapObject()->getGeoIPData( $ip_address, $company_data );
+		}
 
+		return NULL; //Return NULL when no data available, and FALSE to try again later.
+	}
+
+	function sendUserFeedback( $rating, $message, $u_obj ) {
 		$company_data = $this->getPrimaryCompanyData();
 		if ( is_array( $company_data ) ) {
 			$user_data = array( 'company_id' => $u_obj->getCompany(), 'host_name' => Misc::getHostName( FALSE ), 'user_id' => $u_obj->getId(), 'permission_level' => $u_obj->getPermissionLevel(), 'company_name' => $u_obj->getCompanyObject()->getName(), 'full_name' => $u_obj->getFullName(), 'work_phone' => $u_obj->getWorkPhone(), 'work_email' => $u_obj->getWorkEmail(), 'home_email' => $u_obj->getHomeEmail(), 'user_ip_address' => Misc::getRemoteIPAddress(), 'user_agent' => ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : NULL ) );

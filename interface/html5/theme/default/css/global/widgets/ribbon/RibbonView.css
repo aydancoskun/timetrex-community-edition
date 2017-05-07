@@ -348,3 +348,13 @@
     font-weight: bold;
     color: #000000;
 }
+
+/**
+Workaround for selenium screen-shot unit testing due to inconsistent corner rounding in google chrome
+see issue 2157 for detils.
+**/
+.UNIT_TEST_MODE * {
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+}

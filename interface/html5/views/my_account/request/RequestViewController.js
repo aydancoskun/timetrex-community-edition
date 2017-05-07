@@ -1287,6 +1287,8 @@ RequestViewController = RequestViewCommonController.extend( {
 	},
 
 	onAddClick: function(data) {
+		TTPromise.add('Request','add');
+		TTPromise.wait();
 		var $this = this;
 		if (this.edit_view) {
 			this.removeEditView();
@@ -1308,6 +1310,7 @@ RequestViewController = RequestViewCommonController.extend( {
 						$this.onTypeChanged();
 					}
 					$this.getScheduleTotalTime();
+					TTPromise.resolve('Request','add');
 				}
 			} );
 		}

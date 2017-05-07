@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -378,11 +378,11 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		}
 
 		//MySQL is picky when it comes to timestamp filters on datestamp columns.
-		$start_datestamp = $this->db->BindDate( $start_date );
-		$end_datestamp = $this->db->BindDate( $end_date );
+		$start_datestamp = $this->db->BindDate( (int)$start_date );
+		$end_datestamp = $this->db->BindDate( (int)$end_date );
 
-		$start_timestamp = $this->db->BindTimeStamp( $start_date );
-		$end_timestamp = $this->db->BindTimeStamp( $end_date );
+		$start_timestamp = $this->db->BindTimeStamp( (int)$start_date );
+		$end_timestamp = $this->db->BindTimeStamp( (int)$end_date );
 
 		$ph = array(
 					'user_id' => (int)$user_id,
@@ -547,8 +547,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$ph = array(
 				'company_id' => (int)$company_id,
 				'user_id' => (int)0, //Open Shift
-				'start_time' => $this->db->BindTimeStamp( $start_time ),
-				'end_time' => $this->db->BindTimeStamp( $end_time ),
+				'start_time' => $this->db->BindTimeStamp( (int)$start_time ),
+				'end_time' => $this->db->BindTimeStamp( (int)$end_time ),
 				'branch_id' => (int)$branch_id,
 				'department_id' => (int)$department_id,
 				'job_id' => (int)$job_id,
@@ -576,8 +576,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			//Make sure when passed a $replaced_id, we also make sure that record still matches all necessary items to fill the original open shift.
 			$ph += array(
 					'user_id2' => (int)0, //Open Shift
-					'start_time2' => $this->db->BindTimeStamp( $start_time ),
-					'end_time2' => $this->db->BindTimeStamp( $end_time ),
+					'start_time2' => $this->db->BindTimeStamp( (int)$start_time ),
+					'end_time2' => $this->db->BindTimeStamp( (int)$end_time ),
 					'branch_id2' => (int)$branch_id,
 					'department_id2' => (int)$department_id,
 					'job_id2' => (int)$job_id,

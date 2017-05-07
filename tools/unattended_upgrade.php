@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -44,12 +44,25 @@ if ( isset($argv) AND in_array('--requirements_only', $argv) ) {
 	$disable_database_connection = TRUE;
 }
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
+
+//Always enable debug logging during upgrade.
+Debug::setEnable(TRUE);
+Debug::setBufferOutput(TRUE);
+Debug::setEnableLog(TRUE);
+Debug::setVerbosity(10);
+ignore_user_abort(TRUE);
+ini_set( 'max_execution_time', 0 );
+ini_set( 'memory_limit', '2048M' ); //Just in case.
+
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
 
 //Since we aren't including database.inc.php, force the timezone to be set to avoid   WARNING(2): getdate(): It is not safe to rely on the system's timezone settings. You are *required* to use the date.timezone setting or the date_default_timezone_set()
 //Sometimes scripts won't make a database connection
 if ( !isset($config_vars['other']['system_timezone']) OR ( isset($config_vars['other']['system_timezone']) AND $config_vars['other']['system_timezone'] == '' ) ) {
 	$config_vars['other']['system_timezone'] = @date('e');
+}
+if ( $config_vars['other']['system_timezone'] == '' ) {
+	$config_vars['other']['system_timezone'] = 'GMT';
 }
 TTDate::setTimeZone( $config_vars['other']['system_timezone'], FALSE, FALSE ); //Don't force SQL to be executed here, as an optimization to avoid DB connections when calling things like getProgressBar()
 
@@ -127,16 +140,6 @@ function CLIExit( $code = 0, $delete_lock_file = TRUE ) {
 
 	exit($code);
 }
-
-//Always enable debug logging during upgrade.
-Debug::setEnable(TRUE);
-Debug::setBufferOutput(TRUE);
-Debug::setEnableLog(TRUE);
-Debug::setVerbosity(10);
-
-ignore_user_abort(TRUE);
-ini_set( 'max_execution_time', 0 );
-ini_set( 'memory_limit', '2048M' ); //Just in case.
 
 Debug::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' Database: Type: '. ( isset($config_vars['database']['type']) ? $config_vars['database']['type'] : 'N/A' ) .' Name: '. ( isset($config_vars['database']['database_name']) ? $config_vars['database']['database_name'] : 'N/A' ) .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -701,6 +704,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 				setAutoUpgradeFailed();
 			}
 		} else {
+			Debug::Text('Already running latest version: '. APPLICATION_VERSION, __FILE__, __LINE__, __METHOD__, 10);
 			echo "Already running latest version: ". APPLICATION_VERSION ."\n";
 			setAutoUpgradeFailed( 0 ); //Clear auto_upgrade_failed setting if it isn't already.
 		}

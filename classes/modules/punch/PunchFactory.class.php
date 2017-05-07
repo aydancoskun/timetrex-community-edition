@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -919,8 +919,11 @@ class PunchFactory extends Factory {
 			Debug::text(' Rounding Disabled... ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
-		//Always round to one min, no matter what. Even on a transfer.
-		$epoch = TTDate::roundTime($epoch, 60);
+		//Always round *down* to the nearest minute, no matter what. Even on a transfer punch.
+		//  We used to round to the nearest minute (average), however in v10.5.0 this was changed.
+		//  Instead this mimics what a wall clock would show, for example 8:00:59 shows as 8:00, so if we do average rounding it would record as 8:01 which they may not expect.
+		//  So if we always round down its still fair and consistent, for both IN and OUT punches, but it more closely matches a clock that they may be looking at, assuming its close to the server time at least.
+		$epoch = TTDate::roundTime($epoch, 60, 10); //Round down.
 
 		if	(	$this->Validator->isDate(		'punch_time',
 												$epoch,

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -855,7 +855,7 @@ class Validator {
 	}
 
 	function resetErrors() {
-		unset($this->errors);
+		$this->errors = array(); //Set to blank array rather than use unset() as that will cause PHP warnings in hasError().
 		$this->num_errors = 0;
 
 		return TRUE;
@@ -905,7 +905,7 @@ class Validator {
 	}
 
 	function resetWarnings() {
-		unset($this->warnings);
+		$this->warnings = array(); //Set to blank array rather than use unset() as that will cause PHP warnings in hasWarning().
 		$this->num_warnings = 0;
 
 		return TRUE;

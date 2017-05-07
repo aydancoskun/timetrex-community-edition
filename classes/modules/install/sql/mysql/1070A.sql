@@ -11,3 +11,7 @@ ALTER TABLE over_time_policy ADD COLUMN trigger_time_adjust_contributing_shift_p
 ALTER TABLE holiday_policy ADD COLUMN shift_on_holiday_type_id integer DEFAULT 0;
 
 CREATE INDEX schedule_replaced_id ON schedule(replaced_id);
+
+ALTER TABLE qualification ADD COLUMN source_type_id integer NOT NULL DEFAULT 10;
+ALTER TABLE qualification ADD COLUMN visibility_type_id integer NOT NULL DEFAULT 10;
+

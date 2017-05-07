@@ -99,11 +99,7 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 		LocalCacheData.current_open_wizard_controller = null;
 		LocalCacheData.extra_filter_for_next_open_view = null;
 		var location = Global.getBaseURL().split( '#' )[0];
-		if(this.default_data && this.default_data.is_portal ){
-			location = location + '#!m=PortalLogin';
-		}else{
-			location = location + '#!m=Login';
-		}
+		location = location + '#!m=Login';
 		if ( LocalCacheData.all_url_args ) {
 			for ( var key in LocalCacheData.all_url_args ) {
 				if ( key !== 'm' && key !== 'sm' && key !== 'key' ) {

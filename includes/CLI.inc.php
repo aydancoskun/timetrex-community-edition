@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -36,7 +36,13 @@
 
 //Allow only CLI PHP binaries to call maint scripts. To avoid a remote party from running them from hitting a URL.
 if ( PHP_SAPI != 'cli' ) {
-	echo "This script can only be called from the Command Line.\n";
+	echo "This script can only be called from the Command Line. (". PHP_SAPI .")\n";
+	exit;
+}
+
+//There appears to be cases where ARGC/ARGV may not be set, so check those too. Fixes: PHP ERROR - NOTICE(8): Undefined variable: argc File: C:\TimeTrex\timetrex\tools\unattended_install.php Line: 31
+if ( !isset($argc) OR !isset($argv) ) {
+	echo "This script can only be called from the Command Line. (args)\n";
 	exit;
 }
 

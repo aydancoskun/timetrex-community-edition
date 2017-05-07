@@ -197,10 +197,7 @@
 				//Delay 100 to make sure awesomebox values are set in select value
 				setTimeout( function() {
 					related_view_controller.onSearch();
-//
 				}, 100 );
-
-				$this.attr( 'search_complete', false );
 
 			} );
 

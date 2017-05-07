@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -166,12 +166,20 @@ class APINotification extends APIFactory {
 										);
 				}
 
-				//Only display message to the primary company.
-				if ( 	(
-							( (time() - (int)APPLICATION_VERSION_DATE) > (86400 * 365) ) AND ( $this->getCurrentCompanyObject()->getId() == 1 //~1yr
-							OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) )
-						)
-						OR ( (time() - (int)APPLICATION_VERSION_DATE) > (86400 * 760) ) //2yrs+30days, show to all companies.
+
+				$application_version_date_days_old = TTDate::getDays( (time() - (int)APPLICATION_VERSION_DATE) );
+				if (
+						//After 1yr, show message only to primary company, supervisors or higher permissions.
+						( $application_version_date_days_old > 365 AND $this->getPermissionObject()->getLevel() >= 15 AND ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) )  )
+
+						//After 1yr + 30 days, show message only to primary company, all employees.
+						OR ( $application_version_date_days_old > 395 AND ( $this->getCurrentCompanyObject()->getId() == 1 OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) )
+
+						//After 1yr + 60 days, show message only to all companies, supervisors or higher permissions.
+						OR ( $application_version_date_days_old > 425 AND $this->getPermissionObject()->getLevel() >= 15 )
+
+						//After 1yr + 90 days, show message to all companies, all employees
+						OR ( $application_version_date_days_old > 455 )
 					) {
 					$retarr[] = array(
 										'delay' => -1,
@@ -180,6 +188,7 @@ class APINotification extends APIFactory {
 										'destination' => NULL,
 										);
 				}
+				unset($application_version_date_days_old);
 
 				//New version available notification.
 				if (	DEMO_MODE == FALSE

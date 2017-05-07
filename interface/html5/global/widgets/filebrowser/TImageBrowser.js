@@ -1,7 +1,6 @@
 (function( $ ) {
 
 	$.fn.TImageBrowser = function( options ) {
-
 		Global.addCss( 'global/widgets/filebrowser/TImageBrowser.css' );
 		var opts = $.extend( {}, $.fn.TImageBrowser.defaults, options );
 
@@ -45,10 +44,8 @@
 		};
 
 		this.getValue = function() {
-
 			var form_data;
-
-			if ( browser.val() ) {
+			if ( browser && browser.val() ) {
 
 				if ( typeof FormData == "undefined" ) {
 					form_data = $this.find( '.browser-form' );
@@ -119,12 +116,11 @@
 		};
 
 		this.each( function() {
-
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 
 			field = o.field;
 
-			var $$this = this;
+			// var $this = this;
 
 			if ( o.default_width > 0 ) {
 				default_width = o.default_width;

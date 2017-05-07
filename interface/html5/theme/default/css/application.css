@@ -16,7 +16,9 @@ html, body {
     -ms-user-select: none;
     user-select: none;
 }
-
+input,select,textarea {
+    font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
+}
 .dataError{
     -webkit-touch-callout: text;
     -webkit-user-select: text;
@@ -58,6 +60,7 @@ html, div {
 
 textarea {
     resize: vertical;
+    font-size: 12px;
 }
 
 .float-left {
@@ -308,6 +311,16 @@ progress::-moz-progress-bar {
     background: #fff;
 }
 
+.portal .content-container-after-login {
+    overflow: auto;
+    height: calc(100% - 70px);
+}
+
+.portal .content-container-after-login{
+    overflow: auto;
+    calc:(100% - 60px);
+}
+
 .top-container {
     margin-top: 0;
     margin-right: 0;
@@ -339,6 +352,10 @@ progress::-moz-progress-bar {
     margin-right: 20px;
     margin-left: 20px;
     position: relative;
+}
+
+.portal .bottom-container {
+    bottom: -5px;
 }
 
 .bottom-container .copyright-container {
@@ -1529,7 +1546,7 @@ progress::-moz-progress-bar {
     background-size: 15px;
 }
 
-.icon-drapCopyIcon {
+.icon-dragCopyIcon {
     background-image: url("global/widgets/ribbon/icons/copy-35x35.png");
     background-size: 15px;
 }
@@ -2714,4 +2731,31 @@ progress::-moz-progress-bar {
     100% {
         background: none;
     }
+}
+#tab_vacancy .first-column, #tab_vacancy .second-column {
+    margin-bottom: 0;
+}
+#tab_vacancy .first-column .edit-view-form-item-div:last-of-type .edit-view-form-item-label-div {
+    border-bottom-left-radius: 0;
+}
+#tab_vacancy .forth-column .edit-view-form-item-div:last-of-type .edit-view-form-item-label-div {
+    border-bottom-left-radius: 0;
+}
+#tab_vacancy .forth-column .edit-view-form-item-div:first-child .edit-view-form-item-label-div {
+    border-top-left-radius: 0;
+}
+#tab_vacancy .third-column .edit-view-form-item-div:first-child .edit-view-form-item-label-div {
+    border-top-left-radius: 0;
+    border-top: 1px solid #C7C7C7;
+}
+#tab_vacancy .third-column .edit-view-form-item-tinymce-textarea-div {
+    border: 1px solid #C7C7C7;
+    margin-right: 0px;
+}
+
+
+.UNIT_TEST_MODE * {
+    font-smooth: never;
+    -webkit-font-smoothing : none;
+    image-rendering: pixelated;
 }

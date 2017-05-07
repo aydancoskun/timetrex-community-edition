@@ -138,7 +138,6 @@ ExceptionViewController = BaseViewController.extend( {
 	},
 
 	onNavigationClick: function( iconName ) {
-
 		var select_item = this.getSelectedItem();
 		//There are cases where select_item might be null. The export button for example.
 		if(select_item != null) {

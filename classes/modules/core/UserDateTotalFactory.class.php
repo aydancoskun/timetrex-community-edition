@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -797,7 +797,7 @@ class UserDateTotalFactory extends Factory {
 		if ( $val == FALSE OR $val == 0 OR $val == '' ) {
 			$val = 0;
 		}
-		
+
 		if	(	$val == 0
 				OR
 				$this->Validator->isFloat(			'bad_quantity',
@@ -1388,6 +1388,19 @@ class UserDateTotalFactory extends Factory {
 		return TRUE;
 	}
 
+	function getEnableCalculatePolicy() {
+		if ( isset($this->is_calculate_policy) ) {
+			return $this->is_calculate_policy;
+		}
+
+		return FALSE;
+	}
+	function setEnableCalculatePolicy($bool) {
+		$this->is_calculate_policy = $bool;
+
+		return TRUE;
+	}
+
 	function calcSystemTotalTime() {
 		global $profiler;
 
@@ -1518,15 +1531,30 @@ class UserDateTotalFactory extends Factory {
 											TTi18n::gettext('Invalid Break Policy'));
 		}
 
-		//Check that the user is allowed to be assigned to the absence policy
-		if ( $this->getObjectType() == 50 AND (int)$this->getSourceObject() != 0 AND $this->getUser() != FALSE ) {
-			$pglf = TTNew('PolicyGroupListFactory');
-			$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('user_id' => array( $this->getUser() ), 'absence_policy' => array( $this->getSourceObject() ) ) );
-			if ( $pglf->getRecordCount() == 0 ) {
-				$this->Validator->isTRUE(	'absence_policy_id',
-								FALSE,
-								TTi18n::gettext('This absence policy is not available for this employee'));
+		//When calculating all the policies from CalculatePolicy class, skip some validation checks that can't be resolved anyways, so we don't cause the transaction to rollback.
+		if ( $this->getEnableCalculatePolicy() == FALSE ) {
+			//Check that the user is allowed to be assigned to the absence policy
+			// Only do this when creating a new record, as the user may have had entries made then later have the absence policy disabled from the policy group.
+			//   In that case it would cause this record from not being saved properly then and possibly prevent recalculations from finishing.
+			if ( $this->getObjectType() == 50 AND (int)$this->getSourceObject() != 0 AND $this->getUser() != FALSE ) {
+				$pglf = TTNew( 'PolicyGroupListFactory' );
+				$pglf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('user_id' => array($this->getUser()), 'absence_policy' => array($this->getSourceObject())) );
+				if ( $pglf->getRecordCount() == 0 ) {
+					$this->Validator->isTRUE( 'absence_policy_id',
+											  FALSE,
+											  TTi18n::gettext( 'This absence policy is not available for this employee' ) );
+				}
 			}
+
+			if ( $this->getDateStamp() != FALSE AND is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getIsLocked() == TRUE ) {
+				//Make sure we only check for pay period being locked when *NOT* called from CalculatePolicy otherwise it can prevent recalculations from occurring
+				//after the pay period is locked (ie: recalculating exceptions each day from maintenance jobs?)
+				//We need to be able to stop absences (non-overridden ones too) from being deleted in closed pay periods.
+				$this->Validator->isTRUE(	'date_stamp',
+											 FALSE,
+											 TTi18n::gettext('Pay Period is Currently Locked') );
+			}
+
 		}
 
 		//This is likely caused by employee not being assigned to a pay period schedule?
@@ -1535,22 +1563,21 @@ class UserDateTotalFactory extends Factory {
 			$this->Validator->isTRUE(	'date_stamp',
 										FALSE,
 										TTi18n::gettext('Date is incorrect, or pay period does not exist for this date. Please create a pay period schedule and assign this employee to it if you have not done so already') );
-		} elseif ( ( $this->getOverride() == TRUE OR ( $this->getOverride() == FALSE AND $this->getObjectType() == 50 ) )
-					AND $this->getDateStamp() != FALSE AND is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getIsLocked() == TRUE ) {
-			//Make sure we only check for pay period being locked if override is TRUE, otherwise it can prevent recalculations from occurring
-			//after the pay period is locked (ie: recalculating exceptions each day from maintenance jobs?)
-			//We need to be able to stop absences (non-overridden ones too) from being deleted in closed pay periods.
-			$this->Validator->isTRUE(	'date_stamp',
-										FALSE,
-										TTi18n::gettext('Pay Period is Currently Locked') );
 		}
+//		This was moved above, so we can skip checking if the pay period is locked when run through CalculatePolicy.
+//		elseif ( ( $this->getOverride() == TRUE OR ( $this->getOverride() == FALSE AND $this->getObjectType() == 50 ) )
+//					AND $this->getDateStamp() != FALSE AND is_object( $this->getPayPeriodObject() ) AND $this->getPayPeriodObject()->getIsLocked() == TRUE ) {
+//			//Make sure we only check for pay period being locked if override is TRUE, otherwise it can prevent recalculations from occurring
+//			//after the pay period is locked (ie: recalculating exceptions each day from maintenance jobs?)
+//			//We need to be able to stop absences (non-overridden ones too) from being deleted in closed pay periods.
+//			$this->Validator->isTRUE(	'date_stamp',
+//										FALSE,
+//										TTi18n::gettext('Pay Period is Currently Locked') );
+//		}
 
 		//Make sure that we aren't trying to overwrite an already overridden entry made by the user for some special purpose.
 		if ( $this->getDeleted() == FALSE
-				AND $this->isNew() == TRUE
-				//AND in_array( $this->getStatus(), array(10, 20, 30) )
-				) {
-
+				AND $this->isNew() == TRUE ) {
 			//Debug::text('Checking for already existing overridden entries ... User ID: '. $this->getUser() .' DateStamp: '. $this->getDateStamp() .' Object Type ID: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
 
 			$udtlf = TTnew( 'UserDateTotalListFactory' );

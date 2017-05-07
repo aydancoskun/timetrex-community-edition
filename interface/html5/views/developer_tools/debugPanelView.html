@@ -45,12 +45,14 @@
         <div class='t-button' id='trigger_js_timeout_button'>Trigger Idle</div>
     </div>
     <hr>
+    <div class='row' id='tt_overlay_disable_row'style='"+rowstyle+"'>
+        <input type='checkbox' id='tt_overlay_disable_checkbox' checked='"+ overlay_is_enabled +"'> Enable Unit Testing Mode
+    </div>
+
     <b>Unit Testing</b>
     <div class='row' id='qunit_row'style='"+rowstyle+"'>
         <p>Note: Replace runUnitTests() in console</p>
         <div class='t-button' id='qunit_test_button'>Run Unit Tests</div>
-        <div id="qunit"></div>
-        <div id="qunit-fixture"></div>
     </div>
     <hr>
 
@@ -77,4 +79,8 @@
         <textarea id='arbitrary_script' style="width:100%;" rows="5"></textarea>
         <div class='t-button' id='trigger_arbitrary_script'>Run Js</div>
     </div>
+</div>
+<div id="qunit_container" style="display:none;">
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
 </div>

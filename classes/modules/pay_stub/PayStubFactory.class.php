@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -2506,7 +2506,7 @@ class PayStubFactory extends Factory {
 					}
 
 					if ( strtolower($export_type) == 'eft_1464_rbc' ) {
-						$eft->setFilePrefixData( '$$AA01CPA1464[PROD{NL$$'."\r\n" ); //Some RBC services require a "routing" line at the top of the file.
+						$eft->setFilePrefixData( '$$AA01CPA1464[PROD[NL$$'."\r\n" ); //Some RBC services require a "routing" line at the top of the file.
 					}
 
 					$total_credit_amount = 0;

@@ -2,7 +2,7 @@
 
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -105,6 +105,7 @@ if ( !isset($disable_database_connection) ) {
 					//Put MySQL into ANSI mode
 					//READ COMMITTED mode is what PGSQL defaults to.
 					//This should hopefully fix odd issues like hierarchy trees becoming corrupt.
+					$db->setSessionInitSQL( 'SET SESSION wait_timeout = 86400' ); //For long running processes, increase the wait_timeout to avoid losing connections and having to restart all that work.
 					$db->setSessionInitSQL( 'SET SESSION sql_mode=\'ansi\'' );
 					$db->setSessionInitSQL( 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED' );
 					//$db->setSessionInitSQL( 'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ' );

@@ -17,29 +17,37 @@ TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 		TopMenuManager.initRibbonMenu();
 
 	}
-
 	if ( window.location.href === Global.getBaseURL() + '#!m=' + subMenuId && force_refresh ) {
 		IndexViewController.instance.router.reloadView( subMenuId );
 	} else {
+		//#2157 - needed for selenium screenshot test to prevent hanging on
+		//various combinations of ribbon and topmenu clicks that are not a change to the hash
+		if ( location.hash == ('#!m=' + subMenuId) ) {
+			TTPromise.wait()
+		}
 		window.location = Global.getBaseURL() + '#!m=' + subMenuId;
-
 	}
 
 };
 
 TopMenuManager.goToPortalView = function( subMenuId, force_refresh ) {
-	if ( !TopMenuManager.ribbon_menus ) {
-		TopMenuManager.initPortalRibbonMenu();
-
-	}
-
 	if ( window.location.href === Global.getBaseURL() + '#!m=' + subMenuId && force_refresh ) {
 		IndexViewController.instance.router.reloadView( subMenuId );
 	} else {
 		window.location = Global.getBaseURL() + '#!m=' + subMenuId;
-
+		//see issue #2193
+		// var location =  Global.getBaseURL() + '#!m=' + subMenuId;
+		// if ( LocalCacheData.all_url_args ) {
+		// 	if ( LocalCacheData.all_url_args.company_id ) {
+		// 		for ( var key in LocalCacheData.all_url_args ) {
+		// 			if ( key !== 'm' ) {
+		// 				location = location + '&' + key + '=' + LocalCacheData.all_url_args[key];
+		// 			}
+		// 		}
+		// 		window.location = location;
+		// 	}
+		// }
 	}
-
 };
 
 TopMenuManager.initRibbonMenu = function() {
@@ -58,164 +66,18 @@ TopMenuManager.initPortalRibbonMenu = function() {
 
 		//when login and refresh, will go into this place, do session check here
 		TopMenuManager.buildPortalRibbonMenuModels();
-		Global.setupPing();
 
 	}
 };
 
 TopMenuManager.buildPortalRibbonMenuModels = function() {
-
-	var permission = PermissionManager.getPermissionData();
+	var permission = true;
 	//HR Menu
 	var hr_menu = new RibbonMenu( {
 		label: $.i18n._( 'HR' ),
 		id: 'hr_menu',
 		sub_menu_groups: []
 	} );
-
-	//reviews group
-	var reviewsSubMenuGroup = new RibbonSubMenuGroup( {
-		label: $.i18n._( 'Reviews' ),
-		id: 'reviewsGroup',
-		ribbon_menu: hr_menu,
-		sub_menus: []
-	} );
-
-	//reviews Group Sub Menu
-	var user_review_control = new RibbonSubMenu( {
-		label: $.i18n._( 'Reviews' ),
-		id: 'UserReviewControl',
-		group: reviewsSubMenuGroup,
-		icon: 'reviews-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'UserReviewControl' ),
-		permission: permission.user_review
-	} );
-
-	var kpi = new RibbonSubMenu( {
-		label: $.i18n._( 'KPI' ),
-		id: 'KPI',
-		group: reviewsSubMenuGroup,
-		icon: 'KPI-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'KPI' ),
-		permission: permission.kpi
-	} );
-
-	var kpi_group = new RibbonSubMenu( {
-		label: $.i18n._( 'KPI<br>Groups' ),
-		id: 'KPIGroup',
-		group: reviewsSubMenuGroup,
-		icon: 'KPI_groups-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'KPIGroup' ),
-		permission: permission.kpi
-	} );
-
-	//Qualifications group
-	var qualificationSubMenuGroup = new RibbonSubMenuGroup( {
-		label: $.i18n._( 'Qualifications' ),
-		id: 'qualificationGroup',
-		ribbon_menu: hr_menu,
-		sub_menus: []
-	} );
-
-	var qualification = new RibbonSubMenu( {
-		label: $.i18n._( 'Qualifications' ),
-		id: 'Qualification',
-		group: qualificationSubMenuGroup,
-		icon: 'qualifications.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'Qualification' ),
-		permission: permission.qualification
-	} );
-
-	var qualification_group = new RibbonSubMenu( {
-		label: $.i18n._( 'Qualification<br>Groups' ),
-		id: 'QualificationGroup',
-		group: qualificationSubMenuGroup,
-		icon: 'qualification_groups-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'QualificationGroup' ),
-		permission: permission.qualification
-	} );
-
-	var user_skill = new RibbonSubMenu( {
-		label: $.i18n._( 'Skills' ),
-		id: 'UserSkill',
-		group: qualificationSubMenuGroup,
-		icon: 'skill-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'UserSkill' ),
-		permission: permission.user_skill
-	} );
-
-	var user_education = new RibbonSubMenu( {
-		label: $.i18n._( 'Education' ),
-		id: 'UserEducation',
-		group: qualificationSubMenuGroup,
-		icon: 'education-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'UserEducation' ),
-		permission: permission.user_education
-	} );
-
-	var user_membership = new RibbonSubMenu( {
-		label: $.i18n._( 'Memberships' ),
-		id: 'UserMembership',
-		group: qualificationSubMenuGroup,
-		icon: 'memberships.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'UserMembership' ),
-		permission: permission.user_membership
-	} );
-
-	var user_license = new RibbonSubMenu( {
-		label: $.i18n._( 'Licenses' ),
-		id: 'UserLicense',
-		group: qualificationSubMenuGroup,
-		icon: 'license-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'UserLicense' ),
-		permission: permission.user_license
-	} );
-
-	var user_language = new RibbonSubMenu( {
-		label: $.i18n._( 'Languages' ),
-		id: 'UserLanguage',
-		group: qualificationSubMenuGroup,
-		icon: 'languages-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'UserLanguage' ),
-		permission: permission.user_language
-	} );
-
-	// Recruitment group
-	var recruitmentSubMenuGroup = new RibbonSubMenuGroup( {
-		label: $.i18n._( 'Recruitment' ),
-		id: 'recruitmentGroup',
-		ribbon_menu: hr_menu,
-		sub_menus: []
-	} );
-
-	var job_vacancy = new RibbonSubMenu( {
-		label: $.i18n._( 'Job<br>Vacancies' ),
-		id: 'PortalJobVacancy',
-		group: recruitmentSubMenuGroup,
-		icon: 'job_vacancies-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'JobVacancy' ),
-		permission: permission.job_vacancy
-	} );
-
-	var job_applicant = new RibbonSubMenu( {
-		label: $.i18n._( 'Job<br>Applicants' ),
-		id: 'JobApplicant',
-		group: recruitmentSubMenuGroup,
-		icon: 'job_applicant-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'JobApplicant' ),
-		permission: permission.job_applicant
-	} );
-
-	var job_application = new RibbonSubMenu( {
-		label: $.i18n._( 'Job<br>Applications' ),
-		id: 'JobApplication',
-		group: recruitmentSubMenuGroup,
-		icon: 'jobapplications-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'JobApplication' ),
-		permission: permission.job_application
-	} );
-
-	//My Account group
 
 	var my_account_menu = new RibbonMenu( {
 		label: $.i18n._( 'My Account' ),
@@ -224,20 +86,177 @@ TopMenuManager.buildPortalRibbonMenuModels = function() {
 	} );
 
 	var logoutGroup = new RibbonSubMenuGroup( {
-		label: $.i18n._( 'Logout' ),
+		label: $.i18n._( '' ),
 		id: 'logoutGroup',
 		ribbon_menu: my_account_menu,
 		sub_menus: []
 	} );
 
-	var logout = new RibbonSubMenu( {
-		label: $.i18n._( 'Logout' ),
-		id: 'PortalLogout',
-		group: logoutGroup,
-		icon: 'logout-35x35.png',
-		permission_result: true,
-		permission: true
+	var recruitmentSubMenuGroup = new RibbonSubMenuGroup( {
+		label: $.i18n._( 'Recruitment' ),
+		id: 'recruitmentGroup',
+		ribbon_menu: hr_menu,
+		sub_menus: []
 	} );
+
+	if ( LocalCacheData.getLoginUser() ) {
+		var job_vacancy = new RibbonSubMenu( {
+			label: $.i18n._( 'Job<br>Vacancies' ),
+			id: 'PortalJobVacancy',
+			group: recruitmentSubMenuGroup,
+			icon: 'job_vacancies-35x35.png',
+			permission_result: true,
+			permission: true
+		} );
+
+		//var job_applicant = new RibbonSubMenu( {
+		//	label: $.i18n._( 'Job<br>Applicants' ),
+		//	id: 'JobApplicant',
+		//	group: recruitmentSubMenuGroup,
+		//	icon: 'job_applicant-35x35.png',
+		//	permission_result: true,
+		//	permission: true
+		//} );
+
+		//My Account group
+		var logout = new RibbonSubMenu( {
+			label: $.i18n._( 'Logout' ),
+			id: 'PortalLogout',
+			group: logoutGroup,
+			icon: 'logout-35x35.png',
+			permission_result: true,
+			permission: true
+		} );
+
+	} else {
+
+		job_vacancy = new RibbonSubMenu( {
+			label: $.i18n._( 'Job<br>Vacancies' ),
+			id: 'PortalJobVacancy',
+			group: recruitmentSubMenuGroup,
+			icon: 'job_vacancies-35x35.png',
+			permission_result: true,
+			permission: true
+		} );
+
+		//My Account group
+		logout = new RibbonSubMenu( {
+			label: $.i18n._( 'Login' ),
+			id: 'PortalLogout',
+			group: logoutGroup,
+			icon: 'logout-35x35.png',
+			permission_result: true,
+			permission: true
+		} );
+
+	}
+
+	////reviews group
+	//var reviewsSubMenuGroup = new RibbonSubMenuGroup( {
+	//	label: $.i18n._( 'Reviews' ),
+	//	id: 'reviewsGroup',
+	//	ribbon_menu: hr_menu,
+	//	sub_menus: []
+	//} );
+
+	////reviews Group Sub Menu
+	//var user_review_control = new RibbonSubMenu( {
+	//	label: $.i18n._( 'Reviews' ),
+	//	id: 'UserReviewControl',
+	//	group: reviewsSubMenuGroup,
+	//	icon: 'reviews-35x35.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'UserReviewControl' ),
+	//	permission: permission.user_review
+	//} );
+	//
+	//var kpi = new RibbonSubMenu( {
+	//	label: $.i18n._( 'KPI' ),
+	//	id: 'KPI',
+	//	group: reviewsSubMenuGroup,
+	//	icon: 'KPI-35x35.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'KPI' ),
+	//	permission: permission.kpi
+	//} );
+	//
+	//var kpi_group = new RibbonSubMenu( {
+	//	label: $.i18n._( 'KPI<br>Groups' ),
+	//	id: 'KPIGroup',
+	//	group: reviewsSubMenuGroup,
+	//	icon: 'KPI_groups-35x35.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'KPIGroup' ),
+	//	permission: permission.kpi
+	//} );
+
+	////Qualifications group
+	//var qualificationSubMenuGroup = new RibbonSubMenuGroup( {
+	//	label: $.i18n._( 'Qualifications' ),
+	//	id: 'qualificationGroup',
+	//	ribbon_menu: hr_menu,
+	//	sub_menus: []
+	//} );
+	//
+	//var qualification = new RibbonSubMenu( {
+	//	label: $.i18n._( 'Qualifications' ),
+	//	id: 'Qualification',
+	//	group: qualificationSubMenuGroup,
+	//	icon: 'qualifications.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'Qualification' ),
+	//	permission: permission.qualification
+	//} );
+	//
+	//var qualification_group = new RibbonSubMenu( {
+	//	label: $.i18n._( 'Qualification<br>Groups' ),
+	//	id: 'QualificationGroup',
+	//	group: qualificationSubMenuGroup,
+	//	icon: 'qualification_groups-35x35.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'QualificationGroup' ),
+	//	permission: permission.qualification
+	//} );
+	//
+	//var user_skill = new RibbonSubMenu( {
+	//	label: $.i18n._( 'Skills' ),
+	//	id: 'UserSkill',
+	//	group: qualificationSubMenuGroup,
+	//	icon: 'skill-35x35.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'UserSkill' ),
+	//	permission: permission.user_skill
+	//} );
+	//
+	//var user_education = new RibbonSubMenu( {
+	//	label: $.i18n._( 'Education' ),
+	//	id: 'UserEducation',
+	//	group: qualificationSubMenuGroup,
+	//	icon: 'education-35x35.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'UserEducation' ),
+	//	permission: permission.user_education
+	//} );
+	//
+	//var user_membership = new RibbonSubMenu( {
+	//	label: $.i18n._( 'Memberships' ),
+	//	id: 'UserMembership',
+	//	group: qualificationSubMenuGroup,
+	//	icon: 'memberships.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'UserMembership' ),
+	//	permission: permission.user_membership
+	//} );
+	//
+	//var user_license = new RibbonSubMenu( {
+	//	label: $.i18n._( 'Licenses' ),
+	//	id: 'UserLicense',
+	//	group: qualificationSubMenuGroup,
+	//	icon: 'license-35x35.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'UserLicense' ),
+	//	permission: permission.user_license
+	//} );
+	//
+	//var user_language = new RibbonSubMenu( {
+	//	label: $.i18n._( 'Languages' ),
+	//	id: 'UserLanguage',
+	//	group: qualificationSubMenuGroup,
+	//	icon: 'languages-35x35.png',
+	//	permission_result: PermissionManager.checkTopLevelPermission( 'UserLanguage' ),
+	//	permission: permission.user_language
+	//} );
 
 	TopMenuManager.ribbon_menus = [hr_menu, my_account_menu];
 
@@ -1292,6 +1311,15 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: permission.job_application
 	} );
 
+	var recruitment_portal_setting = new RibbonSubMenu( {
+		label: $.i18n._( 'Portal<br>Settings' ),
+		id: 'RecruitmentPortalConfig',
+		group: recruitmentSubMenuGroup,
+		icon: 'settings-35x35.png',
+		permission_result: PermissionManager.checkTopLevelPermission( 'JobApplicant' ),
+		permission: permission.job_applicant
+	} );
+
 	//My Account group
 
 	var my_account_menu = new RibbonMenu( {
@@ -1486,7 +1514,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var email_help = new RibbonSubMenu( {
-		label: $.i18n._( 'Email Help' ),
+		label: (LocalCacheData.getCurrentCompany().product_edition_id > 10) ? $.i18n._( 'Email Help' ) : $.i18n._( 'Community<br>Forums' ),
 		id: 'EmailHelp',
 		group: help_group,
 		icon: 'emailhelp-35x35.png',

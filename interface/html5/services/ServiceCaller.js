@@ -74,12 +74,13 @@ var ServiceCaller = Backbone.Model.extend( {
 
 //		var data = {filedata: form_data, SessionID: LocalCacheData.getSessionID()};
 //
-		ProgressBar.showProgressBar();
+		var message_id = UUID.guid();
+		ProgressBar.showProgressBar( message_id );
 
 		//On IE 9
 		if ( typeof FormData == "undefined" ) {
 			form_data.attr( 'method', 'POST' );
-			form_data.attr( 'action', ServiceCaller.uploadURL + '?' + paramaters + '&SessionID=' + LocalCacheData.getSessionID() );
+			form_data.attr( 'action', ServiceCaller.uploadURL + '?' + paramaters + '&' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID() );
 			form_data.attr( 'enctype', 'multipart/form-data' );
 
 			ProgressBar.changeProgressBarMessage( 'File Uploading' );
@@ -100,7 +101,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 		ProgressBar.changeProgressBarMessage( 'File Uploading' );
 		$.ajax( {
-			url: ServiceCaller.uploadURL + '?' + paramaters + '&SessionID=' + LocalCacheData.getSessionID(), //Server script to process data
+			url: ServiceCaller.uploadURL + '?' + paramaters + '&' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID(), //Server script to process data
 			type: 'POST',
 //			xhr: function() {     // Custom XMLHttpRequest
 //				var myXhr = $.ajaxSettings.xhr();
@@ -139,9 +140,13 @@ var ServiceCaller = Backbone.Model.extend( {
 		var $this = this;
 		var message_id;
 		var url = ServiceCaller.getURLWithSessionId( 'Class=' + className + '&Method=' + function_name + '&v=2' );
-
-		if ( LocalCacheData.getStationID() ) {
-			url = url + '&StationID=' + LocalCacheData.getStationID();
+		if ( LocalCacheData.all_url_args ) {
+			if ( LocalCacheData.all_url_args.hasOwnProperty('company_id') ) {
+				url = url + '&company_id=' + LocalCacheData.all_url_args.company_id;
+			}
+		}
+		if ( Global.getStationID() ) {
+			url = url + '&StationID=' + Global.getStationID();
 		}
 
 		var apiReturnHandler;
@@ -245,8 +250,9 @@ var ServiceCaller = Backbone.Model.extend( {
 				break;
 		}
 
+		message_id = UUID.guid();
+		TTPromise.add('ServiceCaller', message_id);
 		if ( className !== 'APIProgressBar' && function_name !== 'Logout' ) {
-			message_id = UUID.guid();
 			url = url + '&MessageID=' + message_id;
 		}
 
@@ -316,11 +322,12 @@ var ServiceCaller = Backbone.Model.extend( {
 					if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'EXCEPTION' ) {
 						Debug.Text('API returned exception: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						TAlertManager.showAlert( apiReturnHandler.getDescription(), 'Error' );
+
+						TTPromise.resolve('ServiceCaller',promise_key);
 						return;
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'SESSION' ) {
 						Debug.Text('API returned session expired: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						LocalCacheData.cleanNecessaryCache(); //make sure the cache is cleared when session is expired
-
 						ServiceCaller.cancelAllError = true;
 						LocalCacheData.login_error_string = $.i18n._( 'Session expired, please login again.' );
 						Global.clearSessionCookie();
@@ -328,9 +335,15 @@ var ServiceCaller = Backbone.Model.extend( {
 							// Prevent a partially loaded login screen when SessionID cookie is set but not valid on server.
 							window.location.reload();
 						} else {
-							window.location = Global.getBaseURL() + '#!m=' + 'Login';
+							if ( LocalCacheData.all_url_args.company_id ) {
+								LocalCacheData.setPortalLoginUser( null );
+								window.location = Global.getBaseURL() + '#!m=PortalJobVacancy&company_id=' + LocalCacheData.all_url_args.company_id;
+							} else {
+								window.location = Global.getBaseURL() + '#!m=' + 'Login';
+							}
 						}
 
+						TTPromise.resolve('ServiceCaller',message_id);
 						return;
 					} else {
 						//Debug.Text('API returned result: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
@@ -358,9 +371,11 @@ var ServiceCaller = Backbone.Model.extend( {
 						}
 					}
 
+					TTPromise.resolve('ServiceCaller',message_id);
 				},
 
 				error: function( jqXHR, textStatus, errorThrown ) {
+					TTPromise.reject('ServiceCaller',message_id);
 					if ( className !== 'APIProgressBar' && function_name !== 'Login' && function_name !== 'getPreLoginData' ) {
 						ProgressBar.removeProgressBar( message_id );
 					}
@@ -370,7 +385,6 @@ var ServiceCaller = Backbone.Model.extend( {
 					}
 
 					if ( jqXHR.responseText && jqXHR.responseText.indexOf( 'User not authenticated' ) >= 0 ) {
-
 						ServiceCaller.cancelAllError = true;
 
 						LocalCacheData.login_error_string = $.i18n._( 'Session timed out, please login again.' );
@@ -418,13 +432,14 @@ var ServiceCaller = Backbone.Model.extend( {
 
 ServiceCaller.getURLWithSessionId = function( rest_url ) {
 
+
 	//Error: Object doesn't support property or method 'cookie' in /interface/html5/services/ServiceCaller.js?v=8.0.0-20150126-192230 line 326
-	if ( $ && $.cookie && !$.cookie( 'SessionID' ) ) {
+	if ( $ && $.cookie && !$.cookie( Global.getSessionIDKey() ) ) {
 		LocalCacheData.setSessionID( '' );
 	}
 
 	if ( $ && $.cookie && $.cookie( 'js_debug' ) ) {
-		return ServiceCaller.baseUrl + '?SessionID=' + LocalCacheData.getSessionID() + '&' + rest_url;
+		return ServiceCaller.baseUrl + '?' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID() + '&' + rest_url;
 	} else {
 		return ServiceCaller.baseUrl + '?' + rest_url;
 	}

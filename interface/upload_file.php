@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -82,7 +82,7 @@ switch ($object_type) {
 					if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 )
 							AND isset($_POST['mime_type'])
 							AND in_array( strtolower( trim($_POST['mime_type']) ), $allowed_upload_content_types ) ) {
-						
+
 						$file_name = $dir . DIRECTORY_SEPARATOR . 'logo.img';
 						$file_data = base64_decode( $_POST['file_data'] );
 						$file_size = strlen( $file_data );
@@ -108,42 +108,6 @@ switch ($object_type) {
 					}
 				}
 				unset($uf, $ulf);
-			} else {
-				Debug::Text('Flex binary upload...', __FILE__, __LINE__, __METHOD__, 10);
-				$upload->set_max_filesize($max_upload_file_size); //5mb or less
-				//$upload->set_acceptable_types( array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png') ); // comma separated string, or array
-				//$upload->set_max_image_size(600, 600);
-				$upload->set_overwrite_mode(1);
-
-				$icf = TTnew( 'InvoiceConfigFactory' );
-				$icf->cleanStoragePath( $current_company->getId() );
-
-				$dir = $icf->getStoragePath( $current_company->getId() );
-				if ( isset($dir) ) {
-					@mkdir($dir, 0700, TRUE);
-
-					$upload_result = $upload->upload("filedata", $dir);
-					//var_dump($upload ); //file data
-					if ($upload_result) {
-						$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
-					} else {
-						$error = $upload->get_error();
-					}
-				}
-				Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
-				if ( isset($success) AND $success != '' ) {
-					Debug::Text('Rename', __FILE__, __LINE__, __METHOD__, 10);
-					//Submit filename to db.
-					//Rename file to just "logo" so its always consistent.
-
-					$file_data_arr = $upload->get_file();
-					rename( $dir.'/'.$upload_result, $dir.'/logo'. $file_data_arr['extension'] );
-
-					//$post_js = 'window.opener.document.getElementById(\'logo\').src = \''. Environment::getBaseURL().'/send_file.php?object_type=invoice_config&rand='.time().'\'; window.opener.showLogo();';
-					//$post_js = 'window.opener.setLogo()';
-				} else {
-					Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
-				}
 			}
 		}
 		break;
@@ -273,46 +237,6 @@ switch ($object_type) {
 					}
 				}
 				unset($uf, $ulf);
-			} else {
-				Debug::Text('Flex binary upload...', __FILE__, __LINE__, __METHOD__, 10);
-				$upload->set_max_filesize($max_upload_file_size); //5mb or less
-				//Flex isn't sending proper MIME types?
-				//$upload->set_acceptable_types( array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png') ); // comma separated string, or array
-				$upload->set_overwrite_mode(1);
-
-				$cf = TTnew( 'CompanyFactory' );
-				$cf->cleanStoragePath( $current_company->getId() );
-
-				$dir = $cf->getStoragePath( $current_company->getId() );
-				Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
-				if ( isset($dir) ) {
-					@mkdir($dir, 0700, TRUE);
-
-					if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
-						//$upload_result = $upload->upload("userfile", $dir);
-						$upload_result = $upload->upload('filedata', $dir); //'filedata' is case sensitive
-						//var_dump($upload ); //file data
-						if ($upload_result) {
-							$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
-						} else {
-							$error = $upload->get_error();
-						}
-					}
-				}
-				Debug::Text('cUpload... Object Type: '. $object_type, __FILE__, __LINE__, __METHOD__, 10);
-
-				Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
-				if ( isset($success) AND $success != '' ) {
-					Debug::Text('Rename', __FILE__, __LINE__, __METHOD__, 10);
-					//Submit filename to db.
-					//Rename file to just "logo" so its always consistent.
-
-					//Don't resize image, because we use so many different sizes (paystub,logo,etc...) that we can't pick a good size, so just leave as original.
-					$file_data_arr = $upload->get_file();
-					rename( $dir.'/'.$upload_result, $dir.'/logo'. $file_data_arr['extension'] );
-				} else {
-					Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
-				}
 			}
 		}
 		break;
@@ -368,45 +292,6 @@ switch ($object_type) {
 								Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
 								$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (a)';
 							}
-						}
-					} else {
-						$error = TTi18n::gettext('Invalid Object ID');
-					}
-					unset($uf, $ulf);
-				} else {
-					Debug::Text('Flex binary upload...', __FILE__, __LINE__, __METHOD__, 10);
-					$upload->set_max_filesize($max_upload_file_size); //25mb or less
-					//Flex isn't sending proper MIME types?
-					//$upload->set_acceptable_types( array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png') ); // comma separated string, or array
-					$upload->set_overwrite_mode(1);
-
-					if ( $ulf->getRecordCount() == 1 ) {
-						$uf = TTnew( 'UserFactory' );
-						$uf->cleanStoragePath( $current_company->getId(), $object_id );
-
-						$dir = $uf->getStoragePath( $current_company->getId() );
-						Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
-						if ( isset($dir) ) {
-							@mkdir($dir, 0700, TRUE);
-
-							if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
-								$upload_result = $upload->upload('filedata', $dir); //'filedata' is case sensitive
-								if ($upload_result) {
-									$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
-								} else {
-									$error = $upload->get_error();
-								}
-							}
-						}
-						Debug::Text('cUpload... Object Type: '. $object_type, __FILE__, __LINE__, __METHOD__, 10);
-
-						Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
-						if ( isset($success) AND $success != '' ) {
-							Debug::Text('Rename', __FILE__, __LINE__, __METHOD__, 10);
-							$file_data_arr = $upload->get_file();
-							rename( $dir.'/'.$upload_result, $dir.'/'. $object_id.$file_data_arr['extension'] );
-						} else {
-							Debug::Text('bUpload Failed!: '. $upload->get_error(), __FILE__, __LINE__, __METHOD__, 10);
 						}
 					} else {
 						$error = TTi18n::gettext('Invalid Object ID');

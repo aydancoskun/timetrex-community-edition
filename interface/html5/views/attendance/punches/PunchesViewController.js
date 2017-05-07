@@ -833,6 +833,7 @@ PunchesViewController = BaseViewController.extend( {
 			this.edit_view_ui_dic.user_id.setAllowMultipleSelection( true );
 		}
 
+		TTPromise.resolve('init','init');
 	},
 
 	initSubLogView: function( tab_id ) {
@@ -1354,7 +1355,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	onMapClick: function() {
-		ProgressBar.showProgressBar(true);
+		ProgressBar.showProgressBar();
 
 		var data = {
 			filter_columns: {

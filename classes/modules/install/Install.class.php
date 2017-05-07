@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -1540,6 +1540,14 @@ class Install {
 
 		return 1;
 	}
+	function checkSafeCacheDirectory() {
+		//Make sure the storage path isn't inside an publically accessible directory
+		if ( isset($this->config_vars['cache']['dir']) AND Misc::isSubDirectory( $this->config_vars['cache']['dir'], Environment::getBasePath() ) == FALSE ) {
+			return 0;
+		}
+
+		return 1;
+	}
 
 	function cleanCacheDirectory( $exclude_regex_filter = '\.ZIP|\.lock|upgrade_staging' ) {
 		global $smarty;
@@ -1609,9 +1617,25 @@ class Install {
 
 		return 1;
 	}
+	function checkSafeStorageDirectory() {
+		//Make sure the storage path isn't inside an publically accessible directory
+		if ( isset($this->config_vars['path']['storage']) AND Misc::isSubDirectory( $this->config_vars['path']['storage'], Environment::getBasePath() ) == FALSE ) {
+			return 0;
+		}
+
+		return 1;
+	}
 
 	function checkWritableLogDirectory() {
 		if ( isset($this->config_vars['path']['log']) AND is_dir($this->config_vars['path']['log']) AND is_writable($this->config_vars['path']['log']) ) {
+			return 0;
+		}
+
+		return 1;
+	}
+	function checkSafeLogDirectory() {
+		//Make sure the storage path isn't inside an publically accessible directory
+		if ( isset($this->config_vars['path']['log']) AND Misc::isSubDirectory( $this->config_vars['path']['log'], Environment::getBasePath() ) == FALSE ) {
 			return 0;
 		}
 
@@ -1730,11 +1754,14 @@ class Install {
 			}
 			$retarr[$this->checkWritableConfigFile()]++;
 			$retarr[$this->checkWritableCacheDirectory()]++;
+			$retarr[$this->checkSafeCacheDirectory()]++;
 			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('clean_cache', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkCleanCacheDirectory()]++;
 			}
 			$retarr[$this->checkWritableStorageDirectory()]++;
+			$retarr[$this->checkSafeStorageDirectory()]++;
 			$retarr[$this->checkWritableLogDirectory()]++;
+			$retarr[$this->checkSafeLogDirectory()]++;
 			if ( !is_array( $exclude_check ) OR ( is_array($exclude_check) AND in_array('file_permissions', $exclude_check) == FALSE ) ) {
 				$retarr[$this->checkFilePermissions()]++;
 			}
@@ -1872,6 +1899,9 @@ class Install {
 			if ( $fail_all == TRUE OR $this->checkWritableCacheDirectory() != 0 ) {
 				$retarr[] = 'WCacheDir';
 			}
+			if ( $fail_all == TRUE OR $this->checkSafeCacheDirectory() != 0 ) {
+				$retarr[] = 'UnSafeCacheDir';
+			}
 			if ( is_array($exclude_check) AND in_array('clean_cache', $exclude_check) == FALSE ) {
 				if ( $fail_all == TRUE OR $this->checkCleanCacheDirectory() != 0 ) {
 					$retarr[] = 'CleanCacheDir';
@@ -1880,8 +1910,14 @@ class Install {
 			if ( $fail_all == TRUE OR $this->checkWritableStorageDirectory() != 0 ) {
 				$retarr[] = 'WStorageDir';
 			}
+			if ( $fail_all == TRUE OR $this->checkSafeStorageDirectory() != 0 ) {
+				$retarr[] = 'UnSafeStorageDir';
+			}
 			if ( $fail_all == TRUE OR $this->checkWritableLogDirectory() != 0 ) {
 				$retarr[] = 'WLogDir';
+			}
+			if ( $fail_all == TRUE OR $this->checkSafeLogDirectory() != 0 ) {
+				$retarr[] = 'UnSafeLogDir';
 			}
 			if ( is_array($exclude_check) AND in_array('file_permissions', $exclude_check) == FALSE ) {
 				if ( $fail_all == TRUE OR $this->checkFilePermissions() != 0 ) {

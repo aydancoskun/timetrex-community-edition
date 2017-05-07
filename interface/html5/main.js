@@ -96,6 +96,7 @@ require.config( {
 		'backbone-min': 'framework/backbone/backbone-min',
 		'jquery.masonry.min': 'framework/jquery.masonry.min',
 		'interact': 'framework/interact.min',
+		'tinymce.min': 'framework/tinymce.min',
 		'jquery.sortable': 'framework/jquery.sortable',
 		'Global': 'global/Global',
 		'RateLimiter': 'global/RateLimiter',
@@ -107,10 +108,11 @@ require.config( {
 		'leaflet-providers': 'framework/leaflet/leaflet-providers/leaflet-providers',
 		'leaflet-routing': 'framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.min',
 		'leaflet-draw': 'framework/leaflet/leaflet-draw/leaflet.draw',
-
+		'pdfjs': 'framework/pdfjs',
+		'autolinker': 'framework/autolinker',
 		'measurement': 'framework/measurement',
+		'ttpromise': 'global/TTPromise',
 	},
-
 	shim: {
 
 		//Make sure jqGrid_extend load after jgGrid
@@ -172,6 +174,7 @@ require( [
 	'ProgressBarManager',
 	'TAlertManager',
 	'sonic',
+	'ttpromise',
 ], function() {
 	if ( window.sessionStorage ) {
 		LocalCacheData.isSupportHTML5LocalCache = true;

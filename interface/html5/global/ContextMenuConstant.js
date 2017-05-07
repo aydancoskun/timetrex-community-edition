@@ -68,7 +68,7 @@ ContextMenuIconName.copy = 'copyIcon';
 
 ContextMenuIconName.reply = 'replyIcon';
 
-ContextMenuIconName.drag_copy = 'drapCopyIcon';
+ContextMenuIconName.drag_copy = 'dragCopyIcon';
 
 ContextMenuIconName.swap = 'swapIcon';
 
@@ -103,6 +103,8 @@ ContextMenuIconName.edit_employee = 'editEmployeeIcon';
 ContextMenuIconName.map = 'mapIcon';
 
 ContextMenuIconName.edit_client = 'editClientIcon';
+
+ContextMenuIconName.edit_job_applicant = 'editJobApplicantIcon';
 
 ContextMenuIconName.client_contact = 'clientContactIcon';
 
@@ -188,6 +190,12 @@ ContextMenuIconName.migrate_pay_stub_account = 'MigratePayStubAccount';
 
 ContextMenuIconName.auto_arrange = 'autoArrange';
 
+ContextMenuIconName.apply_job = 'applyJobIcon';
+
+ContextMenuIconName.job_application = 'jobApplicationIcon';
+
+ContextMenuIconName.portal_preview = 'portalPreviewIcon';
+
 var Icons = function() {
 
 };
@@ -270,3 +278,4 @@ Icons.find_available = 'fillshift-35x35.png';
 Icons.wizard = 'wizard2-35x35.png';
 Icons.restart = 'restart-35x35.png';
 Icons.branches = 'branches-35x35.png';
+Icons.job_applicant = 'job_applicant-35x35.png';

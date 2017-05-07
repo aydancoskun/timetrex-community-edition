@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -39,11 +39,16 @@ forceNoCacheHeaders(); //Send headers to disable caching.
 
 //Returns valid classes when unauthenticated.
 function getUnauthenticatedAPIClasses() {
-	return array('APIAuthentication', 'APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin', 'APIProgressBar', 'APIInstall');
+	return array('APIAuthentication','APIRecruitmentAuthentication', 'APIJobApplicantPortal','APIJobVacancyPortal', 'APIDocumentPortal', 'APIClientStationUnAuthenticated', 'APIAuthenticationPlugin', 'APIClientStationUnAuthenticatedPlugin', 'APIDocumentPortal', 'APICompanyPortal', 'APIProgressBar', 'APIInstall');
+}
+
+function getAuthenticatedPortalAPIMethods() {
+	return array('getJobApplicant', 'getJobApplicantEducation', 'setJobApplicantEducation', 'getJobApplicantEmployment', 'setJobApplicantEmployment', 'getJobApplicantLanguage', 'setJobApplicantLanguage', 'getJobApplicantLicense', 'setJobApplicantLicense', 'getJobApplicantLocation', 'setJobApplicantLocation', 'getJobApplicantMembership', 'setJobApplicantMembership',
+	'getJobApplicantReference', 'setJobApplicantReference', 'getJobApplicantSkill', 'setJobApplicantSkill', 'getJobApplication', 'setJobApplication', 'getAttachment', 'addAttachment', 'uploadAttachment');
 }
 
 //Returns session ID from _COOKIE, _POST, then _GET.
-function getSessionID() {
+function getSessionID( $authentication_type_id = 800 ) {
 
 	//FIXME: Work-around for bug in Mobile app v3.0.86 that uses old SessionIDs in the Cookie, but correct ones on the URL.
 	if ( isset($_COOKIE['SessionID']) AND isset($_GET['SessionID']) AND $_COOKIE['SessionID'] != $_GET['SessionID'] ) {
@@ -55,12 +60,15 @@ function getSessionID() {
 		}
 	}
 
-	if ( isset($_COOKIE['SessionID']) AND $_COOKIE['SessionID'] != '' ) {
-		$session_id = $_COOKIE['SessionID'];
-	} elseif ( isset($_POST['SessionID']) AND $_POST['SessionID'] != '' ) {
-		$session_id = $_POST['SessionID'];
-	} elseif ( isset($_GET['SessionID']) AND $_GET['SessionID'] != '' ) {
-		$session_id = $_GET['SessionID'];
+	$authentication = new Authentication();
+	$session_name = $authentication->getName( $authentication_type_id );
+
+	if ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) {
+		$session_id = $_COOKIE[$session_name];
+	} elseif ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) {
+		$session_id = $_POST[$session_name];
+	} elseif ( isset($_GET[$session_name]) AND $_GET[$session_name] != '' ) {
+		$session_id = $_GET[$session_name];
 	} else {
 		$session_id = FALSE;
 	}
@@ -81,6 +89,37 @@ function getStationID() {
 	}
 
 	return $station_id;
+}
+
+function getJSONError() {
+	$retval = FALSE;
+
+	if ( function_exists('json_last_error') ) { //Handle PHP v5.3 and older.
+		switch( json_last_error() ) {
+			case JSON_ERROR_NONE:
+				break;
+			case JSON_ERROR_DEPTH:
+				$retval = 'Maximum stack depth exceeded';
+				break;
+			case JSON_ERROR_STATE_MISMATCH:
+				$retval = 'Underflow or the modes mismatch';
+				break;
+			case JSON_ERROR_CTRL_CHAR:
+				$retval = 'Unexpected control character found';
+				break;
+			case JSON_ERROR_SYNTAX:
+				$retval = 'Syntax error, malformed JSON';
+				break;
+			case JSON_ERROR_UTF8:
+				$retval = 'Malformed UTF-8 characters, possibly incorrectly encoded';
+				break;
+			default:
+				$retval = 'Unknown error';
+				break;
+		}
+	}
+
+	return $retval;
 }
 
 //Make sure cron job information is always logged.

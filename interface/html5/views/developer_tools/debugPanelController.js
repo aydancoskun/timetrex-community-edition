@@ -1,6 +1,6 @@
 $(document).on('click', '.tt_debug_close_btn', function(e) {
     e.preventDefault();
-    $('#tt_debug_console').remove();
+    Debug.closePanel();
 });
 
 $(document).on('change', '#tt_debug_enable_checkbox', function(e) {
@@ -45,6 +45,12 @@ $(document).on('change', '#tt_debug_exception_verbosity', function(e) {
     Debug.setVerbosity($(this).val());
 });
 
+
+$(document).on('change', '#tt_overlay_disable_checkbox', function(e) {
+    e.preventDefault();
+    Global.UNIT_TEST_MODE = $(this).is(':checked');
+});
+
 $(document).on('click', '#qunit_test_button', function(e) {
     e.preventDefault();
     $('#tt_debug_console').css('width','80%');
@@ -78,6 +84,17 @@ function runUnitTests() {
         $("<script id='qunit_script' src='framework/qunit/qunit.js'></script>").appendTo('head');
         $("<link rel='stylesheet' type='text/css' href='framework/qunit/qunit.css'>").appendTo('head');
         QUnit.config.autostart = false;
+        $('#qunit_container').css('width','100vw');
+        $('#qunit_container').css('height','100vh');
+        $('#qunit_container').css('overflow-y','scroll');
+        $('#qunit_container').css('position','fixed');
+        $('#qunit_container').css('top','0px');
+        $('#qunit_container').css('left','0px');
+        $('#qunit_container').css('z-index','100');
+        $('#qunit_container').css('background','#fff');
+        $('#qunit_container').show();
+
+        $('#tt_debug_console').remove();
     }
     if( !window.qunit_initiated ) {
         window.qunit_initiated = true;
@@ -93,6 +110,117 @@ function runUnitTests() {
         assert.ok(Global.MoneyRound(1.77777777, 2) == '1.78', 'Global.MoneyRound(1.77777777, 2) == 1.78 -- Passed!');
         assert.ok(Global.MoneyRound(9.1, 2) == '9.10', 'Global.MoneyRound(9.1, 2) == 9.10 -- Passed!');
         assert.ok(Global.MoneyRound(1.0049999999999999, 2) == '1.01', 'Global.MoneyRound(1.0049999999999999, 2) == 1.01 -- Passed!');
+    });
+
+	QUnit.test("TTPromise Case 1: wait(category) on a single promise", function (assert) {
+        var done = assert.async();
+
+        TTPromise.clearAllPromises();
+        assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj length = 0.');
+        assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+
+        TTPromise.add('test','test1');
+        assert.ok( typeof(TTPromise.promises['test']) == 'object' , "TTPromise.promises['test'] exists.");
+        assert.ok( Object.keys(TTPromise.promises['test']).length == 1 , 'promises object length = 1.');
+        assert.ok( TTPromise.filterPromiseArray('test').length == 1, 'TTPromise.filterPromiseArray(test).length == 1');
+
+        TTPromise.wait('test',null, function(){
+            //will be run on resolve()
+            assert.ok(1 == "1", "TEST Promise test resolved.");
+            assert.ok( typeof (TTPromise.promises['test']) == "undefined" , 'promises[test] is null.');
+            assert.ok( TTPromise.filterPromiseArray('test').length == 0, 'filterPromiseArray(test).length == 0.');
+            assert.ok( TTPromise.filterPromiseArray('test', 'test1') == false , 'filterPromiseArray("test","test1") length = 0.');
+            done();
+        });
+
+        assert.ok( typeof (TTPromise.promises['test']['test1'])  == 'object', 'promises object length = 1.');
+        TTPromise.resolve('test','test1');
+	});
+
+    QUnit.test("TTPromise Case 2: wait('one_of_many_categories').", function (assert) {
+        var done = assert.async();
+        TTPromise.clearAllPromises();
+
+        assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj empty.');
+        assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+
+        TTPromise.add('testa','test1');
+        //debugger
+        assert.ok( TTPromise.filterPromiseArray('testa').length == 1, 'filterPromiseArray(testa).length == 1.');
+        assert.ok( TTPromise.filterPromiseArray('testa', 'test1').length == 1, 'filterPromiseArray("testa","test1") length = 1.');
+
+        TTPromise.add('testa','test2');
+        assert.ok( TTPromise.filterPromiseArray('testa').length == 2, 'filterPromiseArray(testa).length == 2.');
+        assert.ok( TTPromise.filterPromiseArray('testa', 'test2').length == 1, 'filterPromiseArray("testa","test1") length = 1.');
+
+        TTPromise.add('testb','test1b');
+        assert.ok( TTPromise.filterPromiseArray('testb').length == 1, 'filterPromiseArray(testb).length == 2.');
+        assert.ok( TTPromise.filterPromiseArray('testb', 'test1b').length == 1, 'filterPromiseArray("testb","test1b") length = 1.');
+
+        TTPromise.add('testb','test2b');
+        assert.ok( TTPromise.filterPromiseArray('testb').length ==2, 'filterPromiseArray(testb).length == 2.');
+        assert.ok( TTPromise.filterPromiseArray('testb', 'test1b').length == 1, 'filterPromiseArray("testb","test1b") length = 1.');
+
+
+        TTPromise.wait('testa',null, function(){
+            //Debug.Arr(TTPromise,'Case2 TTPromise',null,null,null,10);
+            assert.ok(1 == "1", "TEST Promise testa resolved.");
+            //will be run on resolve()
+            assert.ok( typeof (TTPromise.promises['testa']) == "undefined" , 'promises[testa] is null.');
+            assert.ok( typeof (TTPromise.promises['testb']) == "object" , 'promises[testb] is not null.');
+            assert.ok( TTPromise.filterPromiseArray('testb').length == 2, 'filterPromiseArray(testb).length == '+TTPromise.filterPromiseArray('testb').length);
+            assert.ok( TTPromise.filterPromiseArray('testa', 'test1').length == 0, 'filterPromiseArray("testb","test1b") length = '+TTPromise.filterPromiseArray('testa', 'test1').length);
+            assert.ok( TTPromise.filterPromiseArray('testa', 'test2').length == 0, 'filterPromiseArray("testb","test1b") length = '+TTPromise.filterPromiseArray('testa', 'test2').length);
+            done();
+        });
+
+        TTPromise.resolve('testb','test1b');
+        TTPromise.resolve('testa','test1');
+        TTPromise.resolve('testa','test2');
+    });
+
+    QUnit.test("TTPromise Case 3: wait(null, null, callback) all cateogries.", function (assert) {
+        var done = assert.async();
+
+        TTPromise.clearAllPromises();
+        assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj empty.');
+        assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+
+        TTPromise.add('testc','test1');
+        assert.ok( TTPromise.filterPromiseArray('testc','test1').length == 1, 'TTPromise.filterPromiseArray(testc,test1).length == 1,.');
+        assert.ok( TTPromise.filterPromiseArray('testc').length == 1, 'TTPromise.filterPromiseArray(testc).length == 1,.');
+
+        TTPromise.add('testc','test2');
+        assert.ok( TTPromise.filterPromiseArray('testc','test2').length == 1, 'TTPromise.filterPromiseArray(testc,test1).length == 1,.');
+        assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
+
+        TTPromise.add('testd','test1b');
+        assert.ok( TTPromise.filterPromiseArray('testd','test1b').length == 1, 'TTPromise.filterPromiseArray(testd,test1b).length == 1,.');
+        assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
+        assert.ok( TTPromise.filterPromiseArray('testd').length == 1, 'TTPromise.filterPromiseArray(testd).length == 1,.');
+
+        TTPromise.add('testd','test2b');
+        assert.ok( TTPromise.filterPromiseArray('testd','test2b').length == 1, 'TTPromise.filterPromiseArray(testd,test2b).length == 1,.');
+        assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
+        assert.ok( TTPromise.filterPromiseArray('testd').length == 2, 'TTPromise.filterPromiseArray(testd).length == 2,.');
+
+        TTPromise.wait(null, null, function(){
+            //will be run on resolve()
+            assert.ok( typeof (TTPromise.promises['testc']) == "undefined", 'promises[testc] is null.');
+            assert.ok( typeof (TTPromise.promises['testd']) == "undefined", 'promises[testd] is  null.');
+            assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+            assert.ok( TTPromise.filterPromiseArray('testc').length == 0, 'TTPromise.filterPromiseArray(testc).length == 0,.');
+            assert.ok( TTPromise.filterPromiseArray('testd').length == 0, 'TTPromise.filterPromiseArray(testd).length == 0,.');
+            done();
+        });
+
+        assert.ok( TTPromise.filterPromiseArray().length == 4 , 'TTPromise.filterPromiseArray().length == 4');
+
+        TTPromise.resolve('testd','test1b');
+        TTPromise.resolve('testd','test2b');
+        TTPromise.resolve('testc','test1');
+        TTPromise.resolve('testc','test2');
+
     });
 }
 

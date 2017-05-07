@@ -3750,43 +3750,44 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( 'df_10', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
-			Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js' );
+			Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js', function(){
 
-			// Dynamic Field 11
-			form_item_input = Global.loadWidgetByName( FormItemType.FORMULA_BUILDER );
-			form_item_input.FormulaBuilder( {
-				field: 'df_11', width: '100%', onFormulaBtnClick: function() {
+				// Dynamic Field 11
+				form_item_input = Global.loadWidgetByName( FormItemType.FORMULA_BUILDER );
+				form_item_input.FormulaBuilder( {
+					field: 'df_11', width: '100%', onFormulaBtnClick: function() {
 
-					var custom_column_api = new (APIFactory.getAPIClass( 'APIReportCustomColumn' ))();
+						var custom_column_api = new (APIFactory.getAPIClass( 'APIReportCustomColumn' ))();
 
-					custom_column_api.getOptions( 'formula_functions', {
-						onResult: function( fun_result ) {
-							var fun_res_data = fun_result.getResult();
+						custom_column_api.getOptions( 'formula_functions', {
+							onResult: function( fun_result ) {
+								var fun_res_data = fun_result.getResult();
 
-							$this.api.getOptions( 'formula_variables', {onResult: onColumnsResult} );
+								$this.api.getOptions( 'formula_variables', {onResult: onColumnsResult} );
 
-							function onColumnsResult( col_result ) {
-								var col_res_data = col_result.getResult();
+								function onColumnsResult( col_result ) {
+									var col_res_data = col_result.getResult();
 
-								var default_args = {};
-								default_args.functions = Global.buildRecordArray( fun_res_data );
-								default_args.variables = Global.buildRecordArray( col_res_data );
-								default_args.formula = $this.current_edit_record.company_value1;
-								default_args.current_edit_record = Global.clone( $this.current_edit_record );
-								default_args.api = $this.api;
+									var default_args = {};
+									default_args.functions = Global.buildRecordArray( fun_res_data );
+									default_args.variables = Global.buildRecordArray( col_res_data );
+									default_args.formula = $this.current_edit_record.company_value1;
+									default_args.current_edit_record = Global.clone( $this.current_edit_record );
+									default_args.api = $this.api;
 
-								IndexViewController.openWizard( 'FormulaBuilderWizard', default_args, function( val ) {
-									$this.current_edit_record.company_value1 = val;
-									$this.edit_view_ui_dic.df_11.setValue( val );
-								} );
+									IndexViewController.openWizard( 'FormulaBuilderWizard', default_args, function( val ) {
+										$this.current_edit_record.company_value1 = val;
+										$this.edit_view_ui_dic.df_11.setValue( val );
+									} );
+								}
+
 							}
-
-						}
-					} );
-				}
+						} );
+					}
+				} );
+				$this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
+				form_item_input.parent().width( '45%' );
 			} );
-			this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
-			form_item_input.parent().width( '45%' );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 			form_item_input.TTextInput( {field: 'df_11'} );

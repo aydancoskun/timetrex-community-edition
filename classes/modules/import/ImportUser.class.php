@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -46,16 +46,6 @@ class ImportUser extends Import {
 	public $user_names = array(); //Stored used usernames so we can find duplicates.
 
 	public $title_options = FALSE;
-	public $branch_options = FALSE;
-	public $branch_manual_id_options = FALSE;
-	public $department_options = FALSE;
-	public $department_manual_id_options = FALSE;
-
-	public $job_options = FALSE;
-	public $job_manual_id_options = FALSE;
-	public $job_item_options = FALSE;
-	public $job_item_manual_id_options = FALSE;
-
 	public $user_group_options = FALSE;
 	public $ethnic_group_options = FALSE;
 
@@ -423,160 +413,20 @@ class ImportUser extends Import {
 		return $retval;
 	}
 
-	function getBranchOptions() {
-		$this->branch_options = $this->branch_manual_id_options = array();
-		$blf = TTNew('BranchListFactory');
-		$blf->getByCompanyId( $this->company_id );
-		if ( $blf->getRecordCount() > 0 ) {
-			foreach( $blf as $b_obj ) {
-				$this->branch_options[$b_obj->getId()] = $b_obj->getName();
-				$this->branch_manual_id_options[$b_obj->getId()] = $b_obj->getManualId();
-			}
-		}
-		unset($blf, $b_obj);
-
-		return TRUE;
-	}
-
 	function parse_default_branch( $input, $default_value = NULL, $parse_hint = NULL ) {
-		if ( trim($input) == '' ) {
-			return 0; //No branch
-		}
-
-		if ( !is_array( $this->branch_options ) ) {
-			$this->getBranchOptions();
-		}
-
-		//Always fall back to searching by name unless we know for sure its by manual_id
-		if ( is_numeric( $input ) AND strtolower($parse_hint) == 'manual_id' ) {
-			//Find based on manual_id/code.
-			$retval = $this->findClosestMatch( $input, $this->branch_manual_id_options, 90 );
-		} else {
-			$retval = $this->findClosestMatch( $input, $this->branch_options );
-		}
-
-		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
-		}
-
-		return $retval;
+		return $this->parse_branch( $input, $default_value, $parse_hint );
 	}
 
-	function getDepartmentOptions() {
-		//Get departments
-		$this->department_options = $this->department_manual_id_options = array();
-		$dlf = TTNew('DepartmentListFactory');
-		$dlf->getByCompanyId( $this->company_id );
-		if ( $dlf->getRecordCount() > 0 ) {
-			foreach( $dlf as $d_obj ) {
-				$this->department_options[$d_obj->getId()] = $d_obj->getName();
-				$this->department_manual_id_options[$d_obj->getId()] = $d_obj->getManualId();
-			}
-		}
-		unset($dlf, $d_obj);
-
-		return TRUE;
-	}
 	function parse_default_department( $input, $default_value = NULL, $parse_hint = NULL ) {
-		if ( trim($input) == '' ) {
-			return 0; //No department
-		}
-
-		if ( !is_array( $this->department_options ) ) {
-			$this->getDepartmentOptions();
-		}
-
-		//Always fall back to searching by name unless we know for sure its by manual_id
-		if ( is_numeric( $input ) AND strtolower($parse_hint) == 'manual_id' ) {
-			//Find based on manual_id/code.
-			$retval = $this->findClosestMatch( $input, $this->department_manual_id_options, 90 );
-		} else {
-			$retval = $this->findClosestMatch( $input, $this->department_options );
-		}
-
-		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
-		}
-
-		return $retval;
+		return $this->parse_department( $input, $default_value, $parse_hint );
 	}
 
-	function getJobOptions() {
-		//Get jobs
-		$this->job_options = $this->job_manual_id_options = array();
-		$dlf = TTNew('JobListFactory');
-		$dlf->getByCompanyId( $this->company_id );
-		if ( $dlf->getRecordCount() > 0 ) {
-			foreach( $dlf as $d_obj ) {
-				$this->job_options[$d_obj->getId()] = $d_obj->getName();
-				$this->job_manual_id_options[$d_obj->getId()] = $d_obj->getManualId();
-			}
-		}
-		unset($dlf, $d_obj);
-
-		return TRUE;
-	}
 	function parse_default_job( $input, $default_value = NULL, $parse_hint = NULL ) {
-		if ( trim($input) == '' ) {
-			return 0; //No job
-		}
-
-		if ( !is_array( $this->job_options ) ) {
-			$this->getJobOptions();
-		}
-
-		//Debug::Text('Created new group name: '. $input .' ID: '. $parse_hint, __FILE__, __LINE__, __METHOD__, 10);
-		if ( is_numeric( $input ) AND strtolower($parse_hint) == 'manual_id' ) {
-			//Find based on manual_id/code.
-			$retval = $this->findClosestMatch( $input, $this->job_manual_id_options, 90 );
-		} else {
-			$retval = $this->findClosestMatch( $input, $this->job_options );
-		}
-
-		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
-		}
-
-		return $retval;
+		return $this->parse_job( $input, $default_value, $parse_hint );
 	}
 
-
-	function getJobItemOptions() {
-		//Get job_items
-		$this->job_item_options = $this->job_item_manual_id_options = array();
-		$dlf = TTNew('JobItemListFactory');
-		$dlf->getByCompanyId( $this->company_id );
-		if ( $dlf->getRecordCount() > 0 ) {
-			foreach( $dlf as $d_obj ) {
-				$this->job_item_options[$d_obj->getId()] = $d_obj->getName();
-				$this->job_item_manual_id_options[$d_obj->getId()] = $d_obj->getManualId();
-			}
-		}
-		unset($dlf, $d_obj);
-
-		return TRUE;
-	}
 	function parse_default_job_item( $input, $default_value = NULL, $parse_hint = NULL ) {
-		if ( trim($input) == '' ) {
-			return 0; //No job_item
-		}
-
-		if ( !is_array( $this->job_item_options ) ) {
-			$this->getJobItemOptions();
-		}
-
-		if ( is_numeric( $input ) AND strtolower($parse_hint) == 'manual_id' ) {
-			//Find based on manual_id/code.
-			$retval = $this->findClosestMatch( $input, $this->job_item_manual_id_options, 90 );
-		} else {
-			$retval = $this->findClosestMatch( $input, $this->job_item_options );
-		}
-
-		if ( $retval === FALSE ) {
-			$retval = -1; //Make sure this fails.
-		}
-
-		return $retval;
+		return $this->parse_job_item( $input, $default_value, $parse_hint );
 	}
 
 	function getUserGroupOptions() {

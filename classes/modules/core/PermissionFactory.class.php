@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -85,20 +85,23 @@ class PermissionFactory extends Factory {
 				}
 				break;
 			case 'preset_flags':
-				if ( getTTProductEdition() >= TT_PRODUCT_COMMUNITY ) {
+				//Remove sections that don't apply to the current product edition.
+				$product_edition = Misc::getCurrentCompanyProductEdition();
+
+				if ( $product_edition >= TT_PRODUCT_COMMUNITY ) {
 					$retval[10] = TTi18n::gettext('Scheduling');
 					$retval[20] = TTi18n::gettext('Time & Attendance');
 					$retval[30] = TTi18n::gettext('Payroll');
 					$retval[70] = TTi18n::gettext('Human Resources');
 				}
 
-				if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+				if ( $product_edition >= TT_PRODUCT_CORPORATE ) {
 					$retval[40] = TTi18n::gettext('Job Costing');
 					$retval[50] = TTi18n::gettext('Document Management');
 					$retval[60] = TTi18n::gettext('Invoicing');
 				}
 
-				if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+				if ( $product_edition >= TT_PRODUCT_ENTERPRISE ) {
 					$retval[75] = TTi18n::gettext('Recruitment');
 					$retval[80] = TTi18n::gettext('Expense Tracking');
 				}
@@ -1341,28 +1344,28 @@ class PermissionFactory extends Factory {
 											'job_vacancy' => array(
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_own' => TTi18n::gettext('View Own'),
-																'view_child' => TTi18n::gettext('View Subordinate'),
+																//'view_child' => TTi18n::gettext('View Subordinate'),
 																'view' => TTi18n::gettext('View'),
 																'add' => TTi18n::gettext('Add'),
 																'edit_own' => TTi18n::gettext('Edit Own'),
-																'edit_child' => TTi18n::gettext('Edit Subordinate'),
+																//'edit_child' => TTi18n::gettext('Edit Subordinate'),
 																'edit' => TTi18n::gettext('Edit'),
 																'delete_own' => TTi18n::gettext('Delete Own'),
-																'delete_child' => TTi18n::gettext('Delete Subordinate'),
+																//'delete_child' => TTi18n::gettext('Delete Subordinate'),
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete')
 															),
 											'job_applicant' => array(
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_own' => TTi18n::gettext('View Own'),
-																'view_child' => TTi18n::gettext('View Subordinate'),
+																//'view_child' => TTi18n::gettext('View Subordinate'),
 																'view' => TTi18n::gettext('View'),
 																'add' => TTi18n::gettext('Add'),
 																'edit_own' => TTi18n::gettext('Edit Own'),
-																'edit_child' => TTi18n::gettext('Edit Subordinate'),
+																//'edit_child' => TTi18n::gettext('Edit Subordinate'),
 																'edit' => TTi18n::gettext('Edit'),
 																'delete_own' => TTi18n::gettext('Delete Own'),
-																'delete_child' => TTi18n::gettext('Delete Subordinate'),
+																//'delete_child' => TTi18n::gettext('Delete Subordinate'),
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete')
 
@@ -1370,14 +1373,14 @@ class PermissionFactory extends Factory {
 											'job_application' => array(
 																'enabled' => TTi18n::gettext('Enabled'),
 																'view_own' => TTi18n::gettext('View Own'),
-																'view_child' => TTi18n::gettext('View Subordinate'),
+																//'view_child' => TTi18n::gettext('View Subordinate'),
 																'view' => TTi18n::gettext('View'),
 																'add' => TTi18n::gettext('Add'),
 																'edit_own' => TTi18n::gettext('Edit Own'),
-																'edit_child' => TTi18n::gettext('Edit Subordinate'),
+																//'edit_child' => TTi18n::gettext('Edit Subordinate'),
 																'edit' => TTi18n::gettext('Edit'),
 																'delete_own' => TTi18n::gettext('Delete Own'),
-																'delete_child' => TTi18n::gettext('Delete Subordinate'),
+																//'delete_child' => TTi18n::gettext('Delete Subordinate'),
 																'delete' => TTi18n::gettext('Delete'),
 																//'undelete' => TTi18n::gettext('Un-Delete')
 

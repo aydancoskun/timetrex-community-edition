@@ -1,12 +1,17 @@
 UserMembershipViewController = BaseViewController.extend( {
 	el: '#user_membership_view_container',
-	qualification_group_array: null,
-	qualification_group_api: null,
-	qualification_api: null,
 
 	document_object_type_id: null,
 
+	qualification_group_array: null,
+	source_type_array: null,
 	ownership_array: null,
+
+	qualification_group_api: null,
+	qualification_api: null,
+
+	sub_view_grid_autosize: true,
+
 	initialize: function( options ) {
 		this._super( 'initialize', options );
 		this.edit_view_tpl = 'UserMembershipEditView.html';
@@ -36,6 +41,7 @@ UserMembershipViewController = BaseViewController.extend( {
 		var $this = this;
 
 		this.initDropDownOption( 'ownership' );
+		this.initDropDownOption( 'source_type' );
 
 		this.qualification_group_api.getQualificationGroup( '', false, false, {
 			onResult: function( res ) {
@@ -198,11 +204,6 @@ UserMembershipViewController = BaseViewController.extend( {
 			}
 		} );
 
-	},
-
-	resizeSubGridHeight: function( length ) {
-		var height = ( length * 26 >= 200 ) ? 200 : length * 26;
-		this.grid.setGridHeight( height );
 	},
 
 	buildEditViewUI: function() {
@@ -398,6 +399,16 @@ UserMembershipViewController = BaseViewController.extend( {
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Source' ),
+				in_column: 2,
+				multiple: true,
+				field: 'source_type_id',
+				basic_search: true,
+				adv_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX} ),
 
 			new SearchField( {
 				label: $.i18n._( 'Start Date' ),

@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -51,6 +51,10 @@ class UserMembershipFactory extends Factory {
 										10 => TTi18n::gettext('Company'),
 										20 => TTi18n::gettext('Individual'),
 									);
+				break;
+			case 'source_type':
+				$qf = TTnew('QualificationFactory');
+				$retval = $qf->getOptions( $name );
 				break;
 			case 'columns':
 				$retval = array(
@@ -376,7 +380,7 @@ class UserMembershipFactory extends Factory {
 	function postSave() {
 		$this->removeCache( $this->getId() );
 		$this->removeCache( $this->getUser().$this->getQualification() );
-		
+
 		if ( $this->getDeleted() == FALSE ) {
 			Debug::text('Setting Tags...', __FILE__, __LINE__, __METHOD__, 10);
 			CompanyGenericTagMapFactory::setTags( $this->getQualificationObject()->getCompany(), 255, $this->getID(), $this->getTag() );

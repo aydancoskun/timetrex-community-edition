@@ -594,8 +594,10 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 						}
 
 						if ( !found ) {
-							$this.grid.clearGridData();
-							$this.grid.setGridParam( {data: new_grid_source_data.concat( new_record )} );
+							//Refresh the search because this is a special case where a new record is added, but the UI sees an edit of the existing join row.
+							// $this.grid.clearGridData();
+							// $this.grid.setGridParam( {data: new_grid_source_data.concat( new_record )} );
+							$this.search();
 
 							if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGridHeight ) ) {
 								len = Global.isSet( len ) ? len : 0;

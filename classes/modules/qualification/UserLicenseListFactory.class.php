@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -324,6 +324,7 @@ class UserLicenseListFactory extends UserLicenseFactory implements IteratorAggre
 
 		$query .= ( isset($filter_data['license_number']) ) ? $this->getWhereClauseSQL( 'a.license_number', $filter_data['license_number'], 'numeric', $ph ) : NULL;
 
+		$query .= ( isset($filter_data['source_type_id']) ) ? $this->getWhereClauseSQL( 'qf.source_type_id', $filter_data['source_type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['group_id']) ) ? $this->getWhereClauseSQL( 'qf.group_id', $filter_data['group_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['group']) ) ? $this->getWhereClauseSQL( 'qgf.name', $filter_data['group'], 'text', $ph ) : NULL;
 
@@ -357,7 +358,7 @@ class UserLicenseListFactory extends UserLicenseFactory implements IteratorAggre
 		$query .=	' AND a.deleted = 0 ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields	);
-		
+
 		$this->ExecuteSQL($query, $ph, $limit, $page);
 
 		return $this;

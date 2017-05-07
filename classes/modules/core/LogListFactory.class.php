@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -227,7 +227,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		}
 		if ( isset($filter_data['exclude_user_id']) AND isset($filter_data['exclude_user_id'][0]) AND !in_array(-1, (array)$filter_data['exclude_user_id']) ) {
 			$query	.=	' AND a.user_id not in ('. $this->getListSQL($filter_data['exclude_user_id'], $ph) .') ';
-		}		
+		}
 		if ( isset($filter_data['log_action_id']) AND isset($filter_data['log_action_id'][0]) AND !in_array(-1, (array)$filter_data['log_action_id']) ) {
 			$query	.=	' AND a.action_id in ('. $this->getListSQL($filter_data['log_action_id'], $ph) .') ';
 		}
@@ -247,7 +247,7 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-		
+
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
@@ -412,6 +412,8 @@ class LogListFactory extends LogFactory implements IteratorAggregate {
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

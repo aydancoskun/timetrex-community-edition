@@ -157,7 +157,8 @@
 
 .popup-loading {
     background-color: #000000;
-    position: absolute;
+    /*position: absolute;*/
+    position: fixed;
     top: 50%;
     left: 50%;
     margin: -100px 0 0 -100px;

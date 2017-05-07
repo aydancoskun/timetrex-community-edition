@@ -1227,6 +1227,10 @@ ImportCSVWizardController = BaseWizardController.extend( {
 						this.api_import.className = 'APIImportPunch';
 						this.api_import.key_name = 'ImportPunch';
 						break;
+					case 'userdatetotal':
+						this.api_import.className = 'APIImportUserDateTotal';
+						this.api_import.key_name = 'ImportUserDateTotal';
+						break;
 					case 'schedule':
 						this.api_import.className = 'APIImportSchedule';
 						this.api_import.key_name = 'ImportSchedule';

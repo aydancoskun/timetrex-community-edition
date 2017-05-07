@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -47,6 +47,10 @@ class UserEducationFactory extends Factory {
 
 		$retval = NULL;
 		switch( $name ) {
+			case 'source_type':
+				$qf = TTnew('QualificationFactory');
+				$retval = $qf->getOptions( $name );
+				break;
 			case 'columns':
 				$retval = array(
 										'-1010-first_name' => TTi18n::gettext('First Name'),

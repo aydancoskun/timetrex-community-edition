@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
  * TimeTrex is a Workforce Management program developed by
- * TimeTrex Software Inc. Copyright (C) 2003 - 2016 TimeTrex Software Inc.
+ * TimeTrex Software Inc. Copyright (C) 2003 - 2017 TimeTrex Software Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by
@@ -58,12 +58,34 @@ class QualificationFactory extends Factory {
 										50 => TTi18n::gettext('Membership')
 									);
 				break;
+			case 'source_type':
+				//Remove sections that don't apply to the current product edition.
+				$product_edition = Misc::getCurrentCompanyProductEdition();
+
+				$retval = array();
+				$retval[10] = TTi18n::gettext('Internal');
+				if ( $product_edition >= TT_PRODUCT_ENTERPRISE ) {
+					$retval[20] = TTi18n::gettext( 'Portal' );
+				}
+				break;
+			case 'visibility_type':
+				//Remove sections that don't apply to the current product edition.
+				$product_edition = Misc::getCurrentCompanyProductEdition();
+
+				$retval = array();
+				$retval[10] = TTi18n::gettext('Internal Only');
+				if ( $product_edition >= TT_PRODUCT_ENTERPRISE ) {
+					$retval[20] = TTi18n::gettext('Portal Only');
+					$retval[100] = TTi18n::gettext('Both');
+				}
+				break;
 			case 'columns':
 				$retval = array(
 										'-1030-name' => TTi18n::gettext('Name'),
 										'-1040-description' => TTi18n::getText('Description'),
 										'-1050-type' => TTi18n::getText('Type'),
-
+										'-1060-visibility_type' => TTi18n::gettext('Visibility'),
+										'-1070-source_type' => TTi18n::gettext('Source'),
 										'-2040-group' => TTi18n::gettext('Group'),
 										'-1300-tag' => TTi18n::gettext('Tags'),
 
@@ -98,6 +120,10 @@ class QualificationFactory extends Factory {
 										'id' => 'ID',
 										'type_id' => 'Type',
 										'type' => FALSE,
+										'visibility_type_id' => 'VisibilityType',
+										'visibility_type' => FALSE,
+										'source_type_id' => 'SourceType',
+										'source_type' => FALSE,
 										'company_id' => 'Company',
 										'group_id' => 'Group',
 										'group' => FALSE,
@@ -110,6 +136,30 @@ class QualificationFactory extends Factory {
 										'deleted' => 'Deleted',
 										);
 		return $variable_function_map;
+	}
+
+	static function getOrCreateQualification( $company_id, $type_id, $name, $source_type_id = 20, $visibility_type_id = 20 ) {
+		$qlf = new QualificationListFactory();
+		$qlf->getByCompanyIdAndTypeIdAndName( $company_id, $type_id, $name );
+		if ( $qlf->getRecordCount() == 1 ) {
+			$qualification_id = $qlf->getCurrent()->getID();
+		} else {
+			$qf = TTnew('QualificationFactory');
+			$qf->setType( $type_id );
+			$qf->setVisibilityType( $visibility_type_id );
+			$qf->setSourceType( $source_type_id );
+			$qf->setCompany( $company_id );
+			$qf->setName( $name );
+			if ( $qf->isValid() ) {
+				$qualification_id = $qf->Save();
+			}
+		}
+
+		if ( isset( $qualification_id ) ) {
+			return $qualification_id;
+		}
+
+		return FALSE;
 	}
 
 	function getType() {
@@ -127,6 +177,50 @@ class QualificationFactory extends Factory {
 											TTi18n::gettext('Type is invalid'),
 											$this->getOptions('type')) ) {
 			$this->data['type_id'] = $type_id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getSourceType() {
+		if ( isset($this->data['source_type_id']) ) {
+			return (int)$this->data['source_type_id'];
+		}
+		return FALSE;
+	}
+
+	function setSourceType($source_type_id) {
+		$source_type_id = trim($source_type_id);
+
+		if (  $this->Validator->inArrayKey(	'source_type_id',
+											$source_type_id,
+											TTi18n::gettext('Source Type is invalid'),
+											$this->getOptions('source_type')) ) {
+											$this->data['source_type_id'] = $source_type_id;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function getVisibilityType() {
+		if ( isset($this->data['visibility_type_id']) ) {
+			return (int)$this->data['visibility_type_id'];
+		}
+		return FALSE;
+	}
+
+	function setVisibilityType($type_id) {
+		$type_id = trim($type_id);
+
+		if (  $this->Validator->inArrayKey(	'visibility_type_id',
+											   $type_id,
+											   TTi18n::gettext('Visibility Type is invalid'),
+											   $this->getOptions('visibility_type')) ) {
+			$this->data['visibility_type_id'] = $type_id;
 
 			return TRUE;
 		}
@@ -327,6 +421,14 @@ class QualificationFactory extends Factory {
 	}
 
 	function preSave() {
+		if ( $this->getVisibilityType() == FALSE ) {
+			$this->setVisibilityType( 10 ); //Internal Only
+		}
+
+		if ( $this->getSourceType() == FALSE ) {
+			$this->setSourceType( 10 ); //Internal
+		}
+
 		return TRUE;
 	}
 
@@ -370,7 +472,6 @@ class QualificationFactory extends Factory {
 	}
 
 	function setObjectFromArray( $data ) {
-
 		if ( is_array( $data ) ) {
 			$variable_function_map = $this->getVariableToFunctionMap();
 			foreach( $variable_function_map as $key => $function ) {
@@ -408,6 +509,18 @@ class QualificationFactory extends Factory {
 						case 'group':
 							$data[$variable] = $this->getColumn( $variable );
 							break;
+						case 'source_type':
+							$function = 'getSourceType';
+							if ( method_exists( $this, $function ) ) {
+								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
+							}
+							break;
+						case 'visibility_type':
+							$function = 'getVisibilityType';
+							if ( method_exists( $this, $function ) ) {
+								$data[$variable] = Option::getByKey( $this->$function(), $this->getOptions( $variable ) );
+							}
+							break;
 						case 'type':
 							$function = 'get'.$variable;
 							if ( method_exists( $this, $function ) ) {
@@ -422,7 +535,6 @@ class QualificationFactory extends Factory {
 							}
 							break;
 					}
-
 				}
 			}
 			$this->getPermissionColumns( $data, $this->getCreatedBy(), FALSE, $permission_children_ids, $include_columns );

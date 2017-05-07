@@ -1480,6 +1480,12 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 				this.current_edit_record.province = res_Data.province;
 			}
 
+			if ( res_Data.postal_code ) {
+				this.edit_view_ui_dic.postal_code.setValue( res_Data.postal_code );
+
+				this.current_edit_record.postal_code = res_Data.postal_code;
+			}
+
 			if ( res_Data.efile_state ) {
 				this.edit_view_ui_dic.efile_state.setValue( res_Data.efile_state );
 

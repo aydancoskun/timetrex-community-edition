@@ -94,7 +94,7 @@ BaseWizardController = BaseWindowController.extend( {
 
 		title.text( this.title );
 		title_1.text( this.title );
-
+		TTPromise.resolve('init', 'init');
 	},
 
 	setButtonsStatus: function() {
@@ -395,13 +395,19 @@ BaseWizardController = BaseWindowController.extend( {
 		return widget;
 	},
 
-	getTextInput: function( field ) {
+	getTextInput: function( field, width ) {
 		var widget = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		widget = widget.TTextInput( {
-			field: field
-		} );
-
+		if ( width ) {
+			widget = widget.TPasswordInput( {
+				field: field,
+				width: width
+			} );
+		} else {
+			widget = widget.TPasswordInput( {
+				field: field
+			} );
+		}
 		return widget;
 	},
 
@@ -499,7 +505,31 @@ BaseWizardController = BaseWindowController.extend( {
 
 	},
 
+	getSimpleTComboBox: function( field, allowMultiple ) {
+
+		if ( !Global.isSet( allowMultiple ) ) {
+			allowMultiple = true;
+		}
+
+		var widget = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+
+		widget = widget.AComboBox( {
+			field: field,
+			set_empty: true,
+			allow_multiple_selection: allowMultiple,
+			layout_name: ALayoutIDs.OPTION_COLUMN,
+			key: 'value'
+		} );
+
+		return widget;
+
+	},
+
 	onGridSelectRow: function( e ) {
+
+	},
+
+	onGridDblClickRow: function( e ) {
 
 	},
 
@@ -521,6 +551,9 @@ BaseWizardController = BaseWindowController.extend( {
 				altRows: true,
 				onSelectRow: function( e ) {
 					$this.onGridSelectRow( e );
+				},
+				ondblClickRow: function() {
+					$this.onGridDblClickRow();
 				},
 				data: [],
 				datatype: 'local',
@@ -551,6 +584,7 @@ BaseWizardController = BaseWindowController.extend( {
 
 	setGridSize: function( grid ) {
 		grid.setGridWidth( $( this.content_div.find( '.grid-div' ) ).width() - 11 );
+		grid.setGridHeight( this.content_div.height() - 150 ); //During merge, this wasn't in MASTER branch.
 	},
 
 	getGridColumns: function( gridId, callBack ) {
@@ -585,6 +619,6 @@ BaseWizardController.openWizard = function( viewId, templateName ) {
 		var args = {};
 		var template = _.template( result );
 		$( 'body' ).append( template( args ) );
-
+		Global.setUIInitComplete();
 	} );
 };

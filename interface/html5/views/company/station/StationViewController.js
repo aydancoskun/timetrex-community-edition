@@ -416,7 +416,7 @@ StationViewController = BaseViewController.extend( {
 
 		icon.insertAfter( station_input );
 		icon.unbind( 'click' ).bind( 'click', function() {
-			var station_id = LocalCacheData.getStationID();
+			var station_id = Global.getStationID();
 			if ( station_id ) {
 				station_input.setValue( station_id );
 			} else {
