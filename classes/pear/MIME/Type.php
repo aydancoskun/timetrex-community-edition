@@ -78,7 +78,7 @@ class MIME_Type {
      * @param  string $type MIME type
      * @return void
      */
-    function MIME_Type($type = false)
+    function __construct($type = false)
     {
         if ($type) {
             $this->parse($type);

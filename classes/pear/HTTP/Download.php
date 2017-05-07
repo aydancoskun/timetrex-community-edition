@@ -247,7 +247,7 @@ class HTTP_Download
      *
      * @see HTTP_Download::setContentDisposition()
      */
-    function HTTP_Download($params = array())
+    function __construct($params = array())
     {
         $this->HTTP = new HTTP_Header;
         $this->_error = $this->setParams($params);
@@ -761,7 +761,7 @@ class HTTP_Download
      * @param   bool    $guess      whether HTTP_Download::guessContentType()
      *                               should be called
      */
-    function staticSend($params, $guess = false)
+    static function staticSend($params, $guess = false)
     {
         $d = new HTTP_Download();
         $e = $d->setParams($params);
@@ -803,7 +803,7 @@ class HTTP_Download
      * @param   string  $add_path   path that should be prepended to the files
      * @param   string  $strip_path path that should be stripped from the files
      */
-    function sendArchive(   $name,
+    static function sendArchive(   $name,
                             $files,
                             $type       = HTTP_DOWNLOAD_TGZ,
                             $add_path   = '',
@@ -1019,7 +1019,7 @@ class HTTP_Download
      * @static
      * @author Philippe Jausions <jausions@php.net>
      */
-    function sortChunks(&$chunks)
+    static function sortChunks(&$chunks)
     {
         $sortFunc = create_function('$a,$b',
             'if ($a[0] == $b[0]) {
@@ -1045,7 +1045,7 @@ class HTTP_Download
      * @static
      * @author Philippe Jausions <jausions@php.net>
      */
-    function mergeChunks($chunks)
+    static function mergeChunks($chunks)
     {
         do {
             $count = count($chunks);

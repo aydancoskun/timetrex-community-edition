@@ -215,8 +215,15 @@ HomeViewController = Backbone.View.extend( {
 	},
 
 	selectContextMenu: function() {
-		var ribbon = $( TopMenuManager.ribbon_view_controller.el );
-		ribbon.tabs( {selected: this.viewId + 'ContextMenu'} );
+		//This code is also in BaseViewController
+		//Error: Uncaught TypeError: Cannot read property 'el' of null in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-113526 line 1880
+		if ( TopMenuManager.selected_menu_id !== this.viewId + 'ContextMenu' && TopMenuManager.ribbon_view_controller ) {
+			var ribbon = $( TopMenuManager.ribbon_view_controller.el );
+			// Error: Object doesn't support property or method 'tabs' in /interface/html5/views/BaseViewController.js?v=8.0.6-20150417-083849 line 2032
+			if ( ribbon ) {
+				ribbon.tabs( {selected: this.viewId + 'ContextMenu'} );
+			}
+		}
 	},
 
 	//Call this when select grid row

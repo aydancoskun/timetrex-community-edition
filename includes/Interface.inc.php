@@ -114,15 +114,6 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 			$current_company = $clf->getByID( $current_user->getCompany() )->getCurrent();
 		}
 
-		//Check to make sure the logged in user's information is all up to date.
-		//Make sure they also have permissions to edit information, otherwise don't redirect them.
-		if ( $current_user->isInformationComplete() == FALSE
-				AND ( !stristr( $_SERVER['SCRIPT_NAME'], 'permissiondenied') AND !stristr( $_SERVER['SCRIPT_NAME'], 'logout') AND !stristr( $_SERVER['SCRIPT_NAME'], 'about') AND !stristr( $_SERVER['SCRIPT_NAME'], 'punch.php') AND !stristr( $_SERVER['SCRIPT_NAME'], 'ajax_server') AND !stristr( $_SERVER['SCRIPT_NAME'], 'global.js') AND !stristr( $_SERVER['SCRIPT_NAME'], 'menu.js') AND !stristr( $_SERVER['SCRIPT_NAME'], 'embeddeddocument') AND !stristr( $_SERVER['SCRIPT_NAME'], 'send_file') AND !stristr( $_SERVER['SCRIPT_NAME'], 'upload_file') )
-				AND !isset($_GET['incomplete']) AND !isset($_POST['incomplete'])
-				AND ($permission->Check('user', 'enabled') AND ( $permission->Check('user', 'edit') OR $permission->Check('user', 'edit_own') OR $permission->Check('user', 'edit_child')) ) ) {
-			Redirect::Page( URLBuilder::getURL( array('id' => $current_user->getID(), 'incomplete' => 1 ), Environment::GetBaseURL().'users/EditUser.php') );
-		}
-
 		$db_time_zone_error = FALSE;
 		$current_user_prefs = $current_user->getUserPreferenceObject();
 
@@ -163,49 +154,23 @@ if ( isset($authenticate) AND $authenticate === FALSE ) {
 			TTi18n::setLocale(); //Sets master locale
 		}
 
-		if ( $current_user->isInformationComplete() == TRUE
-				AND $current_user_prefs->isPreferencesComplete() == FALSE
-				AND ( !stristr( $_SERVER['SCRIPT_NAME'], 'permissiondenied') AND !stristr( $_SERVER['SCRIPT_NAME'], 'logout') AND !stristr( $_SERVER['SCRIPT_NAME'], 'about') AND !stristr( $_SERVER['SCRIPT_NAME'], 'punch.php') AND !stristr( $_SERVER['SCRIPT_NAME'], 'ajax_server') AND !stristr( $_SERVER['SCRIPT_NAME'], 'global.js') AND !stristr( $_SERVER['SCRIPT_NAME'], 'menu.js') )
-				AND !isset($_GET['incomplete']) AND !isset($_POST['incomplete'])
-				AND ($permission->Check('user_preference', 'enabled') AND ( $permission->Check('user_preference', 'edit') OR $permission->Check('user_preference', 'edit_child') OR $permission->Check('user_preference', 'edit_own') ) ) ) {
-			Redirect::Page( URLBuilder::getURL( array('incomplete' => 1 ), Environment::GetBaseURL().'users/EditUserPreference.php') );
-		}
-
-		//Handle station functionality
-		if ( isset( $_COOKIE['StationID'] ) ) {
-			Debug::text('Station ID Cookie found! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
-
-			$slf = new StationListFactory();
-			$slf->getByStationIdandCompanyId( $_COOKIE['StationID'], $current_company->getId() );
-			$current_station = $slf->getCurrent();
-			unset($slf);
-			if ( $current_station->isNew() ) {
-				Debug::text('Station ID is NOT IN DB!! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
-			}
-		} else {
-			Debug::text('No Station cookie defined... User ID: '. $current_user->getId(), __FILE__, __LINE__, __METHOD__, 10);
-			$current_station = NULL; //No station cookie defined, make sure we at least initialize the variable.
-		}
+//		//Handle station functionality
+//		if ( isset( $_COOKIE['StationID'] ) ) {
+//			Debug::text('Station ID Cookie found! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
+//
+//			$slf = new StationListFactory();
+//			$slf->getByStationIdandCompanyId( $_COOKIE['StationID'], $current_company->getId() );
+//			$current_station = $slf->getCurrent();
+//			unset($slf);
+//			if ( $current_station->isNew() ) {
+//				Debug::text('Station ID is NOT IN DB!! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
+//			}
+//		} else {
+//			Debug::text('No Station cookie defined... User ID: '. $current_user->getId(), __FILE__, __LINE__, __METHOD__, 10);
+//			$current_station = NULL; //No station cookie defined, make sure we at least initialize the variable.
+//		}
 		//Debug::Arr($current_station, 'Current Station Object: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('Current Company: '. $current_company->getName(), __FILE__, __LINE__, __METHOD__, 10);
-
-		//Make sure CronJobs are running correctly.
-		$cjlf = new CronJobListFactory();
-		$cjlf->getMostRecentlyRun();
-		if ( $cjlf->getRecordCount() > 0 ) {
-			//Is last run job more then 48hrs old?
-			$cj_obj = $cjlf->getCurrent();
-
-			if ( PRODUCTION == TRUE
-					AND DEMO_MODE == FALSE
-					AND $cj_obj->getLastRunDate() < ( time() - 172800 )
-					AND $cj_obj->getCreatedDate() < ( time() - 172800 ) ) {
-				$cron_out_of_date = 1;
-			} else {
-				$cron_out_of_date = 0;
-			}
-		}
-		unset($cjlf, $cj_obj);
 
 		$profiler->stopTimer( 'Interface.inc - Post-Authentication' );
 	} else {
@@ -282,54 +247,10 @@ $smarty->assign('MOBILE_BROWSER', Misc::detectMobileBrowser() );
 if ( isset($current_user) )  {
 	$smarty->assign_by_ref('current_user', $current_user );
 	$smarty->assign_by_ref('current_user_prefs', $current_user_prefs );
-
-	if ( !isset($skip_message_check) ) {
-		$profiler->startTimer( 'Interface.inc - Check for UNREAD messages...');
-
-		//CHeck for unread messages
-		/*
-		$mlf = new MessageListFactory();
-		$unread_messages = $mlf->getNewMessagesByUserId( $current_user->getId() );
-		*/
-		$mclf = new MessageControlListFactory();
-		$unread_messages = $mclf->getNewMessagesByCompanyIdAndUserId( $current_user->getCompany(), $current_user->getId() );
-		Debug::text('UnRead Messages: '. $unread_messages, __FILE__, __LINE__, __METHOD__, 10);
-		$smarty->assign_by_ref('unread_messages', $unread_messages );
-		if ( isset($_COOKIE['newMailPopUp']) ) {
-			$smarty->assign_by_ref('newMailPopUp', $_COOKIE['newMailPopUp'] );
-		}
-		unset($mclf);
-		$profiler->stopTimer( 'Interface.inc - Check for UNREAD messages...');
-
-		$profiler->startTimer( 'Interface.inc - Check for Exceptions');
-
-		$elf = new ExceptionListFactory();
-		$elf->getFlaggedExceptionsByUserIdAndPayPeriodStatus( $current_user->getId(), 10 );
-		$display_exception_flag = FALSE;
-		if ( $elf->getRecordCount() > 0 ) {
-			foreach($elf as $e_obj) {
-				if ( $e_obj->getColumn('severity_id') == 30 ) {
-					$display_exception_flag = 'red';
-				} elseif ( $e_obj->getColumn('severity_id') == 20 ) {
-					$display_exception_flag = 'yellow';
-				}
-				break;
-			}
-		}
-		unset($elf, $e_obj);
-
-		if ( isset($display_exception_flag) ) {
-			Debug::text('Exception Flag to Display: '. $display_exception_flag, __FILE__, __LINE__, __METHOD__, 10);
-			$smarty->assign_by_ref('display_exception_flag', $display_exception_flag );
-			//Make sure we leave this variable around for the menu.js.php.
-		}
-
-		$profiler->stopTimer( 'Interface.inc - Check for Exceptions');
-	}
 }
-if ( isset($current_station) ) {
-	$smarty->assign_by_ref('current_station', $current_station );
-}
+//if ( isset($current_station) ) {
+//	$smarty->assign_by_ref('current_station', $current_station );
+//}
 
 $smarty->assign('BASE_URL', Environment::getBaseURL() );
 $smarty->assign('profiler', $profiler );

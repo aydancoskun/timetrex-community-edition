@@ -1168,6 +1168,8 @@ class Install {
 				Debug::text('Webserver running as User: '. $user['name'], __FILE__, __LINE__, __METHOD__, 9);
 
 				return $user['name'];
+			} else {
+				Debug::text('POSIX extension not installed, unable to determine webserver user...', __FILE__, __LINE__, __METHOD__, 9);
 			}
 		}
 
@@ -1310,26 +1312,6 @@ class Install {
 		@include_once('PEAR.php');
 
 		if ( class_exists('PEAR') ) {
-			return 0;
-		}
-
-		return 1;
-	}
-
-	function checkPEARHTML_Progress() {
-		include_once('HTML/Progress.php');
-
-		if ( class_exists('HTML_Progress') ) {
-			return 0;
-		}
-
-		return 1;
-	}
-
-	function checkPEARHTML_AJAX() {
-		include_once('HTML/AJAX/Server.php');
-
-		if ( class_exists('HTML_AJAX_Server') ) {
 			return 0;
 		}
 

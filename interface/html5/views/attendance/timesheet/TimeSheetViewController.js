@@ -1547,7 +1547,10 @@ TimeSheetViewController = BaseViewController.extend( {
 			init_data_immediately: true,
 			default_args: default_args,
 			show_search_inputs: true,
-			always_include_columns: ['default_branch_id', 'default_department_id', 'default_job_id', 'default_job_item_id']
+			always_include_columns: ['default_branch_id', 'default_department_id', 'default_job_id', 'default_job_item_id'],
+			setRealValueCallBack: (function( val ) {
+				$this.userValueSet(val);
+			})
 		} );
 
 		navigation_widget_div.append( this.employee_nav );
@@ -1993,7 +1996,6 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 			$this.api_timesheet.getTimeSheetData( user_id, start_date_string, args, {
 				onResult: function( result ) {
-
 					$this.full_timesheet_data = result.getResult();
 
 					if ( $this.full_timesheet_data === true || !$this.full_timesheet_data.hasOwnProperty( 'timesheet_dates' ) ) {
@@ -5570,12 +5572,17 @@ TimeSheetViewController = BaseViewController.extend( {
 			if ( !date ) continue;
 			date_string = date.format( this.full_format );
 
-			accumulated_time = accumulated_user_date_total_data[key].accumulated_time;
-			var branch_time = accumulated_user_date_total_data[key].branch_time;
-			var department_time = accumulated_user_date_total_data[key].department_time;
-			var job_time = accumulated_user_date_total_data[key].job_time;
-			var job_item_time = accumulated_user_date_total_data[key].job_item_time;
-			premium_time = accumulated_user_date_total_data[key].premium_time;
+			//Error: Uncaught TypeError: Cannot read property 'accumulated_time' of undefined
+			if ( typeof accumulated_user_date_total_data[key] != 'undefined' ) {
+				accumulated_time = accumulated_user_date_total_data[key].accumulated_time;
+				var branch_time = accumulated_user_date_total_data[key].branch_time;
+				var department_time = accumulated_user_date_total_data[key].department_time;
+				var job_time = accumulated_user_date_total_data[key].job_time;
+				var job_item_time = accumulated_user_date_total_data[key].job_item_time;
+				premium_time = accumulated_user_date_total_data[key].premium_time;
+			} else {
+				Debug.Text( 'ERROR: accumulated_user_date_total_data[key] is null or undefined!', 'TimesheetViewController.js', 'TimesheetViewController', 'buildSubGridsSource', 1 );
+			}
 
 			if ( Global.isSet( accumulated_time ) ) {
 				this.buildSubGridsData( accumulated_time, date_string, this.accumulated_time_source_map, this.accumulated_time_source, 'accumulated_time' );
@@ -6542,6 +6549,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			if ( LocalCacheData.all_url_args.user_id ) {
 				this.employee_nav.setValue( LocalCacheData.all_url_args.user_id );
 			}
+
 			if ( !LocalCacheData.last_timesheet_selected_date ) { //Saved current select date in cache. so still select last select date when go to other view and back
 				if ( LocalCacheData.current_selet_date && Global.strToDate( LocalCacheData.current_selet_date, 'YYYYMMDD' ) ) { //Select date get from URL.
 					this.setDatePickerValue( Global.strToDate( LocalCacheData.current_selet_date, 'YYYYMMDD' ).format() );
@@ -6569,17 +6577,20 @@ TimeSheetViewController = BaseViewController.extend( {
 		var default_date = this.start_date_picker.getDefaultFormatValue();
 
 		if ( !this.edit_view &&
-			(window.location.href.indexOf( 'date=' + default_date ) === -1 || window.location.href.indexOf( 'user_id=' + this.getSelectEmployee() === -1 )) ) {
+			//Removing date from the generated URLs to avoid bookmarking to stale dates by users.
+			//(window.location.href.indexOf( 'date=' + default_date ) === -1 || window.location.href.indexOf( 'user_id=' + this.getSelectEmployee() === -1 )) ) {
+			( window.location.href.indexOf( 'user_id=' + this.getSelectEmployee() === -1 )) ) {
 
-			var location = Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + default_date + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
+			//var location = Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + default_date + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
+			var location = Global.getBaseURL() + '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
 
 			if ( LocalCacheData.all_url_args ) {
 				for ( var key in LocalCacheData.all_url_args ) {
-					if ( key === 'm' || key === 'date' || key === 'user_id' || key === 'show_wage' || key === 'mode' ) {
+					//if ( key === 'm' || key === 'date' || key === 'user_id' || key === 'show_wage' || key === 'mode' ) {
+					if ( key === 'm' || key === 'user_id' || key === 'show_wage' || key === 'mode' ) {
 						continue;
 					}
 					location = location + '&' + key + '=' + LocalCacheData.all_url_args[key];
-
 				}
 			}
 
@@ -6736,7 +6747,8 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	reSetURL: function() {
-		var args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
+		//var args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
+		var args = '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue();
 		Global.setURLToBrowser( Global.getBaseURL() + args );
 		LocalCacheData.all_url_args = IndexViewController.instance.router.buildArgDic( args.split( '&' ) );
 	},
@@ -7090,11 +7102,11 @@ TimeSheetViewController = BaseViewController.extend( {
 		if ( this.current_edit_record && this.current_edit_record.id ) {
 
 			if ( a ) {
-				Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&a=' + a + '&id=' + this.current_edit_record.id + '&t=' + t +
-				'&tab=' + tab_name );
-
+				//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&a=' + a + '&id=' + this.current_edit_record.id + '&t=' + t +
+				Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&a=' + a + '&id=' + this.current_edit_record.id + '&t=' + t + '&tab=' + tab_name );
 			} else {
-				Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&id=' + this.current_edit_record.id + '&t=' + t );
+				//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&id=' + this.current_edit_record.id + '&t=' + t );
+				Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&id=' + this.current_edit_record.id + '&t=' + t );
 			}
 
 			Global.trackView();
@@ -7102,10 +7114,11 @@ TimeSheetViewController = BaseViewController.extend( {
 		} else {
 
 			if ( a ) {
-				Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&a=' + a + '&t=' + t +
-				'&tab=' + tab_name );
+				//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&a=' + a + '&t=' + t +
+				Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&a=' + a + '&t=' + t + '&tab=' + tab_name );
 			} else {
-				Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&t=' + t );
+				//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&t=' + t );
+				Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&user_id=' + this.getSelectEmployee() + '&show_wage=' + this.wage_btn.getValue( true ) + '&mode=' + this.toggle_button.getValue() + '&t=' + t );
 			}
 
 		}
@@ -8960,6 +8973,15 @@ TimeSheetViewController = BaseViewController.extend( {
 			context_btn.addClass( 'disable-image' );
 		}
 	},
+
+	userValueSet: function(val) {
+		//If the value here is null, the timesheet data will be missing therefore we want to force the value to the currently logged in user.
+		//Mostly caused when developers switch instances or databases during testing.
+		if ( typeof val == 'undefined' ) {
+			this.employee_nav.setValue( LocalCacheData.getLoginUser() );
+			Debug.Text('ERROR: Invalid User ID in URL. Switching to current User ID.', 'TimesheetViewConroller.js', 'TimesheetViewConroller', 'userValueSet', 10);
+		}
+	}
 
 } );
 

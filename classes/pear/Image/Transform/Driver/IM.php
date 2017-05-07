@@ -52,15 +52,6 @@ class Image_Transform_Driver_IM extends Image_Transform
     /**
      * Class constructor
      */
-    function Image_Transform_Driver_IM()
-    {
-        $this->__construct();
-    } // End Image_IM
-
-
-    /**
-     * Class constructor
-     */
     function __construct()
     {
         $this->_init();

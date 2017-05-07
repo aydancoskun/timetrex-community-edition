@@ -40,7 +40,7 @@ $GLOBALS['_Payment_Process_TrustCommerce'] = array(
  * that you use it in a production envorinment without further testing.
  *
  * @package Payment_Process
- * @author Robert Peake <robert.peake@trustcommerce.com> 
+ * @author Robert Peake <robert.peake@trustcommerce.com>
  * @version @version@
  */
 class Payment_Process_TrustCommerce extends Payment_Process_Common {
@@ -134,11 +134,6 @@ class Payment_Process_TrustCommerce extends Payment_Process_Common {
         $this->_driver = 'TrustCommerce';
     }
 
-    function Payment_Process_TrustCommerce($options = false)
-    {
-        $this->__construct($options);
-    }
-
     /**
      * Process the transaction.
      *
@@ -155,7 +150,7 @@ class Payment_Process_TrustCommerce extends Payment_Process_Common {
         // Prepare the data
         $result = $this->_prepare();
         if (PEAR::isError($result)) {
-            return $result; 
+            return $result;
         }
 
         // Don't die partway through
@@ -207,7 +202,7 @@ class Payment_Process_TrustCommerce extends Payment_Process_Common {
         PEAR::popErrorHandling();
 
         $response = Payment_Process_Result::factory($this->_driver,
-                                                     $this->_responseBody, 
+                                                     $this->_responseBody,
                                                      $this);
 
         if (!PEAR::isError($response)) {
@@ -260,7 +255,7 @@ class Payment_Process_TrustCommerce extends Payment_Process_Common {
         }
         /* end amount mangle */
 
-        if ($this->_payment->getType() == 'CreditCard' && 
+        if ($this->_payment->getType() == 'CreditCard' &&
             $this->action != PAYMENT_PROCESS_ACTION_POSTAUTH) {
             $data['media'] = 'cc';
         }
@@ -277,7 +272,7 @@ class Payment_Process_TrustCommerce extends Payment_Process_Common {
                 $sets[] = $key.'='.urlencode($val);
             }
         }
-        
+
         $this->_options['authorizeUri'] = 'https://vault.trustcommerce.com/trans/?'.implode('&',$sets);
 
         return $return;
@@ -295,7 +290,7 @@ class Payment_Process_Result_TrustCommerce extends Payment_Process_Result {
     /**
      * TrustCommerce status codes
      *
-     * This array holds response codes. 
+     * This array holds response codes.
      *
      * @see getStatusText()
      * @access private
@@ -345,7 +340,7 @@ class Payment_Process_Result_TrustCommerce extends Payment_Process_Result {
     );
 
 
-    function Payment_Process_Response_TrustCommerce($rawResponse) 
+    function Payment_Process_Response_TrustCommerce($rawResponse)
     {
         $this->Payment_Process_Response($rawResponse);
     }
@@ -369,7 +364,7 @@ class Payment_Process_Result_TrustCommerce extends Payment_Process_Result {
         foreach($this->_fieldMap as $key => $val) {
             $this->$val = $responseArray[$key];
         }
-        if (!isset($this->_statusCodeMessages[$this->messageCode])) 
+        if (!isset($this->_statusCodeMessages[$this->messageCode]))
         {
             $message = $this->_statusCodeMessages[$responseArray['status']];
             if($responseArray['error'])
@@ -381,7 +376,7 @@ class Payment_Process_Result_TrustCommerce extends Payment_Process_Result {
                 }
             }
             $this->_statusCodeMessages[$this->messageCode] = $message;
-        } 
+        }
     }
 }
 ?>

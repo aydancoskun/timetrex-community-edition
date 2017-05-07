@@ -626,6 +626,11 @@
 				//id is a public member of this class which contains the field id, so we wrapped 'id' in quotes here to show it's not the public member from above.
 				filter.filter_data = {'id': val};
 
+				//#2289 - If you have an employee who can view subordinate punches but not view subordinate employee, you will see permission denied without sending the permission section.
+				if ( default_args && Global.isSet( default_args.permission_section ) ) {
+					filter.permission_section = default_args.permission_section;
+				}
+
 				if ( this.customSearchFilter ) {
 					filter = this.customSearchFilter( filter );
 				}
@@ -1530,7 +1535,7 @@
 					}
 				}
 
-				if ( Global.isSet( args_from_saved_layout.permission_section ) ) {
+				if ( args_from_saved_layout && Global.isSet( args_from_saved_layout.permission_section ) ) {
 					args.permission_section = args_from_saved_layout.permission_section;
 				}
 
@@ -1554,7 +1559,7 @@
 					}
 				}
 
-				if ( Global.isSet( default_args.permission_section ) ) {
+				if ( default_args && Global.isSet( default_args.permission_section ) ) {
 					args.permission_section = default_args.permission_section;
 				}
 

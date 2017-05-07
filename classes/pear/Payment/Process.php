@@ -463,7 +463,7 @@ class Payment_Process_Result {
      */
     var $cvvMessage = 'No CVV message from gateway';
 
-    function Payment_Process_Result($rawResponse, $request)
+    function __construct($rawResponse, $request)
     {
         $this->_rawResponse = $rawResponse;
         $this->_request = $request;

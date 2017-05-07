@@ -56,7 +56,7 @@ class Image_Transform_Driver_Imagick extends Image_Transform
      *
      *
      */
-    function Image_Transform_Driver_Imagick()
+    function __construct()
     {
         if (!PEAR::loadExtension('imagick')) {
             return PEAR::raiseError('The imagick extension can not be found.', true);

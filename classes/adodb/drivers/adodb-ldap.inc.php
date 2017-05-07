@@ -1,6 +1,8 @@
 <?php
 /*
-  V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights reserved.
+  @version   v5.20.9  21-Dec-2016
+  @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
+  @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
    Released under both BSD license and Lesser GPL library license.
   Whenever there is any discrepancy between the two licenses,
   the BSD license will take precedence.
@@ -43,7 +45,7 @@ class ADODB_ldap extends ADOConnection {
 	# error on binding, eg. "Binding: invalid credentials"
 	var $_bind_errmsg = "Binding: %s";
 
-	function ADODB_ldap()
+	function __construct()
 	{
 	}
 
@@ -292,7 +294,7 @@ class ADORecordSet_ldap extends ADORecordSet{
 	var $canSeek = false;
 	var $_entryID; /* keeps track of the entry resource identifier */
 
-	function ADORecordSet_ldap($queryID,$mode=false)
+	function __construct($queryID,$mode=false)
 	{
 		if ($mode === false) {
 			global $ADODB_FETCH_MODE;
@@ -313,7 +315,7 @@ class ADORecordSet_ldap extends ADORecordSet{
 			break;
 		}
 
-		$this->ADORecordSet($queryID);
+		parent::__construct($queryID);
 	}
 
 	function _initrs()
@@ -349,7 +351,7 @@ class ADORecordSet_ldap extends ADORecordSet{
 		return $results;
 	}
 
-	function GetRowAssoc()
+	function GetRowAssoc($upper = ADODB_ASSOC_CASE)
 	{
 		$results = array();
 		foreach ( $this->fields as $k=>$v ) {

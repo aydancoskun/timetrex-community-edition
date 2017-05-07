@@ -681,8 +681,6 @@ class Authentication {
 			}
 
 			if ( $password_result === TRUE ) {
-				Debug::text('Login Succesful for User Name: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
-
 				$this->setType( $type );
 				$this->setSessionID( $this->genSessionID() );
 				$this->setIPAddress();
@@ -694,6 +692,8 @@ class Authentication {
 
 				//Write data to db.
 				$this->Write();
+
+				Debug::text('Login Succesful for User Name: '. $user_name .' Session ID: Cookie: '. $this->getSessionID() .' DB: '. $this->encryptSessionID( $this->getSessionID() ), __FILE__, __LINE__, __METHOD__, 10);
 
 				//Only update last_login_date when using user_name to login to the web interface.
 				if ( $type == 'user_name' ) {

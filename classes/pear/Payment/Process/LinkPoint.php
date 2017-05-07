@@ -14,7 +14,7 @@
  *
  * @category   Payment
  * @package    Payment_Process
- * @author     Joe Stump <joe@joestump.net> 
+ * @author     Joe Stump <joe@joestump.net>
  * @copyright  1997-2005 The PHP Group
  * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
  * @version    CVS: $Revision: 1.13 $
@@ -149,22 +149,9 @@ class Payment_Process_LinkPoint extends Payment_Process_Common
     }
 
     /**
-     * Payment_Process_LinkPoint
-     *
-     * @author Joe Stump <joe@joestump.net>
-     * @access public
-     * @param array $options
-     * @return void
-     */
-    function Payment_Process_LinkPoint($options = false)
-    {
-        $this->__construct($options);
-    }
-
-    /**
      * Process the transaction.
      *
-     * @author Joe Stump <joe@joestump.net> 
+     * @author Joe Stump <joe@joestump.net>
      * @access public
      * @return mixed Payment_Process_Result on success, PEAR_Error on failure
      */
@@ -337,8 +324,8 @@ class Payment_Process_LinkPoint extends Payment_Process_Common
 
 /**
  * Payment_Process_Result_LinkPoint
- * 
- * LinkPoint result class 
+ *
+ * LinkPoint result class
  *
  * @author Joe Stump <joe@joestump.net>
  * @package Payment_Process
@@ -456,7 +443,7 @@ class Payment_Processor_LinkPoint_XML_Parser extends XML_Parser
 {
     /**
      * $response
-     * 
+     *
      * @var array $response Raw response as an array
      * @access public
      */
@@ -478,7 +465,7 @@ class Payment_Processor_LinkPoint_XML_Parser extends XML_Parser
      * @return void
      * @see XML_Parser
      */
-    function Payment_Processor_LinkPoint_XML_Parser()
+    function __construct()
     {
         $this->XML_Parser();
     }

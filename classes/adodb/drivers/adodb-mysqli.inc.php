@@ -1,12 +1,18 @@
 <?php
 /*
-V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights reserved.
+@version   v5.20.9  21-Dec-2016
+@copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
+@copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
   Whenever there is any discrepancy between the two licenses,
   the BSD license will take precedence.
   Set tabs to 8.
 
-  MySQL code that does not support transactions. Use mysqlt if you need transactions.
+  This is the preferred driver for MySQL connections, and supports both transactional
+  and non-transactional table types. You can use this as a drop-in replacement for both
+  the mysql and mysqlt drivers. As of ADOdb Version 5.20.0, all other native MySQL drivers
+  are deprecated
+
   Requires mysql client. Works on Windows and Unix.
 
 21 October 2003: MySQLi extension implementation by Arjen de Rijke (a.de.rijke@xs4all.nl)
@@ -57,7 +63,7 @@ class ADODB_mysqli extends ADOConnection {
 	var $arrayClass = 'ADORecordSet_array_mysqli';
 	var $multiQuery = false;
 
-	function ADODB_mysqli()
+	function __construct()
 	{
 		// if(!extension_loaded("mysqli"))
 		//trigger_error("You must have the mysqli extension installed.", E_USER_ERROR);
@@ -112,7 +118,8 @@ class ADODB_mysqli extends ADOConnection {
 					$argUsername,
 					$argPassword,
 					$argDatabasename,
-					$this->port,
+					# PHP7 compat: port must be int. Use default port if cast yields zero
+					(int)$this->port != 0 ? (int)$this->port : 3306,
 					$this->socket,
 					$this->clientFlags);
 
@@ -878,7 +885,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	var $databaseType = "mysqli";
 	var $canSeek = true;
 
-	function ADORecordSet_mysqli($queryID, $mode = false)
+	function __construct($queryID, $mode = false)
 	{
 		if ($mode === false) {
 			global $ADODB_FETCH_MODE;
@@ -899,7 +906,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 				break;
 		}
 		$this->adodbFetchMode = $mode;
-		$this->ADORecordSet($queryID);
+		parent::__construct($queryID);
 	}
 
 	function _initrs()
@@ -954,10 +961,11 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		return $o;
 	}
 
-	function GetRowAssoc($upper = true)
+	function GetRowAssoc($upper = ADODB_ASSOC_CASE)
 	{
-		if ($this->fetchMode == MYSQLI_ASSOC && !$upper)
+		if ($this->fetchMode == MYSQLI_ASSOC && $upper == ADODB_ASSOC_CASE_LOWER) {
 			return $this->fields;
+		}
 		$row = ADORecordSet::GetRowAssoc($upper);
 		return $row;
 	}
@@ -1026,7 +1034,10 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		$this->_currentRow++;
 		$this->fields = @mysqli_fetch_array($this->_queryID,$this->fetchMode);
 
-		if (is_array($this->fields)) return true;
+		if (is_array($this->fields)) {
+			$this->_updatefields();
+			return true;
+		}
 		$this->EOF = true;
 		return false;
 	}
@@ -1034,6 +1045,7 @@ class ADORecordSet_mysqli extends ADORecordSet{
 	function _fetch()
 	{
 		$this->fields = mysqli_fetch_array($this->_queryID,$this->fetchMode);
+		$this->_updatefields();
 		return is_array($this->fields);
 	}
 
@@ -1042,11 +1054,15 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		//if results are attached to this pointer from Stored Proceedure calls, the next standard query will die 2014
 		//only a problem with persistant connections
 
-		while(mysqli_more_results($this->connection->_connectionID)){
-			@mysqli_next_result($this->connection->_connectionID);
+		if(isset($this->connection->_connectionID) && $this->connection->_connectionID instanceof MySQLi) {
+			while(@mysqli_more_results($this->connection->_connectionID)){
+				@mysqli_next_result($this->connection->_connectionID);
+			}
 		}
 
-		mysqli_free_result($this->_queryID);
+		if($this->_queryID instanceof mysqli_result) {
+			@mysqli_free_result($this->_queryID);
+		}
 		$this->_queryID = false;
 	}
 
@@ -1098,12 +1114,12 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		case 'ENUM':
 		case 'SET':
 
-		case MYSQLI_TYPE_TINY_BLOB:
+		case MYSQLI_TYPE_TINY_BLOB :
 		#case MYSQLI_TYPE_CHAR :
-		case MYSQLI_TYPE_STRING:
-		case MYSQLI_TYPE_ENUM:
-		case MYSQLI_TYPE_SET:
-		case 253:
+		case MYSQLI_TYPE_STRING :
+		case MYSQLI_TYPE_ENUM :
+		case MYSQLI_TYPE_SET :
+		case 253 :
 			if ($len <= $this->blobSize) return 'C';
 
 		case 'TEXT':
@@ -1123,20 +1139,20 @@ class ADORecordSet_mysqli extends ADORecordSet{
 		case MYSQLI_TYPE_MEDIUM_BLOB :
 			return !empty($fieldobj->binary) ? 'B' : 'X';
 
-		case 'YEAR':
-		case 'DATE':
-		case MYSQLI_TYPE_DATE :
-		case MYSQLI_TYPE_YEAR :
-			return 'D';
-		   
-		//Handle geometry types as raw metatype, as they need to be unmolested strings with functions often.
+		//Handle geometry types as strings as they need to be passed through to the database unmodified with functions often.
 		case MYSQLI_TYPE_GEOMETRY:
 		case 'GEOMETRY':
 		case 'POINT':
 		case 'LINESTRING':
 		case 'POLYGON':
 			return 'Z';
-		   
+
+		case 'YEAR':
+		case 'DATE':
+		case MYSQLI_TYPE_DATE :
+		case MYSQLI_TYPE_YEAR :
+			return 'D';
+
 		case 'TIME':
 		case 'DATETIME':
 		case 'TIMESTAMP':
@@ -1183,9 +1199,9 @@ class ADORecordSet_mysqli extends ADORecordSet{
 
 class ADORecordSet_array_mysqli extends ADORecordSet_array {
 
-	function ADORecordSet_array_mysqli($id=-1,$mode=false)
+	function __construct($id=-1,$mode=false)
 	{
-		$this->ADORecordSet_array($id,$mode);
+		parent::__construct($id,$mode);
 	}
 
 	function MetaType($t, $len = -1, $fieldobj = false)

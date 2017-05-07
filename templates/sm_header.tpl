@@ -21,10 +21,6 @@ function help_window(group) {
 
 <body id="body" onLoad="{$body_onload};{if $is_report != TRUE}firstElementFocus();{/if}">
 
-{if $enable_ajax == TRUE}
-<script type='text/javascript' src='{$BASE_URL}ajax_server.php?client=all&stub=AJAX_Server'></script>
-{/if}
-
 {if $enable_calendar == TRUE}
 <style type="text/css">@import url({$BASE_URL}jscalendar/skins/aqua/theme.css);</style>
 <script type="text/javascript" src="{$BASE_URL}jscalendar/calendar.js"></script>

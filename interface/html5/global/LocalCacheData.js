@@ -258,6 +258,17 @@ LocalCacheData.getPortalLoginUser = function() {
 LocalCacheData.setLoginUser = function( val ) {
 	LocalCacheData.setLocalCache( 'loginUser', val, 'JSON' );
 };
+LocalCacheData.setPunchLoginUser = function( val ) {
+	LocalCacheData.setLocalCache( 'punchLoginUser', val, 'JSON' );
+};
+
+LocalCacheData.getPunchLoginUser = function() {
+	return LocalCacheData.getLocalCache( 'punchLoginUser', 'JSON' );
+};
+
+LocalCacheData.setPortalLoginUser = function( val ) {
+	LocalCacheData.setLocalCache( 'portalLoginUser', val, 'JSON' );
+};
 
 LocalCacheData.setPortalLoginUser = function( val ) {
 	LocalCacheData.setLocalCache( 'portalLoginUser', val, 'JSON' );
@@ -343,7 +354,9 @@ LocalCacheData.cleanNecessaryCache =  function() {
 	LocalCacheData.last_timesheet_selected_date = null;
 	//JS load Optimize
 	if ( LocalCacheData.loadViewRequiredJSReady ) {
-		ALayoutCache.layout_dic = {};
+		if ( typeof ALayoutCache !== 'undefined' ) {
+			ALayoutCache.layout_dic = {};
+		}
 	}
 	LocalCacheData.view_layout_cache = {};
 	LocalCacheData.result_cache = {};

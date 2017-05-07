@@ -1,6 +1,8 @@
 <?php
 /*
-V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights reserved.
+@version   v5.20.9  21-Dec-2016
+@copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
+@copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
   Whenever there is any discrepancy between the two licenses,
   the BSD license will take precedence.
@@ -31,7 +33,7 @@ class ADODB_sqlite extends ADOConnection {
 	var $sysTimeStamp = "adodb_date('Y-m-d H:i:s')";
 	var $fmtTimeStamp = "'Y-m-d H:i:s'";
 
-	function ADODB_sqlite()
+	function __construct()
 	{
 	}
 
@@ -213,6 +215,11 @@ class ADODB_sqlite extends ADOConnection {
 		if (!$rez) {
 			$this->_errorNo = sqlite_last_error($this->_connectionID);
 		}
+		// If no data was returned, we don't need to create a real recordset
+		// Note: this code is untested, as I don't have a sqlite2 setup available
+		elseif (sqlite_num_fields($rez) == 0) {
+			$rez = true;
+		}
 
 		return $rez;
 	}
@@ -283,7 +290,7 @@ class ADODB_sqlite extends ADOConnection {
 	}
 
 	var $_dropSeqSQL = 'drop table %s';
-	function DropSequence($seqname)
+	function DropSequence($seqname = 'adodbseq')
 	{
 		if (empty($this->_dropSeqSQL)) {
 			return false;
@@ -297,7 +304,7 @@ class ADODB_sqlite extends ADOConnection {
 		return @sqlite_close($this->_connectionID);
 	}
 
-	function MetaIndexes($table, $primary = FALSE, $owner=false, $owner = false)
+	function MetaIndexes($table, $primary = FALSE, $owner = false)
 	{
 		$false = false;
 		// save old fetch mode
@@ -357,7 +364,7 @@ class ADORecordset_sqlite extends ADORecordSet {
 	var $databaseType = "sqlite";
 	var $bind = false;
 
-	function ADORecordset_sqlite($queryID,$mode=false)
+	function __construct($queryID,$mode=false)
 	{
 
 		if ($mode === false) {

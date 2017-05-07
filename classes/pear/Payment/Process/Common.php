@@ -167,20 +167,6 @@ class Payment_Process_Common {
         $this->setOptions($options);
     }
     // }}}
-    // {{{ Payment_Process_Common($options = false)
-    /**
-     * Payment_Process_Common
-     *
-     * PHP 4.x constructor
-     *
-     * @author Joe Stump <joe@joestump.net>
-     * @access public
-     */
-    function Payment_Process_Common($options = false)
-    {
-        $this->__construct();
-    }
-    // }}}
     // {{{ setPayment(&$payment)
     /**
      * Sets payment

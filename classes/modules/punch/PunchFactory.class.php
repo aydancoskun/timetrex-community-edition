@@ -406,7 +406,7 @@ class PunchFactory extends Factory {
 		$status = trim($status);
 
 		Debug::text(' Status: '. $status, __FILE__, __LINE__, __METHOD__, 10);
-		if ( $this->Validator->inArrayKey(	'status',
+		if ( $this->Validator->inArrayKey(	'status_id',
 											$status,
 											TTi18n::gettext('Incorrect Status'),
 											$this->getOptions('status')) ) {
@@ -477,7 +477,7 @@ class PunchFactory extends Factory {
 	function setType($value) {
 		$value = trim($value);
 
-		if ( $this->Validator->inArrayKey(	'type',
+		if ( $this->Validator->inArrayKey(	'type_id',
 											$value,
 											TTi18n::gettext('Incorrect Type'),
 											$this->getOptions('type')) ) {
@@ -523,12 +523,13 @@ class PunchFactory extends Factory {
 
 		$original_epoch = $epoch;
 
-		Debug::text(' Rounding Timestamp: '. TTDate::getDate('DATE+TIME', $epoch ) .'('. $epoch .') Status ID: '. $this->getStatus() .' Type ID: '. $this->getType(), __FILE__, __LINE__, __METHOD__, 10);
+		$is_transfer = ( ( $this->getTransfer() == TRUE OR $this->getEnableAutoTransfer() ) ? TRUE : FALSE );
 
 		//Punch control is no longer used for rounding.
 		//Check for rounding policies.
 		$riplf = TTnew( 'RoundIntervalPolicyListFactory' );
-		$type_id = $riplf->getPunchTypeFromPunchStatusAndType( $this->getStatus(), $this->getType() );
+		$type_id = $riplf->getPunchTypeFromPunchStatusAndType( $this->getStatus(), $this->getType(), $is_transfer );
+		Debug::text(' Rounding Timestamp: '. TTDate::getDate('DATE+TIME', $epoch ) .'('. $epoch .') Status ID: '. $this->getStatus() .' Type ID: '. $this->getType() .' Round Policy Type: '. $type_id .' Is Transfer: '. (int)$is_transfer, __FILE__, __LINE__, __METHOD__, 10);
 
 		$riplf->getByPolicyGroupUserIdAndTypeId( $this->getUser(), $type_id );
 		Debug::text(' Round Interval Punch Type: '. $type_id .' User: '. $this->getUser() .' Total Records: '. $riplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -887,6 +888,17 @@ class PunchFactory extends Factory {
 			}
 		} else {
 			Debug::text(' NO Rounding Policy(s) Found', __FILE__, __LINE__, __METHOD__, 10);
+
+			//Even when rounding policies don't exist,
+			//  Always round *down* to the nearest minute, no matter what. Even on a transfer punch.
+			//  We used to round to the nearest minute (average), however in v10.5.0 this was changed.
+			//  Instead this mimics what a wall clock would show, for example 8:00:59 shows as 8:00, so if we do average rounding it would record as 8:01 which they may not expect.
+			//  So if we always round down its still fair and consistent, for both IN and OUT punches, but it more closely matches a clock that they may be looking at, assuming its close to the server time at least.
+			//
+			//  **To disable rounding completely and record punches to the exact second, they must create a rounding policy with a interval of 0 and no grace time.
+			//
+			//  This is also done in setTimeStamp() when rounding policies are disabled.
+			$epoch = TTDate::roundTime($epoch, 60, 10); //Round down.
 		}
 
 		Debug::text(' Rounded TimeStamp: '. TTDate::getDate('DATE+TIME', $epoch ) .'('. $epoch .') Original TimeStamp: '. TTDate::getDate('DATE+TIME', $original_epoch ), __FILE__, __LINE__, __METHOD__, 10);
@@ -913,17 +925,22 @@ class PunchFactory extends Factory {
 
 		//We can't disable rounding if its the first IN punch and no transfer actually needs to occur.
 		//Have setTransfer check to see if there is a previous punch and if not, don't allow it to be set.
-		if ( $enable_rounding == TRUE AND ( $this->getTransfer() == FALSE OR $this->getEnableAutoTransfer() == FALSE ) ) {
-			$epoch = $this->roundTimeStamp($epoch);
+		if ( $enable_rounding == TRUE ) {
+				$epoch = $this->roundTimeStamp($epoch);
 		} else {
-			Debug::text(' Rounding Disabled... ', __FILE__, __LINE__, __METHOD__, 10);
-		}
+			Debug::text(' Rounding policies disabled... ', __FILE__, __LINE__, __METHOD__, 10);
 
-		//Always round *down* to the nearest minute, no matter what. Even on a transfer punch.
-		//  We used to round to the nearest minute (average), however in v10.5.0 this was changed.
-		//  Instead this mimics what a wall clock would show, for example 8:00:59 shows as 8:00, so if we do average rounding it would record as 8:01 which they may not expect.
-		//  So if we always round down its still fair and consistent, for both IN and OUT punches, but it more closely matches a clock that they may be looking at, assuming its close to the server time at least.
-		$epoch = TTDate::roundTime($epoch, 60, 10); //Round down.
+			//When rounding is disabled, that just disables rounding policies.
+			//  Still always round *down* to the nearest minute, no matter what. Even on a transfer punch.
+			//  We used to round to the nearest minute (average), however in v10.5.0 this was changed.
+			//  Instead this mimics what a wall clock would show, for example 8:00:59 shows as 8:00, so if we do average rounding it would record as 8:01 which they may not expect.
+			//  So if we always round down its still fair and consistent, for both IN and OUT punches, but it more closely matches a clock that they may be looking at, assuming its close to the server time at least.
+			//
+			//  **To disable rounding completely and record punches to the exact second, they must create a rounding policy with a interval of 0 and no grace time.
+			//
+			//  This is also done in roundTimeStamp() when no rounding policies apply.
+			$epoch = TTDate::roundTime($epoch, 60, 10); //Round down.
+		}
 
 		if	(	$this->Validator->isDate(		'punch_time',
 												$epoch,
@@ -1244,7 +1261,8 @@ class PunchFactory extends Factory {
 			return $this->auto_transfer;
 		}
 
-		return TRUE;
+		return FALSE; //Default to FALSE otherwise roundTimeStamp() will treat it as a transfer punch and only apply the transfer rounding policy type to it.
+		//return TRUE;
 	}
 	function setEnableAutoTransfer($bool) {
 		$this->auto_transfer = $bool;
@@ -1791,12 +1809,12 @@ class PunchFactory extends Factory {
 
 	function Validate( $ignore_warning = TRUE ) {
 		if ( $this->getStatus() == FALSE ) {
-			$this->Validator->isTRUE(	'status',
+			$this->Validator->isTRUE(	'status_id',
 										FALSE,
 										TTi18n::getText('Status not specified'));
 		}
 		if ( $this->getType() == FALSE ) {
-			$this->Validator->isTRUE(	'type',
+			$this->Validator->isTRUE(	'type_id',
 										FALSE,
 										TTi18n::getText('Type not specified'));
 		}
@@ -1878,7 +1896,7 @@ class PunchFactory extends Factory {
 						$pf->setTransfer( TRUE );
 						$pf->setType( $p_obj->getNextType() );
 						$pf->setStatus( 20 ); //Out
-						$pf->setTimeStamp( $this->getTimeStamp(), FALSE ); //Disable rounding.
+						$pf->setTimeStamp( $this->getTimeStamp() ); //Use the exact timestamp from the previous punch so they always match now that transfer punches can round.
 						$pf->setActualTimeStamp( $this->getTimeStamp() );
 						//$pf->setOriginalTimeStamp( $this->getTimeStamp() ); //set in preSave()
 						$pf->setLongitude( $this->getLongitude() );
@@ -2203,6 +2221,9 @@ class PunchFactory extends Factory {
 					switch( $key ) {
 						case 'transfer':
 							$this->$function( $data[$key], $full_time_stamp ); //Assume time_stamp contains date as well.
+							if ( $this->getTransfer() == TRUE ) {
+								$this->setEnableAutoTransfer( TRUE );
+							}
 							break;
 						case 'time_stamp':
 							if ( method_exists( $this, $function ) ) {

@@ -47,6 +47,113 @@ class APIAuthentication extends APIFactory {
 		return TRUE;
 	}
 
+	function PunchLogin( $user_name = NULL, $password = NULL ) {
+		global $config_vars;
+		Debug::Text('Quick Punch ID: '. $user_name, __FILE__, __LINE__, __METHOD__, 10);
+		$authentication = new Authentication();
+		if ( ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == 1 ) OR ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == 1 ) ) {
+			Debug::text('WARNING: Installer is enabled... Normal logins are disabled!', __FILE__, __LINE__, __METHOD__, 10);
+			//When installer is enabled, just display down for maintenance message to user if they try to login.
+			$error_message = TTi18n::gettext('%1 is currently undergoing maintenance. We apologize for any inconvenience this may cause, please try again later.', array(APPLICATION_NAME) );
+			$validator_obj = new Validator();
+			$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
+			$validator_obj->isTrue( 'user_name', FALSE, $error_message );
+			$validator = array();
+			$validator[0] = $validator_obj->getErrorsArray();
+			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
+		}
+		if ( isset($config_vars['other']['web_session_expire']) AND $config_vars['other']['web_session_expire'] != '' ) {
+			$authentication->setEnableExpireSession( (int)$config_vars['other']['web_session_expire'] );
+		}
+		$clf = TTnew( 'CompanyListFactory' );
+		$clf->getByPhoneID( $user_name );
+		if ( $clf->getRecordCount() == 1 ) {
+			$c_obj = $clf->getCurrent();
+		} else {
+			$c_obj = FALSE;
+		}
+		//Checks user_name/password
+		$password_result = FALSE;
+		$user_name = trim($user_name);
+		if ( $user_name != '' AND $password != '' AND ( is_object($c_obj) AND $c_obj->getStatus() == 10 AND $c_obj->getProductEdition() > 10 ) ) {
+			$password_result = $authentication->Login($user_name, $password, 'QUICK_PUNCH_ID');
+		}
+		if ( $password_result === TRUE ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$clf->getByID( $authentication->getObject()->getCompany() );
+			$current_company = $clf->getCurrent();
+			unset($clf);
+			$create_new_station = FALSE;
+			//If this is a new station, insert it now.
+			if ( isset( $_COOKIE['StationID'] ) ) {
+				Debug::text('Station ID Cookie found! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
+
+				$slf = TTnew( 'StationListFactory' );
+				$slf->getByStationIdandCompanyId( $_COOKIE['StationID'], $current_company->getId() );
+				$current_station = $slf->getCurrent();
+				unset($slf);
+
+				if ( $current_station->isNew() ) {
+					Debug::text('Station ID is NOT IN DB!! '. $_COOKIE['StationID'], __FILE__, __LINE__, __METHOD__, 10);
+					$create_new_station = TRUE;
+				}
+			} else {
+				$create_new_station = TRUE;
+			}
+
+			if ( $create_new_station == TRUE ) {
+				//Insert new station
+				$sf = TTnew( 'StationFactory' );
+
+				$sf->setCompany( $current_company->getId() );
+				$sf->setStatus( 20 ); //Enabled
+				if ( Misc::detectMobileBrowser() == FALSE ) {
+					Debug::text('PC Station device...', __FILE__, __LINE__, __METHOD__, 10);
+					$sf->setType( 10 ); //PC
+				} else {
+					$sf->setType( 26 ); //Mobile device web browser
+					Debug::text('Mobile Station device...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+				$sf->setSource( Misc::getRemoteIPAddress() );
+				$sf->setStation();
+				$sf->setDescription( substr( $_SERVER['HTTP_USER_AGENT'], 0, 250) );
+				if ( $sf->isValid() ) { //Standard Edition can't save mobile stations.
+					if ( $sf->Save(FALSE) ) {
+						$sf->setCookie();
+					}
+				}
+			}
+			return array('SessionID' => $authentication->getSessionId());
+		} else {
+			$validator_obj = new Validator();
+			$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
+
+			$error_column = 'user_name';
+			$error_message = TTi18n::gettext('Quick Punch ID or Password is incorrect');
+			//Get company status from user_name, so we can display messages for ONHOLD/Cancelled accounts.
+			if ( is_object( $c_obj ) ) {
+				if ( $c_obj->getStatus() == 20 ) {
+					$error_message = TTi18n::gettext('Sorry, your company\'s account has been placed ON HOLD, please contact customer support immediately');
+				} elseif ( $c_obj->getStatus() == 23 ) {
+					$error_message = TTi18n::gettext('Sorry, your trial period has expired, please contact our sales department to reactivate your account');
+				} elseif ( $c_obj->getStatus() == 28 ) {
+					if ( $c_obj->getMigrateURL() != '' ) {
+						$error_message = TTi18n::gettext('To better serve our customers your account has been migrated, please update your bookmarks to use the following URL from now on') . ': ' . 'http://'. $c_obj->getMigrateURL();
+					} else {
+						$error_message = TTi18n::gettext('To better serve our customers your account has been migrated, please contact customer support immediately.');
+					}
+				} elseif ( $c_obj->getStatus() == 30 ) {
+					$error_message = TTi18n::gettext('Sorry, your company\'s account has been CANCELLED, please contact customer support if you believe this is an error');
+				}
+			}
+			$validator_obj->isTrue( $error_column, FALSE, $error_message );
+			$validator = array();
+			$validator[0] = $validator_obj->getErrorsArray();
+			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
+		}
+		return $this->returnHandler( FALSE );
+	}
+
 	//Default username=NULL to prevent argument warnings messages if its not passed from the API.
 	function Login($user_name = NULL, $password = NULL, $type = 'USER_NAME') {
 		global $config_vars;

@@ -467,7 +467,7 @@ class DemoData {
 		$cf->setStatus( 10 ); //Active
 		$cf->setProductEdition( getTTProductEdition() );
 		$cf->setName( 'ABC Company ('. $this->getUserNamePostfix() .')', TRUE ); //Must force this change due to demo mode being enabled.
-		$cf->setShortName( 'ABC' );
+		$cf->setShortName( substr( 'ABC'. $this->getUserNamePostfix(), 0, 15 ) ); //This must be unique to allow the recruitment portal to work properly.
 		$cf->setBusinessNumber( '123456789' );
 		//$cf->setOriginatorID( $company_data['originator_id'] );
 		//$cf->setDataCenterID($company_data['data_center_id']);
@@ -6608,6 +6608,7 @@ class DemoData {
 
 		$pf = TTnew( 'PunchFactory' );
 		$pf->setTransfer( FALSE );
+		$pf->setEnableAutoTransfer( FALSE );
 		$pf->setUser( $user_id );
 		$pf->setType( $type_id );
 		$pf->setStatus( $status_id );
@@ -6850,6 +6851,7 @@ class DemoData {
 		if ( $out_time_stamp !== NULL ) {
 			$pf_in = TTnew( 'PunchFactory' );
 			$pf_in->setTransfer( FALSE );
+			$pf_in->setEnableAutoTransfer( FALSE );
 			$pf_in->setUser( $user_id );
 			$pf_in->setType( $data['out_type_id'] );
 			$pf_in->setStatus( 20 );
@@ -6882,6 +6884,7 @@ class DemoData {
 		if ( $in_time_stamp !== NULL ) {
 			$pf_out = TTnew( 'PunchFactory' );
 			$pf_out->setTransfer( FALSE );
+			$pf_out->setEnableAutoTransfer( FALSE );
 			$pf_out->setUser( $user_id );
 			$pf_out->setType( $data['in_type_id'] );
 			$pf_out->setStatus( 10 );

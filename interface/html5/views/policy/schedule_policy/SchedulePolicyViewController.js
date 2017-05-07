@@ -144,7 +144,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 
 		var default_args = {};
 		default_args.filter_data = {};
-		default_args.filter_data.type_id = [200, 10];
+		default_args.filter_data.type_id = [10, 40, 50, 60, 70, 80, 90, 100, 180, 200 ];
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );

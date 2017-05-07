@@ -349,7 +349,7 @@ class Validate_Finance_IBAN
      * @param    string      $iban              IBAN to be validated / processed
      * @access   public
      */
-    function Validate_Finance_IBAN($iban = '')
+    function __construct($iban = '')
     {
         $iban = strtoupper($iban);
         $this->_iban = $iban;

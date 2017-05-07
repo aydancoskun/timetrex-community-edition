@@ -54,14 +54,6 @@ class Image_Transform_Driver_Imagick2 extends Image_Transform
     var $imageHandle = null;
 
     /**
-     * @see __construct()
-     */
-    function Image_Transform_Driver_Imagick2()
-    {
-        $this->__construct();
-    } // End Image_Transform_Driver_Imagick2
-
-    /**
      * @see http://www.imagemagick.org/www/formats.html
      */
     function __construct()

@@ -1,6 +1,8 @@
 <?php
 /*
-V5.20dev  ??-???-2014  (c) 2000-2014 John Lim (jlim#natsoft.com). All rights reserved.
+@version   v5.20.9  21-Dec-2016
+@copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
+@copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
   Whenever there is any discrepancy between the two licenses,
   the BSD license will take precedence.
@@ -31,7 +33,7 @@ class ADODB_sqlite3 extends ADOConnection {
 	var $sysTimeStamp = "adodb_date('Y-m-d H:i:s')";
 	var $fmtTimeStamp = "'Y-m-d H:i:s'";
 
-	function ADODB_sqlite3()
+	function __construct()
 	{
 	}
 
@@ -193,8 +195,13 @@ class ADODB_sqlite3 extends ADOConnection {
 	function _query($sql,$inputarr=false)
 	{
 		$rez = $this->_connectionID->query($sql);
-		if (!$rez) {
-			$this->_connectionID->lastErrorCode();
+		if ($rez === false) {
+			$this->_errorNo = $this->_connectionID->lastErrorCode();
+		}
+		// If no data was returned, we don't need to create a real recordset
+		elseif ($rez->numColumns() == 0) {
+			$rez->finalize();
+			$rez = true;
 		}
 
 		return $rez;
@@ -266,7 +273,7 @@ class ADODB_sqlite3 extends ADOConnection {
 	}
 
 	var $_dropSeqSQL = 'drop table %s';
-	function DropSequence($seqname)
+	function DropSequence($seqname = 'adodbseq')
 	{
 		if (empty($this->_dropSeqSQL)) {
 			return false;
@@ -280,7 +287,7 @@ class ADODB_sqlite3 extends ADOConnection {
 		return $this->_connectionID->close();
 	}
 
-	function MetaIndexes($table, $primary = FALSE, $owner=false, $owner = false)
+	function MetaIndexes($table, $primary = FALSE, $owner = false)
 	{
 		$false = false;
 		// save old fetch mode
@@ -340,7 +347,7 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 	var $databaseType = "sqlite3";
 	var $bind = false;
 
-	function ADORecordset_sqlite3($queryID,$mode=false)
+	function __construct($queryID,$mode=false)
 	{
 
 		if ($mode === false) {
@@ -389,7 +396,6 @@ class ADORecordset_sqlite3 extends ADORecordSet {
 
 	function _initrs()
 	{
-		$this->_numOfRows = 1;
 		$this->_numOfFields = $this->_queryID->numColumns();
 
 	}

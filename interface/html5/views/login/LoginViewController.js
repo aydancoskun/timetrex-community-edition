@@ -86,7 +86,7 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	onQuickPunchClick: function() {
-		window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'quick_punch/QuickPunchLogin.php' );
+		window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'html5/quick_punch' );
 	},
 
 	onLoginBtnClick: function() {

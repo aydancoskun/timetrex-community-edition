@@ -144,11 +144,6 @@ class Payment_Process_Beanstream extends Payment_Process_Common
         $this->_makeRequired('customerId','login', 'password', 'action', 'invoiceNumber');
     }
 
-    function Payment_Process_Beanstream($options = false)
-    {
-        $this->__construct($options);
-    }
-
     /**
      * Processes the transaction.
      *

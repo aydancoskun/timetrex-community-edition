@@ -149,9 +149,11 @@ var ApplicationRouter = Backbone.Router.extend( {
 									}
 									break;
 								default:
-									if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-										(LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
+									// Error: Unable to get property 'id' of undefined or null reference
+									if ( typeof LocalCacheData.current_open_primary_controller != 'undefined' && (!LocalCacheData.current_open_primary_controller.edit_view || LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id ) ) {
 										openEditView( edit_id, true );
+									} else {
+										Debug.Text( 'ERROR: Cannot open edit view.', 'IndexController.js', 'IndexController', 'onViewChange', 1 );
 									}
 									break;
 							}
@@ -186,15 +188,16 @@ var ApplicationRouter = Backbone.Router.extend( {
 				LocalCacheData.current_doing_context_action = action;
 			}
 
-			switch ( view_id ) {
-				case 'TimeSheet':
-				case 'Schedule':
-					if ( args.date ) {
-						LocalCacheData.current_selet_date = args.date;
-					}
-					break;
-
-			}
+			// Prevent user bookmarking to past dates as starting from a bookmark with an old date leads to complaints.
+			// switch ( view_id ) {
+			// 	case 'TimeSheet':
+			// 	case 'Schedule':
+			// 		if ( args.date ) {
+			// 			LocalCacheData.current_selet_date = args.date;
+			// 		}
+			// 		break;
+			//
+			// }
 
 		}
 
@@ -516,10 +519,12 @@ var ApplicationRouter = Backbone.Router.extend( {
 	addTopMenu: function() {
 		var $this = this;
 		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js', function(){
-			// #2235 - ReferenceError: RibbonViewController is not defined
-			//Error: ReferenceError: Can't find variable: RibbonViewController
-			RibbonViewController.loadView();
-
+			// Error: 'RibbonViewController' is undefined
+			if ( RibbonViewController ) {
+				// #2235 - ReferenceError: RibbonViewController is not defined
+				//Error: ReferenceError: Can't find variable: RibbonViewController
+				RibbonViewController.loadView();
+			}
 			$( 'body' ).removeClass( 'login-bg' );
 			$( 'body' ).addClass( 'application-bg' );
 			$this.setContentDivHeight();

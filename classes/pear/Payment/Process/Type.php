@@ -52,14 +52,14 @@ class Payment_Process_Type
     /**
      * $firstName
      *
-     * @var string $firstName 
+     * @var string $firstName
      */
     var $firstName;
 
     /**
      * $lastName
      *
-     * @var string $lastName 
+     * @var string $lastName
      */
     var $lastName;
 
@@ -72,7 +72,7 @@ class Payment_Process_Type
 
     /**
      * $address
-     * 
+     *
      * @var string $addres
      */
     var $address;
@@ -139,12 +139,7 @@ class Payment_Process_Type
 
     }
     // }}}
-    // {{{ Payment_Process_Type()
-    function Payment_Process_Type()
-    {
-        $this->__construct();
-    }
-    // }}}
+
     // {{{ &factory($type)
     /**
     * factory
@@ -255,6 +250,6 @@ class Payment_Process_Type
         return true;
     }
     // }}}
-}  
+}
 
 ?>

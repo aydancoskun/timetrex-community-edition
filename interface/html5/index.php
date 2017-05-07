@@ -109,72 +109,72 @@ unset($authentication);
 ?>
 	<!DOCTYPE html>
 	<html>
-	    <head>
-    		<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    		<title><?php echo APPLICATION_NAME .' Workforce Management';?></title>
-    		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    		<meta name="Keywords" content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system" />
-    		<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily." />
-    		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    		<link rel="shortcut icon" type="image/ico" href="<?php echo Environment::getBaseURL();?>../favicon.ico">
-    		<script src="global/RateLimit.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    		<?php if ( file_exists('theme/default/css/login.composite.css') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/login.composite.css?v=<?php echo APPLICATION_BUILD?>">
-    			<script>
-    				use_composite_css_files = true;
-    			</script>
-    		<?php } else { ?>
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/ui.jqgrid.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/ribbon/RibbonView.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/search_panel/SearchPanel.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/views/attendance/timesheet/TimeSheetView.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/views/attendance/schedule/ScheduleView.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/timepicker/TTimePicker.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/datepicker/TDatePicker.css?v=<?php echo APPLICATION_BUILD?>">
-                <link rel="stylesheet" type="text/css" href="theme/default/css/right_click_menu/rightclickmenu.css?v=<?php echo APPLICATION_BUILD?>">
-                <link rel="stylesheet" type="text/css" href="theme/default/css/views/wizard/Wizard.css?v=<?php echo APPLICATION_BUILD?>">
-    			<link rel="stylesheet" type="text/css" href="theme/default/css/image_area_select/imgareaselect-default.css?v=<?php echo APPLICATION_BUILD?>">
-    			<?php if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) { ?>
-    				<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet.css?v=<?php echo APPLICATION_BUILD?>">
-    				<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-draw/leaflet.draw.css?v=<?php echo APPLICATION_BUILD?>">
-    				<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.css?v=<?php echo APPLICATION_BUILD?>">
-    			<?php } ?>
+		<head>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+			<meta name="Keywords" content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system" />
+			<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily." />
+			<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<title><?php echo APPLICATION_NAME .' Workforce Management';?></title>
+			<link rel="shortcut icon" type="image/ico" href="<?php echo Environment::getBaseURL();?>../favicon.ico">
+			<script src="global/RateLimit.js?v=<?php echo APPLICATION_BUILD?>"></script>
+			<?php if ( file_exists('theme/default/css/login.composite.css') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
+				<link rel="stylesheet" type="text/css" href="theme/default/css/login.composite.css?v=<?php echo APPLICATION_BUILD?>">
+				<script>
+					use_composite_css_files = true;
+				</script>
+			<?php } else { ?>
+				<link rel="stylesheet" type="text/css" href="theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/ui.jqgrid.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/ribbon/RibbonView.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/search_panel/SearchPanel.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/views/attendance/timesheet/TimeSheetView.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/views/attendance/schedule/ScheduleView.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/timepicker/TTimePicker.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/datepicker/TDatePicker.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/right_click_menu/rightclickmenu.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/views/wizard/Wizard.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/image_area_select/imgareaselect-default.css?v=<?php echo APPLICATION_BUILD?>">
+				<?php if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) { ?>
+					<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet.css?v=<?php echo APPLICATION_BUILD?>">
+					<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-draw/leaflet.draw.css?v=<?php echo APPLICATION_BUILD?>">
+					<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.css?v=<?php echo APPLICATION_BUILD?>">
+				<?php } ?>
 			<link rel="stylesheet" type="text/css" href="theme/default/css/text_layer_builder.css?v=<?php echo APPLICATION_BUILD?>">
-    			<script>
-    				use_composite_css_files = false;
-    			</script>
-    		<?php } ?>
-    
-    		<?php if ( file_exists('login.composite.js') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
-    			<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
-    			<script src="login.composite.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<!-- <script async src="base.composite.js?v=<?php echo APPLICATION_BUILD?>"></script> -->
-    			<script>
-    				use_composite_js_files = true;
-    				//Global.addCss( "universe.composite.css" );
-    			</script>
-    		<?php } else { ?>
-    			<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
-    			<script src="framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="framework/jquery.form.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="framework/jquery.masonry.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="framework/interact.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-                <script src="framework/tinymce/tinymce.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="global/LocalCacheData.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script src="framework/widgets/color-picker/color-picker.js?v=<?php echo APPLICATION_BUILD?>"></script>
-    			<script>
-    				use_composite_js_files = false;
-    			</script>
-    		<?php } ?>
-    	</head>
+				<script>
+					use_composite_css_files = false;
+				</script>
+			<?php } ?>
+
+			<?php if ( file_exists('login.composite.js') ) { //See tools/compile/Gruntfile.js to configure which files are included in the composites... ?>
+				<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
+				<script src="login.composite.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<!-- <script async src="base.composite.js?v=<?php echo APPLICATION_BUILD?>"></script> -->
+				<script>
+					use_composite_js_files = true;
+					//Global.addCss( "universe.composite.css" );
+				</script>
+			<?php } else { ?>
+				<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="global/APIGlobal.js.php?v=<?php echo APPLICATION_BUILD?><?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '&disable_db=1'; }?>"></script>
+				<script src="framework/jquery.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="framework/jquery.form.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="framework/backbone/underscore-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="framework/backbone/backbone-min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="framework/jquery.masonry.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="framework/interact.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="framework/tinymce/tinymce.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="global/Global.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="global/LocalCacheData.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script src="framework/widgets/color-picker/color-picker.js?v=<?php echo APPLICATION_BUILD?>"></script>
+				<script>
+					use_composite_js_files = false;
+				</script>
+			<?php } ?>
+		</head>
 	<?php
 	/*
 	<!--z-index

@@ -99,7 +99,7 @@ class Net_DIME_Record extends PEAR
 						  NET_DIME_TYPE => '',
 						  NET_DIME_DATA => '');
     
-    function Net_DIME_Record($debug = FALSE)
+    function __construct($debug = FALSE)
     {
         $this->debug = $debug;
         if ($debug) $this->padstr = '*';
@@ -345,7 +345,7 @@ class Net_DIME_Message extends PEAR
      *
      * TODO: integrate with the php streams stuff
      */
-    function Net_DIME_Message($stream=NULL, $record_size = 4096, $debug = FALSE)
+    function __construct($stream=NULL, $record_size = 4096, $debug = FALSE)
     {
         $this->stream = $stream;
         $this->record_size = $record_size;

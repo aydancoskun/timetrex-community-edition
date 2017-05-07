@@ -403,6 +403,10 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		}
 		Debug::text('Annual Taxable Income: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
 
+		if ( $retval < 0 ) {
+			$retval = 0;
+		}
+
 		return $retval;
 	}
 
@@ -580,6 +584,10 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			$amount = bcadd( $amount, $threshold_amount);
 		}
 
+		if ( $amount < 0 ) {
+			$amount = 0;
+		}
+
 		return $amount;
 	}
 
@@ -596,6 +604,10 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 		Debug::text('Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
 
 		$amount = bcmul( $pay_period_income, $rate );
+
+		if ( $amount < 0 ) {
+			$amount = 0;
+		}
 
 		return $amount;
 	}
@@ -622,6 +634,10 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 			$retval = $max_amount;
 		} else {
 			$retval = $amount;
+		}
+
+		if ( $retval < 0 ) {
+			$retval = 0;
 		}
 
 		return $retval;
@@ -688,7 +704,7 @@ class PayrollDeduction_US extends PayrollDeduction_US_Data {
 
 		return 0;
 	}
-	
+
 	/*
 		Use this to get all useful values.
 	*/

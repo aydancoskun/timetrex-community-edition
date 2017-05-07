@@ -122,6 +122,7 @@ Global.sendErrorReport = function() {
 				'\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie +
 				'\n\nCurrent Ping: '+ Global.current_ping +
 				'\n\nIdle Time: '+ Global.idle_time +
+				'\n\nSession ID Key: '+ LocalCacheData.getSessionID() +
 				'\n\nCurrent User Object: \n' + Debug.varDump(login_user) + ' ' +
 				'\n\nCurrent Company Object: \n' + Debug.varDump(LocalCacheData.getCurrentCompany()) + ' ';
 		} else {
@@ -328,6 +329,9 @@ Global.setWidgetEnabled = function( widget, val ) {
 
 Global.createViewTabs = function() {
 	//JS load Optimize
+	if(typeof WidgetNamesDic == 'undefined'){
+		return;
+	}
 	if ( LocalCacheData.loadViewRequiredJSReady ) {
 		if ( !LocalCacheData.view_min_tab_bar ) {
 			var view_min_tab_bar = Global.loadWidgetByName( WidgetNamesDic.VIEW_MIN_TAB_BAR );
@@ -1887,6 +1891,15 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'PortalJobVacancy':
 			path = 'views/portal/hr/recruitment/';
 			break;
+		case 'PortalLogin':
+			path = 'views/portal/login/';
+			break;
+		case 'QuickPunchLogin':
+			path = 'views/quick_punch/login/';
+			break;
+		case 'QuickPunch':
+			path = 'views/quick_punch/punch/';
+			break
 		case 'UserDateTotalParent':
 		case 'UserDateTotal':
 			path = 'views/attendance/timesheet/';
@@ -3221,6 +3234,52 @@ Global.getSessionIDKey = function() {
 	return 'SessionID';
 };
 
+Global.loadStyleSheet = function( path, fn, scope ) {
+	var head = document.getElementsByTagName( 'head' )[0], // reference to document.head for appending/ removing link nodes
+		link = document.createElement( 'link' );           // create the link node
+	link.setAttribute( 'href', path );
+	link.setAttribute( 'rel', 'stylesheet' );
+	link.setAttribute( 'type', 'text/css' );
+	var sheet, cssRules;
+// get the correct properties to check for depending on the browser
+	if ( 'sheet' in link ) {
+		sheet = 'sheet';
+		cssRules = 'cssRules';
+	}
+	else {
+		sheet = 'styleSheet';
+		cssRules = 'rules';
+	}
+	var interval_id = setInterval( function() {                     // start checking whether the style sheet has successfully loaded
+			try {
+				if ( link[sheet] && link[sheet][cssRules].length ) { // SUCCESS! our style sheet has loaded
+					clearInterval( interval_id );                      // clear the counters
+					clearTimeout( timeout_id );
+					fn.call( scope || window, true, link );           // fire the callback with success == true
+				}
+			} catch ( e ) {} finally {}
+		}, 10 ),                                                   // how often to check if the stylesheet is loaded
+		timeout_id = setTimeout( function() {       // start counting down till fail
+			clearInterval( timeout_id );             // clear the counters
+			clearTimeout( timeout_id );
+			head.removeChild( link );                // since the style sheet didn't load, remove the link node from the DOM
+			fn.call( scope || window, false, link ); // fire the callback with success == false
+		}, 15000 );                                 // how long to wait before failing
+	head.appendChild( link );  // insert the link node into the DOM and start loading the style sheet
+	return link; // return the link node;
+};
+
+Global.getSessionIDKey = function() {
+	if ( LocalCacheData.all_url_args ) {
+		if ( LocalCacheData.all_url_args.hasOwnProperty('company_id') ) {
+			return 'SessionID-JA';
+		}
+		if ( LocalCacheData.all_url_args.hasOwnProperty('punch_user_id') ) {
+			return 'SessionID-QP';
+		}
+	}
+	return 'SessionID';
+};
 //don't let the user leave without clicking OK.
 //uses localcachedata so that it will work in the ribbon
 Global.checkBeforeExit = function( functionToExecute ) {
@@ -3459,19 +3518,33 @@ Global.convertValidationErrorToString = function(object) {
 	//Debug.Arr(object,'Converting Error to String: ','Global.js', 'Global', 'convertValidationErrorToString', 10);
 	var retval = '';
 
-	if ( object[0] ) {
-		object = object[0];
+	// #2288 - If you are deleting several records and records 2 and 4 contain errors, those are the object keys that will need to be referenced here.
+	// To fix this we need to grab the first element independent of the index number.
+	if ( Object.keys(object).length > 0 ) {
+		for ( var first in object ) {
+			object = object[first];
+			break;
+		}
 	}
 
 	var error_strings = [];
-	for ( var index in object ) {
-		for ( var key in  object[index] ) {
-			if ( Global.isArray(  object[index][key]) || typeof( object[index][key]) == 'object' ) {
-				for ( var i in  object[index][key] ) {
-					error_strings.push( object[index][key][i] );
-				}
+	if ( typeof object == 'string' ) {
+		//#2290 - error objects are not always uniform and can sometimes cause malformed error tips (see screenshot) if we do not check each level for string type
+		error_strings.push( object );
+	} else {
+		for (var index in object) {
+			if (typeof object[index] == 'string') {
+				error_strings.push( object[index] );
 			} else {
-				error_strings.push( object[index][key] );
+				for (var key in  object[index]) {
+					if (typeof( object[index][key]) == 'string') {
+						error_strings.push(object[index][key]);
+					} else {
+						for (var i in  object[index][key]) {
+							error_strings.push(object[index][key][i]);
+						}
+					}
+				}
 			}
 		}
 	}

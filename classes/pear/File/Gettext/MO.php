@@ -62,7 +62,7 @@ class File_Gettext_MO extends File_Gettext
      * @return  object      File_Gettext_MO
      * @param   string      $file   path to GNU MO file
      */
-    function File_Gettext_MO($file = '')
+    function __construct($file = '')
     {
         $this->file = $file;
     }

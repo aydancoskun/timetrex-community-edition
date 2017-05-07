@@ -153,11 +153,6 @@ class Payment_Process_BeanstreamEFT extends Payment_Process_Common
 		$this->_makeRequired('customerId','password', 'action', 'invoiceNumber');
     }
 
-    function Payment_Process_BeanstreamEFT($options = false)
-    {
-        $this->__construct($options);
-    }
-
     /**
      * Prepare the batch data.
      *

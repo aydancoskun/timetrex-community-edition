@@ -76,11 +76,6 @@ class Payment_Process_Type_CreditCard extends Payment_Process_Type
         parent::__construct();
     }
 
-    function Payment_Process_Type_CreditCard()
-    {
-        $this->__construct();
-    }
-
     /**
      * _validateCardNumber
      *
@@ -176,7 +171,7 @@ class Payment_Process_Type_CreditCard extends Payment_Process_Type
                 return true;
             }
         }
-    
+
         return PEAR::raiseError('Invalid expiration date provided');
     }
 

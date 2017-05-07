@@ -137,7 +137,7 @@ class Image_Barcode_Code39 extends Image_Barcode {
      * @author Ryan Briones <ryanbriones@webxdesign.org>
      *
      */
-    function Image_Barcode_Code39( $text = '', $wThin = 0, $wThick = 0 ) {
+    function __construct( $text = '', $wThin = 0, $wThick = 0 ) {
 
         // Check $text for invalid characters
         if ( $this->checkInvalid( $text ) ) {

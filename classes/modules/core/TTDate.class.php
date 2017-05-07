@@ -365,7 +365,7 @@ class TTDate {
 		}
 
 		$enable_rounding = TRUE;
-		if ( strpos( $time_unit, '"' ) !== FALSE ) {
+		if ( strpos( $time_unit, '"' ) !== FALSE ) { //Use quotes around the time unit to prevent rounding of decimal hours to the nearest minute.
 			$enable_rounding = FALSE;
 		}
 

@@ -2245,7 +2245,7 @@ class Misc {
 			//If during an install/schema upgrade a SQL error has occurred, the transaction will be aborted and cause the below select to fail.
 			//To avoid an infinite loop, always check that the transaction hasn't already failed.
 			global $db;
-			if ( $db->hasFailedTrans() == FALSE ) {
+			if ( is_object($db) AND $db->hasFailedTrans() == FALSE ) {
 				$registration_key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
 			}
 		} catch (Exception $e) {
@@ -2521,10 +2521,12 @@ class Misc {
 		if ( !isset($desktop) ) {
 			$desktop = 0;
 		}
+		// ?desktop=1 must be sent in cases like password reset email links to prevent the user from being redirected to the QuickPunch login page when trying to reset passwords.
+		// Unfortunately when using #!m=... we can't detect what page they are really trying to go to on the server side.
 		if ( getTTProductEdition() != TT_PRODUCT_COMMUNITY AND $desktop != 1 ) {
 			$browser = self::detectMobileBrowser();
 			if ( $browser == 'ios' OR $browser == 'html5' OR $browser == 'android' ) {
-				Redirect::Page( URLBuilder::getURL( NULL, Environment::getBaseURL().'/quick_punch/QuickPunchLogin.php' ) );
+				Redirect::Page( URLBuilder::getURL( NULL, Environment::getBaseURL().'/html5/quick_punch/' ) );
 			}
 		} else {
 			Debug::Text('Desktop browser override: '. (int)$desktop, __FILE__, __LINE__, __METHOD__, 10);

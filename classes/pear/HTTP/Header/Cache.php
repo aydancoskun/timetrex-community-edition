@@ -58,7 +58,7 @@ class HTTP_Header_Cache extends HTTP_Header
      * @param   int     $expires 
      * @param   string  $unit
      */
-    function HTTP_Header_Cache($expires = 0, $unit = 'seconds')
+    function __construct($expires = 0, $unit = 'seconds')
     {
         parent::HTTP_Header();
         $this->setHeader('Pragma', 'cache');

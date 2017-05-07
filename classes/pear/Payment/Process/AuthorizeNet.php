@@ -167,11 +167,6 @@ class Payment_Process_AuthorizeNet extends Payment_Process_Common
         $this->_makeRequired('login', 'password', 'action');
     }
 
-    function Payment_Process_AuthorizeNet($options = false)
-    {
-        $this->__construct($options);
-    }
-
     /**
      * Processes the transaction.
      *

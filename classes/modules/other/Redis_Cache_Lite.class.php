@@ -35,13 +35,14 @@
  ********************************************************************************/
 
 class Redis_Cache_Lite extends Cache_Lite {
-	function Redis_Cache_Lite( $options = array(NULL) ) {
-		$this->Cache_Lite( $options );
+	function __construct( $options = array(NULL) ) {
+		//$this->Cache_Lite( $options );
+		parent::__construct( $options );
 
 		if ( defined('ADODB_DIR') ) {
 			include_once( ADODB_DIR .'/adodb-csvlib.inc.php');
 		}
-		
+
 		$this->redisConnectMaster();
 
 		return TRUE;
@@ -67,7 +68,7 @@ class Redis_Cache_Lite extends Cache_Lite {
 			} else {
 				$connection_retval = $this->_redisHostConn[$key]->connect( trim( $this->_redisHostHost[$key] ), NULL, 2 );
 			}
-			
+
 			if ( $connection_retval === TRUE ) {
 				if ( isset($this->_redisDB) AND $this->_redisDB != '' ) {
 					if ( $this->_redisHostConn[$key]->select( $this->_redisDB ) === FALSE ) {
@@ -81,7 +82,7 @@ class Redis_Cache_Lite extends Cache_Lite {
 				return $this->_redisHostConn[$key];
 			} else {
 				$this->_redisHostConn[$key] = FALSE; //Prevent further connections from timing out during this request...
-				Debug::Text( 'Error connecting to the Redis database! (a)', __FILE__, __LINE__, __METHOD__, 1);				
+				Debug::Text( 'Error connecting to the Redis database! (a)', __FILE__, __LINE__, __METHOD__, 1);
 			}
 		} catch (Exception $e) {
 			$this->_redisHostConn[$key] = FALSE; //Prevent further connections from timing out during this request...

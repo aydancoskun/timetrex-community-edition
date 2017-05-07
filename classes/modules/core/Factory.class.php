@@ -809,7 +809,7 @@ abstract class Factory {
 		}
 		return $retval;
 	}
-
+	
 	protected function getListSQL($array, &$ph = NULL, $cast = FALSE ) {
 		//Debug::Arr($array, 'List Values:', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ph === NULL ) {
@@ -1097,6 +1097,37 @@ abstract class Factory {
 						} else {
 							//$query_stub = 'circle('. $columns .') @> point('. $args .')'; //Sometimes polygons are passed into this, so we can't convert them to circles.
 							$query_stub = $columns .' @> point('. $args .')';
+						}
+					}
+					$retval = $query_stub;
+				}
+				break;
+			case 'full_text':
+				if ( isset( $args ) AND !is_array($args) AND trim($args) != '' ) {
+					$split_args = explode(',', str_replace( array(' ', ';'), ',', $args) ); //Support " " (space) and ";" and ", " as separators.
+					if ( is_array( $split_args ) AND count($split_args) > 0 AND $query_stub == '' ) {
+						foreach( $split_args as $key => $arg ) {
+							if ( trim( $arg ) != '' ) {
+								$ph_arr[] = addslashes( $this->stripSQLSyntax( TTi18n::strtolower($arg) ) );
+								if ( $this->getDatabaseType() == 'mysql' ) {
+									if ( $query_stub == '' AND !is_array($columns) ) {
+										$query_stub = '( lower('. $columns .') LIKE ?';
+									} else {
+										$query_stub .= 'lower('. $columns .') LIKE ?';
+									}
+									if ( isset( $split_args[$key+1] ) ) {
+										$query_stub .= ' OR ';
+									} else {
+										$query_stub .= ' )';
+									}
+									$ph[] = $this->handleSQLSyntax( '*'.TTi18n::strtolower($arg).'*' );
+								}
+							}
+						}
+						if ( $query_stub == '' AND !is_array($columns) ) {
+							if ( $this->getDatabaseType() == 'postgres' ) {
+								$query_stub = $columns . ' @@ to_tsquery(\'' . implode(' & ', $ph_arr) . '\')';
+							}
 						}
 					}
 					$retval = $query_stub;

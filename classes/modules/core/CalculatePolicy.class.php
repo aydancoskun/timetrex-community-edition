@@ -2479,9 +2479,13 @@ class CalculatePolicy {
 				Debug::text('  Current Trigger TimeStamp: '. TTDate::getDate('DATE+TIME', $current_trigger_time_arr['start_time_stamp'] ), __FILE__, __LINE__, __METHOD__, 10);
 
 				Debug::text('  Total UDT Rows: '. count( $user_date_total_rows ), __FILE__, __LINE__, __METHOD__, 10);
-				$next_start_time_stamp = FALSE;
+				$over_time_recurse_already_processed_map = array();
 				foreach( $user_date_total_rows as $udt_key => $udt_obj ) {
 					//Debug::text('  UDT Row KEY: '. $udt_key .' ID: '. $udt_obj->getId() .' Object Type ID: '. $udt_obj->getObjectType() .' Pay Code: '. $udt_obj->getPayCode() .' Start Time: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+					if ( isset($over_time_recurse_already_processed_map[$udt_key]) ) {
+						Debug::text('    Skipping UDT KEY: '. $udt_key .' as we already processed it as part of recursive lookup...', __FILE__, __LINE__, __METHOD__, 10);
+						continue;
+					}
 
 					//Detect gap between UDT end -> start timestamps so we can adjust accordingly.
 					//Make sure there is a StartTimeStamp already set on this record, otherwise in cases of creating an absence directly on the timesheet,
@@ -2491,16 +2495,17 @@ class CalculatePolicy {
 							AND $udt_obj->getStartTimeStamp() != ''
 							AND $prev_udt_obj->getStartTimeStamp() != $udt_obj->getStartTimeStamp() //Make sure its not the same record.
 							AND $prev_udt_obj->getEndTimeStamp() != $udt_obj->getStartTimeStamp()
-							AND $prev_udt_obj->getTotalTime() > 0 //If the previous UDT record has been reduced to TotalTime=0, ignore it when it comes to this gap adjustment. This helps with overlapping OT policies that have differential criteria. 
+							AND $prev_udt_obj->getTotalTime() > 0 //If the previous UDT record has been reduced to TotalTime=0, ignore it when it comes to this gap adjustment. This helps with overlapping OT policies that have differential criteria.
 						) {
 						$current_trigger_time_arr['start_time_stamp'] += ( $udt_obj->getStartTimeStamp() - $prev_udt_obj->getEndTimeStamp() );
-						Debug::text('    Found gap between UDT records, either a split shift, lunch or break, adjusting next start time... Prev End: '. TTDate::getDate('DATE+TIME', $prev_udt_obj->getEndTimeStamp() ) .' Current Start: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('    Found gap between UDT records, either a split shift, lunch or break, adjusting next start time... Prev Start: '. TTDate::getDate('DATE+TIME', $prev_udt_obj->getStartTimeStamp() ) .' End: '. TTDate::getDate('DATE+TIME', $prev_udt_obj->getEndTimeStamp() ) .' Total Time: '. $prev_udt_obj->getTotalTime() .' Current Start: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ) .' End: '. TTDate::getDate('DATE+TIME', $udt_obj->getEndTimeStamp() ) .' Total Time: '. $udt_obj->getTotalTime(), __FILE__, __LINE__, __METHOD__, 10);
 					}
 
 					//This must be below the gap detection/adjustment above.
 					if	( isset($this->over_time_recurse_map[$udt_key]) ) {
 						Debug::text('  Found recursive key, swapping UDT record... UDT Row KEY: '. $udt_key .' ID: '. $udt_obj->getId() .' New ID: '. $this->over_time_recurse_map[$udt_key], __FILE__, __LINE__, __METHOD__, 10);
 						$udt_obj = $this->user_date_total[$this->over_time_recurse_map[$udt_key]];
+						$over_time_recurse_already_processed_map[$this->over_time_recurse_map[$udt_key]] = TRUE; //Mark the destination UDT record as already processed to prevent it from being processed twice.
 					}
 
 					//If the BaseRate is the average regular rate, each time its calculated it will continue to increase.
@@ -5268,7 +5273,7 @@ class CalculatePolicy {
 											$j_obj = $jlf->getCurrent();
 
 											//Status is completed and the User Date Stamp is greater then the job end date.
-											//If no end date is set, ignore this.
+											//If no end date is set, ignore this as we can't be sure when the exception should be triggered, and if they ever recalc timesheets retroactively it could trigger on every day.
 											if ( $j_obj->getStatus() == 30 AND $j_obj->getEndDate() != FALSE AND $date_stamp > $j_obj->getEndDate() ) {
 												$current_exceptions[] = array(
 																				'user_id' => $user_id,
@@ -8424,6 +8429,7 @@ class CalculatePolicy {
 
 			$this->getSchedulePolicy(); //Must come before getScheduleData() so we can get the maximum start/stop window for getScheduleData().
 			$this->getScheduleData( $date_range['start_date'], $date_range['end_date'] );
+			$this->getPunchData( $date_range['start_date'], $date_range['end_date'] ); //This is required properly set timestamps on manual timesheet records. It used to only be called after getExceptionPolicy() below.
 
 			if ( $this->getFlag('meal') == TRUE OR $this->getFlag('break') == TRUE OR $this->getFlag('regular') == TRUE OR $this->getFlag('overtime') == TRUE OR $this->getFlag('premium') == TRUE OR $this->getFlag('accrual') == TRUE OR $this->getFlag('holiday') == TRUE OR $this->getFlag('undertime_absence') == TRUE ) {
 				$this->getUserWageData( $date_range['start_date'], $date_range['end_date'] );
@@ -8474,7 +8480,6 @@ class CalculatePolicy {
 
 			if ( $this->getFlag('exception') == TRUE ) {
 				$this->getExceptionPolicy();
-				$this->getPunchData( $date_range['start_date'], $date_range['end_date'] );
 				$this->getExceptionData( $date_range['start_date'], $date_range['end_date'] );
 			}
 		} else {
@@ -8614,6 +8619,10 @@ class CalculatePolicy {
 	}
 
 	private function _calculate( $date_stamp ) {
+		//Make sure we reset these before calculating each day, otherwise they corrupt data in subsequent days.
+		$this->prev_user_date_total_start_time_stamp = NULL;
+		$this->prev_user_date_total_end_time_stamp = NULL;
+
 		$this->setPayPeriodFromDate( $date_stamp );
 		if ( is_object( $this->pay_period_schedule_obj )
 				AND ( $this->pay_period_obj == NULL

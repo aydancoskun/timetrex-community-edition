@@ -6,10 +6,10 @@ RibbonViewController = Backbone.View.extend( {
 	subMenuNavMap: null,
 
 	initialize: function( options ) {
-
-		this.render();
+		// TopMenuManager should be initialized before render to avoid possible race condition.
+		// Error: TypeError: TopMenuManager.ribbon_view_controller is null in /interface/html5/framework/jquery.min.js?v=10.5.0-20170331-081453 line 2 > eval line 218
 		TopMenuManager.ribbon_view_controller = this;
-
+		this.render();
 	},
 
 	onMenuSelect: function( e, ui ) {

@@ -1102,6 +1102,10 @@ BaseViewController = Backbone.View.extend( {
 				$this.removeEditView();
 			}
 		} else {
+			// If some valid records were deleted, we need to refresh the search grid.
+			if ( result.getRecordDetails().valid && result.getRecordDetails().valid > 0 ) {
+				$this.search();
+			}
 			TAlertManager.showErrorAlert( result );
 		}
 	},
@@ -2245,10 +2249,20 @@ BaseViewController = Backbone.View.extend( {
 				continue;
 			}
 			if ( widget.is( ':visible' ) ) {
-				widget.setErrorStyle( error_list[key], true );
-				found_in_current_tab = true;
+				// Error: Uncaught TypeError: widget.setErrorStyle is not a function
+				if( widget.setErrorStyle && typeof widget.setErrorStyle == 'function' ) {
+					widget.setErrorStyle(error_list[key], true);
+					found_in_current_tab = true;
+				} else {
+					Debug.Text('ERROR: widget.setErrorStyle is not a function.', 'BaseViewController.js', 'BaseViewController', null, 10);
+				}
 			} else {
-				widget.setErrorStyle( error_list[key] );
+				// Error: Uncaught TypeError: widget.setErrorStyle is not a function
+				if( widget.setErrorStyle && typeof widget.setErrorStyle == 'function' ) {
+					widget.setErrorStyle(error_list[key]);
+				} else {
+					Debug.Text('ERROR: widget.setErrorStyle is not a function.', 'BaseViewController.js', 'BaseViewController', null, 10);
+				}
 			}
 			this.showErrorStatusOnTab( widget, true );
 			this.edit_view_error_ui_dic[key] = widget;
@@ -2312,7 +2326,7 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	selectContextMenu: function() {
-
+		//This code is also in HomeViewController
 		//Error: Uncaught TypeError: Cannot read property 'el' of null in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-113526 line 1880
 		if ( TopMenuManager.selected_menu_id !== this.viewId + 'ContextMenu' && TopMenuManager.ribbon_view_controller ) {
 			var ribbon = $( TopMenuManager.ribbon_view_controller.el );
@@ -4972,7 +4986,10 @@ BaseViewController = Backbone.View.extend( {
 		if ( !this.sub_view_mode && this.search_panel ) {
 
 			//Set Display Column in layout panel
-			this.column_selector.setSelectGridData( display_columns );
+			//Error: TypeError: null is not an object (evaluating 'this.column_selector.setSelectGridData')
+			if( this.column_selector ) {
+				this.column_selector.setSelectGridData(display_columns);
+			}
 
 			//Set Sort by awesomebox in layout panel
 			this.sort_by_selector.setSourceData( this.buildSortSelectorUnSelectColumns( display_columns ) );
@@ -5585,16 +5602,22 @@ BaseViewController = Backbone.View.extend( {
 		} else {
 			filter.filter_page = 1;
 		}
-		if ( this.sub_view_mode && this.parent_key ) {
+		//Error: Uncaught TypeError: Cannot read property 'data' of null
+		if ( typeof this.select_layout != 'undefined' && this.sub_view_mode && this.parent_key ) {
 			this.select_layout.data.filter_data[this.parent_key] = this.parent_value;
 		}
+		//Error: Uncaught TypeError: Cannot read property 'data' of null
 		//If sub view controller set custom filters, get it
-		if ( Global.isSet( this.getSubViewFilter ) ) {
+		if ( typeof this.select_layout != 'undefined' && Global.isSet( this.getSubViewFilter ) ) {
 			this.select_layout.data.filter_data = this.getSubViewFilter( this.select_layout.data.filter_data );
 		}
+
 		//select_layout will not be null, it's set in setSelectLayout function
 		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
-		filter.filter_sort = this.select_layout.data.filter_sort;
+		//Error: Uncaught TypeError: Cannot read property 'data' of null
+		if ( typeof this.select_layout != 'undefined' ) {
+			filter.filter_sort = this.select_layout.data.filter_sort;
+		}
 
 		if ( this.refresh_id > 0 ) {
 			filter.filter_data = {};

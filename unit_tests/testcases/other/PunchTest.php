@@ -54,7 +54,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 		$this->assertGreaterThan( 0, $this->company_id );
 
-		$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
+		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
 		$dd->createCurrency( $this->company_id, 10 );
 
@@ -272,6 +272,14 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$ripf->setCompany( $company_id );
 
 		switch ( $type ) {
+			case 5: //All Punches - Nearest second.
+				$ripf->setName( '5min [1]' );
+				$ripf->setPunchType( 10 ); //All Punches
+				$ripf->setRoundType( 30 ); //Up
+				$ripf->setInterval( 0 ); //0mins - Save to nearest second.
+				$ripf->setGrace( 0 ); //0min
+				$ripf->setStrict( FALSE );
+				break;
 			case 10: //In - Up
 				$ripf->setName( '5min [1]' );
 				$ripf->setPunchType( 40 ); //In
@@ -388,6 +396,14 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 				$ripf->setConditionStaticTotalTime( (9 * 3600) );
 				$ripf->setConditionStartWindow( 900 ); //15 Min
 				$ripf->setConditionStopWindow( 900 ); //15 Min
+				break;
+			case 500: //Transfer Punches - Up to 5min
+				$ripf->setName( '5min [1]' );
+				$ripf->setPunchType( 40 ); //In
+				$ripf->setRoundType( 95 ); //Up
+				$ripf->setInterval( (60 * 5) ); //5mins
+				$ripf->setGrace( (60 * 3) ); //3min
+				$ripf->setStrict( FALSE );
 				break;
 
 		}
@@ -4004,6 +4020,117 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		//Total Time
 		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
 		$this->assertEquals( (8 * 3600), $udt_arr[$date_epoch][0]['total_time'] );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testRoundingE
+	 */
+	function testRoundingE() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$policy_ids['round'][] = $this->createRoundingPolicy( $this->company_id, 5 ); //In
+		//$policy_ids['round'][] = $this->createRoundingPolicy( $this->company_id, 20 ); //Out
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   $policy_ids['round'],
+								   array( $this->user_id ) );
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:03:03AM'),
+								 strtotime($date_stamp.' 4:46:07PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
+		//print_r($punch_arr);
+		$this->assertEquals( 1, count($punch_arr[$date_epoch]) );
+
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime($date_stamp.' 8:03:03AM') );
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime($date_stamp.' 4:46:07PM') );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//Total Time
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
+		$this->assertEquals( 31384, $udt_arr[$date_epoch][0]['total_time'] );
+
+		return TRUE;
+	}
+
+	/**
+	 * @group Punch_testRoundingF
+	 */
+	function testRoundingF() {
+		global $dd;
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		//No rounding policies.
+		//$policy_ids['round'][] = $this->createRoundingPolicy( $this->company_id, 5 ); //In
+		//$policy_ids['round'][] = $this->createRoundingPolicy( $this->company_id, 20 ); //Out
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL, //$policy_ids['round'],
+								   array( $this->user_id ) );
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:03:03AM'),
+								 strtotime($date_stamp.' 4:46:57PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
+		//print_r($punch_arr);
+		$this->assertEquals( 1, count($punch_arr[$date_epoch]) );
+
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime($date_stamp.' 8:03:00AM') );
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime($date_stamp.' 4:46:00PM') );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//Total Time
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
+		$this->assertEquals( 31380, $udt_arr[$date_epoch][0]['total_time'] );
 
 		return TRUE;
 	}

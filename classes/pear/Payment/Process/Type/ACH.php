@@ -45,7 +45,7 @@ class Payment_Process_Type_ACH extends Payment_Process_Type
     var $accountCode;
     var $name;
 
-    function Payment_Process_Type_ACH()
+    function __construct()
     {
 
     }

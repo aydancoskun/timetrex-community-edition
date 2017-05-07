@@ -15,6 +15,12 @@ var APIAuthentication = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'Login', arguments );
 	},
 
+	PunchLogin: function() {
+
+		return this.argumentsHandler( this.className, 'PunchLogin', arguments );
+
+	},
+
 	getPreLoginData: function() {
 
 		return this.argumentsHandler( this.className, 'getPreLoginData', arguments );

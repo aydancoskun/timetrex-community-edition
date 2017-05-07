@@ -54,7 +54,7 @@ class MIME_Type_Parameter {
      * @param  string $param MIME parameter to parse, if set.
      * @return void
      */
-    function MIME_Type_Parameter($param = false)
+    function __construct($param = false)
     {
         if ($param) {
             $this->parse($param);

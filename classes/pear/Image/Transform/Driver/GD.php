@@ -81,14 +81,6 @@ class Image_Transform_Driver_GD extends Image_Transform
 
     /**
      * Check settings
-     */
-    function Image_Transform_Driver_GD()
-    {
-        $this->__construct();
-    } // End function Image
-
-    /**
-     * Check settings
      *
      * @since PHP 5
      */

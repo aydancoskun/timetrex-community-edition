@@ -45,7 +45,7 @@ class Payment_Process_Type_EFT extends Payment_Process_Type
     var $institutionCode;
     var $name;
 
-    function Payment_Process_Type_EFT()
+    function __construct()
     {
 
     }

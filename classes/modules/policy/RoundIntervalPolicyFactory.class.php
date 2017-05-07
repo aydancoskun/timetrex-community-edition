@@ -69,6 +69,7 @@ class RoundIntervalPolicyFactory extends Factory {
 										70 => TTi18n::gettext('Lunch - Out'),
 										80 => TTi18n::gettext('Break - In'),
 										90 => TTi18n::gettext('Break - Out'),
+										95 => TTi18n::gettext('Transfer Punches'),
 										100 => TTi18n::gettext('Lunch Total'),
 										110 => TTi18n::gettext('Break Total'),
 										120 => TTi18n::gettext('Day Total'),
@@ -82,6 +83,7 @@ class RoundIntervalPolicyFactory extends Factory {
 										70 => array(10, 30),
 										80 => array(10, 20, 110),
 										90 => array(10, 30),
+										95 => array(), //Return blank array, which will automatically append 95 in getByPolicyGroupUserIdAndTypeId().
 									);
 				break;
 			case 'condition_type':
@@ -194,7 +196,7 @@ class RoundIntervalPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function getPunchTypeFromPunchStatusAndType($status, $type) {
+	function getPunchTypeFromPunchStatusAndType($status, $type, $transfer) {
 		if ( $status == '' ) {
 			return FALSE;
 		}
@@ -203,28 +205,32 @@ class RoundIntervalPolicyFactory extends Factory {
 			return FALSE;
 		}
 
-		switch($type) {
-			case 10: //Normal
-				if ( $status == 10 ) { //In
-					$punch_type = 40;
-				} else {
-					$punch_type = 50;
-				}
-				break;
-			case 20: //Lunch
-				if ( $status == 10 ) { //In
-					$punch_type = 60;
-				} else {
-					$punch_type = 70;
-				}
-				break;
-			case 30: //Break
-				if ( $status == 10 ) { //In
-					$punch_type = 80;
-				} else {
-					$punch_type = 90;
-				}
-				break;
+		if ( $transfer == TRUE ) {
+			$punch_type = 95; //Transfer
+		} else {
+			switch ( $type ) {
+				case 10: //Normal
+					if ( $status == 10 ) { //In
+						$punch_type = 40;
+					} else {
+						$punch_type = 50;
+					}
+					break;
+				case 20: //Lunch
+					if ( $status == 10 ) { //In
+						$punch_type = 60;
+					} else {
+						$punch_type = 70;
+					}
+					break;
+				case 30: //Break
+					if ( $status == 10 ) { //In
+						$punch_type = 80;
+					} else {
+						$punch_type = 90;
+					}
+					break;
+			}
 		}
 
 		return $punch_type;
@@ -611,6 +617,12 @@ class RoundIntervalPolicyFactory extends Factory {
 				$this->Validator->isTRUE( 'in_use',
 										  FALSE,
 										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by policy groups' ) );
+			}
+		}
+
+		if ( $ignore_warning == FALSE ) {
+			if ( $this->getInterval() == 0 ) {
+				$this->Validator->Warning( 'round_interval', TTi18n::gettext( 'An interval of 0 will result in punches being saved to the nearest second, consider using 1 minute instead' ) );
 			}
 		}
 

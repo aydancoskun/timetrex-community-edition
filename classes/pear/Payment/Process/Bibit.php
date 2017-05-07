@@ -116,7 +116,7 @@ class Payment_Process_Bibit extends Payment_Process_Common {
 
     /**
      * The order amounts exponent
-     * 
+     *
      * @access private
      */
     var $exponent = 0;
@@ -141,35 +141,35 @@ class Payment_Process_Bibit extends Payment_Process_Common {
      * @access private
      */
     var $shopper_email_address;
-    
+
     /**
      * The unique id of the users session
      *
      * @access private
      */
     var $session_id;
-    
+
     /**
      * Unique id of the authenticed shopper
      *
      * @access private
      */
     var $authenticated_shopper_id;
-    
+
     /**
      * Shipping address
      *
      * @access private
      */
     var $shipping_address = array();
-   
+
     /**
      * Payment method mask
      *
      * @access private
      */
     var $payment_method_mask = array();
-   
+
     /**
      * $_typeFieldMap
      *
@@ -196,11 +196,6 @@ class Payment_Process_Bibit extends Payment_Process_Common {
         $this->_driver = 'Bibit';
         $this->_makeRequired('login', 'password', 'ordercode', 'description', 'amount', 'currency', 'exponent', 'cardNumber', 'expDate', 'action');
 
-    }
-
-    function Payment_Process_Bibit($options = false)
-    {
-        $this->__construct($options);
     }
 
     /**
@@ -252,7 +247,7 @@ class Payment_Process_Bibit extends Payment_Process_Common {
         // Restore error handling
         PEAR::popErrorHandling();
 
-        $response = &Payment_Process_Result::factory($this->_driver, 
+        $response = &Payment_Process_Result::factory($this->_driver,
                                                      $this->_responseBody,
                                                      $this);
         if (!PEAR::isError($response)) {
@@ -269,7 +264,7 @@ class Payment_Process_Bibit extends Payment_Process_Common {
      * @return string The query xml
      */
     function _prepareQueryString()
-    {  
+    {
         $data = array_merge($this->_options,$this->_data);
 
         $doc = XML_Util::getXMLDeclaration();
@@ -281,7 +276,7 @@ class Payment_Process_Bibit extends Payment_Process_Common {
             $doc .= XML_Util::createStartElement('orderModification', array('orderCode' => $data['x_ordercode']));
             if ($data['x_action'] == PAYMENT_PROCESS_ACTION_BIBIT_CAPTURE) {
                 $doc .= XML_Util::createStartElement('capture');
-                
+
                 $d = array();
                 $t = time() - 86400;
                 $d['dayOfMonth'] = date('d', $t);
@@ -309,7 +304,7 @@ class Payment_Process_Bibit extends Payment_Process_Common {
         } else {
             $doc .= XML_Util::createStartElement('submit');
             $doc .= XML_Util::createStartElement('order', array('orderCode' => $data['x_ordercode']));
-            
+
             $doc .= XML_Util::createTag('description', null, $data['x_descr']);
             $doc .= XML_Util::createTag('amount', array('value' => $data['x_amount'],
                                                         'currencyCode' => $data['x_currency'],
@@ -319,7 +314,7 @@ class Payment_Process_Bibit extends Payment_Process_Common {
                 $doc .= XML_Util::createCDataSection($data['x_ordercontent']);
                 $doc .= XML_Util::createEndElement('orderContent');
             }
-         
+
             if ($data['x_action'] == PAYMENT_PROCESS_ACTION_BIBIT_REDIRECT) {
                 if (is_array($data['paymentMethodMask']) && count($data['paymentMethodMask'] > 0)) {
                     $doc .= XML_Util::createStartElement('paymentMethodMask');
@@ -356,9 +351,9 @@ class Payment_Process_Bibit extends Payment_Process_Common {
                 if (isset($data['x_card_code'])) {
                     $doc .= XML_Util::createTag('cvc', null, $data['x_card_code']);
                 }
-              
+
                 $doc .= XML_Util::createEndElement($cc_type);
-                
+
                 if ((isset($data['shopperIPAddress']) || isset($data['sessionId']))
                 &&  ($data['shopperIPAddress'] != ''  || $data['sessionId'] != '')) {
                     $t = array();
@@ -372,14 +367,14 @@ class Payment_Process_Bibit extends Payment_Process_Common {
                     $doc .= XML_Util::createTag('session', $t);
                     unset($t);
                 }
-              
+
                 $doc .= XML_Util::createEndElement('paymentDetails');
             }
-        
-            if ((isset($data['shopperEmailAddress'])    && $data['shopperEmailAddress'] != '') 
+
+            if ((isset($data['shopperEmailAddress'])    && $data['shopperEmailAddress'] != '')
             ||  (isset($data['authenticatedShopperID']) && $data['authenticatedShopperID'] != '')) {
                 $doc .= XML_Util::createStartElement('shopper');
-                
+
                 if ($data['shopperEmailAddress'] != '') {
                     $doc .= XML_Util::createTag('shopperEmailAddress', null, $data['shopperEmailAddress']);
                 }
@@ -389,10 +384,10 @@ class Payment_Process_Bibit extends Payment_Process_Common {
 
                 $doc .= XML_Util::createEndElement('shopper');
             }
-       
+
             if (is_array($data['shippingAddress']) && count($data['shippingAddress']) > 0) {
                 $a = $data['shippingAddress'];
-                
+
                 $doc .= XML_Util::createStartElement('shippingAddress');
                 $doc .= XML_Util::createStartElement('address');
 
@@ -406,11 +401,11 @@ class Payment_Process_Bibit extends Payment_Process_Common {
                         $doc .= XML_Util::createTag($field, null, $a[$field]);
                     }
                 }
-               
+
                 $doc .= XML_Util::createEndElement('address');
                 $doc .= XML_Util::createEndElement('shippingAddress');
             }
-       
+
             $doc .= XML_Util::createEndElement('order');
             $doc .= XML_Util::createEndElement('submit');
         }
@@ -424,7 +419,7 @@ class Payment_Process_Bibit extends Payment_Process_Common {
     /**
      * Prepare the ordercontent
      *
-     * Docs says max size is 10k 
+     * Docs says max size is 10k
      *
      * @access private
      */
@@ -560,11 +555,11 @@ class Payment_Process_Result_Bibit extends Payment_Process_Result
     var $_returnCode = PAYMENT_PROCESS_RESULT_DECLINED;
 
     var $_lastEvent = NULL;
-    
+
     var $_fieldMap = array(
     );
 
-    function Payment_Process_Result_Bibit($rawResponse)
+    function __construct($rawResponse)
     {
         $this->_rawResponse = $rawResponse;
     }
@@ -594,12 +589,12 @@ class Payment_Process_Result_Bibit extends Payment_Process_Result
         if (!PEAR::isError($e) && $e->next()) {
             $this->_returnCode = PAYMENT_PROCESS_RESULT_OTHER;
             $this->_errorCode = $e->getData();
-            
+
             $e = $doc->evaluate('//reply/error/text()');
             $this->message = $e->getData();
             return;
         }
-        
+
         $orderType = $this->_request->_data['x_action'];
         switch ($orderType) {
         case PAYMENT_PROCESS_ACTION_BIBIT_AUTH:
@@ -607,7 +602,7 @@ class Payment_Process_Result_Bibit extends Payment_Process_Result
             if (!PEAR::isError($e) && $e->next()) {
                 $this->_lastEvent = $e->getData();
             }
-        
+
             $amount = $doc->evaluate('//reply/orderStatus/payment/amount/attribute::value');
             if (!PEAR::isError($amount) && $amount->next()) {
                if ($this->_lastEvent == 'AUTHORISED') {

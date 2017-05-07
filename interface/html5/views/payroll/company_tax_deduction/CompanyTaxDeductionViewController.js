@@ -1147,6 +1147,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			this.detachElement( 'df_100' );
 		}
 
+		//prevent race condition by making double-sure that we get all the dynamic fields.
+		var $this = this;
+		TTPromise.wait(null, null, function(){
+			$this.hideAllDynamicFields
+		});
 	},
 
 	initEmployeeSetting: function() {
@@ -3591,6 +3596,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	},
 
 	buildEditViewUI: function() {
+		TTPromise.add('CompanyTaxDeduction','buildEditViewUI');
 
 		this._super( 'buildEditViewUI' );
 
@@ -3750,8 +3756,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( 'df_10', form_item_input, tab_tax_deductions_column1, '', null, true );
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
+			TTPromise.add('CompanyTaxDeduction','df_11');
 			Global.loadScript( 'global/widgets/formula_builder/FormulaBuilder.js', function(){
-
 				// Dynamic Field 11
 				form_item_input = Global.loadWidgetByName( FormItemType.FORMULA_BUILDER );
 				form_item_input.FormulaBuilder( {
@@ -3787,6 +3793,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				} );
 				$this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
 				form_item_input.parent().width( '45%' );
+				TTPromise.resolve('CompanyTaxDeduction','df_11');
 			} );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
@@ -4090,6 +4097,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		form_item_input.setColumns( display_columns );
 //		form_item_input.setUnselectedGridData( [] );
+		TTPromise.resolve('CompanyTaxDeduction','buildEditViewUI');
 
 	},
 

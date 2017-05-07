@@ -132,11 +132,6 @@ class Payment_Process_Transfirst extends Payment_Process_Common {
         $this->_makeRequired('login', 'password', 'action', 'invoiceNumber', 'customerId', 'amount', 'cardNumber', 'expDate');
     }
 
-    function Payment_Process_Transfirst($options = false)
-    {
-        $this->__construct($options);
-    }
-
     /**
      * Prepare the data.
      *
@@ -534,7 +529,7 @@ class Payment_Process_Result_Transfirst extends Payment_Process_Result {
      * @param  string  $rawResponse  The raw response from the gateway
      * @return mixed boolean true on success, PEAR_Error on failure
      */
-    function Payment_Process_Result_Transfirst($rawResponse)
+    function __construct($rawResponse)
     {
         $res = $this->_validateResponse($rawResponse);
         if (!$res || PEAR::isError($res)) {

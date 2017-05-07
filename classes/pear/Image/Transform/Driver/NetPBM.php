@@ -51,15 +51,6 @@ class Image_Transform_Driver_NetPBM extends Image_Transform
     /**
      * Class Constructor
      */
-    function Image_Transform_Driver_NetPBM()
-    {
-        $this->__construct();
-
-    } // End function Image_NetPBM
-
-    /**
-     * Class Constructor
-     */
     function __construct()
     {
         if (!defined('IMAGE_TRANSFORM_NETPBM_PATH')) {

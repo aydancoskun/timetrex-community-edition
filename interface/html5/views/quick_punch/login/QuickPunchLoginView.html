@@ -1,0 +1,21 @@
+<div class="container quick_punch_login_container">
+    <form class="form-signin" role="form" autocomplete="off">
+        <h4 class="form-signin-heading"><img src="../../images/lock.gif">  <%= $.i18n._('Quick Punch Login') %></h4>
+        <div class="form-group">
+            <label for="user_name"><%= $.i18n._('Quick Punch ID') %></label>
+            <input tabindex="1" tab-start type="number" data-toggle="tooltip" class="form-control" name="user_name" id="user_name" autocomplete="off" autofocus>
+        </div>
+        <div class="form-group">
+            <label for="password"><%= $.i18n._('Password') %></label>
+            <input tabindex="2" type="password" data-toggle="tooltip" class="form-control" id="password" name="password" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label for="language"><%= $.i18n._('Language') %></label>
+            <select tabindex="3" id="language" data-toggle="tooltip" name="language" class="form-control">
+
+            </select>
+        </div>
+        <button tabindex="0" tab-end class="btn btn-lg btn-primary btn-block" id="punch_login" type="button"><%= $.i18n._('Login') %></button>
+    </form>
+
+</div> <!-- /container -->

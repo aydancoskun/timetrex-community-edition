@@ -46,7 +46,7 @@ class Payment_Process_Type_eCheck extends Payment_Process_Type
     var $driversLicense;
     var $driversLicenseState;
 
-    function Payment_Process_Type_eCheck()
+    function __construct()
     {
 
     }

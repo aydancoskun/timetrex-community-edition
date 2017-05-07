@@ -2747,7 +2747,7 @@ class UserFactory extends Factory {
 				$subject = APPLICATION_NAME .' '. TTi18n::gettext('password reset requested at') .' '. TTDate::getDate('DATE+TIME', time() ) .' '. TTi18n::gettext('from') .' '. Misc::getRemoteIPAddress();
 				$body = '<html><body>';
 				$body .= TTi18n::gettext('A password reset has been requested for') .' "'. $this->getUserName() .'", ';
-				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'html5/#!sm=ResetPassword&key='. $password_reset_key .'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
+				$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'html5/?desktop=1#!sm=ResetPassword&key='. $password_reset_key .'">'. TTi18n::gettext('please click here to reset your password now') .'</a>.';
 				$body .= '<br><br>';
 				$body .= TTi18n::gettext('If you did not request your password to be reset, you may ignore this email.');
 				$body .= '<br><br>';

@@ -141,6 +141,9 @@ var ServiceCaller = Backbone.Model.extend( {
 		var message_id;
 		var url = ServiceCaller.getURLWithSessionId( 'Class=' + className + '&Method=' + function_name + '&v=2' );
 		if ( LocalCacheData.all_url_args ) {
+			if ( LocalCacheData.all_url_args.hasOwnProperty('user_id') ) {
+				url = url + '&user_id=' + LocalCacheData.all_url_args.user_id;
+			}
 			if ( LocalCacheData.all_url_args.hasOwnProperty('company_id') ) {
 				url = url + '&company_id=' + LocalCacheData.all_url_args.company_id;
 			}
@@ -322,8 +325,12 @@ var ServiceCaller = Backbone.Model.extend( {
 					if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'EXCEPTION' ) {
 						Debug.Text('API returned exception: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
 						TAlertManager.showAlert( apiReturnHandler.getDescription(), 'Error' );
-
-						TTPromise.resolve('ServiceCaller',promise_key);
+						//Error: Uncaught ReferenceError: promise_key is not defined
+						if ( typeof promise_key != 'undefined' ) {
+							TTPromise.reject('ServiceCaller', promise_key);
+						} else {
+							Debug.Text('ERROR: Unable to release promise beacuse key is NULL.', 'ServiceCaller.js', 'ServiceCaller', null, 10);
+						}
 						return;
 					} else if ( !apiReturnHandler.isValid() && apiReturnHandler.getCode() === 'SESSION' ) {
 						Debug.Text('API returned session expired: '+ message_id, 'ServiceCaller.js', 'ServiceCaller', null, 10);
@@ -335,14 +342,20 @@ var ServiceCaller = Backbone.Model.extend( {
 							// Prevent a partially loaded login screen when SessionID cookie is set but not valid on server.
 							window.location.reload();
 						} else {
-							if ( LocalCacheData.all_url_args.company_id ) {
-								LocalCacheData.setPortalLoginUser( null );
-								window.location = Global.getBaseURL() + '#!m=PortalJobVacancy&company_id=' + LocalCacheData.all_url_args.company_id;
+							var paths = Global.getBaseURL().replace(ServiceCaller.rootURL, '').split( '/' );
+							if ( paths.indexOf('quick_punch') > 0 ) {
+								window.location = Global.getBaseURL() + '#!m=' + 'QuickPunchLogin';
+							} else if ( paths.indexOf('portal') > 0 ) {
+								if ( LocalCacheData.all_url_args.company_id ) {
+									LocalCacheData.setPortalLoginUser( null );
+									window.location = Global.getBaseURL() + '#!m=PortalJobVacancy&company_id=' + LocalCacheData.all_url_args.company_id;
+								}
 							} else {
-								window.location = Global.getBaseURL() + '#!m=' + 'Login';
+								if ( !LocalCacheData.all_url_args.company_id ) {
+									window.location = Global.getBaseURL() + '#!m=' + 'Login';
+								}
 							}
 						}
-
 						TTPromise.resolve('ServiceCaller',message_id);
 						return;
 					} else {

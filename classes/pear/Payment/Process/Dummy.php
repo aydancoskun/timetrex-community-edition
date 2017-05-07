@@ -87,7 +87,7 @@ class Payment_Process_Dummy extends Payment_Process_Common {
 }
 
 class Payment_Process_Result_Dummy extends Payment_Process_Result {
-    function Payment_Process_Result_Dummy()
+    function __construct()
     {
     }
 }

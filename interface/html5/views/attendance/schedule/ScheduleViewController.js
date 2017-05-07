@@ -253,7 +253,8 @@ ScheduleViewController = BaseViewController.extend( {
 		var mode = this.getMode();
 		var default_date = this.start_date_picker.getDefaultFormatValue();
 		if ( !this.edit_view ) {
-			window.location = Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + default_date + '&mode=' + mode;
+			//window.location = Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + default_date + '&mode=' + mode;
+			window.location = Global.getBaseURL() + '#!m=' + this.viewId + '&mode=' + mode;
 		}
 	},
 
@@ -261,7 +262,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 		this.start_date_picker.setValue( val );
 
-		this.setDateUrl();
+		//this.setDateUrl();
 
 		LocalCacheData.last_schedule_selected_date = val;
 
@@ -7176,36 +7177,38 @@ ScheduleViewController = BaseViewController.extend( {
 
 	events: {},
 
-	setDateUrl: function() {
-		var $this = this;
-		if ( !$this.edit_view ) {
-
-			var mode = this.getMode();
-			var default_date = $this.start_date_picker.getDefaultFormatValue();
-
-			if ( mode ) {
-				window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date + '&mode=' + mode;
-			} else {
-				if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.mode ) {
-					$this.setToggleButtonValue( LocalCacheData.all_url_args.mode );
-					mode = this.getMode();
-					window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date + '&mode=' + mode;
-				} else {
-					window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date;
-				}
-			}
-
-		}
-	},
+	// setDateUrl: function() {
+	// 	var $this = this;
+	// 	if ( !$this.edit_view ) {
+	//
+	// 		var mode = this.getMode();
+	// 		var default_date = $this.start_date_picker.getDefaultFormatValue();
+	//
+	// 		if ( mode ) {
+	// 			window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date + '&mode=' + mode;
+	// 		} else {
+	// 			if ( LocalCacheData.all_url_args && LocalCacheData.all_url_args.mode ) {
+	// 				$this.setToggleButtonValue( LocalCacheData.all_url_args.mode );
+	// 				mode = this.getMode();
+	// 				window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date + '&mode=' + mode;
+	// 			} else {
+	// 				window.location = Global.getBaseURL() + '#!m=' + $this.viewId + '&date=' + default_date;
+	// 			}
+	// 		}
+	//
+	// 	}
+	// },
 
 	reSetURL: function() {
 		var mode = this.getMode();
 		var args;
 		if ( mode ) {
-			args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode;
+			//args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode;
+			args = '#!m=' + this.viewId + '&mode=' + mode;
 			window.location = Global.getBaseURL() + args;
 		} else {
-			args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue();
+			//args = '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue();
+			args = '#!m=' + this.viewId;
 			window.location = Global.getBaseURL() + args;
 		}
 		LocalCacheData.all_url_args = IndexViewController.instance.router.buildArgDic( args.split( '&' ) );
@@ -7233,11 +7236,13 @@ ScheduleViewController = BaseViewController.extend( {
 			if ( this.current_edit_record && this.current_edit_record.id ) {
 				if ( a ) {
 
-					Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&a=' + a + '&id=' + this.current_edit_record.id +
+					//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&a=' + a + '&id=' + this.current_edit_record.id +
+					Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&mode=' + mode + '&a=' + a + '&id=' + this.current_edit_record.id +
 					'&tab=' + tab_name );
 
 				} else {
-					Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&id=' + this.current_edit_record.id );
+					//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&id=' + this.current_edit_record.id );
+					Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&mode=' + mode + '&id=' + this.current_edit_record.id );
 
 				}
 
@@ -7248,15 +7253,18 @@ ScheduleViewController = BaseViewController.extend( {
 
 					//Edit a record which don't have id, schedule view Recurring Scedule
 					if ( a === 'edit' ) {
-						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&a=' + 'new' +
+						//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&a=' + 'new' +
+						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&mode=' + mode + '&a=' + 'new' +
 						'&tab=' + tab_name );
 					} else {
-						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&a=' + a +
+						//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode + '&a=' + a +
+						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&mode=' + mode + '&a=' + a +
 						'&tab=' + tab_name );
 					}
 
 				} else {
-					Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode );
+					//Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&date=' + this.start_date_picker.getDefaultFormatValue() + '&mode=' + mode );
+					Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&mode=' + mode );
 				}
 			}
 
@@ -7313,7 +7321,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 			}
 			$this.setDatePickerValue( new_date.format() );
-			$this.setDateUrl();
+			//$this.setDateUrl();
 
 			$this.search( false, true );
 
@@ -7345,14 +7353,14 @@ ScheduleViewController = BaseViewController.extend( {
 			}
 
 			$this.setDatePickerValue( new_date.format() );
-			$this.setDateUrl();
+			//$this.setDateUrl();
 
 			$this.search( false, true );
 
 		} );
 
 		this.start_date_picker.bind( 'formItemChange', function() {
-			$this.setDateUrl();
+			//$this.setDateUrl();
 			$this.search( false, true );
 		} );
 

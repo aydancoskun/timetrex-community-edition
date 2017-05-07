@@ -63,9 +63,19 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		if ( LocalCacheData.all_url_args ) {
 			if ( !LocalCacheData.all_url_args.hasOwnProperty('company_id') ) {
-				// TAlertManager.showAlert( 'Invalid Company' );
-				IndexViewController.instance.router.showTipModal( $.i18n._('Invalid Company') );
-				return;
+				TTPromise.add('IndexController', 'onViewChange');
+				TTPromise.wait( null, null, function() {
+					if ( IndexViewController && IndexViewController.instance && IndexViewController.instance.router ) {
+						IndexViewController.instance.router.showTipModal( $.i18n._('Invalid Company') );
+					} else {
+						TAlertManager.showAlert( $.i18n._('Invalid Company') );
+					}
+				});
+
+				setTimeout( function() {
+					//Ensure that the error is shown in a relatively timely fashion AFTER the framework needed to render properly is loaded.
+					TTPromise.resolve('IndexController', 'onViewChange');
+				},4000);
 			}
 		}
 		var reg = new RegExp( '^[0-9]*$' );
