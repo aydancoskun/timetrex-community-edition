@@ -319,7 +319,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 	function getByPasswordResetKey( $key ) {
 		$key = trim($key);
 
-		if ( $this->Validator->isRegEx('email', $key, NULL, '/^[a-z0-9]{40}$/i' ) == FALSE ) {
+		if ( $this->Validator->isRegEx('key', $key, NULL, '/^[a-z0-9]{40}$/i' ) == FALSE ) {
 			return FALSE;
 		}
 
@@ -2107,7 +2107,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['address1']) ) ? $this->getWhereClauseSQL( 'a.address1', $filter_data['address1'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['address2']) ) ? $this->getWhereClauseSQL( 'a.address2', $filter_data['address2'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['postal_code']) ) ? $this->getWhereClauseSQL( 'a.postal_code', $filter_data['postal_code'], 'text', $ph ) : NULL;
-		$query .= ( isset($filter_data['employee_number']) ) ? $this->getWhereClauseSQL( 'a.employee_number', $filter_data['employee_number'], 'numeric', $ph ) : NULL;
+		$query .= ( isset($filter_data['employee_number']) AND !is_array($filter_data['employee_number']) AND trim($filter_data['employee_number']) != '' ) ? $this->getWhereClauseSQL( 'a.employee_number', $filter_data['employee_number'], 'numeric', $ph ) : NULL;
 		$query .= ( isset($filter_data['user_name']) ) ? $this->getWhereClauseSQL( 'a.user_name', $filter_data['user_name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['sin']) ) ? $this->getWhereClauseSQL( 'a.sin', $filter_data['sin'], 'numeric_string', $ph ) : NULL;
 

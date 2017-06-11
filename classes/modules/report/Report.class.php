@@ -1098,7 +1098,7 @@ class Report {
 		$config = $this->getConfig();
 
 		//Reports with other formats (Tax reports, printable timesheets), don't specify columns.
-		if ( !isset($config['columns']) AND in_array( $format, array('pdf', 'csv') ) ) {
+		if ( !isset($config['columns']) AND in_array( $format, array('pdf', 'csv', 'html') ) ) {
 			$this->validator->isTrue( 'columns', FALSE, TTi18n::gettext('No columns specified to display on report') );
 			$config['columns'] = array();
 		}
@@ -1137,7 +1137,7 @@ class Report {
 			}
 		}
 
-		if ( isset($config['sub_total']) AND is_array($config['sub_total']) ) {
+		if ( isset($config['sub_total']) AND is_array($config['sub_total']) AND isset($config['columns']) AND is_array( $config['columns'] ) ) {
 			$sub_total_diff = array_diff( $config['sub_total'], array_keys( $config['columns'] ) );
 			if ( is_array($sub_total_diff) AND count($sub_total_diff) > 0 ) {
 				foreach( $sub_total_diff as $sub_total_bad_column ) {
@@ -3168,7 +3168,8 @@ class Report {
 			$this->html = '<html>';
 			$this->html .= '<head>';
 			$this->html .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-			$this->html .= '<title>' .$this->title. '</title>';
+			//$this->html .= '<title>'. $this->title .'</title>';
+			$this->html .= '<title>'. $this->getDescription('report_name') .'</title>';
 			$this->html .= '<meta name="author" content="' .$this->getUserObject()->getFullName(). '">';
 			$this->html .= '<meta name="description" content="' .APPLICATION_NAME .' '. TTi18n::getText('Report'). '">';
 			$this->html .= '<style type="text/css">';
@@ -3195,7 +3196,8 @@ class Report {
 			$this->pdf->setImageScale( $this->PDF_IMAGE_SCALE_RATIO );
 
 			$this->pdf->SetAuthor( $this->getUserObject()->getFullName() );
-			$this->pdf->SetTitle( $this->title );
+			//$this->pdf->SetTitle( $this->title );
+			$this->pdf->SetTitle( $this->getDescription('report_name') );
 			$this->pdf->SetSubject( APPLICATION_NAME .' '. TTi18n::getText('Report') );
 
 			$this->pdf->setMargins( $this->config['other']['left_margin'], $this->config['other']['top_margin'], $this->config['other']['right_margin'] );

@@ -211,23 +211,23 @@ class APIInstall extends APIFactory {
 
 		if ( $install_obj->isInstallMode() == TRUE ) {
 			//Convert enterprisedb type to postgresql8
-			if ( isset($data['type']) AND $data['type'] == 'enterprisedb' ) {
-				$data['final_type'] = 'postgres8';
-
-				//Check to see if a port was specified or not, if not, default to: 5444
-				if ( strpos($data['host'], ':') === FALSE ) {
-					$data['final_host'] = $data['host'].':5444';
-				} else {
-					$data['final_host'] = $data['host'];
-				}
-			} else {
+//			if ( isset($data['type']) AND $data['type'] == 'enterprisedb' ) {
+//				$data['final_type'] = 'postgres8';
+//
+//				//Check to see if a port was specified or not, if not, default to: 5444
+//				if ( strpos($data['host'], ':') === FALSE ) {
+//					$data['final_host'] = $data['host'].':5444';
+//				} else {
+//					$data['final_host'] = $data['host'];
+//				}
+//			} else {
 				if ( isset($data['type']) ) {
 					$data['final_type'] = $data['type'];
 				}
 				if ( isset($data['host']) ) {
 					$data['final_host'] = $data['host'];
 				}
-			}
+//			}
 
 			//In case load balancing is used, parse out just the first host.
 			$host_arr = Misc::parseDatabaseHostString( $data['final_host'] );

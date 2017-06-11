@@ -464,7 +464,10 @@ class APIAbsencePolicy extends APIFactory {
 		if ( $aplf->getRecordCount() > 0 ) {
 			$ap_obj = $aplf->getCurrent();
 			$pfp_obj = $ap_obj->getPayFormulaPolicyObject();
-			
+
+			$prev_aplf = TTnew( 'AbsencePolicyListFactory' );
+			$prev_aplf->getByIdAndCompanyId( $previous_absence_policy_id, $this->getCurrentCompanyObject()->getId() );
+
 			$accrual_rate = ( is_object( $pfp_obj ) ) ? $pfp_obj->getAccrualRate() : (-1);
 
 			Debug::Text('Before Accrual Rate: Amount: '. $amount .' Prev Amount: '. $previous_amount, __FILE__, __LINE__, __METHOD__, 10);
@@ -489,21 +492,42 @@ class APIAbsencePolicy extends APIFactory {
 				if ( is_object( $ap_obj->getPayCodeObject() )
 						AND is_object( $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject() )
 						AND is_object( $pfp_obj ) ) {
+					$pay_stub_entry_account_accrual_id = $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject()->getAccrual();
+
 					$pself = TTnew('PayStubEntryListFactory');
-					$pay_stub_entry_account_data = $pself->getLastSumByUserIdAndEntryNameIdAndDate( $user_id, $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject()->getAccrual(), $epoch );
+					$pay_stub_entry_account_data = $pself->getLastSumByUserIdAndEntryNameIdAndDate( $user_id, $pay_stub_entry_account_accrual_id, $epoch );
 					if ( isset($pay_stub_entry_account_data['ytd_amount']) AND $pay_stub_entry_account_data['ytd_amount'] !== NULL ) {
+						/** @var PayCodeListFactory $pclf */
+						$pclf = TTnew('PayCodeListFactory');
+						$accrual_account_pay_code_ids = (array)$pclf->getIDSByListFactory( $pclf->getByCompanyIdAndAccrualPayStubEntryAccountID( $this->getCurrentCompanyObject()->getId(), $pay_stub_entry_account_accrual_id) );
+
 						//Get all UserDateTotal records after the last pay stub date, so we can include dollar amounts that havne't appeared on pay stubs yet.
 						$udtlf = TTnew('UserDateTotalListFactory');
-						$udt_sum_arr = $udtlf->getSumByUserIDAndObjectTypeIDAndSourceObjecTIDAndPayCodeIDAndStartDateAndEndDate( $user_id, 25, $ap_obj->getID(), $ap_obj->getPayCode(), TTDate::getBeginDayEpoch( strtotime( $pay_stub_entry_account_data['end_date'] ) + 7200 ), ( time() + ( 86400 * 365 ) ) );
-						Debug::Arr($udt_sum_arr, ' UDT Sum for Pay Code: '. $ap_obj->getPayCode() .' SRC Object ID: '. $ap_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( strtotime( $pay_stub_entry_account_data['end_date'] ) + 7200 ) ), __FILE__, __LINE__, __METHOD__, 10);
+						$udt_sum_arr = $udtlf->getSumByUserIDAndObjectTypeIDAndPayCodeIDAndStartDateAndEndDate( $user_id, 25, $accrual_account_pay_code_ids, TTDate::getBeginDayEpoch( strtotime( $pay_stub_entry_account_data['end_date'] ) + 7200 ), ( time() + ( 86400 * 365 ) ) );
+						Debug::Arr( array( $udt_sum_arr, $accrual_account_pay_code_ids ), 'UDT Sum array.  SRC Object ID: '. $ap_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', TTDate::getBeginDayEpoch( strtotime( $pay_stub_entry_account_data['end_date'] ) + 7200 ) ), __FILE__, __LINE__, __METHOD__, 10);
 
 						$uwlf = TTnew('UserWageListFactory');
 						$uwlf->getByUserIdAndGroupIDAndBeforeDate( $user_id, $pfp_obj->getWageGroup(), $epoch, 1 );
+
+						$dollar_previous_amount = 0;
+
 						if ( $uwlf->getRecordCount() > 0 ) {
 							$dollar_amount = ( TTDate::getHours( $amount ) * $pfp_obj->getHourlyRate( $uwlf->getCurrent()->getHourlyRate() ) );
-							$dollar_previous_amount = ( TTDate::getHours( $previous_amount ) * $pfp_obj->getHourlyRate( $uwlf->getCurrent()->getHourlyRate() ) );
-						} else {
-							$dollar_previous_amount = $dollar_amount = 0;
+							if ( $prev_aplf->getRecordCount() > 0 ) {
+								$prev_pc_obj = $prev_aplf->getCurrent()->getPayCodeObject();
+
+								if ( is_object( $prev_pc_obj )
+									AND ( is_object( $prev_pc_obj->getPayStubEntryAccountObject() )
+										AND
+										( is_object( $prev_pc_obj->getPayStubEntryAccountObject() )
+											AND $pay_stub_entry_account_accrual_id == $prev_pc_obj->getPayStubEntryAccountObject()->getAccrual()
+										)
+									)
+								) {
+									$dollar_previous_amount = ( TTDate::getHours( $previous_amount ) * $pfp_obj->getHourlyRate( $uwlf->getCurrent()->getHourlyRate() ) );
+									Debug::Text( 'Pay stub entry account accrual has not changed, setting previous amount.', __FILE__, __LINE__, __METHOD__, 10 );
+								}
+							}
 						}
 
 						$available_dollar_balance = ( ( $pay_stub_entry_account_data['ytd_amount'] - $dollar_previous_amount ) - $udt_sum_arr['total_time_amount'] );
@@ -519,8 +543,6 @@ class APIAbsencePolicy extends APIFactory {
 
 			if ( is_object($pfp_obj) AND $pfp_obj->getAccrualPolicyAccount() != '' ) {
 				//The previous amount is cleared when the accrual policy (by way of absence policy) is changed to prevent miscalculation of remaining accrued time.
-				$prev_aplf = TTnew( 'AbsencePolicyListFactory' );
-				$prev_aplf->getByIdAndCompanyId( $previous_absence_policy_id, $this->getCurrentCompanyObject()->getId() );
 				if ( $prev_aplf->getRecordCount() > 0 ) {
 					$prev_pfp_obj = $prev_aplf->getCurrent()->getPayFormulaPolicyObject();
 					if ( is_object($prev_pfp_obj) AND (int)$pfp_obj->getAccrualPolicyAccount() != (int)$prev_pfp_obj->getAccrualPolicyAccount() ) {

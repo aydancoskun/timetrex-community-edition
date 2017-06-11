@@ -700,6 +700,9 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	openEditView: function() {
+		//#2295 - Re-initialize previous_absence_policy_id to ensure that previously saved values are passed correctly into the estimation of projected available balance.
+		this.previous_absence_policy_id = false;
+
 		Global.setUINotready();
 		TTPromise.add('init','init');
 		TTPromise.wait();
@@ -6780,6 +6783,9 @@ TimeSheetViewController = BaseViewController.extend( {
 					$this.search();
 					$this.onEditClick( refresh_id );
 
+					//#2295 - Re-initialize previous_absence_policy_id to ensure that previously saved values are passed correctly into the estimation of projected available balance.
+					this.previous_absence_policy_id = false;
+
 					$this.onSaveAndContinueDone( result );
 				} else {
 					$this.setErrorMenu();
@@ -7922,6 +7928,8 @@ TimeSheetViewController = BaseViewController.extend( {
 
 					$this.removeEditView();
 
+					//#2295 - Re-initialize previous_absence_policy_id to ensure that previously saved values are passed correctly into the estimation of projected available balance.
+					this.previous_absence_policy_id = false;
 				} else {
 					$this.setErrorMenu();
 					$this.setErrorTips( result );

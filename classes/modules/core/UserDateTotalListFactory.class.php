@@ -847,7 +847,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		return $total;
 	}
 
-	function getSumByUserIDAndObjectTypeIDAndSourceObjectIdAndPayCodeIDAndStartDateAndEndDate( $user_id, $object_type_id, $src_object_id, $pay_code_id, $start_date, $end_date ) {
+	function getSumByUserIDAndObjectTypeIDAndPayCodeIDAndStartDateAndEndDate( $user_id, $object_type_id, $pay_code_id, $start_date, $end_date ) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -866,6 +866,16 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 					'end_date' => $this->db->BindDate( $end_date ),
 					);
 
+//		$query = '
+//					select	sum(total_time) as total_time, sum(actual_total_time) as actual_total_time, sum(total_time_amount) as total_time_amount
+//					from	'. $this->getTable() .' as a
+//					where	a.user_id = ?
+//						AND a.date_stamp >= ?
+//						AND a.date_stamp <= ?
+//						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+//						AND a.src_object_id in ('. $this->getListSQL( $src_object_id, $ph, 'int' ) .')
+//						AND a.pay_code_id in ('. $this->getListSQL( $pay_code_id, $ph, 'int' ) .')
+//						AND ( a.deleted = 0 )';
 		$query = '
 					select	sum(total_time) as total_time, sum(actual_total_time) as actual_total_time, sum(total_time_amount) as total_time_amount
 					from	'. $this->getTable() .' as a
@@ -873,7 +883,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
 						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
-						AND a.src_object_id in ('. $this->getListSQL( $src_object_id, $ph, 'int' ) .')
 						AND a.pay_code_id in ('. $this->getListSQL( $pay_code_id, $ph, 'int' ) .')
 						AND ( a.deleted = 0 )';
 
@@ -1977,6 +1986,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							a.hourly_rate as hourly_rate,
 							a.hourly_rate_with_burden as hourly_rate_with_burden,
 
+							'. $this->getSQLStringAggregate( 'a.note', ' -- ') .' as udt_note,
 							min(a.start_time_stamp) as start_time_stamp,
 							max(a.end_time_stamp) as end_time_stamp,
 							sum(a.total_time) as total_time,
@@ -2114,6 +2124,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							a.hourly_rate as hourly_rate,
 							a.hourly_rate_with_burden as hourly_rate_with_burden,
 
+							'. $this->getSQLStringAggregate( 'a.note', ' -- ') .' as udt_note,
 							min(a.start_time_stamp) as start_time_stamp,
 							max(a.end_time_stamp) as end_time_stamp,
 							sum(a.quantity) as quantity,

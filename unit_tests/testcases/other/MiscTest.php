@@ -1052,5 +1052,50 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -1, -100 ), -99 );
 		$this->assertEquals( Misc::getAmountDifferenceUpToLimit( -0, -100 ), -100 );
 	}
+
+	function testIsSubDirectory() {
+		$parent_dir = '/';
+		$child_dir = '/var';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), TRUE );
+
+		$parent_dir = '/var';
+		$child_dir = '/usr';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+
+		$parent_dir = '/var';
+		$child_dir = '/usr/';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+
+		$parent_dir = '/var/';
+		$child_dir = '/usr/';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+
+		//Test with directories that do not exist.
+		$parent_dir = '/var/www/TimeTrex556688';
+		$child_dir = '/var/www/TimeTrex556688Test';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+
+		$parent_dir = '/var/www/TimeTrex556688/';
+		$child_dir = '/var/www/TimeTrex556688Test/';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+
+
+		$parent_dir = '/var/www/TimeTrex556688Test';
+		$child_dir = '/var/www/TimeTrex556688';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+
+		$parent_dir = '/var/www/TimeTrex556688';
+		$child_dir =  '/var/www/TimeTrex556688/storage';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), TRUE );
+
+		$parent_dir = '/var/www/TimeTrex556688/';
+		$child_dir =  '/var/www/TimeTrex556688/storage/';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), TRUE );
+
+		//This directory should exist for this test to be accurate.
+		$parent_dir = '/etc/cron.d';
+		$child_dir =  '/etc/cron.daily';
+		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
+	}
 }
 ?>

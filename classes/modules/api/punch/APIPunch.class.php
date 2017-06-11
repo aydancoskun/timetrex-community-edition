@@ -98,6 +98,7 @@ class APIPunch extends APIFactory {
 				$data['punch_time'] = TTDate::getAPIDate( 'TIME', $epoch );
 				$data['original_time_stamp'] = TTDate::getAPIDate( 'DATE+TIME', $epoch );
 				$data['actual_time_stamp'] = TTDate::getAPIDate( 'DATE+TIME', $epoch );
+				$data['epoch'] = $epoch;
 				$data['first_name'] = $user_obj->getFirstName();
 				$data['last_name'] = $user_obj->getLastName();
 				$data['station_id'] = $current_station->getId();

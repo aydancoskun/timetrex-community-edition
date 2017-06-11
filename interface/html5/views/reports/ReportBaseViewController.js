@@ -1129,6 +1129,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		}
 
+		if ( ui.index === 0 ) {
+			this.validate();
+		}
 	},
 
 	/**
@@ -2739,10 +2742,14 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	//Make sure this.current_edit_record is updated before validate
-	validate: function() {
+	validate: function( synchronous ) {
 		var $this = this;
 		var other = this.getFormValues();
 		var chart = this.getChartValues();
+
+		//#2293 - Refresh the report tab UI based on any changes to chart or setup tabs, or changes that hide and show fields will not validate properly.
+		this.buildReportUIBaseOnSetupFields();
+
 		var report = this.visible_report_values;
 		if ( report.sort ) {
 			report.sort = this.convertSortValues( report.sort );
@@ -2758,12 +2765,23 @@ ReportBaseViewController = BaseViewController.extend( {
 		if ( report.sort ) {
 			report.sort = this.convertSortValues( report.sort );
 		}
-		this.api['validateReport']( config, 'pdf', {
-			onResult: function( result ) {
-				$this.validateResult( result );
 
-			}
-		} );
+		if ( !synchronous ) {
+			this.api['validateReport']( config, 'pdf', {
+				onResult: function( result ) {
+					$this.validateResult( result );
+				}
+			} );
+
+			return null;
+		} else {
+			//#2293 - synchronous call to validation api allows us to return the value in realtime
+			var result = this.api['validateReport'](config, 'pdf', {async: false});
+			this.validateResult(result);
+
+			return result.getResult();
+		}
+
 	},
 
 	onViewExcelClick: function() {
@@ -2904,6 +2922,12 @@ ReportBaseViewController = BaseViewController.extend( {
 		if ( !key ) {
 			key = 'pdf';
 		}
+
+		//#2293 - make validation call synchronously to stop the report from being shown if it fails.
+		if ( !this.validate( true ) ) {
+			return;
+		}
+
 		var config = this.getPostReportJson();
 		var post_data = {0: config, 1: key};
 		if ( this.include_form_setup ) {

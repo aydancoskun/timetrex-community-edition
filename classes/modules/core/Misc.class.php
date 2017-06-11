@@ -1757,7 +1757,7 @@ class Misc {
 	static function parseDatabaseHostString( $database_host_string ) {
 		$retarr = array();
 
-		$db_hosts = explode(',', $database_host_string );
+		$db_hosts = explode(',', str_replace(' ', '', $database_host_string ) );
 		if ( is_array($db_hosts) ) {
 			$i = 0;
 			foreach( $db_hosts as $db_host ) {
@@ -2044,10 +2044,19 @@ class Misc {
 	}
 
 	static function isSubDirectory( $child_dir, $parent_dir ) {
-		if ( strpos( realpath( $child_dir ), realpath( $parent_dir ) ) === 0 ) {
+		//Make sure directories always end in trailing slash, otherwise paths like this will fail:
+		//  Child: /var/www/TimeTrex Parent: /var/www/TimeTrexTest
+		$child_dir = rtrim($child_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
+		$parent_dir = rtrim($parent_dir, DIRECTORY_SEPARATOR ) . DIRECTORY_SEPARATOR;
+		if ( strpos( $child_dir, $parent_dir ) === 0 ) {
 			return TRUE;
-		} elseif ( strpos( realpath( $child_dir ), realpath( $parent_dir ) ) === 0 ) { //Test realpaths incase they are relative or have "../" in them.
-			return TRUE;
+		} else {
+			//When using realpath(), if the path does not exist it will return FALSE. In that case it can never be a sub directory.
+			$real_child_dir = realpath( $child_dir );
+			$real_parent_dir = realpath( $parent_dir );
+			if ( $real_child_dir !== FALSE AND $real_parent_dir !== FALSE AND strpos( $real_child_dir.DIRECTORY_SEPARATOR, $real_parent_dir.DIRECTORY_SEPARATOR ) === 0 ) { //Test realpaths incase they are relative or have "../" in them.
+				return TRUE;
+			}
 		}
 
 		return FALSE;

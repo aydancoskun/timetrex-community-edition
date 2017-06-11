@@ -188,6 +188,44 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 		return $this;
 	}
 
+	function getByCompanyIdAndAccrualPayStubEntryAccountID($company_id, $pay_stub_entry_account_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_stub_entry_account_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'company_id' => (int)$company_id,
+				'pay_stub_entry_account_id' => (int)$pay_stub_entry_account_id
+		);
+
+		$psef = new PayStubEntryAccountFactory();
+		$query = '
+					SELECT a.* FROM
+						'. $this->getTable() .' as a
+						LEFT JOIN '. $psef->getTable() .' as psea ON ( a.pay_stub_entry_account_id = psea.id )
+						WHERE a.company_id = ?
+							AND psea.accrual_pay_stub_entry_account_id = ?
+							AND ( a.deleted = 0 AND psea.deleted = 0 )';
+
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
 	static function getPayCodeTypeMap( $company_id ) {
 		$pclf = TTnew( 'PayCodeListFactory' );
 		$pclf->getByCompanyId( $company_id );
@@ -207,6 +245,8 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 
 		return FALSE;
 	}
+
+
 
 	function getAPISearchByCompanyIdAndArrayCriteria( $company_id, $filter_data, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $company_id == '') {

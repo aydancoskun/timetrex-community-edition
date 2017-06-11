@@ -245,37 +245,25 @@ AccrualViewController = BaseViewController.extend( {
 			} ),
 
 			new SearchField( {
-				label: $.i18n._( 'Created By' ),
-				in_column: 1,
-				field: 'created_by',
-				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
-				multiple: true,
-				basic_search: !this.hide_search_field,
-				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
-
-			new SearchField( {
-				label: $.i18n._( 'Updated By' ),
-				in_column: 1,
-				field: 'updated_by',
-				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
-				multiple: true,
-				basic_search: !this.hide_search_field,
-				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX
-			} ),
-
-			new SearchField( {
 				label: $.i18n._( 'Type' ),
-				in_column: 2,
+				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
+				in_column: 1,
+				multiple: true,
+				field: 'group_id',
+				layout_name: ALayoutIDs.TREE_COLUMN,
+				tree_mode: true,
+				basic_search: !this.hide_search_field,
+				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -302,19 +290,30 @@ AccrualViewController = BaseViewController.extend( {
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
+			
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
+				in_column: 2,
+				field: 'created_by',
+				layout_name: ALayoutIDs.USER,
+				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				multiple: true,
+				basic_search: !this.hide_search_field,
+				adv_search: false,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
 			new SearchField( {
-				label: $.i18n._( 'Group' ),
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
+				field: 'updated_by',
+				layout_name: ALayoutIDs.USER,
+				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				multiple: true,
-				field: 'group_id',
-				layout_name: ALayoutIDs.TREE_COLUMN,
-				tree_mode: true,
 				basic_search: !this.hide_search_field,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
-
 		];
 	},
 

@@ -3482,7 +3482,18 @@ Global.MoneyRound = function(number, decimals) {
 		decimals = 2;
 	}
 
+	//#2294 - We must round the absolute value or negative numbers will round toward zero.
+	var negative = false;
+	if ( number < 0 ) {
+		negative = true;
+	}
+	number = Math.abs(number);
+
 	retval = +(Math.round(number + "e+" + decimals) + "e-" + decimals);
+
+	if ( negative ) {
+		retval = retval * -1;
+	}
 
 	return retval.toFixed( decimals );
 };

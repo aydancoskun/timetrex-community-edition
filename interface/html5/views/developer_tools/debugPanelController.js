@@ -109,7 +109,26 @@ function runUnitTests() {
         assert.ok(Global.MoneyRound(1.005, 2) == '1.01', 'Global.MoneyRound(1.005, 2) == 1.01 -- Passed!');
         assert.ok(Global.MoneyRound(1.77777777, 2) == '1.78', 'Global.MoneyRound(1.77777777, 2) == 1.78 -- Passed!');
         assert.ok(Global.MoneyRound(9.1, 2) == '9.10', 'Global.MoneyRound(9.1, 2) == 9.10 -- Passed!');
-        assert.ok(Global.MoneyRound(1.0049999999999999, 2) == '1.01', 'Global.MoneyRound(1.0049999999999999, 2) == 1.01 -- Passed!');
+		assert.ok(Global.MoneyRound(1.0049999999999999, 2) == '1.01', 'Global.MoneyRound(1.0049999999999999, 2) == 1.01 -- Passed!');
+
+		assert.ok(Global.MoneyRound(-28.120, 2) == '-28.12', 'Global.MoneyRound(-28.120, 2) == -28.12 -- Passed!');
+		assert.ok(Global.MoneyRound(28.120, 2) == '28.12', 'Global.MoneyRound(28.120, 2) == 28.12 -- Passed!');
+
+		assert.ok(Global.MoneyRound(-28.124, 2) == '-28.12', 'Global.MoneyRound(-28.124, 2) == -28.12 -- Passed!');
+		assert.ok(Global.MoneyRound(28.124, 2) == '28.12', 'Global.MoneyRound(28.124, 2) == 28.12 -- Passed!');
+		assert.ok(Global.MoneyRound(-28.125, 2) == '-28.13', 'Global.MoneyRound(-28.125, 2) == -28.13 -- Passed!');
+		assert.ok(Global.MoneyRound(28.125, 2) == '28.13', 'Global.MoneyRound(28.125, 2) == 28.13 -- Passed!');
+
+		assert.ok(Global.MoneyRound(-28.129, 2) == '-28.13', 'Global.MoneyRound(-28.129, 2) == -28.13 -- Passed!');
+		assert.ok(Global.MoneyRound(28.129, 2) == '28.13', 'Global.MoneyRound(28.129, 2) == 28.13 -- Passed!');
+
+		assert.ok(Global.MoneyRound(-0.124, 2) == '-0.12', 'Global.MoneyRound(-0.124, 2) == -0.12 -- Passed!');
+		assert.ok(Global.MoneyRound(0.124, 2) == '0.12', 'Global.MoneyRound(0.124, 2) == 0.12 -- Passed!');
+		assert.ok(Global.MoneyRound(-0.155, 2) == '-0.16', 'Global.MoneyRound(-0.155, 2) == -0.16 -- Passed!');
+		assert.ok(Global.MoneyRound(0.155, 2) == '0.16', 'Global.MoneyRound(0.155, 2) == 0.16 -- Passed!');
+
+		assert.ok(Global.MoneyRound(-0.001, 2) == '0.00', 'Global.MoneyRound(-0.001, 2) == 0.00 -- Passed!');
+		assert.ok(Global.MoneyRound(0.001, 2) == '0.00', 'Global.MoneyRound(0.001, 2) == 0.00 -- Passed!');
     });
 
 	QUnit.test("TTPromise Case 1: wait(category) on a single promise", function (assert) {

@@ -373,7 +373,7 @@ class PunchFactory extends Factory {
 	}
 	function setTransfer($bool, $time_stamp = NULL) {
 		//If a timestamp is passed, check for the previous punch, if one does NOT exist, transfer can not be enabled.
-		if ( $bool == TRUE AND $time_stamp != '' ) {
+		if ( $bool == TRUE AND $time_stamp != '' AND $this->isNew() ) { //If the punch isn't a new one, always accept the transfer flag so we don't mistakenly round punches that are transfer punches when an administrator edits them.
 			$prev_punch_obj = $this->getPreviousPunchObject( $time_stamp );
 			//Make sure we check that the previous punch wasn't an out punch from the last shift.
 			if ( !is_object( $prev_punch_obj ) OR ( is_object( $prev_punch_obj ) AND $prev_punch_obj->getStatus() == 20 ) ) {
@@ -523,7 +523,8 @@ class PunchFactory extends Factory {
 
 		$original_epoch = $epoch;
 
-		$is_transfer = ( ( $this->getTransfer() == TRUE OR $this->getEnableAutoTransfer() ) ? TRUE : FALSE );
+		//$is_transfer = ( ( $this->getTransfer() == TRUE OR $this->getEnableAutoTransfer() ) ? TRUE : FALSE ); //This broke rounding on timeclocks for the first IN punch of the day when a Branch/Department/Job/Task was specified.
+		$is_transfer = $this->getTransfer();
 
 		//Punch control is no longer used for rounding.
 		//Check for rounding policies.
@@ -534,6 +535,7 @@ class PunchFactory extends Factory {
 		$riplf->getByPolicyGroupUserIdAndTypeId( $this->getUser(), $type_id );
 		Debug::text(' Round Interval Punch Type: '. $type_id .' User: '. $this->getUser() .' Total Records: '. $riplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $riplf->getRecordCount() > 0 ) {
+			$is_rounded_timestamp = FALSE;
 			//Loop over each rounding policy testing the conditionals and rounding the punch if necessary.
 			foreach( $riplf as $round_policy_obj ) {
 				Debug::text(' Found Rounding Policy: '. $round_policy_obj->getId() .' Punch Type: '. $round_policy_obj->getPunchType() .' Conditional Type: '. $round_policy_obj->getConditionType(), __FILE__, __LINE__, __METHOD__, 10);
@@ -626,7 +628,7 @@ class PunchFactory extends Factory {
 
 							$epoch = ( $plf->getCurrent()->getTimeStamp() + $total_lunch_time );
 							Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
-
+							$is_rounded_timestamp = TRUE;
 						} else {
 							Debug::text('DID NOT Find Lunch Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 						}
@@ -705,14 +707,13 @@ class PunchFactory extends Factory {
 							$epoch = ( $plf->getCurrent()->getTimeStamp() + $total_break_time );
 							Debug::text('Epoch after total rounding is: '. $epoch .' - '. TTDate::getDate('DATE+TIME', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 
+							$is_rounded_timestamp = TRUE;
 						} else {
 							Debug::text('DID NOT Find break Punch Out: '. TTDate::getDate('DATE+TIME', $plf->getCurrent()->getTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 						}
-
 					} else {
 						Debug::text('Skipping break Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					}
-
 				} elseif ( $round_policy_obj->getPunchType() == 120 ) { //Day Total Rounding
 					Debug::text('Day Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $this->getStatus() == 20 AND $this->getType() == 10 ) { //Out, Type Normal
@@ -808,6 +809,8 @@ class PunchFactory extends Factory {
 									Debug::text('Day Total Diff: '. $day_total_time_diff, __FILE__, __LINE__, __METHOD__, 10);
 
 									$epoch = ( $original_epoch + $day_total_time_diff );
+
+									$is_rounded_timestamp = TRUE;
 								}
 							}
 						} else {
@@ -867,6 +870,8 @@ class PunchFactory extends Factory {
 							}
 						}
 					}
+
+					$is_rounded_timestamp = TRUE;
 				}
 
 				//In cases where employees transfer between jobs, then have rounding on just In or Out punches,
@@ -886,6 +891,14 @@ class PunchFactory extends Factory {
 				unset($plf, $p_obj);
 				*/
 			}
+
+			//In cases where there may be one or more conditional rounding policies, if none of the conditions match, the punch still needs to be rounded down to the nearest minute,
+			//otherwise its recorded to the nearest second when they may not be expecting that.
+			// So when we know there are rounding policies, if none of them get applied, treat it as if there aren't any policies at all and still round to the minute.
+			if ( $is_rounded_timestamp == FALSE ) {
+				Debug::text(' Rounding Policy(s) found, but due to conditions none applied...', __FILE__, __LINE__, __METHOD__, 10);
+				$epoch = TTDate::roundTime($epoch, 60, 10); //Round down.
+			}
 		} else {
 			Debug::text(' NO Rounding Policy(s) Found', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -902,7 +915,6 @@ class PunchFactory extends Factory {
 		}
 
 		Debug::text(' Rounded TimeStamp: '. TTDate::getDate('DATE+TIME', $epoch ) .'('. $epoch .') Original TimeStamp: '. TTDate::getDate('DATE+TIME', $original_epoch ), __FILE__, __LINE__, __METHOD__, 10);
-
 		return $epoch;
 	}
 
@@ -2204,7 +2216,9 @@ class PunchFactory extends Factory {
 			*/
 
 			//Parse time stamp above loop so we don't have to do it twice.
-			if ( isset($data['punch_date']) AND $data['punch_date'] != '' AND isset($data['punch_time']) AND $data['punch_time'] != '' ) {
+			if ( isset($data['epoch']) AND $data['epoch'] != '' ) {
+				$full_time_stamp = $data['epoch'];
+			} elseif ( isset($data['punch_date']) AND $data['punch_date'] != '' AND isset($data['punch_time']) AND $data['punch_time'] != '' ) {
 				$full_time_stamp = TTDate::parseDateTime( $data['punch_date'].' '.$data['punch_time'] );
 				//Debug::text('Setting Punch Time/Date: Date Stamp: '. $data['punch_date'] .' Time Stamp: '. $data['punch_time'] .' Full Time Stamp: '. $data['full_time_stamp'] .' Parsed: '. TTDate::getDate('DATE+TIME', $full_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 			} elseif ( isset($data['time_stamp']) AND $data['time_stamp'] != '' ) {

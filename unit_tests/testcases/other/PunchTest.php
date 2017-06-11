@@ -4256,6 +4256,68 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group Punch_testRoundingConditionA
+	 */
+	function testRoundingConditionA3() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
+		//Test punches outside the condition with seconds, so its just rounded to the minute.
+		global $dd;
+
+		TTDate::setTimeFormat('g:i:s A T');
+
+		$this->createPayPeriodSchedule( 10 );
+		$this->createPayPeriods();
+		$this->getAllPayPeriods();
+
+		$policy_ids['round'][] = $this->createRoundingPolicy( $this->company_id, 110 ); //In
+		$policy_ids['round'][] = $this->createRoundingPolicy( $this->company_id, 120 ); //Out
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   $policy_ids['round'],
+								   array( $this->user_id ) );
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:17:29AM'),
+								 strtotime($date_stamp.' 4:43:59PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => 0,
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
+		//print_r($punch_arr);
+		$this->assertEquals( 1, count($punch_arr[$date_epoch]) );
+
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][0]['time_stamp'], strtotime($date_stamp.' 8:17:00 AM') );
+		$this->assertEquals( $punch_arr[$date_epoch][0]['shift_data']['punches'][1]['time_stamp'], strtotime($date_stamp.' 4:43:00 PM') );
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//Total Time
+		$this->assertEquals( 5, $udt_arr[$date_epoch][0]['object_type_id'] );
+		$this->assertEquals( 30360, $udt_arr[$date_epoch][0]['total_time'] );
+
+		return TRUE;
+	}
+
+	/**
 	 * @group Punch_testRoundingConditionB
 	 */
 	function testRoundingConditionB() {

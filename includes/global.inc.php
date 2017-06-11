@@ -56,8 +56,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '10.6.0' );
-define('APPLICATION_VERSION_DATE', 1493794800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("03-May-2017")."\n\n";'
+define('APPLICATION_VERSION', '10.6.1' );
+define('APPLICATION_VERSION_DATE', 1495004400 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("17-May-2017")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );

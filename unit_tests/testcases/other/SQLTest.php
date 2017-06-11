@@ -257,7 +257,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 										case 'ClientContactListFactory':
 											switch ( $method_parameter->name ) {
 												case 'key':
-													$input_argument = '900d6136975e3a728051a62ed1191910';
+													$input_argument = '900d6136975e3a728051a62ed119191034568745';
 													break;
 											}
 											break;
