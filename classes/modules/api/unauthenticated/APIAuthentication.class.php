@@ -423,24 +423,6 @@ class APIAuthentication extends APIFactory {
 	function getOrganizationURL() {
 		return ORGANIZATION_URL;
 	}
-	function isApplicationBranded() {
-		global $config_vars;
-
-		if ( isset($config_vars['branding']['application_name']) ) {
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-	function isPoweredByLogoEnabled() {
-		global $config_vars;
-
-		if ( isset($config_vars['branding']['disable_powered_by_logo']) AND $config_vars['branding']['disable_powered_by_logo'] == TRUE ) {
-			return FALSE;
-		}
-
-		return TRUE;
-	}
 
 	function isAnalyticsEnabled() {
 		global $config_vars;
@@ -539,7 +521,6 @@ class APIAuthentication extends APIFactory {
 				'application_version' => $this->getApplicationVersion(),
 				'application_version_date' => $this->getApplicationVersionDate(),
 				'application_build' => $this->getApplicationBuild(),
-				'powered_by_logo_enabled' => $this->isPoweredByLogoEnabled(),
 				'deployment_on_demand' => $this->getDeploymentOnDemand(),
 				'analytics_enabled' => $this->isAnalyticsEnabled(),
 				'analytics_tracking_code' => $this->getAnalyticsTrackingCode(),
@@ -575,8 +556,6 @@ class APIAuthentication extends APIFactory {
 				'api_base_url' => Environment::getAPIBaseURL( $api ),
 				'api_json_url' => Environment::getAPIURL( 'json' ),
 				'images_url' => Environment::getImagesURL(),
-				'powered_by_logo_enabled' => $this->isPoweredByLogoEnabled(),
-				'is_application_branded' => $this->isApplicationBranded(),
 				'application_name' => $this->getApplicationName(),
 				'organization_name' => $this->getOrganizationName(),
 				'organization_url' => $this->getOrganizationURL(),

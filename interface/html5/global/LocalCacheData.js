@@ -56,15 +56,11 @@ LocalCacheData.currentShownContextMenuName = '';
 
 LocalCacheData.isSupportHTML5LocalCache = false;
 
-//LocalCacheData.isApplicationBranded = null;
-
 LocalCacheData.loginData = null;
 
 LocalCacheData.currentLanguage = 'en_us';
 
 LocalCacheData.currentLanguageDic = {};
-
-LocalCacheData.enablePoweredByLogo = null;
 
 LocalCacheData.appType = null;
 
@@ -200,23 +196,6 @@ LocalCacheData.setViewMinMap = function( val ) {
 
 	LocalCacheData.setLocalCache( 'viewMinMap', val, 'JSON' );
 };
-
-//LocalCacheData.getIsApplicationBranded = function() {
-//	return LocalCacheData.getLocalCache( 'isApplicationBranded' );
-//};
-
-//LocalCacheData.setIsApplicationBranded = function( val ) {
-//
-//	LocalCacheData.setLocalCache( 'isApplicationBranded', val );
-//};
-
-//LocalCacheData.getOrgUrl = function() {
-//	return LocalCacheData.getLocalCache( 'OrgUrl' );
-//};
-//
-//LocalCacheData.setOrgUrl = function( val ) {
-//	LocalCacheData.setLocalCache( 'OrgUrl', val );
-//};
 
 LocalCacheData.getCopyRightInfo = function() {
 	return LocalCacheData.getLocalCache( 'copyRightInfo' );

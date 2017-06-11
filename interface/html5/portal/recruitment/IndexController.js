@@ -182,9 +182,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		var timeout_count;
 		timeout_count = 0;
-		$('link[title="application css"]').prop('disabled', true);
 		if (LocalCacheData.loadViewRequiredJSReady) {
-			initRibbonMenuAndCopyRight();
+			showRibbonMenuAndLoadView();
 		} else {
 			var auto_login_timer = setInterval(function () {
 				if (timeout_count == 100) {
@@ -192,33 +191,11 @@ var ApplicationRouter = Backbone.Router.extend( {
 				}
 				timeout_count = timeout_count + 1;
 				if (LocalCacheData.loadViewRequiredJSReady) {
-					initRibbonMenuAndCopyRight();
+					showRibbonMenuAndLoadView();
 					clearInterval(auto_login_timer);
 				}
 			}, 600);
 		}
-		// if ( Global.isSet( view_id ) ) {
-		// 	$('link[title="application css"]').prop('disabled', true);
-		// 	if (LocalCacheData.loadViewRequiredJSReady) {
-		// 		initRibbonMenuAndCopyRight();
-		// 	} else {
-		// 		var auto_login_timer = setInterval(function () {
-		// 			if (timeout_count == 100) {
-		// 				clearInterval(auto_login_timer);
-		// 			}
-		// 			timeout_count = timeout_count + 1;
-		// 			if (LocalCacheData.loadViewRequiredJSReady) {
-		// 				initRibbonMenuAndCopyRight();
-		// 				clearInterval(auto_login_timer);
-		// 			}
-		// 		}, 600);
-		// 	}
-		// }
-		// } else {
-		// 	$('link[title="application css"]').prop('disabled', false);
-		// 	showRibbonMenuAndLoadView();
-		// }
-
 		function showRibbonMenuAndLoadView() {
 			//Show ribbon menu UI
 			// if ( view_id ) {
@@ -233,6 +210,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			// }
 			$( 'body' ).removeClass( 'login-bg' );
 			Global.loadStyleSheet( '../../theme/default/portal/css/portal.css' + '?v=' + APIGlobal.pre_login_data.application_build );
+			$('link[title="application css"]').prop('disabled', true);
 			if ( !$this.headerView ) {
 				$this.headerView = new HeaderViewController();
 				$('#topContainer').html($this.headerView.el);
@@ -276,17 +254,6 @@ var ApplicationRouter = Backbone.Router.extend( {
 				PortalBaseViewController.loadView( view_id );
 			} );
 		}
-
-		function initRibbonMenuAndCopyRight() {
-			//Start check signal
-			// Global.setSignalStrength();
-			Global.loadPage( 'views/portal/footer/FooterView.html', function( result ) {
-				$('#bottomContainer').html( _.template( result )() );
-			} )
-
-			showRibbonMenuAndLoadView();
-		}
-
 		function checkIds() {
 
 			if ( Global.isArray( LocalCacheData.current_open_primary_controller.current_edit_record ) ) {

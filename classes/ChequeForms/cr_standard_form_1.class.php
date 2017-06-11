@@ -88,7 +88,7 @@ class ChequeForms_CR_STANDARD_FORM_1 extends ChequeForms_Base {
 
                                 array(
                                     'function' => 'drawSegments',
-                                    'value' => array(TTi18n::gettext('Employee Signature:'), TTi18n::gettext('Supervisor Signature:'), TTi18n::gettext('(print name)')),
+                                    'value' => array(TTi18n::gettext('Employee Signature').':', TTi18n::gettext('Supervisor Signature').':', TTi18n::gettext('(print name)')),
                                     'coordinates' => array(
                                             array(
                                                 'x' => 7,

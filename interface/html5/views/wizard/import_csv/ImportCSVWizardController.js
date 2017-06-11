@@ -773,7 +773,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					} else {
 						var data_grid_error_source = $this.createErrorSource( result.getDetails() );
 
-						$this.showErrorGrid( $.i18n._( 'Import failed due to the following reasons:' ),
+						$this.showErrorGrid( $.i18n._( 'Import failed due to the following reasons' ) +':',
 							data_grid_error_source,
 							$.i18n._( 'Invalid records have been skipped, all other records have been imported successfully.' ),
 							result.getRecordDetails() );

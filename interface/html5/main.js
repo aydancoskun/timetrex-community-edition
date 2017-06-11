@@ -438,7 +438,6 @@ require( [
 			ServiceCaller.mainCompanyLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=primary_company_logo';
 			ServiceCaller.poweredByLogo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=smcopyright';
 			ServiceCaller.login_page_powered_by_logo = ServiceCaller.rootURL + loginData.base_url + 'send_file.php?api=1&object_type=copyright';
-			LocalCacheData.enablePoweredByLogo = loginData.powered_by_logo_enabled;
 			LocalCacheData.appType = loginData.deployment_on_demand;
 			LocalCacheData.productEditionId = loginData.product_edition;
 			var controller = new IndexViewController();

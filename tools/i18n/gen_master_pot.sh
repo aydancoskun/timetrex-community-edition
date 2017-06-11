@@ -24,19 +24,20 @@ POT_FILENAME=messages.pot
 touch $LOCALE_ROOT/$POT_FILENAME
 
 #---- Extract strings from templates ----
-echo "Parsing templates..."
-TMP_FILE=/tmp/gen_master_pot_tmp.txt
-find $DEPTH/templates -name "*.tpl" | grep -v "\.git" | xargs -i php tsmarty2c.php \{\} | xgettext --from-code=UTF-8 --no-wrap --language=C --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
+#echo "Parsing templates..."
+#TMP_FILE=/tmp/gen_master_pot_tmp.txt
+#find $DEPTH/templates -name "*.tpl" | grep -v "\.git" | xargs -i php tsmarty2c.php \{\} | xgettext --from-code=UTF-8 --no-wrap --language=C --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
 
 #---- Extract strings from PHP Files ----
 # Note that we want to extract from TTi18n::gettext() calls.
 # xgettext ignores the "TTi18n::" bit and sees the gettext(). So it works.
+#  When we removed the SMARTY parsing, also remove --join-existing option as this is now the first parse command that is run.
 echo "Parsing PHP Files..."
-find $DEPTH/ -name "*.php" | grep -v templates_c | grep -v "\.git" | xargs cat | xgettext --from-code=UTF-8 --no-wrap --keyword=getText --join-existing --language=PHP --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
+find $DEPTH/ -name "*.php" | grep -v templates_c | grep -v "\.git" | xargs cat | xgettext --from-code=UTF-8 --no-wrap --keyword=getText --language=PHP --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
 
 echo "Parsing JS Files..."
 #find $DEPTH/ -name "*.js" | grep -v "\.git" | xargs cat | sed 's/<br>/ /g' | sed 's/\n/ /g' | xgettext --from-code=UTF-8 --no-wrap --keyword=_ --join-existing --language=Javascript --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
-find $DEPTH/ -name "*.js" | egrep -v "\.git|/tools/compile" | xargs cat | xgettext --from-code=UTF-8 --no-wrap --keyword=_ --join-existing --language=Javascript --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
+find $DEPTH/ -name "*.js" | egrep -v "\.git|/tools/compile|/interface/html5/framework" | xargs cat | xgettext --from-code=UTF-8 --no-wrap --keyword=_ --join-existing --language=Javascript --no-location -s --output-dir=$LOCALE_ROOT -o $POT_FILENAME -
 
 #---- Extract strings from DB Tables with static strings ----
 ###  Not necessary for TimeTrex at this time ###

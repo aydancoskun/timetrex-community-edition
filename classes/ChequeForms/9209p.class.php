@@ -52,7 +52,7 @@ class ChequeForms_9209P extends ChequeForms_Base {
                                 array(
                                     'page' => 1,
                                     'template_page' => 1,
-                                    'value' => TTi18n::gettext('Date:').' ',
+                                    'value' => TTi18n::gettext('Date').': ',
                                     'coordinates' => array(
                                                 'x' => 172,
                                                 'y' => 20,

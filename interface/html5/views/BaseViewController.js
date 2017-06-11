@@ -6861,7 +6861,7 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 		var place_holder = $( '<p style="display: none">' );
-		place_holder.addClass( 'place_holder_' + key )
+		place_holder.addClass( '.edit-view:visible place_holder_' + key )
 		place_holder.insertBefore( this.edit_view_form_item_dic[key] );
 		this.edit_view_form_item_dic[key].detach();
 	},
@@ -6872,7 +6872,8 @@ BaseViewController = Backbone.View.extend( {
 			return;
 		}
 
-		var place_holder = $( '.place_holder_' + key );
+		//var place_holder = $( '.edit-view:visible .edit-view-tab:visible .place_holder_' + key);
+		var place_holder = $( '.edit-view:visible .place_holder_' + key);
 		this.edit_view_form_item_dic[key].insertBefore( place_holder );
 		place_holder.remove();
 	},
@@ -7078,7 +7079,7 @@ BaseViewController.loadView = function( view_id ) {
 			case 'PortalJobVacancy':
 				args = {
 					search_label: $.i18n._('Search'),
-					load_more: $.i18n._('Loading More') + '...'
+					load_more: $.i18n._('Loading') + '...'
 				};
 				break;
 			case 'MyJobApplication':

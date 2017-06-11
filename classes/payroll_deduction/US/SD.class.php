@@ -40,4 +40,5 @@
  */
 class PayrollDeduction_US_SD extends PayrollDeduction_US {
 }
+
 ?>

@@ -818,9 +818,9 @@ class Form941Report extends Report {
 			$f941->l7z = bcadd( $this->form_data['total']['social_security_tax'], $this->form_data['total']['medicare_tax'] ); //Input value used to calculate L7 itself.
 
 			if ( isset($setup_data['quarter_deposit']) AND $setup_data['quarter_deposit'] != ''	 ) {
-				$f941->l11 = Misc::MoneyFormat($setup_data['quarter_deposit'], FALSE);
+				$f941->l13 = Misc::MoneyFormat($setup_data['quarter_deposit'], FALSE);
 			}
-			//Debug::Text('L11: '. $f941->l11 .' L6: '. $f941->calcL6() .' - '. $this->form_data['total']['l10'], __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Text('L13: '. $f941->l13 .' L6: '. $f941->calcL6() .' - '. $this->form_data['total']['l10'], __FILE__, __LINE__, __METHOD__, 10);
 
 			$f941->l13b = TRUE;
 

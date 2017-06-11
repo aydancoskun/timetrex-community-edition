@@ -919,7 +919,7 @@ function toggleObject(objectID) {
 }
 
 function SubmitWithMessage(form) {
-		var alertMsg= "<?php echo TTi18n::gettext('Frame data DOES NOT exists:'); ?> ";
+		var alertMsg= "<?php echo TTi18n::gettext('ERROR: Frame data DOES NOT exist.'); ?> ";
         if ( window.frames['LayerMessageFactoryFrame'].document.message_data ) {
 			total_messages = window.frames['LayerMessageFactoryFrame'].document.message_data.total_messages.value;
 

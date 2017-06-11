@@ -1039,50 +1039,6 @@ class TTDate {
 		return $current_epoch;
 	}
 
-	public static function getTimeStampFromSmarty($prefix, $array) {
-		Debug::text('Prefix: '. $prefix, __FILE__, __LINE__, __METHOD__, 10);
-		//Debug::Arr($array, 'getTimeStampFromSmarty Array:', __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( isset($array[$prefix.'Year']) ) {
-			$year = $array[$prefix.'Year'];
-		} else {
-			$year = strftime("%Y");
-		}
-		if ( isset($array[$prefix.'Month']) ) {
-			$month = $array[$prefix.'Month'];
-		} else {
-			//$month = strftime("%m");
-			$month = 1;
-		}
-		if ( isset($array[$prefix.'Day']) ) {
-			$day = $array[$prefix.'Day'];
-		} else {
-			//If day isn't specified it uses the current day, but then if its the 30th, and they
-			//select February, it goes to March!
-			//$day = strftime("%d");
-			$day = 1;
-		}
-		if ( isset($array[$prefix.'Hour']) ) {
-			$hour = $array[$prefix.'Hour'];
-		} else {
-			$hour = 0;
-		}
-		if ( isset($array[$prefix.'Minute']) ) {
-			$min = $array[$prefix.'Minute'];
-		} else {
-			$min = 0;
-		}
-		if ( isset($array[$prefix.'Second']) ) {
-			$sec = $array[$prefix.'Second'];
-		} else {
-			$sec = 0;
-		}
-
-		Debug::text('Year: '. $year .' Month: '. $month .' Day: '. $day .' Hour: '. $hour .' Min: '. $min .' Sec: '. $sec, __FILE__, __LINE__, __METHOD__, 10);
-
-		return self::getTimeStamp($year, $month, $day, $hour, $min, $sec);
-	}
-
 	public static function getTimeStamp($year="", $month="", $day="", $hour = 0, $min = 0, $sec = 0) {
 		if ( empty($year) ) {
 			$year = strftime("%Y");

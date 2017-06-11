@@ -272,6 +272,10 @@ class PermissionControlFactory extends Factory {
 	}
 	function setUser($ids) {
 		Debug::text('Setting User IDs : ', __FILE__, __LINE__, __METHOD__, 10);
+		if ( !is_array($ids) ) {
+			$ids = array($ids);
+		}
+
 		if ( is_array($ids) AND count($ids) > 0 ) {
 			global $current_user;
 
@@ -333,12 +337,14 @@ class PermissionControlFactory extends Factory {
 					$puf->setPermissionControl( $this->getId() );
 					$puf->setUser( $id );
 
-					$obj = $ulf->getById( $id )->getCurrent();
-
-					if ($this->Validator->isTrue(		'user',
-														$puf->Validator->isValid(),
-														TTi18n::gettext('Selected employee is invalid, or already assigned to another permission group').' ('. $obj->getFullName() .')' )) {
-						$puf->save();
+					$ulf->getById( $id );
+					if ( $ulf->getRecordCount() > 0 ) {
+						$obj = $ulf->getCurrent();
+						if ($this->Validator->isTrue(		'user',
+															 $puf->Validator->isValid(),
+															 TTi18n::gettext('Selected employee is invalid, or already assigned to another permission group').' ('. $obj->getFullName() .')' )) {
+							$puf->save();
+						}
 					}
 				}
 			}

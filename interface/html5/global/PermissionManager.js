@@ -30,20 +30,12 @@ var PermissionManager = (function() {
 
 	var helpMenuValidate = function() {
 
-		var is_app_branded = LocalCacheData.loginData.is_application_branded;
-
 		if ( PermissionManager.validate( 'user', 'edit' ) ||
 			PermissionManager.validate( 'user', 'edit_child' ) ||
 			PermissionManager.validate( 'recurring_schedule', 'enabled' ) ||
 			PermissionManager.validate( 'recurring_schedule_template', 'enabled' )
 		) {
-
-			if ( !is_app_branded ||
-				(is_app_branded && LocalCacheData.getCurrentCompany().id === LocalCacheData.getLoginData().primary_company_id) ) {
-				return true;
-			} else {
-				return false;
-			}
+			return true;
 		}
 
 		return false;

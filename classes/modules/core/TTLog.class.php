@@ -75,6 +75,7 @@ class TTLog {
 		$lf->setTableName( $table );
 		$lf->setUser( (int)$user_id );
 		$lf->setDescription( $description );
+		$lf->setDate( time() );
 
 		//Debug::text('Object ID: '. $object_id .' Action ID: '. $action_id .' Table: '. $table .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $lf->isValid() === TRUE ) {

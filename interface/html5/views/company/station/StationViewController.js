@@ -900,7 +900,7 @@ StationViewController = BaseViewController.extend( {
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.push_frequency_array ) );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'Last Upload:' ) + " </span>" );
+		label = $( "<span class='widget-right-label'> " + $.i18n._( 'Last Upload' ) + ": </span>" );
 		widget_text = Global.loadWidgetByName( FormItemType.TEXT );
 		widget_text.TText( {field: 'last_partial_push_date'} );
 

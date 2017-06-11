@@ -41,32 +41,32 @@
 class PayrollDeduction_US_IL extends PayrollDeduction_US {
 
 	var $state_options = array(
-								20160101 => array( // 01-Jan-2016
-													'rate' => 3.75,
-													'line_1_allowance' => 2175,
-													'line_2_allowance' => 1000
-													),
-								20150101 => array( // 01-Jan-2015
-													'rate' => 3.75,
-													'line_1_allowance' => 2150,
-													'line_2_allowance' => 1000
-													),
-								20140101 => array( // 01-Jan-2014
-													'rate' => 5.0,
-													'line_1_allowance' => 2125,
-													'line_2_allowance' => 1000
-													),
-								20130101 => array( // 01-Jan-2013
-													'rate' => 5.0,
-													'line_1_allowance' => 2100,
-													'line_2_allowance' => 1000
-													),
-								20060101 => array(
-													'rate' => 3.0,
-													'line_1_allowance' => 2000,
-													'line_2_allowance' => 1000
-													)
-								);
+			20160101 => array( // 01-Jan-2016
+							   'rate'             => 3.75,
+							   'line_1_allowance' => 2175,
+							   'line_2_allowance' => 1000,
+			),
+			20150101 => array( // 01-Jan-2015
+							   'rate'             => 3.75,
+							   'line_1_allowance' => 2150,
+							   'line_2_allowance' => 1000,
+			),
+			20140101 => array( // 01-Jan-2014
+							   'rate'             => 5.0,
+							   'line_1_allowance' => 2125,
+							   'line_2_allowance' => 1000,
+			),
+			20130101 => array( // 01-Jan-2013
+							   'rate'             => 5.0,
+							   'line_1_allowance' => 2100,
+							   'line_2_allowance' => 1000,
+			),
+			20060101 => array(
+					'rate'             => 3.0,
+					'line_1_allowance' => 2000,
+					'line_2_allowance' => 1000,
+			),
+	);
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -74,16 +74,16 @@ class PayrollDeduction_US_IL extends PayrollDeduction_US {
 		$line_1_allowance = $this->getStateLine1AllowanceAmount();
 		$line_2_allowance = $this->getStateLine2AllowanceAmount();
 
-		$income = bcsub( bcsub( $annual_income, $line_1_allowance), $line_2_allowance );
+		$income = bcsub( bcsub( $annual_income, $line_1_allowance ), $line_2_allowance );
 
-		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Taxable Income: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $income;
 	}
 
 
 	function getStateLine1AllowanceAmount() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 		}
@@ -92,13 +92,13 @@ class PayrollDeduction_US_IL extends PayrollDeduction_US {
 
 		$retval = bcmul( $this->getUserValue1(), $allowance );
 
-		Debug::text('State Line 1 Allowance Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Line 1 Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
 	function getStateLine2AllowanceAmount() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 		}
@@ -107,7 +107,7 @@ class PayrollDeduction_US_IL extends PayrollDeduction_US {
 
 		$retval = bcmul( $this->getUserValue2(), $allowance );
 
-		Debug::text('State Line 1 Allowance Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Line 1 Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
@@ -118,16 +118,16 @@ class PayrollDeduction_US_IL extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+			$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 			if ( $retarr == FALSE ) {
 				return FALSE;
 			}
 
-			$rate = bcdiv( $retarr['rate'], 100);
+			$rate = bcdiv( $retarr['rate'], 100 );
 			$retval = bcmul( $annual_income, $rate );
 		}
 
-		Debug::text('State Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( $retval < 0 ) {
 			$retval = 0;
@@ -136,4 +136,5 @@ class PayrollDeduction_US_IL extends PayrollDeduction_US {
 		return $retval;
 	}
 }
+
 ?>

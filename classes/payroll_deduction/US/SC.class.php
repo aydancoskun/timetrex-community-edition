@@ -41,68 +41,68 @@
 class PayrollDeduction_US_SC extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-												20170101 => array(
-															0 => array(
-																	array( 'income' => 2140,	'rate' => 1.7,	'constant' => 0 ),
-																	array( 'income' => 4280,	'rate' => 3,	'constant' => 27.82 ),
-																	array( 'income' => 6420,	'rate' => 4,	'constant' => 70.62 ),
-																	array( 'income' => 8560,	'rate' => 5,	'constant' => 134.82 ),
-																	array( 'income' => 10700,	'rate' => 6,	'constant' => 220.42 ),
-																	array( 'income' => 10700,	'rate' => 7,	'constant' => 327.42 ),
-																),
-															),
-												20060101 => array(
-															0 => array(
-																	array( 'income' => 2000,	'rate' => 2,	'constant' => 0 ),
-																	array( 'income' => 4000,	'rate' => 3,	'constant' => 20 ),
-																	array( 'income' => 6000,	'rate' => 4,	'constant' => 60 ),
-																	array( 'income' => 8000,	'rate' => 5,	'constant' => 120 ),
-																	array( 'income' => 10000,	'rate' => 6,	'constant' => 200 ),
-																	array( 'income' => 10000,	'rate' => 7,	'constant' => 300 ),
-																),
-															),
-												);
+			20170101 => array(
+					0 => array(
+							array('income' => 2140, 'rate' => 1.7, 'constant' => 0),
+							array('income' => 4280, 'rate' => 3, 'constant' => 27.82),
+							array('income' => 6420, 'rate' => 4, 'constant' => 70.62),
+							array('income' => 8560, 'rate' => 5, 'constant' => 134.82),
+							array('income' => 10700, 'rate' => 6, 'constant' => 220.42),
+							array('income' => 10700, 'rate' => 7, 'constant' => 327.42),
+					),
+			),
+			20060101 => array(
+					0 => array(
+							array('income' => 2000, 'rate' => 2, 'constant' => 0),
+							array('income' => 4000, 'rate' => 3, 'constant' => 20),
+							array('income' => 6000, 'rate' => 4, 'constant' => 60),
+							array('income' => 8000, 'rate' => 5, 'constant' => 120),
+							array('income' => 10000, 'rate' => 6, 'constant' => 200),
+							array('income' => 10000, 'rate' => 7, 'constant' => 300),
+					),
+			),
+	);
 
 	var $state_options = array(
-								20170101 => array(
-													'standard_deduction_rate' => 10,
-													'standard_deduction_maximum' => 2860,
-													'allowance' => 2370
-													),
-								20060101 => array(
-													'standard_deduction_rate' => 10,
-													'standard_deduction_maximum' => 2600,
-													'allowance' => 2300
-													),
-								);
+			20170101 => array(
+					'standard_deduction_rate'    => 10,
+					'standard_deduction_maximum' => 2860,
+					'allowance'                  => 2370,
+			),
+			20060101 => array(
+					'standard_deduction_rate'    => 10,
+					'standard_deduction_maximum' => 2600,
+					'allowance'                  => 2300,
+			),
+	);
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
 		$standard_deductions = $this->getStateStandardDeduction();
 		$allowance = $this->getStateAllowanceAmount();
 
-		$income = bcsub( bcsub($annual_income, $standard_deductions), $allowance );
+		$income = bcsub( bcsub( $annual_income, $standard_deductions ), $allowance );
 
-		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Taxable Income: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $income;
 	}
 
 	function getStateFederalTaxMaximum() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 		}
 
-		$maximum = $retarr['federal_tax_maximum'][$this->getStateFilingStatus()];
+		$maximum = $retarr['federal_tax_maximum'][ $this->getStateFilingStatus() ];
 
-		Debug::text('Maximum State allowed Federal Tax: '. $maximum, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Maximum State allowed Federal Tax: ' . $maximum, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $maximum;
 	}
 
 	function getStateStandardDeduction() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 
@@ -111,20 +111,20 @@ class PayrollDeduction_US_SC extends PayrollDeduction_US {
 		if ( $this->getStateAllowance() == 0 ) {
 			$deduction = 0;
 		} else {
-			$rate = bcdiv( $retarr['standard_deduction_rate'], 100);
+			$rate = bcdiv( $retarr['standard_deduction_rate'], 100 );
 			$deduction = bcmul( $this->getAnnualTaxableIncome(), $rate );
 			if ( $deduction > $retarr['standard_deduction_maximum'] ) {
 				$deduction = $retarr['standard_deduction_maximum'];
 			}
 		}
 
-		Debug::text('Standard Deduction: '. $deduction, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Standard Deduction: ' . $deduction, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $deduction;
 	}
 
 	function getStateAllowanceAmount() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 
@@ -134,7 +134,7 @@ class PayrollDeduction_US_SC extends PayrollDeduction_US {
 
 		$retval = bcmul( $this->getStateAllowance(), $allowance );
 
-		Debug::text('State Allowance Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
@@ -145,21 +145,22 @@ class PayrollDeduction_US_SC extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$rate = $this->getData()->getStateRate($annual_income);
-			$state_constant = $this->getData()->getStateConstant($annual_income);
+			$rate = $this->getData()->getStateRate( $annual_income );
+			$state_constant = $this->getData()->getStateConstant( $annual_income );
 			//$state_rate_income = $this->getData()->getStateRatePreviousIncome($annual_income);
 
 			//$retval = bcadd( bcmul( bcsub( $annual_income, $state_rate_income ), $rate ), $state_constant );
-			$retval = bcsub( bcmul( $annual_income, $rate), $state_constant);
+			$retval = bcsub( bcmul( $annual_income, $rate ), $state_constant );
 		}
 
 		if ( $retval < 0 ) {
 			$retval = 0;
 		}
 
-		Debug::text('State Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 }
+
 ?>

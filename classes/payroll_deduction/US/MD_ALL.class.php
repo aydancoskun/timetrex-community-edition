@@ -41,43 +41,43 @@
 class PayrollDeduction_US_MD_ALL extends PayrollDeduction_US_MD {
 
 	var $district_options = array(
-								//01-Jan-12: No change.
-								//01-Jan-11: No change.
-								//01-Jan-10: No change.
-								//01-Jan-09: No change.
-								20080701 => array(
-													'standard_deduction_rate' => 15,
-													'standard_deduction_minimum' => 1500,
-													'standard_deduction_maximum' => 2000,
-													'allowance' => 3200
-													),
-								20060101 => array(
-													'standard_deduction_rate' => 15,
-													'standard_deduction_minimum' => 1500,
-													'standard_deduction_maximum' => 2000,
-													'allowance' => 2400
-													)
-								);
+		//01-Jan-12: No change.
+		//01-Jan-11: No change.
+		//01-Jan-10: No change.
+		//01-Jan-09: No change.
+		20080701 => array(
+				'standard_deduction_rate'    => 15,
+				'standard_deduction_minimum' => 1500,
+				'standard_deduction_maximum' => 2000,
+				'allowance'                  => 3200,
+		),
+		20060101 => array(
+				'standard_deduction_rate'    => 15,
+				'standard_deduction_minimum' => 1500,
+				'standard_deduction_maximum' => 2000,
+				'allowance'                  => 2400,
+		),
+	);
 
 	function getDistrictAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
 		$standard_deduction = $this->getDistrictStandardDeductionAmount();
 		$district_allowance = $this->getDistrictAllowanceAmount();
 
-		$income = bcsub( bcsub( $annual_income, $standard_deduction), $district_allowance);
+		$income = bcsub( bcsub( $annual_income, $standard_deduction ), $district_allowance );
 
-		Debug::text('District Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'District Annual Taxable Income: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $income;
 	}
 
 	function getDistrictStandardDeductionAmount() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->district_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->district_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 		}
 
-		$rate = bcdiv( $retarr['standard_deduction_rate'], 100);
+		$rate = bcdiv( $retarr['standard_deduction_rate'], 100 );
 
 		$deduction = bcmul( $this->getAnnualTaxableIncome(), $rate );
 
@@ -89,13 +89,13 @@ class PayrollDeduction_US_MD_ALL extends PayrollDeduction_US_MD {
 			$retval = $deduction;
 		}
 
-		Debug::text('District Standard Deduction Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'District Standard Deduction Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
 	function getDistrictAllowanceAmount() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->district_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->district_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 		}
@@ -104,7 +104,7 @@ class PayrollDeduction_US_MD_ALL extends PayrollDeduction_US_MD {
 
 		$retval = bcmul( $this->getDistrictAllowance(), $allowance_arr );
 
-		Debug::text('District Allowance Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'District Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
@@ -120,9 +120,10 @@ class PayrollDeduction_US_MD_ALL extends PayrollDeduction_US_MD {
 			$retval = 0;
 		}
 
-		Debug::text('District Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'District Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 }
+
 ?>

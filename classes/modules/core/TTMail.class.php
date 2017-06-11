@@ -259,7 +259,9 @@ class TTMail {
 		if ( !is_array( $this->getTo() ) ) {
 			$to = array( $this->getTo() );
 		} else {
-			$to = $this->getTo();
+			//Even though the RFC says the local part of email address is case sensitive, it should never really be required in the real-world.
+			//This prevents duplicate emails from being sent to email@mydomain.com and Email@mydomain.com or EMAIL@mydomain.com
+			$to = Misc::arrayIUnique( $this->getTo() );
 		}
 
 		//When using SMTP, we have to manually send to each envelope-to, but make sure the original TO header is set.

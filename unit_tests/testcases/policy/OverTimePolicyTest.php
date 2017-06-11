@@ -10437,6 +10437,281 @@ class OverTimePolicyTest extends PHPUnit_Framework_TestCase {
 	}
 
 	/**
+	 * @group OvertimePolicy_testNestedDifferentialWeeklyOverTimePolicyB
+	 */
+	function testNestedDifferentialWeeklyOverTimePolicyB() {
+		if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) {
+			return TRUE;
+		}
+
+		global $dd;
+
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 200 ); //OT1.5
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 210 ); //OT2.0
+		$policy_ids['pay_formula_policy'][]  = $this->createPayFormulaPolicy( $this->company_id, 220 ); //OT2.5
+
+		//Daily
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 100, $policy_ids['pay_formula_policy'][0] );
+		$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 110, $policy_ids['pay_formula_policy'][1] );
+		//$policy_ids['pay_code'][]  = $this->createPayCode( $this->company_id, 120, $policy_ids['pay_formula_policy'][2] );
+
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 10, $this->policy_ids['contributing_shift_policy'][12], $this->policy_ids['pay_code'][100] ); //Regular Time policy as OT policy.
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 240, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][0] );
+		$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 1241, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][1] );
+		//$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 1001, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][2] );
+		//$policy_ids['overtime'][] = $this->createOverTimePolicy( $this->company_id, 230, $this->policy_ids['contributing_shift_policy'][12], $policy_ids['pay_code'][3] );
+
+		//Create Policy Group
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL, //Meal
+								   NULL, //Exception
+								   NULL, //Holiday
+								   $policy_ids['overtime'], //OT
+								   NULL, //Premium
+								   NULL, //Round
+								   array($this->user_id), //Users
+								   NULL, //Break
+								   NULL, //Accrual
+								   NULL, //Expense
+								   NULL, //Absence
+								   array($this->policy_ids['regular'][12]) //Regular
+		);
+
+
+		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		//
+		//Day of Week: 1
+		//
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->branch_ids[0],
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//OverTime as Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		//
+		//Day of Week: 2
+		//
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->branch_ids[0],
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//OverTime as Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		//
+		//Day of Week: 3
+		//
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 4:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->branch_ids[0],
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//OverTime as Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (8 * 3600) );
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+		//
+		//Day of Week: 4
+		//
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 7:00PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->branch_ids[0],
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (11 * 3600) );
+		//OverTime as Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (11 * 3600) );
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 2 );
+
+
+		//
+		//Day of Week: 5
+		//
+		$date_epoch = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (4 * 86400 + 3601) );
+		$date_stamp = TTDate::getDate('DATE', $date_epoch );
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:00AM'),
+								 strtotime($date_stamp.' 8:30AM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->branch_ids[0],
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 8:30AM'),
+								 strtotime($date_stamp.' 10:00AM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->branch_ids[0],
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 10:00AM'),
+								 strtotime($date_stamp.' 12:15PM'),
+								 array(
+										 'in_type_id' => 10,
+										 'out_type_id' => 20,
+										 'branch_id' => $this->branch_ids[0],
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$dd->createPunchPair( 	$this->user_id,
+								 strtotime($date_stamp.' 12:45PM'),
+								 strtotime($date_stamp.' 4:30PM'),
+								 array(
+										 'in_type_id' => 20,
+										 'out_type_id' => 10,
+										 'branch_id' => $this->branch_ids[1], //Branch that is not included in OT differential.
+										 'department_id' => 0,
+										 'job_id' => 0,
+										 'job_item_id' => 0,
+								 ),
+								 TRUE
+		);
+
+		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
+		//print_r($udt_arr);
+
+		//Total Time
+		$this->assertEquals( $udt_arr[$date_epoch][0]['object_type_id'], 5 ); //5=System Total
+		$this->assertEquals( $udt_arr[$date_epoch][0]['pay_code_id'], 0 );
+		$this->assertEquals( $udt_arr[$date_epoch][0]['total_time'], (8 * 3600) );
+		//OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['pay_code_id'], $policy_ids['pay_code'][1] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][1]['total_time'], (0.25 * 3600) );
+		//OverTime as Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][2]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][2]['pay_code_id'], $policy_ids['pay_code'][0] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][2]['total_time'], (3.75 * 3600) );
+		//OverTime as Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][3]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][3]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][3]['total_time'], (0.50 * 3600) );
+		//OverTime as Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][4]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][4]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][4]['total_time'], (1.50 * 3600) );
+		//OverTime as Regular Time
+		$this->assertEquals( $udt_arr[$date_epoch][5]['object_type_id'], 30 ); //Overtime
+		$this->assertEquals( $udt_arr[$date_epoch][5]['pay_code_id'], $this->policy_ids['pay_code'][100] ); //OverTime
+		$this->assertEquals( $udt_arr[$date_epoch][5]['total_time'], (2 * 3600) );
+
+		//Make sure no other hours
+		$this->assertEquals( count($udt_arr[$date_epoch]), 6 );
+
+		return TRUE;
+	}
+
+	/**
 	 * @group OvertimePolicy_testDifferentialDailyOverTimePolicyA
 	 */
 	function testDifferentialDailyOverTimePolicyA() {

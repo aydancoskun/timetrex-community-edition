@@ -2668,7 +2668,7 @@ class UserFactory extends Factory {
 
 			$body = '<html><body>';
 			$body .= TTi18n::gettext('The email address %1 has been added to your %2 account', array($primary_email, APPLICATION_NAME) ).', ';
-			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ConfirmEmail.php?action:confirm_email=1&email='. $primary_email .'&key='. $email_is_valid_key .'">'. TTi18n::gettext('please click here to confirm and activate this email address') .'</a>.';
+			$body .= ' <a href="'. Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'html5/ConfirmEmail.php?action:confirm_email=1&email='. $primary_email .'&key='. $email_is_valid_key .'">'. TTi18n::gettext('please click here to confirm and activate this email address') .'</a>.';
 			$body .= '<br><br>';
 			$body .= '--<br>';
 			$body .= APPLICATION_NAME;

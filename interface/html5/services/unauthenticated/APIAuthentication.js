@@ -32,11 +32,6 @@ var APIAuthentication = ServiceCaller.extend( {
 
 	},
 
-//	isApplicationBranded: function() {
-//		return this.argumentsHandler( this.className, 'isApplicationBranded', arguments );
-//
-//	},
-
 	getOrganizationName: function() {
 
 		return this.argumentsHandler( this.className, 'getOrganizationName', arguments );
@@ -57,7 +52,7 @@ var APIAuthentication = ServiceCaller.extend( {
 		return this.argumentsHandler( this.className, 'getOrganizationURL', arguments );
 
 	},
-	
+
 
 	passwordReset: function() {
 

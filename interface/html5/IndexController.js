@@ -344,7 +344,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 				} );
 			}
 			$( '#copy_right_info_1' ).css( 'display', 'inline' );
-			$( '#copy_right_logo_link' ).attr( 'href', 'http://' + LocalCacheData.getLoginData().organization_url );
+			$( '#copy_right_logo_link' ).attr( 'href', 'https://' + LocalCacheData.getLoginData().organization_url );
 			if ( !$( '#copy_right_logo' ).attr( 'src' ) ) {
 				$( '#copy_right_logo' ).attr( 'src', ServiceCaller.poweredByLogo + '&t=' + new Date().getTime() );
 			}
@@ -475,7 +475,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 		label_container.children().eq( 0 ).text( label );
 		Global.topContainer().append( label_container );
 		this.testInternetConnection();
-		if ( ( APIGlobal.pre_login_data.demo_mode === false && APIGlobal.pre_login_data.deployment_on_demand === true && LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
+		//if ( ( APIGlobal.pre_login_data.demo_mode === false && APIGlobal.pre_login_data.deployment_on_demand === true && LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
+		if ( ( APIGlobal.pre_login_data.demo_mode === false && LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
 			var permission_api = new (APIFactory.getAPIClass( 'APIPermissionControl' ))();
 			var filter = {};
 			filter.filter_data = {};

@@ -33,29 +33,17 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-
-require_once('../includes/global.inc.php');
-
-//Debug::setVerbosity( 11 );
-
-$authenticate = FALSE;
-require_once(Environment::getBasePath() .'includes/Interface.inc.php');
-
-$smarty->assign('title', TTi18n::gettext('Confirm Email'));
-
-/*
- * Get FORM variables
- */
+require_once('../../includes/global.inc.php');
+forceNoCacheHeaders(); //Send headers to disable caching.
+TTi18n::chooseBestLocale();
 extract	(FormVariables::GetVariables(
-										array	(
+									array	(
 												'action',
 												'email',
 												'email_confirmed',
 												'key',
-												) ) );
-
+											) ) );
 $validator = new Validator();
-
 $action = Misc::findSubmitButton();
 Debug::Text('Action: '. $action, __FILE__, __LINE__, __METHOD__, 10);
 switch ($action) {
@@ -66,7 +54,7 @@ switch ($action) {
 			Debug::Text('FOUND Email Validation key! Email: '. $email, __FILE__, __LINE__, __METHOD__, 10);
 
 			$valid_key = TRUE;
-			
+
 			$ttsc = new TimeTrexSoapClient();
 
 			$user_obj = $ulf->getCurrent();
@@ -92,7 +80,7 @@ switch ($action) {
 
 				TTLog::addEntry( $user_obj->getId(), 500, TTi18n::gettext('Validated email address').': '. $email, $user_obj->getId(), 'users' );
 
-				Redirect::Page( URLBuilder::getURL( array('email_confirmed' => 1, 'email' => $email ), 'ConfirmEmail.php' ) );
+				Redirect::Page( URLBuilder::getURL( array('email_confirmed' => 1, 'email' => $email ), Environment::getBaseURL().'html5/ConfirmEmail.php' ) );
 				break;
 			} else {
 				Debug::Text('aDID NOT FIND email validation key!', __FILE__, __LINE__, __METHOD__, 10);
@@ -103,24 +91,38 @@ switch ($action) {
 			$email_confirmed = FALSE;
 		}
 	default:
-		if ( $email_confirmed == FALSE ) {
-			//Make sure we don't allow malicious users to use some long email address like:
-			//"This is the FBI, you have been fired if you don't..."
-			if ( $validator->isEmail( 'email', $email, TTi18n::getText('Invalid confirmation key') ) == FALSE ) {
-				$email = NULL;
-				//$email_sent = FALSE;
-			}
+		//Make sure we don't allow malicious users to use some long email address like:
+		//"This is the FBI, you have been fired if you don't..."
+		if ( $validator->isEmail( 'email', $email, TTi18n::getText('Invalid confirmation key') ) == FALSE ) {
+			$email = NULL;
+			$email_confirmed = FALSE;
 		}
 
 		break;
 }
-
-$smarty->assign_by_ref('email', $email);
-$smarty->assign_by_ref('email_confirmed', $email_confirmed);
-$smarty->assign_by_ref('key', $key);
-$smarty->assign_by_ref('action', $action);
-
-$smarty->assign_by_ref('validator', $validator);
-
-$smarty->display('ConfirmEmail.tpl');
+$BASE_URL = './';
+require ('../../includes/Header.inc.php');
+?>
+<div id="contentContainer" class="content-container">
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-12">
+				<div id="contentBox-ConfirmEmail">
+					<div class="textTitle2"><?php echo TTi18n::getText('Email Address Confirmed') ?></div>
+					<?php if ( $email_confirmed == TRUE ) { ?>
+						<div id="rowWarning" class="text-center">
+							<?php echo TTi18n::getText('Email address') . ' <b>'. $email .'</b> ' . TTi18n::getText('has been confirmed and activated.') ?>
+						</div>
+					<?php } else if ( $email_confirmed == FALSE ) { ?>
+						<div id="rowWarning" valign="center">
+							<?php echo TTi18n::getText('Invalid or expired confirmation key, please try again.') ?>
+						</div>
+					<?php } ?>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<?php
+require ('../../includes/Footer.inc.php');
 ?>

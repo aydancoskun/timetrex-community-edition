@@ -55,7 +55,7 @@ class ChequeForms_CR_STANDARD_FORM_2 extends ChequeForms_Base {
                                 ),
 
                                 array(
-                                    'value' => TTi18n::gettext('Recipient Copy:'),
+                                    'value' => TTi18n::gettext('Recipient Copy').':',
                                     'coordinates' => array(
                                             'x' => 65,
                                             'y' => 95,
@@ -85,7 +85,7 @@ class ChequeForms_CR_STANDARD_FORM_2 extends ChequeForms_Base {
                                 ),
                                 array(
                                     'function' => 'drawPiecemeal',
-                                    'value' => TTi18n::gettext('Date of Issue:'),
+                                    'value' => TTi18n::gettext('Date of Issue').':',
                                     'coordinates' => array(
                                             array(
                                                 'x' => 75,
@@ -109,7 +109,7 @@ class ChequeForms_CR_STANDARD_FORM_2 extends ChequeForms_Base {
                                 ),
                                 array(
                                     'function' => 'drawPiecemeal',
-                                    'value' => TTi18n::gettext('Recipient:'),
+                                    'value' => TTi18n::gettext('Recipient').':',
                                     'coordinates' => array(
                                             array(
                                                 'x' => 75,
@@ -133,7 +133,7 @@ class ChequeForms_CR_STANDARD_FORM_2 extends ChequeForms_Base {
                                 ),
                                 array(
                                     'function' => 'drawPiecemeal',
-                                    'value' => TTi18n::gettext('Amount:'),
+                                    'value' => TTi18n::gettext('Amount').':',
                                     'coordinates' => array(
                                             array(
                                                 'x' => 75,
@@ -157,7 +157,7 @@ class ChequeForms_CR_STANDARD_FORM_2 extends ChequeForms_Base {
                                 ),
                                 array(
                                     'function' => 'drawPiecemeal',
-                                    'value' => TTi18n::gettext('Regarding:'),
+                                    'value' => TTi18n::gettext('Regarding').':',
                                     'coordinates' => array(
                                             array(
                                                 'x' => 75,
@@ -461,7 +461,7 @@ class ChequeForms_CR_STANDARD_FORM_2 extends ChequeForms_Base {
     }
 
     function filterCompanyName( $value ) {
-        return $this->company_name.' '.TTi18n::gettext('Copy:');
+        return $this->company_name.' '.TTi18n::gettext('Copy').':';
     }
 
 }

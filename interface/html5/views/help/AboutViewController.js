@@ -173,7 +173,7 @@ AboutViewController = BaseViewController.extend( {
 						var html = '<br><b>' + $.i18n._( 'NOTICE' ) + ':' + '</b> ' + $.i18n._( 'There is a new version of' ) + ' ';
 						html += '<b>' + $.i18n._( this.current_edit_record['application_name'] ) + '</b> ' + $.i18n._( 'available' ) + '.';
 						html += '<br>' + $.i18n._( 'This version may contain tax table updates necessary for accurate payroll calculation, we recommend that you upgrade as soon as possible.' ) + '<br>';
-						html += "" + $.i18n._( 'The latest version can be downloaded from' ) + ":" + " <a href='http://" + this.current_edit_record['organization_url'] + "/?upgrade=1' target='_blank'>";
+						html += "" + $.i18n._( 'The latest version can be downloaded from' ) + ":" + " <a href='https://" + this.current_edit_record['organization_url'] + "/?upgrade=1' target='_blank'>";
 						html += "<b>" + this.current_edit_record['organization_url'] + "</b></a><br><br>";
 
 						$( this.edit_view_form_item_dic['notice'].find( ".tblDataWarning" ) ).html( html );

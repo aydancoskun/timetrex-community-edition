@@ -1166,7 +1166,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			html_item.remove();
 		}
 
-		//Error: TypeError: this.edit_view_tab is null in /interface/html5/views/reports/ReportBaseViewController.js?v=8.0.4-20150320-094021 line 1100 
+		//Error: TypeError: this.edit_view_tab is null in /interface/html5/views/reports/ReportBaseViewController.js?v=8.0.4-20150320-094021 line 1100
 		if ( this.edit_view_tab ) {
 			var tab_report = this.edit_view_tab.find( '#tab_report' );
 
@@ -2963,10 +2963,10 @@ ReportBaseViewController = BaseViewController.extend( {
 			refresh_request += '	}';
 			refresh_request += '}';
 			refresh_request += 'function startRefresh() {';
-			refresh_request += ' try {';
+			refresh_request += '	try {';
 			refresh_request += '		$.ajax({';
 			refresh_request += '			dataType: "JSON",';
-			refresh_request += "			data: {json:'" + JSON.stringify( post_data ) + "'},";
+			refresh_request += "			data: {json:'" + Global.htmlEncode( JSON.stringify( post_data ) ) + "'},";
 			refresh_request += '			type: "POST",';
 			refresh_request += "            url: '" + url + "',";
 			refresh_request += '			success: function(result) {';

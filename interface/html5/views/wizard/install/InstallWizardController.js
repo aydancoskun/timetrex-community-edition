@@ -308,7 +308,7 @@ InstallWizardController = BaseWizardController.extend( {
 					license_html = license_html + $.i18n._( 'After this change has been made, you can click the "Re-Check" button below to begin your installation.' );
 					license_html = license_html + '<br>';
 					license_html = license_html + '<br>';
-					license_html = license_html + $.i18n._( 'For help, please visit' ) + ' <a href="http://www.timetrex.com">www.timetrex.com</a> ';
+					license_html = license_html + $.i18n._( 'For help, please visit' ) + ' <a href="https://www.timetrex.com">www.timetrex.com</a> ';
 					license.append( license_html );
 
 					var ribbon_button_box = this.getRibbonButtonBox();
@@ -348,15 +348,15 @@ InstallWizardController = BaseWizardController.extend( {
 						step_title_htm = step_title_htm
 						+ '<p style="background-color: #FFFF00">'
 						+ $.i18n._( 'For installation support, please contact ' )
-						+ '<a href="http://www.timetrex.com/contactus.php" target="_blank">' + $.i18n._( 'TimeTrex support' ) + '</a>';
+						+ '<a href="https://www.timetrex.com/contactus.php" target="_blank">' + $.i18n._( 'TimeTrex support' ) + '</a>';
 					} else if ( stepData.tt_product_edition == 10 ) {
 
 						step_title_htm = step_title_htm
 						+ '<p style="background-color: #FFFF00">'
 						+ $.i18n._( 'For installation support, please join our community ' )
-						+ '<a href="http://forums.timetrex.com" target="_blank">' + $.i18n._( 'forums' ) + '</a>'
+						+ '<a href="https://forums.timetrex.com" target="_blank">' + $.i18n._( 'forums' ) + '</a>'
 						+ $.i18n._( ' or contact a TimeTrex support expert for ' )
-						+ '<a href="http://www.timetrex.com/setup_support.php" target="_blank">' + $.i18n._( 'Implementation Support Services' ) + '</a></p>';
+						+ '<a href="https://www.timetrex.com/setup_support.php" target="_blank">' + $.i18n._( 'Implementation Support Services' ) + '</a></p>';
 					}
 
 				}
@@ -1316,7 +1316,7 @@ InstallWizardController = BaseWizardController.extend( {
 							} else if ( stepData[key].check_timetrex_version == 2 ) {
 								widget.html(
 									$.i18n._( 'A Newer Version of TimeTrex is Available.' ) + ' '
-									+ '<a href="http://www.timetrex.com/download.php">' + $.i18n._( 'Download' ) + ' v' + stepData[key].latest_timetrex_version + ' ' + $.i18n._( 'Now' ) + '</a>' );
+									+ '<a href="https://www.timetrex.com/download.php">' + $.i18n._( 'Download' ) + ' v' + stepData[key].latest_timetrex_version + ' ' + $.i18n._( 'Now' ) + '</a>' );
 								widget.addClass( 'dataWarning' );
 							}
 							break;
@@ -1477,7 +1477,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'allow_fopen_url is Off. (Please enable it in php.ini)' ) );
+								widget.html( $.i18n._( 'ALLOW_FOPEN_URL is Off. (Please enable it in php.ini)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1485,7 +1485,7 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'magic_quotes_gpc is On. (Please disable it in php.ini)' ) );
+								widget.html( $.i18n._( 'MAGIC_QUOTES_GPC is On. (Please disable it in php.ini)' ) );
 								widget.addClass( 'dataError' );
 							}
 							break;
@@ -1524,7 +1524,7 @@ InstallWizardController = BaseWizardController.extend( {
 								widget.html( $.i18n._( 'OK' ) );
 								edit_view_form_item_dic.hide();
 							} else {
-								widget.html( $.i18n._( 'PHP open_basedir setting' ) + ' ' + '(' + stepData[key].php_open_base_dir + ') ' + $.i18n._( 'does not include directory of PHP CLI binary' ) + ' ' + '(' + stepData[key].php_cli_directory + ')' );
+								widget.html( $.i18n._( 'PHP OPEN_BASEDIR setting' ) + ' ' + '(' + stepData[key].php_open_base_dir + ') ' + $.i18n._( 'does not include directory of PHP CLI binary' ) + ' ' + '(' + stepData[key].php_cli_directory + ')' );
 								widget.addClass( 'dataError' );
 							}
 							break;

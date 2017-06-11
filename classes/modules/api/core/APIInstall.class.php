@@ -78,7 +78,7 @@ class APIInstall extends APIFactory {
 		if ( $install_obj->isInstallMode() == TRUE ) {
 
 			if ( DEPLOYMENT_ON_DEMAND == FALSE ) {
-				$install_obj->cleanCacheDirectory( '' ); //Don't exclude .ZIP files, so if there is a corrupt one it will be redownloaded after a manual installer is run.
+				$install_obj->cleanCacheDirectory();
 			}
 
 			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array_merge( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'require'), $install_obj->getFailedRequirements( FALSE, array('clean_cache', 'file_permissions','file_checksums') ) ), 'pre_install.php'), "r");

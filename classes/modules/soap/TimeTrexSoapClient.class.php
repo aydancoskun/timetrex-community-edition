@@ -199,12 +199,15 @@ class TimeTrexSoapClient {
 		$version = SystemSettingFactory::getSystemSettingValueByKey( 'system_version' );
 		if ( $version !== FALSE ) {
 			$retval = $this->getSoapObject()->isLatestVersion( $this->getLocalRegistrationKey(), $company_id, $version, getTTProductEdition() );
-			Debug::Text(' Current Version: '. $version .' Retval: '. (int)$retval, __FILE__, __LINE__, __METHOD__, 10);
-
-			return $retval;
+			if ( is_object( $retval ) AND get_class( $retval ) == 'SoapFault' ) {
+				Debug::Arr($retval, 'ERROR: Cant check for latest version, SOAP connection failed!', __FILE__, __LINE__, __METHOD__, 10);
+			} else {
+				Debug::Text( ' Current Version: ' . $version . ' Retval: ' . (int)$retval, __FILE__, __LINE__, __METHOD__, 10 );
+				return $retval;
+			}
 		}
 
-		return FALSE;
+		return TRUE; //Default to TRUE (already running latest version) in the event that something goes wrong.
 	}
 
 	function isValidRegistrationKey( $key ) {

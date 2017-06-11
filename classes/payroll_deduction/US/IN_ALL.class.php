@@ -45,9 +45,9 @@ class PayrollDeduction_US_IN_ALL extends PayrollDeduction_US_IN {
 		$state_allowance = $this->getStateAllowanceAmount();
 		$state_dependant_allowance = $this->getStateDependantAllowanceAmount();
 
-		$income = bcsub( bcsub( $annual_income, $state_allowance), $state_dependant_allowance);
+		$income = bcsub( bcsub( $annual_income, $state_allowance ), $state_dependant_allowance );
 
-		Debug::text('District Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'District Annual Taxable Income: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $income;
 	}
@@ -58,18 +58,19 @@ class PayrollDeduction_US_IN_ALL extends PayrollDeduction_US_IN {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$rate = bcdiv( $this->getUserValue3(), 100);
+			$rate = bcdiv( $this->getUserValue3(), 100 );
 
-			$retval = bcmul( $annual_income, $rate);
+			$retval = bcmul( $annual_income, $rate );
 		}
 
 		if ( $retval < 0 ) {
 			$retval = 0;
 		}
 
-		Debug::text('District Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'District Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 }
+
 ?>

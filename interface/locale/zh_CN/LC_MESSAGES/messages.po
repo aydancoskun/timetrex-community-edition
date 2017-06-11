@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-19 15:05-0700\n"
+"POT-Creation-Date: 2017-05-22 09:39-0700\n"
 "PO-Revision-Date: 2011-04-22 14:28+0000\n"
 "Last-Translator: Wylmer Wang <Unknown>\n"
 "Language-Team: none\n"
@@ -46,6 +46,9 @@ msgid "%1 entry for amount: %2 is invalid"
 msgstr ""
 
 msgid "%1 experienced a general error, please contact technical support."
+msgstr ""
+
+msgid "%1 has detected a database error, please contact technical support immediately."
 msgstr ""
 
 msgid "%1 has detected a duplicate request running at the exact same time, please try your request again in a couple minutes."
@@ -511,9 +514,6 @@ msgstr ""
 msgid "9"
 msgstr ""
 
-msgid "<strong>Error:</strong> shape edges cannot cross!"
-msgstr ""
-
 msgid "A"
 msgstr ""
 
@@ -557,6 +557,12 @@ msgid "ADVANCED SEARCH"
 msgstr ""
 
 msgid "ALLOW"
+msgstr ""
+
+msgid "ALLOW_FOPEN_URL Turned Off"
+msgstr ""
+
+msgid "ALLOW_FOPEN_URL is Off. (Please enable it in php.ini)"
 msgstr ""
 
 msgid "AMEX"
@@ -704,6 +710,9 @@ msgid "Account"
 msgstr "帐户"
 
 msgid "Account Balance"
+msgstr ""
+
+msgid "Account Credit"
 msgstr ""
 
 msgid "Account Name"
@@ -961,6 +970,21 @@ msgstr ""
 msgid "Add KPIs from Groups"
 msgstr ""
 
+msgid "Add New Course"
+msgstr ""
+
+msgid "Add New Language"
+msgstr ""
+
+msgid "Add New Membership"
+msgstr ""
+
+msgid "Add New Skill"
+msgstr ""
+
+msgid "Add New Type"
+msgstr ""
+
 msgid "Add permission denied"
 msgstr "不允许添加权限"
 
@@ -1090,8 +1114,8 @@ msgstr "Advanced Percent (Tax Bracket)"
 msgid "Advanced Percent (Tax Bracket)"
 msgstr "Advanced Percent (Tax Bracket)"
 
-msgid "Advanced Search"
-msgstr "先进搜索"
+msgid "Advanced Percent (w/Target)"
+msgstr ""
 
 msgid "Advanced: Average"
 msgstr "高级：平均"
@@ -1405,6 +1429,9 @@ msgstr ""
 msgid "Allow"
 msgstr "允许"
 
+msgid "Allow New Records For"
+msgstr ""
+
 msgid "Allowances"
 msgstr "津贴"
 
@@ -1474,9 +1501,6 @@ msgstr ""
 msgid "Amount Type"
 msgstr ""
 
-msgid "Amount does not match type, try using a negative or positive value instead"
-msgstr ""
-
 msgid "Amount has too many digits"
 msgstr ""
 
@@ -1492,14 +1516,17 @@ msgstr ""
 msgid "Amount/Unit"
 msgstr ""
 
-msgid "Amount:"
-msgstr "总计："
+msgid "Amounts of type \"%1\" must be a %2 value instead"
+msgstr ""
 
-msgid "An email has been sent to <b>%1</b> with instructions on how to change your password."
-msgstr "电子邮件已经发送到<b>%1</b>，为你说明如何更改你的密码。"
+msgid "An email has been sent to you with instructions on how to change your password."
+msgstr ""
 
 msgid "An employees first wage entry must be effective on or before the employees hire date"
 msgstr "员工的首个工资输入必须在员工受雇日当天或之前开始生效"
+
+msgid "An interval of 0 will result in punches being saved to the nearest second, consider using 1 minute instead"
+msgstr ""
 
 msgid "Ancona"
 msgstr ""
@@ -1605,6 +1632,9 @@ msgstr ""
 
 msgid "Apayao"
 msgstr "Apayao"
+
+msgid "Applicant"
+msgstr ""
 
 msgid "Applicant Education Course"
 msgstr ""
@@ -1822,6 +1852,9 @@ msgstr ""
 msgid "Application Type"
 msgstr ""
 
+msgid "Application sent successfully!"
+msgstr ""
+
 msgid "Applications"
 msgstr ""
 
@@ -1844,6 +1877,9 @@ msgid "Arauca"
 msgstr "阿劳卡"
 
 msgid "Ards"
+msgstr ""
+
+msgid "Are you sure you want to apply for this position without uploading a resume?"
 msgstr ""
 
 msgid "Are you sure you want to continue without saving?"
@@ -2062,9 +2098,6 @@ msgstr ""
 msgid "Auto-Refresh"
 msgstr ""
 
-msgid "Auto-submitting in"
-msgstr ""
-
 msgid "Auto<br>Punch"
 msgstr ""
 
@@ -2072,6 +2105,9 @@ msgid "Automatic"
 msgstr ""
 
 msgid "Automatic Experience"
+msgstr ""
+
+msgid "Automatic Resume Parsing"
 msgstr ""
 
 msgid "Automatic TimeClock Setup"
@@ -2105,6 +2141,12 @@ msgid "Available Hours Per Week (Maximum)"
 msgstr ""
 
 msgid "Available Hours Per Week (Minimum)"
+msgstr ""
+
+msgid "Available Hours Per Week(Maximum)"
+msgstr ""
+
+msgid "Available Hours Per Week(Minimum)"
 msgstr ""
 
 msgid "Available Immediate Drug Test"
@@ -2365,9 +2407,6 @@ msgstr ""
 msgid "Basic"
 msgstr ""
 
-msgid "Basic Search"
-msgstr "基本搜索"
-
 msgid "Basilan"
 msgstr "Basilan"
 
@@ -2608,9 +2647,6 @@ msgstr ""
 msgid "Bonus/Correction (Out-of-Cycle)"
 msgstr ""
 
-msgid "Bookmark This Page!"
-msgstr "收藏此页！"
-
 msgid "Boolean"
 msgstr ""
 
@@ -2625,9 +2661,6 @@ msgstr ""
 
 msgid "Botswana"
 msgstr "Botswana"
-
-msgid "Bottom"
-msgstr "底"
 
 msgid "Bournemouth"
 msgstr ""
@@ -2712,9 +2745,6 @@ msgstr "分公司选择无效"
 
 msgid "Branch/Department"
 msgstr ""
-
-msgid "Branch:"
-msgstr "分公司："
 
 msgid "Branch: Code"
 msgstr ""
@@ -2863,6 +2893,9 @@ msgstr ""
 msgid "CSV file"
 msgstr ""
 
+msgid "CURL Enabled"
+msgstr ""
+
 msgid "CUSTOM"
 msgstr ""
 
@@ -3001,12 +3034,6 @@ msgstr "加拿大 EFT-PC (CSV)"
 msgid "Cancel"
 msgstr ""
 
-msgid "Cancel drawing"
-msgstr ""
-
-msgid "Cancel editing, discards all changes."
-msgstr ""
-
 msgid "Cannot re-parent group to itself"
 msgstr "无法重置组为其父组"
 
@@ -3136,9 +3163,6 @@ msgstr "Chandigarh"
 msgid "Change Log"
 msgstr "更改日志"
 
-msgid "Change Password"
-msgstr "更改密码"
-
 msgid "Charitable Contributions (Box: 46)"
 msgstr ""
 
@@ -3163,8 +3187,8 @@ msgstr ""
 msgid "Check File Permission..."
 msgstr ""
 
-msgid "Check For Updates"
-msgstr "查看有无更新"
+msgid "Check For<br>Updates"
+msgstr ""
 
 msgid "Checking"
 msgstr ""
@@ -3304,46 +3328,10 @@ msgstr ""
 msgid "Click"
 msgstr ""
 
-msgid "Click and drag to draw circle."
-msgstr ""
-
-msgid "Click and drag to draw rectangle."
-msgstr ""
-
-msgid "Click cancel to undo changes."
-msgstr ""
-
-msgid "Click first point to close this shape."
-msgstr ""
-
-msgid "Click here to run the installer now."
-msgstr ""
-
-msgid "Click last point to finish line."
-msgstr ""
-
-msgid "Click map to place marker."
-msgstr ""
-
-msgid "Click on a feature to remove"
-msgstr ""
-
 msgid "Click the"
 msgstr ""
 
 msgid "Click the Edit icon below to override pay stub amounts"
-msgstr ""
-
-msgid "Click to continue drawing line."
-msgstr ""
-
-msgid "Click to continue drawing shape."
-msgstr ""
-
-msgid "Click to start drawing line."
-msgstr ""
-
-msgid "Click to start drawing shape."
 msgstr ""
 
 msgid "Client"
@@ -3478,9 +3466,6 @@ msgstr ""
 msgid "Columns"
 msgstr "列"
 
-msgid "Columns:"
-msgstr "列："
-
 msgid "Comayagua"
 msgstr "科马亚瓜"
 
@@ -3500,6 +3485,9 @@ msgid "Committed"
 msgstr "确定的"
 
 msgid "Community"
+msgstr ""
+
+msgid "Community<br>Forums"
 msgstr ""
 
 msgid "Como"
@@ -3610,6 +3598,9 @@ msgstr ""
 msgid "Configuration Modes"
 msgstr ""
 
+msgid "Configure Available Fields"
+msgstr ""
+
 msgid "Confirm Email"
 msgstr ""
 
@@ -3620,6 +3611,9 @@ msgid "Confirm all requests are authorized"
 msgstr ""
 
 msgid "Confirm email address"
+msgstr ""
+
+msgid "Confirm email does not match email"
 msgstr ""
 
 msgid "Confirm that no critical exceptions exist"
@@ -3647,6 +3641,9 @@ msgid "Conflicting start date"
 msgstr "冲突开始日期"
 
 msgid "Conflicting start date, does not match pay period"
+msgstr ""
+
+msgid "Conflicting start/end date, pay period already exists."
 msgstr ""
 
 msgid "Conflicting start/end time, schedule already exists for this employee"
@@ -3727,9 +3724,6 @@ msgstr ""
 msgid "Contact Title"
 msgstr ""
 
-msgid "Contact Title contains invalid characters"
-msgstr ""
-
 msgid "Contact Title is too short or too long"
 msgstr ""
 
@@ -3793,6 +3787,12 @@ msgstr ""
 msgid "Conversion Rate"
 msgstr "转换率"
 
+msgid "Conversion Rate is too high"
+msgstr ""
+
+msgid "Conversion Rate is too low"
+msgstr ""
+
 msgid "Conversion rate not specified"
 msgstr ""
 
@@ -3816,9 +3816,6 @@ msgstr "复制"
 
 msgid "Copy of"
 msgstr "副本"
-
-msgid "Copy:"
-msgstr "副本："
 
 msgid "Copy<br>as New"
 msgstr ""
@@ -3884,6 +3881,9 @@ msgid "Create Invoices"
 msgstr ""
 
 msgid "Create any necessary pay stub amendments"
+msgstr ""
+
+msgid "Create ethnic groups that don't already exist."
 msgstr ""
 
 msgid "Create groups that don't already exist."
@@ -4025,6 +4025,9 @@ msgid "Current Stock"
 msgstr ""
 
 msgid "Current Time"
+msgstr ""
+
+msgid "Current User Name or Password is incorrect"
 msgstr ""
 
 msgid "Current View"
@@ -4216,6 +4219,9 @@ msgstr ""
 msgid "Database User Name"
 msgstr ""
 
+msgid "Database version check"
+msgstr ""
+
 msgid "Date"
 msgstr "日期"
 
@@ -4243,8 +4249,8 @@ msgstr ""
 msgid "Date not specified"
 msgstr ""
 
-msgid "Date of Issue:"
-msgstr "签发期："
+msgid "Date of Issue"
+msgstr ""
 
 msgid "Date specified is before the first pay period started"
 msgstr ""
@@ -4257,9 +4263,6 @@ msgstr "日期/时间标准"
 
 msgid "Date/Time is incorrect, or pay period does not exist for this date. Please create a pay period schedule and assign this employee to it if you have not done so already"
 msgstr ""
-
-msgid "Date:"
-msgstr "日期："
 
 msgid "Dates"
 msgstr ""
@@ -4426,7 +4429,13 @@ msgstr "拒绝"
 msgid "Declined"
 msgstr "拒绝"
 
-msgid "Declined Offer"
+msgid "Declined: Already Employed"
+msgstr ""
+
+msgid "Declined: Offer"
+msgstr ""
+
+msgid "Declined: Other"
 msgstr ""
 
 msgid "Deduction"
@@ -4513,9 +4522,6 @@ msgstr ""
 msgid "Default task must also be allowed in the task criteria"
 msgstr "任务条件内也要允许默认任务"
 
-msgid "Default:"
-msgstr "默认："
-
 msgid "Defined By Policy Group"
 msgstr ""
 
@@ -4548,15 +4554,6 @@ msgstr "删除下属"
 
 msgid "Delete all Data"
 msgstr "删除全部数据"
-
-msgid "Delete last point"
-msgstr ""
-
-msgid "Delete last point drawn"
-msgstr ""
-
-msgid "Delete layers."
-msgstr ""
 
 msgid "Delete permission denied"
 msgstr "不允许删除权限"
@@ -4612,9 +4609,6 @@ msgstr "部门不存在"
 msgid "Department name is too short or too long"
 msgstr "部门名太短或太长"
 
-msgid "Department:"
-msgstr "部门："
-
 msgid "Department: Code"
 msgstr ""
 
@@ -4646,6 +4640,9 @@ msgid "Derbyshire"
 msgstr ""
 
 msgid "Derry"
+msgstr ""
+
+msgid "Describe Criminal Convictions"
 msgstr ""
 
 msgid "Describe criminal convictions"
@@ -4918,24 +4915,6 @@ msgstr "草稿"
 msgid "Drag & Drop"
 msgstr ""
 
-msgid "Drag handles, or marker to edit feature."
-msgstr ""
-
-msgid "Draw a circle"
-msgstr ""
-
-msgid "Draw a marker"
-msgstr ""
-
-msgid "Draw a polygon"
-msgstr ""
-
-msgid "Draw a polyline"
-msgstr ""
-
-msgid "Draw a rectangle"
-msgstr ""
-
 msgid "Driver"
 msgstr ""
 
@@ -4952,6 +4931,15 @@ msgid "Due Date"
 msgstr "到期日"
 
 msgid "Due date should be after start date"
+msgstr ""
+
+msgid "Due to <specify reason here>, please add the missing %1 %2 punch at <%3>"
+msgstr ""
+
+msgid "Due to <specify reason here>, please correct the %1 %2 punch at %3 to be a %1 %2 punch at <X:XX AM/PM> instead."
+msgstr ""
+
+msgid "Due to <specify reason here>, please correct the <Normal/Lunch/Break> <In/Out> punch at <X::XX AM/PM> to be a <Normal/Lunch/Break> <In/Out> punch at <X:XX AM/PM> instead."
 msgstr ""
 
 msgid "Due to your company's password policy, your password must be changed immediately"
@@ -5017,10 +5005,16 @@ msgstr ""
 msgid "ERROR: Employee number does not exist!"
 msgstr ""
 
+msgid "ERROR: Frame data DOES NOT exist."
+msgstr ""
+
 msgid "ERROR: INVALID PAY CODE"
 msgstr ""
 
 msgid "ERROR: Invalid Absence Policy"
+msgstr ""
+
+msgid "ERROR: Invalid PRIMARY_COMPANY_ID defined in timetrex.ini.php file."
 msgstr ""
 
 msgid "ERROR: Journal entries do not balance"
@@ -5042,6 +5036,15 @@ msgid "ERROR: Please try again later or narrow your search criteria to decrease 
 msgstr ""
 
 msgid "ERROR: UnAssigned Regular Time"
+msgstr ""
+
+msgid "ERROR: Unable to communicate with license server, please check your internet connection."
+msgstr ""
+
+msgid "ERROR: Unable to load resource!"
+msgstr ""
+
+msgid "ERROR: Unable to preview document..."
 msgstr ""
 
 msgid "ERROR: Unable to upload file!"
@@ -5230,9 +5233,6 @@ msgstr "编辑任务域"
 msgid "Edit Transfer Field"
 msgstr "编辑调职域"
 
-msgid "Edit layers."
-msgstr ""
-
 msgid "Edit permission denied"
 msgstr "不允许编辑权限"
 
@@ -5241,6 +5241,9 @@ msgstr "不允许修改权限，员工不存在"
 
 msgid "Edit permission denied, record does not exist"
 msgstr "不允许修改权限，纪录不存在"
+
+msgid "Edit<br>Applicant"
+msgstr ""
 
 msgid "Edit<br>Client"
 msgstr ""
@@ -5353,8 +5356,8 @@ msgstr ""
 msgid "Email"
 msgstr "Email"
 
-msgid "Email Address:"
-msgstr "电邮地址："
+msgid "Email Address"
+msgstr ""
 
 msgid "Email Bcc address is too short or too long"
 msgstr "密送的地址太短或太长"
@@ -5401,7 +5404,7 @@ msgstr "Email 通知"
 msgid "Email Pay Stub to"
 msgstr ""
 
-msgid "Email address <b>%1</b> has been confirmed and activated."
+msgid "Email address already exists, please Login instead"
 msgstr ""
 
 msgid "Email address is invalid"
@@ -5425,7 +5428,13 @@ msgstr "发自的地址太短或太长"
 msgid "Email is invalid"
 msgstr ""
 
+msgid "Email must be specified"
+msgstr ""
+
 msgid "Email not specified"
+msgstr ""
+
+msgid "Email or Password is incorrect"
 msgstr ""
 
 msgid "Email sent"
@@ -5440,16 +5449,16 @@ msgstr ""
 msgid "Email validation key is invalid"
 msgstr ""
 
-msgid "Email:"
-msgstr "Email："
-
 msgid "Emailed Report"
 msgstr ""
 
 msgid "Emergency Contact"
 msgstr ""
 
-msgid "Employed Time Period"
+msgid "Employed Time Period (Full)"
+msgstr ""
+
+msgid "Employed Time Period (Partial)"
 msgstr ""
 
 msgid "Employee"
@@ -5656,9 +5665,6 @@ msgstr "员工设置"
 msgid "Employee Signature"
 msgstr ""
 
-msgid "Employee Signature:"
-msgstr "员工签名："
-
 msgid "Employee Skill"
 msgstr ""
 
@@ -5737,6 +5743,9 @@ msgstr ""
 msgid "Employee is not assigned to this job"
 msgstr "没有分配员工给这工作"
 
+msgid "Employee is not currently active"
+msgstr ""
+
 msgid "Employee is not specified"
 msgstr ""
 
@@ -5772,9 +5781,6 @@ msgstr ""
 
 msgid "Employee/Employer EI"
 msgstr ""
-
-msgid "Employee:"
-msgstr "员工："
 
 msgid "Employee: Province/State"
 msgstr ""
@@ -5849,6 +5855,9 @@ msgid "Employment"
 msgstr ""
 
 msgid "Employment Anniversary"
+msgstr ""
+
+msgid "Employment History"
 msgstr ""
 
 msgid "Employment Income (Box 14)"
@@ -6053,9 +6062,6 @@ msgid "Ethnic Group"
 msgstr ""
 
 msgid "Ethnic Group is invalid"
-msgstr ""
-
-msgid "Ethnic Group: "
 msgstr ""
 
 msgid "Ethnic Groups"
@@ -6278,6 +6284,9 @@ msgid "Expected Wage"
 msgstr ""
 
 msgid "Expected Wage Type"
+msgstr ""
+
+msgid "Expected Wage Type is invalid"
 msgstr ""
 
 msgid "Expense"
@@ -6526,6 +6535,9 @@ msgstr ""
 msgid "File Permissions"
 msgstr ""
 
+msgid "File Uploading"
+msgstr ""
+
 msgid "File checksums do not match, some"
 msgstr ""
 
@@ -6577,10 +6589,10 @@ msgstr "最终：停业或停止支付工资"
 msgid "Finance and Insurance"
 msgstr "财经保险业"
 
-msgid "Find Available"
+msgid "Find available Employees"
 msgstr ""
 
-msgid "Find available Employees"
+msgid "Find<br>Available"
 msgstr ""
 
 msgid "FingerPrint"
@@ -6624,6 +6636,9 @@ msgstr "名字含有无效字符"
 
 msgid "First name is too short or too long"
 msgstr "名字太短或太长"
+
+msgid "First name must be specified"
+msgstr ""
 
 msgid "First used date is invalid"
 msgstr ""
@@ -6718,9 +6733,6 @@ msgstr ""
 msgid "Forgot Your Password"
 msgstr ""
 
-msgid "Forgot Your Password?"
-msgstr "是否忘记你的密码？"
-
 msgid "Forli-Cesena"
 msgstr ""
 
@@ -6766,9 +6778,6 @@ msgstr "Form W2 Report"
 msgid "Form W2/W3"
 msgstr ""
 
-msgid "Form data has been saved!"
-msgstr "表格数据已保存。"
-
 msgid "Form setup"
 msgstr ""
 
@@ -6795,9 +6804,6 @@ msgstr ""
 
 msgid "Formula is too short or too long"
 msgstr ""
-
-msgid "Frame data DOES NOT exists:"
-msgstr "框数据不存在："
 
 msgid "France"
 msgstr "法国"
@@ -6910,6 +6916,9 @@ msgstr ""
 msgid "GEO Fence Violation"
 msgstr ""
 
+msgid "GEO Fence must be defined, please draw a circle or polygon on the map"
+msgstr ""
+
 msgid "GEO Type"
 msgstr ""
 
@@ -6917,9 +6926,6 @@ msgid "GEO color is too short or too long"
 msgstr ""
 
 msgid "GEO<br>Fences"
-msgstr ""
-
-msgid "GEOFence"
 msgstr ""
 
 msgid "GETTEXT Enabled"
@@ -7057,9 +7063,6 @@ msgstr "良好"
 msgid "Good Friday"
 msgstr "耶稣受难日"
 
-msgid "Good:"
-msgstr "良好："
-
 msgid "Gorizia"
 msgstr ""
 
@@ -7164,9 +7167,6 @@ msgstr ""
 
 msgid "Group By"
 msgstr ""
-
-msgid "Group By:"
-msgstr "组属："
 
 msgid "Group C"
 msgstr ""
@@ -7365,9 +7365,6 @@ msgstr ""
 
 msgid "Hidalgo"
 msgstr "Hidalgo"
-
-msgid "Hide Columns"
-msgstr "隐藏列"
 
 msgid "Hierarchy"
 msgstr "等级制度"
@@ -7594,6 +7591,9 @@ msgstr ""
 msgid "INCOMPLETE"
 msgstr "不完整"
 
+msgid "INSECURE, must not be a sub-directory of base path."
+msgstr ""
+
 msgid "INTL Enabled"
 msgstr ""
 
@@ -7648,7 +7648,7 @@ msgstr "如果你曾经请求以下密码"
 msgid "If you wish to see more pages, please go to the report \"Setup\" tab to increase this setting and run the report again."
 msgstr ""
 
-msgid "If you would like to be contacted regarding your feedback, please provide:"
+msgid "If you would like to be contacted regarding your feedback, please provide"
 msgstr ""
 
 msgid "Ifugao"
@@ -7690,7 +7690,7 @@ msgstr ""
 msgid "Import Wizard"
 msgstr ""
 
-msgid "Import failed due to the following reasons:"
+msgid "Import failed due to the following reasons"
 msgstr ""
 
 msgid "Import file exceeds the maximum number of allowed lines (%1), please reduce the number of lines and try again."
@@ -7731,6 +7731,12 @@ msgstr "早签入"
 
 msgid "In Late"
 msgstr "晚签入"
+
+msgid "In Latitude"
+msgstr ""
+
+msgid "In Longitude"
+msgstr ""
 
 msgid "In Punch"
 msgstr "签入打卡"
@@ -7798,9 +7804,6 @@ msgstr ""
 msgid "In/Out"
 msgstr "签入/签出"
 
-msgid "In/Out:"
-msgstr "签入/签出："
-
 msgid "Inactive"
 msgstr ""
 
@@ -7809,6 +7812,9 @@ msgstr "收件箱"
 
 msgid "Inches (in)"
 msgstr "英寸 (in)"
+
+msgid "Incident"
+msgstr ""
 
 msgid "Include"
 msgstr "包括"
@@ -8103,9 +8109,6 @@ msgstr ""
 
 msgid "Incorrect Industry"
 msgstr ""
-
-msgid "Incorrect Input!"
-msgstr "输入错误！"
 
 msgid "Incorrect Interval"
 msgstr "错误间隔"
@@ -8941,6 +8944,9 @@ msgstr "无效公司"
 msgid "Invalid Country"
 msgstr "无效国家"
 
+msgid "Invalid Course"
+msgstr ""
+
 msgid "Invalid Credit Account"
 msgstr "无效信用帐户"
 
@@ -8970,9 +8976,6 @@ msgstr "无效描述长度"
 
 msgid "Invalid District"
 msgstr "无效地区"
-
-msgid "Invalid Email address"
-msgstr ""
 
 msgid "Invalid Employee"
 msgstr "无效员工"
@@ -9025,6 +9028,12 @@ msgstr ""
 msgid "Invalid KPI"
 msgstr ""
 
+msgid "Invalid Language"
+msgstr ""
+
+msgid "Invalid License"
+msgstr ""
+
 msgid "Invalid Local File Name Length"
 msgstr "无效本地文件名长度"
 
@@ -9033,6 +9042,9 @@ msgstr ""
 
 msgid "Invalid Meal Policy"
 msgstr "无效用餐政策"
+
+msgid "Invalid Membership"
+msgstr ""
 
 msgid "Invalid Message id"
 msgstr ""
@@ -9103,6 +9115,9 @@ msgstr "优先次序无效"
 msgid "Invalid ProRate, must be a numeric value"
 msgstr ""
 
+msgid "Invalid Proficiency"
+msgstr ""
+
 msgid "Invalid Province"
 msgstr "无效省份"
 
@@ -9137,6 +9152,9 @@ msgid "Invalid Revision Length"
 msgstr "修改长度无效"
 
 msgid "Invalid Sex"
+msgstr ""
+
+msgid "Invalid Skill"
 msgstr ""
 
 msgid "Invalid Source Object"
@@ -9223,14 +9241,14 @@ msgstr "无效可保险收入"
 msgid "Invalid insurable hours"
 msgstr "无效可保险小时"
 
+msgid "Invalid job applicant"
+msgstr ""
+
 msgid "Invalid label"
 msgstr "无效标签"
 
 msgid "Invalid last date"
 msgstr "无效最终日期"
-
-msgid "Invalid license file"
-msgstr ""
 
 msgid "Invalid license file or unable to activate license"
 msgstr ""
@@ -9248,9 +9266,6 @@ msgid "Invalid name"
 msgstr "无效名称"
 
 msgid "Invalid object_type"
-msgstr ""
-
-msgid "Invalid or expired confirmation key, please try again."
 msgstr ""
 
 msgid "Invalid password strength"
@@ -9775,9 +9790,6 @@ msgstr "工作无效"
 msgid "Job/Task"
 msgstr "工作/任务"
 
-msgid "Job:"
-msgstr "工作："
-
 msgid "Job: Code"
 msgstr ""
 
@@ -9881,6 +9893,9 @@ msgid "Key Words"
 msgstr ""
 
 msgid "Key Words is invalid"
+msgstr ""
+
+msgid "Keywords"
 msgstr ""
 
 msgid "KiloGrams (kg)"
@@ -10159,9 +10174,6 @@ msgstr ""
 msgid "Last Upload"
 msgstr "最后一次上载"
 
-msgid "Last Upload:"
-msgstr ""
-
 msgid "Last Used Date"
 msgstr ""
 
@@ -10179,6 +10191,9 @@ msgstr "姓氏含有无效字符"
 
 msgid "Last name is too short or too long"
 msgstr "姓氏太短或太长"
+
+msgid "Last name must be specified"
+msgstr ""
 
 msgid "Last used date is invalid"
 msgstr ""
@@ -10384,6 +10399,9 @@ msgstr ""
 msgid "Livorno"
 msgstr ""
 
+msgid "Loading"
+msgstr ""
+
 msgid "Local File Name"
 msgstr ""
 
@@ -10427,9 +10445,6 @@ msgid "Lodi"
 msgstr ""
 
 msgid "Log Directory"
-msgstr ""
-
-msgid "Logging out in"
 msgstr ""
 
 msgid "Login"
@@ -10605,6 +10620,9 @@ msgstr "Luxembourg"
 
 msgid "M"
 msgstr "一"
+
+msgid "MAGIC_QUOTES_GPC is On. (Please disable it in php.ini)"
+msgstr ""
 
 msgid "MAIL Enabled"
 msgstr ""
@@ -11056,6 +11074,12 @@ msgstr ""
 msgid "Message Summary"
 msgstr ""
 
+msgid "Message body is too long."
+msgstr ""
+
+msgid "Message body is too short."
+msgstr ""
+
 msgid "Message recipient is invalid"
 msgstr ""
 
@@ -11255,9 +11279,6 @@ msgid "Minimum Time-Off Between Shifts"
 msgstr ""
 
 msgid "Minimum Wage"
-msgstr ""
-
-msgid "Minimum Wage Type is invalid"
 msgstr ""
 
 msgid "Minimum age must only be digits"
@@ -11575,9 +11596,6 @@ msgstr ""
 msgid "Name not specified"
 msgstr ""
 
-msgid "Name:"
-msgstr "名："
-
 msgid "Namibia"
 msgstr "Namibia"
 
@@ -11686,14 +11704,8 @@ msgstr ""
 msgid "New Password (Confirm)"
 msgstr ""
 
-msgid "New Password (confirm):"
-msgstr "新密码(确定)："
-
 msgid "New Password(confirm)"
 msgstr ""
-
-msgid "New Password:"
-msgstr "新密码："
 
 msgid "New South Wales"
 msgstr "新南威尔士州"
@@ -11929,12 +11941,6 @@ msgstr ""
 msgid "No jobs to invoice, possibly due to job start/end date not matching specified invoice date range"
 msgstr ""
 
-msgid "No layers to delete."
-msgstr ""
-
-msgid "No layers to edit."
-msgstr ""
-
 msgid "No report exists."
 msgstr ""
 
@@ -11975,6 +11981,9 @@ msgid "None"
 msgstr "无"
 
 msgid "None Apply"
+msgstr ""
+
+msgid "None provided yet, click the \"+\" icon to add"
 msgstr ""
 
 msgid "Nonemployee Compensation (7)"
@@ -12094,6 +12103,9 @@ msgstr ""
 msgid "Not Installed. (BCMATH extension must be enabled)"
 msgstr ""
 
+msgid "Not Installed. (CURL extension must be enabled)"
+msgstr ""
+
 msgid "Not Installed. (GD extension must be enabled)"
 msgstr ""
 
@@ -12177,9 +12189,6 @@ msgstr ""
 
 msgid "Note(public)"
 msgstr ""
-
-msgid "Note:"
-msgstr "备注："
 
 msgid "Notes"
 msgstr "备注"
@@ -12406,6 +12415,9 @@ msgstr ""
 msgid "Opening Balance Pay Stubs must not come after any other pay stub for this employee"
 msgstr ""
 
+msgid "Operating System"
+msgstr ""
+
 msgid "Optional"
 msgstr "可选项"
 
@@ -12604,6 +12616,12 @@ msgstr "早签出"
 msgid "Out Late"
 msgstr "晚签出"
 
+msgid "Out Latitude"
+msgstr ""
+
+msgid "Out Longitude"
+msgstr ""
+
 msgid "Out Punch"
 msgstr "签出打卡"
 
@@ -12790,6 +12808,9 @@ msgstr ""
 msgid "PHP Information"
 msgstr "PHP 信息"
 
+msgid "PHP OPEN_BASEDIR setting"
+msgstr ""
+
 msgid "PHP Open BaseDir"
 msgstr ""
 
@@ -12798,12 +12819,6 @@ msgstr "PHP 需求："
 
 msgid "PHP Version"
 msgstr ""
-
-msgid "PHP open_basedir setting"
-msgstr ""
-
-msgid "PIN or Password is incorrect"
-msgstr "PIN或密码错误"
 
 msgid "PIN/Phone ID"
 msgstr ""
@@ -12922,6 +12937,9 @@ msgstr ""
 msgid "Parse Hint"
 msgstr ""
 
+msgid "Parsed Resume"
+msgstr ""
+
 msgid "Parsing import data..."
 msgstr ""
 
@@ -12970,6 +12988,9 @@ msgstr "密码－电话"
 msgid "Password - Web"
 msgstr "密码－网上"
 
+msgid "Password - Web (Exceeded Maximum Age)"
+msgstr ""
+
 msgid "Password - Web (Password Policy)"
 msgstr ""
 
@@ -13000,6 +13021,9 @@ msgstr ""
 msgid "Password has been changed successfully, you may now login"
 msgstr ""
 
+msgid "Password has been changed successfully, you may now login."
+msgstr ""
+
 msgid "Password is too short"
 msgstr ""
 
@@ -13026,6 +13050,9 @@ msgstr "密码重置日期无效"
 
 msgid "Password reset key is invalid"
 msgstr "密码重置键无效"
+
+msgid "Password reset key is invalid, please try resetting your password again."
+msgstr ""
 
 msgid "Password updated date is invalid"
 msgstr ""
@@ -13611,13 +13638,16 @@ msgstr ""
 msgid "Please correct the user name/password and try again."
 msgstr ""
 
-msgid "Please correct them and try again."
+msgid "Please correct your settings and try again."
 msgstr ""
 
 msgid "Please delete all files/directories in"
 msgstr ""
 
 msgid "Please draw your full and complete signature in the signature pad with your mouse"
+msgstr ""
+
+msgid "Please ensure that your profile is accurate and complete."
 msgstr ""
 
 msgid "Please enter the administrator user name and password"
@@ -13674,7 +13704,13 @@ msgstr ""
 msgid "Please specify an employee"
 msgstr ""
 
+msgid "Please specify your new password"
+msgstr ""
+
 msgid "Please try again later..."
+msgstr ""
+
+msgid "Please upgrade your database to meet the minimum version requirements and try again."
 msgstr ""
 
 msgid "Please upload file again"
@@ -13735,6 +13771,18 @@ msgid "Port"
 msgstr ""
 
 msgid "Portal"
+msgstr ""
+
+msgid "Portal Only"
+msgstr ""
+
+msgid "Portal Setting"
+msgstr ""
+
+msgid "Portal<br>Preview"
+msgstr ""
+
+msgid "Portal<br>Settings"
 msgstr ""
 
 msgid "Portrait"
@@ -13875,9 +13923,6 @@ msgstr ""
 msgid "Previous Saved Searches"
 msgstr ""
 
-msgid "Previous Saved Searches:"
-msgstr "上一个保存的搜索："
-
 msgid "Previous Session"
 msgstr ""
 
@@ -13926,8 +13971,8 @@ msgstr "打印"
 msgid "Print Checks"
 msgstr ""
 
-msgid "Print Timesheet"
-msgstr "打印考勤表"
+msgid "Print TimeSheet"
+msgstr ""
 
 msgid "Priority"
 msgstr ""
@@ -14049,6 +14094,9 @@ msgstr ""
 msgid "Proficiency is invalid"
 msgstr ""
 
+msgid "Profile Saved Successfully!"
+msgstr ""
+
 msgid "Profit %"
 msgstr "盈利 %"
 
@@ -14126,9 +14174,6 @@ msgstr ""
 
 msgid "Punch Department"
 msgstr "打卡部门"
-
-msgid "Punch In / Out"
-msgstr "签入/签出"
 
 msgid "Punch In/Out"
 msgstr "签出/签入"
@@ -14216,9 +14261,6 @@ msgstr ""
 
 msgid "Punch Type"
 msgstr "打卡类型"
-
-msgid "Punch Type:"
-msgstr "打卡类型："
 
 msgid "Punch exceeds maximum shift time of"
 msgstr "打卡超出为此工资期时间表定下的"
@@ -14352,9 +14394,6 @@ msgstr "数量"
 msgid "Quantity by Job"
 msgstr ""
 
-msgid "Quantity:"
-msgstr "数量："
-
 msgid "Quarter"
 msgstr "季度"
 
@@ -14401,6 +14440,9 @@ msgid "Quick Punch ID is already in use, please try a different one"
 msgstr ""
 
 msgid "Quick Punch ID must be digits only"
+msgstr ""
+
+msgid "Quick Punch ID or Password is incorrect"
 msgstr ""
 
 msgid "Quick Punch Login"
@@ -14595,11 +14637,11 @@ msgstr ""
 msgid "Received By"
 msgstr "收件人"
 
-msgid "Recipient Copy:"
-msgstr "收件人副本："
+msgid "Recipient"
+msgstr ""
 
-msgid "Recipient:"
-msgstr "收件人："
+msgid "Recipient Copy"
+msgstr ""
 
 msgid "Record Of Employment"
 msgstr ""
@@ -14706,6 +14748,9 @@ msgstr ""
 msgid "Reference Information By Applicant/Job Vacancy/Status"
 msgstr ""
 
+msgid "References"
+msgstr ""
+
 msgid "Referrer"
 msgstr ""
 
@@ -14715,8 +14760,8 @@ msgstr ""
 msgid "Refresh All<br>Dashlets"
 msgstr ""
 
-msgid "Regarding:"
-msgstr "关于："
+msgid "Regarding"
+msgstr ""
 
 msgid "Reggio di Calabria"
 msgstr ""
@@ -14775,22 +14820,19 @@ msgstr ""
 msgid "Reimburse Amount"
 msgstr ""
 
-msgid "Reimburse:"
-msgstr ""
-
 msgid "Relative"
 msgstr ""
 
 msgid "Release All Accruals"
 msgstr ""
 
-msgid "Release button to finish drawing."
-msgstr ""
-
 msgid "Releasing all employee accruals"
 msgstr "释放所有员工累积"
 
 msgid "Remaining Balance"
+msgstr ""
+
+msgid "Remaining Credit"
 msgstr ""
 
 msgid "Remaining UnRead Messages"
@@ -14865,8 +14907,8 @@ msgstr "请求"
 msgid "Request (Authorizations)"
 msgstr ""
 
-msgid "Request - Type"
-msgstr "请求 - 类型"
+msgid "Request - Employee"
+msgstr ""
 
 msgid "Request Authorization"
 msgstr ""
@@ -14878,6 +14920,9 @@ msgid "Request Schedule - Employee"
 msgstr ""
 
 msgid "Request Summary"
+msgstr ""
+
+msgid "Request already has schedule data assigned to it"
 msgstr ""
 
 msgid "Request: Absence (incl. Vacation)"
@@ -14927,6 +14972,9 @@ msgstr ""
 
 msgid "Result"
 msgstr "结果"
+
+msgid "Resume"
+msgstr ""
 
 msgid "Retail Trade"
 msgstr ""
@@ -15375,9 +15423,6 @@ msgstr ""
 msgid "Save Search As"
 msgstr ""
 
-msgid "Save Search As:"
-msgstr "搜索保存为："
-
 msgid "Save Setup"
 msgstr ""
 
@@ -15388,9 +15433,6 @@ msgid "Save and Close"
 msgstr ""
 
 msgid "Save as New"
-msgstr ""
-
-msgid "Save changes."
 msgstr ""
 
 msgid "Save<br>& Continue"
@@ -15419,9 +15461,6 @@ msgstr ""
 
 msgid "Saved Reports"
 msgstr "保存的报表"
-
-msgid "Saved Search & Layout"
-msgstr "保存的搜索和布局"
 
 msgid "Saved report is invalid"
 msgstr ""
@@ -15528,6 +15567,9 @@ msgstr ""
 msgid "Scheduled Report"
 msgstr ""
 
+msgid "Scheduled Shift to replace does not exist."
+msgstr ""
+
 msgid "Scheduled Shifts"
 msgstr "已定轮班"
 
@@ -15612,8 +15654,17 @@ msgstr ""
 msgid "Section"
 msgstr ""
 
+msgid "Secure Cache Directory"
+msgstr ""
+
+msgid "Secure Log Directory"
+msgstr ""
+
 msgid "Secure Login"
 msgstr "安全登录"
+
+msgid "Secure Storage Directory"
+msgstr ""
 
 msgid "Security"
 msgstr ""
@@ -15627,10 +15678,19 @@ msgstr ""
 msgid "Select All"
 msgstr "全选"
 
+msgid "Select Country"
+msgstr ""
+
 msgid "Select Destination Pay Code"
 msgstr ""
 
+msgid "Select Province"
+msgstr ""
+
 msgid "Select Source Pay Codes"
+msgstr ""
+
+msgid "Select all that apply"
 msgstr ""
 
 msgid "Select import settings"
@@ -15702,6 +15762,9 @@ msgstr "选择的地区无效"
 
 msgid "Selected Employee is already assigned to another Pay Period"
 msgstr "选择的员工已分配给另一工资期"
+
+msgid "Selected Employee is already assigned to another Pay Period Schedule"
+msgstr ""
 
 msgid "Selected Employee is already assigned to another Permission Group"
 msgstr "选择的员工已分配给另一权限组"
@@ -15862,9 +15925,6 @@ msgstr ""
 msgid "Server"
 msgstr ""
 
-msgid "Server response time:"
-msgstr "服务器反应时间："
-
 msgid "Service"
 msgstr "服务"
 
@@ -15883,7 +15943,7 @@ msgstr "设置日期"
 msgid "Set estimates to 0 to use Task Billable Amounts instead."
 msgstr "将估算设置为 0 后改用任务可收费总额。"
 
-msgid "Set this to 128M or higher"
+msgid "Set this to 512M or higher"
 msgstr ""
 
 msgid "Setting Date Failed!"
@@ -16210,9 +16270,6 @@ msgstr ""
 msgid "Sort By"
 msgstr ""
 
-msgid "Sort By:"
-msgstr "排序基于："
-
 msgid "Sorting Data..."
 msgstr ""
 
@@ -16226,6 +16283,9 @@ msgid "Source Object"
 msgstr ""
 
 msgid "Source Pay Stub Account(s)"
+msgstr ""
+
+msgid "Source Type is invalid"
 msgstr ""
 
 msgid "SourceIP"
@@ -16492,6 +16552,9 @@ msgstr ""
 msgid "Status is invalid"
 msgstr ""
 
+msgid "Status must be specified"
+msgstr ""
+
 msgid "Status not specified"
 msgstr ""
 
@@ -16567,9 +16630,6 @@ msgstr "Subject Wages"
 msgid "Subject Wages YTD"
 msgstr ""
 
-msgid "Submit"
-msgstr "提交"
-
 msgid "Subordinate"
 msgstr ""
 
@@ -16607,6 +16667,12 @@ msgid "Sulu"
 msgstr "Sulu"
 
 msgid "Sum"
+msgstr ""
+
+msgid "Summarized Description"
+msgstr ""
+
+msgid "Summarized description is too short or too long"
 msgstr ""
 
 msgid "Summary"
@@ -16662,9 +16728,6 @@ msgstr ""
 
 msgid "Supervisor Signature"
 msgstr ""
-
-msgid "Supervisor Signature:"
-msgstr "主管签名："
 
 msgid "Supervisor is invalid"
 msgstr "主管无效"
@@ -16825,8 +16888,11 @@ msgstr "Tanzania, United Republic of"
 msgid "Taranto"
 msgstr ""
 
-msgid "Target Balance/Limit"
-msgstr "目标平衡/限制"
+msgid "Target Amount Limit"
+msgstr ""
+
+msgid "Target YTD Limit/Balance"
+msgstr ""
 
 msgid "Tariff Code"
 msgstr "税则号"
@@ -16917,9 +16983,6 @@ msgstr "没有分配任务给这工作"
 
 msgid "Task not specified or is invalid"
 msgstr ""
-
-msgid "Task:"
-msgstr "任务："
 
 msgid "Task: Code"
 msgstr ""
@@ -17030,6 +17093,9 @@ msgid "Tax/Deduction is invalid"
 msgstr ""
 
 msgid "Tax<br>Reports"
+msgstr ""
+
+msgid "Taxable Medicare Additional Wages"
 msgstr ""
 
 msgid "Taxable Medicare Wages"
@@ -17248,9 +17314,6 @@ msgstr "现用此货币"
 msgid "This functionality is only available in"
 msgstr ""
 
-msgid "This functionality is only available in "
-msgstr ""
-
 msgid "This is extremely important and without these maintenance jobs running"
 msgstr ""
 
@@ -17261,6 +17324,9 @@ msgid "This pay code is currently in use"
 msgstr ""
 
 msgid "This pay formula policy is currently in use"
+msgstr ""
+
+msgid "This policy is currently in use"
 msgstr ""
 
 msgid "This station is currently pending activation by a supervisor..."
@@ -17350,9 +17416,6 @@ msgstr "时间窗口"
 msgid "Time Zone"
 msgstr ""
 
-msgid "Time and Attendance - Secure Login"
-msgstr "时间和考勤－安全登录"
-
 msgid "Time and status match that of another punch, this could be due to rounding"
 msgstr ""
 
@@ -17370,9 +17433,6 @@ msgstr ""
 
 msgid "Time stamp not specified"
 msgstr ""
-
-msgid "Time:"
-msgstr "时间："
 
 msgid "TimeClock"
 msgstr ""
@@ -17467,17 +17527,8 @@ msgstr ""
 msgid "TimeZone"
 msgstr "时区"
 
-msgid "Timesheet"
-msgstr ""
-
-msgid "Timesheet Detail"
-msgstr "考勤表细节"
-
 msgid "Timesheet Summary"
 msgstr "考勤表摘要"
-
-msgid "Timesheet Verification"
-msgstr ""
 
 msgid "Timesheet Verification by Pay Period/Employee"
 msgstr ""
@@ -17508,9 +17559,6 @@ msgstr "尊称"
 
 msgid "Title already exists"
 msgstr "标题已存在"
-
-msgid "Title contains invalid characters"
-msgstr ""
 
 msgid "Title is invalid"
 msgstr "标题无效"
@@ -17571,9 +17619,6 @@ msgstr "太少休息"
 
 msgid "Too Many Breaks"
 msgstr "太多休息"
-
-msgid "Top"
-msgstr "顶"
 
 msgid "Torbay"
 msgstr ""
@@ -17911,11 +17956,11 @@ msgstr "交易"
 msgid "Transfer"
 msgstr "调职"
 
-msgid "Transfer funds or write checks"
+msgid "Transfer Punches"
 msgstr ""
 
-msgid "Transfer:"
-msgstr "调职："
+msgid "Transfer funds or write checks"
+msgstr ""
 
 msgid "Transit/Routing"
 msgstr ""
@@ -17990,6 +18035,9 @@ msgid "Type is invalid"
 msgstr ""
 
 msgid "Type is not available in %1 Community Edition, please contact our sales department for more information"
+msgstr ""
+
+msgid "Type must be specified"
 msgstr ""
 
 msgid "Type not specified"
@@ -18230,7 +18278,19 @@ msgstr ""
 msgid "Unsuitable: Drug Test"
 msgstr ""
 
+msgid "Unsuitable: Education"
+msgstr ""
+
 msgid "Unsuitable: Experience"
+msgstr ""
+
+msgid "Unsuitable: Languages"
+msgstr ""
+
+msgid "Unsuitable: Licenses"
+msgstr ""
+
+msgid "Unsuitable: Memberships"
 msgstr ""
 
 msgid "Unsuitable: Other"
@@ -18239,7 +18299,7 @@ msgstr ""
 msgid "Unsuitable: Skills"
 msgstr ""
 
-msgid "Unsuitable: Wage"
+msgid "Unsuitable: Wage Requirements"
 msgstr ""
 
 msgid "Unsupported"
@@ -18365,6 +18425,15 @@ msgstr ""
 msgid "Upload License"
 msgstr ""
 
+msgid "Upload Resume"
+msgstr ""
+
+msgid "Upload Successful!"
+msgstr ""
+
+msgid "Uploaded Date"
+msgstr ""
+
 msgid "Uruguay"
 msgstr "Uruguay"
 
@@ -18400,9 +18469,6 @@ msgstr "用户名或密码错误"
 
 msgid "User Name or Password is incorrect."
 msgstr ""
-
-msgid "User Name:"
-msgstr "用户名："
 
 msgid "User Setting - Name"
 msgstr ""
@@ -18755,6 +18821,12 @@ msgstr "Virginia"
 msgid "Visa"
 msgstr "Visa"
 
+msgid "Visibility"
+msgstr ""
+
+msgid "Visibility Type is invalid"
+msgstr ""
+
 msgid "Viterbo"
 msgstr ""
 
@@ -18773,9 +18845,6 @@ msgstr ""
 msgid "WARNING: %1 application version does not match database version. Please re-run the %1 installer to complete the upgrade process."
 msgstr ""
 
-msgid "WARNING: %1 application version does not match database version. Please re-run the TimeTrex installer to complete the upgrade process."
-msgstr "警告：%1 应用程序版本不兼容数据版本。请再运行 TimeTrex 安装程序方可完成升级程序。"
-
 msgid "WARNING: %1 automatic upgrade has failed due to a system error! Please contact your %1 administrator immediately to re-run the %1 installer to correct the issue."
 msgstr ""
 
@@ -18784,9 +18853,6 @@ msgstr ""
 
 msgid "WARNING: %1 is currently in INSTALL MODE. Please go to your timetrex.ini.php file and set \"installer_enabled\" to \"FALSE\"."
 msgstr "警告：%1 正处于安装模式。请到你的 timetrex.ini.php 文件将 \"installer_enabled\" 设置为 \"FALSE\"。"
-
-msgid "WARNING: %1 maintenance jobs have not run in the last 48hours. Please contact your %1 administrator immediately."
-msgstr "警告：%1 维护工作过去48小时没运行。请立即联系你的 %1 管理员。"
 
 msgid "WARNING: %1 system requirement check has failed! Please contact your %1 administrator immediately to re-run the %1 installer to correct the issue."
 msgstr ""
@@ -18797,13 +18863,13 @@ msgstr "警告：%1 无法设置你的时区。请立即联系你的 %1 管理�
 msgid "WARNING: Critical maintenance jobs have not run in the last 48hours. Please contact your %1 administrator immediately."
 msgstr ""
 
+msgid "WARNING: Employee has day(s) not assigned to a pay period. Please perform a pay period import to correct."
+msgstr ""
+
 msgid "WARNING: Employee is not assigned to a pay period schedule."
 msgstr ""
 
 msgid "WARNING: Employee is not assigned to a policy group."
-msgstr ""
-
-msgid "WARNING: Employees has days not assigned to a pay period. Please perform a pay period import to correct."
 msgstr ""
 
 msgid "WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative."
@@ -18816,6 +18882,12 @@ msgid "WARNING: Payment for this invoice has failed, please contact our billing 
 msgstr ""
 
 msgid "WARNING: Please click here and enter an email address for your account, this is required to receive important notices and prevent your account from being locked out."
+msgstr ""
+
+msgid "WARNING: System stack components (PHP/%2) are out-of-date and not supported with this version of %1! Please upgrade them immediately!"
+msgstr ""
+
+msgid "WARNING: System stack components are out-of-date and not supported with this version of %1! Please perform a manual upgrade to the latest version of %1 immediately!"
 msgstr ""
 
 msgid "WARNING: The credit card on file expires in"
@@ -19475,9 +19547,6 @@ msgstr ""
 msgid "Your browser don't support Camera, please use File tipe in step 1, or use Chrome or FireFox"
 msgstr ""
 
-msgid "Your password has been changed successfully, you may now login."
-msgstr "你的密码已成功更改，你可以登录了。"
-
 msgid "Your password has exceeded its maximum age specified by your company's password policy and must be changed immediately"
 msgstr ""
 
@@ -19595,13 +19664,22 @@ msgstr ""
 msgid "by absence policies"
 msgstr ""
 
+msgid "by accrual policies"
+msgstr ""
+
 msgid "by break policies"
+msgstr ""
+
+msgid "by contributing pay code policies"
 msgstr ""
 
 msgid "by contributing shift policies"
 msgstr ""
 
 msgid "by employee timesheets"
+msgstr ""
+
+msgid "by holiday policies"
 msgstr ""
 
 msgid "by meal policies"
@@ -19613,10 +19691,22 @@ msgstr ""
 msgid "by pay codes"
 msgstr ""
 
+msgid "by pay formula policies"
+msgstr ""
+
+msgid "by policy groups"
+msgstr ""
+
 msgid "by premium policies"
 msgstr ""
 
 msgid "by regular time policies"
+msgstr ""
+
+msgid "by schedule policies"
+msgstr ""
+
+msgid "by tax/deductions"
 msgstr ""
 
 msgid "click here"
@@ -19632,12 +19722,6 @@ msgid "currently selected, click the arrow to modify."
 msgstr "当前选定的，单击箭头即可修改。"
 
 msgid "data without saving, would you like to save your data now?"
-msgstr ""
-
-msgid "database has not been initialized yet, please run the installer again and follow the on screen instructions."
-msgstr ""
-
-msgid "database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
 msgstr ""
 
 msgid "date( Year, Month, Day, Hour, Minute )"
@@ -19700,9 +19784,6 @@ msgstr ""
 msgid "expecting ')'"
 msgstr ""
 
-msgid "experienced a general error, please contact technical support."
-msgstr "有个错误，请联系技术支持。"
-
 msgid "files are not readable/writable. See detailed error messages below."
 msgstr ""
 
@@ -19763,9 +19844,6 @@ msgstr ""
 msgid "ie"
 msgstr "既是"
 
-msgid "ie:"
-msgstr "ie:"
-
 msgid "ie: root, postgres"
 msgstr ""
 
@@ -19798,9 +19876,6 @@ msgstr "的考勤表正确无误。"
 
 msgid "is already assigned as a superior"
 msgstr ""
-
-msgid "is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try back later."
-msgstr "目前正在维护中。带来不便，特此致歉。请稍后再试。"
 
 msgid "is incorrect, perhaps it should be"
 msgstr ""
@@ -19835,9 +19910,6 @@ msgstr ""
 msgid "m"
 msgstr ""
 
-msgid "magic_quotes_gpc is On. (Please disable it in php.ini)"
-msgstr "magic_quotes_gpc 设置为 On。(请在 php.ini 改为 Off)"
-
 msgid "min"
 msgstr "分"
 
@@ -19861,6 +19933,9 @@ msgstr ""
 
 msgid "mth"
 msgstr "月"
+
+msgid "negative"
+msgstr ""
 
 msgid "no spaces"
 msgstr ""
@@ -19901,7 +19976,13 @@ msgstr ""
 msgid "please click here to reset your password now"
 msgstr ""
 
+msgid "positive"
+msgstr ""
+
 msgid "prior to the holiday"
+msgstr ""
+
+msgid "recruitment portal config"
 msgstr ""
 
 msgid "regardless if you use it for processing payroll or not. Please select the pay period frequency and enter the start date, end date and transaction date (date the employees are paid) for your next four pay periods. Based on this information"
@@ -19930,12 +20011,6 @@ msgstr "秒"
 
 msgid "second( #time_stamp# )"
 msgstr ""
-
-msgid "seconds"
-msgstr "秒"
-
-msgid "seconds."
-msgstr "秒。"
 
 msgid "should be initially setup, please select one or more locations that your employees reside within."
 msgstr ""
@@ -19970,8 +20045,8 @@ msgstr ""
 msgid "the include path is"
 msgstr ""
 
-msgid "then:"
-msgstr "之后："
+msgid "then"
+msgstr ""
 
 msgid "this Quick Start Wizard will walk you through the initial setup by asking you a few basic questions about your company."
 msgstr ""
@@ -20021,7 +20096,7 @@ msgstr "周"
 msgid "worked during the designated period."
 msgstr "的时间而签署此考勤表。"
 
-msgid "xpath=//div[@id='ribbon']/ul/li[11]/a"
+msgid "wrong number of arguments ("
 msgstr ""
 
 msgid "year( #time_stamp# )"
@@ -20366,6 +20441,9 @@ msgstr ""
 #~ msgid "Advance transaction date is set"
 #~ msgstr "已设置预支交易日期"
 
+#~ msgid "Advanced Search"
+#~ msgstr "先进搜索"
+
 #~ msgid "After First Punch"
 #~ msgstr "第一次打卡后"
 
@@ -20398,6 +20476,12 @@ msgstr ""
 
 #~ msgid "Amount Type:"
 #~ msgstr "总计类型："
+
+#~ msgid "Amount:"
+#~ msgstr "总计："
+
+#~ msgid "An email has been sent to <b>%1</b> with instructions on how to change your password."
+#~ msgstr "电子邮件已经发送到<b>%1</b>，为你说明如何更改你的密码。"
 
 #~ msgid "Apply Preset"
 #~ msgstr "应用预设值"
@@ -20498,6 +20582,9 @@ msgstr ""
 #~ msgid "Base Price:"
 #~ msgstr "基本价："
 
+#~ msgid "Basic Search"
+#~ msgstr "基本搜索"
+
 #~ msgid "Bcc Address:"
 #~ msgstr "密送："
 
@@ -20522,6 +20609,12 @@ msgstr ""
 #~ msgid "Body:"
 #~ msgstr "内容："
 
+#~ msgid "Bookmark This Page!"
+#~ msgstr "收藏此页！"
+
+#~ msgid "Bottom"
+#~ msgstr "底"
+
 #~ msgid "Box 12a:"
 #~ msgstr "框12a："
 
@@ -20545,6 +20638,9 @@ msgstr ""
 
 #~ msgid "Branch/Dept"
 #~ msgstr "分公司/部门"
+
+#~ msgid "Branch:"
+#~ msgstr "分公司："
 
 #~ msgid "Branches Currently Selected, Click the arrow to modify."
 #~ msgstr "当前选定的分公司，单击箭头即可修改。"
@@ -20621,8 +20717,14 @@ msgstr ""
 #~ msgid "Change Log:"
 #~ msgstr "更改日志："
 
+#~ msgid "Change Password"
+#~ msgstr "更改密码"
+
 #~ msgid "Change Web Password"
 #~ msgstr "更改网上密码"
+
+#~ msgid "Check For Updates"
+#~ msgstr "查看有无更新"
 
 #~ msgid "Christmas"
 #~ msgstr "圣诞岛"
@@ -20678,6 +20780,9 @@ msgstr ""
 #~ msgid "Columbus Day"
 #~ msgstr "Columbus Day"
 
+#~ msgid "Columns:"
+#~ msgstr "列："
+
 #~ msgid "Commands"
 #~ msgstr "命令"
 
@@ -20731,6 +20836,9 @@ msgstr ""
 
 #~ msgid "Continue"
 #~ msgstr "下一步"
+
+#~ msgid "Copy:"
+#~ msgstr "副本："
 
 #~ msgid "Cost"
 #~ msgstr "成本"
@@ -20816,8 +20924,14 @@ msgstr ""
 #~ msgid "Date Successfully Set To: "
 #~ msgstr "日期成功设置为： "
 
+#~ msgid "Date of Issue:"
+#~ msgstr "签发期："
+
 #~ msgid "Date range exceeds the maximum of 31 days"
 #~ msgstr "日期范围超越最大的31天"
+
+#~ msgid "Date:"
+#~ msgstr "日期："
 
 #~ msgid "Day Of Month:"
 #~ msgstr "日："
@@ -20873,6 +20987,9 @@ msgstr ""
 #~ msgid "Default Task:"
 #~ msgstr "默认任务："
 
+#~ msgid "Default:"
+#~ msgstr "默认："
+
 #~ msgid "Delete Data"
 #~ msgstr "删除数据"
 
@@ -20887,6 +21004,9 @@ msgstr ""
 
 #~ msgid "Department List"
 #~ msgstr "部门清单"
+
+#~ msgid "Department:"
+#~ msgstr "部门："
 
 #~ msgid "Departments Currently Selected, Click the arrow to modify."
 #~ msgstr "当前选定的部门，单击箭头即可修改。"
@@ -21215,11 +21335,17 @@ msgstr ""
 #~ msgid "Eligible Retiring Allowance (26)"
 #~ msgstr "符合条件的退休津贴(26)"
 
+#~ msgid "Email Address:"
+#~ msgstr "电邮地址："
+
 #~ msgid "Email Invoice To Contact(s):"
 #~ msgstr "Email发送发票给联系人："
 
 #~ msgid "Email was not specified"
 #~ msgstr "Email 没指定"
+
+#~ msgid "Email:"
+#~ msgstr "Email："
 
 #~ msgid "Employee Administration"
 #~ msgstr "员工管理"
@@ -21269,6 +21395,9 @@ msgstr ""
 #~ msgid "Employee Search"
 #~ msgstr "员工搜索"
 
+#~ msgid "Employee Signature:"
+#~ msgstr "员工签名："
+
 #~ msgid "Employee Status:"
 #~ msgstr "员工状态："
 
@@ -21313,6 +21442,9 @@ msgstr ""
 
 #~ msgid "Employee/Employer EI Accounts:"
 #~ msgstr "员工/雇主EI帐号："
+
+#~ msgid "Employee:"
+#~ msgstr "员工："
 
 #~ msgid "Employees Currently Selected, Click the arrow to modify."
 #~ msgstr "当前选定的员工，单击箭头即可修改。"
@@ -21563,6 +21695,9 @@ msgstr ""
 #~ msgid "Force Time Zone:"
 #~ msgstr "强用时区："
 
+#~ msgid "Forgot Your Password?"
+#~ msgstr "是否忘记你的密码？"
+
 #~ msgid "Form 1099-Misc Report"
 #~ msgstr "Form 1099-Misc Report"
 
@@ -21574,6 +21709,12 @@ msgstr ""
 
 #~ msgid "Form Type:"
 #~ msgstr "表格类型："
+
+#~ msgid "Form data has been saved!"
+#~ msgstr "表格数据已保存。"
+
+#~ msgid "Frame data DOES NOT exists:"
+#~ msgstr "框数据不存在："
 
 #~ msgid "Frequency:"
 #~ msgstr "频率："
@@ -21635,6 +21776,9 @@ msgstr ""
 #~ msgid "Good Wednesday"
 #~ msgstr "Good Wednesday"
 
+#~ msgid "Good:"
+#~ msgstr "良好："
+
 #~ msgid "Grace Period:"
 #~ msgstr "宽限期："
 
@@ -21643,6 +21787,9 @@ msgstr ""
 
 #~ msgid "Group B:"
 #~ msgstr "B 组："
+
+#~ msgid "Group By:"
+#~ msgstr "组属："
 
 #~ msgid "Group Schedule"
 #~ msgstr "组时间表"
@@ -21688,6 +21835,9 @@ msgstr ""
 
 #~ msgid "Help:"
 #~ msgstr "帮助："
+
+#~ msgid "Hide Columns"
+#~ msgstr "隐藏列"
 
 #~ msgid "Hide Employer Contributions:"
 #~ msgstr "隐藏雇主缴付："
@@ -21773,6 +21923,9 @@ msgstr ""
 #~ msgid "In order for your %1 installation to function properly, please ensure all of the system check items listed below are marked as <b>OK</b>. If any are red, please take the necessary steps to fix them."
 #~ msgstr "若要你的 %1 软件操作正常，请确保下列所有系统核选条目都标记为 <b>OK</b>。若有任何红色字样，请按提示纠正情况。"
 
+#~ msgid "In/Out:"
+#~ msgstr "签入/签出："
+
 #~ msgid "In:"
 #~ msgstr "入："
 
@@ -21835,6 +21988,9 @@ msgstr ""
 
 #~ msgid "Income Tax Deducted (Box: 22):"
 #~ msgstr "扣除所得税(框:22)："
+
+#~ msgid "Incorrect Input!"
+#~ msgstr "输入错误！"
 
 #~ msgid "Incorrect advance end date"
 #~ msgstr "错误预支结束日期"
@@ -21937,6 +22093,9 @@ msgstr ""
 
 #~ msgid "Job Start Date:"
 #~ msgstr "工作开始日期："
+
+#~ msgid "Job:"
+#~ msgstr "工作："
 
 #~ msgid "JobTracking"
 #~ msgstr "工作跟踪"
@@ -22199,6 +22358,9 @@ msgstr ""
 #~ msgid "NOTICE:"
 #~ msgstr "通知："
 
+#~ msgid "Name:"
+#~ msgstr "名："
+
 #~ msgid "Net"
 #~ msgstr "净"
 
@@ -22216,6 +22378,12 @@ msgstr ""
 
 #~ msgid "New Message"
 #~ msgstr "新信息"
+
+#~ msgid "New Password (confirm):"
+#~ msgstr "新密码(确定)："
+
+#~ msgid "New Password:"
+#~ msgstr "新密码："
 
 #~ msgid "Next available code"
 #~ msgstr "下一个可用代码"
@@ -22297,6 +22465,9 @@ msgstr ""
 
 #~ msgid "Note (public):"
 #~ msgstr "备注(公开)："
+
+#~ msgid "Note:"
+#~ msgstr "备注："
 
 #~ msgid "Objects:"
 #~ msgstr "物件："
@@ -22405,6 +22576,9 @@ msgstr ""
 
 #~ msgid "PHP Version:"
 #~ msgstr "PHP 版本："
+
+#~ msgid "PIN or Password is incorrect"
+#~ msgstr "PIN或密码错误"
 
 #~ msgid "PO Number:"
 #~ msgstr "采购单编号："
@@ -22653,6 +22827,9 @@ msgstr ""
 #~ msgid "Premium: "
 #~ msgstr "优先： "
 
+#~ msgid "Previous Saved Searches:"
+#~ msgstr "上一个保存的搜索："
+
 #~ msgid "Price Type:"
 #~ msgstr "价格类型："
 
@@ -22676,6 +22853,9 @@ msgstr ""
 
 #~ msgid "Print Schedule"
 #~ msgstr "打印时间表"
+
+#~ msgid "Print Timesheet"
+#~ msgstr "打印考勤表"
 
 #~ msgid "Priority:"
 #~ msgstr "优先次序："
@@ -22734,14 +22914,23 @@ msgstr ""
 #~ msgid "Punch Failed!"
 #~ msgstr "打卡失败！"
 
+#~ msgid "Punch In / Out"
+#~ msgstr "签入/签出"
+
 #~ msgid "Punch List"
 #~ msgstr "打卡清单"
+
+#~ msgid "Punch Type:"
+#~ msgstr "打卡类型："
 
 #~ msgid "Purchase Order #:"
 #~ msgstr "订购单＃"
 
 #~ msgid "Qty"
 #~ msgstr "数量"
+
+#~ msgid "Quantity:"
+#~ msgstr "数量："
 
 #~ msgid "Quarter 1 (01-Jan to 31-Mar)"
 #~ msgstr "季度 1 (01-01 to 03-31)"
@@ -22824,6 +23013,12 @@ msgstr ""
 #~ msgid "Recent Requests"
 #~ msgstr "近期请求"
 
+#~ msgid "Recipient Copy:"
+#~ msgstr "收件人副本："
+
+#~ msgid "Recipient:"
+#~ msgstr "收件人："
+
 #~ msgid "Recipients Currently Selected, Click the arrow to modify."
 #~ msgstr "当前选定的接收人，单击箭头即刻修改。"
 
@@ -22847,6 +23042,9 @@ msgstr ""
 
 #~ msgid "Recurring Schedule Template List"
 #~ msgstr "定期时间表模板清单"
+
+#~ msgid "Regarding:"
+#~ msgstr "关于："
 
 #~ msgid "Registration Key:"
 #~ msgstr "注册钥匙："
@@ -22880,6 +23078,9 @@ msgstr ""
 
 #~ msgid "Report Setup:"
 #~ msgstr "报表设置："
+
+#~ msgid "Request - Type"
+#~ msgstr "请求 - 类型"
 
 #~ msgid "Request Date"
 #~ msgstr "申请日期"
@@ -22944,8 +23145,14 @@ msgstr ""
 #~ msgid "San Salvador Party"
 #~ msgstr "San Salvador Party"
 
+#~ msgid "Save Search As:"
+#~ msgstr "搜索保存为："
+
 #~ msgid "Saved Schedules"
 #~ msgstr "保存的时间表"
+
+#~ msgid "Saved Search & Layout"
+#~ msgstr "保存的搜索和布局"
 
 #~ msgid "Schedule Branch:"
 #~ msgstr "时间表分公司："
@@ -23049,6 +23256,9 @@ msgstr ""
 #~ msgid "Serial No:"
 #~ msgstr "序列号："
 
+#~ msgid "Server response time:"
+#~ msgstr "服务器反应时间："
+
 #~ msgid "Server:"
 #~ msgstr "服务器:"
 
@@ -23120,6 +23330,9 @@ msgstr ""
 
 #~ msgid "Sorry, no items match your criteria."
 #~ msgstr "对不起，没有匹配你的条件的条目。"
+
+#~ msgid "Sort By:"
+#~ msgstr "排序基于："
 
 #~ msgid "Source:"
 #~ msgstr "源："
@@ -23226,6 +23439,9 @@ msgstr ""
 #~ msgid "Subject:"
 #~ msgstr "主题："
 
+#~ msgid "Submit"
+#~ msgstr "提交"
+
 #~ msgid "Submit Message"
 #~ msgstr "提交信息"
 
@@ -23241,6 +23457,9 @@ msgstr ""
 #~ msgid "Summary Totals"
 #~ msgstr "汇总"
 
+#~ msgid "Supervisor Signature:"
+#~ msgstr "主管签名："
+
 #~ msgid "Supervisor:"
 #~ msgstr "上级："
 
@@ -23255,6 +23474,9 @@ msgstr ""
 
 #~ msgid "Table of Contents"
 #~ msgstr "目录"
+
+#~ msgid "Target Balance/Limit"
+#~ msgstr "目标平衡/限制"
 
 #~ msgid "Tariff Code:"
 #~ msgstr "税则号："
@@ -23273,6 +23495,9 @@ msgstr ""
 
 #~ msgid "Task is invalid"
 #~ msgstr "任务无效"
+
+#~ msgid "Task:"
+#~ msgstr "任务："
 
 #~ msgid "Tasks Currently Selected, Click the arrow to modify."
 #~ msgstr "当前选定的工作组，单击箭头即刻修改。"
@@ -23379,6 +23604,12 @@ msgstr ""
 #~ msgid "Time Units:"
 #~ msgstr "时间单位："
 
+#~ msgid "Time and Attendance - Secure Login"
+#~ msgstr "时间和考勤－安全登录"
+
+#~ msgid "Time:"
+#~ msgstr "时间："
+
 #~ msgid "TimeTrex"
 #~ msgstr "TimeTrex"
 
@@ -23387,6 +23618,9 @@ msgstr ""
 
 #~ msgid "TimeTrex Version:"
 #~ msgstr "TimeTrex 版本："
+
+#~ msgid "Timesheet Detail"
+#~ msgstr "考勤表细节"
 
 #~ msgid "Title:"
 #~ msgstr "标题："
@@ -23402,6 +23636,9 @@ msgstr ""
 
 #~ msgid "To:"
 #~ msgstr "到："
+
+#~ msgid "Top"
+#~ msgstr "顶"
 
 #~ msgid "Total Actual Cost:"
 #~ msgstr "总实际成本："
@@ -23471,6 +23708,9 @@ msgstr ""
 
 #~ msgid "Transaction Start Date:"
 #~ msgstr "交易开始日期："
+
+#~ msgid "Transfer:"
+#~ msgstr "调职："
 
 #~ msgid "Type of Return:"
 #~ msgstr "回报类型："
@@ -23577,6 +23817,9 @@ msgstr ""
 #~ msgid "User Name for"
 #~ msgstr "用户名："
 
+#~ msgid "User Name:"
+#~ msgstr "用户名："
+
 #~ msgid "UserID"
 #~ msgstr "用户 ID"
 
@@ -23648,6 +23891,12 @@ msgstr ""
 
 #~ msgid "WARNING:"
 #~ msgstr "警告："
+
+#~ msgid "WARNING: %1 application version does not match database version. Please re-run the TimeTrex installer to complete the upgrade process."
+#~ msgstr "警告：%1 应用程序版本不兼容数据版本。请再运行 TimeTrex 安装程序方可完成升级程序。"
+
+#~ msgid "WARNING: %1 maintenance jobs have not run in the last 48hours. Please contact your %1 administrator immediately."
+#~ msgstr "警告：%1 维护工作过去48小时没运行。请立即联系你的 %1 管理员。"
 
 #~ msgid ""
 #~ "WARNING: Deleting a pay period will also delete all punches assigned to that pay period. Once data is deleted it can not be recovered.\n"
@@ -23827,6 +24076,9 @@ msgstr ""
 #~ msgid "Your PHP configuration file (php.ini) is located at:<br> <b>%1</b>, the include path is: \"<b>%2</b>\""
 #~ msgstr "你的 PHP 配置文件 (php.ini) 存在：<br> <b>%1</b>，其 include path 是：\"<b>%2</b>\""
 
+#~ msgid "Your password has been changed successfully, you may now login."
+#~ msgstr "你的密码已成功更改，你可以登录了。"
+
 #~ msgid "[R]"
 #~ msgstr "[R]"
 
@@ -23845,8 +24097,14 @@ msgstr ""
 #~ msgid "day(s) after above date."
 #~ msgstr "从上述日期开始后的天数。"
 
+#~ msgid "experienced a general error, please contact technical support."
+#~ msgstr "有个错误，请联系技术支持。"
+
 #~ msgid "iButton ID is already taken"
 #~ msgstr "iButton ID 已被他人使用"
+
+#~ msgid "ie:"
+#~ msgstr "ie:"
 
 #~ msgid "installed"
 #~ msgstr "/安装。"
@@ -23854,8 +24112,14 @@ msgstr ""
 #~ msgid "installer_enabled = TRUE"
 #~ msgstr "installer_enabled = TRUE"
 
+#~ msgid "is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try back later."
+#~ msgstr "目前正在维护中。带来不便，特此致歉。请稍后再试。"
+
 #~ msgid "locked"
 #~ msgstr "锁定"
+
+#~ msgid "magic_quotes_gpc is On. (Please disable it in php.ini)"
+#~ msgstr "magic_quotes_gpc 设置为 On。(请在 php.ini 改为 Off)"
 
 #~ msgid "modifications are not permitted."
 #~ msgstr "不允许修改。"
@@ -23865,6 +24129,15 @@ msgstr ""
 
 #~ msgid "of the:"
 #~ msgstr "于："
+
+#~ msgid "seconds"
+#~ msgstr "秒"
+
+#~ msgid "seconds."
+#~ msgstr "秒。"
+
+#~ msgid "then:"
+#~ msgstr "之后："
 
 #~ msgid "to be reset,"
 #~ msgstr "重启，"

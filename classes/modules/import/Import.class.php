@@ -678,7 +678,7 @@ class Import {
 				return $retval;
 			}
 		} else {
-			$retval = array_search( strtolower($input), array_map('strtolower', $options) );
+			$retval = array_search( strtolower($input), array_map('strtolower', (array)$options) );
 			if ( $retval !== FALSE ) {
 				return $retval;
 			}

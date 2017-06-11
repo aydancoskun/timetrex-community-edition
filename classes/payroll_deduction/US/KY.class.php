@@ -41,62 +41,62 @@
 class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-												20060101 => array(
-															0 => array(
-																	array( 'income' => 3000,	'rate' => 2,	'constant' => 0 ),
-																	array( 'income' => 4000,	'rate' => 3,	'constant' => 60 ),
-																	array( 'income' => 5000,	'rate' => 4,	'constant' => 90 ),
-																	array( 'income' => 8000,	'rate' => 5,	'constant' => 130 ),
-																	array( 'income' => 75000,	'rate' => 5.8,	'constant' => 280 ),
-																	array( 'income' => 75000,	'rate' => 6,	'constant' => 4166 ),
-																),
-															),
-												);
+			20060101 => array(
+					0 => array(
+							array('income' => 3000, 'rate' => 2, 'constant' => 0),
+							array('income' => 4000, 'rate' => 3, 'constant' => 60),
+							array('income' => 5000, 'rate' => 4, 'constant' => 90),
+							array('income' => 8000, 'rate' => 5, 'constant' => 130),
+							array('income' => 75000, 'rate' => 5.8, 'constant' => 280),
+							array('income' => 75000, 'rate' => 6, 'constant' => 4166),
+					),
+			),
+	);
 
 
 	var $state_options = array(
-								20170101 => array( //01-Jan-2017
-													'standard_deduction' => 2480,
-													'allowance' => 10
-													),
-								20160101 => array( //01-Jan-2016
-													'standard_deduction' => 2460,
-													'allowance' => 20
-													),
-								20150101 => array( //01-Jan-2015
-													'standard_deduction' => 2440,
-													'allowance' => 20
-													),
-								20140101 => array( //01-Jan-2014
-													'standard_deduction' => 2400,
-													'allowance' => 20
-													),
-								20130101 => array( //01-Jan-2013
-													'standard_deduction' => 2360,
-													'allowance' => 20
-													),
-								//20120101
-								20090101 => array( //01-Jan-2012 **Had the wrong date before, was 2009.
-													'standard_deduction' => 2290,
-													'allowance' => 20
-													),
-								20090101 => array( //01-Jan-2009
-													'standard_deduction' => 2190,
-													'allowance' => 20
-													),
-								20080101 => array(
-													'standard_deduction' => 2100,
-													'allowance' => 20
-													),
-								20070101 => array(
-													'standard_deduction' => 2050,
-													'allowance' => 20
-													),
-								20060101 => array(
-													'standard_deduction' => 1970,
-													'allowance' => 22
-													)
-								);
+			20170101 => array( //01-Jan-2017
+							   'standard_deduction' => 2480,
+							   'allowance'          => 10,
+			),
+			20160101 => array( //01-Jan-2016
+							   'standard_deduction' => 2460,
+							   'allowance'          => 20,
+			),
+			20150101 => array( //01-Jan-2015
+							   'standard_deduction' => 2440,
+							   'allowance'          => 20,
+			),
+			20140101 => array( //01-Jan-2014
+							   'standard_deduction' => 2400,
+							   'allowance'          => 20,
+			),
+			20130101 => array( //01-Jan-2013
+							   'standard_deduction' => 2360,
+							   'allowance'          => 20,
+			),
+			//20120101
+			20090101 => array( //01-Jan-2012 **Had the wrong date before, was 2009.
+							   'standard_deduction' => 2290,
+							   'allowance'          => 20,
+			),
+			20090101 => array( //01-Jan-2009
+							   'standard_deduction' => 2190,
+							   'allowance'          => 20,
+			),
+			20080101 => array(
+					'standard_deduction' => 2100,
+					'allowance'          => 20,
+			),
+			20070101 => array(
+					'standard_deduction' => 2050,
+					'allowance'          => 20,
+			),
+			20060101 => array(
+					'standard_deduction' => 1970,
+					'allowance'          => 22,
+			),
+	);
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -104,13 +104,13 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 		$income = bcsub( $annual_income, $standard_deduction );
 
-		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Taxable Income: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $income;
 	}
 
 	function getStateStandardDeduction() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 
@@ -118,13 +118,13 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 		$retval = $retarr['standard_deduction'];
 
-		Debug::text('State Standard Deduction Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Standard Deduction Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
 	function getStateAllowanceAmount() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 
@@ -134,7 +134,7 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 		$retval = bcmul( $this->getStateAllowance(), $allowance_arr );
 
-		Debug::text('State Allowance Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
@@ -145,9 +145,9 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$rate = $this->getData()->getStateRate($annual_income);
-			$prev_income = $this->getData()->getStateRatePreviousIncome($annual_income);
-			$state_constant = $this->getData()->getStateConstant($annual_income);
+			$rate = $this->getData()->getStateRate( $annual_income );
+			$prev_income = $this->getData()->getStateRatePreviousIncome( $annual_income );
+			$state_constant = $this->getData()->getStateConstant( $annual_income );
 
 			$retval = bcadd( bcmul( bcsub( $annual_income, $prev_income ), $rate ), $state_constant );
 		}
@@ -158,9 +158,10 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 			$retval = 0;
 		}
 
-		Debug::text('State Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 }
+
 ?>

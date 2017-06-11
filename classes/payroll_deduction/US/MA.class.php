@@ -39,59 +39,59 @@
  * @package PayrollDeduction\US
  */
 class PayrollDeduction_US_MA extends PayrollDeduction_US {
-/*
-	protected $state_ma_filing_status_options = array(
-														10 => 'Regular',
-														20 => 'Head of Household',
-														30 => 'Blind',
-														40 => 'Head of Household and Blind'
-									);
-*/
+	/*
+		protected $state_ma_filing_status_options = array(
+															10 => 'Regular',
+															20 => 'Head of Household',
+															30 => 'Blind',
+															40 => 'Head of Household and Blind'
+										);
+	*/
 
 	var $state_options = array(
-								20160101 => array( //01-Jan-16
-													'rate' => 5.10,
-													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
-													'federal_tax_maximum' => 2000,
-													'minimum_income' => 8000,
-													),
-								20150101 => array( //01-Jan-15
-													'rate' => 5.15,
-													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
-													'federal_tax_maximum' => 2000,
-													'minimum_income' => 8000,
-													),
-								20140101 => array( //01-Jan-14
-													'rate' => 5.20,
-													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
-													'federal_tax_maximum' => 2000,
-													'minimum_income' => 8000,
-													),
-								20120101 => array( //01-Jan-12
-													'rate' => 5.25,
-													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
-													'federal_tax_maximum' => 2000,
-													'minimum_income' => 8000,
-													),
-								20090101 => array( //01-Jan-09
-													'rate' => 5.30,
-													'allowance' => array( 4400, 1000 ), //1 = Base amount, 2 = Per Allowance multiplier
-													'federal_tax_maximum' => 2000,
-													'minimum_income' => 8000,
-													),
-								20060101 => array( //01-Jan-06
-													'rate' => 5.30,
-													'standard_deduction' => array(
-																			10 => 0,
-																			20 => 2100,
-																			30 => 2200,
-																			40 => 2200
-																			),
-													'allowance' => array( 3850, 2850 ),
-													'federal_tax_maximum' => 2000,
-													'minimum_income' => 8000,
-													)
-								);
+			20160101 => array( //01-Jan-16
+							   'rate'                => 5.10,
+							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
+							   'federal_tax_maximum' => 2000,
+							   'minimum_income'      => 8000,
+			),
+			20150101 => array( //01-Jan-15
+							   'rate'                => 5.15,
+							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
+							   'federal_tax_maximum' => 2000,
+							   'minimum_income'      => 8000,
+			),
+			20140101 => array( //01-Jan-14
+							   'rate'                => 5.20,
+							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
+							   'federal_tax_maximum' => 2000,
+							   'minimum_income'      => 8000,
+			),
+			20120101 => array( //01-Jan-12
+							   'rate'                => 5.25,
+							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
+							   'federal_tax_maximum' => 2000,
+							   'minimum_income'      => 8000,
+			),
+			20090101 => array( //01-Jan-09
+							   'rate'                => 5.30,
+							   'allowance'           => array(4400, 1000), //1 = Base amount, 2 = Per Allowance multiplier
+							   'federal_tax_maximum' => 2000,
+							   'minimum_income'      => 8000,
+			),
+			20060101 => array( //01-Jan-06
+							   'rate'                => 5.30,
+							   'standard_deduction'  => array(
+									   10 => 0,
+									   20 => 2100,
+									   30 => 2200,
+									   40 => 2200,
+							   ),
+							   'allowance'           => array(3850, 2850),
+							   'federal_tax_maximum' => 2000,
+							   'minimum_income'      => 8000,
+			),
+	);
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -106,44 +106,44 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 		if ( $federal_tax > $this->getStateFederalTaxMaximum() ) {
 			$federal_tax = $this->getStateFederalTaxMaximum();
 		}
-		Debug::text('Federal Tax: '. $federal_tax, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Federal Tax: ' . $federal_tax, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$income = bcsub( bcsub( bcsub($annual_income, $federal_tax), $state_deductions), $state_allowance );
+		$income = bcsub( bcsub( bcsub( $annual_income, $federal_tax ), $state_deductions ), $state_allowance );
 
-		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Taxable Income: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $income;
 	}
 
 	function getStateFederalTaxMaximum() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 		}
 
 		$maximum = $retarr['federal_tax_maximum'];
 
-		Debug::text('Maximum State allowed Federal Tax: '. $maximum, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Maximum State allowed Federal Tax: ' . $maximum, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $maximum;
 	}
 
 	function getStateStandardDeduction() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 
 		}
 
-		$deduction = $retarr['standard_deduction'][$this->getStateFilingStatus()];
+		$deduction = $retarr['standard_deduction'][ $this->getStateFilingStatus() ];
 
-		Debug::text('Standard Deduction: '. $deduction, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Standard Deduction: ' . $deduction, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $deduction;
 	}
 
 	function getStateAllowanceAmount() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 
@@ -162,11 +162,11 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 			} elseif ( $this->getStateAllowance() == 1 ) {
 				$retval = $allowance_arr[0];
 			} else {
-				$retval = bcadd($allowance_arr[0], bcmul( bcsub( $this->getStateAllowance(), 1 ), $allowance_arr[1] ) );
+				$retval = bcadd( $allowance_arr[0], bcmul( bcsub( $this->getStateAllowance(), 1 ), $allowance_arr[1] ) );
 			}
 		}
 
-		Debug::text('State Allowance Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
@@ -177,23 +177,24 @@ class PayrollDeduction_US_MA extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+			$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 			if ( $retarr == FALSE ) {
 				return FALSE;
 			}
 
 			$rate = bcdiv( $retarr['rate'], 100 );
 
-			$retval = bcmul( $annual_income, $rate);
+			$retval = bcmul( $annual_income, $rate );
 		}
 
 		if ( $retval < 0 ) {
 			$retval = 0;
 		}
 
-		Debug::text('State Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 }
+
 ?>

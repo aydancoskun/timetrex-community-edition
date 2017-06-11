@@ -42,26 +42,28 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 	//
 	// Federal
 	//
-	function setFederalFilingStatus($value) {
+	function setFederalFilingStatus( $value ) {
 		$this->data['federal_filing_status'] = $value;
 
 		return TRUE;
 	}
+
 	function getFederalFilingStatus() {
-		if ( isset($this->data['federal_filing_status']) ) {
+		if ( isset( $this->data['federal_filing_status'] ) ) {
 			return $this->data['federal_filing_status'];
 		}
 
 		return 10; //Single
 	}
 
-	function setFederalAllowance($value) {
+	function setFederalAllowance( $value ) {
 		$this->data['federal_allowance'] = $value;
 
 		return TRUE;
 	}
+
 	function getFederalAllowance() {
-		if ( isset($this->data['federal_allowance']) ) {
+		if ( isset( $this->data['federal_allowance'] ) ) {
 			return $this->data['federal_allowance'];
 		}
 
@@ -75,7 +77,7 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 
 		$retval = bcmul( $this->getGrossPayPeriodIncome(), $this->getAnnualPayPeriods() );
 
-		Debug::text('Annual Taxable Income: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Annual Taxable Income: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
@@ -92,8 +94,8 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 		$annual_taxable_income = $this->getAnnualTaxableIncome();
 		$annual_allowance = bcmul( $this->getFederalAllowanceAmount( $this->getDate() ), $this->getFederalAllowance() );
 
-		Debug::text('Annual Taxable Income: '. $annual_taxable_income, __FILE__, __LINE__, __METHOD__, 10);
-		Debug::text('Allowance: '. $annual_allowance, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Annual Taxable Income: ' . $annual_taxable_income, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'Allowance: ' . $annual_allowance, __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( $this->getFederalFilingStatus() == 20 ) {
 			$annual_filing = $this->getFederalFilingAmount( $this->getData() );
@@ -101,9 +103,9 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 			$annual_filing = 0;
 		}
 
-		Debug::text('Filing: '. $annual_filing, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Filing: ' . $annual_filing, __FILE__, __LINE__, __METHOD__, 10 );
 
-		$taxTable = $this->getData()->getFederalTaxTable($annual_taxable_income);
+		$taxTable = $this->getData()->getFederalTaxTable( $annual_taxable_income );
 
 		/*
 		 *	T = Total Income Tax calculated for that employee
@@ -130,13 +132,13 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 				if ( $prev_income != 0 AND $prev_income > 0 ) {
 
 					if ( $annual_taxable_income > $prev_income AND $annual_taxable_income <= $income ) {
-						$tax = bcadd( $tax, (bcmul($rate, bcsub($annual_taxable_income, $prev_income))) );
+						$tax = bcadd( $tax, ( bcmul( $rate, bcsub( $annual_taxable_income, $prev_income ) ) ) );
 					} else {
-						$tmp_prev_income[$i] = $prev_income;
+						$tmp_prev_income[ $i ] = $prev_income;
 						if ( $i >= 2 AND $i < 3 ) {
 							if ( $annual_taxable_income > $income ) {
-								$tax = bcadd( $tax, bcmul($prev_rate, bcsub($prev_income, $tmp_prev_income[$i - 1])) );
-								$tax = bcadd( $tax, bcmul($rate, bcsub($annual_taxable_income, $income)) );
+								$tax = bcadd( $tax, bcmul( $prev_rate, bcsub( $prev_income, $tmp_prev_income[ $i - 1 ] ) ) );
+								$tax = bcadd( $tax, bcmul( $rate, bcsub( $annual_taxable_income, $income ) ) );
 							}
 						}
 					}
@@ -145,9 +147,9 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 				$i++;
 			}
 
-			$tax = bcsub($tax, $AD);
-		}else{
-			Debug::text('Income is less then Total Income Tax Adjustments: ', __FILE__, __LINE__, __METHOD__, 10);
+			$tax = bcsub( $tax, $AD );
+		} else {
+			Debug::text( 'Income is less then Total Income Tax Adjustments: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 			$tax = 0;
 		}
@@ -156,9 +158,10 @@ class PayrollDeduction_CR extends PayrollDeduction_CR_Data {
 			$tax = 0;
 		}
 
-		Debug::text('RetVal: '. $tax, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'RetVal: ' . $tax, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $tax;
 	}
 }
+
 ?>

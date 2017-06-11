@@ -34,9 +34,12 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
-require_once('../../includes/global.inc.php'); //Mainly to force redirect to SSL URL if required...
+require_once('../../includes/global.inc.php');
+$form_vars = FormVariables::GetVariables( array('desktop') );
+if ( array_key_exists( 'desktop', $form_vars ) AND $form_vars['desktop'] != 1 ) { //isset() won't work here as 'desktop' key can be NULL
+	unset($form_vars['desktop']);
+}
 
-Misc::redirectMobileBrowser(); //Redirect mobile browsers automatically.
-Redirect::Page( URLBuilder::getURL( NULL, Environment::getDefaultInterfaceBaseURL() ) ); //Redirect to default interface URL.
-Debug::writeToLog();
+header('HTTP/1.1 301 Moved Permanently');
+Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL().'html5/') );
 ?>

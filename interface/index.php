@@ -40,5 +40,6 @@ if ( array_key_exists( 'desktop', $form_vars ) AND $form_vars['desktop'] != 1 ) 
 	unset($form_vars['desktop']);
 }
 
+header('HTTP/1.1 301 Moved Permanently');
 Redirect::Page( URLBuilder::getURL( $form_vars, Environment::GetBaseURL().'html5/') );
 ?>

@@ -35,11 +35,12 @@
  ********************************************************************************/
 
 
-include_once( dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'GovernmentForms_Base.class.php' );
+include_once( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'GovernmentForms_Base.class.php' );
 
 /**
  * @package GovernmentForms
  */
 class GovernmentForms_US extends GovernmentForms_Base {
 }
+
 ?>

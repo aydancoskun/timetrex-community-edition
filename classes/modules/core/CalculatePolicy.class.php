@@ -2484,6 +2484,7 @@ class CalculatePolicy {
 					//Debug::text('  UDT Row KEY: '. $udt_key .' ID: '. $udt_obj->getId() .' Object Type ID: '. $udt_obj->getObjectType() .' Pay Code: '. $udt_obj->getPayCode() .' Start Time: '. TTDate::getDate('DATE+TIME', $udt_obj->getStartTimeStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 					if ( isset($over_time_recurse_already_processed_map[$udt_key]) ) {
 						Debug::text('    Skipping UDT KEY: '. $udt_key .' as we already processed it as part of recursive lookup...', __FILE__, __LINE__, __METHOD__, 10);
+						$prev_udt_obj = $udt_obj;
 						continue;
 					}
 

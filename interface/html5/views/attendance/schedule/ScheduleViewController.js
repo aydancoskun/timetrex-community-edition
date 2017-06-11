@@ -1854,10 +1854,7 @@ ScheduleViewController = BaseViewController.extend( {
 			onResult: function( result ) {
 				var select_shift;
 				var result_data = result.getResult();
-				//OPEN option
-				if ( args.length === 1 && args.user_id === 0 ) {
-					result_data.user_id = 0;
-				}
+
 				select_shift = result_data;
 				if ( $this.select_cells_Array.length >= 1 ) {
 					for ( var i = 0, n = args.length; i < n; i++ ) {
@@ -1907,6 +1904,7 @@ ScheduleViewController = BaseViewController.extend( {
 		if ( !this.edit_view ) {
 			this.initEditViewUI( 'Schedule', 'ScheduleEditView.html' );
 		}
+		this.previous_absence_policy_id = false;
 
 	},
 
@@ -1982,6 +1980,10 @@ ScheduleViewController = BaseViewController.extend( {
 				this.current_edit_record['start_date_stamp'] = c_value;
 				break;
 
+		}
+
+		if( key = 'absence_policy_id' ) {
+			this.previous_absence_policy_id = this.current_edit_record.absence_policy_id;
 		}
 
 		if ( key === 'date_stamp' ||
@@ -2360,10 +2362,13 @@ ScheduleViewController = BaseViewController.extend( {
 				record.push( commonRecord );
 			}
 			record = this.getRecordsFromUserIDs( record );
+		} else {
+			record = this.getRecordsFromUserIDs( [record] );
 		}
 
 		this.api['set' + this.api.key_name]( record, false, false, ignoreWarning, {
 			onResult: function( result ) {
+				this.previous_absence_policy_id = false;
 				$this.onSaveAndContinueResult( result );
 
 			}
@@ -2465,6 +2470,7 @@ ScheduleViewController = BaseViewController.extend( {
 						$this.refresh_id = result_data
 					}
 					$this.search();
+					this.previous_absence_policy_id = false;
 
 						$this.removeEditView();
 
@@ -2611,7 +2617,6 @@ ScheduleViewController = BaseViewController.extend( {
 //	  },
 
 	onTypeChange: function( getRate ) {
-
 		if ( parseInt( this.current_edit_record.status_id ) === 20 ) {
 			this.attachElement( 'absence_policy_id' );
 		} else {
@@ -3003,6 +3008,11 @@ ScheduleViewController = BaseViewController.extend( {
 		for ( var key in date_dic ) {
 			result.push( key );
 		}
+
+		if ( result.length === 0 ) {
+			result.push( this.getDefaultUser() );
+		}
+
 		return result;
 	},
 
@@ -3036,6 +3046,11 @@ ScheduleViewController = BaseViewController.extend( {
 		var user_id = this.current_edit_record.user_id;
 		var total_time = this.current_edit_record.total_time;
 		var last_date_stamp = this.current_edit_record.start_date_stamp;
+
+		//On first run, set previous_absence_policy_id.
+		if ( this.previous_absence_policy_id == false ) {
+			this.previous_absence_policy_id = this.current_edit_record.absence_policy_id;
+		}
 
 		//For mass adding case, select multiple cells and click new
 		if ( this.is_mass_adding ) {
@@ -3090,8 +3105,10 @@ ScheduleViewController = BaseViewController.extend( {
 			user_id,
 			last_date_stamp,
 			total_time,
-			this.pre_total_time, {
+			this.pre_total_time,
+			this.previous_absence_policy_id, {
 				onResult: function( result ) {
+
 					$this.getBalanceHandler( result, last_date_stamp );
 				}
 			}
@@ -4156,14 +4173,12 @@ ScheduleViewController = BaseViewController.extend( {
 
 		function addGridData() {
 			for ( var i = j; i < j + 200; i++ ) {
-
 				if ( i < $this.schedule_source.length ) {
 					var item = $this.schedule_source[i];
 					$this.grid.addRowData( i + 1, item );
 				} else {
 					break;
 				}
-
 			}
 
 			j = i;
@@ -4202,6 +4217,21 @@ ScheduleViewController = BaseViewController.extend( {
 
 		}
 
+	},
+
+	getDefaultUser: function() {
+		var default_user_id = false;
+		if ( this.schedule_source.length === 1 && this.schedule_source[0].user_id != '' ) {
+			//case where only one user has a schedule on the sheet
+			default_user_id = this.schedule_source[0].user_id;
+		} else if ( this.schedule_source.length === 1 && this.filter_data && this.filter_data.include_user_ids && this.filter_data.include_user_ids.value.length === 1 ) {
+			//case where one user is selected in include_users but does not have a schedule attributed to them (new users for example)
+			default_user_id = this.filter_data.include_user_ids.value[0];
+		} else {
+			default_user_id = LocalCacheData.getLoginUser().id;
+		}
+
+		return default_user_id;
 	},
 
 	setWeeklyTotalHeaderSize: function() {

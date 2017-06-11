@@ -40,4 +40,5 @@
  */
 class PayrollDeduction_CA_QC extends PayrollDeduction_CA {
 }
+
 ?>

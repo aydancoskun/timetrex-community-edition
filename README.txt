@@ -3,8 +3,8 @@ TimeTrex Workforce Management
 INSTALLATION INSTRUCTIONS
 
 1. Confirm that your system meets the TimeTrex minimum requirements.
-	- PHP v5.3+ or greater
-	- PostgreSQL v9.0+ or MySQL v5.5+ (PostgreSQL is highly recommended)
+	- PHP v5.4+ or greater
+	- PostgreSQL v9.1+ or MySQL v5.5+ (PostgreSQL is highly recommended)
 
 2. Locate your webroot directory on your web server. This is the directory
 on your web server where publicly accessilbe files are made available by your

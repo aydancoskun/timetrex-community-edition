@@ -117,20 +117,6 @@ class Environment {
 		return self::getAPIBaseURL( $api ).'api.php';
 	}
 
-	static function getTemplateDir() {
-		return self::getBasePath() . self::$template_dir . DIRECTORY_SEPARATOR;
-	}
-
-	static function getTemplateCompileDir() {
-		global $config_vars;
-
-		if ( isset($config_vars['path']['templates']) ) {
-			return $config_vars['path']['templates'] . DIRECTORY_SEPARATOR;
-		} else {
-			return self::getBasePath() . self::$template_compile_dir . DIRECTORY_SEPARATOR;
-		}
-	}
-
 	static function getImagesPath() {
 		return self::getBasePath() . DIRECTORY_SEPARATOR .'interface'. DIRECTORY_SEPARATOR .'images'. DIRECTORY_SEPARATOR;
 	}

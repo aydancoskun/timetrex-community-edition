@@ -100,7 +100,7 @@ unset($authentication);
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="Keywords" content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system"/>
 	<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
-	<title><?php echo APPLICATION_NAME .' '. TTi18n::getText('Workforce Management');?></title>
+	<title><?php echo APPLICATION_NAME .' '. TTi18n::getText('Workforce Management Software');?></title>
 	<script async src="../../framework/stacktrace.js"></script>
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -175,11 +175,21 @@ Login view:10
 		<!--<![endif]-->
 	</div>
 </div>
-<div id="bottomContainer" class="bottom-container need-hidden-element" ondragstart="return false;"></div>
+<div id="bottomContainer" class="bottom-container need-hidden-element" ondragstart="return false;">
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <p class="footer-copyright"><?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="overlay" class=""></div>
 <!-- Modal -->
-<div class="modal fade bs-example-modal-sm" id="signinModal" style="display: none" tabindex="-1" role="dialog" aria-describedby="using as sign in dialog" aria-labelledby="signinModalLabel">
+<div class="modal fade bs-example-modal-sm" id="signinModal" style="display: none" tabindex="-1" role="dialog" aria-describedby="using as Login dialog" aria-labelledby="signinModalLabel">
 	<div class="modal-dialog modal-sm" aria-hidden="true" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -192,7 +202,7 @@ Login view:10
 			</div>
 			<div id="signinModalFooter" class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-				<button type="button" class="btn btn-primary">Sign In</button>
+				<button type="button" class="btn btn-primary">Login</button>
 			</div>
 		</div>
 	</div>

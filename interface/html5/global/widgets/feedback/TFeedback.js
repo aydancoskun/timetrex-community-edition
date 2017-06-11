@@ -90,7 +90,7 @@
 			message_container.find('.top-bar-title').html( $.i18n._( 'Feedback' ) );
 			message_container.find('.email-label-text').html( $.i18n._( 'Email' ) );
 			message_container.find('.phone-label-text').html( $.i18n._( 'Phone' ) );
-			message_container.find('.contact-notice-text').html( $.i18n._( 'If you would like to be contacted regarding your feedback, please provide:') );
+			message_container.find('.contact-notice-text').html( $.i18n._( 'If you would like to be contacted regarding your feedback, please provide') +':' );
 
 			message_container.find('.sendButton' ).bind('click', $this.saveIconSelection);
 

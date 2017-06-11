@@ -84,7 +84,6 @@ class Misc {
 	}
 
 	//This function totals arrays where the data wanting to be totaled is deep in a multi-dimentional array.
-	//Usually a row array just before its passed to smarty.
 	static function ArrayAssocSum($array, $element = NULL, $decimals = NULL, $include_non_numeric = FALSE ) {
 		if ( !is_array($array) ) {
 			return FALSE;
@@ -134,7 +133,6 @@ class Misc {
 	}
 
 	//This function is similar to a SQL group by clause, only its done on a AssocArray
-	//Pass it a row array just before you send it to smarty.
 	static function ArrayGroupBy($array, $group_by_elements, $ignore_elements = array() ) {
 
 		if ( !is_array($group_by_elements) ) {
@@ -473,6 +471,15 @@ class Misc {
 		$arr_count = array_count_values( $arr );
 		arsort( $arr_count );
 		return key( $arr_count );
+	}
+
+	/**
+	 * Case insensitive array_unique().
+	 * @param $array
+	 * @return array
+	 */
+	static function arrayIUnique( $array ) {
+		return array_intersect_key( $array, array_unique( array_map('strtolower', $array) ) );
 	}
 
 	//Adds prefix to all array keys, mainly for reportings and joining array data together to avoid conflicting keys.
@@ -1639,7 +1646,7 @@ class Misc {
 					sleep(1); //Help prevent fast redirect loops.
 					if ( $rl->check() == FALSE ) {
 						Debug::Text('ERROR: Excessive redirects... sending to down for maintenance page to stop the loop: '. Misc::getRemoteIPAddress() .' for up to 1 minutes...', __FILE__, __LINE__, __METHOD__, 10);
-						Redirect::Page( URLBuilder::getURL( array('exception' => 'domain_redirect_loop' ), Environment::getBaseURL().'DownForMaintenance.php') );
+						Redirect::Page( URLBuilder::getURL( array('exception' => 'domain_redirect_loop' ), Environment::getBaseURL().'html5/DownForMaintenance.php') );
 					} else {
 						Redirect::Page( URLBuilder::getURL( NULL, $redirect_url ) );
 					}
@@ -2546,7 +2553,7 @@ class Misc {
 
 	static function redirectUnSupportedBrowser() {
 		if ( self::isUnSupportedBrowser() == TRUE ) {
-			Redirect::Page( URLBuilder::getURL( array('tt_version' => APPLICATION_VERSION, 'tt_edition' => getTTProductEdition() ), 'http://www.timetrex.com/supported_web_browsers.php' ) );
+			Redirect::Page( URLBuilder::getURL( array('tt_version' => APPLICATION_VERSION, 'tt_edition' => getTTProductEdition() ), 'https://www.timetrex.com/supported_web_browsers.php' ) );
 		}
 
 		return TRUE;

@@ -41,15 +41,15 @@
 class PayrollDeduction_US_PA extends PayrollDeduction_US {
 
 	var $state_options = array(
-								20060101 => array(
-													'rate' => 3.07,
-													)
-								);
+			20060101 => array(
+					'rate' => 3.07,
+			),
+	);
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
 
-		Debug::text('State Annual Taxable Income: '. $annual_income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Taxable Income: ' . $annual_income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $annual_income;
 	}
@@ -60,12 +60,12 @@ class PayrollDeduction_US_PA extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+			$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 			if ( $retarr == FALSE ) {
 				return FALSE;
 			}
 
-			$rate = bcdiv( $retarr['rate'], 100);
+			$rate = bcdiv( $retarr['rate'], 100 );
 			$retval = bcmul( $annual_income, $rate );
 		}
 
@@ -73,9 +73,10 @@ class PayrollDeduction_US_PA extends PayrollDeduction_US {
 			$retval = 0;
 		}
 
-		Debug::text('State Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 }
+
 ?>

@@ -226,11 +226,7 @@ RibbonViewController = Backbone.View.extend( {
 
 		this.setSelectSubMenu( TopMenuManager.selected_sub_menu_id );
 
-		if ( LocalCacheData.loginData.is_application_branded ) {
-			$( '#leftLogo' ).attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/images/logo1.png' ) );
-		} else {
-			$( '#leftLogo' ).attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/images/logo.png' ) );
-		}
+		$( '#leftLogo' ).attr( 'src', Global.getRealImagePath( 'css/global/widgets/ribbon/images/logo.png' ) );
 		$( '#rightLogo' ).attr( 'src', ServiceCaller.companyLogo + '&t=' + new Date().getTime() );
 
 		if ( LocalCacheData.getLoginUserPreference() ) {
@@ -291,15 +287,15 @@ RibbonViewController = Backbone.View.extend( {
 				this.doPortalLogout();
 				break;
 			case 'AdminGuide':
-				var url = 'http://www.timetrex.com/h.php?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				var url = 'https://www.timetrex.com/h.php?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'FAQS':
-				url = 'http://www.timetrex.com/h.php?id=faq&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				url = 'https://www.timetrex.com/h.php?id=faq&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'WhatsNew':
-				url = 'http://www.timetrex.com/h.php?id=changelog&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				url = 'https://www.timetrex.com/h.php?id=changelog&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'EmailHelp':
@@ -308,7 +304,7 @@ RibbonViewController = Backbone.View.extend( {
 					url = 'mailto:support@timetrex.com?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' +
 					'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
 				} else {
-					url = 'http://www.timetrex.com/r.php?id=29';
+					url = 'https://www.timetrex.com/r.php?id=29';
 				}
 
 				window.open( url, '_blank' );

@@ -429,7 +429,7 @@ class APIPayStub extends APIFactory {
 								}
 
 								if ( $pay_stub_entry_obj->isValid() == TRUE ) {
-									$lf->addEntry( $pay_stub_entry['pay_stub_entry_name_id'], $pay_stub_entry['amount'], $pay_stub_entry['units'], $pay_stub_entry['rate'], $pay_stub_entry['description'], $pay_stub_entry['pay_stub_amendment_id'], NULL, NULL, $ytd_adjustment );
+									$lf->addEntry( $pay_stub_entry['pay_stub_entry_name_id'], $pay_stub_entry['amount'], $pay_stub_entry['units'], $pay_stub_entry['rate'], $pay_stub_entry['description'], $pay_stub_entry['pay_stub_amendment_id'], NULL, NULL, $ytd_adjustment, $pay_stub_entry['user_expense_id'] );
 									$processed_entries++;
 								} else {
 									Debug::Text( ' ERROR: Unable to save PayStubEntry... ', __FILE__, __LINE__, __METHOD__, 10 );

@@ -888,7 +888,7 @@ class RemittanceSummaryReport extends Report {
 				$this->pdf->setFillColor(240); //Grayscale only.
 				$this->pdf->setLineWidth( 1 );
 
-				$this->pdf->writeHTMLcell( 100, 5, ( ( $this->pdf->getPageWidth() - 100 ) / 2 ), $this->pdf->getY(), '<a href="http://www.timetrex.com/r.php?id=10100">PAY ONLINE NOW</>', 1, 0, FALSE, TRUE, 'C');
+				$this->pdf->writeHTMLcell( 100, 5, ( ( $this->pdf->getPageWidth() - 100 ) / 2 ), $this->pdf->getY(), '<a href="https://www.timetrex.com/r.php?id=10100">PAY ONLINE NOW</>', 1, 0, FALSE, TRUE, 'C');
 
 				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize( $this->config['other']['table_row_font_size'] ) );
 				$this->pdf->SetTextColor(0);
@@ -974,7 +974,7 @@ class RemittanceSummaryReport extends Report {
 			}
 			$this->html .= '</tr>';
 
-			$this->html .= '<tr><th class="pay-online" colspan="' . count($columns) . '"><a href="http://www.timetrex.com/r.php?id=10100" target="_blank">PAY ONLINE NOW</a></th></tr>';
+			$this->html .= '<tr><th class="pay-online" colspan="' . count($columns) . '"><a href="https://www.timetrex.com/r.php?id=10100" target="_blank">PAY ONLINE NOW</a></th></tr>';
 			$this->html .= '</thead>';
 			$this->html .= '</table>';
 		}

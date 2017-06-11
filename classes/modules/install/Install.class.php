@@ -909,7 +909,7 @@ class Install {
 
 		$dirs = array();
 
-		//Make sure we check all files inside the log, storage, cache and templates_c directories, in case some files were created with the incorrect permissions and can't be overwritten.
+		//Make sure we check all files inside the log, storage, and cache directories, in case some files were created with the incorrect permissions and can't be overwritten.
 		if ( isset($this->config_vars['cache']['dir']) ) {
 			$dirs[] = $this->config_vars['cache']['dir'];
 		}
@@ -918,9 +918,6 @@ class Install {
 		}
 		if ( isset($this->config_vars['path']['storage']) ) {
 			$dirs[] = $this->config_vars['path']['storage'];
-		}
-		if ( Environment::getTemplateCompileDir() != '' ) {
-			$dirs[] = Environment::getTemplateCompileDir();
 		}
 
 		$dirs[] = dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR;
@@ -1532,12 +1529,6 @@ class Install {
 	}
 
 	function cleanCacheDirectory( $exclude_regex_filter = '\.ZIP|\.lock|upgrade_staging' ) {
-		global $smarty;
-
-		if ( isset($smarty) ) {
-			$smarty->clear_all_cache();
-		}
-
 		return Misc::cleanDir( $this->config_vars['cache']['dir'], TRUE, TRUE, FALSE, $exclude_regex_filter ); //Don't clean UPGRADE.ZIP file and 'upgrade_staging' directory.
 	}
 

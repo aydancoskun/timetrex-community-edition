@@ -79,7 +79,7 @@ var TAlertManager = (function() {
 	};
 
 	var showBrowserTopBanner = function() {
-		var div = $( '<div class="browser-banner"><a href="http://www.timetrex.com/supported_web_browsers.php" target="_blank"><span class="label"></span></a></div>' );
+		var div = $( '<div class="browser-banner"><a href="https://www.timetrex.com/supported_web_browsers.php" target="_blank"><span class="label"></span></a></div>' );
 		div.find( 'span' ).text( $.i18n._( LocalCacheData.getLoginData().application_name + ' requires a modern HTML5 standards compatible web browser, click here for more information.' ) );
 
 		$( 'body' ).append( div );

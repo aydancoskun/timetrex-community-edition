@@ -58,7 +58,7 @@ class PurgeDatabase {
 														),
 										'accrual_policy_account' => array(
 														'company',
-														),																														
+														),
 										'accrual_policy_milestone' => array(
 														'accrual_policy'
 														),
@@ -259,7 +259,7 @@ class PurgeDatabase {
 										'job_application' => array(
 														'job_applicant',
 														'job_vacancy',
-														),										
+														),
 										'job_applicant_location' => array(
 														'job_applicant',
 														),
@@ -547,6 +547,9 @@ class PurgeDatabase {
 										//				'company',
 										//				'users'
 										//				),
+										'report_custom_column' => array(
+														'company',
+										),
 										'user_title' => array(
 														'company'
 														),
@@ -671,7 +674,7 @@ class PurgeDatabase {
 								'user_wage' => 120,
 								'user_report_data' => 45,
 								'users' => 120,
-								'recurring_schedule' => 0, //Delete these immediately.								
+								'recurring_schedule' => 0, //Delete these immediately.
 								'bread_crumb' => 45,
 								'system_log' => 45,
 								'system_log_detail' => 45,
@@ -1010,7 +1013,7 @@ class PurgeDatabase {
 						default:
 							//
 							//
-							// FIXME: 120 days after 01-Jan-14 change "updated_date" to "deleted_date" for all queries. 
+							// FIXME: 120 days after 01-Jan-14 change "updated_date" to "deleted_date" for all queries.
 							// All deleted records by that time should have the deleted_date set properly.
 							//
 							//
@@ -1111,10 +1114,10 @@ class PurgeDatabase {
 
 		//Get all tables in a database and their ID columns to aid in creating export/import mapping
 		$exclude_columns = array('id', 'type_id', 'status_id', 'length_of_service_unit_id', 'apply_frequency_id', 'category_id', 'other_id1', 'other_id2', 'other_id3', 'other_id4', 'other_id5', 'ibutton_id', 'manual_id', 'exclusive_id', 'session_id', 'cc_type_id', 'originator_id', 'data_center_id', 'product_edition_id', 'calculation_id', 'severity_id', 'email_notification_id', 'default_schedule_status_id', 'phone_id', 'sex_id' );
-		
+
 		$table_name_map = array();
 		$table_name_map['user'] = 'users';
-		
+
 		$dict = NewDataDictionary($db);
 		$tables = $dict->MetaTables();
 		sort($tables);

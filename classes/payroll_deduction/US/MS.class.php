@@ -39,35 +39,35 @@
  * @package PayrollDeduction\US
  */
 class PayrollDeduction_US_MS extends PayrollDeduction_US {
-/*
-	protected $state_filing_status_options = array(
-														10 => 'Single',
-														20 => 'Married - Spouse Works',
-														30 => 'Married - Spouse does not Work',
-														40 => 'Head of Household',
-									);
-*/
+	/*
+		protected $state_filing_status_options = array(
+															10 => 'Single',
+															20 => 'Married - Spouse Works',
+															30 => 'Married - Spouse does not Work',
+															40 => 'Head of Household',
+										);
+	*/
 
 	var $state_income_tax_rate_options = array(
-												20060101 => array(
-															0 => array(
-																	array( 'income' => 5000,	'rate' => 3.0,	'constant' => 0 ),
-																	array( 'income' => 10000,	'rate' => 4.0,	'constant' => 150 ),
-																	array( 'income' => 10000,	'rate' => 5.0,	'constant' => 350 ),
-																),
-															),
-												);
+			20060101 => array(
+					0 => array(
+							array('income' => 5000, 'rate' => 3.0, 'constant' => 0),
+							array('income' => 10000, 'rate' => 4.0, 'constant' => 150),
+							array('income' => 10000, 'rate' => 5.0, 'constant' => 350),
+					),
+			),
+	);
 
 	var $state_options = array(
-								20060101 => array(
-													'standard_deduction' => array(
-																				'10' => 2300.00,
-																				'20' => 2300.00,
-																				'30' => 4600.00,
-																				'40' => 3400.00,
-																				),
-													)
-								);
+			20060101 => array(
+					'standard_deduction' => array(
+							'10' => 2300.00,
+							'20' => 2300.00,
+							'30' => 4600.00,
+							'40' => 3400.00,
+					),
+			),
+	);
 
 	function getStateAnnualTaxableIncome() {
 		$annual_income = $this->getAnnualTaxableIncome();
@@ -75,23 +75,23 @@ class PayrollDeduction_US_MS extends PayrollDeduction_US {
 		$state_deductions = $this->getStateStandardDeduction();
 		$state_allowance = $this->getStateAllowance();
 
-		$income = bcsub( bcsub($annual_income, $state_deductions), $state_allowance );
+		$income = bcsub( bcsub( $annual_income, $state_deductions ), $state_allowance );
 
-		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Taxable Income: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $income;
 	}
 
 	function getStateStandardDeduction() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 
 		}
 
-		$deduction = $retarr['standard_deduction'][$this->getStateFilingStatus()];
+		$deduction = $retarr['standard_deduction'][ $this->getStateFilingStatus() ];
 
-		Debug::text('Standard Deduction: '. $deduction, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Standard Deduction: ' . $deduction, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $deduction;
 	}
@@ -102,9 +102,9 @@ class PayrollDeduction_US_MS extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$rate = $this->getData()->getStateRate($annual_income);
-			$state_constant = $this->getData()->getStateConstant($annual_income);
-			$state_rate_income = $this->getData()->getStateRatePreviousIncome($annual_income);
+			$rate = $this->getData()->getStateRate( $annual_income );
+			$state_constant = $this->getData()->getStateConstant( $annual_income );
+			$state_rate_income = $this->getData()->getStateRatePreviousIncome( $annual_income );
 
 			$retval = bcadd( bcmul( bcsub( $annual_income, $state_rate_income ), $rate ), $state_constant );
 		}
@@ -113,10 +113,11 @@ class PayrollDeduction_US_MS extends PayrollDeduction_US {
 			$retval = 0;
 		}
 
-		Debug::text('State Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 
 }
+
 ?>

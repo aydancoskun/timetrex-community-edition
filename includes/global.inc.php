@@ -34,6 +34,8 @@
  * the words "Powered by TimeTrex".
  ********************************************************************************/
 
+date_default_timezone_set('GMT'); //Default timezone to UTC until we can at least determine or set another one. This should also prevent: PHP ERROR - WARNING(2): getdate(): It is not safe to rely on the system's timezone settings. You are *required* to use the date.timezone setting or the date_default_timezone_set() function
+
 //PHP v5.1.0 introduced $_SERVER['REQUEST_TIME'], but it doesn't include microseconds until v5.4.0.
 if ( !isset($_SERVER['REQUEST_TIME_FLOAT']) OR version_compare(PHP_VERSION, '5.4.0', '<') == TRUE ) {
 	$_SERVER['REQUEST_TIME_FLOAT'] = microtime( TRUE );
@@ -56,8 +58,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '10.6.1' );
-define('APPLICATION_VERSION_DATE', 1495004400 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("17-May-2017")."\n\n";'
+define('APPLICATION_VERSION', '10.6.2' );
+define('APPLICATION_VERSION_DATE', 1496991600 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("17-May-2017")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -99,7 +101,7 @@ if ( isset($config_vars['debug']['production']) AND $config_vars['debug']['produ
 	define('PRODUCTION', FALSE);
 }
 																																																							//**REMOVING OR CHANGING THIS APPLICATION NAME AND ORGANIZATION URL IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
-																																																							( isset($config_vars['branding']['application_name']) AND $config_vars['branding']['application_name'] != '' ) ? define('APPLICATION_NAME', $config_vars['branding']['application_name']) : define('APPLICATION_NAME', (PRODUCTION == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex'); ( isset($config_vars['branding']['organization_name']) AND $config_vars['branding']['organization_name'] != '' ) ? define('ORGANIZATION_NAME', $config_vars['branding']['organization_name']) : define('ORGANIZATION_NAME', 'TimeTrex'); ( isset($config_vars['branding']['organization_url']) AND $config_vars['branding']['organization_url'] != '' ) ? define('ORGANIZATION_URL', $config_vars['branding']['organization_url']) : define('ORGANIZATION_URL', 'www.TimeTrex.com');
+																																																							define('APPLICATION_NAME', (PRODUCTION == FALSE) ? 'TimeTrex-Debug' : 'TimeTrex'); define('ORGANIZATION_NAME', 'TimeTrex'); define('ORGANIZATION_URL', 'www.TimeTrex.com');
 if ( isset($config_vars['other']['demo_mode']) AND $config_vars['other']['demo_mode'] == 1 ) {
 	define('DEMO_MODE', TRUE);
 } else {
@@ -374,7 +376,7 @@ set_include_path(
 require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'Exception.class.php');
 require_once(Environment::getBasePath() .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'Debug.class.php');
 																																																							//**REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT**//
-																																																							if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. All Rights Reserved.' ); }
+																																																							if ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="http://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. The Program is free software provided AS IS, without warranty. Licensed under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html" class="footerLink" target="_blank">AGPLv3.</a>' ); } else { define( 'COPYRIGHT_NOTICE', 'Copyright &copy; '. date('Y') .' <a href="https://'. ORGANIZATION_URL .'" class="footerLink">'. ORGANIZATION_NAME .'</a>. All Rights Reserved.' ); }
 Debug::setEnable( (bool)$config_vars['debug']['enable'] );
 Debug::setEnableTidy( FALSE );
 Debug::setEnableDisplay( (bool)$config_vars['debug']['enable_display'] );

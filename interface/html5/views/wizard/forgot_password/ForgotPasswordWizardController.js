@@ -95,7 +95,7 @@ ForgotPasswordWizardController = BaseWizardController.extend( {
 		this.stepsWidgetDic[1].email.clearErrorStyle();
 
 		if ( !email ) {
-			this.stepsWidgetDic[1].email.setErrorStyle( $.i18n._( 'Email can\'t be empty' ), true );
+			this.stepsWidgetDic[1].email.setErrorStyle( $.i18n._( 'Email must be specified' ), true );
 		} else {
 			this.api.resetPassword( email, {
 				onResult: function( result ) {

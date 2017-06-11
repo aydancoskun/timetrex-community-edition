@@ -3168,10 +3168,9 @@ class Report {
 			$this->html = '<html>';
 			$this->html .= '<head>';
 			$this->html .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
-			//$this->html .= '<title>'. $this->title .'</title>';
-			$this->html .= '<title>'. $this->getDescription('report_name') .'</title>';
-			$this->html .= '<meta name="author" content="' .$this->getUserObject()->getFullName(). '">';
-			$this->html .= '<meta name="description" content="' .APPLICATION_NAME .' '. TTi18n::getText('Report'). '">';
+			$this->html .= '<title>'. htmlentities( $this->getDescription('report_name'), ENT_QUOTES ) .'</title>';
+			$this->html .= '<meta name="author" content="'. htmlentities( $this->getUserObject()->getFullName(), ENT_QUOTES ) .'">';
+			$this->html .= '<meta name="description" content="'. APPLICATION_NAME .' '. TTi18n::getText('Report') .'">';
 			$this->html .= '<style type="text/css">';
 			$this->html .= $this->_html_CSS();
 			$this->html .= '</style>';

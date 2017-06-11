@@ -341,7 +341,7 @@ QuickPunchViewController = Backbone.View.extend({
         Global.contentContainer().html( this.$el );
         this.initOptions();
         $(document).off('keydown').on("keydown", function(event) {
-            var attrs = event.currentTarget.activeElement.attributes;
+            var attrs = event.target.attributes;
             if ( event.keyCode === 13 ) {
                 if ( $this.save_btn.attr('disabled') == 'disabled' ) {
                     return;

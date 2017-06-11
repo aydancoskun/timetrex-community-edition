@@ -168,7 +168,7 @@ class DBError extends Exception {
 						AND in_array( strtolower($code), array('dberror', 'dbinitialize') ) ) {
 					Redirect::Page( URLBuilder::getURL( array(), Environment::getBaseURL().'html5/index.php?installer=1&disable_db=1&external_installer=0#!m=Install&a=license&external_installer=0') );
 				} else {
-					Redirect::Page( URLBuilder::getURL( array('exception' => $code ), Environment::getBaseURL().'DownForMaintenance.php') );
+					Redirect::Page( URLBuilder::getURL( array('exception' => $code ), Environment::getBaseURL().'html5/DownForMaintenance.php') );
 				}
 				exit;
 			}
@@ -219,7 +219,7 @@ class GeneralError extends Exception {
 				echo json_encode( $obj->returnHandler( FALSE, 'EXCEPTION', TTi18n::getText('%1 experienced a general error, please contact technical support.', array( APPLICATION_NAME ) ) ) );
 				exit;
 			} else {
-				Redirect::Page( URLBuilder::getURL( array('exception' => 'GeneralError'), Environment::getBaseURL().'DownForMaintenance.php') );
+				Redirect::Page( URLBuilder::getURL( array('exception' => 'GeneralError'), Environment::getBaseURL().'html5/DownForMaintenance.php') );
 				exit;
 			}
 		}

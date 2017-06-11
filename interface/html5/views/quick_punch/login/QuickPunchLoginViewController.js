@@ -28,7 +28,7 @@ QuickPunchLoginViewController = Backbone.View.extend({
         this.$('input[name="user_name"]').focus();
         this.setLanguageSourceData('language');
         $(document).off('keydown').on("keydown", function(event) {
-            var attrs = event.currentTarget.activeElement.attributes;
+            var attrs = event.target.attributes;
             if ( event.keyCode === 13 ) {
                 if ( $this.login_btn.attr('disabled') == 'disabled'  ) {
                     return;

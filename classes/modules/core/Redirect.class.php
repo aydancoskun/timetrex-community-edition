@@ -49,7 +49,7 @@ class Redirect {
 
 		if ( Debug::getVerbosity() != 11 ) {
 			forceNoCacheHeaders(); //Make sure Chrome doesn't cache redirects.
-			header("Location: $url\n\n");
+			header('Location: '. $url);
 
 			//Prevent the rest of the script from running after redirect?
 			Debug::writeToLog();

@@ -33,9 +33,10 @@
  * feasible for technical reasons, the Appropriate Legal Notices must display
  * the words "Powered by TimeTrex".
  ********************************************************************************/
-
+if ( isset($_GET['disable_db']) AND $_GET['disable_db'] == 1 ) {
+	$disable_database_connection = TRUE;
+}
 require_once('../includes/global.inc.php');
-
 require_once('PEAR.php');
 require_once('HTTP/Download.php');
 

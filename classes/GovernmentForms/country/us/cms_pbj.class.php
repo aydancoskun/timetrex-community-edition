@@ -45,12 +45,12 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 
 	public function getFilterFunction( $name ) {
 		$variable_function_map = array(
-										//'year' => 'isNumeric',
-										//'ein' => array( 'stripNonNumeric', 'isNumeric'),
-						  );
+			//'year' => 'isNumeric',
+			//'ein' => array( 'stripNonNumeric', 'isNumeric'),
+		);
 
-		if ( isset($variable_function_map[$name]) ) {
-			return $variable_function_map[$name];
+		if ( isset( $variable_function_map[ $name ] ) ) {
+			return $variable_function_map[ $name ];
 		}
 
 		return FALSE;
@@ -59,7 +59,7 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 	public function getTemplateSchema( $name = NULL ) {
 		$template_schema = array();
 
-		if ( isset($template_schema[$name]) ) {
+		if ( isset( $template_schema[ $name ] ) ) {
 			return $name;
 		} else {
 			return $template_schema;
@@ -68,92 +68,92 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 
 	public static function getFederalYearQuarterMonth( $epoch = NULL ) {
 		$year_quarter_months = array(
-									1 => 2,
-									2 => 2,
-									3 => 2,
-									4 => 3,
-									5 => 3,
-									6 => 3,
-									7 => 4,
-									8 => 4,
-									9 => 4,
-									10 => 1,
-									11 => 1,
-									12 => 1,
-								);
+				1  => 2,
+				2  => 2,
+				3  => 2,
+				4  => 3,
+				5  => 3,
+				6  => 3,
+				7  => 4,
+				8  => 4,
+				9  => 4,
+				10 => 1,
+				11 => 1,
+				12 => 1,
+		);
 
 		$month = TTDate::getMonth( $epoch );
 
-		if ( isset($year_quarter_months[$month]) ) {
-			return $year_quarter_months[$month];
+		if ( isset( $year_quarter_months[ $month ] ) ) {
+			return $year_quarter_months[ $month ];
 		}
 
 		return FALSE;
 	}
 
-	
+
 	function _outputXML() {
-		$xml = new SimpleXMLElement('<nursingHomeData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nhpbj_2_00_0.xsd"></nursingHomeData>');
+		$xml = new SimpleXMLElement( '<nursingHomeData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nhpbj_2_00_0.xsd"></nursingHomeData>' );
 		$this->setXMLObject( $xml );
 
-		$xml->addChild('header');
-		$xml->header->addAttribute('fileSpecVersion', '2.00.0');
+		$xml->addChild( 'header' );
+		$xml->header->addAttribute( 'fileSpecVersion', '2.00.0' );
 
-		$xml->header->addChild('facilityId', $this->facility_code );
-		$xml->header->addChild('stateCode', $this->state_code );
-		$xml->header->addChild('reportQuarter', $this->getFederalYearQuarterMonth( $this->date ));
-		$xml->header->addChild('federalFiscalYear', TTDate::getFiscalYearFromEpoch( $this->date, 'US' ) );
+		$xml->header->addChild( 'facilityId', $this->facility_code );
+		$xml->header->addChild( 'stateCode', $this->state_code );
+		$xml->header->addChild( 'reportQuarter', $this->getFederalYearQuarterMonth( $this->date ) );
+		$xml->header->addChild( 'federalFiscalYear', TTDate::getFiscalYearFromEpoch( $this->date, 'US' ) );
 
-		$xml->header->addChild('softwareVendorName', APPLICATION_NAME );
-		$xml->header->addChild('softwareVendorEmail', 'support@timetrex.com' );
-		$xml->header->addChild('softwareProductName', APPLICATION_NAME );
-		$xml->header->addChild('softwareProductVersion', APPLICATION_VERSION );
+		$xml->header->addChild( 'softwareVendorName', APPLICATION_NAME );
+		$xml->header->addChild( 'softwareVendorEmail', 'support@timetrex.com' );
+		$xml->header->addChild( 'softwareProductName', APPLICATION_NAME );
+		$xml->header->addChild( 'softwareProductVersion', APPLICATION_VERSION );
 
-		$xml->addChild('employees');
-		$xml->addChild('staffingHours');
-		$xml->staffingHours->addAttribute('processType', 'replace');
+		$xml->addChild( 'employees' );
+		$xml->addChild( 'staffingHours' );
+		$xml->staffingHours->addAttribute( 'processType', 'replace' );
 
 		$records = $this->getRecords();
-		if ( is_array($records) AND count($records) > 0 ) {
+		if ( is_array( $records ) AND count( $records ) > 0 ) {
 			//Process records into Employee -> Date -> Hour Entries
 			$tmp_rows = array();
-			foreach( $records as $record ) {
-				$tmp_rows[$record['employee_number']][$record['date_stamp']][$record['pbj_job_title_code']][] = $record;
+			foreach ( $records as $record ) {
+				$tmp_rows[ $record['employee_number'] ][ $record['date_stamp'] ][ $record['pbj_job_title_code'] ][] = $record;
 			}
-			unset($records);
+			unset( $records );
 
-			if ( isset($tmp_rows) ) {
+			if ( isset( $tmp_rows ) ) {
 				$e = 0;
-				foreach( $tmp_rows as $key => $date_data ) {
-					$xml->employees->addChild('employee');
-					$xml->staffingHours->addChild('staffHours');
+				foreach ( $tmp_rows as $key => $date_data ) {
+					$xml->employees->addChild( 'employee' );
+					$xml->staffingHours->addChild( 'staffHours' );
 
 					$d = 0;
-					foreach( $date_data as $date_stamp => $hour_data ) {
+					foreach ( $date_data as $date_stamp => $hour_data ) {
 						$h = 0;
-						foreach( $hour_data as $title_code => $title_data ) {
-							foreach( $title_data as $data ) {
+						foreach ( $hour_data as $title_code => $title_data ) {
+							foreach ( $title_data as $data ) {
 								$this->arrayToObject( $data ); //Convert record array to object
 
 								if ( $d == 0 AND $h == 0 ) {
-									$xml->employees->employee[$e]->addChild('employeeId', $this->employee_number );
-									$xml->employees->employee[$e]->addChild('hireDate', date('Y-m-d', $this->{'hire-date_stamp'} ) );
+									$xml->employees->employee[ $e ]->addChild( 'employeeId', $this->employee_number );
+									$xml->employees->employee[ $e ]->addChild( 'hireDate', date( 'Y-m-d', $this->{'hire-date_stamp'} ) );
 									if ( $this->{'termination-date_stamp'} != '' ) {
-										$xml->employees->employee[$e]->addChild('terminationDate', date('Y-m-d', $this->{'termination-date_stamp'} ) );
+										$xml->employees->employee[ $e ]->addChild( 'terminationDate', date( 'Y-m-d', $this->{'termination-date_stamp'} ) );
 									}
 
-									$xml->staffingHours->staffHours[$e]->addChild('employeeId', $this->employee_number );
-									$xml->staffingHours->staffHours[$e]->addChild('workDays');
+									$xml->staffingHours->staffHours[ $e ]->addChild( 'employeeId', $this->employee_number );
+									$xml->staffingHours->staffHours[ $e ]->addChild( 'workDays' );
 								}
 
 								if ( $h == 0 ) {
-									$xml->staffingHours->staffHours[$e]->workDays->addChild('workDay');
-									$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->addChild('date', date('Y-m-d', $date_stamp ) );
-									$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->addChild('hourEntries');
+									$xml->staffingHours->staffHours[ $e ]->workDays->addChild( 'workDay' );
+									$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->addChild( 'date', date( 'Y-m-d', $date_stamp ) );
+									$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->addChild( 'hourEntries' );
 								}
 
-								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->addChild('hourEntry');
-								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild('hours', round( TTDate::getHours( $this->pbj_hours ), 2) );
+								$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->hourEntries->addChild( 'hourEntry' );
+								$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->hourEntries->hourEntry[ $h ]->addChild( 'hours', round( TTDate::getHours( $this->pbj_hours ), 2 ) );
 								/*
 								1=Administrator
 								2=Medical Director
@@ -196,7 +196,7 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 								39=Housekeeping Service Worker (opt
 								40=Other Service Worker (optional)
 								*/
-								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild('jobTitleCode', (int)$this->pbj_job_title_code );
+								$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->hourEntries->hourEntry[ $h ]->addChild( 'jobTitleCode', (int)$this->pbj_job_title_code );
 
 								/*
 								1=Exempt
@@ -204,7 +204,7 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 								3=Contract
 								*/
 								//Default to Non-Exempt as that is most common.
-								$xml->staffingHours->staffHours[$e]->workDays->workDay[$d]->hourEntries->hourEntry[$h]->addChild('payTypeCode', ( (int)$this->pbj_pay_type_code == 0 ) ? 2 : (int)$this->pbj_pay_type_code  );
+								$xml->staffingHours->staffHours[ $e ]->workDays->workDay[ $d ]->hourEntries->hourEntry[ $h ]->addChild( 'payTypeCode', ( (int)$this->pbj_pay_type_code == 0 ) ? 2 : (int)$this->pbj_pay_type_code );
 
 								$h++;
 							}
@@ -223,4 +223,5 @@ class GovernmentForms_US_CMS_PBJ extends GovernmentForms_US {
 		return FALSE;
 	}
 }
+
 ?>

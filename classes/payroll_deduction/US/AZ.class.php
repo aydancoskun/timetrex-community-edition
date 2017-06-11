@@ -46,7 +46,7 @@ class PayrollDeduction_US_AZ extends PayrollDeduction_US {
 		$annual_income = $this->getAnnualTaxableIncome();
 
 		$rate = $this->getUserValue1();
-		Debug::text('Raw Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'Raw Rate: ' . $rate, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//Because of the change from a percent of federal rate to a gross rate,
 		//add some checks so if an employee's amount isn't changed we default to the closest rate.
@@ -63,16 +63,17 @@ class PayrollDeduction_US_AZ extends PayrollDeduction_US {
 		} elseif ( $rate >= 10.7 ) {
 			$rate = 1.3;
 		}
-		Debug::text(' Adjusted Rate: '. $rate, __FILE__, __LINE__, __METHOD__, 10);
-		$retval = bcmul( $annual_income, bcdiv( $rate, 100) );
+		Debug::text( ' Adjusted Rate: ' . $rate, __FILE__, __LINE__, __METHOD__, 10 );
+		$retval = bcmul( $annual_income, bcdiv( $rate, 100 ) );
 
 		if ( $retval < 0 ) {
 			$retval = 0;
 		}
 
-		Debug::text('State Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 }
+
 ?>

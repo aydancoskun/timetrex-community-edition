@@ -43,31 +43,31 @@ class PayrollDeduction_CR_Data extends PayrollDeduction_Base {
 	var $country_primary_currency = 'CRC';
 
 	var $federal_income_tax_rate_options = array(
-												20070930 => array(
-															10 => array(
-																	array( 'income' => 6096000,	'rate' => 0,	'constant' => 0 ),
-																	array( 'income' => 9144000,	'rate' => 10,	'constant' => 0 ),
-																	array( 'income' => 9144000,	'rate' => 15,	'constant' => 0 ),
-																	),
-															),
-												20060930 => array(
-															10 => array(
-																	array( 'income' => 5616000,	'rate' => 0,	'constant' => 0 ),
-																	array( 'income' => 8424000,	'rate' => 10,	'constant' => 0 ),
-																	array( 'income' => 8424000,	'rate' => 15,	'constant' => 0 ),
-																),
-															),
-												);
+			20070930 => array(
+					10 => array(
+							array('income' => 6096000, 'rate' => 0, 'constant' => 0),
+							array('income' => 9144000, 'rate' => 10, 'constant' => 0),
+							array('income' => 9144000, 'rate' => 15, 'constant' => 0),
+					),
+			),
+			20060930 => array(
+					10 => array(
+							array('income' => 5616000, 'rate' => 0, 'constant' => 0),
+							array('income' => 8424000, 'rate' => 10, 'constant' => 0),
+							array('income' => 8424000, 'rate' => 15, 'constant' => 0),
+					),
+			),
+	);
 
 	var $federal_allowance = array(
-									20060930 => 10560.00, //01-Oct-07
-									20070930 => 11520.00  //01-Oct-07
-								);
+			20060930 => 10560.00, //01-Oct-07
+			20070930 => 11520.00  //01-Oct-07
+	);
 
 	var $federal_filing = array(
-									20060930 => 15720.00, //01-Oct-07
-									20070930 => 17040.00  //01-Oct-07
-								);
+			20060930 => 15720.00, //01-Oct-07
+			20070930 => 17040.00  //01-Oct-07
+	);
 
 	function __construct() {
 		global $db;
@@ -88,48 +88,48 @@ class PayrollDeduction_CR_Data extends PayrollDeduction_Base {
 			$federal_status = 10;
 		}
 
-		if ($epoch == NULL OR $epoch == ''){
+		if ( $epoch == NULL OR $epoch == '' ) {
 			$epoch = $this->getISODate( TTDate::getTime() );
 		}
 
 		$this->income_tax_rates = FALSE;
-		if ( isset($this->federal_income_tax_rate_options) AND count($this->federal_income_tax_rate_options) > 0 ) {
+		if ( isset( $this->federal_income_tax_rate_options ) AND count( $this->federal_income_tax_rate_options ) > 0 ) {
 			$prev_income = 0;
 			$prev_rate = 0;
 			$prev_constant = 0;
 
-			$federal_income_tax_rate_options = $this->getDataFromRateArray($epoch, $this->federal_income_tax_rate_options );
-			if ( isset($federal_income_tax_rate_options[$federal_status]) ) {
-				foreach( $federal_income_tax_rate_options[$federal_status] as $data ) {
+			$federal_income_tax_rate_options = $this->getDataFromRateArray( $epoch, $this->federal_income_tax_rate_options );
+			if ( isset( $federal_income_tax_rate_options[ $federal_status ] ) ) {
+				foreach ( $federal_income_tax_rate_options[ $federal_status ] as $data ) {
 					$this->income_tax_rates['federal'][] = array(
-															'prev_income' => $prev_income,
-															'income' => $data['income'],
-															'prev_rate' => ( $prev_rate / 100 ),
-															'rate' => ( $data['rate'] / 100 ),
-															'prev_constant' => $prev_constant,
-															'constant' => $data['constant']
-															);
+							'prev_income'   => $prev_income,
+							'income'        => $data['income'],
+							'prev_rate'     => ( $prev_rate / 100 ),
+							'rate'          => ( $data['rate'] / 100 ),
+							'prev_constant' => $prev_constant,
+							'constant'      => $data['constant'],
+					);
 
 					$prev_income = $data['income'];
 					$prev_rate = $data['rate'];
 					$prev_constant = $data['constant'];
 				}
 			}
-			unset($prev_income, $prev_rate, $prev_constant, $data, $federal_income_tax_rate_options);
+			unset( $prev_income, $prev_rate, $prev_constant, $data, $federal_income_tax_rate_options );
 		}
-				
+
 		return $this;
 	}
 
-	function getFederalTaxTable($income) {
+	function getFederalTaxTable( $income ) {
 		$arr = $this->income_tax_rates['federal'];
 
 		//Debug::Arr($arr, 'Federal tax table: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $arr;
 	}
 
-	function getFederalAllowanceAmount($date) {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->federal_allowance);
+	function getFederalAllowanceAmount( $date ) {
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->federal_allowance );
 		if ( $retarr != FALSE ) {
 			return $retarr;
 		}
@@ -137,8 +137,8 @@ class PayrollDeduction_CR_Data extends PayrollDeduction_Base {
 		return FALSE;
 	}
 
-	function getFederalFilingAmount($date) {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->federal_filing);
+	function getFederalFilingAmount( $date ) {
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->federal_filing );
 
 		if ( $retarr != FALSE ) {
 			return $retarr;
@@ -148,4 +148,5 @@ class PayrollDeduction_CR_Data extends PayrollDeduction_Base {
 	}
 
 }
+
 ?>

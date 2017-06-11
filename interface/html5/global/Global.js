@@ -243,7 +243,7 @@ Global.initStaticStrings = function() {
 Global.getUpgradeMessage = function() {
 	var message = $.i18n._( 'This functionality is only available in' ) +
 		' ' + LocalCacheData.getLoginData().application_name + ' ' + $.i18n._( 'Professional, Corporate, or Enterprise Editions.' ) +
-		' ' + $.i18n._( 'For more information please visit' ) + ' <a href="http://www.timetrex.com/r.php?id=810" target="_blank">www.timetrex.com</a>';
+		' ' + $.i18n._( 'For more information please visit' ) + ' <a href="https://www.timetrex.com/r.php?id=810" target="_blank">www.timetrex.com</a>';
 
 	Global.trackView( 'CommunityUpgrade' );
 	return message;
@@ -3010,7 +3010,7 @@ Global.htmlDecode = function( str ) {
 Global.htmlEncode = function( str ) {
 	var encodedStr = str;
 	if ( encodedStr ) {
-		encodedStr = str.replace( /[\u00A0-\u9999<>\&]/gim, function( i ) {
+		encodedStr = str.replace( /[\u00A0-\u9999<>\'"\&]/gim, function( i ) {
 			return '&#' + i.charCodeAt( 0 ) + ';';
 		} );
 		encodedStr = encodedStr.replace( /&#60;br&#62;/g, "<br>" );

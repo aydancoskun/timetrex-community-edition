@@ -78,7 +78,7 @@ class APINotification extends APIFactory {
 					$license_validate = $license->validateLicense( $system_settings['license'], NULL );
 					$license_message = $license->getFullErrorMessage( $license_validate, TRUE );
 					if ( $license_message != '' ) {
-						$destination_url = 'http://www.timetrex.com/r.php?id=899';
+						$destination_url = 'https://www.timetrex.com/r.php?id=899';
 
 						if ( $license_validate === TRUE ) {
 							//License likely expires soon.
@@ -204,7 +204,7 @@ class APINotification extends APIFactory {
 											'delay' => -1,
 											'bg_color' => '#FFFF00', //Yellow
 											'message' => TTi18n::getText('NOTICE: A new version of %1 available, it is highly recommended that you upgrade as soon as possible. Click here to download the latest version.', array( APPLICATION_NAME ) ),
-											'destination' => ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) ? 'http://www.timetrex.com/r.php?id=19' : 'http://www.timetrex.com/r.php?id=9',
+											'destination' => ( getTTProductEdition() == TT_PRODUCT_COMMUNITY ) ? 'https://www.timetrex.com/r.php?id=19' : 'https://www.timetrex.com/r.php?id=9',
 											);
 					}
 					unset($new_version_available_notification_arr);
@@ -223,7 +223,7 @@ class APINotification extends APIFactory {
 										'delay' => -1,
 										'bg_color' => '#FFFF00', //Yellow
 										'message' => TTi18n::getText('NOTICE: Your instance of %1 has been upgraded to v%2, click here to see whats new.', array( APPLICATION_NAME, APPLICATION_VERSION ) ),
-										'destination' => 'http://www.timetrex.com/h.php?id=changelog&v='. APPLICATION_VERSION .'&e='. $this->getCurrentCompanyObject()->getProductEdition(),
+										'destination' => 'https://www.timetrex.com/h.php?id=changelog&v='. APPLICATION_VERSION .'&e='. $this->getCurrentCompanyObject()->getProductEdition(),
 										);
 				}
 				unset($new_version_notification_arr);
@@ -337,9 +337,9 @@ class APINotification extends APIFactory {
 		$current_user_prefs = $this->getCurrentUserObject()->getUserPreferenceObject();
 		if ( $current_user_prefs->setDateTimePreferences() == FALSE ) {
 			//Setting timezone failed, alert user to this fact.
-			//WARNING: %1 was unable to set your time zone. Please contact your %1 administrator immediately.{/t} {if $permission->Check('company', 'enabled') AND $permission->Check('company', 'edit_own')}<a href="http://forums.timetrex.com/viewtopic.php?t=40">{t}For more information please click here.{/t}</a>{/if}
+			//WARNING: %1 was unable to set your time zone. Please contact your %1 administrator immediately.{/t} {if $permission->Check('company', 'enabled') AND $permission->Check('company', 'edit_own')}<a href="https://forums.timetrex.com/viewtopic.php?t=40">{t}For more information please click here.{/t}</a>{/if}
 			if ( $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'edit_own') ) {
-				$destination_url = 'http://www.timetrex.com/r.php?id=1010';
+				$destination_url = 'https://www.timetrex.com/r.php?id=1010';
 				$sub_message = TTi18n::getText('For more information please click here.');
 			} else {
 				$destination_url = NULL;

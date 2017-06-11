@@ -200,7 +200,7 @@ unset($authentication);
 	<body class="login-bg" oncontextmenu="return true;">
 
 
-	<div class="need-hidden-element" ><a href="http://www.timetrex.com">Workforce Management</a><a href="http://www.timetrex.com/time_and_attendance.php">Time and Attendance</a></div>
+	<div class="need-hidden-element" ><a href="https://www.timetrex.com">Workforce Management Software</a><a href="https://www.timetrex.com/time_and_attendance.php">Time and Attendance</a></div>
 	<div id="topContainer" class="top-container"></div>
 	<div id="contentContainer" class="content-container">
 		<div class="loading-view">
@@ -214,7 +214,7 @@ unset($authentication);
 			<!--<![endif]-->
 		</div>
 	</div>
-	<div class="need-hidden-element"><a href="http://www.timetrex.com/download.php">Download Time and Attendance Software</a></div>
+	<div class="need-hidden-element"><a href="https://www.timetrex.com/download.php">Download Time and Attendance Software</a></div>
 	<div id="bottomContainer" class="bottom-container" ondragstart="return false;">
 		<ul class="signal-strength">
 			<li class="signal-strength-very-weak"><div></div></li>

@@ -82,7 +82,7 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	onAppTypeClick: function() {
-		window.open( "http://" + LocalCacheData.loginData.organization_url );
+		window.open( "https://" + LocalCacheData.loginData.organization_url );
 	},
 
 	onQuickPunchClick: function() {
@@ -507,20 +507,16 @@ LoginViewController = BaseViewController.extend( {
 			}, 100 );
 		} );
 
-		if ( LocalCacheData.loginData.powered_by_logo_enabled ) {
-			$( '#powered_by' ).show();
-			$( '#powered_by' ).attr( 'src', ServiceCaller.login_page_powered_by_logo );
-			$( '#powered_by' ).attr( 'alt', LocalCacheData.loginData.application_name + ' Workforce Management' );
-
-			var powered_by_link = $( '<a target="_blank" href="http://' + LocalCacheData.getLoginData().organization_url + '"></a>' );
-			powered_by_link.append( $( '#powered_by' ) );
-			powered_by_link.addClass( 'powered-by-img-seo' );
-			$( '#login_copy_right_info' ).html( $( '#copy_right_info_1' ).html() );
-
-			$( '#login_copy_right_info' ).show();
-			powered_by_link.insertAfter( $( $this.el ) );
-			$( '#login_copy_right_info' ).insertAfter( $( $this.el ) );
-		}
+		$( '#powered_by' ).show();
+		$( '#powered_by' ).attr( 'src', ServiceCaller.login_page_powered_by_logo );
+		$( '#powered_by' ).attr( 'alt', LocalCacheData.loginData.application_name + ' Workforce Management Software' );
+		var powered_by_link = $( '<a target="_blank" href="https://' + LocalCacheData.getLoginData().organization_url + '"></a>' );
+		powered_by_link.append( $( '#powered_by' ) );
+		powered_by_link.addClass( 'powered-by-img-seo' );
+		$( '#login_copy_right_info' ).html( $( '#copy_right_info_1' ).html() );
+		$( '#login_copy_right_info' ).show();
+		powered_by_link.insertAfter( $( $this.el ) );
+		$( '#login_copy_right_info' ).insertAfter( $( $this.el ) );
 
 		if ( LocalCacheData.productEditionId === 10 ) {
 			$( '#social_div' ).insertAfter( $( $this.el ) );

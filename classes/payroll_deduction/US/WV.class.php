@@ -41,29 +41,29 @@
 class PayrollDeduction_US_WV extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-											20060101 => array(
-														10 => array(
-																array( 'income' => 10000,	'rate' => 3.0,	'constant' => 0 ),
-																array( 'income' => 25000,	'rate' => 4.0,	'constant' => 300 ),
-																array( 'income' => 40000,	'rate' => 4.5,	'constant' => 900 ),
-																array( 'income' => 60000,	'rate' => 6.0,	'constant' => 1575 ),
-																array( 'income' => 60000,	'rate' => 6.5,	'constant' => 2775 ),
-																),
-														20 => array(
-																array( 'income' => 6000,	'rate' => 3.0,	'constant' => 0 ),
-																array( 'income' => 15000,	'rate' => 4.0,	'constant' => 180 ),
-																array( 'income' => 24000,	'rate' => 4.5,	'constant' => 540 ),
-																array( 'income' => 36000,	'rate' => 6.0,	'constant' => 945 ),
-																array( 'income' => 36000,	'rate' => 6.5,	'constant' => 1665 ),
-															),
-														),
-											);
-		
+			20060101 => array(
+					10 => array(
+							array('income' => 10000, 'rate' => 3.0, 'constant' => 0),
+							array('income' => 25000, 'rate' => 4.0, 'constant' => 300),
+							array('income' => 40000, 'rate' => 4.5, 'constant' => 900),
+							array('income' => 60000, 'rate' => 6.0, 'constant' => 1575),
+							array('income' => 60000, 'rate' => 6.5, 'constant' => 2775),
+					),
+					20 => array(
+							array('income' => 6000, 'rate' => 3.0, 'constant' => 0),
+							array('income' => 15000, 'rate' => 4.0, 'constant' => 180),
+							array('income' => 24000, 'rate' => 4.5, 'constant' => 540),
+							array('income' => 36000, 'rate' => 6.0, 'constant' => 945),
+							array('income' => 36000, 'rate' => 6.5, 'constant' => 1665),
+					),
+			),
+	);
+
 	var $state_options = array(
-								20060101 => array(
-													'allowance' => 2000
-													)
-								);
+			20060101 => array(
+					'allowance' => 2000,
+			),
+	);
 
 	function getStatePayPeriodDeductionRoundedValue( $amount ) {
 		return $this->RoundNearestDollar( $amount );
@@ -75,13 +75,13 @@ class PayrollDeduction_US_WV extends PayrollDeduction_US {
 
 		$income = bcsub( $annual_income, $state_allowance );
 
-		Debug::text('State Annual Taxable Income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Taxable Income: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $income;
 	}
 
 	function getStateAllowanceAmount() {
-		$retarr = $this->getDataFromRateArray($this->getDate(), $this->state_options);
+		$retarr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
 		if ( $retarr == FALSE ) {
 			return FALSE;
 
@@ -91,7 +91,7 @@ class PayrollDeduction_US_WV extends PayrollDeduction_US {
 
 		$retval = bcmul( $this->getStateAllowance(), $allowance_arr );
 
-		Debug::text('State Allowance Amount: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
@@ -102,9 +102,9 @@ class PayrollDeduction_US_WV extends PayrollDeduction_US {
 		$retval = 0;
 
 		if ( $annual_income > 0 ) {
-			$rate = $this->getData()->getStateRate($annual_income);
-			$state_constant = $this->getData()->getStateConstant($annual_income);
-			$state_rate_income = $this->getData()->getStateRatePreviousIncome($annual_income);
+			$rate = $this->getData()->getStateRate( $annual_income );
+			$state_constant = $this->getData()->getStateConstant( $annual_income );
+			$state_rate_income = $this->getData()->getStateRatePreviousIncome( $annual_income );
 
 			$retval = bcadd( bcmul( bcsub( $annual_income, $state_rate_income ), $rate ), $state_constant );
 		}
@@ -113,9 +113,10 @@ class PayrollDeduction_US_WV extends PayrollDeduction_US {
 			$retval = 0;
 		}
 
-		Debug::text('State Annual Tax Payable: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::text( 'State Annual Tax Payable: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $retval;
 	}
 }
+
 ?>

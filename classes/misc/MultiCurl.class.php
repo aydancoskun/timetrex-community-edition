@@ -23,239 +23,280 @@
  * @example   examples/example.php How to use MultiCurl class library.
  */
 abstract class MultiCurl {
-    /**
-     * Maximal number of CURL multi sessions. Default: 10 sessions.
-     *
-     * @var integer
-     */
-    private $maxSessions = 10;
+	/**
+	 * Maximal number of CURL multi sessions. Default: 10 sessions.
+	 *
+	 * @var integer
+	 */
+	private $maxSessions = 10;
 
-    /**
-     * Maximal size of downloaded content. Default: 10 Mb (10 * 1024 * 1024).
-     *
-     * @var integer
-     */
-    private $maxSize = 10485760;
+	/**
+	 * Maximal size of downloaded content. Default: 10 Mb (10 * 1024 * 1024).
+	 *
+	 * @var integer
+	 */
+	private $maxSize = 10485760;
 
-    /**
-     * Common CURL options (used for all requests).
-     *
-     * @var array
-     */
-    private $curlOptions;
+	/**
+	 * Common CURL options (used for all requests).
+	 *
+	 * @var array
+	 */
+	private $curlOptions;
 
-    /**
-     * Current CURL multi sessions.
-     *
-     * @var array
-     */
-    private $sessions = array();
+	/**
+	 * Current CURL multi sessions.
+	 *
+	 * @var array
+	 */
+	private $sessions = array();
 
-    /**
-     * Class constructor. Setup primary parameters.
-     *
-     * @param array $curlOptions Common CURL options.
-     */
-    public function __construct($curlOptions = array()) {
-        $this->setCurlOptions($curlOptions);
-    }
+	/**
+	 * Class constructor. Setup primary parameters.
+	 *
+	 * @param array $curlOptions Common CURL options.
+	 */
+	public function __construct($curlOptions = array()) {
+		if(empty($curlOptions))
+		{
+			$header[] = "Accept: */*";
+			$header[] = "Cache-Control: max-age=0";
+			$header[] = "Accept-Charset: utf-8;q=0.7,*;q=0.7";
+			$header[] = "Accept-Language: en-us,en;q=0.5";
+			$header[] = "Pragma: ";
 
-    /**
-     * Class destructor. Close opened sessions.
-     */
-    public function __destruct() {
-        foreach ($this->sessions as $i => $sess) {
-            $this->destroySession($i);
-        }
-    }
+			$curlOptions=array(
+					CURLOPT_HEADER     		=> true,
+					CURLOPT_HTTPHEADER 		=> $header,
+					CURLOPT_USERAGENT  		=> 'Googlebot/2.1 (+http://www.google.com/bot.html)',
+					CURLOPT_CONNECTTIMEOUT 	=> 20,
+					CURLOPT_TIMEOUT 		=> 10
+			);
+		}
+		$this->setCurlOptions($curlOptions);
+	}
 
-    /**
-     * Adds new URL to query.
-     *
-     * @param mixed $url URL for downloading.
-     * @param array $curlOptions CURL options for current request.
-     */
-    public function addUrl($url, $curlOptions = array(), $identifier = NULL ) {
-        // Check URL
-        if (!$url) {
-            throw new Exception('URL is empty!');
-        }
+	/**
+	 * Class destructor. Close opened sessions.
+	 */
+	public function __destruct() {
+		foreach ($this->sessions as $i => $sess) {
+			$this->destroySession($i);
+		}
+	}
 
-        // Check array of URLs
-        if (is_array($url)) {
-            foreach ($url as $s) {
-                $this->addUrl($s, $curlOptions);
-            }
-            return;
-        }
+	/**
+	 * Adds new URL to query.
+	 *
+	 * @param mixed $url URL for downloading.
+	 * @param array $curlOptions CURL options for current request.
+	 */
+	public function addUrl($url, $extra_data = NULL, $curlOptions = array()) {
+		// Check URL
+		if (!$url) {
+			throw new Exception('URL is empty!');
+		}
 
-        // Check query
-        while (count($this->sessions) == $this->maxSessions) {
-            $this->checkSessions();
-        }
+		// Check array of URLs
+		if (is_array($url)) {
+			foreach ($url as $s) {
+				$this->addUrl($s, $curlOptions);
+			}
+			return;
+		}
 
-        // Init new CURL session
-        $ch = curl_init($url);
-        foreach ($this->curlOptions as $option => $value) {
-            curl_setopt($ch, $option, $value);
-        }
-        foreach ($curlOptions as $option => $value) {
-            curl_setopt($ch, $option, $value);
-        }
+		// Check query
+		while (count($this->sessions) == $this->maxSessions) {
+			$this->checkSessions();
+		}
 
-        // Init new CURL multi session
-        $mh = curl_multi_init();
-        curl_multi_add_handle($mh, $ch);
-        $this->sessions[] = array($mh, $ch, $url, $identifier);
-        $this->execSession(array_pop(array_keys($this->sessions)));
-    }
+		// Init new CURL session
+		$ch = curl_init($url);
+		foreach ($this->curlOptions as $option => $value) {
+			curl_setopt($ch, $option, $value);
+		}
+		foreach ($curlOptions as $option => $value) {
+			curl_setopt($ch, $option, $value);
+		}
 
-    /**
-     * Waits CURL milti sessions.
-     */
-    public function wait() {
-        while (count($this->sessions)) {
-            $this->checkSessions();
-        }
-    }
+		// Init new CURL multi session
+		$mh = curl_multi_init();
+		curl_multi_add_handle($mh, $ch);
+		$this->sessions[] = array($mh, $ch, $url, $extra_data);
+		$sessions_key = array_keys($this->sessions);
+		$this->execSession(array_pop($sessions_key));
+	}
 
-    /**
-     * Executes all active CURL multi sessions.
-     */
-    protected function checkSessions() {
-        foreach ($this->sessions as $i => $sess) {
-            if (curl_multi_select($sess[0]) != -1) {
-                $this->execSession($i);
-            }
-        }
-    }
+	/**
+	 * Waits CURL milti sessions.
+	 */
+	public function wait() {
+		while (count($this->sessions)) {
+			$this->checkSessions();
+		}
+	}
 
-    /**
-     * Executes CURL multi session, check session status and downloaded size.
-     *
-     * @param integer $i A session id.
-     */
-    protected function execSession($i) {
-        list($mh, $ch) = $this->sessions[$i];
+	/**
+	 * Executes all active CURL multi sessions.
+	 */
+	protected function checkSessions() {
+		foreach ($this->sessions as $i => $sess) {
+			if ($this->multiSelect($sess[0]) != -1) {
+				$this->execSession($i);
+			}
+			else {
+				throw new Exception('Multicurl loop detected!');
+			}
+		}
+	}
 
-        while (($mrc = curl_multi_exec($mh, $act)) == CURLM_CALL_MULTI_PERFORM);
+	/**
+	 * Executes CURL multi session, check session status and downloaded size.
+	 *
+	 * @param integer $i A session id.
+	 */
+	protected function execSession($i) {
+		list($mh, $ch) = $this->sessions[$i];
+		if ($mh) {
+			do {
+				$mrc = curl_multi_exec($mh, $act);
+			} while ($act > 0);
+			if (!$act || $mrc !== CURLM_OK || curl_getinfo($ch, CURLINFO_SIZE_DOWNLOAD) >= $this->maxSize) {
+				$this->closeSession($i);
+			}
+		}
+	}
 
-        if (!$act || $mrc != CURLM_OK ||
-             curl_getinfo($ch, CURLINFO_SIZE_DOWNLOAD) >= $this->maxSize) {
-            $this->closeSession($i);
-        }
-    }
+	/**
+	 * Replace curl_multi_select.
+	 *
+	 * @see http://php.net/manual/en/function.curl-multi-select.php#110869
+	 * @param resource $mh A cURL multi handle returned by curl_multi_init().
+	 * @param float $timeout Time, in seconds, to wait for a response.
+	 */
+	protected function multiSelect($mh, $timeout = 1.0) {
+		$ts = microtime(true);
 
-    /**
-     * Closes session.
-     *
-     * @param integer $i A session id.
-     */
-    protected function closeSession($i) {
-        list(, $ch, $url, $identifier ) = $this->sessions[$i];
+		do {
+			$mrc = curl_multi_exec($mh, $act);
+			$ct = microtime(true);
+			$t = $ct - $ts;
+			if ($t >= $timeout) {
+				return CURLM_CALL_MULTI_PERFORM;
+			}
+		} while ($mrc == CURLM_CALL_MULTI_PERFORM);
+	}
 
-        $content = !curl_error($ch) ? curl_multi_getcontent($ch) : null;
-        $info = curl_getinfo($ch);
-        $this->destroySession($i);
-        $this->onLoad($url, $content, $info, $identifier);
-    }
+	/**
+	 * Closes session.
+	 *
+	 * @param integer $i A session id.
+	 */
+	protected function closeSession($i) {
+		list(, $ch, $url, $extra_data) = $this->sessions[$i];
 
-    /**
-     * Destroys session.
-     *
-     * @param integer $i A session id.
-     */
-    protected function destroySession($i) {
-        list($mh, $ch,) = $this->sessions[$i];
+		$content = !curl_error($ch) ? curl_multi_getcontent($ch) : null;
+		$info = curl_getinfo($ch);
+		$this->destroySession($i);
+		$this->onLoad($url, $content, $info, $extra_data);
+	}
 
-        curl_multi_remove_handle($mh, $ch);
-        curl_close($ch);
-        curl_multi_close($mh);
+	/**
+	 * Destroys session.
+	 *
+	 * @param integer $i A session id.
+	 */
+	protected function destroySession($i) {
+		list($mh, $ch,) = $this->sessions[$i];
 
-        unset($this->sessions[$i]);
-    }
+		curl_multi_remove_handle($mh, $ch);
+		curl_close($ch);
+		curl_multi_close($mh);
 
-    /**
-     * Gets maximal number of CURL multi sessions.
-     *
-     * @return integer Maximal number of CURL multi sessions.
-     */
-    public function getMaxSessions() {
-        return $this->maxSessions;
-    }
+		unset($this->sessions[$i]);
+	}
 
-    /**
-     * Sets maximal number of CURL multi sessions.
-     *
-     * @param integer $maxSessions Maximal number of CURL multi sessions.
-     */
-    public function setMaxSessions($maxSessions) {
-        if ((int)$maxSessions <= 0) {
-            throw new Exception('Max sessions number must be bigger then zero!');
-        }
+	/**
+	 * Gets maximal number of CURL multi sessions.
+	 *
+	 * @return integer Maximal number of CURL multi sessions.
+	 */
+	public function getMaxSessions() {
+		return $this->maxSessions;
+	}
 
-        $this->maxSessions = (int)$maxSessions;
-    }
+	/**
+	 * Sets maximal number of CURL multi sessions.
+	 *
+	 * @param integer $maxSessions Maximal number of CURL multi sessions.
+	 */
+	public function setMaxSessions($maxSessions) {
+		if ((int)$maxSessions <= 0) {
+			throw new Exception('Max sessions number must be bigger then zero!');
+		}
 
-    /**
-     * Gets maximal size limit for downloaded content.
-     *
-     * @return integer Maximal size limit for downloaded content.
-     */
-    public function getMaxSize() {
-        return $this->maxSize;
-    }
+		$this->maxSessions = (int)$maxSessions;
+	}
 
-    /**
-     * Sets maximal size limit for downloaded content.
-     *
-     * @param integer $maxSize Maximal size limit for downloaded content.
-     */
-    public function setMaxSize($maxSize) {
-        if ((int)$maxSize <= 0) {
-            throw new Exception('Max size limit must be bigger then zero!');
-        }
+	/**
+	 * Gets maximal size limit for downloaded content.
+	 *
+	 * @return integer Maximal size limit for downloaded content.
+	 */
+	public function getMaxSize() {
+		return $this->maxSize;
+	}
 
-        $this->maxSize = (int)$maxSize;
-    }
+	/**
+	 * Sets maximal size limit for downloaded content.
+	 *
+	 * @param integer $maxSize Maximal size limit for downloaded content.
+	 */
+	public function setMaxSize($maxSize) {
+		if ((int)$maxSize <= 0) {
+			throw new Exception('Max size limit must be bigger then zero!');
+		}
 
-    /**
-     * Gets CURL options for all requests.
-     *
-     * @return array CURL options.
-     */
-    public function getCurlOptions() {
-        return $this->curlOptions;
-    }
+		$this->maxSize = (int)$maxSize;
+	}
 
-    /**
-     * Sets CURL options for all requests.
-     *
-     * @param array $curlOptions CURL options.
-     */
-    public function setCurlOptions($curlOptions) {
-        if (!array_key_exists(CURLOPT_FOLLOWLOCATION, $curlOptions)) {
-            $curlOptions[CURLOPT_FOLLOWLOCATION] = 1;
-        }
-        $curlOptions[CURLOPT_RETURNTRANSFER] = 1;
-        $this->curlOptions = $curlOptions;
-    }
+	/**
+	 * Gets CURL options for all requests.
+	 *
+	 * @return array CURL options.
+	 */
+	public function getCurlOptions() {
+		return $this->curlOptions;
+	}
 
-    /**
-     * OnLoad callback event.
-     *
-     * @param string $url URL for downloading.
-     * @param string $content Downloaded content.
-     * @param array $info CURL session information.
-     */
-    protected abstract function onLoad($url, $content, $info, $identifier );
+	/**
+	 * Sets CURL options for all requests.
+	 *
+	 * @param array $curlOptions CURL options.
+	 */
+	public function setCurlOptions($curlOptions) {
+		if (!array_key_exists(CURLOPT_FOLLOWLOCATION, $curlOptions)) {
+			$curlOptions[CURLOPT_FOLLOWLOCATION] = 1;
+		}
+		$curlOptions[CURLOPT_RETURNTRANSFER] = 1;
+		$this->curlOptions = $curlOptions;
+	}
 
-    /**
-     * Checks CURL extension, etc.
-     */
-    public static function checkEnvironment() {
-        if (!extension_loaded('curl')) {
-            throw new Exception('CURL extension not loaded');
-        }
-    }
+	/**
+	 * OnLoad callback event.
+	 *
+	 * @param string $url URL for downloading.
+	 * @param string $content Downloaded content.
+	 * @param array $info CURL session information.
+	 */
+	protected abstract function onLoad($url, $content, $info, $extra_data);
+
+	/**
+	 * Checks CURL extension, etc.
+	 */
+	public static function checkEnvironment() {
+		if (!extension_loaded('curl')) {
+			throw new Exception('CURL extension not loaded');
+		}
+	}
 }

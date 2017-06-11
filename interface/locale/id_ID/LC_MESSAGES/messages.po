@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-19 15:05-0700\n"
+"POT-Creation-Date: 2017-05-22 09:39-0700\n"
 "PO-Revision-Date: 2013-10-21 04:07+0000\n"
 "Last-Translator: Noke Nahuway <it-tech_yajasi@yajasi.org>\n"
 "Language-Team: Indonesian <id@li.org>\n"
@@ -46,6 +46,9 @@ msgid "%1 entry for amount: %2 is invalid"
 msgstr ""
 
 msgid "%1 experienced a general error, please contact technical support."
+msgstr ""
+
+msgid "%1 has detected a database error, please contact technical support immediately."
 msgstr ""
 
 msgid "%1 has detected a duplicate request running at the exact same time, please try your request again in a couple minutes."
@@ -511,9 +514,6 @@ msgstr ""
 msgid "9"
 msgstr ""
 
-msgid "<strong>Error:</strong> shape edges cannot cross!"
-msgstr ""
-
 msgid "A"
 msgstr ""
 
@@ -558,6 +558,12 @@ msgstr ""
 
 msgid "ALLOW"
 msgstr "MENGIJINKAN"
+
+msgid "ALLOW_FOPEN_URL Turned Off"
+msgstr ""
+
+msgid "ALLOW_FOPEN_URL is Off. (Please enable it in php.ini)"
+msgstr ""
 
 msgid "AMEX"
 msgstr "AMEX"
@@ -704,6 +710,9 @@ msgid "Account"
 msgstr "Akun"
 
 msgid "Account Balance"
+msgstr ""
+
+msgid "Account Credit"
 msgstr ""
 
 msgid "Account Name"
@@ -961,6 +970,21 @@ msgstr ""
 msgid "Add KPIs from Groups"
 msgstr ""
 
+msgid "Add New Course"
+msgstr ""
+
+msgid "Add New Language"
+msgstr ""
+
+msgid "Add New Membership"
+msgstr ""
+
+msgid "Add New Skill"
+msgstr ""
+
+msgid "Add New Type"
+msgstr ""
+
 msgid "Add permission denied"
 msgstr "Penambahan Izin Ditolak"
 
@@ -1090,8 +1114,8 @@ msgstr "Persen Lanjutan (Golongan Pajak Alternatif)"
 msgid "Advanced Percent (Tax Bracket)"
 msgstr "Persen Lanjutan (Golongan Pajak)"
 
-msgid "Advanced Search"
-msgstr "Pencarian Lanjutan"
+msgid "Advanced Percent (w/Target)"
+msgstr ""
 
 msgid "Advanced: Average"
 msgstr "Lanjutan: Rata-rata"
@@ -1405,6 +1429,9 @@ msgstr ""
 msgid "Allow"
 msgstr "Mengizinkan"
 
+msgid "Allow New Records For"
+msgstr ""
+
 msgid "Allowances"
 msgstr "Alokasi-alokasi"
 
@@ -1474,9 +1501,6 @@ msgstr ""
 msgid "Amount Type"
 msgstr ""
 
-msgid "Amount does not match type, try using a negative or positive value instead"
-msgstr "Jumlah tidak cocok dengan jenis, coba gunakan nilai negatif atau positif"
-
 msgid "Amount has too many digits"
 msgstr "Nilai memiliki angka terlalu banyak"
 
@@ -1492,14 +1516,17 @@ msgstr ""
 msgid "Amount/Unit"
 msgstr ""
 
-msgid "Amount:"
-msgstr "Jumlah:"
+msgid "Amounts of type \"%1\" must be a %2 value instead"
+msgstr ""
 
-msgid "An email has been sent to <b>%1</b> with instructions on how to change your password."
-msgstr "Sebuah email telah dikirim ke <b>%1</ b> dengan petunjuk tentang cara untuk mengubah sandi Anda."
+msgid "An email has been sent to you with instructions on how to change your password."
+msgstr ""
 
 msgid "An employees first wage entry must be effective on or before the employees hire date"
 msgstr "Tanggal efektif upah kerja yang pertama harus efektif pada atau sebelum tanggal karyawan diperkerjakan"
+
+msgid "An interval of 0 will result in punches being saved to the nearest second, consider using 1 minute instead"
+msgstr ""
 
 msgid "Ancona"
 msgstr "Ancona"
@@ -1605,6 +1632,9 @@ msgstr "Aosta"
 
 msgid "Apayao"
 msgstr "Apayao"
+
+msgid "Applicant"
+msgstr ""
 
 msgid "Applicant Education Course"
 msgstr ""
@@ -1822,6 +1852,9 @@ msgstr ""
 msgid "Application Type"
 msgstr ""
 
+msgid "Application sent successfully!"
+msgstr ""
+
 msgid "Applications"
 msgstr ""
 
@@ -1845,6 +1878,9 @@ msgstr "Arauca"
 
 msgid "Ards"
 msgstr "Ards"
+
+msgid "Are you sure you want to apply for this position without uploading a resume?"
+msgstr ""
 
 msgid "Are you sure you want to continue without saving?"
 msgstr ""
@@ -2062,9 +2098,6 @@ msgstr ""
 msgid "Auto-Refresh"
 msgstr ""
 
-msgid "Auto-submitting in"
-msgstr "Auto-Mengirimkan di"
-
 msgid "Auto<br>Punch"
 msgstr ""
 
@@ -2072,6 +2105,9 @@ msgid "Automatic"
 msgstr ""
 
 msgid "Automatic Experience"
+msgstr ""
+
+msgid "Automatic Resume Parsing"
 msgstr ""
 
 msgid "Automatic TimeClock Setup"
@@ -2105,6 +2141,12 @@ msgid "Available Hours Per Week (Maximum)"
 msgstr ""
 
 msgid "Available Hours Per Week (Minimum)"
+msgstr ""
+
+msgid "Available Hours Per Week(Maximum)"
+msgstr ""
+
+msgid "Available Hours Per Week(Minimum)"
 msgstr ""
 
 msgid "Available Immediate Drug Test"
@@ -2365,9 +2407,6 @@ msgstr ""
 msgid "Basic"
 msgstr ""
 
-msgid "Basic Search"
-msgstr "Pencarian dasar"
-
 msgid "Basilan"
 msgstr "Basilan"
 
@@ -2608,9 +2647,6 @@ msgstr "Bolzano"
 msgid "Bonus/Correction (Out-of-Cycle)"
 msgstr ""
 
-msgid "Bookmark This Page!"
-msgstr "Bookmark Halaman Ini!"
-
 msgid "Boolean"
 msgstr ""
 
@@ -2625,9 +2661,6 @@ msgstr "Keduanya (Masuk dan Keluar )"
 
 msgid "Botswana"
 msgstr "Botswana"
-
-msgid "Bottom"
-msgstr "bagian bawah"
 
 msgid "Bournemouth"
 msgstr "Bournemouth"
@@ -2712,9 +2745,6 @@ msgstr "Pilihan cabang tidak valid"
 
 msgid "Branch/Department"
 msgstr ""
-
-msgid "Branch:"
-msgstr "Cabang"
 
 msgid "Branch: Code"
 msgstr "Cabang: Kode"
@@ -2863,6 +2893,9 @@ msgstr ""
 msgid "CSV file"
 msgstr ""
 
+msgid "CURL Enabled"
+msgstr ""
+
 msgid "CUSTOM"
 msgstr ""
 
@@ -3001,12 +3034,6 @@ msgstr "Kanada - HSBC EFT-PC (CSV​​)"
 msgid "Cancel"
 msgstr "Batal"
 
-msgid "Cancel drawing"
-msgstr ""
-
-msgid "Cancel editing, discards all changes."
-msgstr ""
-
 msgid "Cannot re-parent group to itself"
 msgstr "Tidak dapat mengelompokkan ulang orangtua untuk dirinya sendiri"
 
@@ -3136,9 +3163,6 @@ msgstr "Chandigarh"
 msgid "Change Log"
 msgstr "Ubah Log"
 
-msgid "Change Password"
-msgstr "Ubah Sandi"
-
 msgid "Charitable Contributions (Box: 46)"
 msgstr ""
 
@@ -3163,8 +3187,8 @@ msgstr ""
 msgid "Check File Permission..."
 msgstr ""
 
-msgid "Check For Updates"
-msgstr "Periksa Untuk Update"
+msgid "Check For<br>Updates"
+msgstr ""
 
 msgid "Checking"
 msgstr "Memeriksa"
@@ -3304,46 +3328,10 @@ msgstr ""
 msgid "Click"
 msgstr ""
 
-msgid "Click and drag to draw circle."
-msgstr ""
-
-msgid "Click and drag to draw rectangle."
-msgstr ""
-
-msgid "Click cancel to undo changes."
-msgstr ""
-
-msgid "Click first point to close this shape."
-msgstr ""
-
-msgid "Click here to run the installer now."
-msgstr "Klik di sini untuk menjalankan installer sekarang."
-
-msgid "Click last point to finish line."
-msgstr ""
-
-msgid "Click map to place marker."
-msgstr ""
-
-msgid "Click on a feature to remove"
-msgstr ""
-
 msgid "Click the"
 msgstr ""
 
 msgid "Click the Edit icon below to override pay stub amounts"
-msgstr ""
-
-msgid "Click to continue drawing line."
-msgstr ""
-
-msgid "Click to continue drawing shape."
-msgstr ""
-
-msgid "Click to start drawing line."
-msgstr ""
-
-msgid "Click to start drawing shape."
 msgstr ""
 
 msgid "Client"
@@ -3478,9 +3466,6 @@ msgstr ""
 msgid "Columns"
 msgstr "Kolom"
 
-msgid "Columns:"
-msgstr "Kolom-kolom:"
-
 msgid "Comayagua"
 msgstr "Comayagua"
 
@@ -3500,6 +3485,9 @@ msgid "Committed"
 msgstr "berkomitmen"
 
 msgid "Community"
+msgstr ""
+
+msgid "Community<br>Forums"
 msgstr ""
 
 msgid "Como"
@@ -3610,6 +3598,9 @@ msgstr ""
 msgid "Configuration Modes"
 msgstr ""
 
+msgid "Configure Available Fields"
+msgstr ""
+
 msgid "Confirm Email"
 msgstr ""
 
@@ -3620,6 +3611,9 @@ msgid "Confirm all requests are authorized"
 msgstr ""
 
 msgid "Confirm email address"
+msgstr ""
+
+msgid "Confirm email does not match email"
 msgstr ""
 
 msgid "Confirm that no critical exceptions exist"
@@ -3647,6 +3641,9 @@ msgid "Conflicting start date"
 msgstr "Bertentangan tanggal mulai"
 
 msgid "Conflicting start date, does not match pay period"
+msgstr ""
+
+msgid "Conflicting start/end date, pay period already exists."
 msgstr ""
 
 msgid "Conflicting start/end time, schedule already exists for this employee"
@@ -3727,9 +3724,6 @@ msgstr ""
 msgid "Contact Title"
 msgstr ""
 
-msgid "Contact Title contains invalid characters"
-msgstr ""
-
 msgid "Contact Title is too short or too long"
 msgstr ""
 
@@ -3793,6 +3787,12 @@ msgstr ""
 msgid "Conversion Rate"
 msgstr "Tingkat konversi"
 
+msgid "Conversion Rate is too high"
+msgstr ""
+
+msgid "Conversion Rate is too low"
+msgstr ""
+
 msgid "Conversion rate not specified"
 msgstr ""
 
@@ -3816,9 +3816,6 @@ msgstr "Salinan"
 
 msgid "Copy of"
 msgstr "Salinan dari"
-
-msgid "Copy:"
-msgstr "Salinan:"
 
 msgid "Copy<br>as New"
 msgstr ""
@@ -3884,6 +3881,9 @@ msgid "Create Invoices"
 msgstr ""
 
 msgid "Create any necessary pay stub amendments"
+msgstr ""
+
+msgid "Create ethnic groups that don't already exist."
 msgstr ""
 
 msgid "Create groups that don't already exist."
@@ -4025,6 +4025,9 @@ msgid "Current Stock"
 msgstr ""
 
 msgid "Current Time"
+msgstr ""
+
+msgid "Current User Name or Password is incorrect"
 msgstr ""
 
 msgid "Current View"
@@ -4216,6 +4219,9 @@ msgstr ""
 msgid "Database User Name"
 msgstr ""
 
+msgid "Database version check"
+msgstr ""
+
 msgid "Date"
 msgstr "Tanggal"
 
@@ -4243,8 +4249,8 @@ msgstr ""
 msgid "Date not specified"
 msgstr ""
 
-msgid "Date of Issue:"
-msgstr "Tanggal Penerbitan"
+msgid "Date of Issue"
+msgstr ""
 
 msgid "Date specified is before the first pay period started"
 msgstr "Tanggal yang ditentukan adalah sebelum periode pembayaran pertama dimulai"
@@ -4257,9 +4263,6 @@ msgstr "Tanggal/Kriteria Waktu"
 
 msgid "Date/Time is incorrect, or pay period does not exist for this date. Please create a pay period schedule and assign this employee to it if you have not done so already"
 msgstr "Tanggal / Waktu tidak benar, atau periode pembayaran tidak ada untuk tanggal ini. Silahkan membuat jadwal periode membayar dan menetapkan karyawan ini untuk itu jika Anda belum melakukannya sudah"
-
-msgid "Date:"
-msgstr "Tanggal:"
 
 msgid "Dates"
 msgstr ""
@@ -4426,7 +4429,13 @@ msgstr "Menolak"
 msgid "Declined"
 msgstr "Ditolak"
 
-msgid "Declined Offer"
+msgid "Declined: Already Employed"
+msgstr ""
+
+msgid "Declined: Offer"
+msgstr ""
+
+msgid "Declined: Other"
 msgstr ""
 
 msgid "Deduction"
@@ -4513,9 +4522,6 @@ msgstr "Pengaturan default untuk perusahaan ini sudah ada"
 msgid "Default task must also be allowed in the task criteria"
 msgstr "Tugas bawaan juga harus diperbolehkan dalam kriteria tugas"
 
-msgid "Default:"
-msgstr "Standar:"
-
 msgid "Defined By Policy Group"
 msgstr ""
 
@@ -4548,15 +4554,6 @@ msgstr "Hapus Memperlemah"
 
 msgid "Delete all Data"
 msgstr "Menghapus semua Data"
-
-msgid "Delete last point"
-msgstr ""
-
-msgid "Delete last point drawn"
-msgstr ""
-
-msgid "Delete layers."
-msgstr ""
 
 msgid "Delete permission denied"
 msgstr "Hapus izin ditolak"
@@ -4612,9 +4609,6 @@ msgstr "Departemen tidak ada"
 msgid "Department name is too short or too long"
 msgstr "Nama Departemen terlalu pendek atau terlalu panjang"
 
-msgid "Department:"
-msgstr "Departemen:"
-
 msgid "Department: Code"
 msgstr "Departemen: Kode"
 
@@ -4647,6 +4641,9 @@ msgstr "Derbyshire"
 
 msgid "Derry"
 msgstr "Derry"
+
+msgid "Describe Criminal Convictions"
+msgstr ""
 
 msgid "Describe criminal convictions"
 msgstr ""
@@ -4918,24 +4915,6 @@ msgstr "Konsep"
 msgid "Drag & Drop"
 msgstr ""
 
-msgid "Drag handles, or marker to edit feature."
-msgstr ""
-
-msgid "Draw a circle"
-msgstr ""
-
-msgid "Draw a marker"
-msgstr ""
-
-msgid "Draw a polygon"
-msgstr ""
-
-msgid "Draw a polyline"
-msgstr ""
-
-msgid "Draw a rectangle"
-msgstr ""
-
 msgid "Driver"
 msgstr ""
 
@@ -4952,6 +4931,15 @@ msgid "Due Date"
 msgstr "Jatuh Tempo"
 
 msgid "Due date should be after start date"
+msgstr ""
+
+msgid "Due to <specify reason here>, please add the missing %1 %2 punch at <%3>"
+msgstr ""
+
+msgid "Due to <specify reason here>, please correct the %1 %2 punch at %3 to be a %1 %2 punch at <X:XX AM/PM> instead."
+msgstr ""
+
+msgid "Due to <specify reason here>, please correct the <Normal/Lunch/Break> <In/Out> punch at <X::XX AM/PM> to be a <Normal/Lunch/Break> <In/Out> punch at <X:XX AM/PM> instead."
 msgstr ""
 
 msgid "Due to your company's password policy, your password must be changed immediately"
@@ -5017,10 +5005,16 @@ msgstr ""
 msgid "ERROR: Employee number does not exist!"
 msgstr "KESALAHAN: Nomor Karyawan tidak ada"
 
+msgid "ERROR: Frame data DOES NOT exist."
+msgstr ""
+
 msgid "ERROR: INVALID PAY CODE"
 msgstr ""
 
 msgid "ERROR: Invalid Absence Policy"
+msgstr ""
+
+msgid "ERROR: Invalid PRIMARY_COMPANY_ID defined in timetrex.ini.php file."
 msgstr ""
 
 msgid "ERROR: Journal entries do not balance"
@@ -5042,6 +5036,15 @@ msgid "ERROR: Please try again later or narrow your search criteria to decrease 
 msgstr ""
 
 msgid "ERROR: UnAssigned Regular Time"
+msgstr ""
+
+msgid "ERROR: Unable to communicate with license server, please check your internet connection."
+msgstr ""
+
+msgid "ERROR: Unable to load resource!"
+msgstr ""
+
+msgid "ERROR: Unable to preview document..."
 msgstr ""
 
 msgid "ERROR: Unable to upload file!"
@@ -5230,9 +5233,6 @@ msgstr "Mengedit Tugas Bidang"
 msgid "Edit Transfer Field"
 msgstr "Mengedit transfer Lapangan"
 
-msgid "Edit layers."
-msgstr ""
-
 msgid "Edit permission denied"
 msgstr "Mengedit izin ditolak"
 
@@ -5241,6 +5241,9 @@ msgstr "Mengedit izin ditolak, karyawan tidak ada"
 
 msgid "Edit permission denied, record does not exist"
 msgstr "Mengedit izin ditolak, catatan tidak ada"
+
+msgid "Edit<br>Applicant"
+msgstr ""
 
 msgid "Edit<br>Client"
 msgstr ""
@@ -5353,8 +5356,8 @@ msgstr ""
 msgid "Email"
 msgstr "e-mail"
 
-msgid "Email Address:"
-msgstr "Alamat Email:"
+msgid "Email Address"
+msgstr ""
 
 msgid "Email Bcc address is too short or too long"
 msgstr "Alamat Email Bcc terlalu pendek atau terlalu panjang"
@@ -5401,7 +5404,7 @@ msgstr "Notifikasi email"
 msgid "Email Pay Stub to"
 msgstr ""
 
-msgid "Email address <b>%1</b> has been confirmed and activated."
+msgid "Email address already exists, please Login instead"
 msgstr ""
 
 msgid "Email address is invalid"
@@ -5425,7 +5428,13 @@ msgstr "Email dari alamat yang terlalu pendek atau terlalu panjang"
 msgid "Email is invalid"
 msgstr ""
 
+msgid "Email must be specified"
+msgstr ""
+
 msgid "Email not specified"
+msgstr ""
+
+msgid "Email or Password is incorrect"
 msgstr ""
 
 msgid "Email sent"
@@ -5440,16 +5449,16 @@ msgstr ""
 msgid "Email validation key is invalid"
 msgstr ""
 
-msgid "Email:"
-msgstr "Surel:"
-
 msgid "Emailed Report"
 msgstr ""
 
 msgid "Emergency Contact"
 msgstr ""
 
-msgid "Employed Time Period"
+msgid "Employed Time Period (Full)"
+msgstr ""
+
+msgid "Employed Time Period (Partial)"
 msgstr ""
 
 msgid "Employee"
@@ -5656,9 +5665,6 @@ msgstr "Pengaturan karyawan"
 msgid "Employee Signature"
 msgstr "Signature karyawan"
 
-msgid "Employee Signature:"
-msgstr "Tanda tangan Karyawan:"
-
 msgid "Employee Skill"
 msgstr ""
 
@@ -5737,6 +5743,9 @@ msgstr ""
 msgid "Employee is not assigned to this job"
 msgstr "Karyawan tidak ditugaskan untuk pekerjaan ini"
 
+msgid "Employee is not currently active"
+msgstr ""
+
 msgid "Employee is not specified"
 msgstr ""
 
@@ -5772,9 +5781,6 @@ msgstr ""
 
 msgid "Employee/Employer EI"
 msgstr ""
-
-msgid "Employee:"
-msgstr "Karyawan:"
 
 msgid "Employee: Province/State"
 msgstr ""
@@ -5850,6 +5856,9 @@ msgstr ""
 
 msgid "Employment Anniversary"
 msgstr "Anniversary Pekerjaan"
+
+msgid "Employment History"
+msgstr ""
 
 msgid "Employment Income (Box 14)"
 msgstr ""
@@ -6053,9 +6062,6 @@ msgid "Ethnic Group"
 msgstr ""
 
 msgid "Ethnic Group is invalid"
-msgstr ""
-
-msgid "Ethnic Group: "
 msgstr ""
 
 msgid "Ethnic Groups"
@@ -6278,6 +6284,9 @@ msgid "Expected Wage"
 msgstr ""
 
 msgid "Expected Wage Type"
+msgstr ""
+
+msgid "Expected Wage Type is invalid"
 msgstr ""
 
 msgid "Expense"
@@ -6526,6 +6535,9 @@ msgstr "Nama Berkas"
 msgid "File Permissions"
 msgstr ""
 
+msgid "File Uploading"
+msgstr ""
+
 msgid "File checksums do not match, some"
 msgstr ""
 
@@ -6577,10 +6589,10 @@ msgstr "Akhir: Bisnis ditutup atau berhenti membayar upah"
 msgid "Finance and Insurance"
 msgstr "Keuangan dan Asuransi"
 
-msgid "Find Available"
+msgid "Find available Employees"
 msgstr ""
 
-msgid "Find available Employees"
+msgid "Find<br>Available"
 msgstr ""
 
 msgid "FingerPrint"
@@ -6624,6 +6636,9 @@ msgstr "Nama pertama berisi karakter yang tidak valid"
 
 msgid "First name is too short or too long"
 msgstr "Nama pertama adalah terlalu pendek atau terlalu panjang"
+
+msgid "First name must be specified"
+msgstr ""
 
 msgid "First used date is invalid"
 msgstr ""
@@ -6718,9 +6733,6 @@ msgstr ""
 msgid "Forgot Your Password"
 msgstr ""
 
-msgid "Forgot Your Password?"
-msgstr "Lupa Password Anda?"
-
 msgid "Forli-Cesena"
 msgstr ""
 
@@ -6766,9 +6778,6 @@ msgstr "Bentuk Laporan W2"
 msgid "Form W2/W3"
 msgstr ""
 
-msgid "Form data has been saved!"
-msgstr "Data formulir telah disimpan!"
-
 msgid "Form setup"
 msgstr ""
 
@@ -6795,9 +6804,6 @@ msgstr ""
 
 msgid "Formula is too short or too long"
 msgstr ""
-
-msgid "Frame data DOES NOT exists:"
-msgstr "Data Bingkai TIDAK ada:"
 
 msgid "France"
 msgstr "Perancis"
@@ -6910,6 +6916,9 @@ msgstr ""
 msgid "GEO Fence Violation"
 msgstr ""
 
+msgid "GEO Fence must be defined, please draw a circle or polygon on the map"
+msgstr ""
+
 msgid "GEO Type"
 msgstr ""
 
@@ -6917,9 +6926,6 @@ msgid "GEO color is too short or too long"
 msgstr ""
 
 msgid "GEO<br>Fences"
-msgstr ""
-
-msgid "GEOFence"
 msgstr ""
 
 msgid "GETTEXT Enabled"
@@ -7057,9 +7063,6 @@ msgstr "Bagus"
 msgid "Good Friday"
 msgstr "Jumat besar"
 
-msgid "Good:"
-msgstr "Baik:"
-
 msgid "Gorizia"
 msgstr "Gorizia"
 
@@ -7164,9 +7167,6 @@ msgstr ""
 
 msgid "Group By"
 msgstr "Dikelompokan berdasarkan .."
-
-msgid "Group By:"
-msgstr "Kelompok Lewat"
 
 msgid "Group C"
 msgstr ""
@@ -7365,9 +7365,6 @@ msgstr "Hertfordshire"
 
 msgid "Hidalgo"
 msgstr "Hidalgo"
-
-msgid "Hide Columns"
-msgstr "Sembunyikan Kolom"
 
 msgid "Hierarchy"
 msgstr "Hirarki"
@@ -7594,6 +7591,9 @@ msgstr "tidak aktif"
 msgid "INCOMPLETE"
 msgstr "TIDAK LENGKAP"
 
+msgid "INSECURE, must not be a sub-directory of base path."
+msgstr ""
+
 msgid "INTL Enabled"
 msgstr ""
 
@@ -7648,7 +7648,7 @@ msgstr "Jika Anda melakukan permintaan password untuk"
 msgid "If you wish to see more pages, please go to the report \"Setup\" tab to increase this setting and run the report again."
 msgstr "jika Anda ingin melihat lebih banyak halaman, silakan kunjungi laporan \"setup\" tab untuk meningkatkan pengaturan ini dan menjalankan lagi laporan."
 
-msgid "If you would like to be contacted regarding your feedback, please provide:"
+msgid "If you would like to be contacted regarding your feedback, please provide"
 msgstr ""
 
 msgid "Ifugao"
@@ -7690,7 +7690,7 @@ msgstr ""
 msgid "Import Wizard"
 msgstr ""
 
-msgid "Import failed due to the following reasons:"
+msgid "Import failed due to the following reasons"
 msgstr ""
 
 msgid "Import file exceeds the maximum number of allowed lines (%1), please reduce the number of lines and try again."
@@ -7731,6 +7731,12 @@ msgstr "dalam dini"
 
 msgid "In Late"
 msgstr "di Akhir"
+
+msgid "In Latitude"
+msgstr ""
+
+msgid "In Longitude"
+msgstr ""
 
 msgid "In Punch"
 msgstr "dalam Pons"
@@ -7798,9 +7804,6 @@ msgstr ""
 msgid "In/Out"
 msgstr "Masuk/Keluar"
 
-msgid "In/Out:"
-msgstr "Masuk/Keluar:"
-
 msgid "Inactive"
 msgstr ""
 
@@ -7809,6 +7812,9 @@ msgstr "Kotak Masuk"
 
 msgid "Inches (in)"
 msgstr "Inci (dalam)"
+
+msgid "Incident"
+msgstr ""
 
 msgid "Include"
 msgstr "Termasuk"
@@ -8103,9 +8109,6 @@ msgstr ""
 
 msgid "Incorrect Industry"
 msgstr "Industri salah"
-
-msgid "Incorrect Input!"
-msgstr "Masukan yang salah!"
 
 msgid "Incorrect Interval"
 msgstr "Jarak yang salah"
@@ -8941,6 +8944,9 @@ msgstr "Perusahaan yang tidak berlaku"
 msgid "Invalid Country"
 msgstr "Negara yang tidak berlaku"
 
+msgid "Invalid Course"
+msgstr ""
+
 msgid "Invalid Credit Account"
 msgstr "Rekening Kredit yang tidak berlaku"
 
@@ -8970,9 +8976,6 @@ msgstr "Memperpanjang Uraian yang tidak berlaku"
 
 msgid "Invalid District"
 msgstr "Wilayah yang tidak berlaku"
-
-msgid "Invalid Email address"
-msgstr ""
 
 msgid "Invalid Employee"
 msgstr "Karyawan yang tidak berlaku"
@@ -9025,6 +9028,12 @@ msgstr ""
 msgid "Invalid KPI"
 msgstr ""
 
+msgid "Invalid Language"
+msgstr ""
+
+msgid "Invalid License"
+msgstr ""
+
 msgid "Invalid Local File Name Length"
 msgstr "Memperpanjang Berkas Nama Lokal yang tidak berlaku"
 
@@ -9033,6 +9042,9 @@ msgstr ""
 
 msgid "Invalid Meal Policy"
 msgstr "Kebijakan Waktu Makan yang tidak berlaku"
+
+msgid "Invalid Membership"
+msgstr ""
 
 msgid "Invalid Message id"
 msgstr ""
@@ -9103,6 +9115,9 @@ msgstr "Prioritas Tidak Sah"
 msgid "Invalid ProRate, must be a numeric value"
 msgstr "Harus Nilai Bersifat angka, bagi rata yang tidak berlaku"
 
+msgid "Invalid Proficiency"
+msgstr ""
+
 msgid "Invalid Province"
 msgstr "Provinsi yang tidak berlaku"
 
@@ -9137,6 +9152,9 @@ msgid "Invalid Revision Length"
 msgstr "Memperpanjang Perubahan yang tidak sah"
 
 msgid "Invalid Sex"
+msgstr ""
+
+msgid "Invalid Skill"
 msgstr ""
 
 msgid "Invalid Source Object"
@@ -9223,14 +9241,14 @@ msgstr "Pendapatan dapat diasuransikan yang tidak sah"
 msgid "Invalid insurable hours"
 msgstr "perjam dapat diasuransikan yang tidak sah"
 
+msgid "Invalid job applicant"
+msgstr ""
+
 msgid "Invalid label"
 msgstr "Label yang tidak sah"
 
 msgid "Invalid last date"
 msgstr "Tanggal lalu yang tidak sah"
-
-msgid "Invalid license file"
-msgstr ""
 
 msgid "Invalid license file or unable to activate license"
 msgstr ""
@@ -9249,9 +9267,6 @@ msgstr "Nama yang tidak sah"
 
 msgid "Invalid object_type"
 msgstr "tipe_objek yang tidak sah"
-
-msgid "Invalid or expired confirmation key, please try again."
-msgstr ""
 
 msgid "Invalid password strength"
 msgstr "tenaga kata kunci yang tidak sah"
@@ -9775,9 +9790,6 @@ msgstr "Pekerjaan yang tidak sah"
 msgid "Job/Task"
 msgstr "Pekerjaan/Tugas"
 
-msgid "Job:"
-msgstr "Tugas"
-
 msgid "Job: Code"
 msgstr ""
 
@@ -9881,6 +9893,9 @@ msgid "Key Words"
 msgstr ""
 
 msgid "Key Words is invalid"
+msgstr ""
+
+msgid "Keywords"
 msgstr ""
 
 msgid "KiloGrams (kg)"
@@ -10159,9 +10174,6 @@ msgstr "Dua Tahun yang Lalu"
 msgid "Last Upload"
 msgstr "Meng-upload yang Lalu"
 
-msgid "Last Upload:"
-msgstr ""
-
 msgid "Last Used Date"
 msgstr ""
 
@@ -10179,6 +10191,9 @@ msgstr "Nama terakhir berisi karakter yang tidak sah"
 
 msgid "Last name is too short or too long"
 msgstr "Nama belakang terlalu pendek atau terlalu panjang"
+
+msgid "Last name must be specified"
+msgstr ""
 
 msgid "Last used date is invalid"
 msgstr ""
@@ -10384,6 +10399,9 @@ msgstr "Liverpool"
 msgid "Livorno"
 msgstr "Livorno"
 
+msgid "Loading"
+msgstr ""
+
 msgid "Local File Name"
 msgstr "Berkas Nama Lokal"
 
@@ -10428,9 +10446,6 @@ msgstr "Lodi"
 
 msgid "Log Directory"
 msgstr ""
-
-msgid "Logging out in"
-msgstr "Masuk di Luar"
 
 msgid "Login"
 msgstr "Masuk"
@@ -10605,6 +10620,9 @@ msgstr "Luksemburg"
 
 msgid "M"
 msgstr "M"
+
+msgid "MAGIC_QUOTES_GPC is On. (Please disable it in php.ini)"
+msgstr ""
 
 msgid "MAIL Enabled"
 msgstr ""
@@ -11056,6 +11074,12 @@ msgstr "Pengirim pesan yang sah"
 msgid "Message Summary"
 msgstr ""
 
+msgid "Message body is too long."
+msgstr ""
+
+msgid "Message body is too short."
+msgstr ""
+
 msgid "Message recipient is invalid"
 msgstr "Penerima pesan tidak sah"
 
@@ -11255,9 +11279,6 @@ msgid "Minimum Time-Off Between Shifts"
 msgstr "Minimum Waktu Berhenti Antara Gilir"
 
 msgid "Minimum Wage"
-msgstr ""
-
-msgid "Minimum Wage Type is invalid"
 msgstr ""
 
 msgid "Minimum age must only be digits"
@@ -11575,9 +11596,6 @@ msgstr ""
 msgid "Name not specified"
 msgstr ""
 
-msgid "Name:"
-msgstr "Nama:"
-
 msgid "Namibia"
 msgstr "Namibia"
 
@@ -11686,14 +11704,8 @@ msgstr ""
 msgid "New Password (Confirm)"
 msgstr ""
 
-msgid "New Password (confirm):"
-msgstr "Kata Sandi Baru( yang pasti )"
-
 msgid "New Password(confirm)"
 msgstr ""
-
-msgid "New Password:"
-msgstr "Kata Sandi Baru:"
 
 msgid "New South Wales"
 msgstr "New South Wales"
@@ -11929,12 +11941,6 @@ msgstr ""
 msgid "No jobs to invoice, possibly due to job start/end date not matching specified invoice date range"
 msgstr ""
 
-msgid "No layers to delete."
-msgstr ""
-
-msgid "No layers to edit."
-msgstr ""
-
 msgid "No report exists."
 msgstr "Tidak ada laporan ada."
 
@@ -11975,6 +11981,9 @@ msgid "None"
 msgstr "Nihil"
 
 msgid "None Apply"
+msgstr ""
+
+msgid "None provided yet, click the \"+\" icon to add"
 msgstr ""
 
 msgid "Nonemployee Compensation (7)"
@@ -12094,6 +12103,9 @@ msgstr ""
 msgid "Not Installed. (BCMATH extension must be enabled)"
 msgstr ""
 
+msgid "Not Installed. (CURL extension must be enabled)"
+msgstr ""
+
 msgid "Not Installed. (GD extension must be enabled)"
 msgstr ""
 
@@ -12177,9 +12189,6 @@ msgstr ""
 
 msgid "Note(public)"
 msgstr ""
-
-msgid "Note:"
-msgstr "catatan:"
 
 msgid "Notes"
 msgstr "Catatan-catatan"
@@ -12406,6 +12415,9 @@ msgstr ""
 msgid "Opening Balance Pay Stubs must not come after any other pay stub for this employee"
 msgstr ""
 
+msgid "Operating System"
+msgstr ""
+
 msgid "Optional"
 msgstr "Pilihan"
 
@@ -12604,6 +12616,12 @@ msgstr "Awal Keluar"
 msgid "Out Late"
 msgstr "Terlambat Keluar"
 
+msgid "Out Latitude"
+msgstr ""
+
+msgid "Out Longitude"
+msgstr ""
+
 msgid "Out Punch"
 msgstr "Pukul Keluar"
 
@@ -12790,6 +12808,9 @@ msgstr ""
 msgid "PHP Information"
 msgstr "Informasi PHP"
 
+msgid "PHP OPEN_BASEDIR setting"
+msgstr ""
+
 msgid "PHP Open BaseDir"
 msgstr ""
 
@@ -12798,12 +12819,6 @@ msgstr "Peralatan PHP"
 
 msgid "PHP Version"
 msgstr ""
-
-msgid "PHP open_basedir setting"
-msgstr ""
-
-msgid "PIN or Password is incorrect"
-msgstr "PIN atau Kata sandi salah"
 
 msgid "PIN/Phone ID"
 msgstr "PIN/ ID TELEPHONE"
@@ -12922,6 +12937,9 @@ msgstr "Parma"
 msgid "Parse Hint"
 msgstr ""
 
+msgid "Parsed Resume"
+msgstr ""
+
 msgid "Parsing import data..."
 msgstr "Penguraian mengimpor Data  ..."
 
@@ -12970,6 +12988,9 @@ msgstr "Kata sandi-Telepon"
 msgid "Password - Web"
 msgstr "Kata sandi-Internet"
 
+msgid "Password - Web (Exceeded Maximum Age)"
+msgstr "Sandi - Web (Melebihi Usia Maksimal)"
+
 msgid "Password - Web (Password Policy)"
 msgstr ""
 
@@ -13000,6 +13021,9 @@ msgstr "Sandi telah digunakan di masa lalu, silahkan pilih yang baru"
 msgid "Password has been changed successfully, you may now login"
 msgstr ""
 
+msgid "Password has been changed successfully, you may now login."
+msgstr ""
+
 msgid "Password is too short"
 msgstr "Sandi terlalu pendek"
 
@@ -13026,6 +13050,9 @@ msgstr "Sandi tanggal ulang tidak sah"
 
 msgid "Password reset key is invalid"
 msgstr "Sandi Kunci ulang tidak valid"
+
+msgid "Password reset key is invalid, please try resetting your password again."
+msgstr ""
 
 msgid "Password updated date is invalid"
 msgstr "Sandi tanggal diperbarui tidak sah"
@@ -13611,7 +13638,7 @@ msgstr "Harap hubungi administrator Anda untuk petunjuk tentang cara mengubah sa
 msgid "Please correct the user name/password and try again."
 msgstr ""
 
-msgid "Please correct them and try again."
+msgid "Please correct your settings and try again."
 msgstr ""
 
 msgid "Please delete all files/directories in"
@@ -13619,6 +13646,9 @@ msgstr ""
 
 msgid "Please draw your full and complete signature in the signature pad with your mouse"
 msgstr "Harap menarik tanda tangan penuh dan lengkap Anda di signature pad dengan mouse Anda"
+
+msgid "Please ensure that your profile is accurate and complete."
+msgstr ""
 
 msgid "Please enter the administrator user name and password"
 msgstr ""
@@ -13674,8 +13704,14 @@ msgstr "Silakan tentukan jenis absen"
 msgid "Please specify an employee"
 msgstr "Silakan tentukan karyawan"
 
+msgid "Please specify your new password"
+msgstr ""
+
 msgid "Please try again later..."
 msgstr "Silakan coba lagi nanti ..."
+
+msgid "Please upgrade your database to meet the minimum version requirements and try again."
+msgstr ""
 
 msgid "Please upload file again"
 msgstr "Silakan coba lagi uploadnya ..."
@@ -13735,6 +13771,18 @@ msgid "Port"
 msgstr ""
 
 msgid "Portal"
+msgstr ""
+
+msgid "Portal Only"
+msgstr ""
+
+msgid "Portal Setting"
+msgstr ""
+
+msgid "Portal<br>Preview"
+msgstr ""
+
+msgid "Portal<br>Settings"
 msgstr ""
 
 msgid "Portrait"
@@ -13875,9 +13923,6 @@ msgstr "Sebelumnya Pukul"
 msgid "Previous Saved Searches"
 msgstr ""
 
-msgid "Previous Saved Searches:"
-msgstr "Sebelumnya Pencarian Tersimpan:"
-
 msgid "Previous Session"
 msgstr ""
 
@@ -13926,8 +13971,8 @@ msgstr "Cetak"
 msgid "Print Checks"
 msgstr ""
 
-msgid "Print Timesheet"
-msgstr "Cetak Terperinci"
+msgid "Print TimeSheet"
+msgstr ""
 
 msgid "Priority"
 msgstr "Prioritas"
@@ -14049,6 +14094,9 @@ msgstr ""
 msgid "Proficiency is invalid"
 msgstr ""
 
+msgid "Profile Saved Successfully!"
+msgstr ""
+
 msgid "Profit %"
 msgstr "laba%"
 
@@ -14126,9 +14174,6 @@ msgstr "Karyawan- Kontrol yang Coblos"
 
 msgid "Punch Department"
 msgstr "Departemen Coblos"
-
-msgid "Punch In / Out"
-msgstr "Coblos Masuk/Keluar"
 
 msgid "Punch In/Out"
 msgstr "Coblos Masuk / Keluar"
@@ -14216,9 +14261,6 @@ msgstr ""
 
 msgid "Punch Type"
 msgstr "Tipe Coblos"
-
-msgid "Punch Type:"
-msgstr "Coblos Tipe:"
 
 msgid "Punch exceeds maximum shift time of"
 msgstr "Coblos melebihi pergeseran waktu maksimum"
@@ -14352,9 +14394,6 @@ msgstr "Kwantitas"
 msgid "Quantity by Job"
 msgstr "Kwintitas lewat Pekerjaan"
 
-msgid "Quantity:"
-msgstr "Kwantitas:"
-
 msgid "Quarter"
 msgstr "Triwulan"
 
@@ -14402,6 +14441,9 @@ msgstr ""
 
 msgid "Quick Punch ID must be digits only"
 msgstr "Coblos Cepat ID harus angka saja"
+
+msgid "Quick Punch ID or Password is incorrect"
+msgstr ""
 
 msgid "Quick Punch Login"
 msgstr "Login Cepat Coblos"
@@ -14595,11 +14637,11 @@ msgstr ""
 msgid "Received By"
 msgstr "Diterima Oleh"
 
-msgid "Recipient Copy:"
-msgstr "Penerima Salinan:"
+msgid "Recipient"
+msgstr ""
 
-msgid "Recipient:"
-msgstr "Penerima:"
+msgid "Recipient Copy"
+msgstr ""
 
 msgid "Record Of Employment"
 msgstr ""
@@ -14706,6 +14748,9 @@ msgstr ""
 msgid "Reference Information By Applicant/Job Vacancy/Status"
 msgstr ""
 
+msgid "References"
+msgstr ""
+
 msgid "Referrer"
 msgstr ""
 
@@ -14715,8 +14760,8 @@ msgstr ""
 msgid "Refresh All<br>Dashlets"
 msgstr ""
 
-msgid "Regarding:"
-msgstr "Mengenai:"
+msgid "Regarding"
+msgstr ""
 
 msgid "Reggio di Calabria"
 msgstr "Reggio di Calabria"
@@ -14775,22 +14820,19 @@ msgstr ""
 msgid "Reimburse Amount"
 msgstr ""
 
-msgid "Reimburse:"
-msgstr ""
-
 msgid "Relative"
 msgstr ""
 
 msgid "Release All Accruals"
 msgstr "Lepaskan Semua Akrual"
 
-msgid "Release button to finish drawing."
-msgstr ""
-
 msgid "Releasing all employee accruals"
 msgstr "Melepaskan semua akrual karyawan"
 
 msgid "Remaining Balance"
+msgstr ""
+
+msgid "Remaining Credit"
 msgstr ""
 
 msgid "Remaining UnRead Messages"
@@ -14865,8 +14907,8 @@ msgstr "Permintaan"
 msgid "Request (Authorizations)"
 msgstr ""
 
-msgid "Request - Type"
-msgstr "Tipe - Permintaan"
+msgid "Request - Employee"
+msgstr ""
 
 msgid "Request Authorization"
 msgstr ""
@@ -14878,6 +14920,9 @@ msgid "Request Schedule - Employee"
 msgstr ""
 
 msgid "Request Summary"
+msgstr ""
+
+msgid "Request already has schedule data assigned to it"
 msgstr ""
 
 msgid "Request: Absence (incl. Vacation)"
@@ -14927,6 +14972,9 @@ msgstr ""
 
 msgid "Result"
 msgstr "Hasil"
+
+msgid "Resume"
+msgstr ""
 
 msgid "Retail Trade"
 msgstr "Perdagangan Eceran"
@@ -15375,9 +15423,6 @@ msgstr ""
 msgid "Save Search As"
 msgstr ""
 
-msgid "Save Search As:"
-msgstr "Simpan Pencarian As:"
-
 msgid "Save Setup"
 msgstr ""
 
@@ -15388,9 +15433,6 @@ msgid "Save and Close"
 msgstr ""
 
 msgid "Save as New"
-msgstr ""
-
-msgid "Save changes."
 msgstr ""
 
 msgid "Save<br>& Continue"
@@ -15419,9 +15461,6 @@ msgstr "Laporan disimpan data"
 
 msgid "Saved Reports"
 msgstr "Laporan yang Disimpan"
-
-msgid "Saved Search & Layout"
-msgstr "Pencarian Tersimpan & Tata Letak"
 
 msgid "Saved report is invalid"
 msgstr "Laporan Tersimpan tidak sah"
@@ -15528,6 +15567,9 @@ msgstr "Jadwal Hari - hari"
 msgid "Scheduled Report"
 msgstr "Jadwal Laporan"
 
+msgid "Scheduled Shift to replace does not exist."
+msgstr ""
+
 msgid "Scheduled Shifts"
 msgstr "jadwal Gilir"
 
@@ -15612,8 +15654,17 @@ msgstr ""
 msgid "Section"
 msgstr "Bagian"
 
+msgid "Secure Cache Directory"
+msgstr ""
+
+msgid "Secure Log Directory"
+msgstr ""
+
 msgid "Secure Login"
 msgstr "Amankan Login"
+
+msgid "Secure Storage Directory"
+msgstr ""
 
 msgid "Security"
 msgstr ""
@@ -15627,10 +15678,19 @@ msgstr "Sefton"
 msgid "Select All"
 msgstr "Pilih semua"
 
+msgid "Select Country"
+msgstr ""
+
 msgid "Select Destination Pay Code"
 msgstr ""
 
+msgid "Select Province"
+msgstr ""
+
 msgid "Select Source Pay Codes"
+msgstr ""
+
+msgid "Select all that apply"
 msgstr ""
 
 msgid "Select import settings"
@@ -15702,6 +15762,9 @@ msgstr "distrik yang dipilih tidak sah"
 
 msgid "Selected Employee is already assigned to another Pay Period"
 msgstr "Karyawan yang dipilih sudah ditugaskan untuk Periode pembayaran lain"
+
+msgid "Selected Employee is already assigned to another Pay Period Schedule"
+msgstr ""
 
 msgid "Selected Employee is already assigned to another Permission Group"
 msgstr "Karyawan yang dipilih sudah ditugaskan untuk Kelompok Izin lain"
@@ -15862,9 +15925,6 @@ msgstr "Serial number harus antara 9 dan 15 digit"
 msgid "Server"
 msgstr ""
 
-msgid "Server response time:"
-msgstr "Server waktu respon:"
-
 msgid "Service"
 msgstr "Layanan"
 
@@ -15883,7 +15943,7 @@ msgstr "mengatur Tanggal"
 msgid "Set estimates to 0 to use Task Billable Amounts instead."
 msgstr "mengatur perkiraan untuk 0 untuk menggunakan Task Jumlah Ditagih sebagai gantinya."
 
-msgid "Set this to 128M or higher"
+msgid "Set this to 512M or higher"
 msgstr ""
 
 msgid "Setting Date Failed!"
@@ -16210,9 +16270,6 @@ msgstr "Urut"
 msgid "Sort By"
 msgstr "Urut Berdasarkan"
 
-msgid "Sort By:"
-msgstr "Urutan Berdasarkan:"
-
 msgid "Sorting Data..."
 msgstr "Mengurutkan data ..."
 
@@ -16226,6 +16283,9 @@ msgid "Source Object"
 msgstr ""
 
 msgid "Source Pay Stub Account(s)"
+msgstr ""
+
+msgid "Source Type is invalid"
 msgstr ""
 
 msgid "SourceIP"
@@ -16492,6 +16552,9 @@ msgstr "Status hanya dapat diubah dari Post Penyesuaian Tertutup"
 msgid "Status is invalid"
 msgstr ""
 
+msgid "Status must be specified"
+msgstr ""
+
 msgid "Status not specified"
 msgstr ""
 
@@ -16567,9 +16630,6 @@ msgstr "Upah subjek"
 msgid "Subject Wages YTD"
 msgstr ""
 
-msgid "Submit"
-msgstr "Menyerahkan"
-
 msgid "Subordinate"
 msgstr ""
 
@@ -16608,6 +16668,12 @@ msgstr "Sulu"
 
 msgid "Sum"
 msgstr "Jumlah"
+
+msgid "Summarized Description"
+msgstr ""
+
+msgid "Summarized description is too short or too long"
+msgstr ""
 
 msgid "Summary"
 msgstr "Ringkasan"
@@ -16661,9 +16727,6 @@ msgid "Supervisor Employees Feedback Rating"
 msgstr ""
 
 msgid "Supervisor Signature"
-msgstr "Tanda tangan Pengawas"
-
-msgid "Supervisor Signature:"
 msgstr "Tanda tangan Pengawas"
 
 msgid "Supervisor is invalid"
@@ -16825,8 +16888,11 @@ msgstr "Tanzania, Republik Persatuan"
 msgid "Taranto"
 msgstr "Taranto"
 
-msgid "Target Balance/Limit"
-msgstr "Sasaran Neraca / Batas Maksimum"
+msgid "Target Amount Limit"
+msgstr ""
+
+msgid "Target YTD Limit/Balance"
+msgstr ""
 
 msgid "Tariff Code"
 msgstr "Kode tarif"
@@ -16917,9 +16983,6 @@ msgstr "Tugas ini tidak ditugaskan untuk pekerjaan ini"
 
 msgid "Task not specified or is invalid"
 msgstr ""
-
-msgid "Task:"
-msgstr "Tugas:"
 
 msgid "Task: Code"
 msgstr ""
@@ -17030,6 +17093,9 @@ msgid "Tax/Deduction is invalid"
 msgstr ""
 
 msgid "Tax<br>Reports"
+msgstr ""
+
+msgid "Taxable Medicare Additional Wages"
 msgstr ""
 
 msgid "Taxable Medicare Wages"
@@ -17248,9 +17314,6 @@ msgstr "Mata uang ini di gunakan"
 msgid "This functionality is only available in"
 msgstr ""
 
-msgid "This functionality is only available in "
-msgstr "Fungsi ini hanya tersedia dalam   Ada terkemuka / spasi di sini. Masing-masing mewakili karakter spasi. Masukkan ruang dalam posisi setara dalam terjemahan. "
-
 msgid "This is extremely important and without these maintenance jobs running"
 msgstr ""
 
@@ -17261,6 +17324,9 @@ msgid "This pay code is currently in use"
 msgstr ""
 
 msgid "This pay formula policy is currently in use"
+msgstr ""
+
+msgid "This policy is currently in use"
 msgstr ""
 
 msgid "This station is currently pending activation by a supervisor..."
@@ -17350,9 +17416,6 @@ msgstr "Jendela Waktu"
 msgid "Time Zone"
 msgstr "Zona Waktu"
 
-msgid "Time and Attendance - Secure Login"
-msgstr "Waktu dan Kehadiran - Login Terproteksi"
-
 msgid "Time and status match that of another punch, this could be due to rounding"
 msgstr "Waktu dan status pertandingan yang punch lain, hal ini bisa disebabkan pembulatan"
 
@@ -17370,9 +17433,6 @@ msgstr "Waktu Hari"
 
 msgid "Time stamp not specified"
 msgstr "Cap waktu tidak ditentukan"
-
-msgid "Time:"
-msgstr "Waktu:"
 
 msgid "TimeClock"
 msgstr ""
@@ -17467,17 +17527,8 @@ msgstr ""
 msgid "TimeZone"
 msgstr "TimeZone"
 
-msgid "Timesheet"
-msgstr ""
-
-msgid "Timesheet Detail"
-msgstr "absen Rincian"
-
 msgid "Timesheet Summary"
 msgstr "Ringkasan Kartu absen"
-
-msgid "Timesheet Verification"
-msgstr ""
 
 msgid "Timesheet Verification by Pay Period/Employee"
 msgstr "Absen Verifikasi oleh Periode pembayaran / Karyawan"
@@ -17508,9 +17559,6 @@ msgstr "Judul"
 
 msgid "Title already exists"
 msgstr "Judul sudah ada"
-
-msgid "Title contains invalid characters"
-msgstr ""
 
 msgid "Title is invalid"
 msgstr "Judul tidak sah"
@@ -17571,9 +17619,6 @@ msgstr "Terlalu Sedikit Istirahat"
 
 msgid "Too Many Breaks"
 msgstr "Terlalu Banyak Istirahat"
-
-msgid "Top"
-msgstr "Atas"
 
 msgid "Torbay"
 msgstr "Torbay"
@@ -17911,11 +17956,11 @@ msgstr "Transaksi"
 msgid "Transfer"
 msgstr "Pemindahbukuan"
 
-msgid "Transfer funds or write checks"
+msgid "Transfer Punches"
 msgstr ""
 
-msgid "Transfer:"
-msgstr "Pemindahbukuan:"
+msgid "Transfer funds or write checks"
+msgstr ""
 
 msgid "Transit/Routing"
 msgstr "Perjalanan / Routing"
@@ -17990,6 +18035,9 @@ msgid "Type is invalid"
 msgstr ""
 
 msgid "Type is not available in %1 Community Edition, please contact our sales department for more information"
+msgstr ""
+
+msgid "Type must be specified"
 msgstr ""
 
 msgid "Type not specified"
@@ -18230,7 +18278,19 @@ msgstr ""
 msgid "Unsuitable: Drug Test"
 msgstr ""
 
+msgid "Unsuitable: Education"
+msgstr ""
+
 msgid "Unsuitable: Experience"
+msgstr ""
+
+msgid "Unsuitable: Languages"
+msgstr ""
+
+msgid "Unsuitable: Licenses"
+msgstr ""
+
+msgid "Unsuitable: Memberships"
 msgstr ""
 
 msgid "Unsuitable: Other"
@@ -18239,7 +18299,7 @@ msgstr ""
 msgid "Unsuitable: Skills"
 msgstr ""
 
-msgid "Unsuitable: Wage"
+msgid "Unsuitable: Wage Requirements"
 msgstr ""
 
 msgid "Unsupported"
@@ -18365,6 +18425,15 @@ msgstr ""
 msgid "Upload License"
 msgstr ""
 
+msgid "Upload Resume"
+msgstr ""
+
+msgid "Upload Successful!"
+msgstr ""
+
+msgid "Uploaded Date"
+msgstr ""
+
 msgid "Uruguay"
 msgstr "Uruguai"
 
@@ -18400,9 +18469,6 @@ msgstr "Nama pengguna atau sandi salah"
 
 msgid "User Name or Password is incorrect."
 msgstr "Nama pengguna atau sandi salah."
-
-msgid "User Name:"
-msgstr "Nama Pengguna:"
 
 msgid "User Setting - Name"
 msgstr ""
@@ -18755,6 +18821,12 @@ msgstr "Virginia"
 msgid "Visa"
 msgstr "Visa"
 
+msgid "Visibility"
+msgstr ""
+
+msgid "Visibility Type is invalid"
+msgstr ""
+
 msgid "Viterbo"
 msgstr "Viterbo"
 
@@ -18773,9 +18845,6 @@ msgstr "PERINGATAN: %1"
 msgid "WARNING: %1 application version does not match database version. Please re-run the %1 installer to complete the upgrade process."
 msgstr "PERINGATAN:% 1 versi aplikasi tidak cocok versi basis data. Silahkan kembali menjalankan installer 1% untuk menyelesaikan proses upgrade."
 
-msgid "WARNING: %1 application version does not match database version. Please re-run the TimeTrex installer to complete the upgrade process."
-msgstr "PERINGATAN:% 1 versi aplikasi tidak cocok versi basis data. Silahkan kembali menjalankan installer TimeTrex untuk menyelesaikan proses upgrade."
-
 msgid "WARNING: %1 automatic upgrade has failed due to a system error! Please contact your %1 administrator immediately to re-run the %1 installer to correct the issue."
 msgstr ""
 
@@ -18784,9 +18853,6 @@ msgstr ""
 
 msgid "WARNING: %1 is currently in INSTALL MODE. Please go to your timetrex.ini.php file and set \"installer_enabled\" to \"FALSE\"."
 msgstr "PERINGATAN:% 1 saat ini sedang dalam INSTALL MODE. Silakan pergi ke file trex.ini.php waktu Anda dan mengatur \"installer_enabled\" untuk \"SALAH\""
-
-msgid "WARNING: %1 maintenance jobs have not run in the last 48hours. Please contact your %1 administrator immediately."
-msgstr "PERINGATAN:% 1 pekerjaan pemeliharaan belum berjalan dalam 48hours terakhir. Silahkan hubungi% 1 administrator Anda segera."
 
 msgid "WARNING: %1 system requirement check has failed! Please contact your %1 administrator immediately to re-run the %1 installer to correct the issue."
 msgstr "PERINGATAN:% 1 sistem memeriksa persyaratan telah gagal! Silahkan hubungi% 1 administrator Anda segera untuk kembali menjalankan% 1 installer untuk memperbaiki masalah ini."
@@ -18797,13 +18863,13 @@ msgstr "PERINGATAN:% 1 tidak dapat mengatur zona waktu Anda. Silahkan hubungi% 1
 msgid "WARNING: Critical maintenance jobs have not run in the last 48hours. Please contact your %1 administrator immediately."
 msgstr "PERINGATAN: pekerjaan pemeliharaan Kritis belum berjalan dalam 48hours terakhir. Silahkan hubungi% 1 administrator Anda segera."
 
+msgid "WARNING: Employee has day(s) not assigned to a pay period. Please perform a pay period import to correct."
+msgstr ""
+
 msgid "WARNING: Employee is not assigned to a pay period schedule."
 msgstr ""
 
 msgid "WARNING: Employee is not assigned to a policy group."
-msgstr ""
-
-msgid "WARNING: Employees has days not assigned to a pay period. Please perform a pay period import to correct."
 msgstr ""
 
 msgid "WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative."
@@ -18816,6 +18882,12 @@ msgid "WARNING: Payment for this invoice has failed, please contact our billing 
 msgstr "PERINGATAN: Pembayaran faktur ini telah gagal, silahkan hubungi departemen penagihan kami untuk mengkonfirmasi atau memperbarui informasi pembayaran. Kegagalan untuk melakukannya dapat mengakibatkan account Anda ditunda dan gangguan layanan mungkin."
 
 msgid "WARNING: Please click here and enter an email address for your account, this is required to receive important notices and prevent your account from being locked out."
+msgstr ""
+
+msgid "WARNING: System stack components (PHP/%2) are out-of-date and not supported with this version of %1! Please upgrade them immediately!"
+msgstr ""
+
+msgid "WARNING: System stack components are out-of-date and not supported with this version of %1! Please perform a manual upgrade to the latest version of %1 immediately!"
 msgstr ""
 
 msgid "WARNING: The credit card on file expires in"
@@ -19475,9 +19547,6 @@ msgstr ""
 msgid "Your browser don't support Camera, please use File tipe in step 1, or use Chrome or FireFox"
 msgstr ""
 
-msgid "Your password has been changed successfully, you may now login."
-msgstr "Kata sandi Anda telah berhasil diubah, kini Anda dapat login."
-
 msgid "Your password has exceeded its maximum age specified by your company's password policy and must be changed immediately"
 msgstr ""
 
@@ -19595,13 +19664,22 @@ msgstr "menurut Judul"
 msgid "by absence policies"
 msgstr ""
 
+msgid "by accrual policies"
+msgstr ""
+
 msgid "by break policies"
+msgstr ""
+
+msgid "by contributing pay code policies"
 msgstr ""
 
 msgid "by contributing shift policies"
 msgstr ""
 
 msgid "by employee timesheets"
+msgstr ""
+
+msgid "by holiday policies"
 msgstr ""
 
 msgid "by meal policies"
@@ -19613,10 +19691,22 @@ msgstr ""
 msgid "by pay codes"
 msgstr ""
 
+msgid "by pay formula policies"
+msgstr ""
+
+msgid "by policy groups"
+msgstr ""
+
 msgid "by premium policies"
 msgstr ""
 
 msgid "by regular time policies"
+msgstr ""
+
+msgid "by schedule policies"
+msgstr ""
+
+msgid "by tax/deductions"
 msgstr ""
 
 msgid "click here"
@@ -19633,12 +19723,6 @@ msgstr "sedang dipilih, klik panah untuk memodifikasi."
 
 msgid "data without saving, would you like to save your data now?"
 msgstr ""
-
-msgid "database has not been initialized yet, please run the installer again and follow the on screen instructions."
-msgstr "Database belum diinisialisasi belum, silakan jalankan installer lagi dan ikuti petunjuk pada layar."
-
-msgid "database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
-msgstr "query database telah timed-out, jika Anda mencoba untuk menjalankan laporan itu mungkin terlalu besar, silahkan mempersempit kriteria pencarian Anda dan coba lagi."
 
 msgid "date( Year, Month, Day, Hour, Minute )"
 msgstr ""
@@ -19700,9 +19784,6 @@ msgstr ""
 msgid "expecting ')'"
 msgstr ""
 
-msgid "experienced a general error, please contact technical support."
-msgstr "xperienced kesalahan umum, silakan hubungi dukungan teknis."
-
 msgid "files are not readable/writable. See detailed error messages below."
 msgstr ""
 
@@ -19763,9 +19844,6 @@ msgstr ""
 msgid "ie"
 msgstr "yaitu"
 
-msgid "ie:"
-msgstr "yaitu:"
-
 msgid "ie: root, postgres"
 msgstr ""
 
@@ -19798,9 +19876,6 @@ msgstr "akurat dan benar."
 
 msgid "is already assigned as a superior"
 msgstr "sudah ditetapkan sebagai atasan"
-
-msgid "is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try back later."
-msgstr "saat ini sedang menjalani perawatan. Kami mohon maaf atas ketidaknyamanan yang mungkin ditimbulkan. Silakan coba lagi nanti."
 
 msgid "is incorrect, perhaps it should be"
 msgstr ""
@@ -19835,9 +19910,6 @@ msgstr ""
 msgid "m"
 msgstr ""
 
-msgid "magic_quotes_gpc is On. (Please disable it in php.ini)"
-msgstr "magic_quotes_gpc adalah On. (Nonaktifkan dalam php.ini)"
-
 msgid "min"
 msgstr "min"
 
@@ -19861,6 +19933,9 @@ msgstr ""
 
 msgid "mth"
 msgstr "mth"
+
+msgid "negative"
+msgstr ""
 
 msgid "no spaces"
 msgstr ""
@@ -19901,8 +19976,14 @@ msgstr ""
 msgid "please click here to reset your password now"
 msgstr "silakan klik di sini untuk mereset password Anda sekarang"
 
+msgid "positive"
+msgstr ""
+
 msgid "prior to the holiday"
 msgstr "sebelum liburan"
+
+msgid "recruitment portal config"
+msgstr ""
 
 msgid "regardless if you use it for processing payroll or not. Please select the pay period frequency and enter the start date, end date and transaction date (date the employees are paid) for your next four pay periods. Based on this information"
 msgstr ""
@@ -19930,12 +20011,6 @@ msgstr "detik"
 
 msgid "second( #time_stamp# )"
 msgstr ""
-
-msgid "seconds"
-msgstr "detik"
-
-msgid "seconds."
-msgstr "detik."
 
 msgid "should be initially setup, please select one or more locations that your employees reside within."
 msgstr ""
@@ -19970,8 +20045,8 @@ msgstr ""
 msgid "the include path is"
 msgstr ""
 
-msgid "then:"
-msgstr "maka:"
+msgid "then"
+msgstr ""
 
 msgid "this Quick Start Wizard will walk you through the initial setup by asking you a few basic questions about your company."
 msgstr ""
@@ -20021,7 +20096,7 @@ msgstr "wk"
 msgid "worked during the designated period."
 msgstr "bekerja selama jangka waktu yang ditetapkan."
 
-msgid "xpath=//div[@id='ribbon']/ul/li[11]/a"
+msgid "wrong number of arguments ("
 msgstr ""
 
 msgid "year( #time_stamp# )"
@@ -20432,6 +20507,9 @@ msgstr "yrs"
 #~ msgid "Advance transaction date is set"
 #~ msgstr "Tanggal transaksi panjar diatur"
 
+#~ msgid "Advanced Search"
+#~ msgstr "Pencarian Lanjutan"
+
 #~ msgid "After First Punch"
 #~ msgstr "Setelah Catatan Pertama"
 
@@ -20476,6 +20554,15 @@ msgstr "yrs"
 
 #~ msgid "Amount Type:"
 #~ msgstr "Jumlah Jenis:"
+
+#~ msgid "Amount does not match type, try using a negative or positive value instead"
+#~ msgstr "Jumlah tidak cocok dengan jenis, coba gunakan nilai negatif atau positif"
+
+#~ msgid "Amount:"
+#~ msgstr "Jumlah:"
+
+#~ msgid "An email has been sent to <b>%1</b> with instructions on how to change your password."
+#~ msgstr "Sebuah email telah dikirim ke <b>%1</ b> dengan petunjuk tentang cara untuk mengubah sandi Anda."
 
 #~ msgid "Annual Pay Periods:"
 #~ msgstr "Periode Gaji Tahunan:"
@@ -20533,6 +20620,9 @@ msgstr "yrs"
 
 #~ msgid "Auto-Pilot:"
 #~ msgstr "Auto-Pilot:"
+
+#~ msgid "Auto-submitting in"
+#~ msgstr "Auto-Mengirimkan di"
 
 #~ msgid "Automatic Client Station Setup"
 #~ msgstr "Stasiun Klien Pengaturan Otomatis"
@@ -20603,6 +20693,9 @@ msgstr "yrs"
 #~ msgid "Base Price:"
 #~ msgstr "Dasar utama harga"
 
+#~ msgid "Basic Search"
+#~ msgstr "Pencarian dasar"
+
 #~ msgid "Bcc Address:"
 #~ msgstr "Alamat Bcc:"
 
@@ -20642,6 +20735,12 @@ msgstr "yrs"
 #~ msgid "Body:"
 #~ msgstr "tubuh:"
 
+#~ msgid "Bookmark This Page!"
+#~ msgstr "Bookmark Halaman Ini!"
+
+#~ msgid "Bottom"
+#~ msgstr "bagian bawah"
+
 #~ msgid "Box 12a:"
 #~ msgstr "Kotak 12a:"
 
@@ -20665,6 +20764,9 @@ msgstr "yrs"
 
 #~ msgid "Branch/Dept"
 #~ msgstr "Cabang / Dept"
+
+#~ msgid "Branch:"
+#~ msgstr "Cabang"
 
 #~ msgid "Branches Currently Selected, Click the arrow to modify."
 #~ msgstr "Cabang Saat Dipilih, Klik tanda panah untuk memodifikasi."
@@ -20756,6 +20858,9 @@ msgstr "yrs"
 #~ msgid "Change Log:"
 #~ msgstr "Ubah Log:"
 
+#~ msgid "Change Password"
+#~ msgstr "Ubah Sandi"
+
 #~ msgid "Change Quick Punch Password"
 #~ msgstr "Mengubah Pukulan Cepat Sandi"
 
@@ -20764,6 +20869,9 @@ msgstr "yrs"
 
 #~ msgid "Charitable Donations (Box: 46):"
 #~ msgstr "Sumbangan Amal (Kotak: 46 :)"
+
+#~ msgid "Check For Updates"
+#~ msgstr "Periksa Untuk Update"
 
 #~ msgid "Christmas"
 #~ msgstr "Hari Raya  Natal"
@@ -20776,6 +20884,9 @@ msgstr "yrs"
 
 #~ msgid "City:"
 #~ msgstr "Kota:"
+
+#~ msgid "Click here to run the installer now."
+#~ msgstr "Klik di sini untuk menjalankan installer sekarang."
 
 #~ msgid "Click here</a> to assign"
 #~ msgstr "Klik di sini </ a> untuk menetapkan"
@@ -20818,6 +20929,9 @@ msgstr "yrs"
 
 #~ msgid "Columbus Day"
 #~ msgstr "hari Kolombus"
+
+#~ msgid "Columns:"
+#~ msgstr "Kolom-kolom:"
 
 #~ msgid "Commands"
 #~ msgstr "Perintah-perintah"
@@ -20878,6 +20992,9 @@ msgstr "yrs"
 
 #~ msgid "Conversion Rate:"
 #~ msgstr "Tingkat konversi:"
+
+#~ msgid "Copy:"
+#~ msgstr "Salinan:"
 
 #~ msgid "Cost"
 #~ msgstr "Biaya"
@@ -20978,6 +21095,9 @@ msgstr "yrs"
 #~ msgid "Date Successfully Set To: "
 #~ msgstr "Tanggal Berhasil Set Untuk: "
 
+#~ msgid "Date of Issue:"
+#~ msgstr "Tanggal Penerbitan"
+
 #~ msgid "Date range exceeds the maximum of 31 days"
 #~ msgstr "Rentang tanggal melebihi maksimum 31 hari"
 
@@ -20986,6 +21106,9 @@ msgstr "yrs"
 
 #~ msgid "Date/Time is incorrect, or pay period does not exist for this date"
 #~ msgstr "Tanggal / Waktu tidak benar, atau periode pembayaran tidak ada untuk tanggal ini"
+
+#~ msgid "Date:"
+#~ msgstr "Tanggal:"
 
 #~ msgid "Day Of Month:"
 #~ msgstr "Hari Dari Bulan:"
@@ -21041,6 +21164,9 @@ msgstr "yrs"
 #~ msgid "Default Task:"
 #~ msgstr "Standar Tugas:"
 
+#~ msgid "Default:"
+#~ msgstr "Standar:"
+
 #~ msgid "Delete Data"
 #~ msgstr "Menghapus Data"
 
@@ -21055,6 +21181,9 @@ msgstr "yrs"
 
 #~ msgid "Department List"
 #~ msgstr "Daftar Departemen"
+
+#~ msgid "Department:"
+#~ msgstr "Departemen:"
 
 #~ msgid "Departments Currently Selected, Click the arrow to modify."
 #~ msgstr "Departemen Saat Dipilih, Klik tanda panah untuk memodifikasi."
@@ -21398,11 +21527,17 @@ msgstr "yrs"
 #~ msgid "Eligible Retiring Allowances (Box: 26):"
 #~ msgstr "Layak Penyisihan Rehat (26):"
 
+#~ msgid "Email Address:"
+#~ msgstr "Alamat Email:"
+
 #~ msgid "Email Invoice To Contact(s):"
 #~ msgstr "Email Faktur Untuk Kontak (s):"
 
 #~ msgid "Email was not specified"
 #~ msgstr "Email tidak ditentukan"
+
+#~ msgid "Email:"
+#~ msgstr "Surel:"
 
 #~ msgid "Emailed Scheduled Report"
 #~ msgstr "Diemail Laporan Terjadwal"
@@ -21458,6 +21593,9 @@ msgstr "yrs"
 #~ msgid "Employee Search"
 #~ msgstr "Cari karyawan"
 
+#~ msgid "Employee Signature:"
+#~ msgstr "Tanda tangan Karyawan:"
+
 #~ msgid "Employee Status:"
 #~ msgstr "Status karyawan"
 
@@ -21502,6 +21640,9 @@ msgstr "yrs"
 
 #~ msgid "Employee/Employer EI Accounts:"
 #~ msgstr "Karyawan / Majikan Akun EI:"
+
+#~ msgid "Employee:"
+#~ msgstr "Karyawan:"
 
 #~ msgid "Employees Currently Selected, Click the arrow to modify."
 #~ msgstr "Karyawan Saat Dipilih, Klik tanda panah untuk memodifikasi."
@@ -21767,6 +21908,9 @@ msgstr "yrs"
 #~ msgid "Force Time Zone:"
 #~ msgstr "Angkatan Zona Waktu:"
 
+#~ msgid "Forgot Your Password?"
+#~ msgstr "Lupa Password Anda?"
+
 #~ msgid "Forlì-Cesena"
 #~ msgstr "Forlì-Cesena"
 
@@ -21781,6 +21925,12 @@ msgstr "yrs"
 
 #~ msgid "Form Type:"
 #~ msgstr "Bentuk Jenis"
+
+#~ msgid "Form data has been saved!"
+#~ msgstr "Data formulir telah disimpan!"
+
+#~ msgid "Frame data DOES NOT exists:"
+#~ msgstr "Data Bingkai TIDAK ada:"
 
 #~ msgid "Frequency:"
 #~ msgstr "Frekuensi:"
@@ -21845,6 +21995,9 @@ msgstr "yrs"
 #~ msgid "Good Wednesday"
 #~ msgstr "baik Rabu"
 
+#~ msgid "Good:"
+#~ msgstr "Baik:"
+
 #~ msgid "Grace Period:"
 #~ msgstr "Masa Tenggang:"
 
@@ -21859,6 +22012,9 @@ msgstr "yrs"
 
 #~ msgid "Group B:"
 #~ msgstr "Kelempok B:"
+
+#~ msgid "Group By:"
+#~ msgstr "Kelompok Lewat"
 
 #~ msgid "Group Schedule"
 #~ msgstr "Jadwal Kelompok"
@@ -21907,6 +22063,9 @@ msgstr "yrs"
 
 #~ msgid "Help:"
 #~ msgstr "Bantuan:"
+
+#~ msgid "Hide Columns"
+#~ msgstr "Sembunyikan Kolom"
 
 #~ msgid "Hide Employer Contributions:"
 #~ msgstr "Sembunyikan Majikan Kontribusi:"
@@ -21998,6 +22157,9 @@ msgstr "yrs"
 #~ msgid "In order to improve your <b>%1</b> experience, please define your personal preferences."
 #~ msgstr "Dalam rangka meningkatkan <b>% 1 </ b> pengalaman, silakan menentukan preferensi pribadi Anda"
 
+#~ msgid "In/Out:"
+#~ msgstr "Masuk/Keluar:"
+
 #~ msgid "In:"
 #~ msgstr "Masuk:"
 
@@ -22063,6 +22225,9 @@ msgstr "yrs"
 
 #~ msgid "Income Tax Deducted (Box: 22):"
 #~ msgstr "Pajak Penghasilan Dikurangi (Kotak: 22):"
+
+#~ msgid "Incorrect Input!"
+#~ msgstr "Masukan yang salah!"
 
 #~ msgid "Incorrect advance end date"
 #~ msgstr "Memajukan Akhir Tanggal yang Salah"
@@ -22175,6 +22340,9 @@ msgstr "yrs"
 #~ msgid "Job Start Date:"
 #~ msgstr "Tanggal Memulai Pekerjaan"
 
+#~ msgid "Job:"
+#~ msgstr "Tugas"
+
 #~ msgid "JobTracking"
 #~ msgstr "Pekerjaan Melacak"
 
@@ -22264,6 +22432,9 @@ msgstr "yrs"
 
 #~ msgid "Log Directory:"
 #~ msgstr "Catatan-sejarah Direktori:"
+
+#~ msgid "Logging out in"
+#~ msgstr "Masuk di Luar"
 
 #~ msgid "Login Attribute:"
 #~ msgstr "Masuk Atribut"
@@ -22481,6 +22652,9 @@ msgstr "yrs"
 #~ msgid "NOTICE:"
 #~ msgstr "PEMBERITAHUAN:"
 
+#~ msgid "Name:"
+#~ msgstr "Nama:"
+
 #~ msgid "Namur "
 #~ msgstr "Namur "
 
@@ -22501,6 +22675,12 @@ msgstr "yrs"
 
 #~ msgid "New Message"
 #~ msgstr "Pesan baru"
+
+#~ msgid "New Password (confirm):"
+#~ msgstr "Kata Sandi Baru( yang pasti )"
+
+#~ msgid "New Password:"
+#~ msgstr "Kata Sandi Baru:"
 
 #~ msgid "New Quick Punch Password (confirm):"
 #~ msgstr "Kata Sandi yang baru pukulannya cepat ( yang pasti )"
@@ -22600,6 +22780,9 @@ msgstr "yrs"
 
 #~ msgid "Note (public):"
 #~ msgstr "Catatan(Umum):"
+
+#~ msgid "Note:"
+#~ msgstr "catatan:"
 
 #~ msgid "Objects:"
 #~ msgstr "Objek:"
@@ -22772,6 +22955,9 @@ msgstr "yrs"
 #~ msgid "PHP Version:"
 #~ msgstr "Versi PHP"
 
+#~ msgid "PIN or Password is incorrect"
+#~ msgstr "PIN atau Kata sandi salah"
+
 #~ msgid "PO Number:"
 #~ msgstr "Nomor PO:"
 
@@ -22816,9 +23002,6 @@ msgstr "yrs"
 
 #~ msgid "Password (confirm):"
 #~ msgstr "Kata sandi ( yang dipastikan_"
-
-#~ msgid "Password - Web (Exceeded Maximum Age)"
-#~ msgstr "Sandi - Web (Melebihi Usia Maksimal)"
 
 #~ msgid "Password Reset requested at "
 #~ msgstr "Pengulangan Kata sandi diminta pada "
@@ -23136,6 +23319,9 @@ msgstr "yrs"
 #~ msgid "Premium: "
 #~ msgstr "Perdana: "
 
+#~ msgid "Previous Saved Searches:"
+#~ msgstr "Sebelumnya Pencarian Tersimpan:"
+
 #~ msgid "Previous pay period is not verified!"
 #~ msgstr "Periode pembayaran sebelumnya tidak diverifikasi!"
 
@@ -23162,6 +23348,9 @@ msgstr "yrs"
 
 #~ msgid "Print Schedule"
 #~ msgstr "Cetak Jadwal"
+
+#~ msgid "Print Timesheet"
+#~ msgstr "Cetak Terperinci"
 
 #~ msgid "Priority:"
 #~ msgstr "Prioritas:"
@@ -23226,14 +23415,23 @@ msgstr "yrs"
 #~ msgid "Punch Failed!"
 #~ msgstr "Coblos yang tidak berlaku"
 
+#~ msgid "Punch In / Out"
+#~ msgstr "Coblos Masuk/Keluar"
+
 #~ msgid "Punch List"
 #~ msgstr "Daftar Coblos"
+
+#~ msgid "Punch Type:"
+#~ msgstr "Coblos Tipe:"
 
 #~ msgid "Purchase Order #:"
 #~ msgstr "Pesanan Pembelian #:"
 
 #~ msgid "Qty"
 #~ msgstr "Qty"
+
+#~ msgid "Quantity:"
+#~ msgstr "Kwantitas:"
 
 #~ msgid "Quarter 1 (01-Jan to 31-Mar)"
 #~ msgstr "Triwulan 1 (01-Jan-31-Mar)"
@@ -23328,6 +23526,12 @@ msgstr "yrs"
 #~ msgid "Recent Requests"
 #~ msgstr "Permintaan terakhir"
 
+#~ msgid "Recipient Copy:"
+#~ msgstr "Penerima Salinan:"
+
+#~ msgid "Recipient:"
+#~ msgstr "Penerima:"
+
 #~ msgid "Recipients Currently Selected, Click the arrow to modify."
 #~ msgstr "Penerima Saat Dipilih, Klik tanda panah untuk memodifikasi."
 
@@ -23351,6 +23555,9 @@ msgstr "yrs"
 
 #~ msgid "Recurring Schedule Template List"
 #~ msgstr "Berulang Daftar Pola Jadwal"
+
+#~ msgid "Regarding:"
+#~ msgstr "Mengenai:"
 
 #~ msgid "Reggio nell'Emilia"
 #~ msgstr "Reggio nell'Emilia"
@@ -23457,6 +23664,9 @@ msgstr "yrs"
 #~ msgid "Report Setup:"
 #~ msgstr "Laporkan Setup"
 
+#~ msgid "Request - Type"
+#~ msgstr "Tipe - Permintaan"
+
 #~ msgid "Request Date"
 #~ msgstr "Tanggal Permintaan"
 
@@ -23541,8 +23751,14 @@ msgstr "yrs"
 #~ msgid "San Salvador Party"
 #~ msgstr "Partai San Salvador"
 
+#~ msgid "Save Search As:"
+#~ msgstr "Simpan Pencarian As:"
+
 #~ msgid "Saved Schedules"
 #~ msgstr "Simpan Agenda"
+
+#~ msgid "Saved Search & Layout"
+#~ msgstr "Pencarian Tersimpan & Tata Letak"
 
 #~ msgid "Schedule Branch:"
 #~ msgstr "jadwal Cabang:"
@@ -23655,6 +23871,9 @@ msgstr "yrs"
 #~ msgid "Serial No:"
 #~ msgstr "Nomor Seri:"
 
+#~ msgid "Server response time:"
+#~ msgstr "Server waktu respon:"
+
 #~ msgid "Server:"
 #~ msgstr "Server:"
 
@@ -23738,6 +23957,9 @@ msgstr "yrs"
 
 #~ msgid "Sorry, your password has exceeded its maximum age specified by your company's password policy and must be changed immediately"
 #~ msgstr "Maaf, sandi Anda telah melampaui usia maksimum ditentukan oleh kebijakan sandi perusahaan Anda dan harus segera diubah"
+
+#~ msgid "Sort By:"
+#~ msgstr "Urutan Berdasarkan:"
 
 #~ msgid "Source:"
 #~ msgstr "Sumber:"
@@ -23853,6 +24075,9 @@ msgstr "yrs"
 #~ msgid "Subject:"
 #~ msgstr "Subjek:"
 
+#~ msgid "Submit"
+#~ msgstr "Menyerahkan"
+
 #~ msgid "Submit Message"
 #~ msgstr "Kirim pesan"
 
@@ -23870,6 +24095,9 @@ msgstr "yrs"
 
 #~ msgid "Summary Totals"
 #~ msgstr "Jumlah Ringkasan"
+
+#~ msgid "Supervisor Signature:"
+#~ msgstr "Tanda tangan Pengawas"
 
 #~ msgid "Supervisor:"
 #~ msgstr "Pengawas:"
@@ -23895,6 +24123,9 @@ msgstr "yrs"
 #~ msgid "Table of Contents"
 #~ msgstr "Daftar Isi"
 
+#~ msgid "Target Balance/Limit"
+#~ msgstr "Sasaran Neraca / Batas Maksimum"
+
 #~ msgid "Tariff Code:"
 #~ msgstr "Kode tarif:"
 
@@ -23912,6 +24143,9 @@ msgstr "yrs"
 
 #~ msgid "Task is invalid"
 #~ msgstr "Tugas tidak sah"
+
+#~ msgid "Task:"
+#~ msgstr "Tugas:"
 
 #~ msgid "Tasks Currently Selected, Click the arrow to modify."
 #~ msgstr "Tugas Saat Dipilih, Klik tanda panah untuk memodifikasi"
@@ -23993,6 +24227,9 @@ msgstr "yrs"
 #~ msgid "This employee is at the final authorization level."
 #~ msgstr "Karyawan ini adalah pada tingkat otorisasi akhir."
 
+#~ msgid "This functionality is only available in "
+#~ msgstr "Fungsi ini hanya tersedia dalam   Ada terkemuka / spasi di sini. Masing-masing mewakili karakter spasi. Masukkan ruang dalam posisi setara dalam terjemahan. "
+
 #~ msgid "This meal policy is in use"
 #~ msgstr "Ini kebijakan makan sedang digunakan"
 
@@ -24035,6 +24272,12 @@ msgstr "yrs"
 #~ msgid "Time Zone:"
 #~ msgstr "Zona Waktu:"
 
+#~ msgid "Time and Attendance - Secure Login"
+#~ msgstr "Waktu dan Kehadiran - Login Terproteksi"
+
+#~ msgid "Time:"
+#~ msgstr "Waktu:"
+
 #~ msgid "TimeSheet Verification:"
 #~ msgstr "kartu absen Verifikasi:"
 
@@ -24046,6 +24289,9 @@ msgstr "yrs"
 
 #~ msgid "TimeTrex Version:"
 #~ msgstr "TimeTrex Versi:"
+
+#~ msgid "Timesheet Detail"
+#~ msgstr "absen Rincian"
 
 #~ msgid "Tips and Group-Term Life Insurance (Line 9):"
 #~ msgstr "Tips dan Kelompok-Term Life Insurance (Jalur 9):"
@@ -24064,6 +24310,9 @@ msgstr "yrs"
 
 #~ msgid "To:"
 #~ msgstr "Untuk:"
+
+#~ msgid "Top"
+#~ msgstr "Atas"
 
 #~ msgid "Total Actual Cost:"
 #~ msgstr "Total Biaya sebenarnya:"
@@ -24139,6 +24388,9 @@ msgstr "yrs"
 
 #~ msgid "Transaction Start Date:"
 #~ msgstr "Tanggal Mulai Transaksi"
+
+#~ msgid "Transfer:"
+#~ msgstr "Pemindahbukuan:"
 
 #~ msgid "Transmitter Number:"
 #~ msgstr "Nomor pemancar:"
@@ -24275,6 +24527,9 @@ msgstr "yrs"
 #~ msgid "User Name for"
 #~ msgstr "Pengguna Nama Untuk:"
 
+#~ msgid "User Name:"
+#~ msgstr "Nama Pengguna:"
+
 #~ msgid "UserID"
 #~ msgstr "UserID"
 
@@ -24355,6 +24610,12 @@ msgstr "yrs"
 
 #~ msgid "WARNING:"
 #~ msgstr "PERINGATAN:"
+
+#~ msgid "WARNING: %1 application version does not match database version. Please re-run the TimeTrex installer to complete the upgrade process."
+#~ msgstr "PERINGATAN:% 1 versi aplikasi tidak cocok versi basis data. Silahkan kembali menjalankan installer TimeTrex untuk menyelesaikan proses upgrade."
+
+#~ msgid "WARNING: %1 maintenance jobs have not run in the last 48hours. Please contact your %1 administrator immediately."
+#~ msgstr "PERINGATAN:% 1 pekerjaan pemeliharaan belum berjalan dalam 48hours terakhir. Silahkan hubungi% 1 administrator Anda segera."
 
 #~ msgid ""
 #~ "WARNING: Deleting a pay period will also delete all punches assigned to that pay period. Once data is deleted it can not be recovered.\n"
@@ -24573,6 +24834,9 @@ msgstr "yrs"
 #~ msgid "Your PHP configuration file (php.ini) is located at:<br> <b>%1</b>, the include path is: \"<b>%2</b>\""
 #~ msgstr "File konfigurasi PHP (php.ini) terletak di: <br> <b>% 1 </ b>, path include adalah: \"<b>% 2 </ b>\""
 
+#~ msgid "Your password has been changed successfully, you may now login."
+#~ msgstr "Kata sandi Anda telah berhasil diubah, kini Anda dapat login."
+
 #~ msgid "[R]"
 #~ msgstr "[R]"
 
@@ -24585,6 +24849,12 @@ msgstr "yrs"
 #~ msgid "closed"
 #~ msgstr "Tutup"
 
+#~ msgid "database has not been initialized yet, please run the installer again and follow the on screen instructions."
+#~ msgstr "Database belum diinisialisasi belum, silakan jalankan installer lagi dan ikuti petunjuk pada layar."
+
+#~ msgid "database query has timed-out, if you were trying to run a report it may be too large, please narrow your search criteria and try again."
+#~ msgstr "query database telah timed-out, jika Anda mencoba untuk menjalankan laporan itu mungkin terlalu besar, silahkan mempersempit kriteria pencarian Anda dan coba lagi."
+
 #~ msgid "database, please wait..."
 #~ msgstr "Database, harap tunggu ..."
 
@@ -24594,8 +24864,14 @@ msgstr "yrs"
 #~ msgid "eFile Information"
 #~ msgstr "Informasi eFile"
 
+#~ msgid "experienced a general error, please contact technical support."
+#~ msgstr "xperienced kesalahan umum, silakan hubungi dukungan teknis."
+
 #~ msgid "iButton ID is already taken"
 #~ msgstr "iButton ID sudah diambil"
+
+#~ msgid "ie:"
+#~ msgstr "yaitu:"
 
 #~ msgid "installed"
 #~ msgstr "terpasang"
@@ -24606,8 +24882,14 @@ msgstr "yrs"
 #~ msgid "is assigned as both a superior and subordinate"
 #~ msgstr "ditugaskan baik sebagai atasan dan bawahan"
 
+#~ msgid "is currently undergoing maintenance. We're sorry for any inconvenience this may cause. Please try back later."
+#~ msgstr "saat ini sedang menjalani perawatan. Kami mohon maaf atas ketidaknyamanan yang mungkin ditimbulkan. Silakan coba lagi nanti."
+
 #~ msgid "locked"
 #~ msgstr "terkunci"
+
+#~ msgid "magic_quotes_gpc is On. (Please disable it in php.ini)"
+#~ msgstr "magic_quotes_gpc adalah On. (Nonaktifkan dalam php.ini)"
 
 #~ msgid "modifications are not permitted."
 #~ msgstr "modifikasi tidak diizinkan."
@@ -24620,6 +24902,15 @@ msgstr "yrs"
 
 #~ msgid "password reset requested at "
 #~ msgstr "reset password diminta pada   Ada terkemuka / spasi di sini. Masing-masing mewakili karakter spasi. Masukkan ruang dalam posisi setara dalam terjemahan. "
+
+#~ msgid "seconds"
+#~ msgstr "detik"
+
+#~ msgid "seconds."
+#~ msgstr "detik."
+
+#~ msgid "then:"
+#~ msgstr "maka:"
 
 #~ msgid "to be reset,"
 #~ msgstr "diatur ulang,"

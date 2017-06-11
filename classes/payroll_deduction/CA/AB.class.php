@@ -40,23 +40,24 @@
  */
 class PayrollDeduction_CA_AB extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
-													20170101 => array(
-																    array( 'income' => 126625,	'rate' => 10,	'constant' => 0 ),
-																    array( 'income' => 151950,	'rate' => 12,	'constant' => 2533 ),
-																    array( 'income' => 202600,	'rate' => 13,	'constant' => 4052 ),
-																    array( 'income' => 303900,	'rate' => 14,	'constant' => 6078 ),
-																    array( 'income' => 303900,	'rate' => 15,	'constant' => 9117 ),
-																),
-													20151001 => array( //01-Oct-2015 (Option 1)
-																	array( 'income' => 125000,	'rate' => 10,	'constant' => 0 ),
-																	array( 'income' => 150000,	'rate' => 12,	'constant' => 2500 ),
-																	array( 'income' => 200000,	'rate' => 13,	'constant' => 4000 ),
-																	array( 'income' => 300000,	'rate' => 14,	'constant' => 6000 ),
-																	array( 'income' => 300000,	'rate' => 15,	'constant' => 9000 ),
-																),
-													20040101 => array(
-																	array( 'income' => 0,	'rate' => 10,	'constant' => 0 ),
-																),
-													);
+			20170101 => array(
+					array('income' => 126625, 'rate' => 10, 'constant' => 0),
+					array('income' => 151950, 'rate' => 12, 'constant' => 2533),
+					array('income' => 202600, 'rate' => 13, 'constant' => 4052),
+					array('income' => 303900, 'rate' => 14, 'constant' => 6078),
+					array('income' => 303900, 'rate' => 15, 'constant' => 9117),
+			),
+			20151001 => array( //01-Oct-2015 (Option 1)
+							   array('income' => 125000, 'rate' => 10, 'constant' => 0),
+							   array('income' => 150000, 'rate' => 12, 'constant' => 2500),
+							   array('income' => 200000, 'rate' => 13, 'constant' => 4000),
+							   array('income' => 300000, 'rate' => 14, 'constant' => 6000),
+							   array('income' => 300000, 'rate' => 15, 'constant' => 9000),
+			),
+			20040101 => array(
+					array('income' => 0, 'rate' => 10, 'constant' => 0),
+			),
+	);
 }
+
 ?>
