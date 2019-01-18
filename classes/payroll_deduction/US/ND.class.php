@@ -41,6 +41,24 @@
 class PayrollDeduction_US_ND extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20190101 => array(
+					10 => array(
+							array('income' => 4500, 'rate' => 0, 'constant' => 0),
+							array('income' => 43000, 'rate' => 1.10, 'constant' => 0),
+							array('income' => 87000, 'rate' => 2.04, 'constant' => 423.50),
+							array('income' => 202000, 'rate' => 2.27, 'constant' => 1321.10),
+							array('income' => 432000, 'rate' => 2.64, 'constant' => 3931.60),
+							array('income' => 432000, 'rate' => 2.90, 'constant' => 10003.60),
+					),
+					20 => array(
+							array('income' => 10400, 'rate' => 0, 'constant' => 0),
+							array('income' => 75000, 'rate' => 1.10, 'constant' => 0),
+							array('income' => 141000, 'rate' => 2.04, 'constant' => 710.60),
+							array('income' => 252000, 'rate' => 2.27, 'constant' => 2057.00),
+							array('income' => 440000, 'rate' => 2.64, 'constant' => 4576.70),
+							array('income' => 440000, 'rate' => 2.90, 'constant' => 9539.90),
+					),
+			),
 			20180101 => array(
 					10 => array(
 							array('income' => 4400, 'rate' => 0, 'constant' => 0),
@@ -314,6 +332,9 @@ class PayrollDeduction_US_ND extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20190101 => array( //01-Jan-19
+							   'allowance' => 4200,
+			),
 			20180101 => array( //01-Jan-18
 							   'allowance' => 4150,
 			),

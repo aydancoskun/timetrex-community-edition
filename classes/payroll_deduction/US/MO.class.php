@@ -47,7 +47,53 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 	*/
 
 	var $state_income_tax_rate_options = array(
-		//Constants are calculated strange from the Government, just use their values.
+		//Constants are calculated strange from the Government, just use their values. Remember to add all constant values from bottom to top together for each bracket. ie: 16 + 37 + 63 + 95, ...
+		20190101 => array(
+				10 => array(
+						array('income' => 1053, 'rate' => 1.5, 'constant' => 0),
+						array('income' => 2106, 'rate' => 2.0, 'constant' => 16),
+						array('income' => 3159, 'rate' => 2.5, 'constant' => 37),
+						array('income' => 4212, 'rate' => 3.0, 'constant' => 63),
+						array('income' => 5265, 'rate' => 3.5, 'constant' => 95),
+						array('income' => 6318, 'rate' => 4.0, 'constant' => 132),
+						array('income' => 7371, 'rate' => 4.5, 'constant' => 174),
+						array('income' => 8424, 'rate' => 5.0, 'constant' => 221),
+						array('income' => 8424, 'rate' => 5.4, 'constant' => 274),
+				),
+				20 => array(
+						array('income' => 1053, 'rate' => 1.5, 'constant' => 0),
+						array('income' => 2106, 'rate' => 2.0, 'constant' => 16),
+						array('income' => 3159, 'rate' => 2.5, 'constant' => 37),
+						array('income' => 4212, 'rate' => 3.0, 'constant' => 63),
+						array('income' => 5265, 'rate' => 3.5, 'constant' => 95),
+						array('income' => 6318, 'rate' => 4.0, 'constant' => 132),
+						array('income' => 7371, 'rate' => 4.5, 'constant' => 174),
+						array('income' => 8424, 'rate' => 5.0, 'constant' => 221),
+						array('income' => 8424, 'rate' => 5.4, 'constant' => 267),
+				),
+				30 => array(
+						array('income' => 1053, 'rate' => 1.5, 'constant' => 0),
+						array('income' => 2106, 'rate' => 2.0, 'constant' => 16),
+						array('income' => 3159, 'rate' => 2.5, 'constant' => 37),
+						array('income' => 4212, 'rate' => 3.0, 'constant' => 63),
+						array('income' => 5265, 'rate' => 3.5, 'constant' => 95),
+						array('income' => 6318, 'rate' => 4.0, 'constant' => 132),
+						array('income' => 7371, 'rate' => 4.5, 'constant' => 174),
+						array('income' => 8424, 'rate' => 5.0, 'constant' => 221),
+						array('income' => 8424, 'rate' => 5.4, 'constant' => 267),
+				),
+				40 => array(
+						array('income' => 1053, 'rate' => 1.5, 'constant' => 0),
+						array('income' => 2106, 'rate' => 2.0, 'constant' => 16),
+						array('income' => 3159, 'rate' => 2.5, 'constant' => 37),
+						array('income' => 4212, 'rate' => 3.0, 'constant' => 63),
+						array('income' => 5265, 'rate' => 3.5, 'constant' => 95),
+						array('income' => 6318, 'rate' => 4.0, 'constant' => 132),
+						array('income' => 7371, 'rate' => 4.5, 'constant' => 174),
+						array('income' => 8424, 'rate' => 5.0, 'constant' => 221),
+						array('income' => 8424, 'rate' => 5.4, 'constant' => 267),
+				),
+		),
 		20180101 => array(
 				10 => array(
 						array('income' => 103, 'rate' => 0, 'constant' => 0),
@@ -205,6 +251,26 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20190101 => array(
+					'standard_deduction'  => array(
+							'10' => 12200.00,
+							'20' => 12200.00,
+							'30' => 24400.00,
+							'40' => 18350.00,
+					),
+					'allowance'           => array( //Removed in 2018.
+													'10' => array(2100.00, 1200.00, 1200.00),
+													'20' => array(2100.00, 1200.00, 1200.00),
+													'30' => array(2100.00, 2100.00, 1200.00),
+													'40' => array(3500.00, 1200.00, 1200.00),
+					),
+					'federal_tax_maximum' => array( //Removed in 2019.
+							'10' => 5000.00,
+							'20' => 5000.00,
+							'30' => 10000.00,
+							'40' => 5000.00,
+					),
+			),
 			20180101 => array(
 					'standard_deduction'  => array(
 							'10' => 12000.00,
@@ -419,8 +485,12 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 		$state_allowance = $this->getStateAllowanceAmount();
 
 		Debug::text( 'State Federal Tax: ' . $federal_tax, __FILE__, __LINE__, __METHOD__, 10 );
-		if ( $federal_tax > $this->getStateFederalTaxMaximum() ) {
-			$federal_tax = $this->getStateFederalTaxMaximum();
+		if ( $this->getDate() < 20190101 ) { //Removed for 2019
+			if ( $federal_tax > $this->getStateFederalTaxMaximum() ) {
+				$federal_tax = $this->getStateFederalTaxMaximum();
+			}
+		} else {
+			$federal_tax = 0;
 		}
 
 		$income = bcsub( bcsub( bcsub( $annual_income, $federal_tax ), $state_deductions ), $state_allowance );

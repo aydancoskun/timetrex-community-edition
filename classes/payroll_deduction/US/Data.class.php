@@ -73,18 +73,19 @@ CHANGED:11-Dec-18				'MO' => 'Missouri',		- http://dor.mo.gov/business/withhold/
 CHANGED:12-Dec-18				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method) - 2018 switched to flat rate 5%.
 CHANGED:14-Dec-18				'IL' => 'Illinois',		- https://www2.illinois.gov/rev/research/taxinformation/payroll/Pages/default.aspx *Booklet IL-700-T
 CHANGED:14-Dec-18				'SC' => 'South Carolina'- https://dor.sc.gov/tax/withholding/forms *Formula for Computing SC Withholding Tax WH-1603F
+CHANGED:20-Dec-18				'MN' => 'Minnesota',	- http://www.revenue.state.mn.us/businesses/withholding/Pages/Forms.aspx *2013 Minnesota Withholding Computer Formula - Calculator: https://www.mndor.state.mn.us/tp/withholdingtaxcalc/_/
+CHANGED:20-Dec-18				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
+CHANGED:20-Dec-18				'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
+CHANGED:20-Dec-18/KEEP CHECING FOR BOOKLET 'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
 CHANGED:11-Dec-18/CHECKAGAIN NYC 'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
-*CHECKAGAIN-*:11-Dec-18(Not updating?) 'VT' => 'Vermont',		- http://tax.vermont.gov/business-and-corp/withholding-tax *Income Tax Withholding  Instructions, Tables, and Charts.
-*CHECKAGAIN-*:11-Dec-18			'OR' => 'Oregon',		- http://www.oregon.gov/DOR/programs/businesses/Pages/payroll-updates.aspx *Search: Withholdings Tax Formulas 2013
-*CHECKAGAIN-*:11-Dec-18			'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
-*CHECKAGAIN-*:11-Dec-18			'AL' => 'Alabama' 		- https://revenue.alabama.gov/individual-corporate/taxes-administered-by-individual-corporate-income-tax/withholding-tax/ *Withholding Tax Tables and Instructions
-*CHECKAGAIN-*:11-Dec-18			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
-*CHECKAGAIN-*:11-Dec-18			'OK' => 'Oklahoma',		- http://ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
-*CHECKAGAIN-*:11-Dec-18			'RI' => 'Rhode Island', - http://www.tax.state.ri.us/misc/software_developers.php *Percentage Method Withholding Tables
-*CHECKAGAIN-*:11-Dec-18			'MN' => 'Minnesota',	- http://www.revenue.state.mn.us/businesses/withholding/Pages/Forms.aspx *2013 Minnesota Withholding Computer Formula - Calculator: https://www.mndor.state.mn.us/tp/withholdingtaxcalc/_/
-*CHECKAGAIN-*:11-Dec-18			'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
-*CHECKAGAIN-*:11-Dec-18			'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
-*CHECKAGAIN-*:11-Dec-18			'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
+*CHECKAGAIN-*:20-Dec-18(Not updating?) 'VT' => 'Vermont',		- http://tax.vermont.gov/business-and-corp/withholding-tax *Income Tax Withholding  Instructions, Tables, and Charts.
+*CHECKAGAIN-*:20-Dec-18			'AL' => 'Alabama' 		- https://revenue.alabama.gov/individual-corporate/taxes-administered-by-individual-corporate-income-tax/withholding-tax/ *Withholding Tax Tables and Instructions
+*CHECKAGAIN-*:20-Dec-18			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
+*CHECKAGAIN-*:20-Dec-18			'CO' => 'Colorado',		- https://www.colorado.gov/pacific/tax/withholding-payroll-tax-instructions-and-forms *Form: DR 1098
+*CHECKAGAIN-*:20-Dec-18			'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
+NOCHANGE:19-Dec-18				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
+NOCHANGE:20-Dec-18				'OK' => 'Oklahoma',		- http://ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
+
 
 
 //Change less often

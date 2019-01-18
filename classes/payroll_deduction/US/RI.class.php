@@ -41,6 +41,18 @@
 class PayrollDeduction_US_RI extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20190101 => array(
+					10 => array(
+							array('income' => 64050, 'rate' => 3.75, 'constant' => 0),
+							array('income' => 145600, 'rate' => 4.75, 'constant' => 2401.88),
+							array('income' => 145600, 'rate' => 5.99, 'constant' => 6275.50),
+					),
+					20 => array(
+							array('income' => 64050, 'rate' => 3.75, 'constant' => 0), //Same as Single rate.
+							array('income' => 145600, 'rate' => 4.75, 'constant' => 2401.88),
+							array('income' => 145600, 'rate' => 5.99, 'constant' => 6275.50),
+					),
+			),
 			20180101 => array(
 					10 => array(
 							array('income' => 62550, 'rate' => 3.75, 'constant' => 0),
@@ -48,7 +60,7 @@ class PayrollDeduction_US_RI extends PayrollDeduction_US {
 							array('income' => 142150, 'rate' => 5.99, 'constant' => 6126.63),
 					),
 					20 => array(
-							array('income' => 62550, 'rate' => 3.75, 'constant' => 0),
+							array('income' => 62550, 'rate' => 3.75, 'constant' => 0), //Same as Single rate.
 							array('income' => 142150, 'rate' => 4.75, 'constant' => 2345.63),
 							array('income' => 142150, 'rate' => 5.99, 'constant' => 6126.63),
 					),
@@ -248,6 +260,10 @@ class PayrollDeduction_US_RI extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20180101 => array( //01-Jan-18
+							   'allowance'           => 1000,
+							   'allowance_threshold' => 227050, //If annual income more than this, allowance is 0.
+			),
 			20180101 => array( //01-Jan-18
 							   'allowance'           => 1000,
 							   'allowance_threshold' => 221800, //If annual income more than this, allowance is 0.

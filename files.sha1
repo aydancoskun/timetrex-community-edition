@@ -1,4 +1,4 @@
-Version: 11.4.0 Generated: Mon Dec 17 14:10:19 PST 2018
+Version: 11.4.1 Generated: Fri Dec 21 14:56:45 PST 2018
 4ccaffb218c4dc3364f42de77fe7a6b54b8a8411  ./install_cron.sh
 bf7bba4d3b08e6f62ac80ec8045d8269247725b6  ./favicon.ico
 77aefa89082e10c5240937fccd1210bcb67778d6  ./maint/MiscDaily.php
@@ -518,9 +518,9 @@ b2ed40cb6f1b8ad287ad4f3b7413e7a5e44cac73  ./classes/payroll_deduction/US/NC.clas
 896801814aafd59c161247997979ab0e119aadc4  ./classes/payroll_deduction/US/VT.class.php
 1776a8b26c33c033703434b310936e5c92697e2f  ./classes/payroll_deduction/US/AR.class.php
 b340566ba5354b930bc88c02ee699941bffd709c  ./classes/payroll_deduction/US/HI.class.php
-3471fe18d8a4b3c3e0fba6011ae972d4402af597  ./classes/payroll_deduction/US/OR.class.php
+ac76934d6b0f1f492f39fbf28c362db7872658ac  ./classes/payroll_deduction/US/OR.class.php
 6407291adeb0d219d4883e97192a07bc73f1bddb  ./classes/payroll_deduction/US/NM.class.php
-9500de9f50eeb0f026adb655b5286cce0e30f070  ./classes/payroll_deduction/US/MN.class.php
+871a1e77f835ba2abe3afa62372c4d9b43f59195  ./classes/payroll_deduction/US/MN.class.php
 3f000297874e8d6136100eb140c43a0b68078efb  ./classes/payroll_deduction/US/UT.class.php
 e3f56bc487dee0adf22c3960c5f71723f792ecc9  ./classes/payroll_deduction/US/MD.class.php
 0ce825c45ae489017a1643c4ca686e4b01ebf53c  ./classes/payroll_deduction/US/DC.class.php
@@ -530,15 +530,15 @@ ae773183b9cbde64e6c274e1ae3b4e353c36f522  ./classes/payroll_deduction/US/NH.clas
 e5f51a62ef97870ffeee7fc844db21aa930b9ccb  ./classes/payroll_deduction/US/KY.class.php
 266ddf787a2a331e4e1d01c97e4d9b380ec59680  ./classes/payroll_deduction/US/IN.class.php
 d053e806bdf98e9c9dd7ea48ed29fe6575619857  ./classes/payroll_deduction/US/AZ.class.php
-aa50c5b206b856669827a0bdae35d797f3d615de  ./classes/payroll_deduction/US/ND.class.php
+fe2798cf10bedf7b730cda992c1a9e6e93fc4eb5  ./classes/payroll_deduction/US/ND.class.php
 9e5c3caf800431acde6ddf2535282b109b6dabb4  ./classes/payroll_deduction/US/MI.class.php
 bfdc952d346b1a3c69af3d18496c05e288934f27  ./classes/payroll_deduction/US/WA.class.php
 ee0743c2cdb8905430f0ed4f395056b83e7a7007  ./classes/payroll_deduction/US/WI.class.php
-e84439734600dd0b472027efe5f73f17274d4d7e  ./classes/payroll_deduction/US/OH.class.php
+8bf9a794003b668904b9d0134cc512523ca3fc53  ./classes/payroll_deduction/US/OH.class.php
 1ab048b75bac6dbabb6966ecbe7b2d202fe99c0e  ./classes/payroll_deduction/US/NY_NYC.class.php
 163f77e51697bb1a55437920d41f7a3840972d0a  ./classes/payroll_deduction/US/NY_YONKERS.class.php
 322c8041f932356282dd61c0efc49806cb286d21  ./classes/payroll_deduction/US/VA.class.php
-dd304e34723817caad5d4a20f2587e394cf37582  ./classes/payroll_deduction/US/Data.class.php
+5deaf8e25e7e2d9116d640b4c183cacbdd173620  ./classes/payroll_deduction/US/Data.class.php
 6cf9c7193999584a0b0866bab6bfa9c9fbeec19c  ./classes/payroll_deduction/US/AK.class.php
 bea1f445bda3a733c32d389ba90f018f66e59d84  ./classes/payroll_deduction/US/MS.class.php
 26293f46cca5cf2c2e218fb6b66ce5c611395900  ./classes/payroll_deduction/US/SD.class.php
@@ -552,7 +552,7 @@ fcd75e4ece2725ffadbde53c1fe048ba98d6c62b  ./classes/payroll_deduction/US/IN_ALL.
 5abeb2ca23560912f20483b846ea9e2162b0478c  ./classes/payroll_deduction/US/AL.class.php
 46c1e3868cf33ddb80c6d9fbb429095552273af4  ./classes/payroll_deduction/US/NJ.class.php
 8e9c5408908e2bea3f2d54b2d2c02898d2c7b4e3  ./classes/payroll_deduction/US/IL.class.php
-bb6563a6eda46d2171b66999706f947e546a3a14  ./classes/payroll_deduction/US/MO.class.php
+3bbdcf36809e08454abb33b14b298ab675858c61  ./classes/payroll_deduction/US/MO.class.php
 60cba018ecd8cf8f489e4ec45455c343c1504663  ./classes/payroll_deduction/US/MA.class.php
 ee5a592c89c0ba963cbb1b5bbc6dfec1f05bdccc  ./classes/payroll_deduction/US/WV.class.php
 338675f449b15cfc5c2185831094cbb62559bc06  ./classes/payroll_deduction/US/LA.class.php
@@ -560,7 +560,7 @@ ee5a592c89c0ba963cbb1b5bbc6dfec1f05bdccc  ./classes/payroll_deduction/US/WV.clas
 3a4ff7a8b6390c1b4cc424847336ed8a427bc96a  ./classes/payroll_deduction/US/GA.class.php
 6536368ceba56e7e656d685f3ffb1a7030539d78  ./classes/payroll_deduction/US/DE.class.php
 1a92c913c3f980787bd2421d52ca5cc1553356a9  ./classes/payroll_deduction/US/CT.class.php
-51ea29c67350c9a1e696e5e9fa0ca9abd7fcb181  ./classes/payroll_deduction/US/RI.class.php
+6b72a8df74c85413d13c55e572293d96b3a36586  ./classes/payroll_deduction/US/RI.class.php
 fb91dc7a819d78e91cf1b6cc9e4f167ff1e39dc9  ./classes/payroll_deduction/US/KS.class.php
 dfd99f07423d44681a1ae51b83607be04a245206  ./classes/payroll_deduction/US/OK.class.php
 ae856561b0ff0c9c6d621a88d36b24d748837455  ./classes/payroll_deduction/US/TN.class.php
@@ -568,7 +568,7 @@ ae856561b0ff0c9c6d621a88d36b24d748837455  ./classes/payroll_deduction/US/TN.clas
 ed1aaab3df01247a46a5bd60bff68141cc2b5cf2  ./classes/payroll_deduction/US/NV.class.php
 48b46a6d6a7fbec8514b3069f92c8ae1899bb9c6  ./classes/payroll_deduction/US/MT.class.php
 1f052a016e2e663c683bcf62439ad25125033fab  ./classes/payroll_deduction/US/FL.class.php
-dfc194dfd99d2d688be4b93554c18b34c130f8d5  ./classes/payroll_deduction/PayrollDeduction.class.php
+acc452a353a6459b907c291b7eddf79ac2648506  ./classes/payroll_deduction/PayrollDeduction.class.php
 3255d49af2b89dd63002a57782193166ddc47403  ./classes/payroll_deduction/CR.class.php
 d57b135adb9f78f6e13d3cb765e2d5e3489ac43e  ./classes/payroll_deduction/CA/QC.class.php
 1b0085085555d5ba027cfc0ab971ac3854599b1d  ./classes/payroll_deduction/CA/SK.class.php
@@ -2961,8 +2961,8 @@ e5279c11bfde4d8a310d8e4653defffdf5bf0988  ./unit_tests/testcases/selenium/LoginT
 660bc0b70e556f75aa0739050b90c40e058f7a7a  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2008.php
 b45ca72e4e196e4e684eb9e93f7126a763e97a93  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2010.csv
 143a11db2f348ee883c64ec7cb24f0ed3bb0faff  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2007.php
-12b39aba2b277cff78e01e9f279090a518d98326  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2019.php
-2f1802d1c1e448166095d614edcbe99531e9d063  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2018.csv
+2c1a4439c370bf115bb467dc7893b15b899dd92a  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2019.php
+0f0bf9c2767360134bb75804894c8ab45076905d  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2018.csv
 88fc4f36f3b9adde0a7eaa346144e805ee3f09c5  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2011.php
 f7a7cc37d0db21b89f27afa222822e8e0fba5e12  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2009.csv
 b419dc2409cb280d3603af50661f127146bef099  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2007.php
@@ -2970,7 +2970,7 @@ b31af9c0921f8ed43258d991d139449828ca37ef  ./unit_tests/testcases/payroll_deducti
 d3c3ae5b4e7e2d0d2abedb5ac89af5b17d1f033d  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2017.php
 0c64a697642cfb2aae0e91e38ccb2d8b2d77237f  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionCRATest2018.csv
 7b92bcfdcef5369171e8972d22f8cc7bc703e127  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2016.csv
-74d33332b4946791fc9dccf0dfb4ed8c911116a9  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2019.csv
+f563ada91e2a857e2fc7a87af4677f5714006960  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2019.csv
 a794910699782ff281b2225b841abcfa8e29bc19  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2011.csv
 4ce61e25736cc579cacf29625d3a2402295d37b2  ./unit_tests/testcases/payroll_deduction/USPayrollDeductionTest2011.csv
 eaf22928af58047b0427de9e6276c647789760b8  ./unit_tests/testcases/payroll_deduction/CAPayrollDeductionTest2019.csv
@@ -3037,7 +3037,7 @@ b22a5ab879c9621649d7e3c0b06b1da2e98836c7  ./index.html
 3b5aa25fdf1992bd2ddfd83cde8dffdbbbfc2cf7  ./UPGRADE.txt
 7044b7fd0bc0f0dfe879182f7c29ab4f9545259e  ./includes/Database.inc.php
 80c8f909606032ffd309c0669fcc1771276ce67f  ./includes/CLI.inc.php
-f22515190548661632741a616c4ba5ed8cc66cb2  ./includes/global.inc.php
+3b0c8dfc71b56089d2511160d297783975ea8d5e  ./includes/global.inc.php
 a2a608a94b6175f90f9be265d9bb94d2ea0a3d84  ./includes/ClassMap.inc.php
 b3ab2e3520e48deaaf321d4bd438ddd0968206c6  ./includes/Interface.inc.php
 c3568ecc7952a13eeb37876e3071efa6a64a1246  ./includes/TableMap.inc.php

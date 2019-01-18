@@ -42,7 +42,7 @@ class PayrollDeduction {
 	var $obj = NULL;
 	var $data = NULL;
 
-	protected $version = '1.0.45';
+	protected $version = '1.0.46';
 	protected $data_version = '20190101';
 
 	function __construct( $country, $province, $district = NULL ) {

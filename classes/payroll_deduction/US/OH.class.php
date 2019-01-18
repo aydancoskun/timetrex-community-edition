@@ -128,6 +128,11 @@ class PayrollDeduction_US_OH extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+		20190101 => array(
+				'allowance' => 650,
+				'rate' => 1.075, //This is the extra multiplier from the "Employer Withholding Taxes: Optional Computer Formula" document, that isn't explained at all.
+		),
+
 		//01-Jan-09: No Change.
 		20080101 => array(
 				'allowance' => 650,
@@ -175,7 +180,12 @@ class PayrollDeduction_US_OH extends PayrollDeduction_US {
 			$state_rate_income = $this->getData()->getStateRatePreviousIncome( $annual_income );
 
 			$retval = bcadd( bcmul( bcsub( $annual_income, $state_rate_income ), $rate ), $state_constant );
-			//$retval = bcadd( bcmul( $annual_income, $rate ), $state_constant );
+
+			//In the "Employer Withholding Taxes: Optional Computer Formula" document there is an extra multiplier that isn't explained, try to apply that here.
+			$state_options_arr = $this->getDataFromRateArray( $this->getDate(), $this->state_options );
+			if ( isset( $state_options_arr['rate'] ) ) {
+				$retval = bcmul( $retval, $state_options_arr['rate'] );
+			}
 		}
 
 		if ( $retval < 0 ) {
