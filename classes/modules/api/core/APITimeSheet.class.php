@@ -56,7 +56,7 @@ class APITimeSheet extends APIFactory {
 	 * @return array
 	 * @internal param array $data filter data
 	 */
-	function getTimeSheetDates( $base_date = FALSE ) {
+	function getTimeSheetDates( $base_date = NULL ) {
 		$epoch = TTDate::parseDateTime( $base_date );
 
 		if ( $epoch == '' ) {
@@ -86,7 +86,7 @@ class APITimeSheet extends APIFactory {
 	 * @param bool $data
 	 * @return array|bool
 	 */
-	function getTimeSheetData( $user_id, $base_date, $data = FALSE ) {
+	function getTimeSheetData( $user_id, $base_date = NULL, $data = NULL ) {
 		if ( $user_id == '' OR TTUUID::isUUID( $user_id ) == FALSE ) {
 			//This isn't really permission issue, but in cases where the user can't see any employees timesheets, we want to display an error to them at least.
 			//return $this->returnHandler( FALSE );
@@ -580,7 +580,7 @@ class APITimeSheet extends APIFactory {
 	 * @param int $base_date EPOCH
 	 * @return array
 	 */
-	function getTimeSheetTotalData( $user_id, $base_date) {
+	function getTimeSheetTotalData( $user_id, $base_date = NULL ) {
 		$retarr = array();
 
 		$timesheet_data = $this->stripReturnHandler( $this->getTimeSheetData( $user_id, $base_date ) );

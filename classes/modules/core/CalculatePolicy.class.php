@@ -1035,8 +1035,6 @@ class CalculatePolicy {
 
 		if ( is_array($object_type_ids) AND count( $object_type_ids ) > 0 ) {
 			//Debug::Arr( $object_type_ids, 'Deleting UDT rows based on total object_type_ids: '. count($object_type_ids), __FILE__, __LINE__, __METHOD__, 10);
-			//$udtlf->getByUserIdAndDateStampAndObjectTypeAndOverrideAndMisMatchPunchControlDateStamp( $this->getUserObject()->getId(), $date_stamp, $object_type_ids, FALSE ); //System totals
-			//$udtlf->bulkDelete( $udtlf->getIDSByListFactory( $udtlf ) );
 			$udtlf->deleteByUserIdAndDateStampAndObjectTypeAndOverrideAndMisMatchPunchControlDateStamp( $this->getUserObject()->getId(), $date_stamp, $object_type_ids, FALSE ); //System totals
 			unset($this->new_system_user_date_total_id[TTDate::getMiddleDayEpoch($date_stamp)]); //Reset this when deleting records, so it can be set again when we insert them later on.
 			$this->delete_system_total_time_already_run = TRUE; //This allows insertUserDateTotal to run later on without inserting duplicated records.

@@ -421,6 +421,38 @@ AccrualViewController = BaseViewController.extend( {
 		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
+	onGridSelectAll: function(){
+		this.edit_enabled = this.editEnabled();
+		this.delete_enabled = this.deleteEnabled()
+		this.setDefaultMenu();
+	},
+
+	deleteEnabled: function(){
+		var grid_selected_id_array = this.getGridSelectIdArray();
+		if ( grid_selected_id_array.length > 0 ) {
+			for ( var i = grid_selected_id_array.length -1; i >= 0; i-- ) {
+				var selected_item = this.getRecordFromGridById(grid_selected_id_array[i]);
+				if (Global.isSet(this.delete_type_array[selected_item.type_id])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	},
+
+	editEnabled: function() {
+		var grid_selected_id_array = this.getGridSelectIdArray();
+		if ( grid_selected_id_array.length > 0 ) {
+			for ( var i = grid_selected_id_array.length -1; i >= 0; i-- ) {
+				var selected_item = this.getRecordFromGridById(grid_selected_id_array[i]);
+				if (Global.isSet(this.user_type_array[selected_item.type_id])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	},
+
 	onGridSelectRow: function() {
 
 		var selected_item = null;
@@ -430,18 +462,8 @@ AccrualViewController = BaseViewController.extend( {
 		if ( grid_selected_length > 0 ) {
 			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
 
-			if ( Global.isSet( this.user_type_array[selected_item.type_id] ) ) {
-				this.edit_enabled = true;
-			} else {
-				this.edit_enabled = false;
-			}
-
-			if ( Global.isSet( this.delete_type_array[selected_item.type_id] ) ) {
-				this.delete_enabled = true;
-			} else {
-				this.delete_enabled = false;
-
-			}
+			this.edit_enabled = this.editEnabled();
+			this.delete_enabled = this.deleteEnabled()
 		}
 
 		this.setDefaultMenu();

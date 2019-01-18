@@ -255,6 +255,10 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 			return FALSE;
 		}
 
+		if ( $order == NULL ) {
+			$order = array('status_id' => 'asc', 'legal_entity_id' => 'asc', 'name' => 'asc');
+		}
+
 		$ph = array(
 			'company_id' => TTUUID::castUUID($company_id),
 			'payroll_remittance_agency_id' => TTUUID::castUUID($agency_id),

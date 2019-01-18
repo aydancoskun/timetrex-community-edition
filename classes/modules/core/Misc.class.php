@@ -1125,8 +1125,7 @@ class Misc {
 	 * @return bool|null|string
 	 */
 	static function Array2CSV( $data, $columns = NULL, $ignore_last_row = TRUE, $include_header = TRUE, $eol = "\n" ) {
-		if ( is_array($data) AND count($data) > 0
-				AND is_array($columns) AND count($columns) > 0 ) {
+		if ( is_array($columns) AND count($columns) > 0 ) { //If data is FALSE or not an array, we still want to output some CSV encoded data.
 
 			if ( $ignore_last_row === TRUE ) {
 				array_pop($data);
@@ -1143,19 +1142,21 @@ class Misc {
 				$out = NULL;
 			}
 
-			foreach( $data as $rows ) {
-				$row_values = array();
-				foreach ($columns as $column_key => $column_name ) {
-					if ( isset($rows[$column_key]) ) {
-						$row_values[] = str_replace("\"", "\"\"", Misc::escapeCSVTriggerChars( $rows[$column_key] ) );
-					} else {
-						//Make sure we insert blank columns to keep proper order of values.
-						$row_values[] = NULL;
+			if ( is_array($data) AND count($data) > 0 ) {
+				foreach ( $data as $rows ) {
+					$row_values = array();
+					foreach ( $columns as $column_key => $column_name ) {
+						if ( isset( $rows[ $column_key ] ) ) {
+							$row_values[] = str_replace( "\"", "\"\"", Misc::escapeCSVTriggerChars( $rows[ $column_key ] ) );
+						} else {
+							//Make sure we insert blank columns to keep proper order of values.
+							$row_values[] = NULL;
+						}
 					}
-				}
 
-				$out .= '"'.implode('","', $row_values).'"'.$eol;
-				unset($row_values);
+					$out .= '"' . implode( '","', $row_values ) . '"' . $eol;
+					unset( $row_values );
+				}
 			}
 
 			return $out;
@@ -1170,20 +1171,22 @@ class Misc {
 	 * @return bool|null|string
 	 */
 	static function Array2JSON( $data, $columns = NULL ) {
-		if ( is_array($data) AND count($data) > 0
-				AND is_array($columns) AND count($columns) > 0 ) {
+		if ( is_array($columns) AND count($columns) > 0 ) { //If data is FALSE or not an array, we still want to output some JSON encoded data.
 
 			$out = array();
-			foreach( $data as $rows ) {
-				$row_values = array();
-				foreach ($columns as $column_key => $column_name ) {
-					if ( isset($rows[$column_key]) ) {
-						$row_values[$column_name] = $rows[$column_key];
-					}
-				}
 
-				$out[] = $row_values;
-				unset($row_values);
+			if ( is_array($data) AND count($data) > 0 ) {
+				foreach ( $data as $rows ) {
+					$row_values = array();
+					foreach ( $columns as $column_key => $column_name ) {
+						if ( isset( $rows[ $column_key ] ) ) {
+							$row_values[ $column_name ] = $rows[ $column_key ];
+						}
+					}
+
+					$out[] = $row_values;
+					unset( $row_values );
+				}
 			}
 
 			return json_encode( $out, JSON_PRETTY_PRINT );
@@ -1203,8 +1206,7 @@ class Misc {
 	 * @return bool|null|string
 	 */
 	static function Array2XML( $data, $columns = NULL, $column_format = NULL, $ignore_last_row = TRUE, $include_xml_header = FALSE, $root_element_name = 'data', $row_element_name = 'row') {
-		if ( is_array($data) AND count($data) > 0
-				AND is_array($columns) AND count($columns) > 0 ) {
+		if ( is_array($columns) AND count($columns) > 0 ) { //If data is FALSE or not an array, we still want to output some XML encoded data.
 
 			if ( $ignore_last_row === TRUE ) {
 				array_pop($data);
@@ -1272,14 +1274,16 @@ class Misc {
 				$out .= '<'. $root_element_name .'>'."\n";
 			}
 
-			foreach( $data as $rows ) {
-				$out .= '<'. $row_element_name .'>'."\n";
-				foreach ($columns as $column_key => $column_name ) {
-					if ( isset($rows[$column_key]) ) {
-						$out .= '	 <'. $column_key .'>'. $rows[$column_key] .'</'. $column_key .'>'."\n";
+			if ( is_array($data) AND count($data) > 0 ) {
+				foreach ( $data as $rows ) {
+					$out .= '<' . $row_element_name . '>' . "\n";
+					foreach ( $columns as $column_key => $column_name ) {
+						if ( isset( $rows[ $column_key ] ) ) {
+							$out .= '	 <' . $column_key . '>' . $rows[ $column_key ] . '</' . $column_key . '>' . "\n";
+						}
 					}
+					$out .= '</' . $row_element_name . '>' . "\n";
 				}
-				$out .= '</'. $row_element_name .'>'."\n";
 			}
 
 			if ( $root_element_name != '' ) {

@@ -482,6 +482,21 @@ class AccrualFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
+		if ( $this->getDeleted() == TRUE ) {
+			$this->Validator->inArrayKey(	'type_id',
+											 $this->getType(),
+											 TTi18n::gettext( 'Unable to delete system accrual records, modify the employees schedule/timesheet instead' ),
+											 $this->getOptions( 'delete_type' )
+			);
+		} elseif ( $this->isNew(TRUE) == FALSE ) {
+			$this->Validator->inArrayKey(	'type_id',
+											 $this->getType(),
+											 TTi18n::gettext( 'Unable to modify system accrual records' ),
+											 $this->getOptions( 'user_type' )
+			);
+		}
+
 		return TRUE;
 	}
 
@@ -502,7 +517,9 @@ class AccrualFactory extends Factory {
 			Debug::text('Found Duplicate Records: '. (int)$alf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $alf->getRecordCount() > 0 ) {
 				foreach($alf as $a_obj ) {
-					$a_obj->Delete();
+					if ( $a_obj->getId() != $this->getId() ) { //Make sure we don't delete the record we are currently editing.
+						$a_obj->Delete();
+					}
 				}
 			}
 		}

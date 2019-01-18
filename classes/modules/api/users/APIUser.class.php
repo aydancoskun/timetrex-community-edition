@@ -829,12 +829,11 @@ class APIUser extends APIFactory {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
-
 		$result = $this->stripReturnHandler( $this->getUser( array('filter_data' => array( 'id' => $employee_id ) ) ) );
 		if ( isset($result[0]) AND count($result[0]) > 0 ) {
 			/** @var UserFactory $uf */
 			$uf = TTnew( 'UserFactory' );
-			$file_name = $uf->getPhotoFileName( $this->current_company->getId(), $employee_id );
+			$file_name = $uf->getPhotoFileName( $this->current_company->getId(), $employee_id, FALSE ); //Do not include default image.
 
 			if ( file_exists($file_name) ) {
 				unlink($file_name);

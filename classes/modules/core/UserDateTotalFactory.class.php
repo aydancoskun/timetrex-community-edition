@@ -1638,6 +1638,13 @@ class UserDateTotalFactory extends Factory {
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
+		//See if the user_id changed, if so prevent it from being saved, as the user_id should never be changed on a user_date_total record as it will cause problems with recalculating.
+		if ( $this->getGenericOldDataValue( 'user_id' ) != FALSE AND $this->getUser() != $this->getGenericOldDataValue( 'user_id' ) ) {
+			$this->Validator->isTRUE(	'user_id',
+										 FALSE,
+										 TTi18n::gettext('Accumulated Time cannot be assigned to a different employee once created') );
+		}
+
 		if ( $this->getObjectType() == FALSE ) {
 			$this->Validator->isTRUE(	'object_type_id',
 										FALSE,

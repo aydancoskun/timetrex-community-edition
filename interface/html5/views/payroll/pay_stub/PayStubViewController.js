@@ -2518,8 +2518,9 @@ PayStubViewController = BaseViewController.extend( {
 					continue;
 				}
 
+
 				if ( row['total_row'] === true ) {
-					if( isNaN(total_amount) ) {
+					if( !Global.isNumeric(total_amount) ) {
 						total_amount = 0;
 					}
 
@@ -2552,19 +2553,19 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				var current_units = 0;
-				if ( Global.isSet( row['units']) &&  parseFloat( row['units'].getValue() ) > 0 ){
+				if ( Global.isSet( row['units']) && Global.isNumeric( row['units'].getValue() ) ){
 					current_units = Global.MoneyRound(parseFloat(row['units'].getValue()))
 					total_units_blank = false;
 				}
 
 				var current_total_amount = 0;
-				if ( Global.isSet( row['amount']) &&  !isNaN(row['amount'].getValue())  ){
+				if ( Global.isSet( row['amount']) && Global.isNumeric(row['amount'].getValue()) ){
 					current_total_amount = parseFloat(row['amount'].getValue());
 					total_units_blank = false;
 				}
 
 				var current_ytd_total = 0;
-				if ( Global.isSet( row['ytd_amount']) &&  !isNaN(row['ytd_amount'].getValue())  ){
+				if ( Global.isSet( row['ytd_amount']) && Global.isNumeric(row['ytd_amount'].getValue()) ){
 					current_ytd_total = parseFloat(row['ytd_amount'].getValue())
 				}
 
@@ -2573,9 +2574,17 @@ PayStubViewController = BaseViewController.extend( {
 				} else {
 					total_units = '';
 				}
-				total_amount = total_amount + current_total_amount;
-				total_ytd_amount = total_ytd_amount + current_ytd_total;
+
+				if ( Global.isNumeric( current_total_amount ) ) {
+					total_amount = total_amount + current_total_amount;
+				}
+
+				if (  Global.isNumeric( current_ytd_total ) ) {
+					total_ytd_amount = total_ytd_amount + current_ytd_total;
+				}
+
 			}
+
 			this.calcTransactionTotals();
 
 		};

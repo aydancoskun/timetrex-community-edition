@@ -174,60 +174,6 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 	 * @param bool $override
 	 * @return bool|UserDateTotalListFactory
 	 */
-	function getByUserIdAndDateStampAndObjectTypeAndOverrideAndMisMatchPunchControlDateStamp( $user_id, $date_stamp, $object_type_id, $override = FALSE) {
-		if ( $user_id == '' ) {
-			return FALSE;
-		}
-
-		if ( $date_stamp == '' ) {
-			return FALSE;
-		}
-
-		if ( $object_type_id == '' ) {
-			return FALSE;
-		}
-
-		$pcf = new PunchControlFactory();
-
-		$ph = array(
-					'user_id' => TTUUID::castUUID($user_id),
-					'date_stamp' => $this->db->BindDate( $date_stamp ),
-					'override' => $this->toBool( $override ),
-					);
-
-		//Don't check for JUST b.deleted = 0 because of the LEFT JOIN, it might be NULL too.
-		//There is a bug where sometimes a user_date_total row is orphaned with no punch_control rows that aren't deleted
-		//So make sure this query includes those orphaned rows so they can be deleted.
-		//( a.user_date_id != b.user_date_id OR b.deleted = 1 )
-		//Ensures that all worked time entries that are map to a punch_control row that is marked as deleted
-		//will also be returned so they can be deleted.
-		$query = '
-					SELECT	a.*
-					FROM 	'. $this->getTable() .' as a
-					LEFT JOIN '. $pcf->getTable() .' as b ON a.punch_control_id = b.id
-					WHERE 	a.user_id = ?
-						AND a.date_stamp = ?
-						AND
-							(
-								( a.override = ? AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .') )
-								OR
-								( b.id IS NOT NULL AND ( a.user_id = b.user_id AND ( a.date_stamp != b.date_stamp OR b.deleted = 1 ) ) )
-							)
-						AND ( a.deleted = 0 )
-					';
-
-		$this->ExecuteSQL( $query, $ph );
-
-		return $this;
-	}
-
-	/**
-	 * @param string $user_id UUID
-	 * @param int $date_stamp EPOCH
-	 * @param int $object_type_id
-	 * @param bool $override
-	 * @return bool|UserDateTotalListFactory
-	 */
 	function deleteByUserIdAndDateStampAndObjectTypeAndOverrideAndMisMatchPunchControlDateStamp( $user_id, $date_stamp, $object_type_id, $override = FALSE) {
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -253,6 +199,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		//There is a bug where sometimes a user_date_total row is orphaned with no punch_control rows that aren't deleted
 		//So make sure this query includes those orphaned rows so they can be deleted.
 		//( a.user_date_id != b.user_date_id OR b.deleted = 1 )
+		// Additionaly we ran into a case where a punch_control record got assigned to a different employee, so we need to be able to clean up that case too by checking a.user_id != b.user_id
 		//Ensures that all worked time entries that are map to a punch_control row that is marked as deleted
 		//will also be returned so they can be deleted.
 		if ( $this->getDatabaseType() === 'mysql' ) {
@@ -277,7 +224,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 							(
 								( a.override = ? AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .') )
 								OR
-								( b.id IS NOT NULL AND ( a.user_id = b.user_id AND ( a.date_stamp != b.date_stamp OR b.deleted = 1 ) ) )
+								( b.id IS NOT NULL AND ( a.user_id != b.user_id OR a.date_stamp != b.date_stamp OR b.deleted = 1 ) )
 							)
 						AND ( a.deleted = 0 )
 					';

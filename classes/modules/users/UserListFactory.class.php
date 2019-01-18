@@ -1241,7 +1241,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		if ($limit == NULL) {
 			$this->ExecuteSQL( $query, $ph );
 		} else {
-			$this->rs = $this->db->PageExecute($query, $limit, $page, $ph);
+			$this->rs = $this->db->PageExecute($query, (int)$limit, (int)$page, $ph);
 
 		}
 

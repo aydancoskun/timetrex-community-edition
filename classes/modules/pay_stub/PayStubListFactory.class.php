@@ -1309,6 +1309,9 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		}
 		$query .= ( isset($filter_data['user_group_id']) ) ? $this->getWhereClauseSQL( 'b.group_id', $filter_data['user_group_id'], 'uuid_list', $ph ) : NULL;
 
+		$query .= ( isset($filter_data['first_name']) ) ? $this->getWhereClauseSQL( 'b.first_name', $filter_data['first_name'], 'text_metaphone', $ph ) : NULL;
+		$query .= ( isset($filter_data['last_name']) ) ? $this->getWhereClauseSQL( 'b.last_name', $filter_data['last_name'], 'text_metaphone', $ph ) : NULL;
+
 		$query .= ( isset($filter_data['default_branch_id']) ) ? $this->getWhereClauseSQL( 'b.default_branch_id', $filter_data['default_branch_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['default_department_id']) ) ? $this->getWhereClauseSQL( 'b.default_department_id', $filter_data['default_department_id'], 'uuid_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['user_title_id']) ) ? $this->getWhereClauseSQL( 'b.title_id', $filter_data['user_title_id'], 'uuid_list', $ph ) : NULL;

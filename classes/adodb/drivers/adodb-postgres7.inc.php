@@ -1,6 +1,6 @@
 <?php
 /*
- @version   v5.20.9  21-Dec-2016
+ @version   v5.21.0-dev  ??-???-2016
  @copyright (c) 2000-2013 John Lim (jlim#natsoft.com). All rights reserved.
  @copyright (c) 2014      Damien Regad, Mark Newnham and the ADOdb community
   Released under both BSD license and Lesser GPL library license.
@@ -33,7 +33,7 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 				THEN 'SERIAL'
 				ELSE t.typname
 			END AS typname,
-			a.attlen, a.atttypmod, a.attnotnull, a.atthasdef, a.attnum
+			a.attlen, a.atttypmod, a.attnotnull, a.atthasdef, a.attnum, t.typcategory
 		FROM
 			pg_class c,
 			pg_attribute a
@@ -67,7 +67,7 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 				THEN 'SERIAL'
 				ELSE t.typname
 			END AS typname,
-			a.attlen, a.atttypmod, a.attnotnull, a.atthasdef, a.attnum
+			a.attlen, a.atttypmod, a.attnotnull, a.atthasdef, a.attnum, t.typcategory
 		FROM
 			pg_class c,
 			pg_namespace n,
@@ -109,6 +109,8 @@ class ADODB_postgres7 extends ADODB_postgres64 {
 	// which makes obsolete the LIMIT limit,offset syntax
 	function SelectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false,$secs2cache=0)
 	{
+		$nrows = (int) $nrows;
+		$offset = (int) $offset;
 		$offsetStr = ($offset >= 0) ? " OFFSET ".((integer)$offset) : '';
 		$limitStr  = ($nrows >= 0)  ? " LIMIT ".((integer)$nrows) : '';
 		if ($secs2cache)
@@ -307,12 +309,6 @@ class ADORecordSet_postgres7 extends ADORecordSet_postgres64{
 
 	var $databaseType = "postgres7";
 
-
-	function __construct($queryID, $mode=false)
-	{
-		parent::__construct($queryID, $mode);
-	}
-
 	// 10% speedup to move MoveNext to child class
 	function MoveNext()
 	{
@@ -338,11 +334,6 @@ class ADORecordSet_assoc_postgres7 extends ADORecordSet_postgres64{
 
 	var $databaseType = "postgres7";
 
-
-	function __construct($queryID, $mode=false)
-	{
-		parent::__construct($queryID, $mode);
-	}
 
 	function _fetch()
 	{

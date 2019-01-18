@@ -963,7 +963,10 @@ class PurgeDatabase {
 
 							$query[] = 'DELETE FROM '. $table .' as a WHERE a.object_type_id in (10, 20, 30, 50, 1010, 1020, 1030, 1040, 1100) AND NOT EXISTS ( select 1 from request as b WHERE a.object_id = b.id)';
 							$query[] = 'DELETE FROM '. $table .' as a WHERE a.object_type_id in (90) AND NOT EXISTS ( select 1 from pay_period_time_sheet_verify as b WHERE a.object_id = b.id)';
-							$query[] = 'DELETE FROM '. $table .' as a WHERE a.object_type_id in (200) AND NOT EXISTS ( select 1 from user_expense as b WHERE a.object_id = b.id)';
+
+							if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+								$query[] = 'DELETE FROM ' . $table . ' as a WHERE a.object_type_id in (200) AND NOT EXISTS ( select 1 from user_expense as b WHERE a.object_id = b.id)';
+							}
 							break;
 						case 'station':
 							//Delete stations that haven't been used (allowed_date) or updated in over two years. Only consider PC/WirelessWeb stations types though.

@@ -2801,7 +2801,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 				case 'maximum_time':
 				case 'total_time':
 				case 'start_stop_window':
-					if ( $.isNumeric( grid_data[i][key] ) ) {
+					if ( Global.isNumeric( grid_data[i][key] ) ) {
 						grid_data[i][key] = Global.secondToHHMMSS( grid_data[i][key] );
 					}
 					break;
@@ -2878,7 +2878,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 				case 'Accrual':
 					switch ( key ) {
 						case 'amount':
-							if ( $.isNumeric( grid_data[i][key] ) ) {
+							if ( Global.isNumeric( grid_data[i][key] ) ) {
 								grid_data[i][key] = Global.secondToHHMMSS( grid_data[i][key] );
 							}
 							break;
@@ -2889,7 +2889,7 @@ Global.formatGridData = function( grid_data, key_name ) {
 				case 'AccrualBalance':
 					switch ( key ) {
 						case 'balance':
-							if ( $.isNumeric( grid_data[i][key] ) ) {
+							if ( Global.isNumeric( grid_data[i][key] ) ) {
 								grid_data[i][key] = Global.secondToHHMMSS( grid_data[i][key] );
 							}
 							break;
@@ -3802,4 +3802,15 @@ Global.NewSession = function( user_id, client_id ) {
 		}
 	} );
 
+}
+
+Global.isNumeric = function( value ) {
+	var retval = false;
+
+	value = parseInt(value);
+	if ( typeof value == 'number' && !isNaN( value ) ) {
+		retval = true;
+	}
+
+	return retval;
 }

@@ -2475,7 +2475,7 @@ abstract class Factory {
 			if ($limit == NULL) {
 				$this->rs = $this->db->Execute($query, $ph);
 			} else {
-				$this->rs = $this->db->PageExecute($query, $limit, $page, $ph);
+				$this->rs = $this->db->PageExecute($query, (int)$limit, (int)$page, $ph);
 			}
 			//$total_time = (microtime(TRUE)-$start_time);
 			//Debug::text('Slow Query Executed in: '. $total_time .'ms. Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);

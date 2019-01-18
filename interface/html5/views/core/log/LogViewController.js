@@ -42,7 +42,7 @@ LogViewController = BaseViewController.extend( {
 		'document_group': ['document_group'],
 		'document_revision': ['document_revision'],
 		'schedule_policy': ['schedule_policy'],
-		'accrual_policy': ['accrual_policy', 'accrual_policy_milestone'],
+		'accrual_policy': ['accrual_policy', 'accrual_policy_milestone', 'accrual_policy_user_modifier'],
 		'client': ['client', 'client_contact', 'client_payment'],
 		'report_custom_column': ['report_custom_column'],
 		'client_contact': ['client_contact'],

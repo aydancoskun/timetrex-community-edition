@@ -45,6 +45,52 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	},
 
+    initSubLogView: function( tab_id ) {
+        var $this = this;
+        if ( this.sub_log_view_controller ) {
+            this.sub_log_view_controller.buildContextMenu( true );
+            this.sub_log_view_controller.setDefaultMenu();
+            $this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
+            $this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+                filter['table_name_object_id'] = {
+                    'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id],
+                };
+
+                return filter;
+            };
+
+            $this.sub_log_view_controller.initData();
+            return;
+        }
+
+        Global.loadScript( 'views/core/log/LogViewController.js', function() {
+            var tab = $this.edit_view_tab.find( '#' + tab_id );
+            var firstColumn = tab.find( '.first-column-sub-view' );
+            Global.trackView( 'Sub' + 'Log' + 'View' );
+            LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+        } );
+
+        function beforeLoadView() {
+
+        }
+
+        function afterLoadView( subViewController ) {
+            $this.sub_log_view_controller = subViewController;
+            $this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
+            $this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+                filter['table_name_object_id'] = {
+                    'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id],
+                };
+
+                return filter;
+            };
+            $this.sub_log_view_controller.parent_view_controller = $this;
+            $this.sub_log_view_controller.postInit = function() {
+                this.initData();
+            }
+        }
+    },
+
 	onAddClick: function() {
 		var $this = this;
 		this.is_viewing = false;

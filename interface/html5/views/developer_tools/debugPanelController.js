@@ -367,6 +367,24 @@ function runUnitTests() {
 
 		TTPromise.resolve('Reports','LoadReports');
 	});
+
+	QUnit.test( "Global.isNumeric()", function (assert) {
+		assert.ok(  Global.isNumeric(1483228800) == true , '1483228800 is an epoch and numeric');
+		assert.ok(  Global.isNumeric("1483228800") == true , '1483228800 is an epoch and a numeric string');
+
+		//assert.ok(  Global.isNumeric("1,483,228,800") == false , '1,483,228,800 has commas and so is not numeric'); //does not handle commas
+
+		assert.ok(  Global.isNumeric(2.1234) == true , '2.1234 is a float and numeric');
+		assert.ok(  Global.isNumeric(-2.1234) == true , '-2.1234 is a negative float and numeric');
+		assert.ok(  Global.isNumeric("2.1234") == true , '"2.1234" is numeric string');
+		assert.ok(  Global.isNumeric(-3) == true , '-3 is numeric');
+		assert.ok(  Global.isNumeric(0) == true , '0 is numeric');
+		assert.ok(  Global.isNumeric(1) == true , '1 is numeric');
+		assert.ok(  Global.isNumeric("1") == true , '"1" is a numeric string');
+		assert.ok(  Global.isNumeric("asdf") == false , '"asdf" is not numeric');
+		assert.ok(  Global.isNumeric("") == false , '"" is not numeric');
+	});
+
 }
 
 function hasDuplicates(array) {

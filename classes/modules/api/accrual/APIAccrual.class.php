@@ -360,7 +360,6 @@ class APIAccrual extends APIFactory {
 
 					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
 
-
 					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
 				}
 

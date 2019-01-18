@@ -1046,6 +1046,8 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function Validate( $ignore_warning = TRUE ) {
+		Debug::text('Validating...', __FILE__, __LINE__, __METHOD__, 10);
+
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
@@ -1195,7 +1197,13 @@ class PunchControlFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
-		Debug::text('Validating...', __FILE__, __LINE__, __METHOD__, 10);
+
+		//See if the user_id changed, if so prevent it from being saved, as the user_id should never be changed on a punch_control record as it will cause problems with recalculating.
+		if ( $this->getGenericOldDataValue( 'user_id' ) != FALSE AND $this->getUser() != $this->getGenericOldDataValue( 'user_id' ) ) {
+			$this->Validator->isTRUE(	'user_id',
+										 FALSE,
+										 TTi18n::gettext('Punch cannot be assigned to a different employee once created') );
+		}
 
 		//Call this here so getShiftData can get the correct total time, before we call findUserDate.
 		if ( $this->getEnableCalcTotalTime() == TRUE ) {

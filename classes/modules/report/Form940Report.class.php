@@ -573,6 +573,10 @@ class Form940Report extends Report {
 		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ralf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
 		if ( $ralf->getRecordCount() > 0 ) {
+			//Initialize array for federal payments above the per state loop below.
+			$form_data['total_payments']['include_pay_stub_entry_account'] = array();
+			$form_data['total_payments']['exclude_pay_stub_entry_account'] = array();
+			$form_data['total_payments']['pay_stub_entry_account'] = array();
 			foreach( $ralf as $key => $ra_obj ) {
 				/** @var PayrollRemittanceAgencyFactory $ra_obj */
 				if ( $ra_obj->getStatus() == 10 AND
@@ -589,20 +593,18 @@ class Form940Report extends Report {
 					//Get associated CompanyDeduction record to determine include/exclude PSE accounts for Total payments to all employees.
 					$cdlf = $ra_obj->getCompanyDeductionListFactory();
 					if ( $cdlf->getRecordCount() > 0 ) {
-						$form_data['total_payments']['include_pay_stub_entry_account'] = array();
-						$form_data['total_payments']['exclude_pay_stub_entry_account'] = array();
-						$form_data['total_payments']['pay_stub_entry_account'] = array();
 						foreach( $cdlf as $cd_obj ) {
 							if ( $cd_obj->getCalculation() == 15 AND stripos( $cd_obj->getName(), 'unemployment' ) !== FALSE ) { //15=Advanced Percent
 								Debug::Text( ' Found Company Deduction record: '. $cd_obj->getName() .' linked to Agency: ' . $ra_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 
 								if ( $province_id == '00' ) {
-									$form_data['total_payments']['include_pay_stub_entry_account'] = array_merge( $form_data['total_payments']['include_pay_stub_entry_account'], (array)$cd_obj->getIncludePayStubEntryAccount() );
-									$form_data['total_payments']['exclude_pay_stub_entry_account'] = array_merge( $form_data['total_payments']['exclude_pay_stub_entry_account'], (array)$cd_obj->getExcludePayStubEntryAccount() );
+									$form_data['total_payments']['include_pay_stub_entry_account'] = array_unique( array_merge( $form_data['total_payments']['include_pay_stub_entry_account'], (array)$cd_obj->getIncludePayStubEntryAccount() ) );
+									$form_data['total_payments']['exclude_pay_stub_entry_account'] = array_unique( array_merge( $form_data['total_payments']['exclude_pay_stub_entry_account'], (array)$cd_obj->getExcludePayStubEntryAccount() ) );
+									$form_data['total_payments']['pay_stub_entry_account'] = array_unique( array_merge( $form_data['total_payments']['pay_stub_entry_account'], (array)$cd_obj->getPayStubEntryAccount() ) );
 								} else {
-									$form_data['state_total_payments'][$province_id]['include_pay_stub_entry_account'] = array_merge( $form_data['total_payments']['include_pay_stub_entry_account'], (array)$cd_obj->getIncludePayStubEntryAccount() );
-									$form_data['state_total_payments'][$province_id]['exclude_pay_stub_entry_account'] = array_merge( $form_data['total_payments']['exclude_pay_stub_entry_account'], (array)$cd_obj->getExcludePayStubEntryAccount() );
-									$form_data['state_total_payments'][$province_id]['pay_stub_entry_account'] = array_merge( $form_data['total_payments']['pay_stub_entry_account'], (array)$cd_obj->getPayStubEntryAccount() );
+									$form_data['state_total_payments'][$province_id]['include_pay_stub_entry_account'] = array_unique( array_merge( $form_data['total_payments']['include_pay_stub_entry_account'], (array)$cd_obj->getIncludePayStubEntryAccount() ) );
+									$form_data['state_total_payments'][$province_id]['exclude_pay_stub_entry_account'] = array_unique( array_merge( $form_data['total_payments']['exclude_pay_stub_entry_account'], (array)$cd_obj->getExcludePayStubEntryAccount() ) );
+									$form_data['state_total_payments'][$province_id]['pay_stub_entry_account'] = array_unique( array_merge( $form_data['total_payments']['pay_stub_entry_account'], (array)$cd_obj->getPayStubEntryAccount() ) );
 								}
 							}
 						}
