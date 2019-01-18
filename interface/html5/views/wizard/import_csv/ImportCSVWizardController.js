@@ -887,36 +887,24 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				if ( !error_info.hasOwnProperty( error_key ) ) {
 					continue;
 				}
-				var found = false;
 
+				error_row = {};
+				// #2345 - we always want the row and column name to show in the error report.
+				error_row.rowIndex = parseInt( key ) + 2;
+				error_row.row = $.i18n._('Unknown');
+				error_row.column = error_key;
+				error_row.message = error_info[error_key][0];
+
+				// Try to get more specific error info.
 				for ( var import_key in import_data ) {
-
-					if ( !import_data.hasOwnProperty( import_key ) ) {
-						continue;
-					}
-
-					if ( import_key === error_key ) {
-						error_row = {};
-						error_row.rowIndex = parseInt( key ) + 1; //Make sure we are adding to an integer.
+					if ( import_key == error_key ) {  // #2345 - This won't match in cases where the csv columns do not match the object properties being validated. For example 'branch' != 'branch_id'
 						error_row.row = import_data[import_key].map_column_name;
 						error_row.column = import_data[import_key].field_name;
-						error_row.message = error_info[error_key][0];
-						result.push( error_row );
-						found = true;
 						break;
 					}
-
 				}
 
-				if ( !found ) {
-					error_row = {};
-					error_row.rowIndex = "Unknown";
-					error_row.row = "Not Defined";
-					error_row.column = error_key;
-					error_row.message = error_info[error_key][0];
-					result.push( error_row );
-				}
-
+				result.push( error_row );
 			}
 		}
 

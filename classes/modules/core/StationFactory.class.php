@@ -1835,7 +1835,7 @@ class StationFactory extends Factory {
 
 		$remote_addr = Misc::getRemoteIPAddress();
 
-		if ( in_array( $this->getType(), array(10, 25) )
+		if ( in_array( $this->getType(), array(10, 25, 26, 28) )
 				AND (
 						preg_match('/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{1,2})*/', $source) //IPv4
 						OR
@@ -1843,7 +1843,7 @@ class StationFactory extends Factory {
 					)
 			) {
 			Debug::text('Source is an IP address!', __FILE__, __LINE__, __METHOD__, 10);
-		} elseif ( in_array( $this->getType(), array(10, 25, 100) ) AND !in_array( strtolower( $this->getStation() ), $this->getOptions('station_reserved_word') ) )  {
+		} elseif ( in_array( $this->getType(), array(10, 25, 26, 28, 100) ) AND !in_array( strtolower( $this->getSource() ), $this->getOptions('station_reserved_word') ) )  {
 			//Do hostname lookups for TTA8 timeclocks as well.
 			Debug::text('Source is NOT an IP address, do hostname lookup: '. $source, __FILE__, __LINE__, __METHOD__, 10);
 
@@ -1919,7 +1919,7 @@ class StationFactory extends Factory {
 		Debug::text('User ID: '. $user_id .' Station ID: '. $current_station_id .' Status: '. $this->getStatus() .' Current Station: '. $this->getStation(), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Handle IP Addresses/Hostnames
-		if ( $this->getType() == 10
+		if ( in_array( $this->getType(), array(10, 25, 26, 28) )
 				AND !in_array( strtolower( $this->getSource() ), $this->getOptions('source_reserved_word') ) ) {
 
 			if ( strpos( $this->getSource(), ',') !== FALSE ) {

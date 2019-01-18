@@ -1775,44 +1775,58 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
-	doCancelClick: function(force,cancel_all) {
+	onCancelClick: function( force_no_confirm, cancel_all ) {
+		TTPromise.add('base','onCancelClick');
 		var $this = this;
-		LocalCacheData.current_doing_context_action = 'cancel';
-		if ( $this.is_changed && !force ) {
-			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
+		//#2342 This logic is also in onSubMenuClick click in RibbonViewController
+		if ( !force_no_confirm
+				&&
+				(
+					$this.is_changed == true
+					|| ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.edit_view && LocalCacheData.current_open_primary_controller.is_changed == true )
+					|| ( LocalCacheData.current_open_report_controller && LocalCacheData.current_open_report_controller.is_changed == true )
+					|| ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.is_changed == true )
+					|| ( LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.edit_view && LocalCacheData.current_open_sub_controller.is_changed == true )
 
-				if ( flag === true ) {
-					doNext();
-				}
-
-			} );
-		} else {
-			doNext();
+				) ) {
+			this.confirm_on_exit = true;
 		}
 
-		function doNext() {
+		LocalCacheData.current_doing_context_action = 'cancel';
+		if ( this.confirm_on_exit == true ) {
+			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( clicked_yes ) {
+				if ( clicked_yes === true ) {
+					doNext( cancel_all );
+				} else {
+					TTPromise.reject('base','onCancelClick');
+				}
+			});
+		} else {
+			doNext( cancel_all );
+		}
+
+		function doNext( cancel_all ) {
 			if ( !$this.edit_view && $this.parent_view_controller && $this.sub_view_mode ) {
 				$this.parent_view_controller.is_changed = false;
+				$this.parent_view_controller.confirm_on_exit = false;
 				$this.parent_view_controller.buildContextMenu( true );
-				$this.parent_view_controller.onCancelClick();
-
+				$this.parent_view_controller.onCancelClick( true ); //Force no confirm so we don't get two messages when cancelling from Edit Employee -> Wage (tab) -> Edit Wage.
 			} else {
 				$this.removeEditView();
 			}
-			TTPromise.resolve('base','onCancelClick');
-		}
-	},
 
-	onCancelClick: function( force, cancel_all ) {
-		TTPromise.add('base','onCancelClick');
-		TTPromise.wait();
-		var $this = this;
-		if ( this.confirm_on_exit ) {
-			Global.checkBeforeExit( function() {
-				$this.doCancelClick(force, cancel_all);
-			} );
-		} else {
-			this.doCancelClick(force, cancel_all);
+			if ( cancel_all ) {
+				if (LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.edit_view ) {
+					LocalCacheData.current_open_primary_controller.onCancelClick();
+				} else if (LocalCacheData.current_open_report_controller ) {
+					LocalCacheData.current_open_report_controller.onCancelClick();
+				} else if (LocalCacheData.current_open_edit_only_controller ) {
+					LocalCacheData.current_open_edit_only_controller.onCancelClick();
+				} else if (LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.edit_view ) {
+					LocalCacheData.current_open_sub_controller.onCancelClick();
+				}
+			}
+			TTPromise.resolve('base', 'onCancelClick');
 		}
 	},
 
@@ -3506,6 +3520,7 @@ BaseViewController = Backbone.View.extend( {
 		this.clearEditView();
 		this.setCurrentEditViewState( '' );
 		this.is_changed = false;
+		this.confirm_on_exit = false;
 		this.mass_edit_record_ids = [];
 		this.edit_view_tab_selected_index = 0;
 

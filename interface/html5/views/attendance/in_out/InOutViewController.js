@@ -344,7 +344,7 @@ InOutViewController = BaseViewController.extend( {
 
 		switch ( key ) {
 			case 'transfer':
-				this.onTransferChanged( c_value );
+				this.onTransferChanged();
 				break;
 			case 'job_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
@@ -375,12 +375,17 @@ InOutViewController = BaseViewController.extend( {
 
 	},
 
-	onTransferChanged: function( value ) {
+	onTransferChanged: function( initial_load ) {
+
+		var is_transfer = false;
+		if ( this.edit_view_ui_dic && this.edit_view_ui_dic['transfer'] && this.edit_view_ui_dic['transfer'].getValue() == true ) {
+			is_transfer = true;
+		}
 
 		// type_id_widget is undefined in interface/html5/framework/jquery.min.js?v=9.0.1-20151022-091549 line 2 > eval line 390
 		var type_id_widget = this.edit_view_ui_dic['type_id'];
 		var status_id_widget = this.edit_view_ui_dic['status_id'];
-		if ( value && type_id_widget && status_id_widget ) {
+		if ( is_transfer && type_id_widget && status_id_widget ) {
 
 			type_id_widget.setEnabled( false );
 			status_id_widget.setEnabled( false );
@@ -407,14 +412,20 @@ InOutViewController = BaseViewController.extend( {
 			}
 
 		}
-		
-		if ( value == true ) {
-			this.original_note = this.edit_view_ui_dic.note.getValue();
+
+		if ( is_transfer == true ) {
+			if ( this.original_note == '' ) {
+				this.original_note = this.current_edit_record.note;
+			} else {
+				this.original_note = this.edit_view_ui_dic.note.getValue();
+			}
 			this.edit_view_ui_dic.note.setValue( this.new_note ? this.new_note : '' );
 			this.current_edit_record.note = this.new_note ? this.new_note : '';
-		} else {
+
+		} else if ( typeof initial_load == 'undefined' || initial_load === false ) {
+
 			this.new_note = this.edit_view_ui_dic.note.getValue();
-			this.edit_view_ui_dic.note.setValue( this.original_note ? this.original_note : '' );
+			this.edit_view_ui_dic.note.setValue(this.original_note ? this.original_note : '');
 			this.current_edit_record.note = this.original_note ? this.original_note : '';
 		}
 	},
@@ -856,8 +867,9 @@ InOutViewController = BaseViewController.extend( {
 		//The API will return if transfer should be enabled/disabled by default.
 		if ( this.show_transfer_ui && this.edit_view_ui_dic['transfer'] ) {
 			this.edit_view_ui_dic['transfer'].setValue( this.current_edit_record['transfer'] );
-			this.onTransferChanged( this.current_edit_record['transfer'] );
 		}
+
+		this.onTransferChanged( true );
 
 		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();

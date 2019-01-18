@@ -2430,7 +2430,7 @@ TimeSheetViewController = BaseViewController.extend( {
 	checkIsSelectedPunchCell: function( row_id, cell_index ) {
 		for ( var i = 0, m = this.select_cells_Array.length; i < m; i++ ) {
 			var cell = this.select_cells_Array[i];
-			if ( cell.row_id === row_id && cell.cell_index === cell_index ) {
+			if ( cell.row_id == row_id && cell.cell_index == cell_index ) {
 				return true;
 			}
 		}

@@ -1286,22 +1286,7 @@ ScheduleViewController = BaseViewController.extend( {
 		var len = this.select_all_shifts_array.length;
 		for ( var i = 0; i < len; i++ ) {
 			var item = this.select_all_shifts_array[i];
-			var new_item = {};
-			new_item.id = item.id;
-			new_item.date_stamp = item.date_stamp;
-			new_item.user_id = item.user_id;
-			new_item.start_time = item.start_time;
-			new_item.end_time = item.end_time;
-			new_item.branch_id = item.branch_id;
-			new_item.department_id = item.department_id;
-			new_item.job_id = item.job_id;
-			new_item.job_item_id = item.job_item_id;
-			new_item.schedule_policy_id = item.schedule_policy_id;
-			new_item.note = item.note;
-			new_item.group_id = item.group_id;
-			new_item.title_id = item.title_id;
-			new_item.start_date_stamp = item.start_date_stamp;
-			args.selected.push( new_item );
+			args.selected.push( item );
 		}
 
 		LocalCacheData.extra_filter_for_next_open_view = {};

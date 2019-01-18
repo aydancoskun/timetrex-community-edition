@@ -1872,7 +1872,7 @@ class PremiumPolicyFactory extends Factory {
 			//If the premium policy start/end time spans midnight, there could be multiple windows to check
 			//where the premium policy applies, make sure we check all windows.
 			for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
-				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), $i);
+				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getStartTime(), TTDate::getBeginDayEpoch( $i ) );
 				$next_i = ( $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp) ); //Get next date to base the end_time_stamp on, and to calculate if we need to adjust for DST.
 				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, ( $next_i + ( TTDate::getDSTOffset( $tmp_start_time_stamp, $next_i ) * -1 ) ) ); //Use $end_time_stamp as it can be modified above due to being near midnight. Also adjust for DST by reversing it.
 				if ( $this->isActive( $tmp_start_time_stamp, $tmp_end_time_stamp, $calculate_policy_obj ) == TRUE ) {

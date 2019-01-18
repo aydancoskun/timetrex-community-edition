@@ -2143,10 +2143,11 @@ class TTDate {
 	}
 
 	public static function getTimeLockedDate($time_epoch, $date_epoch) {
-		//This causes unit tests to fail.
-		//if ( $time_epoch == '' OR $date_epoch == '' ) {
-			//return FALSE;
-		//}
+		//This check is needed because if the $time_epoch is FALSE or 0, it gets treated as Jan 1st 1969 @ 4:00PM in some cases due to time zone (PST) by getdate()
+		//so to prevent it from erroneously locking the date at 4PM, just return the original $date_epoch instead.
+		if ( $time_epoch == '' ) {
+			return $date_epoch;
+		}
 
 		$time_arr = getdate($time_epoch);
 		$date_arr = getdate($date_epoch);

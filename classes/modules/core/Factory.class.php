@@ -1418,9 +1418,11 @@ abstract class Factory {
 				}
 				break;
 			case 'boolean':
-				if ( isset($args) AND !is_array($args) AND trim($args) != '' AND !is_numeric($args) ) {
+				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
-						switch( strtolower( trim($args) ) ) {
+						switch( strtolower( trim( (string)$args) ) ) { //Cast to string here is critical for the below CASE's to work properly.
+							//Can't check for (int)1 or (bool)TRUE here as it matches even with (bool)FALSE.
+							case '1':
 							case 'yes':
 							case 'y':
 							case 'true':
@@ -1429,6 +1431,7 @@ abstract class Factory {
 								$ph[] = 1;
 								$query_stub = $columns .' = ?';
 								break;
+							case '0':
 							case 'no':
 							case 'n':
 							case 'false':
@@ -1436,6 +1439,9 @@ abstract class Factory {
 							case 'off':
 								$ph[] = 0;
 								$query_stub = $columns .' = ?';
+								break;
+							default:
+								Debug::Text('Invalid boolean value: '. $args, __FILE__, __LINE__, __METHOD__, 10);
 								break;
 						}
 					}

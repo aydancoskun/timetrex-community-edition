@@ -259,6 +259,7 @@ ScheduleShiftViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
 			set_empty: !this.checkOpenPermission(),
+			set_special_empty: true,
 			field: 'user_id',
 			addition_source_function: (function( target, source_data ) {
 				return $this.onEmployeeSourceCreate( target, source_data );

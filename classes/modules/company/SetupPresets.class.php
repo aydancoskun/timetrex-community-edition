@@ -2775,10 +2775,19 @@ class SetupPresets extends Factory {
 		}
 
 		if ( $country == 'us' AND $province != '' ) {
+			//States that have income tax.
 			if ( in_array( $province, array('al', 'az', 'ar', 'ca', 'co', 'ct', 'de', 'dc', 'ga', 'hi', 'id', 'il',
 											'in', 'ia', 'ks', 'ky', 'la', 'me', 'md', 'ma', 'mi', 'mn', 'ms', 'mo',
 											'mt', 'ne', 'nj', 'nm', 'ny', 'nc', 'nd', 'oh', 'ok', 'or', 'pa', 'ri',
 											'sc', 'ut', 'vt', 'va', 'wi', 'wv') ) ) {
+
+				//States that don't use marital statuses as user_value1.
+				if ( in_array( $province, array( 'az', 'il', 'in', 'oh', 'va' ) ) ) {
+					$user_value1 = 0;
+				} else {
+					$user_value1 = 10; //Single
+				}
+
 				//State Income Tax
 				$this->createCompanyDeduction(
 												array(
@@ -2791,7 +2800,7 @@ class SetupPresets extends Factory {
 													'country' => strtoupper($country),
 													'province' => strtoupper($province),
 													'pay_stub_entry_account_id' => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper($province).' - State Income Tax' ),
-													'user_value1' => 10, //Single
+													'user_value1' => $user_value1, //Single
 													'user_value2' => 0, //0 Allowances
 													'include_pay_stub_entry_account' => array( $psea_obj->getTotalGross() ),
 													'exclude_pay_stub_entry_account' => array(
@@ -2814,6 +2823,7 @@ class SetupPresets extends Factory {
 													'user_value1' => 0,
 												)
 											);
+				unset($user_value1);
 			}
 
 			//State UI wage base list: http://www.americanpayroll.org/members/stateui/state-ui-2/

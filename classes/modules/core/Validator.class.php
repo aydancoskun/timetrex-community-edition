@@ -585,13 +585,13 @@ class Validator {
 		$retval = FALSE;
 		switch ( strtolower( trim( $country) ) ) {
 			case 'ca':
-				if ( ( is_numeric( $sin ) AND $sin >= 100000000 AND $sin <= 999999999 ) ) {
-					$a_SIN = str_split($sin);
+				if ( ( is_numeric( $sin ) AND $sin >= 100000000 AND $sin < 999999999 ) ) {
+					$a_SIN = str_split( $sin );
 
-					if ( ( $a_SIN[1] *= 2) >= 10 ) {
+					if ( ( $a_SIN[1] *= 2 ) >= 10 ) {
 						$a_SIN[1] -= 9;
 					}
-					if ( ( $a_SIN[3] *= 2) >= 10 ) {
+					if ( ( $a_SIN[3] *= 2 ) >= 10 ) {
 						$a_SIN[3] -= 9;
 					}
 					if ( ( $a_SIN[5] *= 2 ) >= 10 ) {
@@ -601,13 +601,17 @@ class Validator {
 						$a_SIN[7] -= 9;
 					}
 
-					if ( ( array_sum($a_SIN) % 10 ) != 0 ) {
+					if ( ( array_sum( $a_SIN ) % 10 ) != 0 ) {
 						$retval = FALSE;
 					} else {
 						$retval = TRUE;
 					}
 				} else {
-					$retval = FALSE;
+					if ( $sin == 999999999 OR $sin == '000000000' ) { //Allow all 9/0's for a SIN in case its an out of country employee that doesn't have one.
+						$retval = TRUE;
+					} else {
+						$retval = FALSE;
+					}
 				}
 				break;
 			case 'us':

@@ -3222,12 +3222,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 					break;
-				case '100-CA': //Federal Income Tax Formula -- Ca
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Claim Amount' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value1 );
-					break;
 				case '100-US':
 				case "100-CR" :
 					$this.attachElement( 'df_14' );
@@ -3241,13 +3235,20 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
+				//
+				//Canada
+				//
+                case '100-CA': //Federal Income Tax Formula -- CA
 				case '200-CA': //Province/State Income TaxFormula -- CA-AB
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Claim Amount' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value1 );
 					break;
-				case '200-US-AZ': //Province/State Income TaxFormula -- CA-AB
+				//
+				//US - States
+				//
+				case '200-US-AZ': //Province/State Income TaxFormula -- US-AZ
 					$this.attachElement( 'df_0' );
 					$this.edit_view_form_item_dic.df_0.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Percent' ) + ": " );
 					$this.edit_view_ui_dic.df_0.setField( 'user_value1' );
@@ -3265,7 +3266,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case '200-US-CT': //Province/State Income TaxFormula -- CA-AB
+				case '200-US-CT': //Province/State Income TaxFormula
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ct_filing_status_array );
@@ -3405,18 +3406,18 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_la_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value3' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value3 );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Exemptions' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value1 );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 
 					$this.attachElement( 'df_2' );
 					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Dependents' ) + ": " );
-					$this.edit_view_ui_dic.df_2.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value2 );
+					$this.edit_view_ui_dic.df_2.setField( 'user_value3' );
+					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value3 );
 
 					break;
 				case "200-US-ME" :

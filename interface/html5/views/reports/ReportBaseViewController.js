@@ -1185,6 +1185,8 @@ ReportBaseViewController = BaseViewController.extend( {
 		this._super( 'removeEditView' );
 		this.sub_custom_column_view_controller = null;
 		this.sub_saved_report_view_controller = null;
+
+		//this is also happening in Ribbonviewcontoller in onSubMenuClick
 		LocalCacheData.current_open_report_controller = null;
 
 	},

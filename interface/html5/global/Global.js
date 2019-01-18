@@ -3280,6 +3280,7 @@ Global.getSessionIDKey = function() {
 	}
 	return 'SessionID';
 };
+
 //don't let the user leave without clicking OK.
 //uses localcachedata so that it will work in the ribbon
 Global.checkBeforeExit = function( functionToExecute ) {
@@ -3288,9 +3289,9 @@ Global.checkBeforeExit = function( functionToExecute ) {
 		alert_message = Global.confirm_on_exit_message;
 	}
 
-	TAlertManager.showConfirmAlert( alert_message, null, function (flag) {
-		if ( flag === true ) {
-			functionToExecute();
+	TAlertManager.showConfirmAlert( alert_message, null, function( clicked_yes ) {
+		if ( clicked_yes === true ) {
+			functionToExecute( clicked_yes );
 		}
 	});
 };
@@ -3579,4 +3580,19 @@ Global.setStationID = function (val) {
 
 Global.getStationID = function () {
 	return getCookie('StationID');
+}
+
+//#2342 - Close all open edit views from one place.
+Global.closeEditViews = function() {
+	TTPromise.add( 'base', 'onCancelClick' );
+    if ( typeof $('#cancelIcon')[0] != 'undefined' && $('#cancelIcon').parent().hasClass('disable-image') == false ) {   //Make sure the cancel exists first.
+		$('#cancelIcon').trigger('click');
+
+		TTPromise.wait( 'base', 'onCancelClick', function() {
+			Global.closeEditViews();
+		} );
+	} else {
+		TTPromise.resolve( 'base', 'closeEditViews');
+		TTPromise.resolve( 'base', 'onCancelClick');
+	}
 }

@@ -753,7 +753,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				}
 
 			}
-
+			TTPromise.resolve('base', 'onCancelClick');
 		}
 
 	},

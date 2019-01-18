@@ -56,6 +56,7 @@ RequestViewCommonController = BaseViewController.extend( {
 				}
 
 			}
+			TTPromise.resolve('base', 'onCancelClick');
 
 		}
 

@@ -55,13 +55,19 @@ RibbonViewController = Backbone.View.extend( {
 		}
 
 	},
-	onReportMenuClick: function( id ) {
 
-		if ( id === 'AffordableCareReport' && !(LocalCacheData.getCurrentCompany().product_edition_id > 10) ) {
-			TAlertManager.showAlert( Global.getUpgradeMessage() );
-		} else {
-			IndexViewController.openReport( LocalCacheData.current_open_primary_controller, id );
-		}
+	onReportMenuClick: function( id ) {
+		TTPromise.add( 'base', 'closeEditViews');
+		Global.closeEditViews();
+		TTPromise.wait( 'base', 'closeEditViews', function( cancel_yes ) {
+			if ( cancel_yes == true ) {
+				if ( id === 'AffordableCareReport' && !(LocalCacheData.getCurrentCompany().product_edition_id > 10) ) {
+					TAlertManager.showAlert(Global.getUpgradeMessage());
+				} else {
+					IndexViewController.openReport(LocalCacheData.current_open_primary_controller, id);
+				}
+			}
+		});
 
 	},
 
@@ -69,16 +75,12 @@ RibbonViewController = Backbone.View.extend( {
 	//Does not trigger on Report menu items with dropdowns (see the right event)
 	onSubMenuClick: function( id ) {
 		var $this = this;
-		if ( (LocalCacheData.current_open_primary_controller &&
-			LocalCacheData.current_open_primary_controller.edit_view &&
-			LocalCacheData.current_open_primary_controller.is_changed) ||
-			(LocalCacheData.current_open_report_controller &&
-			LocalCacheData.current_open_report_controller.is_changed) ||
-			(LocalCacheData.current_open_edit_only_controller &&
-			LocalCacheData.current_open_edit_only_controller.is_changed) ||
-			(LocalCacheData.current_open_sub_controller &&
-			LocalCacheData.current_open_sub_controller.edit_view &&
-			LocalCacheData.current_open_sub_controller.is_changed) ) {
+		//#2342 This logic is also in onCancelClick in BaseViewController
+		if ( ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.edit_view && LocalCacheData.current_open_primary_controller.is_changed == true )
+			|| ( LocalCacheData.current_open_report_controller && LocalCacheData.current_open_report_controller.is_changed == true )
+			|| ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.is_changed == true )
+			|| ( LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.edit_view && LocalCacheData.current_open_sub_controller.is_changed == true ) ) {
+
 			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( flag ) {
 				if ( flag === true ) {
 					doNext();
@@ -95,6 +97,12 @@ RibbonViewController = Backbone.View.extend( {
 		}
 
 		function doNext() {
+			// #2342 - confirmation box popup up on EVERY Ribbon menu navigation
+			//this logic is also happening in ReportBaseViewController in RemoveEditView
+			if ( LocalCacheData.current_open_report_controller ) {
+				LocalCacheData.current_open_report_controller = null;
+			}
+
 			$this.setSelectSubMenu( id );
 			$this.openSelectView( id );
 		}

@@ -464,6 +464,7 @@ MessageControlViewController = BaseViewController.extend( {
 				$this.removeEditView();
 				$this.isReloadViewUI = false;
 			}
+			TTPromise.resolve('base', 'onCancelClick');
 
 		}
 

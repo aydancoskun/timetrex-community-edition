@@ -581,6 +581,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 			}
+			this.buildContextMenu( true );
+			this.setEditMenu();
 		} else if ( this.edit_view_tab_selected_index === 2 ) {
 
 			if ( this.current_edit_record.id ) {

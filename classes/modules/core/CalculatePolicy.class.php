@@ -2523,9 +2523,10 @@ class CalculatePolicy {
 					//This must be below the $udt_obj assignment above.
 					//Even if the combined_rate is lower, if the input UDT record is not overtime, then we know some UDT records were skipped over likely due to differential criteria OT policies that only matched the middle of a shift.
 					//  See Unit Test: OvertimePolicy_testDifferentialDailyOverTimePolicyE1
+					//  Some of these checks are also in: $this->calculateOverTimePolicy()
 					if (	$current_trigger_time_arr['combined_rate'] > $prev_policy_data['combined_rate']
 							OR
-							$current_trigger_time_arr['combined_rate'] == $prev_policy_data['combined_rate'] AND $current_trigger_time_arr['calculation_order'] <= $prev_policy_data['calculation_order']
+							( $current_trigger_time_arr['combined_rate'] == $prev_policy_data['combined_rate'] AND $current_trigger_time_arr['calculation_order'] <= $prev_policy_data['calculation_order'] )
 							OR
 							//This may cause problems with banked time, as there wouldn't be an hourly rate associated with it, but there would be a combined_rate (accrual rate)
 							$hourly_rate >= $udt_obj->getHourlyRate() ) {
@@ -2711,8 +2712,10 @@ class CalculatePolicy {
 			}
 			Debug::text('Maximum Possible Over Time: '. $maximum_daily_total_time .' Is Differential Criteria: '. (int)$is_differential_criteria, __FILE__, __LINE__, __METHOD__, 10);
 
+
 			foreach( $trigger_time_arr_keys as $key => $trigger_time_arr_trigger_time ) {
 				$current_trigger_time_arr_trigger_time = $trigger_time_arr_keys[$key];
+
 				foreach( $trigger_time_arr[$current_trigger_time_arr_trigger_time] as $key_b => $current_trigger_time_arr ) {
 					//Filter based on combined_rate/calculation_order here rather than in processTriggerTimeArray() due to differential criterias.
 					//Only once a OT policy has actually been used do we take it into account and require the next policy to have a higher rate AND lower calculation order.
@@ -2721,11 +2724,16 @@ class CalculatePolicy {
 					//Move these checks into calculateOverTimePolicyForTriggerTime() so we can better handle differential criteria and hourly rate decisions when differential criterias are used.
 					if ( 	$prev_policy_data == FALSE
 							OR (
-									$is_differential_criteria == TRUE
+									(
+										$is_differential_criteria == TRUE
+											//Make sure we aren't going from a non-weekly OT type to a weekly OT type. Daily to Daily, or Weekly to Weekly is fine. See unit test: OvertimePolicy::testDailyAndWeeklyOverTimePolicyE3
+											//  Otherwise it could be switching from daily OT to a weekly OT, which should never happen unless the rate has changed.
+											AND ( $current_trigger_time_arr['is_weekly_over_time_policy_type_id'] == $prev_policy_data['is_weekly_over_time_policy_type_id'] )
+									)
 									OR
 									$current_trigger_time_arr['combined_rate'] > $prev_policy_data['combined_rate']
 									OR
-									$current_trigger_time_arr['combined_rate'] == $prev_policy_data['combined_rate'] AND $current_trigger_time_arr['calculation_order'] <= $prev_policy_data['calculation_order']
+									( $current_trigger_time_arr['combined_rate'] == $prev_policy_data['combined_rate'] AND $current_trigger_time_arr['calculation_order'] <= $prev_policy_data['calculation_order'] )
 								)
 						) {
 						$calculate_retval = $this->calculateOverTimePolicyForTriggerTime( $date_stamp, $current_trigger_time_arr, $prev_policy_data );
@@ -2792,6 +2800,10 @@ class CalculatePolicy {
 		return FALSE;
 	}
 
+	function getWeeklyOverTimePolicyTypeIds() {
+		return array(20, 30, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 210 );
+	}
+
 	function getWeeklyOverTimePolicyPayCodes() {
 		$weekly_over_time_pay_code_ids = array();
 		$weekly_over_time_policies = $this->filterWeeklyOverTimePolicy();
@@ -2822,7 +2834,7 @@ class CalculatePolicy {
 		$otplf = $this->over_time_policy;
 		if ( is_array($otplf) AND count($otplf) > 0 ) {
 			foreach( $otplf as $otp_obj ) {
-				if ( in_array( $otp_obj->getType(), array(20, 30, 210) ) ) {
+				if ( in_array( $otp_obj->getType(), $this->getWeeklyOverTimePolicyTypeIds() ) ) {
 					$retarr[$otp_obj->getId()] = $otp_obj;
 				}
 			}
@@ -3438,7 +3450,7 @@ class CalculatePolicy {
 				if ( is_numeric($trigger_time) ) {
 					$pay_formula_obj = $this->getPayFormulaPolicyObjectByPolicyObject( $otp_obj );
 					if ( is_object( $pay_formula_obj ) ) {
-						$trigger_time_arr[] = array( 'name' => $otp_obj->getName(), 'calculation_order' => $otp_calculation_order[$otp_obj->getType()], 'trigger_time' => $trigger_time, 'is_differential_criteria' => $otp_obj->isDifferentialCriteriaDefined(), 'over_time_policy_id' => $otp_obj->getId(), 'over_time_policy_type_id' => $otp_obj->getType(), 'contributing_shift_policy_id' => $otp_obj->getContributingShiftPolicy(), 'pay_code_id' => $otp_obj->getPayCode(), 'combined_rate' => ($pay_formula_obj->getRate() + $pay_formula_obj->getAccrualRate()) );
+						$trigger_time_arr[] = array( 'name' => $otp_obj->getName(), 'calculation_order' => $otp_calculation_order[$otp_obj->getType()], 'trigger_time' => $trigger_time, 'is_differential_criteria' => $otp_obj->isDifferentialCriteriaDefined(), 'over_time_policy_id' => $otp_obj->getId(), 'over_time_policy_type_id' => $otp_obj->getType(), 'is_weekly_over_time_policy_type_id' => in_array( $otp_obj->getType(), $this->getWeeklyOverTimePolicyTypeIds() ), 'contributing_shift_policy_id' => $otp_obj->getContributingShiftPolicy(), 'pay_code_id' => $otp_obj->getPayCode(), 'combined_rate' => ($pay_formula_obj->getRate() + $pay_formula_obj->getAccrualRate()) );
 						//Debug::Arr($trigger_time_arr, 'Trigger Time Array: ', __FILE__, __LINE__, __METHOD__, 10);
 					} else {
 						Debug::Arr( array_keys( (array)$this->pay_codes ), 'Pay Formula Policy not found! OT Policy ID: '. $otp_obj->getID(), __FILE__, __LINE__, __METHOD__, 10);
@@ -3487,7 +3499,7 @@ class CalculatePolicy {
 		$trigger_time_arr = Sort::arrayMultiSort( $trigger_time_arr, array( 'calculation_order' => SORT_ASC, 'trigger_time' => SORT_DESC, 'is_differential_criteria' => SORT_ASC, 'combined_rate' => SORT_DESC )  );
 		//Debug::Arr($trigger_time_arr, 'Source Trigger Arr After Calculation Order Sort: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		$weekly_overtime_policy_type_ids = array(20, 30, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 210 );
+		$weekly_overtime_policy_type_ids = $this->getWeeklyOverTimePolicyTypeIds();
 
 		$date_stamp = TTDate::getMiddleDayEpoch( $date_stamp ); //Optimization - Move outside loop.
 
@@ -7536,7 +7548,13 @@ class CalculatePolicy {
 					//  We considered just not calculating any policies before the hire date, however that may cause problems with re-hires.
 					if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $date_stamp ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
 						Debug::Text( 'Skip calculation of holidays before the hire date: ' . TTDate::getDate( 'DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
+						return TRUE;
+					}
 
+					//Skip calculating holidays after the termination date, as currently absences can't be entered after the termination date anyways,
+					// //and a 0hr absence which gets entered almost every time will cause timesheet calculation to fail.
+					if ( $this->getUserObject()->getTerminationDate() != '' AND TTDate::getBeginDayEpoch( $date_stamp ) > TTDate::getBeginDayEpoch( $this->getUserObject()->getTerminationDate() ) ) {
+						Debug::Text( 'Skip calculation of holidays after the termination date: ' . TTDate::getDate( 'DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
 						return TRUE;
 					}
 

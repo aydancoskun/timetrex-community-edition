@@ -191,9 +191,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 
 			foreach( $rsclf as $rsc_obj ) {
 				//Handle generating recurring schedule rows, so they are as real-time as possible.
-				$current_epoch = time();
-
-				$start_date = TTDate::getBeginWeekEpoch( $current_epoch );
+				$current_epoch = TTDate::getBeginWeekEpoch( TTDate::getBeginWeekEpoch( time() ) - 86400 );
 
 				$rsf = TTnew('RecurringScheduleFactory');
 				$rsf->setAMFMessageID( $this->getAMFMessageID() );
@@ -203,13 +201,13 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 					//FIXME: Put a cap on this perhaps, as 3mths into the future so we don't spend a ton of time doing this
 					//if the user puts sets it to display 1-2yrs in the future. Leave creating the rest of the rows to the maintenance job?
 					//Since things may change we will want to delete all schedules with each change, but only add back in X weeks at most unless from a maintenance job.
-					$maximum_end_date = ( TTDate::getBeginWeekEpoch($current_epoch) + ( $rsc_obj->getDisplayWeeks() * ( 86400 * 7 ) ) );
+					$maximum_end_date = ( TTDate::getEndWeekEpoch($current_epoch + ( 86400 * 7 ) ) + ( $rsc_obj->getDisplayWeeks() * ( 86400 * 7 ) ) );
 					if ( $rsc_obj->getEndDate() != '' AND $maximum_end_date > $rsc_obj->getEndDate() ) {
 						$maximum_end_date = $rsc_obj->getEndDate();
 					}
-					Debug::text('Recurring Schedule ID: '. $rsc_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('Recurring Schedule ID: '. $rsc_obj->getID() .' Start Date: '. TTDate::getDate('DATE+TIME', $current_epoch ) .' Maximum End Date: '. TTDate::getDate('DATE+TIME', $maximum_end_date ), __FILE__, __LINE__, __METHOD__, 10);
 
-					$rsf->addRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getCompany(), $rsc_obj->getID(), $start_date, $maximum_end_date );
+					$rsf->addRecurringSchedulesFromRecurringScheduleControl( $rsc_obj->getCompany(), $rsc_obj->getID(), $current_epoch, $maximum_end_date );
 				}
 				$rsf->CommitTransaction();
 			}

@@ -403,7 +403,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 
 		$query = '
 					select	a.* ';
-					
+
 		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			$query .= ', _ADODB_COUNT
 							(
@@ -413,7 +413,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		} else {
 			$query .= ', 0 as is_scheduled ';
 		}
-	
+
 		$query .= '	from '. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
 						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
@@ -426,7 +426,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['is_default']) ) ? $this->getWhereClauseSQL( 'a.is_default', $filter_data['is_default'], 'boolean', $ph ) : NULL;
-		$query .= ( isset($filter_data['is_scheduled']) ) ? $this->getWhereClauseSQL( 'is_scheduled', $filter_data['is_scheduled'], 'boolean', $ph ) : NULL;
+		//$query .= ( isset($filter_data['is_scheduled']) ) ? $this->getWhereClauseSQL( 'is_scheduled', $filter_data['is_scheduled'], 'boolean', $ph ) : NULL; //Unable to filter by a dynamically generated column.
 
 		$query .= ( isset($filter_data['created_by']) ) ? $this->getWhereClauseSQL( array('a.created_by', 'y.first_name', 'y.last_name'), $filter_data['created_by'], 'user_id_or_name', $ph ) : NULL;
 		$query .= ( isset($filter_data['updated_by']) ) ? $this->getWhereClauseSQL( array('a.updated_by', 'z.first_name', 'z.last_name'), $filter_data['updated_by'], 'user_id_or_name', $ph ) : NULL;
@@ -449,7 +449,7 @@ class UserReportDataListFactory extends UserReportDataFactory implements Iterato
 			return FALSE;
 		}
 
-		$list = array(); 
+		$list = array();
 		if ( $include_blank == TRUE ) {
 			$list[0] = '--';
 		}

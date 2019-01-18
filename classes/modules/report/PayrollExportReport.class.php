@@ -2464,23 +2464,26 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					//Combine all hours from the same code together.
 					foreach( $setup_data['csv_advanced']['columns'] as $column_id => $column_data ) {
 						$hour_code = trim($column_data['hour_code']);
+						$hourly_rate = ( isset($row[$column_id.'_hourly_rate']) ) ? $row[$column_id.'_hourly_rate'] : NULL;
+						$hour_code_key = $hour_code .':'. $hourly_rate; //Support for multiple rates of pay with the same hour code.
 						if ( isset( $row[$column_id.'_time'] ) AND $hour_code != '' ) {
-							if ( !isset($tmp_hour_codes[$hour_code]) ) {
-								$tmp_hour_codes[$hour_code]['hours'] = 0;
+							if ( !isset($tmp_hour_codes[$hour_code_key]) ) {
+								$tmp_hour_codes[$hour_code_key]['hour_code'] = $hour_code;
+								$tmp_hour_codes[$hour_code_key]['hours'] = 0;
 							}
 
-							//FIXME: Change array so the key is $hour_code.$hourly_rate, then put hour_code in the array value part.
-							//That way we can loop through each hour_code/hourly_rate combination and make duplicate lines if multiple rates exist.
-							$tmp_hour_codes[$hour_code]['hours'] = bcadd( $tmp_hour_codes[$column_data['hour_code']]['hours'], $row[$column_id.'_time'] ); //Use seconds for math here.
-							$tmp_hour_codes[$hour_code]['rate'] = ( isset($row[$column_id.'_hourly_rate']) ) ? $row[$column_id.'_hourly_rate'] : NULL;
+							$tmp_hour_codes[$hour_code_key]['hour_code'] = $hour_code;
+							$tmp_hour_codes[$hour_code_key]['hours'] = bcadd( $tmp_hour_codes[$hour_code_key]['hours'], $row[$column_id.'_time'] ); //Use seconds for math here.
+							$tmp_hour_codes[$hour_code_key]['rate'] = $hourly_rate;
 						}
 					}
+					unset($hour_code, $hourly_rate, $hour_code_key);
 
 					if ( isset($tmp_hour_codes) ) {
 						foreach($tmp_hour_codes as $hour_code => $hour_code_arr ) {
 							foreach( $setup_data['csv_advanced']['export_columns'] as $export_column ) {
 								$tmp_rows[$i][$export_column] = ( isset($row[$export_column]) ) ? ( is_array($row[$export_column]) AND isset($row[$export_column]['display']) ) ? $row[$export_column]['display'] : $row[$export_column] : NULL;
-								$tmp_rows[$i]['hour_code'] = $hour_code;
+								$tmp_rows[$i]['hour_code'] = $hour_code_arr['hour_code'];
 								$tmp_rows[$i]['hours'] = $hour_code_arr['hours']; //_postProcess() already converts this.
 								$tmp_rows[$i]['hourly_rate'] = $hour_code_arr['rate'];
 							}

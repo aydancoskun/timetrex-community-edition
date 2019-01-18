@@ -46,12 +46,6 @@ class OverTimePolicyFactory extends Factory {
 	protected $contributing_shift_policy_obj = NULL;
 	protected $pay_code_obj = NULL;
 
-	//Use the ordering of Type_ID
-	//We basically convert all types to Daily OT prior to calculation.
-	//Daily time always takes precedence, because more then 12hrs in a day deserves double time.
-	//Then Weekly time
-	//Then Bi Weekly
-	//Then Day Of Week
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -119,64 +113,72 @@ class OverTimePolicyFactory extends Factory {
 									);
 				break;
 			case 'calculation_order':
+				//Use the ordering of Type_ID
+				//We basically convert all types to Daily OT prior to calculation.
+				//1. Day Of Week (Since it should activate after 0hrs usually)
+				//2. Daily time (because more then 12hrs in a day deserves double time)
+				//3. Weekly time (Make sure Weekly >40, >50 can be stacked)
+				//4. Bi-Weekly
+				//5. >2 Weeks
+
 				$retval = array(
-										10 => 90, //Daily
-										20 => 200, //Weekly
-										30 => 300, //Bi-Weekly
+						10 => 170, //Daily
+						20 => 200, //Weekly
+						30 => 300, //Bi-Weekly
 
-										503 => 353, //Every 3 Weeks
-										504 => 354, //Every 4 Weeks
-										505 => 355, //Every 5 Weeks
-										506 => 356, //'Every 6 Weeks
-										507 => 357, //'Every 7 Weeks
-										508 => 358, //'Every 8 Weeks
-										509 => 359, //'Every 9 Weeks
-										510 => 360, //'Every 10 Weeks
-										511 => 361, //'Every 11 Weeks
-										512 => 362, //'Every 12 Weeks
+						503 => 353, //Every 3 Weeks
+						504 => 354, //Every 4 Weeks
+						505 => 355, //Every 5 Weeks
+						506 => 356, //Every 6 Weeks
+						507 => 357, //Every 7 Weeks
+						508 => 358, //Every 8 Weeks
+						509 => 359, //Every 9 Weeks
+						510 => 360, //Every 10 Weeks
+						511 => 361, //Every 11 Weeks
+						512 => 362, //Every 12 Weeks
 
-										40 => 20, //Sunday
-										50 => 30, //Monday
-										60 => 40, //Tuesday
-										70 => 50, //Wednesday
-										80 => 60, //Thursday
-										90 => 70, //Friday
-										100 => 80, //Saturday
+						40  => 20, //Sunday
+						50  => 30, //Monday
+						60  => 40, //Tuesday
+						70  => 50, //Wednesday
+						80  => 60, //Thursday
+						90  => 70, //Friday
+						100 => 80, //Saturday
 
-										150 => 92, //After 2-Days/Week Consecutive Worked
-										151 => 91, //After 3-Days/Week Consecutive Worked
-										152 => 90, //After 4-Days/Week Consecutive Worked
-										153 => 89, //After 5-Days/Week Consecutive Worked
-										154 => 88, //After 6-Days/Week Consecutive Worked
-										155 => 87, //After 7-Days/Week Consecutive Worked
+						150 => 92, //After 2-Days/Week Consecutive Worked
+						151 => 91, //After 3-Days/Week Consecutive Worked
+						152 => 90, //After 4-Days/Week Consecutive Worked
+						153 => 89, //After 5-Days/Week Consecutive Worked
+						154 => 88, //After 6-Days/Week Consecutive Worked
+						155 => 87, //After 7-Days/Week Consecutive Worked
 
-										300 => 98, //After 2-Days Consecutive Worked
-										301 => 97, //After 3-Days Consecutive Worked
-										302 => 96, //After 4-Days Consecutive Worked
-										303 => 95, //After 5-Days Consecutive Worked
-										304 => 94, //After 6-Days Consecutive Worked
-										305 => 93, //After 7-Days Consecutive Worked
+						300 => 98, //After 2-Days Consecutive Worked
+						301 => 97, //After 3-Days Consecutive Worked
+						302 => 96, //After 4-Days Consecutive Worked
+						303 => 95, //After 5-Days Consecutive Worked
+						304 => 94, //After 6-Days Consecutive Worked
+						305 => 93, //After 7-Days Consecutive Worked
 
-										//Since these are specific to certain days, they should be calculated before above consecutive policies.
-										350 => 86, //2nd Consecutive Day Worked
-										351 => 85, //3rd Consecutive Day Worked
-										352 => 84, //4th Consecutive Day Worked
-										353 => 83, //5th Consecutive Day Worked
-										354 => 82, //6th Consecutive Day Worked
-										355 => 81, //7th Consecutive Day Worked
+						//Since these are specific to certain days, they should be calculated before above consecutive policies.
+						350 => 86, //2nd Consecutive Day Worked
+						351 => 85, //3rd Consecutive Day Worked
+						352 => 84, //4th Consecutive Day Worked
+						353 => 83, //5th Consecutive Day Worked
+						354 => 82, //6th Consecutive Day Worked
+						355 => 81, //7th Consecutive Day Worked
 
-										//This these are no consecutive, they should be calculated after consecutive policies.
-										400 => 105, //After 2-Days/Week Worked
-										401 => 104, //After 3-Days/Week Worked
-										402 => 103, //After 4-Days/Week Worked
-										403 => 102, //After 5-Days/Week Worked
-										404 => 101, //After 6-Days/Week Worked
-										405 => 100, //After 7-Days/Week Worked
+						//This these are not consecutive, they should be calculated after consecutive policies.
+						400 => 105, //After 2-Days/Week Worked
+						401 => 104, //After 3-Days/Week Worked
+						402 => 103, //After 4-Days/Week Worked
+						403 => 102, //After 5-Days/Week Worked
+						404 => 101, //After 6-Days/Week Worked
+						405 => 100, //After 7-Days/Week Worked
 
-										180 => 190, //Holiday - This must come after all Daily types, as this usually applies >0hrs and Daily >8 hrs should still apply too.
-										200 => 100, //Over Schedule (Daily) / No Schedule
-										210 => 210, //Over Schedule (Weekly) / No Schedule
-									);
+						180 => 190, //Holiday - This must come after all Daily types, as this usually applies >0hrs and Daily >8 hrs should still apply too.
+						200 => 180, //Over Schedule (Daily) / No Schedule
+						210 => 210, //Over Schedule (Weekly) / No Schedule
+				);
 				break;
 			case 'branch_selection_type':
 				$retval = array(

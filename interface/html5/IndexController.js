@@ -595,14 +595,20 @@ IndexViewController = Backbone.View.extend( {
 } );
 
 IndexViewController.goToView = function( view_name, filter ) {
-	if ( TopMenuManager.selected_sub_menu_id ) {
-		$( '#' + TopMenuManager.selected_sub_menu_id ).removeClass( 'selected-menu' );
-	}
+	TTPromise.add( 'base', 'closeEditViews');
+	Global.closeEditViews();
+	TTPromise.wait( 'base', 'closeEditViews', function( cancel_yes ) {
+		if ( cancel_yes == true ) {
+			if ( TopMenuManager.selected_sub_menu_id ) {
+				$('#' + TopMenuManager.selected_sub_menu_id).removeClass('selected-menu');
+			}
 
-	$( '#' + view_name ).addClass( 'selected-menu' );
-	LocalCacheData.default_filter_for_next_open_view = filter;
+			$('#' + view_name).addClass('selected-menu');
+			LocalCacheData.default_filter_for_next_open_view = filter;
 
-	TopMenuManager.goToView( view_name, true );
+			TopMenuManager.goToView(view_name, true);
+		}
+	});
 
 };
 
@@ -655,37 +661,41 @@ IndexViewController.openWizard = function( wizardName, defaultData, callBack ) {
 };
 
 IndexViewController.openReport = function( parent_view_controller, view_name, id ) {
-	var view_controller = null;
+	TTPromise.add( 'base', 'closeEditViews');
+	Global.closeEditViews();
+	TTPromise.wait( 'base', 'closeEditViews', function( cancel_yes ) {
+		var view_controller = null;
 
-	if ( LocalCacheData.current_open_report_controller ) {
-		LocalCacheData.current_open_report_controller.removeEditView();
-	}
+		if (LocalCacheData.current_open_report_controller) {
+			LocalCacheData.current_open_report_controller.removeEditView();
+		}
 
-	ProgressBar.showOverlay();
+		ProgressBar.showOverlay();
 
-	switch ( view_name ) {
-		default:
-			Global.loadViewSource( view_name, view_name + 'ViewController.js', function() {
-				/* jshint ignore:start */
-				view_controller = eval( 'new ' + view_name + 'ViewController( {edit_only_mode: true} ); ' );
-				/* jshint ignore:end */
-				view_controller.parent_view_controller = parent_view_controller;
-				view_controller.openEditView();
+		switch (view_name) {
+			default:
+				Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
+					/* jshint ignore:start */
+					view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
+					/* jshint ignore:end */
+					view_controller.parent_view_controller = parent_view_controller;
+					view_controller.openEditView();
 
-				var current_url = window.location.href;
-				if ( current_url.indexOf( '&sm' ) > 0 ) {
-					current_url = current_url.substring( 0, current_url.indexOf( '&sm' ) );
-				}
-				current_url = current_url + '&sm=' + view_name;
+					var current_url = window.location.href;
+					if (current_url.indexOf('&sm') > 0) {
+						current_url = current_url.substring(0, current_url.indexOf('&sm'));
+					}
+					current_url = current_url + '&sm=' + view_name;
 
-				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
-					current_url = current_url + '&sid=' + LocalCacheData.default_edit_id_for_next_open_edit_view;
-				}
-				Global.setURLToBrowser( current_url );
+					if (LocalCacheData.default_edit_id_for_next_open_edit_view) {
+						current_url = current_url + '&sid=' + LocalCacheData.default_edit_id_for_next_open_edit_view;
+					}
+					Global.setURLToBrowser(current_url);
 
-			} );
-			break;
-	}
+				});
+				break;
+		}
+	});
 
 };
 
@@ -693,23 +703,23 @@ IndexViewController.openReport = function( parent_view_controller, view_name, id
 IndexViewController.openEditView = function( parent_view_controller, view_name, id ) {
 	var view_controller = null;
 
-	if ( !PermissionManager.checkTopLevelPermission( view_name ) && view_name !== 'Map' ) {
-		if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView' ) {
-			if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
-				TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+	if (!PermissionManager.checkTopLevelPermission(view_name) && view_name !== 'Map') {
+		if (LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView') {
+			if (LocalCacheData.getLoginUserPreference().default_login_screen) {
+				TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
 			} else {
-				TopMenuManager.goToView( 'Home' );
+				TopMenuManager.goToView('Home');
 			}
 		} else {
-			TAlertManager.showAlert('Permission denied', 'ERROR', function() {
-				if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
-					TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
+			TAlertManager.showAlert('Permission denied', 'ERROR', function () {
+				if (LocalCacheData.getLoginUserPreference().default_login_screen) {
+					TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
 				} else {
-					TopMenuManager.goToView( 'Home' );
+					TopMenuManager.goToView('Home');
 				}
 			});
 		}
-		Debug.Text('Navigation permission denied. View: '+ view_name, 'IndexController.js', 'IndexController', 'openEditView', 10);
+		Debug.Text('Navigation permission denied. View: ' + view_name, 'IndexController.js', 'IndexController', 'openEditView', 10);
 		return;
 	}
 
@@ -718,12 +728,12 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 	// 3. Click the Invoices tab 4. Edit an invoice 5. Click Payment on the ribbon menu 6. Click Cancel to bring you back to the invoice edit scren, then Cancel again to go back to the Invoices tab on the client screen.
 	// 7. You won't be back there. The Client screen will be missing.
 	//if ( LocalCacheData.current_open_edit_only_controller ) {
-		//LocalCacheData.current_open_edit_only_controller.onCancelClick();
+	//LocalCacheData.current_open_edit_only_controller.onCancelClick();
 	//}
 
 	// track edit view only view
-	Global.trackView( view_name );
-	switch ( view_name ) {
+	Global.trackView(view_name);
+	switch (view_name) {
 		case "Request":
 			Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
 				/* jshint ignore:start */
@@ -748,7 +758,7 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 			break;
 		case "Map":
 			//require(['async!' + APIGlobal.pre_login_data.map_api_url + '!callback'], function () {
-			require(['leaflet', 'leaflet-timetrex', 'leaflet-providers', 'leaflet-routing', 'measurement'], function() {
+			require(['leaflet', 'leaflet-timetrex', 'leaflet-providers', 'leaflet-routing', 'measurement'], function () {
 				Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
 					/* jshint ignore:start */
 					view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
@@ -758,31 +768,31 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 					view_controller.openEditView(id);
 					LocalCacheData.current_open_edit_only_controller = view_controller;
 				});
-			} );
+			});
 			break;
 		default:
-			Global.loadViewSource( view_name, view_name + 'ViewController.js', function() {
+			Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
 				/* jshint ignore:start */
-				view_controller = eval( 'new ' + view_name + 'ViewController( {edit_only_mode: true} ); ' );
+				view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
 				/* jshint ignore:end */
 				view_controller.parent_view_controller = parent_view_controller;
-				view_controller.openEditView( id );
+				view_controller.openEditView(id);
 
 				var current_url = window.location.href;
-				if ( current_url.indexOf( '&sm' ) > 0 ) {
-					current_url = current_url.substring( 0, current_url.indexOf( '&sm' ) );
+				if (current_url.indexOf('&sm') > 0) {
+					current_url = current_url.substring(0, current_url.indexOf('&sm'));
 				}
-				if ( id && _.isString( id ) ) {
+				if (id && _.isString(id)) {
 					current_url = current_url + '&sm=' + view_name + '&sid=' + id;
 				} else {
 					current_url = current_url + '&sm=' + view_name;
 				}
 
-				Global.setURLToBrowser( current_url );
+				Global.setURLToBrowser(current_url);
 
 				LocalCacheData.current_open_edit_only_controller = view_controller;
 
-			} );
+			});
 			break;
 
 	}

@@ -825,7 +825,7 @@ class RecurringScheduleFactory extends Factory {
 
 		return TRUE;
 	}
-	
+
 	//Find the difference between $epoch and the schedule time, so we can determine the best schedule that fits.
 	//**This returns FALSE when it doesn't match, so make sure you do an exact comparison using ===
 	function inScheduleDifference( $epoch, $status_id = FALSE ) {
@@ -1077,7 +1077,7 @@ class RecurringScheduleFactory extends Factory {
 					//FIXME: Put a cap on this perhaps, as 3mths into the future so we don't spend a ton of time doing this
 					//if the user puts sets it to display 1-2yrs in the future. Leave creating the rest of the rows to the maintenance job?
 					//Since things may change we will want to delete all schedules with each change, but only add back in X weeks at most unless from a maintenance job.
-					$maximum_end_date = ( TTDate::getBeginWeekEpoch($current_epoch) + ( $rsc_obj->getDisplayWeeks() * ( 86400 * 7 ) ) );
+					$maximum_end_date = ( TTDate::getEndWeekEpoch($current_epoch + ( 86400 * 7 )) + ( $rsc_obj->getDisplayWeeks() * ( 86400 * 7 ) ) );
 					if ( $rsc_obj->getEndDate() != '' AND $maximum_end_date > $rsc_obj->getEndDate() ) {
 						$maximum_end_date = $rsc_obj->getEndDate();
 					}
@@ -1091,15 +1091,15 @@ class RecurringScheduleFactory extends Factory {
 
 		return TRUE;
 	}
-	
+
 	function clearRecurringSchedulesFromRecurringScheduleControl( $id, $start_date, $end_date ) {
 		global $amf_message_id;
-		
+
 		$start_date = TTDate::getBeginDayEpoch( $start_date );
 		$end_date = TTDate::getEndDayEpoch( $end_date );
-		
+
 		//$id can be an array, as HolidayFactory uses that to recalculate schedules on holidays.
-		
+
 		$rslf = TTnew('RecurringScheduleListFactory');
 		$rslf->getByRecurringScheduleControlIDAndStartDateAndEndDate( $id, $start_date, $end_date );
 		if ( $rslf->getRecordCount() ) {
@@ -1120,6 +1120,8 @@ class RecurringScheduleFactory extends Factory {
 
 	function addRecurringSchedulesFromRecurringScheduleControl( $company_id, $id, $start_date, $end_date ) {
 		global $amf_message_id, $profiler;
+
+		$current_epoch = time();
 		
 		$start_date = TTDate::getBeginDayEpoch( $start_date );
 		$end_date = TTDate::getEndDayEpoch( $end_date );
@@ -1149,7 +1151,7 @@ class RecurringScheduleFactory extends Factory {
 		if ( $rsclf->getRecordCount() > 0 ) {
 			Debug::text('Recurring Schedule Control List Record Count: '. $rsclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $rsclf as $rsc_obj ) {
-				$display_weeks_end_date = TTDate::getEndWeekEpoch( ( TTDate::getBeginWeekEpoch( time() ) + ( $rsc_obj->getDisplayWeeks() * (86400 * 7) ) ) );
+				$display_weeks_end_date = ( TTDate::getEndWeekEpoch( $current_epoch + ( 86400 * 7 ) ) + ( $rsc_obj->getDisplayWeeks() * (86400 * 7) ) );
 				if ( $end_date > $display_weeks_end_date ) {
 					$end_date = $display_weeks_end_date;
 					Debug::text('  Adjusting End Date to: '. TTDate::getDate('DATE', $display_weeks_end_date), __FILE__, __LINE__, __METHOD__, 10);
@@ -1270,7 +1272,7 @@ class RecurringScheduleFactory extends Factory {
 							//if ( $recurring_schedule_shift['created_by_id'] > 0 ) {
 							//	$rsf->setCreatedBy( $recurring_schedule_shift['created_by_id'] );
 							//}
-							
+
 							if ( $rsf->isValid() ) {
 								$rsf->Save();
 								//$sf->CommitTransaction();
@@ -1311,9 +1313,9 @@ class RecurringScheduleFactory extends Factory {
 
 	function addScheduleFromRecurringSchedule( $company_obj, $start_date, $end_date ) {
 		$current_epoch = time();
-		
+
 		$company_id = $company_obj->getID();
-		
+
 		$rslf = TTNew('RecurringScheduleListFactory');
 		$rslf->getByCompanyIDAndStartDateAndEndDateAndNoConflictingSchedule($company_id, $start_date, $end_date );
 		Debug::text('Recurring Schedules Pending Commit: '. $rslf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -1332,7 +1334,7 @@ class RecurringScheduleFactory extends Factory {
 					//Use system timezone.
 					TTDate::setTimeZone();
 				}
-				
+
 				$sf = TTnew('ScheduleFactory');
 
 				$sf->StartTransaction();

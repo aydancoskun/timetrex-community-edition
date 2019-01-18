@@ -64,11 +64,11 @@ function getSessionID( $authentication_type_id = 800 ) {
 	$session_name = $authentication->getName( $authentication_type_id );
 
 	if ( isset($_COOKIE[$session_name]) AND $_COOKIE[$session_name] != '' ) {
-		$session_id = $_COOKIE[$session_name];
+		$session_id = (string)$_COOKIE[$session_name];
 	} elseif ( isset($_POST[$session_name]) AND $_POST[$session_name] != '' ) {
-		$session_id = $_POST[$session_name];
+		$session_id = (string)$_POST[$session_name];
 	} elseif ( isset($_GET[$session_name]) AND $_GET[$session_name] != '' ) {
-		$session_id = $_GET[$session_name];
+		$session_id = (string)$_GET[$session_name];
 	} else {
 		$session_id = FALSE;
 	}

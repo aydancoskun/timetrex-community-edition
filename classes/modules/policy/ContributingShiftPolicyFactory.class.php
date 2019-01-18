@@ -1121,6 +1121,11 @@ class ContributingShiftPolicyFactory extends Factory {
 			return TRUE;
 		}
 
+		//If no start/end time filters are set, we can short circuit this by making sure the exact date (no forward/backward date checks) matches and return TRUE.
+		if ( $this->getFilterStartTime() == '' AND $this->getFilterEndTime() == '' AND isset($calculate_policy_obj->user_date_total[$udt_key]) ) {
+			return $this->isActive( $calculate_policy_obj->user_date_total[$udt_key]->getDateStamp(), NULL, NULL, NULL, NULL, $calculate_policy_obj );
+		}
+
 		//Debug::text(' PP Raw Start TimeStamp('.$this->getFilterStartTime(TRUE).'): '. TTDate::getDate('DATE+TIME', $this->getFilterStartTime() ) .' Raw End TimeStamp: '. TTDate::getDate('DATE+TIME', $this->getFilterEndTime() ), __FILE__, __LINE__, __METHOD__, 10);
 		$start_time_stamp = TTDate::getTimeLockedDate( $this->getFilterStartTime(), $in_epoch); //Base the end time on day of the in_epoch.
 		$end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), $in_epoch); //Base the end time on day of the in_epoch.
@@ -1141,7 +1146,7 @@ class ContributingShiftPolicyFactory extends Factory {
 			//If the premium policy start/end time spans midnight, there could be multiple windows to check
 			//where the premium policy applies, make sure we check all windows.
 			for( $i = (TTDate::getMiddleDayEpoch($start_time_stamp) - 86400); $i <= (TTDate::getMiddleDayEpoch($end_time_stamp) + 86400); $i += 86400 ) {
-				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getFilterStartTime(), $i);
+				$tmp_start_time_stamp = TTDate::getTimeLockedDate( $this->getFilterStartTime(), TTDate::getBeginDayEpoch( $i ) );
 				$next_i = ( $tmp_start_time_stamp + ($end_time_stamp - $start_time_stamp) ); //Get next date to base the end_time_stamp on, and to calculate if we need to adjust for DST.
 				$tmp_end_time_stamp = TTDate::getTimeLockedDate( $end_time_stamp, ( $next_i + ( TTDate::getDSTOffset( $tmp_start_time_stamp, $next_i ) * -1 ) ) ); //Use $end_time_stamp as it can be modified above due to being near midnight. Also adjust for DST by reversing it.
 				if ( $this->isActive( $tmp_start_time_stamp, $tmp_start_time_stamp, $tmp_end_time_stamp, $udt_key, $shift_data, $calculate_policy_obj ) == TRUE ) {

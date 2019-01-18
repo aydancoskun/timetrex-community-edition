@@ -903,7 +903,7 @@ class Misc {
 		if ( in_array( $first_char, $trigger_chars ) ) {
 			$retval = '\''. $input; //Prepend with single quote "'" to force it to text.
 		} else {
-			$retval =  $input;
+			$retval = $input;
 		}
 
 		return str_replace('|', '\|', $retval ); //Make sure pipes are escaped anywhere in the string.
@@ -1529,39 +1529,46 @@ class Misc {
 	static function downloadHTTPFile( $url, $file_name ) {
 		if ( function_exists('curl_exec') ) {
 			Debug::Text( 'Using CURL for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
-			// Open file to write
-			$fp = fopen( $file_name, 'w+' );
-			if ( $fp !== FALSE ) {
-				$curl = curl_init();
 
-				//Don't require SSL verification, as the SSL certs may be out-of-date: http://stackoverflow.com/questions/316099/cant-connect-to-https-site-using-curl-returns-0-length-content-instead-what-c
-				curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
-				curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, FALSE );
+			if ( is_writable( dirname( $file_name ) ) ) {
+				// Open file to write
+				$fp = fopen( $file_name, 'w+' );
+				if ( $fp !== FALSE ) {
+					$curl = curl_init();
 
-				curl_setopt( $curl, CURLOPT_URL, $url );
-				curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
-				curl_setopt( $curl, CURLOPT_RETURNTRANSFER, FALSE ); // Set return transfer to false
-				curl_setopt( $curl, CURLOPT_BINARYTRANSFER, TRUE );
-				curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
-				curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 10 );
-				curl_setopt( $curl, CURLOPT_TIMEOUT, 0); //Never timeout
-				curl_setopt( $curl, CURLOPT_FILE, $fp ); // Write data to local file
-				curl_exec( $curl );
-				curl_close( $curl );
-				fclose( $fp );
+					//Don't require SSL verification, as the SSL certs may be out-of-date: http://stackoverflow.com/questions/316099/cant-connect-to-https-site-using-curl-returns-0-length-content-instead-what-c
+					curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
+					curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, FALSE );
 
-				if ( file_exists( $file_name ) ) {
-					$file_size = filesize( $file_name );
-					if ( $file_size > 0 ) {
-						return (int)$file_size;
+					curl_setopt( $curl, CURLOPT_URL, $url );
+					curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
+					curl_setopt( $curl, CURLOPT_RETURNTRANSFER, FALSE ); // Set return transfer to false
+					curl_setopt( $curl, CURLOPT_BINARYTRANSFER, TRUE );
+					curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
+					curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 10 );
+					curl_setopt( $curl, CURLOPT_TIMEOUT, 0 ); //Never timeout
+					curl_setopt( $curl, CURLOPT_FILE, $fp ); // Write data to local file
+					curl_exec( $curl );
+					curl_close( $curl );
+					fclose( $fp );
+
+					if ( file_exists( $file_name ) ) {
+						$file_size = filesize( $file_name );
+						if ( $file_size > 0 ) {
+							return (int)$file_size;
+						}
 					}
-				}
 
-				Debug::Text( 'ERROR: File download failed: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-				return FALSE;
+					Debug::Text( 'ERROR: File download failed: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+
+					return FALSE;
+				} else {
+					Debug::Text( 'ERROR: Unable to open file for download/writing, likely permission problem?: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+
+					return FALSE;
+				}
 			} else {
-				Debug::Text( 'ERROR: Unable to open file for download/writing, likely permission problem?: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-				return FALSE;
+				Debug::Text( 'ERROR: Download directory not writable, likely permission problem?: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		} else {
 			Debug::Text( 'Using PHP streams for HTTP...', __FILE__, __LINE__, __METHOD__, 10);

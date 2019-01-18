@@ -726,6 +726,8 @@ class Install {
 				if ( $obj->getSequenceName() != '' ) {
 					$this->initializeSequence( $obj, $table, $class, $db_conn );
 				}
+			} else {
+				Debug::Text('  Missing class for table: '. $table .' Class: '. $class, __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 
@@ -948,10 +950,10 @@ class Install {
 
 						$i++;
 
-						if ( $is_root_user == TRUE AND fileowner( $file_name ) === 0 ) { //Check if file is owned by root.
-							Debug::Text('Changing ownership of: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-							chown( $file_name, $web_server_user );
-							chgrp( $file_name, $web_server_user );
+						if ( $is_root_user == TRUE AND $web_server_user != FALSE AND @fileowner( $file_name ) === 0 ) { //Check if file is owned by root.
+							Debug::Text('  Changing ownership of: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+							@chown( $file_name, $web_server_user );
+							@chgrp( $file_name, $web_server_user );
 						}
 
 						//Debug::Text('Checking readable/writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);

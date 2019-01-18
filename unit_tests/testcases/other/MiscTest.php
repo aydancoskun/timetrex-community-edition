@@ -983,6 +983,24 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( (int)$size, 30 ); //30 Bytes.
 		$this->assertEquals( filesize($temp_file_name), (int)$size ); //30 Bytes.
 		unlink($temp_file_name);
+
+
+		//Test downloading to the same file that should already exist from above.
+		//Debug::Text( ' Temp File Name: '. $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
+		$size = (int)Misc::downloadHTTPFile( 'https://'.$url, $temp_file_name );
+		$this->assertEquals( (int)$size, (int)$header_size ); //Make sure the downloaded size matches the header size too.
+		$this->assertEquals( (int)$size, 30 ); //30 Bytes.
+		$this->assertEquals( filesize($temp_file_name), (int)$size ); //30 Bytes.
+		unlink($temp_file_name);
+
+
+		//Test downloading to a directory without permissions, or one that doesn't exist.
+		$temp_file_name = '/root'.tempnam( '/tmp/', 'unit_test_http_' );
+		Debug::Text( ' Temp File Name: '. $temp_file_name, __FILE__, __LINE__, __METHOD__, 10 );
+		$retval = Misc::downloadHTTPFile( 'https://'.$url, $temp_file_name );
+
+		$this->assertEquals( $retval, FALSE ); //Download should fail without PHP warnings.
+		@unlink($temp_file_name);
 	}
 
 	function testgetAmountUpToLimit() {
@@ -1085,16 +1103,16 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
 
 		$parent_dir = '/var/www/TimeTrex556688';
-		$child_dir =  '/var/www/TimeTrex556688/storage';
+		$child_dir = '/var/www/TimeTrex556688/storage';
 		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), TRUE );
 
 		$parent_dir = '/var/www/TimeTrex556688/';
-		$child_dir =  '/var/www/TimeTrex556688/storage/';
+		$child_dir = '/var/www/TimeTrex556688/storage/';
 		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), TRUE );
 
 		//This directory should exist for this test to be accurate.
 		$parent_dir = '/etc/cron.d';
-		$child_dir =  '/etc/cron.daily';
+		$child_dir = '/etc/cron.daily';
 		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
 	}
 

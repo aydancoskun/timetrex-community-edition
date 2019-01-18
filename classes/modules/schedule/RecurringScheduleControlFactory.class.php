@@ -475,7 +475,7 @@ class RecurringScheduleControlFactory extends Factory {
 			//FIXME: Put a cap on this perhaps, as 3mths into the future so we don't spend a ton of time doing this
 			//if the user puts sets it to display 1-2yrs in the future. Leave creating the rest of the rows to the maintenance job?
 			//Since things may change we will want to delete all schedules with each change, but only add back in X weeks at most unless from a maintenance job.
-			$maximum_end_date = ( TTDate::getBeginWeekEpoch($current_epoch) + ( $this->getDisplayWeeks() * ( 86400 * 7 ) ) );
+			$maximum_end_date = ( TTDate::getEndWeekEpoch($current_epoch + ( 86400 * 7 )) + ( $this->getDisplayWeeks() * ( 86400 * 7 ) ) );
 			if ( $this->getEndDate() != '' AND $maximum_end_date > $this->getEndDate() ) {
 				$maximum_end_date = $this->getEndDate();
 			}

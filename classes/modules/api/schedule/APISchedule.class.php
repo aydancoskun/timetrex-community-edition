@@ -94,7 +94,9 @@ class APISchedule extends APIFactory {
 
 			Debug::Arr( $user_ids, 'First Date Stamp: '. $first_date_stamp .' Last: '. $last_date_stamp .' User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
+			$retarr['user_id'] = $this->getCurrentUserObject()->getID();
 			$retarr['date_stamp'] = TTDate::getDate('DATE', time() );
+
 			Debug::Text( 'No input data to base defaults on...', __FILE__, __LINE__, __METHOD__, 10);
 
 			return $retarr;
