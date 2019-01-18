@@ -3064,8 +3064,6 @@ class TTDate {
 						'-1650-last_24_months' => TTi18n::getText('Last 24 Months'),
 
 						'-1700-this_year' => TTi18n::getText('This Year'), //Used to be 'This Year (Year-To-Date)', but its actually the entire year which was confusing for some users. They can use 'This Year (Up To Today)' instead.
-						'-1705-this_year_this_pay_period' => TTi18n::getText('This Year (Up To This Pay Period)'),
-						'-1710-this_year_last_pay_period' => TTi18n::getText('This Year (Up To Last Pay Period)'),
 						'-1715-this_year_yesterday' => TTi18n::getText('This Year (Up To Yesterday)'),
 						'-1716-this_year_today' => TTi18n::getText('This Year (Up To Today)'),
 						'-1717-this_year_ytd' => TTi18n::getText('This Year (Year-To-Date)'), //Could be "This Year (Up to Tomorrow)"? This does not include the current day.
@@ -3092,8 +3090,6 @@ class TTDate {
 						'-1812-to_this_week' => TTi18n::getText('Up To This Week'),
 						'-1814-to_7_days' => TTi18n::getText('Up To 7 Days Ago'),
 						'-1816-to_14_days' => TTi18n::getText('Up To 14 Days Ago'),
-						'-1820-to_last_pay_period' => TTi18n::getText('Up To Last Pay Period'),
-						'-1822-to_this_pay_period' => TTi18n::getText('Up To This Pay Period'),
 						'-1830-to_last_month' => TTi18n::getText('Up To Last Month'),
 						'-1832-to_this_month' => TTi18n::getText('Up To This Month'),
 						'-1840-to_30_days' => TTi18n::getText('Up To 30 Days Ago'),
@@ -3140,6 +3136,10 @@ class TTDate {
 									'-1200-this_pay_period' => TTi18n::getText('This Pay Period'), //Select one or more pay period schedules
 									'-1210-last_pay_period' => TTi18n::getText('Last Pay Period'), //Select one or more pay period schedules
 									'-1212-no_pay_period' => TTi18n::getText('No Pay Period'), //Data assigned to no pay periods or pay_period_id = 0
+									'-1705-this_year_this_pay_period' => TTi18n::getText('This Year (Up To This Pay Period)'),
+									'-1710-this_year_last_pay_period' => TTi18n::getText('This Year (Up To Last Pay Period)'),
+									'-1820-to_last_pay_period' => TTi18n::getText('Up To Last Pay Period'),
+									'-1822-to_this_pay_period' => TTi18n::getText('Up To This Pay Period'),
 									);
 
 			$retarr = array_merge( $retarr, $pay_period_arr );

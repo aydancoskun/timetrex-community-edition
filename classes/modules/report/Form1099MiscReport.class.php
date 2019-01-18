@@ -736,6 +736,8 @@ class Form1099MiscReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) AND isset($this->tmp_data['user']) ) {
+			$sort_columns = $this->getSortConfig();
+
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach ( $level_1 as $date_stamp => $row ) {
@@ -759,8 +761,8 @@ class Form1099MiscReport extends Report {
 			if ( is_array($this->data) AND !($format == 'html' OR $format == 'pdf') ) {
 				Debug::Text('Calculating Form Data...', __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $this->data as $row ) {
-					if ( !isset($this->form_data[$row['user_id']]) ) {
-						$this->form_data[$row['user_id']] = array( 'user_id' => $row['user_id'] );
+					if ( !isset($this->form_data['user'][$row['legal_entity_id']][$row['user_id']]) ) {
+						$this->form_data['user'][$row['legal_entity_id']][$row['user_id']] = array( 'user_id' => $row['user_id'] );
 					}
 
 					foreach( $row as $key => $value ) {
@@ -771,6 +773,8 @@ class Form1099MiscReport extends Report {
 								$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = 0;
 							}
 							$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = bcadd( $this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key], $value );
+						} elseif ( isset( $sort_columns[$key] ) ) { //Sort columns only, to help sortFormData() later on.
+							$this->form_data['user'][ $row['legal_entity_id'] ][ $row['user_id'] ][ $key ] = $value;
 						}
 					}
 				}
@@ -807,6 +811,8 @@ class Form1099MiscReport extends Report {
 		Debug::Text('Form Type: '. $form_type, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( isset( $this->form_data['user'] ) AND is_array( $this->form_data['user'] ) ) {
+			$this->sortFormData(); //Make sure forms are sorted.
+
 			foreach ( $this->form_data['user'] as $legal_entity_id => $user_rows ) {
 				//$total_row = array();
 
@@ -822,8 +828,6 @@ class Form1099MiscReport extends Report {
 
 				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
-
-				$this->sortFormData(); //Make sure forms are sorted.
 
 				$f1099m = $this->getF1099MiscObject();
 				$f1099m->setDebug(FALSE);

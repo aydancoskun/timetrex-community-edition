@@ -1278,6 +1278,5 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 
 		unset( $uuid_arr, $sorted_uuid_arr, $diff_uuid_arr );
 	}
-
 }
 ?>

@@ -534,6 +534,13 @@ class AccrualFactory extends Factory {
 		//Calculate balance
 		if ( $this->getEnableCalcBalance() == TRUE ) {
 			Debug::text('Calculating Balance is enabled! ', __FILE__, __LINE__, __METHOD__, 10);
+
+			//If the user and/or the accrual policy account was changed, recalculate the old and new values.
+			$data_diff = $this->getDataDifferences();
+			if ( isset($data_diff['user_id']) OR isset($data_diff['accrual_policy_account_id']) ) {
+				AccrualBalanceFactory::calcBalance( ( ( isset($data_diff['user_id']) ) ? $data_diff['user_id'] : $this->getUser() ), ( ( isset($data_diff['accrual_policy_account_id']) ) ? $data_diff['accrual_policy_account_id'] : $this->getAccrualPolicyAccount() ) );
+			}
+
 			AccrualBalanceFactory::calcBalance( $this->getUser(), $this->getAccrualPolicyAccount() );
 		}
 

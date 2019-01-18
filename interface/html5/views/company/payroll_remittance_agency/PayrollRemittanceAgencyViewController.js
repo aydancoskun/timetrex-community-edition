@@ -608,13 +608,13 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
 		this.onTypeChange();
-		this.getAgencyOptions();
 		var $this = this;
 		TTPromise.wait( null, null, function() {
 			$this.detachElement( 'province' );
 			$this.detachElement( 'district' );
 			$this.eSetProvince( $this.current_edit_record['country'] );
 			$this.setDistrict( $this.current_edit_record['country'], $this.current_edit_record['province'] );
+			$this.getAgencyOptions();
 		} );
 	},
 

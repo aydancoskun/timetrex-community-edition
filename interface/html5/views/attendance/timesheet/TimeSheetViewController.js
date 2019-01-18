@@ -2358,6 +2358,12 @@ TimeSheetViewController = BaseViewController.extend( {
 					var cell_val = $( e.target ).closest( 'td,th' ).html();
 					$this.onCellSelect( 'absence_grid', row_id, cell_index, cell_val, this, e );
 					$this.onSelectRow( 'absence_grid', row_id, this );
+
+					if ( $( '.edit-view:visible' ).length == 0 ) {
+						$this.setDefaultMenu();
+					} else {
+						$this.setEditMenu();
+					}
 				}
 			},
 			onCellSelect: function ( row_id, cell_index, cell_val, e ) {

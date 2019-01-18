@@ -571,6 +571,7 @@ class Debug {
 		$error = error_get_last();
 		if ( $error !== NULL AND isset($error['type']) AND $error['type'] == 1 ) { //Only trigger fatal errors on shutdown.
 			self::$php_errors++;
+			self::$email_log = TRUE; //On FATAL error, the error handler is not called, just shutdown is called. So we need to make sure we increment the php_errors and enable emailing the log.
 			self::Text('PHP ERROR - FATAL('. $error['type'] .'): '. $error['message'] .' File: '. $error['file'] .' Line: '. $error['line'], $error['file'], $error['line'], __METHOD__, 0 );
 
 			if ( defined('TIMETREX_API') AND TIMETREX_API == TRUE ) { //Only when a fatal error occurs.

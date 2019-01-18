@@ -1425,6 +1425,12 @@ Global.hasRequireLoaded = function( scriptPath ) {
 };
 
 Global.loadScript = function( scriptPath, onResult ) {
+	if ( typeof scriptPath !== 'string' ) {
+		// Not ideal fix but this is to handle the scriptPath.split is not a function error in #2696. if the path is not a string, split does not exist as a function.
+		// Hard to find root-cause/reproduce, so this fix is to reduce the occurances of the JS exceptions related to it.
+		return false;
+	}
+
 	var async = true;
 	if ( typeof (onResult) === 'undefined' ) {
 		async = false;
@@ -3893,7 +3899,7 @@ Global.NewSession = function( user_id, client_id ) {
 Global.isNumeric = function( value ) {
 	var retval = false;
 
-	value = parseInt( value );
+	value = parseFloat( value );
 	if ( typeof value == 'number' && !isNaN( value ) ) {
 		retval = true;
 	}

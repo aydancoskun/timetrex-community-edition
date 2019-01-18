@@ -590,7 +590,7 @@ class FormW2Report extends Report {
 				'l12b' => $default_include_exclude_arr,
 				'l12c' => $default_include_exclude_arr,
 				'l12d' => $default_include_exclude_arr,
-				'l13' => $default_include_exclude_arr,
+				'l13b' => array('company_deduction'),
 				'l14' => $default_include_exclude_arr,
 				'l14a' => $default_include_exclude_arr,
 				'l14b' => $default_include_exclude_arr,
@@ -663,6 +663,23 @@ class FormW2Report extends Report {
 			//Debug::Arr($tax_deductions, 'Tax Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Arr($user_deduction_data, 'User Deductions: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
+		unset( $cd_obj);
+
+		//Get users assigned to Box 13b (Retirement Plan) tax/deductions.
+		if ( isset($form_data['l13b']['company_deduction']) ) {
+			$udlf = TTnew( 'UserDeductionListFactory' );
+			$udlf->getByCompanyIdAndCompanyDeductionId( $this->getUserObject()->getCompany(), $form_data['l13b']['company_deduction'] );
+			if ($udlf->getRecordCount() > 0 ) {
+				foreach( $udlf as $ud_obj ) {
+					if ( ( $ud_obj->getStartDate() == '' OR $ud_obj->getStartDate() <= $filter_data['end_date'] )
+							AND ( $ud_obj->getEndDate() == '' OR $ud_obj->getEndDate() >= $filter_data['start_date'] ) ) {
+						$this->form_data['l13_user_deduction_data'][ $ud_obj->getUser() ] = TRUE;
+					}
+				}
+			}
+		}
+		unset( $udlf, $ud_obj);
+
 
 		$pself = TTnew( 'PayStubEntryListFactory' );
 		$pself->getAPIReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
@@ -889,6 +906,8 @@ class FormW2Report extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) AND isset($this->tmp_data['user']) ) {
+			$sort_columns = $this->getSortConfig();
+
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				if ( isset($this->tmp_data['user'][$user_id]) ) {
 					foreach ( $level_1 as $date_stamp => $row ) {
@@ -912,8 +931,8 @@ class FormW2Report extends Report {
 			if ( is_array($this->data) AND !($format == 'html' OR $format == 'pdf') ) {
 				Debug::Text('Calculating Form Data...', __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $this->data as $row ) {
-					if ( !isset($this->form_data[$row['user_id']]) ) {
-						$this->form_data[$row['user_id']] = array( 'user_id' => $row['user_id'] );
+					if ( !isset($this->form_data['user'][$row['legal_entity_id']][$row['user_id']]) ) {
+						$this->form_data['user'][$row['legal_entity_id']][$row['user_id']] = array( 'user_id' => $row['user_id'] );
 					}
 
 					foreach( $row as $key => $value ) {
@@ -924,6 +943,8 @@ class FormW2Report extends Report {
 								$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = 0;
 							}
 							$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = bcadd( $this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key], $value );
+						} elseif ( isset( $sort_columns[$key] ) ) { //Sort columns only, to help sortFormData() later on.
+							$this->form_data['user'][$row['legal_entity_id']][$row['user_id']][$key] = $value;
 						}
 					}
 				}
@@ -959,6 +980,8 @@ class FormW2Report extends Report {
 		}
 
 		if ( isset( $this->form_data['user'] ) AND is_array( $this->form_data['user'] ) ) {
+			$this->sortFormData(); //Make sure forms are sorted.
+
 			foreach ( $this->form_data['user'] as $legal_entity_id => $user_rows ) {
 				if ( isset( $this->form_data['legal_entity'][$legal_entity_id] ) == FALSE ) {
 					Debug::Text( 'Missing Legal Entity: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -978,9 +1001,10 @@ class FormW2Report extends Report {
 				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 
-				if ( is_object($this->form_data['remittance_agency'][$legal_entity_id]['00']) ) {
-					$contact_user_obj = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getContactUserObject();
-				} else {
+				if ( is_object( $this->form_data['remittance_agency'][ $legal_entity_id ]['00'] ) ) {
+					$contact_user_obj = $this->form_data['remittance_agency'][ $legal_entity_id ]['00']->getContactUserObject();
+				}
+				if ( !isset( $contact_user_obj ) OR !is_object( $contact_user_obj ) ) {
 					$contact_user_obj = $this->getUserObject();
 				}
 
@@ -1012,8 +1036,6 @@ class FormW2Report extends Report {
 
 					$this->getFormObject()->addForm( $return1040 );
 				}
-
-				$this->sortFormData(); //Make sure forms are sorted.
 
 				$fw2 = $this->getFW2Object();
 
@@ -1101,6 +1123,7 @@ class FormW2Report extends Report {
 									'l12c'                => NULL,
 									'l12d_code'           => NULL,
 									'l12d'                => NULL,
+									'l13b'                => FALSE,
 									'l14a_name'           => NULL,
 									'l14a'                => NULL,
 									'l14b_name'           => NULL,
@@ -1126,6 +1149,10 @@ class FormW2Report extends Report {
 							if ( $row['l12d'] > 0 AND isset( $setup_data['l12d_code'] ) AND $setup_data['l12d_code'] != '' ) {
 								$ee_data['l12d_code'] = $setup_data['l12d_code'];
 								$ee_data['l12d'] = $row['l12d'];
+							}
+
+							if ( isset($this->form_data['l13_user_deduction_data']) AND isset($this->form_data['l13_user_deduction_data'][$user_id]) ) {
+								$ee_data['l13b'] = TRUE;
 							}
 
 							if ( $row['l14a'] > 0 AND isset( $setup_data['l14a_name'] ) AND $setup_data['l14a_name'] != '' ) {

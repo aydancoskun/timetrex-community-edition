@@ -368,6 +368,8 @@ class LogDetailFactory extends Factory {
 						}
 					}
 					break;
+				case 'RemittanceSourceAccountFactory':
+				case 'RemittanceSourceAccountListFactory':
 				case 'RemittanceDestinationAccountFactory':
 				case 'RemittanceDestinationAccountListFactory':
 					//Only log secure values.
@@ -395,6 +397,15 @@ class LogDetailFactory extends Factory {
 							$diff_arr['state_id']
 					);
 				break;
+				case 'LegalEntityFactory':
+				case 'LegalEntityListFactory':
+					//Only log secure values.
+					if ( isset($diff_arr['payment_services_api_key']) ) {
+						$old_data['payment_services_api_key'] = ( isset($old_data['payment_services_api_key']) ) ? $object->getSecurePaymentServicesAPIKey( $object->getPaymentServicesAPIKey( $old_data['payment_services_api_key'] ) ) : '';
+						$new_data['payment_services_api_key'] = ( isset($new_data['payment_services_api_key']) ) ? $object->getSecurePaymentServicesAPIKey( $object->getPaymentServicesAPIKey( $new_data['payment_services_api_key'] ) ) : '';
+					}
+					break;
+
 			}
 
 			//Ignore specific columns here, like updated_date, updated_by, etc...

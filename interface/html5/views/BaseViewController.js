@@ -1289,7 +1289,7 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	onCustomContextClick: function( id ) {
-
+		return false; //FALSE tells onContextMenuClick() to keep processing.
 	},
 
 	onNavigationClick: function( id ) {
@@ -7347,8 +7347,6 @@ BaseViewController = Backbone.View.extend( {
 			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
 			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
 
-			var tab = $this.edit_view_tab.find( '#' + tab_id );
-			var firstColumn = tab.find( '.first-column-sub-view' );
 			this.sub_log_view_controller.search();
 		} else {
 
@@ -7545,7 +7543,7 @@ BaseViewController = Backbone.View.extend( {
 					content: '<div style="width:100%;">' +
 					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Available Balance' ) + ': </span><span style="float:right;">' + available_balance_value + '</span></div>' +
 					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Current Time' ) + ': </span><span style="float:right;">' + current_time_value + '</span></div>' +
-					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Remaining Balance' ) + ' : </span><span style="float:right;">' + remaining_balance_value + '</span></div>' +
+					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Remaining Balance' ) + ': </span><span style="float:right;">' + remaining_balance_value + '</span></div>' +
 					'<div style="width:100%; height: 20px; clear: both;"></div>' +
 					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Projected Balance by' ) + ' ' + last_date_stamp + ': </span><span style="float:right;">' + Global.secondToHHMMSS( result_data.projected_balance ) + '</span></div>' +
 					'<div style="width:100%; clear: both;"><span style="float:left;">' + $.i18n._( 'Projected Remaining Balance' ) + ':</span><span style="float:right;">' + Global.secondToHHMMSS( result_data.projected_remaining_balance ) + '</span></div>' +

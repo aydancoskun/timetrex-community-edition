@@ -242,7 +242,6 @@ class CalculatePayStub extends PayStubFactory {
 			return $this->user_obj;
 		} else {
 			$ulf = TTnew( 'UserListFactory' );
-			//$this->user_obj = $ulf->getById( $this->getUser() )->getCurrent();
 			$ulf->getById( $this->getUser() );
 			if ( $ulf->getRecordCount() > 0 ) {
 				$this->user_obj = $ulf->getCurrent();

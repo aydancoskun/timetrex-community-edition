@@ -153,7 +153,7 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 		var eFile = new RibbonSubMenu( {
 			label: $.i18n._( 'eFile' ),
-			id: ContextMenuIconName.e_file,
+			id: ContextMenuIconName.e_file_xml,
 			group: form_setup_group,
 			icon: Icons.e_file,
 			permission_result: true,
@@ -203,10 +203,14 @@ T4SummaryReportViewController = ReportBaseViewController.extend( {
 
 	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.e_file: //All report view
+			case ContextMenuIconName.e_file_xml: //All report view
 				this.onViewClick( 'efile_xml' );
 				break;
+			default:
+				return false; //FALSE tells onContextMenuClick() to keep processing.
 		}
+
+		return true;
 	},
 
 	onReportMenuClick: function( id ) {

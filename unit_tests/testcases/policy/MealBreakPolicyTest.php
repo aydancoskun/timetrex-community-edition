@@ -451,7 +451,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -527,7 +527,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -603,7 +603,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -695,7 +695,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -789,7 +789,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -884,7 +884,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -962,7 +962,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1028,7 +1028,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 								   array( $this->policy_ids['regular'][100] ) //Regular
 		);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_epoch2 = TTDate::getBeginDayEpoch( ( $date_epoch + 86400 + 3601 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
@@ -1117,7 +1117,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1229,7 +1229,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1342,7 +1342,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1488,7 +1488,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1635,7 +1635,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1781,7 +1781,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1859,7 +1859,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1920,7 +1920,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2101,7 +2101,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2281,7 +2281,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									NULL, //Absence
 									$this->policy_ids['regular'] //Regular
 									);
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2410,7 +2410,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2539,7 +2539,7 @@ class MealBreakPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,

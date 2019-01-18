@@ -162,6 +162,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 						'-1420-due_date' => TTi18n::gettext('Due Date'),
 						'-1430-next_reminder_date' => TTi18n::gettext('Next Reminder Date'),
+						'-1440-reminder_user_id' => TTi18n::gettext('Send Reminder To'),
 
 						'-2000-created_by' => TTi18n::gettext('Created By'),
 						'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -1010,7 +1011,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 			//Send data to TimeTrex Payment Services.
 			$le_obj = $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject();
 			if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
-				require_once( '../../classes/modules/other/TimeTrexPaymentServices.class.php' );
+				require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'TimeTrexPaymentServices.class.php' );
 				try {
 					$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
 					$retval = $tt_ps_api->setAgencyAuthorization( $tt_ps_api->convertRemittanceAgencyEventObjectToAgencyAuthorizationArray( $this ) );
@@ -1048,9 +1049,12 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						case 'effective_date':
 						case 'due_date':
 						case 'last_due_date':
+						case 'next_reminder_date':
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( TTDate::parseDateTime( $data[$key] ) );
 							}
+							break;
+						case 'last_reminder_date': //Skip this as should only be set internally.
 							break;
 						case 'enable_recalculate_dates':
 							$this->setEnableRecalculateDates( $data[$key] );
@@ -1142,7 +1146,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Payroll Remittance Agency') .': '. $this->getPayrollRemittanceAgencyId(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Payroll Remittance Agency Event'), NULL, $this->getTable(), $this );
 	}
 
 	/**

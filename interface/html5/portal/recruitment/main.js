@@ -538,6 +538,7 @@ require( [
 	'backbone',
 	'jquery',
 	'html2canvas',
+	'moment',
 	'jquery-ui',
 	'TTUUID',
 	'RateLimit',
@@ -547,7 +548,6 @@ require( [
 	'jquery-ui',
 	'jquery.i18n',
 	'jquery_ba_resize',
-	'moment',
 	'IndexController',
 	'BaseViewController',
 	'PortalBaseViewController',
@@ -563,7 +563,8 @@ require( [
 	'ttpromise',
 
 	'APIAuthentication',
-], function(BackBone, $, html2canvas) {
+], function(BackBone, $, html2canvas, moment) {
+	window.moment = moment;
 	window.html2canvas = html2canvas;
 	Global.url_offset = '../../';
 	Global.addCss("right_click_menu/rightclickmenu.css");

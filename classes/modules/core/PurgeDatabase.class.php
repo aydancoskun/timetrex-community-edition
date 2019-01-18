@@ -841,12 +841,12 @@ class PurgeDatabase {
 		$current_tables = $db->MetaTables();
 
 		if ( is_array( $purge_tables ) AND is_array( $current_tables ) ) {
-			$db->StartTrans();
 			foreach( $purge_tables as $table => $expire_days ) {
 //				if ( PRODUCTION == FALSE ) {
 //					$expire_days = 0;
 //				}
 
+				$db->StartTrans(); //Try to keep the transactions as short lived as possible to avoid replication delays on the database.
 				if ( in_array($table, $current_tables) ) {
 					$query = array();
 					switch ( $table ) {
@@ -1133,26 +1133,32 @@ class PurgeDatabase {
 				} else {
 					Debug::Text('Table not found for purging: '. $table, __FILE__, __LINE__, __METHOD__, 10);
 				}
+
+				//$db->FailTrans();
+				$db->CompleteTrans();
 			}
 
 			//
 			//Purge saved punch images.
 			//
 			if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+				//This doesn't need to be wrapped in a transaction, and can take quite a while due to disk I/O. Doing so can harm the database performance, especially with replication.
 				Debug::Text('Purging Punch Images...', __FILE__, __LINE__, __METHOD__, 10);
 
 				$plf = new PunchListFactory();
 				$total_records = -1;
 				$x = 0;
 				$i = 0;
-				while ( $total_records == -1 OR ( $total_records > 0 AND $x <= 10 ) ) { //Limit to 10 batches in total.
-					$plf->getByHasImageAndCreatedDate( TRUE, ( time() - ( 86400 * 120 ) ), 10000 ); //Expire Days: 120 -- Limit to 10000 at a time.
+				while ( $total_records == -1 OR ( $total_records > 0 AND $x <= 250 ) ) { //Limit to 10 batches in total.
+					$db->StartTrans(); //Try to keep the transactions as short lived as possible to avoid replication delays on the database.
+
+					$plf->getByHasImageAndCreatedDate( TRUE, ( time() - ( 86400 * 120 ) ), 1000 ); //Expire Days: 120 -- Limit to 500 at a time, as its mostly the file I/O that takes the time here.
 					$total_records = $plf->getRecordCount();
 					Debug::text('Batch: '. $x .' Punches with images older than X days: '. $plf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 					if ( $plf->getRecordCount() > 0 ) {
 						foreach( $plf as $p_obj ) {
 							Debug::text('  Punch ID: '. $p_obj->getID() .' Date: '. TTDate::getDate('DATE+TIME', $p_obj->getTimeStamp() ) .' Image File Name: '. $p_obj->getImageFileName(), __FILE__, __LINE__, __METHOD__, 10);
-							$query = 'UPDATE '. $plf->getTable() .' SET has_image = 0 WHERE id = \''. TTUUID::castUUID($p_obj->getID()) .'\'';
+							$query = 'UPDATE '. $plf->getTable() .' SET has_image = 0 WHERE id = \''. TTUUID::castUUID( $p_obj->getID() ) .'\'';
 							if ( $plf->db->Execute( $query ) !== FALSE ) {
 								$p_obj->cleanStoragePath();
 							} else {
@@ -1162,14 +1168,14 @@ class PurgeDatabase {
 						}
 					}
 
+					//$db->FailTrans();
+					$db->CompleteTrans();
+
 					$x++;
 				}
 				Debug::text('  Deleted Punch Images: '. $i, __FILE__, __LINE__, __METHOD__, 10);
 				unset($plf, $p_obj, $total_records, $x, $i, $query);
 			}
-
-			//$db->FailTrans();
-			$db->CompleteTrans();
 
 			//Since deleting a lot of records especially in system_log can cause large planning times of queries that select from that table. This manifested itself in the Audit tab taking 2-3 seconds to load.
 			// Therefore force a regular vacuum to run on the entire database once we are done. We could also tune the autovacuum parameters more for these tables to be extra sure.

@@ -309,8 +309,12 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|UserDeductionListFactory
 	 */
-	function getByUserIdAndCountryID( $user_id, $country_code, $where = NULL, $order = NULL) {
+	function getByUserIdAndCalculationIdAndCountryID( $user_id, $calculation_id, $country_code, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
+			return FALSE;
+		}
+
+		if ( $calculation_id == '') {
 			return FALSE;
 		}
 
@@ -318,11 +322,18 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 			return FALSE;
 		}
 
-		//$uf = new UserFactory();
+		if ( $order == NULL ) {
+			$order = array( 'b.status_id' => 'asc', 'b.calculation_id' => 'asc', 'b.calculation_order' => 'asc', 'b.id' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
 		$cdf = new CompanyDeductionFactory();
 
 		$ph = array(
 				'user_id' => TTUUID::castUUID($user_id),
+				'calculation_id' => (int)$calculation_id,
 				'country_code' => (string)$country_code,
 		);
 
@@ -333,11 +344,12 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 					where
 						a.company_deduction_id = b.id
 						AND a.user_id = ?
+						AND b.calculation_id = ?
 						AND b.country = ?
 						AND ( a.deleted = 0 AND b.deleted = 0 )
 					';
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 

@@ -378,7 +378,7 @@ class ScheduleFactory extends Factory {
 			if ( $raw === TRUE ) {
 				return $value;
 			} else {
-				return TTDate::strtotime( $value );
+				return TTDate::getMiddleDayEpoch( TTDate::strtotime( $value ) );  //setDateStamp() forces to middle day epoch, so get should do that as well to be consistent. See UserDateTotal and PunchControl.
 			}
 		}
 

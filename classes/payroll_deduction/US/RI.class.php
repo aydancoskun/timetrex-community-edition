@@ -260,6 +260,7 @@ class PayrollDeduction_US_RI extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			//01-Jan-19: No Change
 			20180101 => array( //01-Jan-18
 							   'allowance'           => 1000,
 							   'allowance_threshold' => 227050, //If annual income more than this, allowance is 0.

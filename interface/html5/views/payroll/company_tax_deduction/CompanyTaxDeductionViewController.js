@@ -151,6 +151,15 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		} );
 	},
 
+	//Override for: Do not show a few of the default columns when in Edit Employee sub-view "Tax" tab.
+	setSelectLayout: function() {
+		if ( this.sub_view_mode ) {
+			this._super( 'setSelectLayout', ['legal_entity_legal_name', 'total_users'] );
+		} else {
+			this._super( 'setSelectLayout' );
+		}
+	},
+
 	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn, pId );
 

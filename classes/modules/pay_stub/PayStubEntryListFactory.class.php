@@ -1423,7 +1423,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 											);
 
 		if ( $order == NULL ) {
-			$order = array( 'b.user_id' => 'asc', 'pay_period_transaction_date' => 'asc', 'ps_order' => 'asc');
+			$order = array( 'c.last_name' => 'asc', 'c.first_name' => 'asc', 'b.user_id' => 'asc', 'pay_period_transaction_date' => 'asc', 'pay_stub_run_id' => 'asc', 'ps_order' => 'asc');
 			$strict = FALSE;
 		} else {
 			$strict = TRUE;

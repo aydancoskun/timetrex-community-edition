@@ -30,6 +30,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		this.edit_view_tpl = 'PayrollRemittanceAgencyEventEditView.html';
 		this.permission_id = 'payroll_remittance_agency';
 		this.script_name = 'PayrollRemittanceAgencyEventView';
+		this.table_name_key = 'payroll_remittance_agency_event';
 		this.viewId = 'PayrollRemittanceAgencyEvent';
 		this.context_menu_name = $.i18n._( 'Remittance Agency Event' );
 		this.navigation_label = $.i18n._( 'Remittance Agency Event' ) + ':';

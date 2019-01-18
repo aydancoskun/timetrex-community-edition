@@ -972,7 +972,7 @@ class LegalEntityFactory extends Factory {
 	}
 
 	function getPaymentServicesAPIObject() {
-		require_once('../../classes/modules/other/TimeTrexPaymentServices.class.php');
+		require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'TimeTrexPaymentServices.class.php' );
 		$tt_ps_api = new TimeTrexPaymentServices( $this->getPaymentServicesUserName(), $this->getPaymentServicesAPIKey() ); //Username and API Key
 
 		return $tt_ps_api;
@@ -984,7 +984,7 @@ class LegalEntityFactory extends Factory {
 		}
 
 		if ( $this->getPaymentServicesStatus() == 10 AND $this->getPaymentServicesUserName() != '' AND $this->getPaymentServicesAPIKey() != '' ) {
-			require_once( '../../classes/modules/other/TimeTrexPaymentServices.class.php' );
+			require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'TimeTrexPaymentServices.class.php' );
 			try {
 				$tt_ps_api = $this->getPaymentServicesAPIObject();
 				return $tt_ps_api->ping();
@@ -1105,7 +1105,7 @@ class LegalEntityFactory extends Factory {
 
 		if ( PRODUCTION == TRUE AND $this->getPaymentServicesStatus() == 10 ) { //10=Enabled
 			//Send data to TimeTrex Payment Services.
-			require_once( '../../classes/modules/other/TimeTrexPaymentServices.class.php' );
+			require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'TimeTrexPaymentServices.class.php' );
 
 			if ( $this->getPaymentServicesUserName() == '' OR $this->getPaymentServicesAPIKey() == '' ) {
 				global $current_user;

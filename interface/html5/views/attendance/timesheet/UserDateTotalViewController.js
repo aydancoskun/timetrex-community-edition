@@ -252,6 +252,18 @@ UserDateTotalViewController = BaseViewController.extend( {
 				this.onSrcObjectChange( key );
 				break;
 			case 'total_time':
+				if ( this.current_edit_record.total_time == 0 ) {
+					this.edit_view_ui_dic.start_time_stamp.setValue( '' );
+					this.edit_view_ui_dic.end_time_stamp.setValue( '' );
+					this.current_edit_record.start_time_stamp = '';
+					this.current_edit_record.end_time_stamp = '';
+
+					//Trigger onChange event for above fields, so in mass edit they are marked as changed.
+					this.edit_view_form_item_dic.start_time_stamp.find('input').trigger('change', '');
+					this.edit_view_form_item_dic.end_time_stamp.find('input').trigger('change', '');
+				}
+				this.calculateAmount();
+				break;
 			case 'hourly_rate':
 				this.calculateAmount();
 				break;
@@ -260,6 +272,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		if ( key !== 'override' ) {
 			this.edit_view_ui_dic.override.setValue( true );
 			this.current_edit_record.override = true;
+			this.edit_view_form_item_dic.override.find('input').trigger('change', '1'); //Trigger onChange event for above fields, so in mass edit they are marked as changed.
 		}
 
 		if ( !doNotValidate ) {

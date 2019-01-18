@@ -805,7 +805,6 @@ class APIPayStub extends APIFactory {
 					if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) ) {
 						Debug::text('Generating pay stubs for specific users...', __FILE__, __LINE__, __METHOD__, 10);
 
-
 						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Company Pay Stubs for Pay Period').': '. TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ), $this->getCurrentUserObject()->getId(), 'pay_stub' ); //Notice
 						$ppsulf->getByCompanyIDAndPayPeriodScheduleIdAndUserID( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule(), $user_ids );
 					} else {
@@ -819,7 +818,7 @@ class APIPayStub extends APIFactory {
 						$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_pay_stubs, NULL, TTi18n::getText('Generating Paystubs...') );
 
 						//FIXME: If a pay stub already exists, it is deleted first, but then if the new pay stub fails to generate, the original one is
-						//  still deleted, so that can cause some people off guard if they don't fix the problem and re-generate the paystubs again.
+						//  still deleted, so that can catch some people off guard if they don't fix the problem and re-generate the paystubs again.
 						//  This can be useful in some cases though, as the opposite problem may arise.
 
 						//Delete existing pay stub. Make sure we only

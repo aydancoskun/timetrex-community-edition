@@ -73,10 +73,10 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 		$dry_run = FALSE;
 	}
 
-	if ( isset($argv[$last_arg]) AND is_numeric($argv[$last_arg]) ) {
+	if ( isset($argv[$last_arg]) AND $argv[$last_arg] != '' AND TTUUID::isUUID( $argv[$last_arg] ) ) {
 		$company_id = $argv[$last_arg];
-	}	
-	
+	}
+
 
 	$filter_start_date = strtotime('2015-01-01');
 	//$filter_start_date = strtotime('2000-01-01');
@@ -163,7 +163,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 
 				if ( $recalc_timesheet == TRUE ) {
 					echo ' Recalculating TimeSheet Balances...'."\n";
-					
+
 					$flags = array(
 									'meal' => FALSE,
 									'undertime_absence' => TRUE, //Needs to calculate undertime absences, otherwise it won't update accruals.
@@ -180,7 +180,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 									//Exception options
 									'exception_premature' => FALSE, //Calculates premature exceptions
 									'exception_future' => FALSE, //Calculates exceptions in the future.
-			
+
 									//Calculate policies for future dates.
 									'future_dates' => FALSE, //Calculates dates in the future.
 									);
@@ -195,7 +195,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 							$pf_obj = $ap_obj->getPayFormulaPolicyObject();
 							if ( is_object($pf_obj) AND $pf_obj->getAccrualPolicyAccount() > 0 AND is_object( $pf_obj->getAccrualPolicyAccountObject() ) AND $pf_obj->getAccrualRate() != 0 ) {
 								Debug::text('Found Absence Policy linked to Accrual: '. $ap_obj->getName() .' Accrual Account ID: '. $pf_obj->getAccrualPolicyAccountObject()->getName(), __FILE__, __LINE__, __METHOD__, 10);
-	
+
 								$ulf = new UserListFactory();
 								$ulf->getByCompanyId( $c_obj->getID() );
 								if ( $ulf->getRecordCount() > 0 ) {
@@ -226,7 +226,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 											}
 										}
 										unset($ablf_tmp, $ab_obj_tmp);
-																				
+
 										$udtlf = new UserDateTotalListFactory();
 										$udtlf->getAccrualOrphansByUserIdAndPayCodeIdAndAccrualPolicyAccountIdAndStartDateAndEndDate( $user_obj->getId(), $ap_obj->getPayCode(), $pf_obj->getAccrualPolicyAccount(), $filter_start_date, $filter_end_date );
 										Debug::text('Orphaned UDT Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
@@ -238,7 +238,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 												$cp->setFlag( $flags );
 												$cp->setUserObject( $user_obj );
 											}
-	
+
 											foreach( $udtlf as $udt_obj ) {
 												Debug::text('  UDT ID: '. $udt_obj->getId() .' User: '. $user_obj->getUsername() .' Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 												if ( $recalc == TRUE ) {
@@ -254,24 +254,24 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 													} else {
 														//echo ' Pay Period is OPEN: '. $udt_obj->getPayPeriodObject()->getID() ."... NOT Unlocking...\n";
 													}
-	
+
 													echo '  Employee: '. $user_obj->getFullName() .' Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ) .' Accrual Account: '.  $pf_obj->getAccrualPolicyAccount() .' recalculating...'."\n";
 													$cp->addPendingCalculationDate( $udt_obj->getDateStamp() );
-	
+
 													//STOP
 													//break;
 												} else {
 													echo '  Employee: '. $user_obj->getFullName() .' Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ) .' Accrual Account: '.  $pf_obj->getAccrualPolicyAccount() .' may need recalculating...'."\n";
 												}
 											}
-	
+
 											if ( $recalc == TRUE ) {
 												$cp->calculate(); //This sets timezone itself.
 												$cp->Save();
-												
+
 												//STOP
 												//break 1;
-											}										
+											}
 										}
 
 										$after_balance = FALSE;
@@ -293,11 +293,11 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 										}
 
 									}
-	
+
 								}
 							}
 						}
-	
+
 						if ( isset( $pay_period_status_ids ) ) {
 							foreach( $pay_period_status_ids as $pay_period_id => $status_id ) {
 								$pplf = new PayPeriodListFactory();
@@ -314,7 +314,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 						}
 						unset($pay_period_status_ids, $pay_period_id, $status_id, $pp_obj, $pplf);
 					}
-					
+
 					if ( $dry_run == TRUE ) {
 						$aplf->FailTransaction();
 					}

@@ -253,7 +253,7 @@ class AccrualListFactory extends AccrualFactory implements IteratorAggregate {
 
 		$strict_order = TRUE;
 		if ( $order == NULL ) {
-			$order = array('c.date_stamp' => 'desc', 'a.time_stamp' => 'desc');
+			$order = array('c.date_stamp' => 'desc', 'a.time_stamp' => 'desc', 'a.created_date' => 'desc', 'a.id' => 'desc');
 			$strict_order = FALSE;
 		}
 

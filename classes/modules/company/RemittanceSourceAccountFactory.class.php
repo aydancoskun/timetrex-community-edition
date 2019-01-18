@@ -150,6 +150,11 @@ class RemittanceSourceAccountFactory extends Factory {
 					'-1060-country' => TTi18n::gettext('Country'),
 					'-1150-data_format' => TTi18n::gettext('Data Format'),
 					'-1160-last_transaction_number' => TTi18n::gettext('Last Transaction Number'),
+
+					'-1500-value1' => TTi18n::gettext('Institution'),
+					'-1510-value2' => TTi18n::gettext('Transit/Routing'),
+					'-1520-value3' => TTi18n::gettext('Account'),
+
 					'-1900-in_use' => TTi18n::gettext('In Use'),
 					'-2000-created_by' => TTi18n::gettext('Created By'),
 					'-2010-created_date' => TTi18n::gettext('Created Date'),
@@ -557,7 +562,7 @@ class RemittanceSourceAccountFactory extends Factory {
 		//If X's are in the account number, skip setting it
 		// Also if a colon is in the account number, its likely an encrypted string, also skip.
 		//This allows them to change other data without seeing the account number.
-		if ( stripos( $value, 'X') !== FALSE OR stripos( $value, ':') !== FALSE ) {
+		if ( stripos( $value, 'X') !== FALSE OR stripos( $value, ':') !== FALSE OR ctype_digit( trim($value) ) == FALSE ) { //Use ctype_digit to confirm bank account number is DIGITS only, so we don't accept scientific notation "5.18E+11".
 			return FALSE;
 		}
 
@@ -1505,7 +1510,7 @@ class RemittanceSourceAccountFactory extends Factory {
 												  FALSE,
 												  TTi18n::gettext( 'Invalid routing number length' ) );
 					} else {
-						$this->Validator->isNumeric( 'value2',
+						$this->Validator->isDigits( 'value2',
 													 $this->getValue2(),
 													 TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
 					}
@@ -1517,7 +1522,7 @@ class RemittanceSourceAccountFactory extends Factory {
 												  FALSE,
 												  TTi18n::gettext( 'Invalid account number length' ) );
 					} else {
-						$this->Validator->isNumeric( 'value3',
+						$this->Validator->isDigits( 'value3',
 													 $this->getValue3(),
 													 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
 					}
@@ -1555,6 +1560,10 @@ class RemittanceSourceAccountFactory extends Factory {
 						$this->Validator->isTrue( 'value1',
 												  FALSE,
 												  TTi18n::gettext( 'Invalid institution number length' ) );
+					} else {
+						$this->Validator->isDigits( 'value1',
+													$this->getValue1(),
+													TTi18n::gettext( 'Invalid institution number, must be digits only' ) );
 					}
 				}
 				// Transit number
@@ -1564,7 +1573,7 @@ class RemittanceSourceAccountFactory extends Factory {
 												  FALSE,
 												  TTi18n::gettext( 'Invalid transit number length' ) );
 					} else {
-						$this->Validator->isNumeric( 'value2',
+						$this->Validator->isDigits( 'value2',
 													 $this->getValue2(),
 													 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
 					}
@@ -1576,7 +1585,7 @@ class RemittanceSourceAccountFactory extends Factory {
 												  FALSE,
 												  TTi18n::gettext( 'Invalid account number length' ) );
 					} else {
-						$this->Validator->isNumeric( 'value3',
+						$this->Validator->isDigits( 'value3',
 													 $this->getValue3(),
 													 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
 					}

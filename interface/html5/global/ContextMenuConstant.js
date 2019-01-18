@@ -166,6 +166,7 @@ ContextMenuIconName.recurring_schedule = 'recurringSchedule';
 ContextMenuIconName.save_setup = 'saveSetupIcon';
 
 ContextMenuIconName.e_file = 'eFileIcon';
+ContextMenuIconName.e_file_xml = 'eFileXMLIcon';
 
 ContextMenuIconName.request = 'requestIcon';
 

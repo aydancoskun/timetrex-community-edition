@@ -73,7 +73,7 @@ class ImportUser extends Import {
 				$retval['-1026-phone_password'] = TTi18n::getText('Quick Punch Password');
 
 				$retval['-1099-group'] = ( isset($retval['-1099-user_group']) ) ? $retval['-1099-user_group'] : NULL;
-				unset($retval['-1099-user_group'], $retval['-1082-full_name']);
+				unset($retval['-1099-user_group'], $retval['-1082-full_name'], $retval['-1401-hierarchy_level_display'], $retval['-1500-last_login_date'], $retval['-1510-max_punch_time_stamp'] );
 				ksort($retval);
 
 				//Since getOptions() can be called without first setting a company, we don't always know the product edition for the currently

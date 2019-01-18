@@ -153,7 +153,7 @@ class APILegalEntity extends APIFactory {
 	 * @param bool $ignore_warning
 	 * @return array|bool
 	 */
-	function setLegalEntity( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
+	function setLegalEntity( $data, $validate_only = FALSE, $ignore_warning = TRUE, $add_presets = TRUE ) {
 		$validate_only = (bool)$validate_only;
 		$ignore_warning = (bool)$ignore_warning;
 
@@ -223,8 +223,10 @@ class APILegalEntity extends APIFactory {
 
 					$lf->Validator->setValidateOnly( $validate_only );
 
-					$lf->setEnableAddRemittanceSource( TRUE );
-					$lf->setEnableAddPresets( TRUE );
+					if ( $add_presets == TRUE ) {
+						$lf->setEnableAddRemittanceSource( TRUE );
+						$lf->setEnableAddPresets( TRUE );
+					}
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {
 						Debug::Text('Saving data...', __FILE__, __LINE__, __METHOD__, 10);
@@ -370,12 +372,139 @@ class APILegalEntity extends APIFactory {
 		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'] ); //Clear fields that can't be copied
+				$lef = TTnew( 'LegalEntityFactory' );
+				$lef->StartTransaction();
+
+				$original_legal_entity_id = $src_rows[$key]['id'];
+				unset( $src_rows[$key]['id'] ); //Clear fields that can't be copied
 				$src_rows[$key]['legal_name'] = Misc::generateCopyName( $row['legal_name'] ); //Generate unique name
+
+				//We need to copy legal entities one at a time rather than in a batch, since we need to do so much other work with them.
+				$retval = $this->setLegalEntity( $src_rows[$key], FALSE, TRUE, FALSE ); //Save copied rows -- $add_presets=FALSE though so we can copy them all from the source legal entity.
+
+				$new_legal_entity_id = NULL;
+				if ( is_array( $retval ) ) {
+					if ( isset( $retval['api_retval'] )
+							AND TTUUID::isUUID( $retval['api_retval'] ) AND $retval['api_retval'] != TTUUID::getZeroID() AND $retval['api_retval'] != TTUUID::getNotExistID() ) {
+						$new_legal_entity_id = $retval['api_retval'];
+					} elseif ( isset( $retval['api_details']['details'][$key] ) ) {
+						$new_legal_entity_id = $retval['api_details']['details'][$key];
+					}
+				} elseif ( TTUUID::isUUID( $retval ) ) {
+					$new_legal_entity_id = $retval;
+				}
+				Debug::Text('  Legal Entity IDs: Original: '. $original_legal_entity_id .' New: '. $new_legal_entity_id, __FILE__, __LINE__, __METHOD__, 10);
+
+				if ( TTUUID::isUUID( $new_legal_entity_id ) AND $new_legal_entity_id != TTUUID::getNotExistID() ) {
+					//Copy Remittance Source Accounts
+					$rsalf = TTnew('RemittanceSourceAccountListFactory');
+					$rsalf->getByLegalEntityIdAndCompanyId( $original_legal_entity_id, $this->getCurrentCompanyObject()->getId() );
+					if ($rsalf->getRecordCount() > 0 ) {
+						foreach( $rsalf as $rsa_obj ) {
+							$rsa_obj->setId( FALSE );
+							$rsa_obj->setLegalEntity( $new_legal_entity_id );
+							$rsa_obj->setName( Misc::generateCopyName( $rsa_obj->getName() ) ); //Generate unique name
+							if ( $rsa_obj->isValid() ) {
+								$rsa_obj->Save();
+							}
+						}
+					}
+					unset( $rsalf, $rsa_obj );
+
+					//Copy Remittance Agencies
+					$pralf = TTnew('PayrollRemittanceAgencyListFactory');
+					$pralf->getByLegalEntityIdAndCompanyId( $original_legal_entity_id, $this->getCurrentCompanyObject()->getId() );
+					if ($pralf->getRecordCount() > 0 ) {
+						foreach( $pralf as $pra_obj ) {
+							$original_pra_id = $pra_obj->getId();
+							Debug::Text('    Copying Payroll Remittance Agency to new legal entity: '. $pra_obj->getName() .' Original ID: '. $original_pra_id, __FILE__, __LINE__, __METHOD__, 10);
+
+							$pra_obj->setId( FALSE );
+							$pra_obj->setLegalEntity( $new_legal_entity_id );
+							if ( $pra_obj->isValid() ) {
+								$new_pra_id = $pra_obj->Save();
+
+								$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+								$praelf->getByLegalEntityIdAndRemittanceAgencyId( $original_legal_entity_id, $original_pra_id );
+								if ( $praelf->getRecordCount() > 0 ) {
+									foreach ( $praelf as $prae_obj ) {
+										Debug::Text('      Copying Payroll Remittance Agency Event to new Remittance Agency: '. $prae_obj->getType() .' Original ID: '. $prae_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+										$prae_obj->setId( FALSE );
+										$prae_obj->setPayrollRemittanceAgencyId( $new_pra_id );
+										if ( $prae_obj->isValid() ) {
+											$prae_obj->Save();
+										}
+									}
+								}
+							}
+						}
+					}
+					unset( $pralf, $prae_obj );
+
+					//Copy Tax/Deduction records (without users).
+					$cdlf = TTnew('CompanyDeductionListFactory');
+					$cdlf->getByCompanyIdAndLegalEntityId( $this->getCurrentCompanyObject()->getId(), $original_legal_entity_id );
+					if ( $cdlf->getRecordCount() > 0 ) {
+						foreach( $cdlf as $cd_obj ) {
+							//Copy all Tax/Deductions assigned to this legal entity, even if they aren't associated with a specific remittance agency.
+							//  However, if they aren't assigned to any specific legal entity, then they won't be copied of course and thats how they can be shared.
+//							if ( $cd_obj->getPayrollRemittanceAgency() != '' AND $cd_obj->getPayrollRemittanceAgency() != TTUUID::getZeroId() ) {
+								Debug::Text('    Copying Tax/Deduction to new legal entity: '. $cd_obj->getName() .' Original ID: '. $cd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+								$tmp_cd_obj_arr = $cd_obj->getObjectAsArray();
+								$tmp_cd_obj_arr['id'] = $cd_obj->getNextInsertId(); //Since we are saving data to child tables, we need to define the ID first.
+								$tmp_cd_obj_arr['legal_entity_id'] = $new_legal_entity_id;
+
+								//Find new Payroll Remittance Agency to assign it to.
+								if ( is_object( $cd_obj->getPayrollRemittanceAgencyObject() ) ) {
+									$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+									$pralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), array('legal_entity_id' => $new_legal_entity_id, 'agency_id' => $cd_obj->getPayrollRemittanceAgencyObject()->getAgency()) );
+									if ( $pralf->getRecordCount() == 1 ) {
+										Debug::Text( '      Found new Remittance Agency to assign... ID: ' . $pralf->getCurrent()->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+										$tmp_cd_obj_arr['payroll_remittance_agency_id'] = $pralf->getCurrent()->getId();
+									} else {
+										Debug::Text( '      a. No Remittance Agency to assign... Remittance Agency ID: ' . $cd_obj->getPayrollRemittanceAgency(), __FILE__, __LINE__, __METHOD__, 10 );
+										$tmp_cd_obj_arr['payroll_remittance_agency_id'] = TTUUID::getZeroID();
+									}
+								} else {
+									Debug::Text( '      b. No Remittance Agency to assign... Remittance Agency ID: ' . $cd_obj->getPayrollRemittanceAgency(), __FILE__, __LINE__, __METHOD__, 10 );
+									$tmp_cd_obj_arr['payroll_remittance_agency_id'] = TTUUID::getZeroID();
+
+									//If no remittance agency is selected, we have to generate a random name to prevent unique name checks from failing.
+									$tmp_cd_obj_arr['name'] = $cd_obj->getName() .' ['. rand(1, 99) .']';
+								}
+
+								unset( $tmp_cd_obj_arr['user'] );
+
+								$tmp_cd_obj = TTnew( 'CompanyDeductionFactory' );
+								$tmp_cd_obj->setObjectFromArray( $tmp_cd_obj_arr );
+								if ( $tmp_cd_obj->isValid() ) {
+									$tmp_cd_obj->Save( TRUE, TRUE );
+									Debug::Text('      New Tax/Deduction ID: '. $tmp_cd_obj_arr['id'], __FILE__, __LINE__, __METHOD__, 10);
+								}
+
+								unset( $tmp_cd_obj_arr, $tmp_cd_obj );
+//							} else {
+//								Debug::Text( '      Skip copying Tax/Deduction that is not assigned to any specific remittance agency: '. $cd_obj->getName() .' Original ID: '. $cd_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+//							}
+						}
+					}
+					unset( $cdlf, $cd_obj );
+
+				} else {
+					//Likely some validation failure, return it back to the user.
+					$lef->FailTransaction();
+					$lef->CommitTransaction();
+
+					return $this->returnHandler( $retval );
+				}
+
+				//$lef->FailTransaction(); //ZZZ REMOVE ME!
+				$lef->CommitTransaction();
+
 			}
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
-			return $this->setLegalEntity( $src_rows ); //Save copied rows
+			return $this->returnHandler( TRUE );
 		}
 
 		return $this->returnHandler( FALSE );

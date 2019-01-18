@@ -430,6 +430,12 @@ class APIRemittanceSourceAccount extends APIFactory {
 				$eft = $pstf->startEFTFile( $rs_obj );
 				$confirmation_number = strtoupper( substr( sha1( TTUUID::generateUUID() ), -8 ) );
 				$record = $pstf->getEFTRecord( $eft, $pstf, $ps_obj, $rs_obj, $this->getCurrentUserObject(), $confirmation_number );
+
+				//Make the destination the same as the source for the sample file, at least then its not 0's and the bank is likely to verify more information.
+				$record->setInstitution( $rs_obj->getValue1() );
+				$record->setTransit( $rs_obj->getValue2() );
+				$record->setAccount( $rs_obj->getValue3() );
+
 				$eft->setRecord( $record );
 				$output = $pstf->endEFTFile( $eft, $rs_obj, $this->getCurrentUserObject(), $ps_obj, $this->getCurrentCompanyObject()->getId(), $pstf->getAmount(), $next_transaction_number, $output );
 			}

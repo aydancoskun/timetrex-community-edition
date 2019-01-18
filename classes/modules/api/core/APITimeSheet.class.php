@@ -200,22 +200,14 @@ class APITimeSheet extends APIFactory {
 				$punch_data[] = $p_obj->getObjectAsArray( $punch_columns );
 			}
 		}
+
 		$meal_and_break_total_data = PunchFactory::calcMealAndBreakTotalTime( $punch_data );
 		if ( $meal_and_break_total_data === FALSE ) {
 			$meal_and_break_total_data = array();
 		}
 
 		//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
-			$wage_permission_children_ids = TRUE;
-		} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-			if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
-				$wage_permission_children_ids = array();
-			}
-			if ( $this->getPermissionObject()->Check('wage', 'view_own') ) {
-				$wage_permission_children_ids[] = $this->getCurrentUserObject()->getID();
-			}
-		}
+		$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view' );
 
 		//
 		//Get total time for day/pay period
@@ -274,7 +266,7 @@ class APITimeSheet extends APIFactory {
 					'note' => TRUE,
 					);
 
-			if ( isset($wage_permission_children_ids) AND ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) ) {
+			if ( $this->getPermissionObject()->isPermissionChild( $user_id, $wage_permission_children_ids ) ) {
 				$udt_columns['total_time_amount'] = TRUE;
 				$udt_columns['hourly_rate'] = TRUE;
 			}
@@ -390,7 +382,7 @@ class APITimeSheet extends APIFactory {
 						'job_item' => TRUE,
 						);
 
-				if ( isset($wage_permission_children_ids) AND ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) ) {
+				if ( $this->getPermissionObject()->isPermissionChild( $user_id, $wage_permission_children_ids ) ) {
 					$udt_columns['total_time_amount'] = TRUE;
 					$udt_columns['hourly_rate'] = TRUE;
 				}

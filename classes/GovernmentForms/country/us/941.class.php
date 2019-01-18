@@ -1298,11 +1298,16 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 	//This requires 'l7z' to be passed in as a total of all the amounts actually deducted from the employee.
 	//So we can compare that with the calculated amounts that should have been deducted, the result of which is l7.
+	//  Take for a example the case where the form calculates $100 should have been paid, but only 99.80 was paid due to rounding.
+	//  Line 7 should be -0.20, so it reduces what should have been paid by that amount and therefore no balance would be owning.
+	//  Therefore the calculation should be l7z (what was actually withheld) - l5e (what should have been withheld).
 	function calcL7( $value, $schema ) {
 		$this->l7 = ( $this->l7z > 0 ) ? ( bcsub( $this->l7z, $this->l5e ) ) : 0;
 		Debug::Text( 'Raw: L7: ' . $this->l7 . ' L5e: ' . $this->l5e . ' L7z: ' . $this->l7z, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( abs( $this->l7 ) > 100 ) { //As a precaution, check to see if cents adjustment exceeds $100, if it does assume its wrong and zero it out.
+		//As a precaution, check to see if cents adjustment exceeds ( total_employees / 100 [cents] ) * 12 [weeks in a quarter], which would be the maximum rounding error that could possibly occur given weekly pay periods.
+		// if it does exceed that amount assume they have made some manual adjustments (ie: manually edited a pay stub) and just zero this out instead.
+		if ( abs( $this->l7 ) > ( ( $this->l1 / 100 ) * 12 ) ) {
 			Debug::Text( 'L7 seems incorrect, ignoring it...', __FILE__, __LINE__, __METHOD__, 10 );
 			$this->l7 = 0;
 		}

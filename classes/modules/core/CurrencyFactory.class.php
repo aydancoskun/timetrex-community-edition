@@ -925,7 +925,7 @@ class CurrencyFactory extends Factory {
 							if ( TTDate::getDays( ( time() - $latest_currency_rate_date ) ) > 30 ) {
 								$crf = TTnew('CurrencyRateFactory');
 								for( $x = TTDate::getMiddleDayEpoch( $latest_currency_rate_date ); $x <= TTDate::getMiddleDayEpoch( time() ); $x += 86400 ) {
-									$crf->db->Execute('INSERT INTO '. $crf->getTable() .' (currency_id,date_stamp,conversion_rate,created_date) VALUES('. $active_currency_id .',\''. $crf->db->BindDate($x) .'\', '. $last_conversion_rate .','. time() .')');
+									$crf->db->Execute('INSERT INTO '. $crf->getTable() .' (id,currency_id,date_stamp,conversion_rate,created_date) VALUES(\''. TTUUID::generateUUID() .'\',\''. $active_currency_id .'\',\''. $crf->db->BindDate($x) .'\', '. $last_conversion_rate .','. time() .')');
 								}
 							} else {
 								for( $x = TTDate::getMiddleDayEpoch( $latest_currency_rate_date ); $x <= TTDate::getMiddleDayEpoch( time() ); $x += 86400 ) {

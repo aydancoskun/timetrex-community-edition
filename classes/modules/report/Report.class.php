@@ -1558,7 +1558,7 @@ class Report {
 		}
 		$this->profiler->stopTimer( 'sort' );
 
-		//Debug::Arr($this->form_data, 'Sort Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->form_data['user'], 'Sort Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		Debug::Text(' Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 		return TRUE;
 	}

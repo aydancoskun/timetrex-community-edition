@@ -348,7 +348,7 @@ class UserDateTotalFactory extends Factory {
 				return $value;
 			} else {
 				if ( !is_numeric( $value ) ) { //Optimization to avoid converting it when run in CalculatePolicy's loops
-					$value = TTDate::strtotime( $value );
+					$value = TTDate::getMiddleDayEpoch( TTDate::strtotime( $value ) ); //Make sure we use middle day epoch when pulling the value from the DB the first time, to match setDateStamp() below. Otherwise setting the datestamp then getting it again before save won't match the same value after its saved to the DB.
 					$this->setGenericDataValue( 'date_stamp', $value );
 				}
 				return $value;
@@ -366,7 +366,7 @@ class UserDateTotalFactory extends Factory {
 		$value = (int)$value;
 
 		if ( $value > 0 ) {
-			//Use middle day epoch to help avoid confusion with different timezones/DST.
+			//Use middle day epoch to help avoid confusion with different timezones/DST. -- getDateStamp() needs to use middle day epoch too then.
 			//See comments about timezones in CalculatePolicy->_calculate().
 			$retval = $this->setGenericDataValue( 'date_stamp', TTDate::getMiddleDayEpoch( $value ) );
 
@@ -424,7 +424,12 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool|int
 	 */
 	function getObjectType() {
-		return (int)$this->getGenericDataValue( 'object_type_id' );
+		$retval = $this->getGenericDataValue( 'object_type_id' );
+		if ( $retval !== FALSE ) {
+			return (int)$retval;
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -1435,11 +1440,16 @@ class UserDateTotalFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// User
-		$ulf = TTnew( 'UserListFactory' );
-		$this->Validator->isResultSetWithRows( 'user',
-											   $ulf->getByID( $this->getUser() ),
-											   TTi18n::gettext( 'Invalid Employee' )
-		);
+
+
+		if ( $this->Validator->getValidateOnly() == FALSE OR $this->getUser() !== FALSE ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$this->Validator->isResultSetWithRows( 'user',
+												   $ulf->getByID( $this->getUser() ),
+												   TTi18n::gettext( 'Invalid Employee' )
+			);
+		}
+
 		// Pay Period
 		if ( $this->getPayPeriod() !== FALSE AND $this->getPayPeriod() != TTUUID::getZeroID() ) {
 			$pplf = TTnew( 'PayPeriodListFactory' );
@@ -1450,15 +1460,18 @@ class UserDateTotalFactory extends Factory {
 		}
 
 		// Date
-		$this->Validator->isDate(		'date_stamp',
-										 $this->getDateStamp(),
-										 TTi18n::gettext('Incorrect date').'(a)'
-		);
-		if ( $this->Validator->isError('date_stamp') == FALSE ) {
-			if ( $this->getDateStamp() == '' OR $this->getDateStamp() <= 0 ) {
-				$this->Validator->isTRUE(		'date_stamp',
-												 FALSE,
-												 TTi18n::gettext('Incorrect date').'(b)');
+		if ( $this->getDateStamp() !== FALSE ) {
+			$this->Validator->isDate( 'date_stamp',
+									  $this->getDateStamp(),
+									  TTi18n::gettext( 'Incorrect date' ) . '(a)'
+			);
+
+			if ( $this->Validator->isError('date_stamp') == FALSE ) {
+				if ( $this->getDateStamp() == '' OR $this->getDateStamp() <= 0 ) {
+					$this->Validator->isTRUE(		'date_stamp',
+													 FALSE,
+													 TTi18n::gettext('Incorrect date').'(b)');
+				}
 			}
 		}
 
@@ -1471,11 +1484,13 @@ class UserDateTotalFactory extends Factory {
 			);
 		}
 		// Object Type
-		$this->Validator->inArrayKey( 'object_type',
-									  $this->getObjectType(),
-									  TTi18n::gettext( 'Incorrect Object Type' ),
-									  $this->getOptions( 'object_type' )
-		);
+		if ( $this->getObjectType() !== FALSE ) {
+			$this->Validator->inArrayKey( 'object_type',
+										  $this->getObjectType(),
+										  TTi18n::gettext( 'Incorrect Object Type' ),
+										  $this->getOptions( 'object_type' )
+			);
+		}
 		// Source Object
 		if ( $this->getSourceObject() !== FALSE AND $this->getSourceObject() != TTUUID::getZeroID() ) {
 			$lf = $this->getSourceObjectListFactory( $this->getObjectType() );
@@ -1655,7 +1670,7 @@ class UserDateTotalFactory extends Factory {
 										 TTi18n::gettext('Accumulated Time cannot be assigned to a different employee once created') );
 		}
 
-		if ( $this->getObjectType() == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getObjectType() == FALSE ) {
 			$this->Validator->isTRUE(	'object_type_id',
 										FALSE,
 										TTi18n::gettext('Type is invalid') );
@@ -1745,7 +1760,7 @@ class UserDateTotalFactory extends Factory {
 
 		//This is likely caused by employee not being assigned to a pay period schedule?
 		//Make sure to allow entries in the future (ie: absences) where no pay period exists yet.
-		if ( $this->getDeleted() == FALSE AND $this->getDateStamp() == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getDeleted() == FALSE AND $this->getDateStamp() == FALSE ) {
 			$this->Validator->isTRUE(	'date_stamp',
 										FALSE,
 										TTi18n::gettext('Date is incorrect, or pay period does not exist for this date. Please create a pay period schedule and assign this employee to it if you have not done so already') );
@@ -1776,23 +1791,23 @@ class UserDateTotalFactory extends Factory {
 
 		//Make sure that we aren't trying to overwrite an already overridden entry made by the user for some special purpose.
 		if ( $this->getDeleted() == FALSE
-				AND $this->isNew() == TRUE ) {
+				AND $this->isNew() == TRUE
+				AND is_object( $this->getUserObject() ) ) {
 			//Debug::text('Checking for already existing overridden entries ... User ID: '. $this->getUser() .' DateStamp: '. $this->getDateStamp() .' Object Type ID: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
 
 			$udtlf = TTnew( 'UserDateTotalListFactory' );
-			if ( $this->getObjectType() == 10
+			if ( ( $this->getObjectType() == 5 OR $this->getObjectType() == 10 OR $this->getObjectType() == 20 )
 					AND TTUUID::isUUID( $this->getPunchControlID() ) AND $this->getPunchControlID() != TTUUID::getZeroID() AND $this->getPunchControlID() != TTUUID::getNotExistID() ) {
 				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPunchControlIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPunchControlID(), TRUE );
-			} elseif ( $this->getObjectType() == 50 OR $this->getObjectType() == 25 ) {
+			} elseif ( $this->getObjectType() != 10 ) { //10=Worked Time. This is often used to import manual timesheet data, and some customers require importing of "duplicate" entries, since the data is converted from other timeclock systems.
 				//Allow object_type_id=50 (absence taken) entries to override object_type_id=25 entries.
 				//So users can create an absence schedule shift, then override it to a smaller number of hours.
 				//However how do we handle cases where an undertime absence policy creates a object_type_id=25 record and the user wants to override it?
 
-				//Allow employee to have multiple absence entries on the same day as long as the branch, department, job, task are all different.
+				//Allow employee to have multiple entries on the same day as long as the branch, department, job, task are all different.
 				if ( $this->getDateStamp() != FALSE AND $this->getUser() != FALSE ) {
 					$filter_data = array( 	'user_id' => TTUUID::castUUID($this->getUser()),
 											'date_stamp' => $this->getDateStamp(),
-											//'object_type_id' => array( (int)$this->getObjectType(), 25 ),
 											'object_type_id' => (int)$this->getObjectType(),
 
 											//Restrict based on src_object_id when entering absences as well.
@@ -1811,21 +1826,12 @@ class UserDateTotalFactory extends Factory {
 										);
 					$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 				}
-			} elseif ( $this->getObjectType() == 30 ) {
-				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPayCodeIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPayCode(), TRUE );
-			} elseif ( $this->getObjectType() == 40 ) {
-				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPayCodeIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPayCode(), TRUE );
-			} elseif ( $this->getObjectType() == 100 ) {
-				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPayCodeIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPayCode(), TRUE );
-			} elseif ( $this->getObjectType() == 5 OR ( $this->getObjectType() == 20
-						AND TTUUID::isUUID( $this->getPunchControlID() ) AND $this->getPunchControlID() != TTUUID::getZeroID() AND $this->getPunchControlID() != TTUUID::getNotExistID() ) ) {
-				$udtlf->getByUserIdAndDateStampAndObjectTypeAndPunchControlIdAndOverride( $this->getUser(), $this->getDateStamp(), $this->getObjectType(), $this->getPunchControlID(), TRUE );
 			}
 
 			//Debug::text('Record Count: '. (int)$udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $udtlf->getRecordCount() > 0 ) {
 				Debug::text('Found an overridden row... NOT SAVING: '. $udtlf->getCurrent()->getId(), __FILE__, __LINE__, __METHOD__, 10);
-				$this->Validator->isTRUE(	'absence_policy_id',
+				$this->Validator->isTRUE(	( ( $this->getObjectType() == 25 OR $this->getObjectType() == 50 ) ? 'absence_policy_id' : 'object_type_id' ),
 											FALSE,
 											TTi18n::gettext('Similar entry already exists, not overriding'));
 			}

@@ -1934,10 +1934,8 @@ class UserDeductionFactory extends Factory {
 
 					//Need to set Federal settings here.
 					$udlf = TTnew( 'UserDeductionListFactory' );
-					$udlf->getByUserIdAndCountryID( $user_id, $cd_obj->getCountry() );
+					$udlf->getByUserIdAndCalculationIdAndCountryID( $user_id, 100, $cd_obj->getCountry() );
 					if ( $udlf->getRecordCount() > 0 ) {
-						Debug::Text('Found Federal User Deduction...', __FILE__, __LINE__, __METHOD__, 10);
-
 						$tmp_ud_obj = $udlf->getCurrent();
 
 						if ( $tmp_ud_obj->getUserValue1() == '' ) {
@@ -1952,9 +1950,7 @@ class UserDeductionFactory extends Factory {
 							$tmp_user_value2 = $tmp_ud_obj->getUserValue2();
 						}
 
-						Debug::Text('TmpUserValue1: '. $tmp_user_value1, __FILE__, __LINE__, __METHOD__, 10);
-						Debug::Text('TmpUserValue2: '. $tmp_user_value2, __FILE__, __LINE__, __METHOD__, 10);
-
+						Debug::Text('Found Federal User Deduction... Total Records: '. $udlf->getRecordCount() .' TmpUserValue1: '. $tmp_user_value1 .' TmpUserValue2: '. $tmp_user_value2, __FILE__, __LINE__, __METHOD__, 10);
 						$pd_obj->setFederalFilingStatus( $tmp_user_value1 );
 						$pd_obj->setFederalAllowance( $tmp_user_value2 );
 
@@ -2142,7 +2138,7 @@ class UserDeductionFactory extends Factory {
 			Debug::text('Legal Entity changed. Trying to match all tax/deduction data to new entity for user: '. $user_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
 			/** @var UserDeductionFactory $ud_obj */
 			foreach( $udlf as $ud_obj ) {
-				$matched_company_deduction_id = array();
+				$matched_company_deduction_ids = array();
 
 				$cd_obj = $ud_obj->getCompanyDeductionObject();
 
@@ -2152,7 +2148,7 @@ class UserDeductionFactory extends Factory {
 				}
 
 				if ( is_object( $cd_obj ) AND $cd_obj->getLegalEntity() == $user_obj->getGenericOldDataValue('legal_entity_id') ) { //Only convert records assigned to the old legal entity. Skip records not assigned to any legal entity.
-					//Search for matching CompanyDeduction reocrd to try to re-assign them to.
+					//Search for matching CompanyDeduction record to try to re-assign them to.
 					//  Must Match: Calculate Type, Legal Entity -> User Legal Entity, Pay Stub Account
 					if ( $cdlf->getRecordCount() > 0 ) {
 						foreach( $cdlf as $tmp_cd_obj ) {
@@ -2160,8 +2156,8 @@ class UserDeductionFactory extends Factory {
 									AND $tmp_cd_obj->getLegalEntity() == $user_obj->getLegalEntity()
 									AND $cd_obj->getPayStubEntryAccount() == $tmp_cd_obj->getPayStubEntryAccount()
 								) {
-								Debug::text('  Match Found! Company Deduction: Old: '. $cd_obj->getName() .'('. $cd_obj->getId() .') New: '. $tmp_cd_obj->getName() .'('. $tmp_cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
-								$matched_company_deduction_id[] = $tmp_cd_obj->getId(); //Use an array, if more than exactly one match, we can't migrate date to it.
+								Debug::text('  Legal Entity/Calculation/Pay Stub Account Match Found! Company Deduction: Old: '. $cd_obj->getName() .'('. $cd_obj->getId() .') New: '. $tmp_cd_obj->getName() .'('. $tmp_cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+								$matched_company_deduction_ids[$tmp_cd_obj->getId()] = $tmp_cd_obj->getName(); //Use an array, if more than exactly one match, we can't migrate date to it.
 							} else {
 								Debug::text('  NOT a Match... Company Deduction: Old: '. $cd_obj->getName() .'('. $cd_obj->getId() .') New: '. $tmp_cd_obj->getName() .'('. $tmp_cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
 							}
@@ -2170,32 +2166,47 @@ class UserDeductionFactory extends Factory {
 					}
 				}
 
-				if ( count( $matched_company_deduction_id ) == 1 ) {
+				Debug::text('  Matches Found ('. count( $matched_company_deduction_ids ) .')!', __FILE__, __LINE__, __METHOD__, 10);
+				if ( count( $matched_company_deduction_ids ) > 1 ) {
+					$matched_company_deduction_id = Misc::findClosestMatch( $cd_obj->getName(), $matched_company_deduction_ids );
+					Debug::text('  Closest Match: '. $matched_company_deduction_id .' Searched For: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+				} elseif ( count( $matched_company_deduction_ids ) == 1 ) {
+					reset($matched_company_deduction_ids);
+					$matched_company_deduction_id = key($matched_company_deduction_ids);
+					Debug::text('  Only one Match: '. $matched_company_deduction_id, __FILE__, __LINE__, __METHOD__, 10);
+				} else {
+					$matched_company_deduction_id = NULL;
+					Debug::text('  No Match Found ('. count( $matched_company_deduction_ids ) .')!', __FILE__, __LINE__, __METHOD__, 10);
+				}
+
+				if ( $matched_company_deduction_id != '' ) {
 					//Create new UserDeduction record so the audit log shows the employee being removed from one CompanyDeduction record and assigned to another.
 					$tmp_ud_obj = clone $ud_obj;
 					$tmp_ud_obj->setId( FALSE );
-					$tmp_ud_obj->setCompanyDeduction( $matched_company_deduction_id[0] );
+					$tmp_ud_obj->setCompanyDeduction( $matched_company_deduction_id );
 					if ( $tmp_ud_obj->isValid() ) {
 						$tmp_ud_obj->Save();
 					}
 					unset($tmp_ud_obj);
-				} else {
-					Debug::text('  No Match Found ('. count( $matched_company_deduction_id ) .')! Unassigning user from: '. $cd_obj->getName() .'('. $cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
 				}
 
-				$ud_obj->setDeleted( TRUE );
-				if ( $ud_obj->isValid() ) {
-					$ud_obj->Save();
+				if ( $cd_obj->getLegalEntity() == TTUUID::getZeroID() AND $matched_company_deduction_id == '' ) {
+					Debug::text('  No legal entity assigned to Tax/Deduction record, and no match found, so *not* unassigning user from: '. $cd_obj->getName() .'('. $cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
 				} else {
-					Debug::text('  ERROR! Validation failed when reassigning CompanyDeduction records... Company Deduction: '. $cd_obj->getName() .'('. $cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text('  Unassigning user from: '. $cd_obj->getName() .'('. $cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+					$ud_obj->setDeleted( TRUE );
+					if ( $ud_obj->isValid() ) {
+						$ud_obj->Save();
+					} else {
+						Debug::text( '  ERROR! Validation failed when reassigning CompanyDeduction records... Company Deduction: ' . $cd_obj->getName() . '(' . $cd_obj->getId() . ')', __FILE__, __LINE__, __METHOD__, 10 );
+					}
 				}
-
 			}
 		}
 
 		$cdlf->CommitTransaction();
 
-		unset( $udlf, $ud_obj, $cd_obj, $cdlf, $matched_company_deduction_id );
+		unset( $udlf, $ud_obj, $cd_obj, $cdlf, $matched_company_deduction_ids );
 
 		return TRUE;
 	}

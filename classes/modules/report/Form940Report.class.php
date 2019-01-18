@@ -691,8 +691,11 @@ class Form940Report extends Report {
 
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['exempt_payments']['include_pay_stub_entry_account'],	$form_data['exempt_payments']['exclude_pay_stub_entry_account'] );
 
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['total_payments']['include_pay_stub_entry_account'], $form_data['total_payments']['exclude_pay_stub_entry_account'] );
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'] );
+						//Net Payments are includes/excludes as they already are excluding exempt payments.
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['total_payments']['include_pay_stub_entry_account'], $form_data['total_payments']['exclude_pay_stub_entry_account'] );
+
+						//Total Payments must include net payments plus all exempt payments, as its later subtracted out on Line 7.
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments']	= $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = 0;
 
 						//Need to total up payments for each employee so we know when we exceed the limit.

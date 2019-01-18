@@ -645,7 +645,7 @@ class CalculatePolicy {
 				}
 			}
 
-			$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+			$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 
 			return TRUE;
 		}
@@ -662,7 +662,7 @@ class CalculatePolicy {
 		$retarr = array();
 		if ( is_array($schedule_arr) ) {
 			foreach( $schedule_arr as $s_obj ) {
-				$retarr[] = $s_obj->getDateStamp();
+				$retarr[] = TTDate::getMiddleDayEpoch( $s_obj->getDateStamp() );
 			}
 		}
 		Debug::text('Schedule Dates: '. count($retarr), __FILE__, __LINE__, __METHOD__, 10);
@@ -1459,7 +1459,7 @@ class CalculatePolicy {
 
 				Debug::text('Total Break Policy Time: '. $break_policy_time, __FILE__, __LINE__, __METHOD__, 10);
 
-				$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+				$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 
 				return TRUE;
 			}
@@ -1837,7 +1837,7 @@ class CalculatePolicy {
 
 				Debug::text('Total Meal Policy Time: '. $meal_policy_time, __FILE__, __LINE__, __METHOD__, 10);
 
-				$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+				$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 
 				return TRUE;
 			}
@@ -2050,7 +2050,7 @@ class CalculatePolicy {
 
 			Debug::text('Done with absence time policies to calculate...', __FILE__, __LINE__, __METHOD__, 10);
 
-			$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+			$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 
 			return TRUE;
 		}
@@ -2138,7 +2138,7 @@ class CalculatePolicy {
 								$this->user_date_total_insert_id--;
 							}
 
-							$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+							$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 
 							return TRUE;
 						} else {
@@ -2559,7 +2559,7 @@ class CalculatePolicy {
 				next($regular_time_policies);
 			}
 
-			$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+			$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 
 			return TRUE;
 		}
@@ -2940,7 +2940,7 @@ class CalculatePolicy {
 			}
 
 			if ( $retval == TRUE ) {
-				$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+				$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 			}
 		} else {
 			Debug::text('ERROR: Unable to find over time policy ID: '. $current_trigger_time_arr['over_time_policy_id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -7413,7 +7413,7 @@ class CalculatePolicy {
 				}
 			}
 
-			$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+			$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 
 			return TRUE;
 		}
@@ -7552,7 +7552,7 @@ class CalculatePolicy {
 					// Consider the case of a Vacation absence record for 8hrs which gets split into Vacation=4.00 and OT Bank=4.00.
 					//   Vacation accrual should be deducted by 8hrs (total absence time), then OT Bank should be deposited by 4hrs, and 4hrs of Vacation is paid.
 					//   So essentially 4hrs of accrual time is being transferred from Vacation to OT Bank, and the difference is paid.
-					$tmp_user_date_total = $this->sortUserDateTotalData( $tmp_user_date_total, 'sortUserDateTotalDataByObjectTypeDescAndID' );
+					$this->sortUserDateTotalData( $tmp_user_date_total, 'sortUserDateTotalDataByObjectTypeDescAndID' ); //Sorting is inplace.
 					foreach( $tmp_user_date_total as $udt_key => $udt_obj ) {
 						$date_stamp = TTDate::getMiddleDayEpoch( $udt_obj->getDateStamp() ); //Optimization - Move outside loop.
 						//Debug::text('bKey: '. $udt_key .' UDT ID: '. $udt_obj->getID() .' Object Type ID: '. $udt_obj->getObjectType() .' Date: '. TTDate::getDate('DATE', $udt_obj->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
@@ -8274,7 +8274,7 @@ class CalculatePolicy {
 				}
 			}
 
-			$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
+			$this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
 
 			return TRUE;
 		}
@@ -8554,7 +8554,7 @@ class CalculatePolicy {
 			$nearest_punch_difference = FALSE;
 			$shift_data = array();
 
-			$user_date_total_arr = $this->sortUserDateTotalData( $user_date_total_arr, 'sortUserDateTotalDataByTimeStampAndAndObjectTypeAndID' ); //Needs to be sorted always to avoid cases where the records are out of order causing the shifts first_in/last_out to be incorrect.
+			$this->sortUserDateTotalData( $user_date_total_arr, 'sortUserDateTotalDataByTimeStampAndAndObjectTypeAndID' ); //Needs to be sorted always to avoid cases where the records are out of order causing the shifts first_in/last_out to be incorrect.
 			foreach( $user_date_total_arr as $udt_key => $udt_obj ) {
 				//When absences are entered on the timesheet directly (overridden) there is no start/end time specified for them,
 				// and they should always be calculated down to a object_type_id=25 (absence) or some other pay code anyways.
@@ -8834,14 +8834,14 @@ class CalculatePolicy {
 	/**
 	 * @param $udtlf
 	 * @param string $sort_function_name
-	 * @return array
+	 * @return bool
 	 */
-	function sortUserDateTotalData( $udtlf, $sort_function_name = 'sortUserDateTotalDataByDateAndObjectTypeAndStartTimeStampAndID' ) {
-		if ( is_array($udtlf) AND $sort_function_name != '' ) {
-			uasort( $udtlf, array( $this, $sort_function_name ) );
+	function sortUserDateTotalData( &$udtlf, $sort_function_name = 'sortUserDateTotalDataByDateAndObjectTypeAndStartTimeStampAndID' ) {
+		if ( is_array( $udtlf ) AND $sort_function_name != '' ) {
+			return uasort( $udtlf, array( $this, $sort_function_name ) ); //Sorting is inplace, so no need to return $udtlf
 		}
 
-		return $udtlf;
+		return FALSE; //Sorting is inplace, so no need to return $udtlf
 	}
 
 	/**
@@ -8973,7 +8973,7 @@ class CalculatePolicy {
 								(
 									( !is_array($start_date) AND $udt_obj_date_stamp >= $start_date AND $udt_obj_date_stamp <= $end_date )
 									OR
-									( is_array($start_date) AND in_array( TTDate::getBeginDayEpoch( $udt_obj->getDateStamp() ), $start_date ) )
+									( is_array($start_date) AND in_array( TTDate::getMiddleDayEpoch( $udt_obj->getDateStamp() ), $start_date ) )
 								)
 							) {
 

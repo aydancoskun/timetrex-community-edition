@@ -396,6 +396,7 @@ class LogFactory extends Factory {
 											'ethnic_group'						=> array('user'),
 											'legal_entity'						=> array('legal_entity'),
 											'payroll_remittance_agency'			=> array('payroll_remittance_agency'),
+											'payroll_remittance_agency_event'	=> array('payroll_remittance_agency'),
 											'remittance_source_account'			=> array('remittance_source_account'),
 											'remittance_destination_account'	=> array('remittance_destination_account'),
 											'geo_fence'							=> array('geo_fence')

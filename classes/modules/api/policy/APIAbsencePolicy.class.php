@@ -502,18 +502,8 @@ class APIAbsencePolicy extends APIFactory {
 			Debug::Text('After Accrual Rate: Amount: '. $amount .' Prev Amount: '. $previous_amount, __FILE__, __LINE__, __METHOD__, 10);
 
 			//Get Wage Permission Hierarchy Children first, as this can be used for viewing, or editing.
-			$wage_permission_children_ids = array();
-			if ( $this->getPermissionObject()->Check('wage', 'view') == TRUE ) {
-				$wage_permission_children_ids = TRUE;
-			} elseif ( $this->getPermissionObject()->Check('wage', 'view') == FALSE ) {
-				if ( $this->getPermissionObject()->Check('wage', 'view_child') == FALSE ) {
-					$wage_permission_children_ids = array();
-				}
-				if ( $this->getPermissionObject()->Check('wage', 'view_own') OR $this->getPermissionObject()->Check('pay_stub', 'view_own') ) { //Check wage/pay stub, as by default users don't have wage, view_own permissions. This is important for Advanced Requests.
-					$wage_permission_children_ids[] = $this->getCurrentUserObject()->getID();
-				}
-			}
-			if ( $wage_permission_children_ids === TRUE OR in_array( $user_id, (array)$wage_permission_children_ids) ) {
+			$wage_permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view' );
+			if ( $this->getPermissionObject()->isPermissionChild( $user_id, $wage_permission_children_ids ) ) {
 				//Check for links to Pay Stub Account accruals, to get dollar amounts too.
 				if ( is_object( $ap_obj->getPayCodeObject() )
 						AND is_object( $ap_obj->getPayCodeObject()->getPayStubEntryAccountObject() )

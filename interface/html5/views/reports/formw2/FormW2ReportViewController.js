@@ -1,6 +1,6 @@
 FormW2ReportViewController = ReportBaseViewController.extend( {
 
-	_required_files: ['APIFormW2Report', 'APIPayStubEntryAccount', 'APICurrency'],
+	_required_files: ['APIFormW2Report', 'APIPayStubEntryAccount', 'APICompanyDeduction', 'APICurrency'],
 
 	kind_of_employer_array: null,
 	efile_state_array: null,
@@ -816,6 +816,20 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
+
+		//Box 13 (Retirement Plan)
+		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APICompanyDeduction' )),
+			allow_multiple_selection: true,
+			layout_name: ALayoutIDs.COMPANY_DEDUCTION,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'l13b_company_deduction'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Retirement Plans (Box 13)' ), form_item_input, tab3_column1 );
+
 		//Box 14a:
 		v_box = $( '<div class=\'v-box\'></div>' );
 
@@ -1108,6 +1122,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 			exclude_pay_stub_entry_account: this.current_edit_record.l12d_exclude_pay_stub_entry_account
 		};
 
+		other.l13b = {
+			company_deduction: this.current_edit_record.l13b_company_deduction
+		};
+
 		other.l14a = {
 			include_pay_stub_entry_account: this.current_edit_record.l14a_include_pay_stub_entry_account,
 			exclude_pay_stub_entry_account: this.current_edit_record.l14a_exclude_pay_stub_entry_account
@@ -1150,210 +1168,171 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 			if ( res_Data.l1 ) {
 				this.edit_view_ui_dic.l1_exclude_pay_stub_entry_account.setValue( res_Data.l1.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l1_include_pay_stub_entry_account.setValue( res_Data.l1.include_pay_stub_entry_account );
-
 				this.current_edit_record.l1_include_pay_stub_entry_account = res_Data.l1.include_pay_stub_entry_account;
 				this.current_edit_record.l1_exclude_pay_stub_entry_account = res_Data.l1.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l2 ) {
 				this.edit_view_ui_dic.l2_exclude_pay_stub_entry_account.setValue( res_Data.l2.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l2_include_pay_stub_entry_account.setValue( res_Data.l2.include_pay_stub_entry_account );
-
 				this.current_edit_record.l2_include_pay_stub_entry_account = res_Data.l2.include_pay_stub_entry_account;
 				this.current_edit_record.l2_exclude_pay_stub_entry_account = res_Data.l2.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l3 ) {
 				this.edit_view_ui_dic.l3_exclude_pay_stub_entry_account.setValue( res_Data.l3.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l3_include_pay_stub_entry_account.setValue( res_Data.l3.include_pay_stub_entry_account );
-
 				this.current_edit_record.l3_include_pay_stub_entry_account = res_Data.l3.include_pay_stub_entry_account;
 				this.current_edit_record.l3_exclude_pay_stub_entry_account = res_Data.l3.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l4 ) {
 				this.edit_view_ui_dic.l4_exclude_pay_stub_entry_account.setValue( res_Data.l4.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l4_include_pay_stub_entry_account.setValue( res_Data.l4.include_pay_stub_entry_account );
-
 				this.current_edit_record.l4_include_pay_stub_entry_account = res_Data.l4.include_pay_stub_entry_account;
 				this.current_edit_record.l4_exclude_pay_stub_entry_account = res_Data.l4.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l5 ) {
 				this.edit_view_ui_dic.l5_exclude_pay_stub_entry_account.setValue( res_Data.l5.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l5_include_pay_stub_entry_account.setValue( res_Data.l5.include_pay_stub_entry_account );
-
 				this.current_edit_record.l5_include_pay_stub_entry_account = res_Data.l5.include_pay_stub_entry_account;
 				this.current_edit_record.l5_exclude_pay_stub_entry_account = res_Data.l5.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l6 ) {
 				this.edit_view_ui_dic.l6_exclude_pay_stub_entry_account.setValue( res_Data.l6.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l6_include_pay_stub_entry_account.setValue( res_Data.l6.include_pay_stub_entry_account );
-
 				this.current_edit_record.l6_include_pay_stub_entry_account = res_Data.l6.include_pay_stub_entry_account;
 				this.current_edit_record.l6_exclude_pay_stub_entry_account = res_Data.l6.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l7 ) {
 				this.edit_view_ui_dic.l7_exclude_pay_stub_entry_account.setValue( res_Data.l7.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l7_include_pay_stub_entry_account.setValue( res_Data.l7.include_pay_stub_entry_account );
-
 				this.current_edit_record.l7_include_pay_stub_entry_account = res_Data.l7.include_pay_stub_entry_account;
 				this.current_edit_record.l7_exclude_pay_stub_entry_account = res_Data.l7.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l8 ) {
 				this.edit_view_ui_dic.l8_exclude_pay_stub_entry_account.setValue( res_Data.l8.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l8_include_pay_stub_entry_account.setValue( res_Data.l8.include_pay_stub_entry_account );
-
 				this.current_edit_record.l8_include_pay_stub_entry_account = res_Data.l8.include_pay_stub_entry_account;
 				this.current_edit_record.l8_exclude_pay_stub_entry_account = res_Data.l8.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l10 ) {
 				this.edit_view_ui_dic.l10_exclude_pay_stub_entry_account.setValue( res_Data.l10.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l10_include_pay_stub_entry_account.setValue( res_Data.l10.include_pay_stub_entry_account );
-
 				this.current_edit_record.l10_include_pay_stub_entry_account = res_Data.l10.include_pay_stub_entry_account;
 				this.current_edit_record.l10_exclude_pay_stub_entry_account = res_Data.l10.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l11 ) {
 				this.edit_view_ui_dic.l11_exclude_pay_stub_entry_account.setValue( res_Data.l11.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l11_include_pay_stub_entry_account.setValue( res_Data.l11.include_pay_stub_entry_account );
-
 				this.current_edit_record.l11_include_pay_stub_entry_account = res_Data.l11.include_pay_stub_entry_account;
 				this.current_edit_record.l11_exclude_pay_stub_entry_account = res_Data.l11.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l12a ) {
 				this.edit_view_ui_dic.l12a_exclude_pay_stub_entry_account.setValue( res_Data.l12a.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l12a_include_pay_stub_entry_account.setValue( res_Data.l12a.include_pay_stub_entry_account );
-
 				this.current_edit_record.l12a_include_pay_stub_entry_account = res_Data.l12a.include_pay_stub_entry_account;
 				this.current_edit_record.l12a_exclude_pay_stub_entry_account = res_Data.l12a.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l12b ) {
 				this.edit_view_ui_dic.l12b_exclude_pay_stub_entry_account.setValue( res_Data.l12b.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l12b_include_pay_stub_entry_account.setValue( res_Data.l12b.include_pay_stub_entry_account );
-
 				this.current_edit_record.l12b_include_pay_stub_entry_account = res_Data.l12b.include_pay_stub_entry_account;
 				this.current_edit_record.l12b_exclude_pay_stub_entry_account = res_Data.l12b.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l12c ) {
 				this.edit_view_ui_dic.l12c_exclude_pay_stub_entry_account.setValue( res_Data.l12c.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l12c_include_pay_stub_entry_account.setValue( res_Data.l12c.include_pay_stub_entry_account );
-
 				this.current_edit_record.l12c_include_pay_stub_entry_account = res_Data.l12c.include_pay_stub_entry_account;
 				this.current_edit_record.l12c_exclude_pay_stub_entry_account = res_Data.l12c.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l12d ) {
 				this.edit_view_ui_dic.l12d_exclude_pay_stub_entry_account.setValue( res_Data.l12d.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l12d_include_pay_stub_entry_account.setValue( res_Data.l12d.include_pay_stub_entry_account );
-
 				this.current_edit_record.l12d_include_pay_stub_entry_account = res_Data.l12d.include_pay_stub_entry_account;
 				this.current_edit_record.l12d_exclude_pay_stub_entry_account = res_Data.l12d.exclude_pay_stub_entry_account;
+			}
 
+			if ( res_Data.l13b ) {
+				this.edit_view_ui_dic.l13b_company_deduction.setValue( res_Data.l13b.company_deduction );
+				this.current_edit_record.l13b_company_deduction = res_Data.l13b.company_deduction;
 			}
 
 			if ( res_Data.l14a ) {
 				this.edit_view_ui_dic.l14a_exclude_pay_stub_entry_account.setValue( res_Data.l14a.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l14a_include_pay_stub_entry_account.setValue( res_Data.l14a.include_pay_stub_entry_account );
-
 				this.current_edit_record.l14a_include_pay_stub_entry_account = res_Data.l14a.include_pay_stub_entry_account;
 				this.current_edit_record.l14a_exclude_pay_stub_entry_account = res_Data.l14a.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l14b ) {
 				this.edit_view_ui_dic.l14b_exclude_pay_stub_entry_account.setValue( res_Data.l14b.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l14b_include_pay_stub_entry_account.setValue( res_Data.l14b.include_pay_stub_entry_account );
-
 				this.current_edit_record.l14b_include_pay_stub_entry_account = res_Data.l14b.include_pay_stub_entry_account;
 				this.current_edit_record.l14b_exclude_pay_stub_entry_account = res_Data.l14b.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l14c ) {
 				this.edit_view_ui_dic.l14c_exclude_pay_stub_entry_account.setValue( res_Data.l14c.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l14c_include_pay_stub_entry_account.setValue( res_Data.l14c.include_pay_stub_entry_account );
-
 				this.current_edit_record.l14c_include_pay_stub_entry_account = res_Data.l14c.include_pay_stub_entry_account;
 				this.current_edit_record.l14c_exclude_pay_stub_entry_account = res_Data.l14c.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l14d ) {
 				this.edit_view_ui_dic.l14d_exclude_pay_stub_entry_account.setValue( res_Data.l14d.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.l14d_include_pay_stub_entry_account.setValue( res_Data.l14d.include_pay_stub_entry_account );
-
 				this.current_edit_record.l14d_include_pay_stub_entry_account = res_Data.l14d.include_pay_stub_entry_account;
 				this.current_edit_record.l14d_exclude_pay_stub_entry_account = res_Data.l14d.exclude_pay_stub_entry_account;
-
 			}
 
 			if ( res_Data.l12a_code ) {
 				this.edit_view_ui_dic.l12a_code.setValue( res_Data.l12a_code );
-
 				this.current_edit_record.l12a_code = res_Data.l12a_code;
 			}
 
 			if ( res_Data.l12a_code ) {
 				this.edit_view_ui_dic.l12b_code.setValue( res_Data.l12b_code );
-
 				this.current_edit_record.l12b_code = res_Data.l12b_code;
 			}
 
 			if ( res_Data.l12c_code ) {
 				this.edit_view_ui_dic.l12c_code.setValue( res_Data.l12c_code );
-
 				this.current_edit_record.l12c_code = res_Data.l12c_code;
 			}
 
 			if ( res_Data.l12d_code ) {
 				this.edit_view_ui_dic.l12d_code.setValue( res_Data.l12d_code );
-
 				this.current_edit_record.l12d_code = res_Data.l12d_code;
 			}
 
 			if ( res_Data.l14a_name ) {
 				this.edit_view_ui_dic.l14a_name.setValue( res_Data.l14a_name );
-
 				this.current_edit_record.l14a_name = res_Data.l14a_name;
 			}
 
 			if ( res_Data.l14b_name ) {
 				this.edit_view_ui_dic.l14b_name.setValue( res_Data.l14b_name );
-
 				this.current_edit_record.l14b_name = res_Data.l14b_name;
 			}
 
 			if ( res_Data.l14c_name ) {
 				this.edit_view_ui_dic.l14c_name.setValue( res_Data.l14c_name );
-
 				this.current_edit_record.l14c_name = res_Data.l14c_name;
 			}
 
 			if ( res_Data.l14d_name ) {
 				this.edit_view_ui_dic.l14d_name.setValue( res_Data.l14d_name );
-
 				this.current_edit_record.l14d_name = res_Data.l14d_name;
 			}
 

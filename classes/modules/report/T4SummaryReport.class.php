@@ -771,6 +771,8 @@ class T4SummaryReport extends Report {
 		//Merge time data with user data
 		$key = 0;
 		if ( isset($this->tmp_data['pay_stub_entry']) AND is_array($this->tmp_data['pay_stub_entry']) ) {
+			$sort_columns = $this->getSortConfig();
+
 			foreach( $this->tmp_data['pay_stub_entry'] as $user_id => $level_1 ) {
 				foreach( $level_1 as $date_stamp => $row ) {
 					$date_columns = TTDate::getReportDates( NULL, $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
@@ -846,8 +848,6 @@ class T4SummaryReport extends Report {
 			$setup_data['status_id'] = 'O'; //Original
 		}
 
-		$this->sortFormData(); //Make sure forms are sorted.
-
 		if ( stristr( $format, 'government' ) ) {
 			$form_type = 'government';
 		} else {
@@ -859,6 +859,9 @@ class T4SummaryReport extends Report {
 		$file_name = NULL;
 		if ( isset( $this->form_data['user'] ) AND is_array( $this->form_data['user'] ) ) {
 			$file_name = 't4_summary.ext';
+
+			$this->sortFormData(); //Make sure forms are sorted.
+
 			foreach ( $this->form_data['user'] as $legal_entity_id => $user_rows ) {
 				if ( isset( $this->form_data['legal_entity'][ $legal_entity_id ] ) == FALSE ) {
 					Debug::Text( 'Missing Legal Entity: ' . $legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
@@ -874,9 +877,10 @@ class T4SummaryReport extends Report {
 				$le_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
 				$company_name = $le_obj->getTradeName();
 
-				if ( is_object($this->form_data['remittance_agency'][ $legal_entity_id ]) ) {
+				if ( is_object( $this->form_data['remittance_agency'][ $legal_entity_id ] ) ) {
 					$contact_user_obj = $this->form_data['remittance_agency'][ $legal_entity_id ]->getContactUserObject();
-				} else {
+				}
+				if ( !isset( $contact_user_obj ) OR !is_object( $contact_user_obj ) ) {
 					$contact_user_obj = $this->getUserObject();
 				}
 

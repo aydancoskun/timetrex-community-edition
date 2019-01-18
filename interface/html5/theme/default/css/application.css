@@ -1970,8 +1970,6 @@ progress::-moz-progress-bar {
 
 .formula-builder .formula-btn {
     float: left;
-    margin-left: 10px;
-
 }
 
 .balance_icon {
@@ -3233,9 +3231,6 @@ th.ui-state-hover {
     overflow-y: auto;
 }
 
-.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
-    padding-left: 2px;
-}
 .timesheet-authorization-summary-title {
     width: calc(100% - 1px) !important;
 }

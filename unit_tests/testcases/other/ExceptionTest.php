@@ -631,7 +631,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 			$prev_punch_control_id = NULL;
 			foreach( $plf as $p_obj ) {
 				if ( $prev_punch_control_id == NULL OR $prev_punch_control_id != $p_obj->getPunchControlID() ) {
-					$date_stamp = TTDate::getBeginDayEpoch( $p_obj->getPunchControlObject()->getDateStamp() );
+					$date_stamp = TTDate::getMiddleDayEpoch( $p_obj->getPunchControlObject()->getDateStamp() );
 					$p_obj->setUser( $this->user_id );
 					$p_obj->getPunchControlObject()->setPunchObject( $p_obj );
 
@@ -739,7 +739,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -789,7 +789,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -837,7 +837,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									NULL,
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginDayEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( time() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1329,7 +1329,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -1374,7 +1374,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -1423,7 +1423,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -1472,7 +1472,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -1517,7 +1517,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -1562,7 +1562,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -1622,7 +1622,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -1667,7 +1667,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -1726,7 +1726,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -1771,7 +1771,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -1831,7 +1831,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -1876,7 +1876,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -1920,7 +1920,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -1964,7 +1964,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 		//
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - ( 3600 * 8 ) ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - ( 3600 * 8 ) ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -2014,7 +2014,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -2059,7 +2059,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - ( 3600 * 8 ) ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - ( 3600 * 8 ) ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$this->createSchedule( $this->user_id, $date_epoch, array(
@@ -2124,7 +2124,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 									array( $this->user_id ) );
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -2185,7 +2185,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 
 		//Always start with a proper punch on the previous day, as that can affect the exception.
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() ) );
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct

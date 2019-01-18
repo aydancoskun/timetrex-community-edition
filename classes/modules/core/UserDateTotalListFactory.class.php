@@ -781,7 +781,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
 						AND a.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
-						AND a.total_time != 0
+						AND ( a.total_time != 0 OR a.override = 1 )
 						AND ( a.deleted = 0 )
 					ORDER BY a.date_stamp asc, a.object_type_id asc, d.type_id desc, a.src_object_id desc, a.total_time, a.id
 					';

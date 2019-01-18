@@ -421,7 +421,6 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 	},
 
 	uniformVariable: function( records ) {
-
 		records.id = this.parseToRecordId( records.id );
 
 		return records;
@@ -1235,6 +1234,60 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 			context_btn.addClass( 'disable-image' );
 		}
 
-	}
+	},
 
+	initSubLogView: function( tab_id ) {
+		var $this = this;
+
+		if ( !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id ) {
+			return;
+		}
+
+		if ( this.sub_log_view_controller ) {
+			this.sub_log_view_controller.buildContextMenu( true );
+			this.sub_log_view_controller.setDefaultMenu();
+			$this.sub_log_view_controller.parent_value = $this.parseToRecordId( $this.current_edit_record.id ); //Need to parse to record ID before passing to Audit tab.
+			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
+			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
+
+			this.sub_log_view_controller.search();
+		} else {
+
+			Global.loadScript( 'views/core/log/LogViewController.js', function() {
+				if ( !$this.edit_view_tab ) {
+					return;
+				}
+				var tab = $this.edit_view_tab.find( '#' + tab_id );
+				var firstColumn = tab.find( '.first-column-sub-view' );
+
+				TTPromise.add( 'initSubAudit', 'init' );
+				TTPromise.wait( 'initSubAudit', 'init', function() {
+					firstColumn.css('opacity', '1');
+				} );
+
+				firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
+
+				Global.trackView( 'Sub' + 'Log' + 'View', LocalCacheData.current_doing_context_action );
+				LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+			} );
+		}
+
+		function beforeLoadView() {
+
+		}
+
+		function afterLoadView( subViewController ) {
+			$this.sub_log_view_controller = subViewController;
+			$this.sub_log_view_controller.parent_key = 'object_id';
+			$this.sub_log_view_controller.parent_value = $this.parseToRecordId( $this.current_edit_record.id ); //Need to parse to record ID before passing to Audit tab.
+			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
+			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_log_view_controller.parent_view_controller = $this;
+
+			$this.sub_log_view_controller.postInit = function() {
+				this.initData();
+			};
+
+		}
+	}
 } );

@@ -881,7 +881,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= ( isset($filter_data['type_id']) ) ? $this->getWhereClauseSQL( 'a.type_id', $filter_data['type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['calculation_id']) ) ? $this->getWhereClauseSQL( 'a.calculation_id', $filter_data['calculation_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_stub_entry_name_id']) ) ? $this->getWhereClauseSQL( 'a.pay_stub_entry_account_id', $filter_data['pay_stub_entry_name_id'], 'uuid_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'a.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['legal_entity_id']) ) ? $this->getWhereClauseSQL( 'a.legal_entity_id', $filter_data['legal_entity_id'], 'uuid_list_with_all', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['name']) ) ? $this->getWhereClauseSQL( 'a.name', $filter_data['name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
@@ -897,6 +897,7 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

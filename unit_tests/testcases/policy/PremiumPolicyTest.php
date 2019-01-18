@@ -257,7 +257,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 						$end_date = TTDate::getBeginWeekEpoch( ( TTDate::getBeginYearEpoch( time() ) - (86400 * (7 * 6) ) ) );
 					}
 				} else {
-					$end_date = ($end_date + ( (86400 * 14) ));
+					$end_date = ($end_date + ( (86400 * 14) ) );
 				}
 
 				Debug::Text('I: '. $i .' End Date: '. TTDate::getDate('DATE+TIME', $end_date), __FILE__, __LINE__, __METHOD__, 10);
@@ -885,8 +885,8 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 				$ppf->setPayType( 10 ); //Pay Multiplied by factor
 
-				$ppf->setStartDate( $this->pay_period_objs[0]->getStartDate() + 86400 );
-				$ppf->setEndDate( $this->pay_period_objs[0]->getStartDate() + (86400 * 3) ); //2nd & 3rd days.
+				$ppf->setStartDate( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400 );
+				$ppf->setEndDate( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) ); //2nd & 3rd days.
 
 				$ppf->setStartTime( TTDate::parseDateTime('12:00 AM') );
 				$ppf->setEndTime( TTDate::parseDateTime('11:59 PM') );
@@ -926,8 +926,8 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 				$ppf->setPayType( 10 ); //Pay Multiplied by factor
 
-				$ppf->setStartDate( $this->pay_period_objs[0]->getStartDate() + 86400 );
-				$ppf->setEndDate( $this->pay_period_objs[0]->getStartDate() + (86400 * 3) ); //2nd & 3rd days.
+				$ppf->setStartDate( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400 );
+				$ppf->setEndDate( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) ); //2nd & 3rd days.
 
 				$ppf->setStartTime( TTDate::parseDateTime('12:00 AM') );
 				$ppf->setEndTime( TTDate::parseDateTime('11:59 PM') );
@@ -935,44 +935,44 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 				$ppf->setDailyTriggerTime( 0 );
 				$ppf->setWeeklyTriggerTime( 0 );
 
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 1
-							OR TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 3)) == 1 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 1
+							OR TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3)) == 1 ) {
 					$ppf->setMon( TRUE );
 				} else {
 					$ppf->setMon( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 2
-						OR TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 3)) == 2) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 2
+						OR TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3)) == 2) {
 					$ppf->setTue( TRUE );
 				} else {
 					$ppf->setTue( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 3
-						OR TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 3)) == 3) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 3
+						OR TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3)) == 3) {
 					$ppf->setWed( TRUE );
 				} else {
 					$ppf->setWed( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 4
-						OR TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 3)) == 4) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 4
+						OR TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3)) == 4) {
 					$ppf->setThu( TRUE );
 				} else {
 					$ppf->setThu( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 5
-						OR TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 3)) == 5 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 5
+						OR TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3)) == 5 ) {
 					$ppf->setFri( TRUE );
 				} else {
 					$ppf->setFri( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 6
-						OR TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 3)) == 6) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 6
+						OR TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3)) == 6) {
 					$ppf->setSat( TRUE );
 				} else {
 					$ppf->setSat( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 0
-						OR TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 3)) == 0) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 0
+						OR TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3)) == 0) {
 					$ppf->setSun( TRUE );
 				} else {
 					$ppf->setSun( FALSE );
@@ -1837,8 +1837,8 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 				$ppf->setPayType( 10 ); //Pay Multiplied by factor
 
-				$ppf->setStartDate( $this->pay_period_objs[0]->getStartDate() + 86400 );
-				$ppf->setEndDate( $this->pay_period_objs[0]->getStartDate() + (86400 * 3) ); //2nd & 3rd days.
+				$ppf->setStartDate( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400 );
+				$ppf->setEndDate( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) ); //2nd & 3rd days.
 
 				$ppf->setStartTime( TTDate::parseDateTime('12:00 AM') );
 				$ppf->setEndTime( TTDate::parseDateTime('11:59 PM') );
@@ -1881,8 +1881,8 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 				$ppf->setPayType( 10 ); //Pay Multiplied by factor
 
-				$ppf->setStartDate( $this->pay_period_objs[0]->getStartDate() + 86400 );
-				$ppf->setEndDate( $this->pay_period_objs[0]->getStartDate() + (86400 * 3) ); //2nd & 3rd days.
+				$ppf->setStartDate( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400 );
+				$ppf->setEndDate( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) ); //2nd & 3rd days.
 
 				$ppf->setStartTime( TTDate::parseDateTime('12:00 AM') );
 				$ppf->setEndTime( TTDate::parseDateTime('11:59 PM') );
@@ -2311,37 +2311,37 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 				$ppf->setDailyTriggerTime( 0 );
 				$ppf->setWeeklyTriggerTime( 0 );
 
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 1 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 1 ) {
 					$ppf->setMon( TRUE );
 				} else {
 					$ppf->setMon( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 2 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 2 ) {
 					$ppf->setTue( TRUE );
 				} else {
 					$ppf->setTue( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 3 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 3 ) {
 					$ppf->setWed( TRUE );
 				} else {
 					$ppf->setWed( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 4 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 4 ) {
 					$ppf->setThu( TRUE );
 				} else {
 					$ppf->setThu( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 5 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 5 ) {
 					$ppf->setFri( TRUE );
 				} else {
 					$ppf->setFri( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 6 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 6 ) {
 					$ppf->setSat( TRUE );
 				} else {
 					$ppf->setSat( FALSE );
 				}
-				if ( TTDate::getDayOfWeek($this->pay_period_objs[0]->getStartDate() + (86400 * 2)) == 0 ) {
+				if ( TTDate::getDayOfWeek( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2)) == 0 ) {
 					$ppf->setSun( TRUE );
 				} else {
 					$ppf->setSun( FALSE );
@@ -2654,7 +2654,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = $this->pay_period_objs[0]->getStartDate();
+		$date_epoch = TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2729,7 +2729,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2810,7 +2810,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2882,7 +2882,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -2956,7 +2956,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3030,7 +3030,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3126,7 +3126,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3222,7 +3222,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3295,7 +3295,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3367,7 +3367,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3440,7 +3440,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3513,7 +3513,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3608,7 +3608,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3704,7 +3704,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = $this->pay_period_objs[0]->getStartDate();
+		$date_epoch = TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3777,7 +3777,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3848,7 +3848,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3925,7 +3925,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3963,7 +3963,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4043,7 +4043,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4123,7 +4123,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4196,7 +4196,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4269,7 +4269,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4360,7 +4360,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4450,7 +4450,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4545,7 +4545,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4640,7 +4640,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4713,7 +4713,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4787,7 +4787,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4861,7 +4861,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -4937,7 +4937,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 6));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 6) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//Test punching in before the premium start time, and out after the premium end time.
@@ -4977,7 +4977,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$recalc_result = UserDateTotalFactory::reCalculateDay( $this->user_id, $date_epoch, TRUE );
 		TTDate::setTimeZone('PST8PDT');
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 6));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 6) );
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch );
 		//print_r($udt_arr);
 
@@ -5033,7 +5033,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 7));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 7) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -5107,7 +5107,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 7));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 7) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -5185,7 +5185,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5262,7 +5262,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -5349,7 +5349,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -5438,7 +5438,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -5530,7 +5530,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -5626,7 +5626,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -5723,7 +5723,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$date_stamp2 = TTDate::getDate('DATE', ($date_epoch + 86400) );
 
@@ -5822,7 +5822,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5909,7 +5909,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5947,7 +5947,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6034,7 +6034,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6072,7 +6072,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6159,7 +6159,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6195,7 +6195,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6279,7 +6279,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//
@@ -6387,7 +6387,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//
@@ -6496,7 +6496,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//
@@ -6597,7 +6597,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//
@@ -6681,7 +6681,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									array($this->user_id) );
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*3);
+		$date_epoch = TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) +(86400*3);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6754,7 +6754,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									array($this->user_id) );
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*3);
+		$date_epoch = TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) +(86400*3);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//
@@ -6866,7 +6866,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6977,7 +6977,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7057,7 +7057,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// This helps to test the getShiftData() function.
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7154,7 +7154,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = $this->pay_period_objs[0]->getStartDate()+86400;
+		$date_epoch = TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) +86400;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7273,7 +7273,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
+		$date_epoch = TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) +(86400*2);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7311,7 +7311,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day3
 		//
-		$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*3);
+		$date_epoch = TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) +(86400*3);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7361,7 +7361,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -7471,13 +7471,13 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch1 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch1 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp1 = TTDate::getDate('DATE', $date_epoch1 );
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -7602,16 +7602,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch1 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch1 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp1 = TTDate::getDate('DATE', $date_epoch1 );
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
-		$date_epoch3 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch3 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -7776,16 +7776,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch1 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch1 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp1 = TTDate::getDate('DATE', $date_epoch1 );
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
-		$date_epoch3 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch3 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -7942,16 +7942,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch1 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch1 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp1 = TTDate::getDate('DATE', $date_epoch1 );
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
-		$date_epoch3 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch3 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -8112,16 +8112,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch1 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch1 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp1 = TTDate::getDate('DATE', $date_epoch1 );
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
-		$date_epoch3 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch3 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -8286,16 +8286,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch1 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch1 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp1 = TTDate::getDate('DATE', $date_epoch1 );
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
-		$date_epoch3 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch3 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -8460,16 +8460,16 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch1 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch1 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp1 = TTDate::getDate('DATE', $date_epoch1 );
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
-		$date_epoch3 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch3 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -8566,7 +8566,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -8644,7 +8644,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -8757,7 +8757,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8791,7 +8791,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8825,7 +8825,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day3
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8859,7 +8859,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day4
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8893,7 +8893,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -8931,7 +8931,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day6
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 6));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 6) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9007,7 +9007,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 0));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 0) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9089,7 +9089,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9123,7 +9123,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9157,7 +9157,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day3
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9195,7 +9195,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day4
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9237,7 +9237,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9275,7 +9275,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day6
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 6));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 6) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9345,10 +9345,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 
 
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch2 = (TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9428,7 +9428,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9466,7 +9466,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9504,7 +9504,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day3
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9542,7 +9542,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day4
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9580,7 +9580,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9622,7 +9622,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day6
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 6));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 6) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9718,7 +9718,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = $this->pay_period_objs[0]->getStartDate()+86400;
+		$date_epoch = $this->pay_period_objs[0]->getStartDate() +86400;
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9859,11 +9859,11 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 
-		//$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
-		$date_epoch = strtotime('10-Mar-2013'); //Use current year
+		//$date_epoch = $this->pay_period_objs[0]->getStartDate() +(86400*2);
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('10-Mar-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('11-Mar-2013'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('11-Mar-2013') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -9937,8 +9937,8 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 
-		//$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
-		$date_epoch = strtotime('10-Mar-2013'); //Use current year
+		//$date_epoch = $this->pay_period_objs[0]->getStartDate() +(86400*2);
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('10-Mar-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10012,8 +10012,8 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 
-		//$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
-		$date_epoch = strtotime('11-Mar-2013'); //Use current year
+		//$date_epoch = $this->pay_period_objs[0]->getStartDate() +(86400*2);
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('11-Mar-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10087,11 +10087,11 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 
-		//$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
-		$date_epoch = strtotime('10-Mar-2013'); //Use current year
+		//$date_epoch = $this->pay_period_objs[0]->getStartDate() +(86400*2);
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('10-Mar-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('11-Mar-2013'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('11-Mar-2013') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10167,10 +10167,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// March
 		//
-		$date_epoch = strtotime('08-Mar-2015'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('08-Mar-2015') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('08-Mar-2015'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('08-Mar-2015') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10210,10 +10210,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// November
 		//
-		$date_epoch = strtotime('01-Nov-2015'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('01-Nov-2015') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('01-Nov-2015'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('01-Nov-2015') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10289,10 +10289,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// March
 		//
-		$date_epoch = strtotime('07-Mar-2015'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('07-Mar-2015') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('08-Mar-2015'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('08-Mar-2015') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10332,10 +10332,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// November
 		//
-		$date_epoch = strtotime('31-Oct-2015'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('31-Oct-2015') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('01-Nov-2015'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('01-Nov-2015') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10409,11 +10409,11 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 
-		//$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
-		$date_epoch = strtotime('02-Nov-2013'); //Use current year
+		//$date_epoch = $this->pay_period_objs[0]->getStartDate() +(86400*2);
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('02-Nov-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('03-Nov-2013'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('03-Nov-2013') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10487,11 +10487,11 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 
-		//$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
+		//$date_epoch = $this->pay_period_objs[0]->getStartDate() +(86400*2);
 		//$date_epoch = strtotime('02-Nov-2013'); //Use current year
 		//$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch = strtotime('02-Nov-2013'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('02-Nov-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10564,11 +10564,11 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									$this->policy_ids['regular'] //Regular
 									);
 
-		//$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
+		//$date_epoch = $this->pay_period_objs[0]->getStartDate() +(86400*2);
 		//$date_epoch = strtotime('02-Nov-2013'); //Use current year
 		//$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch = strtotime('03-Nov-2013'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('03-Nov-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10642,11 +10642,11 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 									);
 
 
-		//$date_epoch = $this->pay_period_objs[0]->getStartDate()+(86400*2);
-		$date_epoch = strtotime('03-Nov-2013'); //Use current year
+		//$date_epoch = $this->pay_period_objs[0]->getStartDate() +(86400*2);
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('03-Nov-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('04-Nov-2013'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('04-Nov-2013') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10722,10 +10722,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// March
 		//
-		$date_epoch = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( strtotime('Second Sunday March 0') ) - 86400 ) ); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( ( TTDate::getMiddleDayEpoch( strtotime('Second Sunday March 0') ) - 86400 ) ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( strtotime('Second Sunday March 0') ) ) ); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getMiddleDayEpoch( strtotime('Second Sunday March 0') ) ) ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10765,10 +10765,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// November
 		//
-		$date_epoch = TTDate::getBeginDayEpoch( ( TTDate::getMiddleDayEpoch( strtotime('First Sunday November 0') ) - 86400 ) ); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( ( TTDate::getMiddleDayEpoch( strtotime('First Sunday November 0') ) - 86400 ) ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch(  ( TTDate::getMiddleDayEpoch( strtotime('First Sunday November 0') ) ) ); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch(  ( TTDate::getMiddleDayEpoch( strtotime('First Sunday November 0') ) ) ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10847,7 +10847,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10890,7 +10890,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10932,7 +10932,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day3
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -10975,7 +10975,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day4
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11017,7 +11017,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (a)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11060,7 +11060,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (a)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11155,7 +11155,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11190,7 +11190,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11224,7 +11224,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day3
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11258,7 +11258,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day4
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11292,7 +11292,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (a)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11331,7 +11331,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (a)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11419,7 +11419,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11454,7 +11454,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11488,7 +11488,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day3
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11522,7 +11522,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day4
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11560,7 +11560,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (a)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11602,7 +11602,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (b)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11653,7 +11653,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (c)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11748,7 +11748,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		// Day1
 		//
 		//$date_epoch = TTDate::getBeginWeekEpoch( time() );
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + 86400);
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + 86400);
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11783,7 +11783,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11817,7 +11817,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day3
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11851,7 +11851,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day4
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 4));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 4) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11889,7 +11889,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (a)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11931,7 +11931,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (b)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -11982,7 +11982,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day5 (c)
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 5));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 5) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12050,7 +12050,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12133,7 +12133,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12216,10 +12216,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12302,9 +12302,9 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 0));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 0) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 1));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 1) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12373,9 +12373,9 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 1));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 1) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12422,9 +12422,9 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 0));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 0) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 1));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 1) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12489,9 +12489,9 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		//
 		// Day2
 		//
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 1));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 1) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -12539,10 +12539,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12626,10 +12626,10 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = ($this->pay_period_objs[0]->getStartDate() + (86400 * 3));
+		$date_epoch2 = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 3) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12712,7 +12712,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12795,7 +12795,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12878,7 +12878,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -12961,7 +12961,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -13044,7 +13044,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0
@@ -13127,7 +13127,7 @@ class PremiumPolicyTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = ($this->pay_period_objs[0]->getStartDate() + (86400 * 2));
+		$date_epoch = ( TTDate::getMiddleDayEpoch( $this->pay_period_objs[0]->getStartDate() ) + (86400 * 2) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$policy_ids['pay_formula_policy'][] = $this->policy_ids['pay_formula_policy'][100]; //Reg1.0

@@ -51,7 +51,7 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		$this->legal_entity_id = $dd->createLegalEntity( $this->company_id, 10 );
 		Debug::text('Company ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
-		$dd->createCurrency( $this->company_id, 10 );
+		$this->currency_id = $dd->createCurrency( $this->company_id, 10 );
 
 		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
@@ -2347,6 +2347,472 @@ class PayStubTest extends PHPUnit_Framework_TestCase {
 		unset($pse_arr, $pay_stub_id, $pay_stub);
 
 		return TRUE;
+	}
+
+
+	/**
+	 * @group testRemittanceSourceAccountValidation
+	 */
+	function testRemittanceSourceAccountValidation() {
+		$rsaf = new RemittanceSourceAccountFactory();
+		$rsaf->setCompany( $this->company_id );
+		$rsaf->setLegalEntity( $this->legal_entity_id );
+		$rsaf->setStatus( 10 ); //Enabled
+		$rsaf->setName( TTUUID::generateUUID() );
+		$rsaf->setCurrency( $this->currency_id );
+		$rsaf->setType( 3000 );
+
+		//
+		// US
+		//
+		$rsaf->setCountry( 'US' );
+		$rsaf->setDataFormat( 10 ); //10=ACH
+		$rsaf->setValue2( 123456789 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$rsaf->Validator->resetErrors();
+
+		$rsaf->setValue2( 123456789 ); //Branch/Routing
+		$rsaf->setValue3( 12345678901234567 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$rsaf->Validator->resetErrors();
+
+		$rsaf->setValue2( '000456789' ); //Branch/Routing
+		$rsaf->setValue3( '00045678901234567' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$rsaf->Validator->resetErrors();
+
+		//Some bank in Carribean (Antigua?) don't have branch/routing numbers, so we need to accept all zeros.
+		$rsaf->setValue2( '000000000' ); //Branch/Routing
+		$rsaf->setValue3( '00045678901234567' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$rsaf->Validator->resetErrors();
+
+		//Routing number invalid. -- Too short.
+		$rsaf->setValue2( 12345678 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Routing number invalid. -- Too long
+		$rsaf->setValue2( 1234567891 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Account number invalid. -- Too short
+		$rsaf->setValue2( 123456789 ); //Branch/Routing
+		$rsaf->setValue3( 12 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Account number invalid. -- Too long
+		$rsaf->setValue2( 123456789 ); //Branch/Routing
+		$rsaf->setValue3( 123456789012345678 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Using scientific notation.
+		$rsaf->setValue2( '5.18E+11' ); //Branch/Routing
+		$rsaf->setValue3( '5.18E+11' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 2 );
+		$rsaf->Validator->resetErrors();
+
+		//Using bogus data.
+		$rsaf->setValue2( '123ABC456789' ); //Branch/Routing
+		$rsaf->setValue3( '123ABC456789' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 2 );
+		$rsaf->Validator->resetErrors();
+
+
+		//
+		// CA
+		//
+		$rsaf->setCountry( 'CA' );
+		$rsaf->setDataFormat( 20 ); //20=1464
+		$rsaf->setValue1( 123 ); //Institution
+		$rsaf->setValue2( 12345 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$rsaf->Validator->resetErrors();
+
+		$rsaf->setValue1( 123 ); //Institution
+		$rsaf->setValue2( 12345 ); //Branch/Routing
+		$rsaf->setValue3( 123456789012 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$rsaf->Validator->resetErrors();
+
+		$rsaf->setValue1( '001' ); //Institution
+		$rsaf->setValue2( '00045' ); //Branch/Routing
+		$rsaf->setValue3( '000456789012' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$rsaf->Validator->resetErrors();
+
+		//Some bank in Carribean (Antigua?) don't have branch/routing numbers, so we need to accept all zeros.
+		$rsaf->setValue1( '000' ); //Institution
+		$rsaf->setValue2( '00000' ); //Branch/Routing
+		$rsaf->setValue3( '000456789012' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 0 );
+		$rsaf->Validator->resetErrors();
+
+		//Institution number invalid. -- Too short.
+		$rsaf->setValue1( '01' ); //Institution
+		$rsaf->setValue2( 12345 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value1' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Institution number invalid. -- Too Long.
+		$rsaf->setValue1( '0013' ); //Institution
+		$rsaf->setValue2( 12345 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value1' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Branch number invalid. -- Too short.
+		$rsaf->setValue1( '001' ); //Institution
+		$rsaf->setValue2( 1234 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Branch number invalid. -- Too long
+		$rsaf->setValue1( '001' ); //Institution
+		$rsaf->setValue2( 123456 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Account number invalid. -- Too short
+		$rsaf->setValue1( '001' ); //Institution
+		$rsaf->setValue2( 12345 ); //Branch/Routing
+		$rsaf->setValue3( 12 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Account number invalid. -- Too long
+		$rsaf->setValue1( '001' ); //Institution
+		$rsaf->setValue2( 12345 ); //Branch/Routing
+		$rsaf->setValue3( 1234567890123 ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 1 );
+		$rsaf->Validator->resetErrors();
+
+		//Using scientific notation.
+		$rsaf->setValue1( '001' ); //Institution
+		$rsaf->setValue2( '5.18E+11' ); //Branch/Routing
+		$rsaf->setValue3( '5.18E+11' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 2 );
+		$rsaf->Validator->resetErrors();
+
+		//Using bogus data.
+		$rsaf->setValue1( '001' ); //Institution
+		$rsaf->setValue2( '123AB' ); //Branch/Routing
+		$rsaf->setValue3( '123ABC456789' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 2 );
+		$rsaf->Validator->resetErrors();
+
+		//Using bogus data.
+		$rsaf->setValue1( '1A1' ); //Institution
+		$rsaf->setValue2( '123AB' ); //Branch/Routing
+		$rsaf->setValue3( '123ABC456789' ); //Account Number
+		$this->assertEquals( $rsaf->isValid(), FALSE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value1' ), TRUE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rsaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rsaf->Validator->getErrorsArray() ), 3 );
+		$rsaf->Validator->resetErrors();
+	}
+
+	/**
+	 * @group testRemittanceDestinationAccountValidation
+	 */
+	function testRemittanceDestinationAccountValidation() {
+		//
+		// US
+		//
+		$rsaf = new RemittanceSourceAccountFactory();
+		$rsaf->setCompany( $this->company_id );
+		$rsaf->setLegalEntity( $this->legal_entity_id );
+		$rsaf->setStatus( 10 ); //Enabled
+		$rsaf->setName( TTUUID::generateUUID() );
+		$rsaf->setCurrency( $this->currency_id );
+		$rsaf->setType( 3000 );
+		$rsaf->setCountry( 'US' );
+		$rsaf->setDataFormat( 10 ); //10=ACH
+		$rsaf->setValue2( 123456789 ); //Branch/Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$remittance_source_account_id = $rsaf->Save();
+
+
+		$rdaf = new RemittanceDestinationAccountFactory();
+		$rdaf->setUser( $this->user_id );
+		$rdaf->setRemittanceSourceAccount( $remittance_source_account_id );
+		$rdaf->setStatus( 10 ); //Enabled
+		$rdaf->setName( TTUUID::generateUUID() );
+		$rdaf->setType( 3000 );
+		$rdaf->setAmountType( 10 ); //10=Percent
+		$rdaf->setPercentAmount( 100 ); //100%
+		$rdaf->setPriority( 5 );
+		$rdaf->setValue1( 22 ); //22=Checkings
+
+
+		$rdaf->setValue2( 123456789 ); //Branch/Routing
+		$rdaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$rdaf->Validator->resetErrors();
+
+		$rdaf->setValue2( 123456789 ); //Branch/Routing
+		$rdaf->setValue3( 12345678901234567 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$rdaf->Validator->resetErrors();
+
+		$rdaf->setValue2( '000456789' ); //Branch/Routing
+		$rdaf->setValue3( '00045678901234567' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$rdaf->Validator->resetErrors();
+
+		//Some bank in Carribean (Antigua?) don't have branch/routing numbers, so we need to accept all zeros.
+		$rdaf->setValue2( '000000000' ); //Branch/Routing
+		$rdaf->setValue3( '00045678901234567' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$rdaf->Validator->resetErrors();
+
+		//Routing number invalid. -- Too short.
+		$rdaf->setValue2( 12345678 ); //Branch/Routing
+		$rdaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Routing number invalid. -- Too long
+		$rdaf->setValue2( 1234567891 ); //Branch/Routing
+		$rdaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Account number invalid. -- Too short
+		$rdaf->setValue2( 123456789 ); //Branch/Routing
+		$rdaf->setValue3( 12 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Account number invalid. -- Too long
+		$rdaf->setValue2( 123456789 ); //Branch/Routing
+		$rdaf->setValue3( 123456789012345678 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Using scientific notation.
+		$rdaf->setValue2( '5.18E+11' ); //Branch/Routing
+		$rdaf->setValue3( '5.18E+11' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 2 );
+		$rdaf->Validator->resetErrors();
+
+		//Using bogus data.
+		$rdaf->setValue2( '123ABC456789' ); //Branch/Routing
+		$rdaf->setValue3( '123ABC456789' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 2 );
+		$rdaf->Validator->resetErrors();
+
+
+		//
+		// CA
+		//
+		$rsaf = new RemittanceSourceAccountFactory();
+		$rsaf->setCompany( $this->company_id );
+		$rsaf->setLegalEntity( $this->legal_entity_id );
+		$rsaf->setStatus( 10 ); //Enabled
+		$rsaf->setName( TTUUID::generateUUID() );
+		$rsaf->setCurrency( $this->currency_id );
+		$rsaf->setType( 3000 );
+		$rsaf->setCountry( 'CA' );
+		$rsaf->setDataFormat( 20 ); //10=1464
+		$rsaf->setValue1( 123 ); //Institution
+		$rsaf->setValue2( 12345 ); //Transit/Branch / Routing
+		$rsaf->setValue3( 123456789 ); //Account Number
+		$remittance_source_account_id = $rsaf->Save();
+
+
+		$rdaf = new RemittanceDestinationAccountFactory();
+		$rdaf->setUser( $this->user_id );
+		$rdaf->setRemittanceSourceAccount( $remittance_source_account_id );
+		$rdaf->setStatus( 10 ); //Enabled
+		$rdaf->setName( TTUUID::generateUUID() );
+		$rdaf->setType( 3000 );
+		$rdaf->setAmountType( 10 ); //10=Percent
+		$rdaf->setPercentAmount( 100 ); //100%
+		$rdaf->setPriority( 5 );
+
+		$rdaf->setValue1( 123 ); //Institution
+		$rdaf->setValue2( 12345 ); //Branch/Routing
+		$rdaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$rdaf->Validator->resetErrors();
+
+		$rdaf->setValue1( 123 ); //Institution
+		$rdaf->setValue2( 12345 ); //Branch/Routing
+		$rdaf->setValue3( 123456789012 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$rdaf->Validator->resetErrors();
+
+		$rdaf->setValue1( '001' ); //Institution
+		$rdaf->setValue2( '00045' ); //Branch/Routing
+		$rdaf->setValue3( '000456789012' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$rdaf->Validator->resetErrors();
+
+		//Some bank in Carribean (Antigua?) don't have branch/routing numbers, so we need to accept all zeros.
+		$rdaf->setValue1( '000' ); //Institution
+		$rdaf->setValue2( '00000' ); //Branch/Routing
+		$rdaf->setValue3( '000456789012' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 0 );
+		$rdaf->Validator->resetErrors();
+
+		//Institution number invalid. -- Too short.
+		$rdaf->setValue1( '01' ); //Institution
+		$rdaf->setValue2( 12345 ); //Branch/Routing
+		$rdaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value1' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Institution number invalid. -- Too Long.
+		$rdaf->setValue1( '0013' ); //Institution
+		$rdaf->setValue2( 12345 ); //Branch/Routing
+		$rdaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value1' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Branch number invalid. -- Too short.
+		$rdaf->setValue1( '001' ); //Institution
+		$rdaf->setValue2( 1234 ); //Branch/Routing
+		$rdaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Branch number invalid. -- Too long
+		$rdaf->setValue1( '001' ); //Institution
+		$rdaf->setValue2( 123456 ); //Branch/Routing
+		$rdaf->setValue3( 123456789 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Account number invalid. -- Too short
+		$rdaf->setValue1( '001' ); //Institution
+		$rdaf->setValue2( 12345 ); //Branch/Routing
+		$rdaf->setValue3( 12 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Account number invalid. -- Too long
+		$rdaf->setValue1( '001' ); //Institution
+		$rdaf->setValue2( 12345 ); //Branch/Routing
+		$rdaf->setValue3( 1234567890123 ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 1 );
+		$rdaf->Validator->resetErrors();
+
+		//Using scientific notation.
+		$rdaf->setValue1( '001' ); //Institution
+		$rdaf->setValue2( '5.18E+11' ); //Branch/Routing
+		$rdaf->setValue3( '5.18E+11' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 2 );
+		$rdaf->Validator->resetErrors();
+
+		//Using bogus data.
+		$rdaf->setValue1( '001' ); //Institution
+		$rdaf->setValue2( '123AB' ); //Branch/Routing
+		$rdaf->setValue3( '123ABC456789' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 2 );
+		$rdaf->Validator->resetErrors();
+
+		//Using bogus data.
+		$rdaf->setValue1( '1A1' ); //Institution
+		$rdaf->setValue2( '123AB' ); //Branch/Routing
+		$rdaf->setValue3( '123ABC456789' ); //Account Number
+		$this->assertEquals( $rdaf->isValid(), FALSE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value1' ), TRUE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value2' ), TRUE );
+		$this->assertEquals( $rdaf->Validator->hasError( 'value3' ), TRUE );
+		$this->assertEquals( count( $rdaf->Validator->getErrorsArray() ), 3 );
+		$rdaf->Validator->resetErrors();
 	}
 }
 ?>

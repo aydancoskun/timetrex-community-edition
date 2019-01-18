@@ -212,6 +212,24 @@ class Validator {
 	 * @param null $msg
 	 * @return bool
 	 */
+	function isDigits( $label, $value, $msg = NULL) {
+		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
+
+		if ( ctype_digit( trim($value) ) == TRUE ) { //Must be *only* digits.
+			return TRUE;
+		}
+
+		$this->Error($label, $msg, $value );
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $label
+	 * @param $value
+	 * @param null $msg
+	 * @return bool
+	 */
 	function isNumeric( $label, $value, $msg = NULL) {
 		//Debug::Text('Value:'. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
@@ -1083,7 +1101,7 @@ class Validator {
 	 * @return bool|string
 	 */
 	function getErrors() {
-		if ( count($this->errors ) > 0) {
+		if ( count( $this->errors ) > 0) {
 			$output = "<ol>\n";
 			foreach ($this->errors as $label) {
 				foreach ($label as $msg) {

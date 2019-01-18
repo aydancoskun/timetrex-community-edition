@@ -598,7 +598,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 			$prev_punch_control_id = NULL;
 			foreach( $plf as $p_obj ) {
 				if ( $prev_punch_control_id == NULL OR $prev_punch_control_id != $p_obj->getPunchControlID() ) {
-					$date_stamp = TTDate::getBeginDayEpoch( $p_obj->getPunchControlObject()->getDateStamp() );
+					$date_stamp = TTDate::getMiddleDayEpoch( $p_obj->getPunchControlObject()->getDateStamp() );
 					$p_obj->setUser( $this->user_id );
 					$p_obj->getPunchControlObject()->setPunchObject( $p_obj );
 
@@ -693,7 +693,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -736,7 +736,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -794,7 +794,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -854,10 +854,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -898,10 +898,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -959,7 +959,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1034,14 +1034,14 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
-		$date_epoch2 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (1 * 86400 + 3601) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
-		$date_epoch3 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
+		$date_epoch3 = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (2 * 86400 + 3601) );
 		$date_stamp3 = TTDate::getDate('DATE', $date_epoch3 );
-		$date_epoch4 = TTDate::getBeginDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
+		$date_epoch4 = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) + (3 * 86400 + 3601) );
 		$date_stamp4 = TTDate::getDate('DATE', $date_epoch4 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1137,7 +1137,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1178,10 +1178,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1200,7 +1200,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 		$this->assertEquals( 1, count($punch_arr[$date_epoch2]) );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
@@ -1225,10 +1225,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1261,7 +1261,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 
 		$this->assertEquals( 2, count($punch_arr[$date_epoch2]) );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
@@ -1291,7 +1291,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1332,10 +1332,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1376,10 +1376,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1399,8 +1399,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
 
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 		$this->assertEquals( 1, count($punch_arr[$date_epoch2]) );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
 
@@ -1425,10 +1425,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//First punch pair
@@ -1473,8 +1473,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 
 		$this->assertEquals( 2, count($punch_arr[$date_epoch2]) );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
@@ -1509,7 +1509,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -1550,10 +1550,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1600,10 +1600,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1646,10 +1646,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1683,10 +1683,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1718,10 +1718,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 ); //Start weeks on Monday so DST change doesn't affect this.
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ); //Start weeks on Monday so DST change doesn't affect this.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Need to create the punches separately as createPunchPair won't split the punches.
@@ -1753,7 +1753,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//Create just an IN punch.
@@ -1838,7 +1838,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//Create just an IN punch.
@@ -1894,7 +1894,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//Create just an IN punch.
@@ -1929,7 +1929,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
 		//print_r($punch_arr);
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
 		$date_epoch2 = TTDate::getEndDayEpoch($date_epoch); //This accounts for DST.
 
 		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
@@ -1960,7 +1960,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		//Create just an IN punch.
@@ -1995,7 +1995,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
 
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
 		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
 		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
 
@@ -2027,10 +2027,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2087,10 +2087,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN and Lunch Out punch.
@@ -2160,10 +2160,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN and Lunch Out punch.
@@ -2222,10 +2222,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2301,10 +2301,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2357,8 +2357,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
 
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 
 		//Make sure previous day has no totals, but new day has proper totals.
 		if ( !isset($punch_arr[$date_epoch]) ) {
@@ -2396,10 +2396,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2434,8 +2434,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 		$this->assertEquals( 2, count($punch_arr[$date_epoch2][0]['shift_data']['punches']) );
 		$this->assertEquals( 1, count($punch_arr[$date_epoch2][0]['shift_data']['punch_control_ids']) );
 		$this->assertEquals( $date_epoch2, $punch_arr[$date_epoch2][0]['date_stamp'] );
@@ -2496,10 +2496,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2531,7 +2531,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		TTDate::setTimeZone('MST7MDT', TRUE); //Due to being a singleton and PHPUnit resetting the state, always force the timezone to be set.
 		//After the timezone has been changed, re-get the date_epoch2 so it matches in the correct timezone.
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -2603,10 +2603,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2642,8 +2642,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
 
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
 		$this->assertEquals( 1, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
@@ -2707,10 +2707,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2746,8 +2746,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
 
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 		$this->assertEquals( 4, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
 		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
 		$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
@@ -2806,10 +2806,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2862,8 +2862,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
 
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 
 		//Make sure previous day has no totals, but new day has proper totals.
 		if ( !isset($punch_arr[$date_epoch]) ) {
@@ -2901,10 +2901,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -2994,10 +2994,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -3074,10 +3074,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time() ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create just an IN punch.
@@ -3157,8 +3157,8 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch2) );
 		//print_r($punch_arr);
 
-		$date_epoch = TTDate::getBeginDayEpoch($date_epoch); //This accounts for DST.
-		$date_epoch2 = TTDate::getBeginDayEpoch($date_epoch2); //This accounts for DST.
+		$date_epoch = TTDate::getMiddleDayEpoch($date_epoch); //This accounts for DST.
+		$date_epoch2 = TTDate::getMiddleDayEpoch($date_epoch2); //This accounts for DST.
 
 		$this->assertEquals( 3, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
 		$this->assertEquals( 2, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
@@ -3205,7 +3205,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3266,7 +3266,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3328,7 +3328,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3389,7 +3389,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3458,7 +3458,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3550,7 +3550,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3634,7 +3634,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3694,7 +3694,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3741,7 +3741,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3795,7 +3795,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -3863,7 +3863,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 20 ); //60min Normal
@@ -3919,7 +3919,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 15 ); //60min AutoAdd
@@ -3971,7 +3971,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 15 ); //60min AutoAdd
@@ -4027,7 +4027,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 15 ); //60min AutoAdd
@@ -4083,7 +4083,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 15, TRUE ); //60min AutoAdd -- **Include Punched Time**
@@ -4135,7 +4135,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 15, TRUE ); //60min AutoAdd -- **Include Punched Time**
@@ -4193,7 +4193,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 15, TRUE ); //60min AutoAdd -- **Include Punched Time**
@@ -4249,7 +4249,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min AutoDeduct
@@ -4305,7 +4305,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min AutoDeduct
@@ -4361,7 +4361,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min AutoDeduct
@@ -4418,7 +4418,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10, TRUE ); //60min AutoDeduct -- **Include Punched Time**
@@ -4474,7 +4474,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10, TRUE ); //60min AutoDeduct -- **Include Punched Time**
@@ -4532,7 +4532,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10, TRUE ); //60min AutoDeduct -- **Include Punched Time**
@@ -4589,7 +4589,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4689,7 +4689,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4788,7 +4788,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4844,7 +4844,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   NULL, //$policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4904,7 +4904,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -4964,7 +4964,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5026,7 +5026,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5086,7 +5086,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5158,7 +5158,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5234,7 +5234,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -5302,7 +5302,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 									$policy_ids['round'],
 									array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -5371,7 +5371,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -5441,7 +5441,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								   $policy_ids['round'],
 								   array( $this->user_id ) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -5493,10 +5493,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
-		$date_epoch = strtotime('02-Nov-2013'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('02-Nov-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('03-Nov-2013'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('03-Nov-2013') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5555,10 +5555,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
-		$date_epoch = strtotime('02-Nov-2013'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('02-Nov-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('03-Nov-2013'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('03-Nov-2013') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5603,10 +5603,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
-		$date_epoch = strtotime('09-Mar-2013'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('09-Mar-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('10-Mar-2013'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('10-Mar-2013') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5665,10 +5665,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
-		$date_epoch = strtotime('09-Mar-2013'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('09-Mar-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = strtotime('10-Mar-2013'); //Use current year
+		$date_epoch2 = TTDate::getMiddleDayEpoch( strtotime('10-Mar-2013') ); //Use current year
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -5714,7 +5714,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 
@@ -5769,7 +5769,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 
@@ -5841,10 +5841,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -5899,10 +5899,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -5960,10 +5960,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -6019,10 +6019,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -6085,10 +6085,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( $date_epoch + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( $date_epoch + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 
@@ -6151,7 +6151,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
@@ -6192,7 +6192,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
@@ -6237,7 +6237,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6254,7 +6254,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 5:00PM');
 
@@ -6294,7 +6294,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6311,7 +6311,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 9:30AM');
 
@@ -6351,7 +6351,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6368,7 +6368,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
 
@@ -6408,7 +6408,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6425,7 +6425,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
 
@@ -6465,7 +6465,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6482,7 +6482,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
 
@@ -6522,7 +6522,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	 $this->user_id,
@@ -6593,7 +6593,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	 $this->user_id,
@@ -6664,7 +6664,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6681,7 +6681,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00:57 PM');
 
@@ -6721,7 +6721,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6738,7 +6738,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00:23 PM');
 
@@ -6777,7 +6777,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -6794,7 +6794,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00:23 PM');
 
@@ -6847,7 +6847,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -6860,7 +6860,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'department_id' => 0,
 																	) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
@@ -6901,7 +6901,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -6914,7 +6914,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 																	'department_id' => $this->tmp_department_id[1],
 																	) );
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
@@ -6955,7 +6955,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -6982,7 +6982,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 5:00PM');
 
@@ -7022,7 +7022,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -7049,7 +7049,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 9:30AM');
 
@@ -7089,7 +7089,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -7116,7 +7116,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
 
@@ -7156,7 +7156,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -7183,7 +7183,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
 
@@ -7223,7 +7223,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -7250,7 +7250,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:00PM');
 
@@ -7290,7 +7290,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -7325,7 +7325,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 		*/
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 8:00AM');
 
@@ -7365,7 +7365,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -7400,7 +7400,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 1:00PM');
 
@@ -7440,7 +7440,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -7475,7 +7475,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 								TRUE
 								);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$epoch = strtotime($date_stamp.' 2:10PM');
 
@@ -7508,10 +7508,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 ); //Start weeks on Monday so DST switchover does cause problems.
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) ); //Start weeks on Monday so DST switchover does cause problems.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7556,7 +7556,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		$dd->createPunchPair( 	$this->user_id,
@@ -7593,10 +7593,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create two punch pairs with the minimum time between shifts, so they both fall on the same day, but are considered two separate shifts.
@@ -7657,10 +7657,10 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time(), 1 );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time(), 1 ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
-		$date_epoch2 = TTDate::getBeginDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
+		$date_epoch2 = TTDate::getMiddleDayEpoch( ( TTDate::getBeginWeekEpoch( time(), 1 ) + 86400 + 3600 ) );
 		$date_stamp2 = TTDate::getDate('DATE', $date_epoch2 );
 
 		//Create two punch pairs with LESS than the minimum time between shifts, so they both fall on the same day, but are considered ONE shift and therefore fails.
@@ -7725,7 +7725,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods( strtotime('01-Jan-2013') );
 		$this->getAllPayPeriods();
 
-		$date_epoch = strtotime('02-Nov-2013'); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( strtotime('02-Nov-2013') ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 

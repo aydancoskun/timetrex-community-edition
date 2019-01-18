@@ -333,6 +333,7 @@ class APIUserDateTotal extends APIFactory {
 					//it can cause confusion as to which date needs to be recalculated, the GMT or PST date?
 					//Try to avoid this by using getMiddleDayEpoch() as much as possible.
 					$lf->setObjectFromArray( $row );
+					$lf->Validator->setValidateOnly( $validate_only );
 
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {

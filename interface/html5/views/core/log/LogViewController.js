@@ -105,6 +105,7 @@ LogViewController = BaseViewController.extend( {
 		'pay_stub': ['pay_stub', 'pay_stub_entry'],
 		'legal_entity': ['legal_entity'],
 		'payroll_remittance_agency': ['payroll_remittance_agency'],
+		'payroll_remittance_agency_event': ['payroll_remittance_agency_event'],
 		'remittance_source_account': ['remittance_source_account'],
 		'remittance_destination_account': ['remittance_destination_account'],
 		'geo_fence': ['geo_fence']

@@ -900,16 +900,17 @@ class TimesheetDetailReport extends Report {
 			if ( $pclf->getRecordCount() > 0 ) {
 				foreach( $pclf as $key => $pc_obj ) {
 					if ( $pc_obj->getNote() != '' ) {
-						if ( isset( $this->tmp_data['punch_control_rows'][TTUUID::castUUID( $pc_obj->getColumn( 'user_id' ) )][(int)TTDate::strtotime( $pc_obj->getColumn( 'date_stamp' ) )][TTUUID::castUUID( $pc_obj->getBranch() )][TTUUID::castUUID( $pc_obj->getDepartment() )]['udt_note'] ) ) {
-							$this->tmp_data['punch_control_rows'][TTUUID::castUUID( $pc_obj->getColumn( 'user_id' ) )][(int)TTDate::strtotime( $pc_obj->getColumn( 'date_stamp' ) )][TTUUID::castUUID( $pc_obj->getBranch() )][TTUUID::castUUID( $pc_obj->getDepartment() )]['udt_note'] .= ' -- ' . $pc_obj->getNote();
+						$date_stamp = (int)TTDate::getMiddleDayEpoch( TTDate::strtotime( $pc_obj->getColumn( 'date_stamp' ) ) );
+						if ( isset( $this->tmp_data['punch_control_rows'][TTUUID::castUUID( $pc_obj->getColumn( 'user_id' ) )][$date_stamp][TTUUID::castUUID( $pc_obj->getBranch() )][TTUUID::castUUID( $pc_obj->getDepartment() )]['udt_note'] ) ) {
+							$this->tmp_data['punch_control_rows'][TTUUID::castUUID( $pc_obj->getColumn( 'user_id' ) )][$date_stamp][TTUUID::castUUID( $pc_obj->getBranch() )][TTUUID::castUUID( $pc_obj->getDepartment() )]['udt_note'] .= ' -- ' . $pc_obj->getNote();
 						} else {
-							$this->tmp_data['punch_control_rows'][TTUUID::castUUID( $pc_obj->getColumn( 'user_id' ) )][(int)TTDate::strtotime( $pc_obj->getColumn( 'date_stamp' ) )][TTUUID::castUUID( $pc_obj->getBranch() )][TTUUID::castUUID( $pc_obj->getDepartment() )]['udt_note'] = $pc_obj->getNote();
+							$this->tmp_data['punch_control_rows'][TTUUID::castUUID( $pc_obj->getColumn( 'user_id' ) )][$date_stamp][TTUUID::castUUID( $pc_obj->getBranch() )][TTUUID::castUUID( $pc_obj->getDepartment() )]['udt_note'] = $pc_obj->getNote();
 						}
 					}
 					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 				}
 			}
-			unset($pclf, $pc_obj, $punch_control_filter_data);
+			unset($pclf, $pc_obj, $punch_control_filter_data, $date_stamp);
 			//Debug::Arr($this->tmp_data['punch_control_rows'], ' Punch Control Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
@@ -2094,11 +2095,12 @@ class TimesheetDetailReport extends Report {
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $plf->getRecordCount(), NULL, TTi18n::getText('Retrieving Punch Data...') );
 				if ( $plf->getRecordCount() > 0 ) {
 					foreach( $plf as $key => $p_obj ) {
-						$this->form_data['user_date_total'][TTUUID::castUUID( $p_obj->getColumn('user_id') )]['punch_rows'][TTUUID::castUUID( $p_obj->getColumn('pay_period_id') )][(int)TTDate::strtotime($p_obj->getColumn('date_stamp'))][$p_obj->getPunchControlID()][$p_obj->getStatus()] = array( 'status_id' => $p_obj->getStatus(), 'type_id' => $p_obj->getType(), 'type_code' => $p_obj->getTypeCode(), 'time_stamp' => $p_obj->getTimeStamp() );
+						$date_stamp = (int)TTDate::getMiddleDayEpoch( TTDate::strtotime( $p_obj->getColumn( 'date_stamp' ) ) );
+						$this->form_data['user_date_total'][TTUUID::castUUID( $p_obj->getColumn('user_id') )]['punch_rows'][TTUUID::castUUID( $p_obj->getColumn('pay_period_id') )][$date_stamp][$p_obj->getPunchControlID()][$p_obj->getStatus()] = array( 'status_id' => $p_obj->getStatus(), 'type_id' => $p_obj->getType(), 'type_code' => $p_obj->getTypeCode(), 'time_stamp' => $p_obj->getTimeStamp() );
 						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 					}
 				}
-				unset($plf, $p_obj);
+				unset($plf, $p_obj, $date_stamp);
 			}
 
 			Debug::Text('Drawing timesheets...', __FILE__, __LINE__, __METHOD__, 10);

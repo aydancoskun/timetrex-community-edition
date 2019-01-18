@@ -49,6 +49,14 @@ class PayrollDeduction_US_MS extends PayrollDeduction_US {
 	*/
 
 	var $state_income_tax_rate_options = array(
+			20190101 => array(
+					0 => array(
+							array('income' => 2000, 'rate' => 0.0, 'constant' => 0),
+							array('income' => 5000, 'rate' => 3.0, 'constant' => 0),
+							array('income' => 10000, 'rate' => 4.0, 'constant' => 90),
+							array('income' => 10000, 'rate' => 5.0, 'constant' => 290),
+					),
+			),
 			20060101 => array(
 					0 => array(
 							array('income' => 5000, 'rate' => 3.0, 'constant' => 0),
@@ -61,10 +69,10 @@ class PayrollDeduction_US_MS extends PayrollDeduction_US {
 	var $state_options = array(
 			20060101 => array(
 					'standard_deduction' => array(
-							'10' => 2300.00,
-							'20' => 2300.00,
-							'30' => 4600.00,
-							'40' => 3400.00,
+							'10' => 2300,
+							'20' => 2300,
+							'30' => 4600,
+							'40' => 3400,
 					),
 			),
 	);

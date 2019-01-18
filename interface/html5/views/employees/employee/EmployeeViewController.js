@@ -2976,19 +2976,11 @@ EmployeeViewController = BaseViewController.extend( {
 
 	},
 
-	getFilterColumnsFromDisplayColumns: function() {
-		var column_filter = {};
-		column_filter.company_id = true;
-		column_filter = this._getFilterColumnsFromDisplayColumns( column_filter );
-
-		return column_filter;
-	},
-
-
 	getFilterColumnsFromDisplayColumns: function( column_filter, enable_system_columns ) {
 		if ( column_filter == undefined ) {
 			column_filter = {};
 		}
+		column_filter.company_id = true;
 		column_filter.latitude = true;
 		column_filter.longitude = true;
 		return this._getFilterColumnsFromDisplayColumns( column_filter, enable_system_columns )

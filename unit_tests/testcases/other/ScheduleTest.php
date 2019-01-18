@@ -442,7 +442,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			$prev_punch_control_id = NULL;
 			foreach( $plf as $p_obj ) {
 				if ( $prev_punch_control_id == NULL OR $prev_punch_control_id != $p_obj->getPunchControlID() ) {
-					$date_stamp = TTDate::getBeginDayEpoch( $p_obj->getPunchControlObject()->getDateStamp() );
+					$date_stamp = TTDate::getMiddleDayEpoch( $p_obj->getPunchControlObject()->getDateStamp() );
 					$p_obj->setUser( $this->user_id );
 					$p_obj->getPunchControlObject()->setPunchObject( $p_obj );
 
@@ -505,7 +505,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->getAllPayPeriods();
 
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 
@@ -538,7 +538,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 		$this->createPayPeriods();
 		$this->getAllPayPeriods();
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() ); //Use current year
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) ); //Use current year
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$date_epoch2 = (TTDate::getBeginWeekEpoch( time() ) + (86400 * 1.5)); //Use current year, handle DST.
@@ -698,7 +698,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 									array($this->policy_ids['regular'][10]) //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -838,7 +838,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 									array($this->policy_ids['regular'][10]) //Regular
 									);
 
-		$date_epoch = TTDate::getBeginWeekEpoch( time() );
+		$date_epoch = TTDate::getMiddleDayEpoch( TTDate::getBeginWeekEpoch( time() ) );
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -935,7 +935,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 									array($this->policy_ids['regular'][10]) //Regular
 									);
 
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$meal_policy_id = $this->createMealPolicy( 10 ); //60min autodeduct
@@ -1008,7 +1008,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 								   array($this->policy_ids['regular'][10]) //Regular
 		);
 
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 
 		$schedule_policy_id = $this->createSchedulePolicy( array( 0 ), $this->policy_ids['absence_policy'][10], 0 ); //Full Shift Undertime
@@ -1130,7 +1130,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 								   array($this->policy_ids['regular'][10]) //Regular
 		);
 
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$iso_date_stamp = date('Ymd', $date_epoch );
 
@@ -1305,7 +1305,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 								   array($this->policy_ids['regular'][10]) //Regular
 		);
 
-		$date_epoch = TTDate::getBeginDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
+		$date_epoch = TTDate::getMiddleDayEpoch( ( time() - 86400 ) ); //This needs to be before today, as CalculatePolicy() restricts full shift undertime to only previous days.
 		$date_stamp = TTDate::getDate('DATE', $date_epoch );
 		$iso_date_stamp = date('Ymd', $date_epoch );
 

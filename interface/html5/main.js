@@ -4,6 +4,7 @@ require.config( {
 	urlArgs: 'v=' + APPLICATION_BUILD,
 
 	paths: {
+		'polyfill': 'framework/polyfill',
 		'CookieSetting': 'global/CookieSetting',
 		'APIGlobal': 'global/APIGlobal.js.php?disable_db=' + DISABLE_DB,
 		'async': 'framework/require_async_plugin',
@@ -336,6 +337,7 @@ require.config( {
 		'Global': {
 			exports: 'Global',
 			deps: [
+				'polyfill',
 				'backbone',
 				'LocalCacheData',
 				'jquery.masonry',
@@ -343,6 +345,7 @@ require.config( {
 			]
 		},
 		'underscore': {
+			deps: ['polyfill'], // polyfill added in several key deps to ensure polyfills get loaded as early as possible.
 			exports: '_'
 		},
 		'interact': {
@@ -366,6 +369,9 @@ require.config( {
 				'ServiceCaller',
 				'APIGlobal'
 			]
+		},
+		'jquery': {
+			deps: ['polyfill'] // polyfill added in several key deps to ensure polyfills get loaded as early as possible.
 		},
 		'jquery.i18n': {
 			deps: ['jquery']
@@ -489,7 +495,7 @@ require.config( {
 			deps: ['leaflet']
 		},
 		'leaflet-timetrex': {
-			deps: ['leaflet', 'leaflet-draw', 'leaflet-routing', 'leaflet-providers', 'leaflet-markercluster', 'measurement'],
+			deps: ['polyfill', 'leaflet', 'leaflet-draw', 'leaflet-routing', 'leaflet-providers', 'leaflet-markercluster', 'measurement'],
 			exports: 'exportFunctions',
 			init: function() {
 				window.TTMapLib = exportFunctions.TTMapLib;

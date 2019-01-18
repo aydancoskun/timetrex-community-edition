@@ -2438,10 +2438,20 @@ PayStubViewController = BaseViewController.extend( {
 
 			if ( key === 'amount' ) {
 				var original_ytd_amount = parseFloat( this.rows_widgets_array[index]['ytd_amount'].attr( 'original_ytd_amount' ) );
+				if ( isNaN( original_ytd_amount ) ) {
+					original_ytd_amount = 0.00;
+				}
+
 				var original_amount = parseFloat( this.rows_widgets_array[index]['ytd_amount'].attr( 'original_amount' ) );
-//				var new_ytd_amount = (original_ytd_amount - original_amount + c_value).toFixed( 4 );
-// 				var new_ytd_amount = Global.removeTrailingZeros( (original_ytd_amount - original_amount + c_value) );
+				if ( isNaN( original_amount ) ) {
+					original_amount = 0.00;
+				}
+
 				var new_ytd_amount = Global.removeTrailingZeros( Decimal( original_ytd_amount ).sub( original_amount ).add( c_value ).toFixed(4) );
+				if ( isNaN( new_ytd_amount ) ) {
+					new_ytd_amount = 0.00;
+				}
+
 				this.rows_widgets_array[index]['ytd_amount'].setValue( new_ytd_amount != 0 ? new_ytd_amount : '-' );
 				this.rows_widgets_array[index]['ytd_amount'].attr( 'original_ytd_amount', new_ytd_amount );
 				this.rows_widgets_array[index]['ytd_amount'].attr( 'original_amount', c_value );

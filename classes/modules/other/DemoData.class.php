@@ -1388,7 +1388,8 @@ class DemoData {
 				$apf->setName( 'Personal Time Off (PTO)/Vacation' );
 				$apf->setType( 20 );
 
-				$apf->setApplyFrequency( 10 );
+				$apf->setApplyFrequency( 30 ); //Monthly
+				$apf->setApplyFrequencyDayOfMonth( 1 ); //1st of Month
 
 				$apf->setMilestoneRolloverHireDate( TRUE );
 
@@ -1399,7 +1400,8 @@ class DemoData {
 				$apf->setName( 'Sick Time' );
 				$apf->setType( 20 );
 
-				$apf->setApplyFrequency( 10 );
+				$apf->setApplyFrequency( 30 );  //Monthly
+				$apf->setApplyFrequencyDayOfMonth( 1 ); //1st of Month
 
 				$apf->setMilestoneRolloverHireDate( TRUE );
 
@@ -8297,8 +8299,8 @@ class DemoData {
 			$policy_ids['accrual'][] = $this->createAccrualPolicy( $company_id, 30, $policy_ids['accrual_account'][2] ); //Sick
 
 			$policy_ids['pay_formula_policy'][100] = $this->createPayFormulaPolicy( $company_id, 100 ); //Regular
-			$policy_ids['pay_formula_policy'][110] = $this->createPayFormulaPolicy( $company_id, 110, $policy_ids['accrual_account'][1] ); //Vacation
-			$policy_ids['pay_formula_policy'][120] = $this->createPayFormulaPolicy( $company_id, 120, $policy_ids['accrual_account'][0] ); //Bank
+			$policy_ids['pay_formula_policy'][110] = $this->createPayFormulaPolicy( $company_id, 110, $policy_ids['accrual_account'][0] ); //Bank
+			$policy_ids['pay_formula_policy'][120] = $this->createPayFormulaPolicy( $company_id, 120, $policy_ids['accrual_account'][1] ); //Vacation
 			$policy_ids['pay_formula_policy'][130] = $this->createPayFormulaPolicy( $company_id, 130, $policy_ids['accrual_account'][2] ); //Sick
 			$policy_ids['pay_formula_policy'][200] = $this->createPayFormulaPolicy( $company_id, 200 ); //OT1.5
 			$policy_ids['pay_formula_policy'][210] = $this->createPayFormulaPolicy( $company_id, 210, $policy_ids['accrual_account'][0] ); //OT2.0
@@ -8312,8 +8314,8 @@ class DemoData {
 			$policy_ids['pay_code'][210] = $this->createPayCode( $company_id, 210, $policy_ids['pay_formula_policy'][210] ); //OT2
 			$policy_ids['pay_code'][300] = $this->createPayCode( $company_id, 300, $policy_ids['pay_formula_policy'][300] ); //Prem1
 			$policy_ids['pay_code'][310] = $this->createPayCode( $company_id, 310, $policy_ids['pay_formula_policy'][310] ); //Prem2
-			$policy_ids['pay_code'][900] = $this->createPayCode( $company_id, 900, $policy_ids['pay_formula_policy'][110] ); //Vacation
-			$policy_ids['pay_code'][910] = $this->createPayCode( $company_id, 910, $policy_ids['pay_formula_policy'][120] ); //Bank
+			$policy_ids['pay_code'][910] = $this->createPayCode( $company_id, 910, $policy_ids['pay_formula_policy'][110] ); //Bank
+			$policy_ids['pay_code'][900] = $this->createPayCode( $company_id, 900, $policy_ids['pay_formula_policy'][120] ); //Vacation
 			$policy_ids['pay_code'][920] = $this->createPayCode( $company_id, 920, $policy_ids['pay_formula_policy'][130] ); //Sick
 
 			$policy_ids['contributing_pay_code_policy'][10] = $this->createContributingPayCodePolicy( $company_id, 10, array( $policy_ids['pay_code'][100] ) ); //Regular
