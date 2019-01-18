@@ -1288,5 +1288,7 @@
 /interface/DownForMaintenance.php
 /interface/client/ForgotPassword.php
 
+/interface/html5/views/my_account/bank_account/
 /interface/html5/employees/bank_account/
 /interface/html5/company/bank_accounts/
+

@@ -738,6 +738,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	},
 	/* jshint ignore:end */
+
 	//set tab 0 visible after all data set done. This be hide when init edit view data
 	setEditViewDataDone: function() {
 //		LocalCacheData.current_doing_context_action = '';
@@ -751,13 +752,14 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.initRightClickMenuForViewButton();
 
 		//Set url selected tab.
-		if (  window.location.href.indexOf( '&tab=' ) > 0 ) {
+		if ( window.location.href.indexOf( '&tab=' ) > 0 ) {
 			var tab_name = window.location.href;
 			tab_name = tab_name.substr( ( window.location.href.indexOf('&tab=') + 5 ) ); //get the selected tab name
 			tab_name = tab_name.substr(0, window.location.href.indexOf('&')); // incase there are subsequent arguments after the tab argument
 			var my_tabs = this.edit_view_tab.find( '.edit-view-tab-bar-label' ).children();
-			for( var n in my_tabs) {
-				if( $(my_tabs[n]).find('a').length > 0 && tab_name == $(my_tabs[n]).find('a').html().replace( /\/|\s+/g, '' ) ){
+
+			for( var n = 0; n < my_tabs; n++ ) {
+				if( $(my_tabs[n]).find('a').length > 0 && tab_name == $(my_tabs[n]).find('a').html().replace( /\/|\s+/g, '' ) ) {
 					$(my_tabs[n]).find('a').click();
 					break;
 				}
@@ -3241,6 +3243,23 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.initEditView();
 
 		} );
+	},
+
+	//#2543 - fixing disconnected menu leading to page_orientation JavaScript exception
+	onCloseIconClick: function() {
+		if ( LocalCacheData.current_open_sub_controller ) {
+			LocalCacheData.current_open_sub_controller.onCancelClick();
+		} else {
+			var $this = this;
+			this.onCancelClick(null,null, function(){
+				if ( !this.edit_view ) {
+					$this.parent_view_controller.buildContextMenu();
+					$this.parent_view_controller.setDefaultMenu();
+				} else {
+					$this.buildEditMenu();
+				}
+			});
+		}
 	}
 
 } );

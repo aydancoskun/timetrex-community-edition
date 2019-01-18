@@ -203,6 +203,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 							var filter = {filter_data: {}};
 							var users = {value: user_ids};
 							filter.filter_data.user_id = users;
+							filter.filter_data.status_id = 50; //active
 							IndexViewController.goToView( 'PayStubAmendment', filter );
 						}
 

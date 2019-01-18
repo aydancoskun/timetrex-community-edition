@@ -212,6 +212,10 @@ CompanyViewController = BaseViewController.extend( {
 //		  }
 //	  },
 
+	setEditMenuSaveIcon: function( context_btn, pId ){
+		//#2542 - Always needs a save icon as this view is always in edit-only mode, ver in view mode
+	},
+
 	onFormItemChange: function( target, doNotValidate ) {
 
 		this.setIsChanged( target );

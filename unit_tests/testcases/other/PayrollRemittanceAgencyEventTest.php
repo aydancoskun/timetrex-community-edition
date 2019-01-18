@@ -60,9 +60,8 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		Debug::text( 'Company ID: ' . $this->company_id, __FILE__, __LINE__, __METHOD__, 10 );
 		Debug::text( 'Legal Entity ID: ' . $this->legal_entity_id, __FILE__, __LINE__, __METHOD__, 10 );
 
-		//only needed to log in witgh UI
-		//FIXME: comment this before commit.
-		$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
+		//This is only needed to log in with the UI. comment this line out for production
+		//$dd->createPermissionGroups( $this->company_id, 40 ); //Administrator only.
 
 		$currency_id = $dd->createCurrency( $this->company_id, 10 );
 		$dd->createUserWageGroups( $this->company_id );
@@ -2936,6 +2935,14 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$now = TTDate::getMiddleDayEpoch( time() );
 		Debug::text( 'Running setUp(): ', __FILE__, __LINE__, __METHOD__, 10 );
 
+		//ensure that we set the admin user's hire date to  some time in the past so it doesn't interfere with the following tests.
+		$user_obj = $this->getUserObject( $this->user_id );
+		$user_obj->setHireDate( TTDate::incrementDate( $now, -5, 'month' ) );
+		if ( $user_obj->isValid() ) {
+			$user_obj->Save( FALSE );
+		}
+
+
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 999 );
 		Debug::text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
@@ -2958,8 +2965,11 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		if ( $praef->isValid() ) {
 			$praef->Save( FALSE );
 		}
+		$praef->getPayrollRemittanceAgencyObject()->setAlwaysOnWeekDay(0);
+		$praef->getPayrollRemittanceAgencyObject()->save();
 
-		$result = $praef->calculateNextDate();
+
+		$result = $praef->calculateNextDate(NULL, $now);
 		//Debug::Arr( $result, 'FIRST RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		//sanity check
@@ -2972,41 +2982,40 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', TTDate::getBeginDayEpoch( TTDate::incrementDate( $now, -5, 'day' ) ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', TTDate::getEndDayEpoch( TTDate::incrementDate( $now, 4, 'day' ) ) ), 'End date Matches.' );
-		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', TTDate::incrementDate( $now, 5, 'day' ) ), 'Due date Matches.' );
+		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', TTDate::getMiddleDayEpoch( TTDate::incrementDate( $result['end_date'], 1, 'day' ) ) ), 'Due date Matches.' );
 
 
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 999 );
 		Debug::text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
-		$user_obj->setHireDate( strtotime( $now ) );
+		$user_obj->setHireDate( $now );
 		Debug::Text( 'SECOND User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $user_obj->isValid() ) {
 			$user_obj->Save( FALSE );
 		}
 
-		$result = $praef->calculateNextDate();
+		$result = $praef->calculateNextDate( NULL, $now );
 		//Debug::Arr( $result, 'SECOND RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', TTDate::getBeginDayEpoch( TTDate::incrementDate( $now, -5, 'day' ) ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', TTDate::getEndDayEpoch( TTDate::incrementDate( $now, 4, 'day' ) ) ), 'End date Matches.' );
-		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', TTDate::incrementDate( $now, 5, 'day' ) ), 'Due date Matches.' );
+		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', TTDate::getMiddleDayEpoch( TTDate::incrementDate( $now, 5, 'day' ) ) ), 'Due date Matches.' );
 
 
 		$this->user_id = $dd->createUser( $this->company_id, $this->legal_entity_id, 999 );
 		Debug::Text( 'User ID: ' . $this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$user_obj = $this->getUserObject( $this->user_id );
 		$user_obj->setHireDate( TTDate::incrementDate( $now, 30, 'day' ) );
-		Debug::Text( 'THIRD User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
-
+		Debug::Text( 'THIRD User Hire Date: ' . TTDate::getDate( 'DATE+TIME', $user_obj->getHireDate() ).' User ID: '.$this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $user_obj->isValid() ) {
 			$user_obj->Save( FALSE );
 		}
-		$result = $praef->calculateNextDate();
+		$result = $praef->calculateNextDate( NULL, $now );
 		//Debug::Arr( $result, 'THIRD RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', TTDate::getBeginDayEpoch( TTDate::incrementDate( $now, -5, 'day' ) ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', TTDate::getEndDayEpoch( TTDate::incrementDate( $now, 4, 'day' ) ) ), 'End date Matches.' );
-		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', TTDate::incrementDate( $now, 5, 'day' ) ), 'Due date Matches.' );
+		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', TTDate::getMiddleDayEpoch( TTDate::incrementDate( $result['end_date'], 1, 'day' ) ) ), 'Due date Matches.' );
 
 
 		//test gap. should return empty dates
@@ -3028,6 +3037,8 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		if ( $praef->isValid() ) {
 			$praef->Save( FALSE );
 		}
+
+		Debug::Text( 'Expected User ID: '.$this->user_id, __FILE__, __LINE__, __METHOD__, 10 );
 		$result = $praef->calculateNextDate( NULL, TTDate::incrementDate( $now, 31, 'day' ) );
 		//Debug::Arr( $result, 'FIFTH RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -3036,9 +3047,10 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertNotEmpty( $result['start_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['end_date'], '$result elements should not be empty.' );
 		$this->assertNotEmpty( $result['due_date'], '$result elements should not be empty.' );
+
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', TTDate::getBeginDayEpoch( TTDate::incrementDate( $now, 30, 'day' ) ) ), 'Start date Matches.' );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', TTDate::getEndDayEpoch( TTDate::incrementDate( $now, 39, 'day' ) ) ), 'End date Matches.' );
-		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', TTDate::incrementDate( $now, 40, 'day' ) ), 'Due date Matches.' );
+		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', TTDate::getMiddleDayEpoch( TTDate::incrementDate( $result['end_date'], 1, 'day' ) ) ), 'Due date Matches.' );
 	}
 
 
@@ -3067,6 +3079,8 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		if ( $praef->isValid() ) {
 			$praef->Save( FALSE );
 		}
+		$praef->getPayrollRemittanceAgencyObject()->setAlwaysOnWeekDay(0);
+		$praef->getPayrollRemittanceAgencyObject()->save();
 
 		$result = $praef->calculateNextDate( NULL, strtotime( '05-Mar-2016' ) );
 		Debug::Arr( $result, 'FIRST RESULT: ', __FILE__, __LINE__, __METHOD__, 10 );

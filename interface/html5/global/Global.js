@@ -129,8 +129,11 @@ Global.sendErrorReport = function() {
 			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
 		}
 
+		console.error('JAVASCRIPT EXCEPTION:\n---------------------------------------------\n'+ error +'\n---------------------------------------------' );
+		debugger;
+
         //When not in production mode, popup alert box anytime an exception appears so it can't be missed.
-        if ( APIGlobal.pre_login_data.production !== true ) {
+        if ( APIGlobal.pre_login_data.production !== true && APIGlobal.pre_login_data.demo_mode !== true && APIGlobal.pre_login_data.sandbox !== true ) {
             alert('JAVASCRIPT EXCEPTION:\n---------------------------------------------\n'+ error +'\n---------------------------------------------' );
         }
 
@@ -1188,6 +1191,10 @@ Global.convertToNumberIfPossible = function( val ) {
 Global.buildRecordArray = function( array, first_item, orderType ) {
 	var finalArray = [];
 
+	if ( first_item ) {
+		finalArray.push( first_item );
+	}
+
 	var id = 1000;
 
 	if ( Global.isSet( array ) ) {
@@ -1744,146 +1751,129 @@ Global.convertColumnsTojGridFormat = function( columns, layout_name, setWidthCal
 };
 /* jshint ignore:start */
 Global.loadWidgetByName = function( widgetName ) {
-	var input;
+	var input = false;
+	var widget_path = false;
+	var raw_text = false;
 	switch ( widgetName ) {
 		case FormItemType.COLOR_PICKER:
-			input = Global.loadWidget( 'global/widgets/color-picker/TColorPicker.html' );
-			input = $( input );
+			widget_path = 'global/widgets/color-picker/TColorPicker.html';
 			break;
 		case WidgetNamesDic.NOTIFICATION_BAR:
-			input = Global.loadWidget( 'global/widgets/top_alert/NotificationBox.html' );
-			input = $( input );
+			widget_path = 'global/widgets/top_alert/NotificationBox.html';
 			break;
 		case FormItemType.FORMULA_BUILDER:
-			input = Global.loadWidget( 'global/widgets/formula_builder/FormulaBuilder.html' );
-			input = $( input );
+			widget_path = 'global/widgets/formula_builder/FormulaBuilder.html';
 			break;
 		case FormItemType.AWESOME_BOX:
-			input = Global.loadWidget( 'global/widgets/awesomebox/AComboBox.html' );
-			input = $( input );
+			widget_path = 'global/widgets/awesomebox/AComboBox.html';
 			break;
 		case FormItemType.AWESOME_DROPDOWN:
-			input = Global.loadWidget( 'global/widgets/awesomebox/ADropDown.html' );
-			input = $( input );
+			widget_path = 'global/widgets/awesomebox/ADropDown.html';
 			break;
 		case FormItemType.TEXT_INPUT:
-			input = Global.loadWidget( 'global/widgets/text_input/TTextInput.html' );
-			input = $( input );
+			widget_path = 'global/widgets/text_input/TTextInput.html';
 			break;
 		case FormItemType.TEXT_INPUT_NO_AUTO:
-			input = Global.loadWidget( 'global/widgets/text_input/TTextInputNoAuto.html' );
-			input = $( input );
+			widget_path = 'global/widgets/text_input/TTextInputNoAuto.html';
 			break;
 		case FormItemType.PASSWORD_INPUT:
-			input = Global.loadWidget( 'global/widgets/text_input/TPasswordInput.html' );
-			input = $( input );
+			widget_path = 'global/widgets/text_input/TPasswordInput.html';
 			break;
 		case FormItemType.TEXT:
-			input = Global.loadWidget( 'global/widgets/text/TText.html' );
-			input = $( input );
+			widget_path = 'global/widgets/text/TText.html';
 			break;
 		case FormItemType.CHECKBOX:
-			input = Global.loadWidget( 'global/widgets/checkbox/TCheckbox.html' );
-			input = $( input );
+			widget_path = 'global/widgets/checkbox/TCheckbox.html';
 			break;
 		case FormItemType.COMBO_BOX:
-			input = Global.loadWidget( 'global/widgets/combobox/TComboBox.html' );
-			input = $( input );
+			widget_path = 'global/widgets/combobox/TComboBox.html';
 			break;
 		case FormItemType.LIST:
-			input = Global.loadWidget( 'global/widgets/list/TList.html' );
-			input = $( input );
+			widget_path = 'global/widgets/list/TList.html';
 			break;
 		case FormItemType.TAG_INPUT:
-			input = Global.loadWidget( 'global/widgets/tag_input/TTagInput.html' );
-			input = $( input );
+			widget_path = 'global/widgets/tag_input/TTagInput.html';
 			break;
 		case FormItemType.DATE_PICKER:
 		case FormItemType.RANGE_PICKER:
-			input = Global.loadWidget( 'global/widgets/datepicker/TDatePicker.html' );
-			input = $( input );
+			widget_path = 'global/widgets/datepicker/TDatePicker.html';
 			break;
 		case FormItemType.TIME_PICKER:
-			input = Global.loadWidget( 'global/widgets/timepicker/TTimePicker.html' );
-			input = $( input );
+			widget_path = 'global/widgets/timepicker/TTimePicker.html';
 			break;
 		case FormItemType.TEXT_AREA:
-			input = Global.loadWidget( 'global/widgets/textarea/TTextArea.html' );
-			input = $( input );
+			widget_path = 'global/widgets/textarea/TTextArea.html';
 			break;
 		case FormItemType.TINYMCE_TEXT_AREA:
-			input = Global.loadWidget( 'global/widgets/textarea/TinymceTextArea.html' );
-			// input = $( input );
+			widget_path = 'global/widgets/textarea/TinymceTextArea.html';
+			raw_text = true;
 			break;
 		case FormItemType.SEPARATED_BOX:
-			input = Global.loadWidget( 'global/widgets/separated_box/SeparatedBox.html' );
-			input = $( input );
+			widget_path = 'global/widgets/separated_box/SeparatedBox.html';
 			break;
 		case FormItemType.IMAGE_BROWSER:
-			input = Global.loadWidget( 'global/widgets/filebrowser/TImageBrowser.html' );
-			input = $( input );
+			widget_path = 'global/widgets/filebrowser/TImageBrowser.html';
 			break;
 		case FormItemType.FILE_BROWSER:
-			input = Global.loadWidget( 'global/widgets/filebrowser/TFileBrowser.html' );
-			input = $( input );
+			widget_path = 'global/widgets/filebrowser/TFileBrowser.html';
 			break;
 		case FormItemType.IMAGE_AVD_BROWSER:
-			input = Global.loadWidget( 'global/widgets/filebrowser/TImageAdvBrowser.html' );
-			input = $( input );
+			widget_path = 'global/widgets/filebrowser/TImageAdvBrowser.html';
 			break;
 		case FormItemType.CAMERA_BROWSER:
-			input = Global.loadWidget( 'global/widgets/filebrowser/CameraBrowser.html' );
-			input = $( input );
+			widget_path = 'global/widgets/filebrowser/CameraBrowser.html';
 			break;
 		case FormItemType.IMAGE_CUT:
-			input = Global.loadWidget( 'global/widgets/filebrowser/TImageCutArea.html' );
-			input = $( input );
+			widget_path = 'global/widgets/filebrowser/TImageCutArea.html';
 			break;
 		case FormItemType.IMAGE:
-			input = $( "<img class='t-image'>" );
-			input = $( input );
+			input = "<img class='t-image'>";
 			break;
 		case FormItemType.INSIDE_EDITOR:
-			input = Global.loadWidget( 'global/widgets/inside_editor/InsideEditor.html' );
-			input = $( input );
+			widget_path = 'global/widgets/inside_editor/InsideEditor.html';
 			break;
 		case WidgetNamesDic.PAGING:
-			input = Global.loadWidget( 'global/widgets/paging/Paging.html' );
-			input = $( input );
+			widget_path = 'global/widgets/paging/Paging.html';
 			break;
 		case WidgetNamesDic.PAGING_2:
-			input = Global.loadWidget( 'global/widgets/paging/Paging2.html' );
-			input = $( input );
+			widget_path = 'global/widgets/paging/Paging2.html';
 			break;
 		case WidgetNamesDic.ERROR_TOOLTIP:
-			input = Global.loadWidget( 'global/widgets/error_tip/ErrorTipBox.html' );
-			input = $( input );
+			widget_path = 'global/widgets/error_tip/ErrorTipBox.html';
 			break;
 		case FormItemType.FEEDBACK_BOX:
-			input = Global.loadWidget( 'global/widgets/feedback/Feedback.html' );
-			input = $( input );
+			widget_path = 'global/widgets/feedback/Feedback.html';
 			break;
 		case WidgetNamesDic.EDIT_VIEW_FORM_ITEM:
-			input = Global.loadWidget( 'global/widgets/edit_view/EditViewFormItem.html' );
-			input = $( input );
+			widget_path = 'global/widgets/edit_view/EditViewFormItem.html';
 			break;
 		case WidgetNamesDic.EDIT_VIEW_SUB_FORM_ITEM:
-			input = Global.loadWidget( 'global/widgets/edit_view/EditViewSubFormItem.html' );
-			input = $( input );
+			widget_path = 'global/widgets/edit_view/EditViewSubFormItem.html';
 			break;
 		case WidgetNamesDic.NO_RESULT_BOX:
-			input = Global.loadWidget( 'global/widgets/message_box/NoResultBox.html' );
-			input = $( input );
+			widget_path = 'global/widgets/message_box/NoResultBox.html';
 			break;
 		case WidgetNamesDic.VIEW_MIN_TAB:
-			input = Global.loadWidget( 'global/widgets/view_min_tab/ViewMinTab.html' );
-			input = $( input );
+			widget_path = 'global/widgets/view_min_tab/ViewMinTab.html';
 			break;
 		case WidgetNamesDic.VIEW_MIN_TAB_BAR:
-			input = Global.loadWidget( 'global/widgets/view_min_tab/ViewMinTabBar.html' );
-			input = $( input );
+			widget_path = 'global/widgets/view_min_tab/ViewMinTabBar.html'
 			break;
+	}
 
+	if ( widget_path != false ) {
+		input = Global.loadWidget( widget_path );
+	}
+
+	if ( input.indexOf('<') != -1 ) {
+		if ( !raw_text ) {
+			input = $(input);
+		}
+	} else {
+		var error_string =  $.i18n._('Network error, failed to load') +' '+ widgetName +' '+ $.i18n._('Result') +': "'+ input +'"';
+		TAlertManager.showNetworkErrorAlert( {status: 200}, error_string, null ); //Show the user an error popoup.
+		throw( new Error(error_string) ); //Halt execution and ensure that the email has a good error message because of failure of web server to provide the requested file.
+		input = false;
 	}
 
 	return input;
@@ -1925,8 +1915,8 @@ Global.loadWidget = function( url ) {
 	if ( !responseData ) {
 		return null;
 	} else {
-	LocalCacheData.loadedWidgetCache[url] = responseData.responseText;
-	return (responseData.responseText);
+		LocalCacheData.loadedWidgetCache[url] = responseData.responseText;
+		return (responseData.responseText);
 	}
 
 };
@@ -2132,9 +2122,6 @@ Global.getViewPathByViewId = function( viewId ) {
 		case 'PermissionControl':
 			path = 'views/company/permission_control/';
 			break;
-		case 'CompanyBankAccount':
-			path = 'views/company/bank_accounts/';
-			break;
 		case 'OtherField':
 			path = 'views/company/other_field/';
 			break;
@@ -2164,9 +2151,6 @@ Global.getViewPathByViewId = function( viewId ) {
 			break;
 		case 'MessageControl':
 			path = 'views/my_account/message_control/';
-			break;
-		case 'LoginUserBankAccount':
-			path = 'views/my_account/bank_account/';
 			break;
 		case 'LoginUserContact':
 			path = 'views/my_account/user_contact/';
@@ -3731,17 +3715,36 @@ Global.getStationID = function () {
 }
 
 //#2342 - Close all open edit views from one place.
-Global.closeEditViews = function() {
-	TTPromise.add( 'base', 'onCancelClick' );
-	if ( typeof $('#cancelIcon')[0] != 'undefined' && $('#cancelIcon').parent().hasClass('disable-image') == false ) {   //Make sure the cancel exists first.
-		$('#cancelIcon').trigger('click');
-
-		TTPromise.wait( 'base', 'onCancelClick', function() {
-			Global.closeEditViews();
-		} );
+Global.closeEditViews = function( callback ) {
+	if  ( LocalCacheData.current_open_report_controller && LocalCacheData.current_open_report_controller.is_changed == true ) {
+		LocalCacheData.current_open_report_controller.onCancelClick( null, null, function() {
+			Global.closeEditViews(callback);
+		});
+	} else if ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.is_changed == true ) {
+		LocalCacheData.current_open_edit_only_controller.onCancelClick( null, null, function() {
+			Global.closeEditViews(callback);
+		});
+	} else if ( LocalCacheData.current_open_sub_controller && LocalCacheData.current_open_sub_controller.edit_view && LocalCacheData.current_open_sub_controller.is_changed == true ){
+		LocalCacheData.current_open_sub_controller.onCancelClick( null, null, function() {
+			Global.closeEditViews(callback);
+		});
+	} else if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.edit_view && LocalCacheData.current_open_primary_controller.is_changed == true ) {
+		LocalCacheData.current_open_primary_controller.onCancelClick( null, null, function() {
+			Global.closeEditViews(callback);
+		});
+	} else if ( LocalCacheData.current_open_primary_controller &&
+				LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' &&
+				LocalCacheData.current_open_primary_controller.getPunchMode() === 'manual' ) {
+					LocalCacheData.current_open_primary_controller.doNextIfNoValueChangeInManualGrid( function() {
+						//#2567 Must conclude here. Recursion would be infinite
+						if ( callback ) {
+							callback();
+						}
+					});
 	} else {
-		TTPromise.resolve( 'base', 'closeEditViews');
-		TTPromise.resolve( 'base', 'onCancelClick');
+		if ( callback ) {
+			callback();
+		}
 	}
 }
 

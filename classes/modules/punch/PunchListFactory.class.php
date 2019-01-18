@@ -1089,10 +1089,11 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 					ORDER BY a.time_stamp desc, a.status_id asc
 					LIMIT 1
 					';
+
 		$query .= $this->getSortSQL( $order );
-		//Debug::Text(' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->ExecuteSQL( $query, $ph );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}

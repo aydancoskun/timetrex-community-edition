@@ -59,6 +59,7 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output .= "    -f (Force creating data even if DEMO_MODE is not enabled. *NOT RECOMMENDED*)\n";
 	$help_output .= "    -s [Numeric USER NAME suffix, ie: '100' to create user names like: 'demoadmin100']\n";
 	$help_output .= "    -n [Number of random users to create above 25]\n";
+	$help_output .= "    -date [Static date to base all other dates on]\n";
 	$help_output .= "    -skip [Skip objects, ie: schedule,punch,invoice,expense,document,hr]\n";
 
 	echo $help_output;
@@ -73,6 +74,12 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		$data['random_users'] = (int)trim($argv[(array_search('-n', $argv) + 1)]);
 	} else {
 		$data['random_users'] = 0;
+	}
+
+	if ( in_array('-date', $argv) ) {
+		$data['date'] = trim($argv[(array_search('-date', $argv) + 1)]);
+	} else {
+		$data['date'] = time();
 	}
 
 	if ( in_array('-f', $argv) ) {
@@ -102,6 +109,7 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 		sleep(1);
 
 		$dd = new DemoData();
+		$dd->setDate( TTDate::getMiddleDayEpoch( TTDate::strtotime($data['date']) ) ); //Always use middle day epoch so its consistent across runs on the same day.
 		$dd->setMaxRandomUsers( $data['random_users'] );
 		$dd->setUserNamePostFix( $data['suffix'] );
 

@@ -349,6 +349,32 @@ class DemoData {
 	}
 
 	/**
+	 * @return bool|int
+	 */
+	function getDate() {
+		if ( isset($this->date) ) {
+			return $this->date;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Sets the date that is used to base all other dates from.
+	 * @param $val
+	 * @return bool
+	 */
+	function setDate( $val ) {
+		if ( $val != '' ) {
+			$this->date = $val;
+
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * @return bool
 	 */
 	function getEnableQuickPunch() {
@@ -2654,8 +2680,8 @@ class DemoData {
 		$ppsf->setStartWeekDay( 0 );
 		$ppsf->setTimeZone( TTDate::getTimeZone() );
 
-		//$anchor_date = TTDate::getBeginWeekEpoch( (time()-(86400 * 42)) ); //Start 6 weeks ago
-		$anchor_date = TTDate::getBeginWeekEpoch( (time() - (86400 * 14)) ); //Start 6 weeks ago
+		//$anchor_date = TTDate::getBeginWeekEpoch( ($this->getDate()-(86400 * 42)) ); //Start 6 weeks ago
+		$anchor_date = TTDate::getBeginWeekEpoch( ($this->getDate() - (86400 * 14)) ); //Start 6 weeks ago
 
 		$ppsf->setAnchorDate( $anchor_date );
 
@@ -3233,7 +3259,7 @@ class DemoData {
 		$uef->setJobItem( $job_item_id );
 		$uef->setCurrency( $default_currency_id );
 		$uef->setPaymentMethod( ( rand(2, 8) * 5 ) );
-		$uef->setIncurredDate( ( time() - ( 86400 * rand(7, 10) ) ) );
+		$uef->setIncurredDate( ( $this->getDate() - ( 86400 * rand(7, 10) ) ) );
 		$uef->setReimbursable( $reimburse );
 		$uef->setGrossAmount( rand(1, 10) * 100 );
 		if ( $uef->isValid() ) {
@@ -3408,7 +3434,7 @@ class DemoData {
 
 		$ccf->setPassword( 'demo' );
 		$ccf->setPasswordResetKey( '1234' );
-		$ccf->setPasswordResetDate( ( time() - ( 86400 * rand(1, 30) ) ) );
+		$ccf->setPasswordResetDate( ( $this->getDate() - ( 86400 * rand(1, 30) ) ) );
 		$ccf->setNote('');
 
 		if ( $ccf->isValid() ) {
@@ -3467,8 +3493,8 @@ class DemoData {
 		$if->setOtherContact( $c_obj->getDefaultOtherContact() );
 		$if->setSalesContact( $this->getRandomArrayValue( (array)$user_ids ) );
 		$if->setCurrency( $default_currency );
-		$if->setOrderDate( TTDate::getTime() );
-		$if->setInvoiceDate( TTDate::getTime() );
+		$if->setOrderDate( $this->getDate() );
+		$if->setInvoiceDate( $this->getDate() );
 
 		if ( $shipping_policy_ids != NULL ) {
 			$shipping_policy_id = $this->getRandomArrayValue( (array)$shipping_policy_ids );
@@ -3564,7 +3590,7 @@ class DemoData {
 		if ( isset($payments) AND count($payments) > 0 ) {
 			Debug::Text('Inserting Payments: '. count($payments), __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $payments as $payment_counter => $payment_data ) {
-				$tf->setEffectiveDate( time() );
+				$tf->setEffectiveDate( $this->getDate() );
 				$tf->setClient( $client_id );
 				$tf->setInvoice( $invoice_id );
 				//$tf->setStatus( 10 ); //Don't set status, let preSave() handle that.
@@ -3674,7 +3700,7 @@ class DemoData {
 			}
 		}
 
-		srand( $type ); //Seed the random number the same for each createUser() call of the same type, so unit tests can rely on a constant hire date/employee wage.
+		srand( $this->getDate().$type ); //Seed the random number the same for each createUser() call of the same type, so unit tests can rely on a constant hire date/employee wage.
 		$hire_date = strtotime( rand( (TTDate::getYear() - 10), (TTDate::getYear() - 2) ).'-'.rand(1, 12).'-'.rand(1, 28));
 
 		if ( empty( $ethnic_group_ids ) == FALSE ) {
@@ -4084,7 +4110,7 @@ class DemoData {
 				break;
 			case 999: //Random user
 				$next_available_employee_number = $uf->getNextAvailableEmployeeNumber( $company_id );
-				srand( $type.$next_available_employee_number ); //Re-seed random number otherwise all random users will be exactly the same.
+				srand( $this->getDate().$type.$next_available_employee_number ); //Re-seed random number otherwise all random users will be exactly the same.
 
 				$first_name = $this->getRandomFirstName();
 				$last_name = $this->getRandomLastName();
@@ -4221,8 +4247,8 @@ class DemoData {
 		$jvf->setName( $jvf->getTitleObject()->getName() );
 		$jvf->setDescription('');
 		$jvf->setPositions(1);
-		$jvf->setPositionOpenDate( ( time() - ( 86400 * rand(30, 35) ) )  );
-		$jvf->setPositionExpireDate( ( time() - ( 86400 * rand(1, 5) ) ) );
+		$jvf->setPositionOpenDate( ( $this->getDate() - ( 86400 * rand(30, 35) ) )  );
+		$jvf->setPositionExpireDate( ( $this->getDate() - ( 86400 * rand(1, 5) ) ) );
 		$jvf->setSummaryDescription('Example job posting...');
 		$jvf->setDescription('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.');
 
@@ -4252,8 +4278,8 @@ class DemoData {
 		$jaf->setType( array_rand( $jaf->getOptions( 'type' ) ) );
 		$jaf->setPriority( array_rand( $jaf->getOptions( 'priority' ) ) );
 		$jaf->setInterviewerUser( $user_id );
-		$jaf->setNextActionDate( ( time() + ( 86400 * rand( 1, 10 ) ) ) );
-		$jaf->setInterviewDate( ( time() + ( 86400 * rand( 11, 15 ) ) ) );
+		$jaf->setNextActionDate( ( $this->getDate() + ( 86400 * rand( 1, 10 ) ) ) );
+		$jaf->setInterviewDate( ( $this->getDate() + ( 86400 * rand( 11, 15 ) ) ) );
 		$jaf->setNote('');
 
 		if ( $jaf->isValid() ) {
@@ -4283,8 +4309,8 @@ class DemoData {
 		$jal->setCountry( 'US' );
 		$jal->setProvince( 'WA' );
 		$jal->setPostalCode( rand(98000, 99499) );
-		$jal->setStartDate( ( time() - ( 86400 * rand( 365, 730 ) ) ) );
-		$jal->setEndDate( ( time() - ( 86400 * rand( 100, 300 ) ) ) );
+		$jal->setStartDate( ( $this->getDate() - ( 86400 * rand( 365, 730 ) ) ) );
+		$jal->setEndDate( ( $this->getDate() - ( 86400 * rand( 100, 300 ) ) ) );
 		if ( $jal->isValid() ) {
 			$insert_id = $jal->Save();
 			Debug::Text('Job Applicant Location ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -4332,8 +4358,8 @@ class DemoData {
 		$jae->setEmploymentStatus(array_rand( $jae->getOptions( 'employment_status' ) ));
 		$jae->setWageType( array_rand( $jae->getOptions( 'wage_type' ) ) );
 		$jae->setWage('');
-		$jae->setStartDate( ( time() - ( 86400 * rand(365, 730) ) ) );
-		$jae->setEndDate( ( time() - ( 86400 * rand(1, 365) ) ) );
+		$jae->setStartDate( ( $this->getDate() - ( 86400 * rand(365, 730) ) ) );
+		$jae->setEndDate( ( $this->getDate() - ( 86400 * rand(1, 365) ) ) );
 
 		$jae->setContactFirstName( $this->getRandomFirstName() );
 		$jae->setContactLastName( $this->getRandomLastName() );
@@ -4390,7 +4416,7 @@ class DemoData {
 		$jar->setMobilePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
 		$jar->setWorkEmail($this->getRandomFirstName().'.'.$this->getRandomLastName().'@abc-company.com');
 		$jar->setHomeEmail('');
-		$jar->setStartDate( ( time() - ( 86400 * rand(1, 14) ) ) );
+		$jar->setStartDate( ( $this->getDate() - ( 86400 * rand(1, 14) ) ) );
 		if ( $jar->isValid() ) {
 			$insert_id = $jar->Save();
 			Debug::Text('Job Applicant Reference ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -4413,7 +4439,7 @@ class DemoData {
 		$jaf->setStatus( 10 ); //Enabled.
 		$jaf->setIdentificationType( array_rand( $jaf->getOptions( 'identification_type' ) ) );
 		$jaf->setIdentificationNumber( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
-		$jaf->setIdentificationExpireDate( ( time() + ( 86400 * rand( 100, 200 ) ) ) );
+		$jaf->setIdentificationExpireDate( ( $this->getDate() + ( 86400 * rand( 100, 200 ) ) ) );
 		$jaf->setAvailableDaysOfWeek( (array)array_rand( $jaf->getOptions( 'available_days_of_week' ), rand(1, 7) ) );
 		$jaf->setAvailableHoursOfDay( (array)array_rand( $jaf->getOptions( 'available_hours_of_day' ), rand(1, 10) ) );
 		$jaf->setIdentificationCountry( 'US' );
@@ -4442,14 +4468,14 @@ class DemoData {
 			$jaf->setAvailableMinimumHoursPerWeek(20);
 			$jaf->setPassword( 'demo' );
 			$jaf->setPasswordResetKey( '1234' );
-			$jaf->setPasswordResetDate( ( time() - ( 86400 * rand(1, 30) ) ) );
-			$jaf->setAvailableStartDate( ( time() - ( 86400 * rand(1, 30) ) ) );
+			$jaf->setPasswordResetDate( ( $this->getDate() - ( 86400 * rand(1, 30) ) ) );
+			$jaf->setAvailableStartDate( ( $this->getDate() - ( 86400 * rand(1, 30) ) ) );
 			$jaf->setMinimumWage( '' );
 			$jaf->setCriminalRecordDescription( '' );
 			$jaf->setCurrentlyEmployed( FALSE );
 			$jaf->setImmediateDrugTest( FALSE );
 			$jaf->setCriminalRecord( FALSE );
-			$jaf->setCreatedDate( ( time() - ( 86400 * rand(31, 365) ) ) );
+			$jaf->setCreatedDate( ( $this->getDate() - ( 86400 * rand(31, 365) ) ) );
 		}
 
 		if ( $jaf->isValid() ) {
@@ -5236,10 +5262,10 @@ class DemoData {
 		$uef->setInstitute( $this->getRandomArrayValue( $this->institute ) );
 		$uef->setMajor( $this->getRandomArrayValue( $this->major ) );
 		$uef->setMinor( $this->getRandomArrayValue( $this->minor ) );
-		$uef->setGraduateDate( ( time() - ( 86400 * rand(21, 30) ) ) );
+		$uef->setGraduateDate( ( $this->getDate() - ( 86400 * rand(21, 30) ) ) );
 		$uef->setGradeScore( rand(60, 100) );
-		$uef->setStartDate( ( time() - ( 86400 * rand(11, 20) ) ) );
-		$uef->setEndDate( ( time() - ( 86400 * rand(1, 10) ) ) );
+		$uef->setStartDate( ( $this->getDate() - ( 86400 * rand(11, 20) ) ) );
+		$uef->setEndDate( ( $this->getDate() - ( 86400 * rand(1, 10) ) ) );
 
 		if ( $uef->isValid() ) {
 			$insert_id = $uef->Save();
@@ -5265,10 +5291,10 @@ class DemoData {
 		$jaef->setInstitute( $this->getRandomArrayValue( $this->institute ) );
 		$jaef->setMajor( $this->getRandomArrayValue( $this->major ) );
 		$jaef->setMinor( $this->getRandomArrayValue( $this->minor ) );
-		$jaef->setGraduateDate( time() - ( 86400 * rand(21, 30) ) );
+		$jaef->setGraduateDate( $this->getDate() - ( 86400 * rand(21, 30) ) );
 		$jaef->setGradeScore( rand(60, 100) );
-		$jaef->setStartDate( ( time() - ( 86400 * rand(11, 20) ) ) );
-		$jaef->setEndDate( ( time() - ( 86400 * rand(1, 10) ) ) );
+		$jaef->setStartDate( ( $this->getDate() - ( 86400 * rand(11, 20) ) ) );
+		$jaef->setEndDate( ( $this->getDate() - ( 86400 * rand(1, 10) ) ) );
 
 		if ( $jaef->isValid() ) {
 			$insert_id = $jaef->Save();
@@ -5296,8 +5322,8 @@ class DemoData {
 		$lf->setUser( $user_id );
 		$lf->setQualification( $qualification_id );
 		$lf->setLicenseNumber( rand(100, 999). rand(100, 999). rand(100, 999) );
-		$lf->setLicenseIssuedDate( ( time() - ( 86400 * rand(21, 30) ) ) );
-		$lf->setLicenseExpiryDate( ( time() - ( 86400 * rand(1, 10) ) ) );
+		$lf->setLicenseIssuedDate( ( $this->getDate() - ( 86400 * rand(21, 30) ) ) );
+		$lf->setLicenseExpiryDate( ( $this->getDate() - ( 86400 * rand(1, 10) ) ) );
 
 		if ( $lf->isValid() ) {
 			$insert_id = $lf->Save();
@@ -5321,8 +5347,8 @@ class DemoData {
 		$jalf->setJobApplicant( $job_applicant_id );
 		$jalf->setQualification( $qualification_id );
 		$jalf->setLicenseNumber( rand(100, 999). rand(100, 999). rand(100, 999) );
-		$jalf->setLicenseIssuedDate( ( time() - ( 86400 * rand(21, 30) ) ) );
-		$jalf->setLicenseExpiryDate( ( time() - ( 86400 * rand(1, 10) ) ) );
+		$jalf->setLicenseIssuedDate( ( $this->getDate() - ( 86400 * rand(21, 30) ) ) );
+		$jalf->setLicenseExpiryDate( ( $this->getDate() - ( 86400 * rand(1, 10) ) ) );
 
 		if ( $jalf->isValid() ) {
 			$insert_id = $jalf->Save();
@@ -5419,8 +5445,8 @@ class DemoData {
 		$umf->setQualification( $qualification_id );
 		$umf->setAmount( rand(10, 100) );
 		$umf->setCurrency( $default_currency_id );
-		$umf->setStartDate( time() - (86400 * rand(21, 30)) );
-		$umf->setRenewalDate( time() - (86400 * rand(10, 20))  );
+		$umf->setStartDate( $this->getDate() - (86400 * rand(21, 30)) );
+		$umf->setRenewalDate( $this->getDate() - (86400 * rand(10, 20))  );
 		switch( $type ) {
 			case 10:
 			case 20:
@@ -5455,8 +5481,8 @@ class DemoData {
 		$jamf->setQualification( $qualification_id );
 		$jamf->setAmount( rand(10, 100) );
 		$jamf->setCurrency( $default_currency_id );
-		$jamf->setStartDate( time() - (86400 * rand(21, 30)) );
-		$jamf->setRenewalDate( time() - (86400 * rand(10, 20))	);
+		$jamf->setStartDate( $this->getDate() - (86400 * rand(21, 30)) );
+		$jamf->setRenewalDate( $this->getDate() - (86400 * rand(10, 20))	);
 		$jamf->setOwnership( array_rand( $jamf->getOptions('ownership') ) );
 
 		if ( $jamf->isValid()) {
@@ -5480,9 +5506,9 @@ class DemoData {
 		$urcf = TTnew('UserReviewControlFactory');
 		$urcf->setUser( $user_id );
 		$urcf->setReviewerUser( $reviewer_user_id );
-		$urcf->setStartDate( time() - (86400 * rand(21, 30)) );
-		$urcf->setEndDate( time() - (86400 * rand(11, 20))	);
-		$urcf->setDueDate( time() - (86400 * rand(1, 10)) );
+		$urcf->setStartDate( $this->getDate() - (86400 * rand(21, 30)) );
+		$urcf->setEndDate( $this->getDate() - (86400 * rand(11, 20))	);
+		$urcf->setDueDate( $this->getDate() - (86400 * rand(1, 10)) );
 		$urcf->setType( rand(2, 9) * 5 );
 		$urcf->setSeverity( rand(1, 5) * 10 );
 		$urcf->setTerm( rand(1, 3) * 10 );
@@ -5514,9 +5540,9 @@ class DemoData {
 		$usf = TTnew( 'UserSkillFactory' );
 		$usf->setUser( $user_id );
 		$usf->setQualification( $qualification_id );
-		$usf->setFirstUsedDate( time() - (86400 * rand(200, 3000)) );
-		$usf->setLastUsedDate( time() - (86400 * rand(11, 20)) );
-		$usf->setExpiryDate( time() - (86400 * rand(1, 10)) );
+		$usf->setFirstUsedDate( $this->getDate() - (86400 * rand(200, 3000)) );
+		$usf->setLastUsedDate( $this->getDate() - (86400 * rand(11, 20)) );
+		$usf->setExpiryDate( $this->getDate() - (86400 * rand(1, 10)) );
 		$usf->setEnableCalcExperience(1);
 		$usf->setDescription('');
 		switch ($type) {
@@ -5557,9 +5583,9 @@ class DemoData {
 		$jasf = TTnew( 'JobApplicantSkillFactory' );
 		$jasf->setJobApplicant( $job_applicant_id );
 		$jasf->setQualification( $qualification_id );
-		$jasf->setFirstUsedDate( time() - (86400 * rand(200, 3000)) );
-		$jasf->setLastUsedDate( time() - (86400 * rand(11, 20)) );
-		$jasf->setExpiryDate( time() - (86400 * rand(1, 10)) );
+		$jasf->setFirstUsedDate( $this->getDate() - (86400 * rand(200, 3000)) );
+		$jasf->setLastUsedDate( $this->getDate() - (86400 * rand(11, 20)) );
+		$jasf->setExpiryDate( $this->getDate() - (86400 * rand(1, 10)) );
 		$jasf->setEnableCalcExperience(TRUE);
 		$jasf->setDescription('');
 		$jasf->setProficiency( array_rand( $jasf->getOptions('proficiency') ) );
@@ -6189,7 +6215,7 @@ class DemoData {
 				$jf->setName( 'House 1' );
 				$jf->setDescription( rand(100, 9999). ' Main St' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
+				$jf->setStartDate( $this->getDate() - (86400 * 14) );
 				$jf->setEndDate( '' );
 
 				$jf->setEstimateTime( (3600 * 500) );
@@ -6218,8 +6244,8 @@ class DemoData {
 				$jf->setName( 'House 2' );
 				$jf->setDescription( rand(100, 9999). ' Springfield Rd' );
 
-				$jf->setStartDate( time() - (86400 * 13) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 13) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6244,8 +6270,8 @@ class DemoData {
 				$jf->setName( 'House 3' );
 				$jf->setDescription( rand(100, 9999). ' Spall Ave' );
 
-				$jf->setStartDate( time() - (86400 * 12) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 12) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6270,8 +6296,8 @@ class DemoData {
 				$jf->setName( 'House 4' );
 				$jf->setDescription( rand(100, 9999). ' Dobbin St' );
 
-				$jf->setStartDate( time() - (86400 * 11) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 11) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6297,8 +6323,8 @@ class DemoData {
 				$jf->setName( 'House 5' );
 				$jf->setDescription( rand(100, 9999). ' Sussex Court' );
 
-				$jf->setStartDate( time() - (86400 * 10) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 10) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6325,8 +6351,8 @@ class DemoData {
 				$jf->setName( 'House 6' );
 				$jf->setDescription( rand(100, 9999). ' Georgia St' );
 
-				$jf->setStartDate( time() - (86400 * 9) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 9) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6350,8 +6376,8 @@ class DemoData {
 				$jf->setName( 'House 7' );
 				$jf->setDescription( rand(100, 9999). ' Gates Rd' );
 
-				$jf->setStartDate( time() - (86400 * 8) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 8) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6376,8 +6402,8 @@ class DemoData {
 				$jf->setName( 'House 8' );
 				$jf->setDescription( rand(100, 9999). ' Lakeshore Rd' );
 
-				$jf->setStartDate( time() - (86400 * 7) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 7) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6402,8 +6428,8 @@ class DemoData {
 				$jf->setName( 'House 9' );
 				$jf->setDescription( rand(100, 9999). ' Main St' );
 
-				$jf->setStartDate( time() - (86400 * 6) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 6) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6428,8 +6454,8 @@ class DemoData {
 				$jf->setName( 'House 10' );
 				$jf->setDescription( rand(100, 9999). ' Ontario St' );
 
-				$jf->setStartDate( time() - (86400 * 5) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 5) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 750) );
 				$jf->setEstimateQuantity( 0 );
@@ -6454,8 +6480,8 @@ class DemoData {
 				$jf->setName( 'Project A' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 4) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 4) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 760) );
 				$jf->setEstimateQuantity( 0 );
@@ -6475,8 +6501,8 @@ class DemoData {
 				$jf->setName( 'Project B' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 3) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 3) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 760) );
 				$jf->setEstimateQuantity( 0 );
@@ -6496,8 +6522,8 @@ class DemoData {
 				$jf->setName( 'Project C' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 2) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 2) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 760) );
 				$jf->setEstimateQuantity( 0 );
@@ -6517,8 +6543,8 @@ class DemoData {
 				$jf->setName( 'Project D' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 1) );
-				$jf->setEndDate( time() + (86400 * 7) );
+				$jf->setStartDate( $this->getDate() - (86400 * 1) );
+				$jf->setEndDate( $this->getDate() + (86400 * 7) );
 
 				$jf->setEstimateTime( (3600 * 760) );
 				$jf->setEstimateQuantity( 0 );
@@ -6538,8 +6564,8 @@ class DemoData {
 				$jf->setName( 'Project E' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 15) );
-				$jf->setEndDate( time() + (86400 * 2) );
+				$jf->setStartDate( $this->getDate() - (86400 * 15) );
+				$jf->setEndDate( $this->getDate() + (86400 * 2) );
 
 				$jf->setEstimateTime( (3600 * 760) );
 				$jf->setEstimateQuantity( 0 );
@@ -6559,8 +6585,8 @@ class DemoData {
 				$jf->setName( 'Project F' );
 				$jf->setDescription( '' );
 
-				$jf->setStartDate( time() - (86400 * 14) );
-				$jf->setEndDate( time() + (86400 * 1) );
+				$jf->setStartDate( $this->getDate() - (86400 * 14) );
+				$jf->setEndDate( $this->getDate() + (86400 * 1) );
 
 				$jf->setEstimateTime( (3600 * 760) );
 				$jf->setEstimateQuantity( 0 );
@@ -7196,6 +7222,9 @@ class DemoData {
 		Debug::Text('User ID: '. $user_id .' Time Stamp: '. TTDate::getDate('DATE+TIME', $time_stamp), __FILE__, __LINE__, __METHOD__, 10);
 
 		$pf = TTnew( 'PunchFactory' );
+
+		$pf->StartTransaction();
+
 		$pf->setTransfer( FALSE );
 		$pf->setEnableAutoTransfer( FALSE );
 		$pf->setUser( $user_id );
@@ -7491,8 +7520,8 @@ class DemoData {
 				$pf_in->setLatitude( $coordinate[0] );
 				$pf_in->setLongitude( $coordinate[1] );
 			} else {
-			$pf_in->setLongitude( $this->getRandomCoordinates('longitude' ) );
-			$pf_in->setLatitude( $this->getRandomCoordinates('latitude' ) );
+				$pf_in->setLongitude( $this->getRandomCoordinates('longitude' ) );
+				$pf_in->setLatitude( $this->getRandomCoordinates('latitude' ) );
 			}
 			if ( $pf_in->isNew() ) {
 				$pf_in->setActualTimeStamp( $out_time_stamp );
@@ -7524,8 +7553,8 @@ class DemoData {
 				$pf_out->setLatitude( $coordinate[0] );
 				$pf_out->setLongitude( $coordinate[1] );
 			} else {
-			$pf_out->setLongitude( $this->getRandomCoordinates('longitude' ) );
-			$pf_out->setLatitude( $this->getRandomCoordinates('latitude' ) );
+				$pf_out->setLongitude( $this->getRandomCoordinates('longitude' ) );
+				$pf_out->setLatitude( $this->getRandomCoordinates('latitude' ) );
 			}
 			if ( $pf_out->isNew() ) {
 				$pf_out->setActualTimeStamp( $in_time_stamp );
@@ -7622,7 +7651,7 @@ class DemoData {
 		$af->setType( $type ); //Awarded
 		$af->setAccrualPolicyAccount( $accrual_policy_account_id );
 		$af->setAmount( rand((3600 * 8), (3600 * 24))  );
-		$af->setTimeStamp( time() - (86400 * 3) );
+		$af->setTimeStamp( $this->getDate() - (86400 * 3) );
 		$af->setEnableCalcBalance( TRUE );
 
 		if ( $af->isValid() ) {
@@ -7768,8 +7797,8 @@ class DemoData {
 				$lef->setPostalCode( '12345' );
 				$lef->setWorkPhone( '555-555-5555' );
 				$lef->setFaxPhone('');
-				$lef->setStartDate( time() - (86400 * 365) );
-				//$lef->setEndDate( time() + (86400 * 7) );
+				$lef->setStartDate( $this->getDate() - (86400 * 365) );
+				//$lef->setEndDate( $this->getDate() + (86400 * 7) );
 				break;
 			case 15: //US
 				$lef->setType( 10 );
@@ -7784,8 +7813,8 @@ class DemoData {
 				$lef->setPostalCode( '98101' );
 				$lef->setWorkPhone( '555-555-5555' );
 				$lef->setFaxPhone('');
-				$lef->setStartDate( time() - (86400 * 365) );
-				//$lef->setEndDate( time() + (86400 * 7) );
+				$lef->setStartDate( $this->getDate() - (86400 * 365) );
+				//$lef->setEndDate( $this->getDate() + (86400 * 7) );
 				break;
 
 			case 20: //Canada
@@ -7801,8 +7830,8 @@ class DemoData {
 				$lef->setPostalCode( 'M5E 1A1' );
 				$lef->setWorkPhone( '555-555-5555' );
 				$lef->setFaxPhone('');
-				$lef->setStartDate( time() - (86400 * 365) );
-				//$lef->setEndDate( time() - (86400 * 7) );
+				$lef->setStartDate( $this->getDate() - (86400 * 365) );
+				//$lef->setEndDate( $this->getDate() - (86400 * 7) );
 				break;
 			case 25: //Canada
 				$lef->setType( 10 );
@@ -7817,8 +7846,8 @@ class DemoData {
 				$lef->setPostalCode( 'V6G 1A1' );
 				$lef->setWorkPhone( '555-555-5555' );
 				$lef->setFaxPhone('');
-				$lef->setStartDate( time() - (86400 * 365) );
-				//$lef->setEndDate( time() - (86400 * 7) );
+				$lef->setStartDate( $this->getDate() - (86400 * 365) );
+				//$lef->setEndDate( $this->getDate() - (86400 * 7) );
 				break;
 
 		}
@@ -8023,7 +8052,7 @@ class DemoData {
 		TTDate::setTimeZone('PST8PDT');
 		TTi18n::setLocale('en_US');
 
-		$current_epoch = time();
+		$current_epoch = $this->getDate();
 
 		$cf = TTnew( 'CompanyFactory' );
 		//$cf->StartTransaction(); //Don't wrap the entire thing in a transaction incase one thing fails not all data is rollbacked.
@@ -8288,7 +8317,7 @@ class DemoData {
 										 $policy_ids['round'],
 										 $user_ids,
 										 NULL,
-										 NULL,
+										 $policy_ids['accrual'],
 										 $policy_ids['expense'],
 										 $policy_ids['absence'],
 										 $policy_ids['regular']
@@ -8821,7 +8850,7 @@ class DemoData {
 				foreach ( $user_ids as $user_id ) {
 					//Pick random jobs/tasks that are used for the entire date range.
 					//So one employee isn't punching into 15 jobs.
-					srand( ( (float)microtime() * 10000000 ) );
+					srand( $this->getDate() );
 					$user_random_job_ids = (array)array_flip( (array)array_rand( $job_ids, 2 ) );
 					$user_random_task_ids = (array)array_flip( (array)array_rand( $task_ids, 3 ) );
 					//Create punches starting 6 weeks ago, up to the end of the week.
@@ -9058,8 +9087,7 @@ class DemoData {
 		}
 
 		////$cf->FailTransaction();
-		$cf->CommitTransaction();
-		$cf->CommitTransaction(); //FIXME: Transaction are mismatched, just not sure where yet.
+		//$cf->CommitTransaction(); //See StartTransaction() call at the top for details.
 
 		Debug::Text(' z.Memory Usage: Current: '. memory_get_usage() .' Peak: '. memory_get_peak_usage(), __FILE__, __LINE__, __METHOD__, 10);
 

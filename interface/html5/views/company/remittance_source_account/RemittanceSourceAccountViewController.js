@@ -263,11 +263,9 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 			var context_btn = this.context_menu_array[i];
 			var id = $(context_btn.find('.ribbon-sub-menu-icon')).attr('id');
 
-			context_btn.removeClass('invisible-image');
-			context_btn.removeClass('disable-image');
-
 			switch (id) {
 				case ContextMenuIconName.export_export:
+					context_btn.removeClass('invisible-image');
 					this.setMenuExportIcon( context_btn, grid_selected_length );
 					break;
 			}
@@ -283,11 +281,9 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 			var context_btn = this.context_menu_array[i];
 			var id = $(context_btn.find('.ribbon-sub-menu-icon')).attr('id');
 
-			context_btn.removeClass('invisible-image');
-			context_btn.removeClass('disable-image');
-
 			switch (id) {
 				case ContextMenuIconName.export_export:
+					context_btn.removeClass('invisible-image');
 					this.setMenuExportIcon( context_btn, grid_selected_length );
 					break;
 			}
@@ -307,7 +303,6 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 
 	onExportClick: function() {
 		var post_data = {0:this.getGridSelectIdArray()};
-		debugger
 		Global.APIFileDownload( this.api.className, 'testExport' , post_data );
 	},
 

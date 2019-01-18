@@ -22,7 +22,6 @@ AccrualViewController = BaseViewController.extend( {
 //	  parent_filter: null,
 
 	init: function( options ) {
-		console.log('this is running');
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'AccrualEditView.html';
 		this.permission_id = 'accrual';

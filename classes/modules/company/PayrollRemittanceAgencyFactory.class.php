@@ -125,6 +125,16 @@ class PayrollRemittanceAgencyFactory extends Factory {
 					return FALSE;
 				}
 
+				if ( $params['country'] == FALSE ) {
+					$params['country'] = '00';
+				}
+				if ( $params['province'] == FALSE ) {
+					$params['province'] = '00';
+				}
+				if ( $params['district'] == FALSE ) {
+					$params['district'] = '00';
+				}
+
 				$params['country'] = strtoupper( $params['country'] );
 				$params['province'] = strtoupper( $params['province'] );
 				$params['district'] = strtoupper( $params['district'] );
@@ -824,37 +834,40 @@ class PayrollRemittanceAgencyFactory extends Factory {
 
 				//Return all values in the following format:
 				//IDs: <Type>:<Country Code>:<Province Code>:<District Code>:<ID>
+
+				$prefix = $params['type_id'] .':'. $params['country'] .':'. ( isset($params['province']) ? $params['province'] : '00') .':'.  ( isset($params['district']) ? $params['district'] : '00') .':';
 				if ( isset( $options[$params['type_id']] ) ) {
 					switch( $params['type_id'] ) {
 						case 10:
 							if ( isset( $options[$params['type_id']][$params['country']] ) ) {
-								$prefix = $params['type_id'].':'.$params['country'].':00:00:';
+								//$prefix = $params['type_id'].':'.$params['country'].':00:00:';
 								$tmp_retval = $options[$params['type_id']][$params['country']];
 							}
 							break;
 						case 20:
 						case 40:
 							if ( isset( $options[$params['type_id']][$params['country']][$params['province']] ) ) {
-								$prefix = $params['type_id'].':'.$params['country'].':'.$params['province'].':00:';
+								//$prefix = $params['type_id'].':'.$params['country'].':'.$params['province'].':00:';
 								$tmp_retval = $options[$params['type_id']][$params['country']][$params['province']];
 								if ( isset($options[$params['type_id']][$params['country']]['00']) ) { //Append non-province specifc items.
 									//Do not use array_merge here. It does not preserve the numeric key the way that the addition operator does.
 									$tmp_retval = ( $tmp_retval + $options[$params['type_id']][$params['country']]['00'] );
 								}
 
-								if ( $params['type_id'] == 40 ) {
-									$tmp_retval['0000'] = TTi18n::gettext( 'Other' );
-								}
-
 							}
-							break;
+						break;
 						case 30:
 							if ( isset( $options[$params['type_id']][$params['country']][$params['province']][$params['district']] ) ) {
-								$prefix = $params['type_id'].':'.$params['country'].':'.$params['province'].':'.$params['district'].':';
+								//$prefix = $params['type_id'].':'.$params['country'].':'.$params['province'].':'.$params['district'].':';
 								$tmp_retval = $options[$params['type_id']][$params['country']][$params['province']][$params['district']];
 							}
-							break;
+						break;
 					}
+				}
+
+				//Don't add the "Other" option for Federal and provincial agencies in US or CA as we define them all explicitly.
+				if ( !( ( $params['type_id'] == 10 OR $params['type_id'] == 20 ) AND ($params['country'] == 'CA' OR $params['country'] == 'US') ) ) {
+					$tmp_retval['0000'] = '-- ' . TTi18n::gettext( 'Other' ) . ' --';
 				}
 
 				//Add prefix to each returned item.
@@ -914,7 +927,12 @@ class PayrollRemittanceAgencyFactory extends Factory {
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.
 				$retval = array(
-					'name',
+						'name',
+						'type_id',
+						'country',
+						'province',
+						'district',
+						'agency_id',
 				);
 				break;
 			case 'linked_columns': //Columns that are linked together, mainly for Mass Edit, if one changes, they all must.
@@ -1465,21 +1483,19 @@ class PayrollRemittanceAgencyFactory extends Factory {
 													$this->getOptions('status')
 												);
 		}
-		// Type
-		if ( $this->getType() != '' ) {
-			$this->Validator->inArrayKey(	'type_id',
-													$this->getType(),
-													TTi18n::gettext('Incorrect Type'),
-													$this->getOptions('type')
-												);
-		}
-		// Agency
-		if ( $this->getAgency() !== FALSE ) {
-			$this->Validator->inArrayKey(	'agency_id',
-													$this->getAgency(),
-													TTi18n::gettext('Incorrect Agency'),
-													$this->getOptions('agency', array( 'type_id' => $this->getType(), 'country' => $this->getCountry(), 'province' => $this->getProvince(), 'district' => $this->getDistrict() ) )
-												);
+		if ( $this->Validator->getValidateOnly() == FALSE ) {
+			// Type
+			$this->Validator->inArrayKey( 'type_id',
+										  $this->getType(),
+										  TTi18n::gettext( 'Incorrect Type' ),
+										  $this->getOptions( 'type' )
+			);
+			// Agency
+			$this->Validator->inArrayKey( 'agency_id',
+										  $this->getAgency(),
+										  TTi18n::gettext( 'Incorrect Agency' ),
+										  $this->getOptions( 'agency', array('type_id' => $this->getType(), 'country' => $this->getCountry(), 'province' => $this->getProvince(), 'district' => $this->getDistrict()) )
+			);
 		}
 		// Name
 		if ( $this->getName() !== FALSE ) {
@@ -1499,23 +1515,27 @@ class PayrollRemittanceAgencyFactory extends Factory {
 
 		// Province/State
 		$cf = TTnew( 'CompanyFactory' );
-		if ( $this->getCountry() !== FALSE AND $this->getProvince() != '' ) {
+
+		if ( $this->getCountry() !== FALSE AND $this->getProvince() != '' AND $this->getProvince() != '00' AND $this->Validator->getValidateOnly() == FALSE) {
 			$options_arr = $cf->getOptions('province');
 			if ( isset($options_arr[$this->getCountry()]) ) {
 				$options = $options_arr[$this->getCountry()];
 			} else {
 				$options = array();
 			}
-			$this->Validator->inArrayKey(	'province',
-												$this->getProvince(),
-												TTi18n::gettext('Invalid Province/State'),
-												$options
-											);
+			//skip validation for type 3rd Party and no provinces exist for country.
+			if ( !( isset( $options) AND count( $options ) == 1 AND isset( $options['00'] ) ) ) {
+				$this->Validator->inArrayKey( 'province',
+											  $this->getProvince(),
+											  TTi18n::gettext( 'Invalid Province/State' ),
+											  $options
+				);
+			}
 			unset( $options_arr, $options );
 		}
 
 		// Country
-		if ( $this->getCountry() !== FALSE ) {
+		if ( $this->getCountry() !== FALSE AND $this->Validator->getValidateOnly() == FALSE) {
 			$this->Validator->inArrayKey(		'country',
 														$this->getCountry(),
 														TTi18n::gettext('Invalid Country'),
@@ -1524,7 +1544,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 		}
 
 		// District
-		if ( $this->getDistrict() != '' AND $this->getDistrict() != '00' ) {
+		if ( $this->getDistrict() != '' AND $this->getDistrict() != '00' AND $this->Validator->getValidateOnly() == FALSE) {
 			$options_arr = $cf->getOptions('district');
 			if ( isset($options_arr[$this->getCountry()][$this->getProvince()]) ) {
 				$options = $options_arr[$this->getCountry()][$this->getProvince()];
@@ -1680,6 +1700,9 @@ class PayrollRemittanceAgencyFactory extends Factory {
 			$this->is_new = TRUE;
 		}
 
+		if( $this->getProvince() == '' ) {
+			$this->setProvince('00');
+		}
 		if( $this->getDistrict() == '' ) {
 			$this->setDistrict('00');
 		}

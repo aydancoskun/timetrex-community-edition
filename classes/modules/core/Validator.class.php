@@ -921,7 +921,7 @@ class Validator {
 		if ( is_float( $value ) === TRUE OR is_int( $value ) === TRUE ) {
 			return $value;
 		} else {
-			$retval = preg_replace( '/[^-0-9\.]/', '', $value );
+			$retval = preg_replace( '/([\.\-])(?=.*?\1)|[^-0-9\.]/', '', $value ); //Strips repeating "." and "-" characters that might slip in due to typos. Then strips non-float valid characters.
 		}
 
 		//Debug::Text('Float String:'. $retval, __FILE__, __LINE__, __METHOD__, $this->verbosity);

@@ -56,16 +56,18 @@ if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']
 		$cjlf = new CronJobListFactory();
 		$job_arr = $cjlf->getArrayByListFactory( $cjlf->getAll() );
 		$total_jobs = count( $job_arr );
-		foreach ( $job_arr as $job_id => $job_name ) {
-			//Get each cronjob row again individually incase the status has changed.
-			$cjlf = new CronJobListFactory();
-			$cjlf->getById( $job_id ); //Let Execute determine if job is running or not so it can find orphans.
-			if ( $cjlf->getRecordCount() > 0 ) {
-				foreach ( $cjlf as $cjf_obj ) {
-					//Debug::text('Checking if Job ID: '. $job_id .' is scheduled to run...', __FILE__, __LINE__, __METHOD__, 0);
-					if ( $cjf_obj->isScheduledToRun( $current_epoch ) == TRUE ) {
-						$executed_jobs++;
-						$cjf_obj->Execute( $config_vars['path']['php_cli'], dirname( __FILE__ ) );
+		if ( is_array( $job_arr ) ) {
+			foreach ( $job_arr as $job_id => $job_name ) {
+				//Get each cronjob row again individually incase the status has changed.
+				$cjlf = new CronJobListFactory();
+				$cjlf->getById( $job_id ); //Let Execute determine if job is running or not so it can find orphans.
+				if ( $cjlf->getRecordCount() > 0 ) {
+					foreach ( $cjlf as $cjf_obj ) {
+						//Debug::text('Checking if Job ID: '. $job_id .' is scheduled to run...', __FILE__, __LINE__, __METHOD__, 0);
+						if ( $cjf_obj->isScheduledToRun( $current_epoch ) == TRUE ) {
+							$executed_jobs++;
+							$cjf_obj->Execute( $config_vars['path']['php_cli'], dirname( __FILE__ ) );
+						}
 					}
 				}
 			}

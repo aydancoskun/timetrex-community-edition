@@ -375,10 +375,10 @@ DashletController = Backbone.View.extend( {
 
 	//Error: Uncaught TypeError: Cannot read property 'contentDocument' of undefined in/interface/html5/#!m=MessageControl line 359
 	setIframeData: function( iframe_data ) {
-		if ( $( this.el ).find( '#iframe' ).length > 0 ) {
-			$( this.el ).find( '#iframe' )[0].contentDocument.open();
-			$( this.el ).find( '#iframe' )[0].contentDocument.writeln( this.iframe_data );
-			$( this.el ).find( '#iframe' )[0].contentDocument.close();
+		if ( $( this.el ).find( '#iframe' ).length > 0 && $( this.el ).find( '#iframe' )[0].contentWindow.document ) {
+			$( this.el ).find( '#iframe' )[0].contentWindow.document.open();
+			$( this.el ).find( '#iframe' )[0].contentWindow.document.writeln( this.iframe_data );
+			$( this.el ).find( '#iframe' )[0].contentWindow.document.close();
 		}
 	},
 

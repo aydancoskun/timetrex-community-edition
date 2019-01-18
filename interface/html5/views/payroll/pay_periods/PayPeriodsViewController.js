@@ -47,14 +47,13 @@ PayPeriodsViewController = BaseViewController.extend( {
 
 	},
 
-	removeEditView: function() {
+	removeEditView: function( is_cancel ) {
 
 		this._super( 'removeEditView' );
 
 		if ( this.parent_view_controller &&
 			( this.parent_view_controller.viewId === 'TimeSheet' || this.parent_view_controller.viewId === 'PayStub' ) ) {
-			debugger
-			this.parent_view_controller.onSubViewRemoved()
+			this.parent_view_controller.onSubViewRemoved( is_cancel )
 		}
 	},
 

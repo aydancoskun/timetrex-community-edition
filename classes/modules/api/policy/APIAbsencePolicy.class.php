@@ -570,14 +570,14 @@ class APIAbsencePolicy extends APIFactory {
 				//The previous amount is cleared when the accrual policy (by way of absence policy) is changed to prevent miscalculation of remaining accrued time.
 				if ( $prev_aplf->getRecordCount() > 0 ) {
 					$prev_pfp_obj = $prev_aplf->getCurrent()->getPayFormulaPolicyObject();
-					if ( is_object($prev_pfp_obj) AND (int)$pfp_obj->getAccrualPolicyAccount() != (int)$prev_pfp_obj->getAccrualPolicyAccount() ) {
+					if ( is_object($prev_pfp_obj) AND TTUUID::castUUID( $pfp_obj->getAccrualPolicyAccount() ) != TTUUID::castUUID( $prev_pfp_obj->getAccrualPolicyAccount() ) ) {
 						Debug::Text( 'Accrual policy has been changed clearing previous amount.', __FILE__, __LINE__, __METHOD__, 10 );
 						$previous_amount = 0;
 					}
 				}
 
 				$aplf = new AccrualPolicyListFactory();
-				$aplf->getByPolicyGroupUserIdAndAccrualPolicyAccount( $user_id, (int)$pfp_obj->getAccrualPolicyAccount() );
+				$aplf->getByPolicyGroupUserIdAndAccrualPolicyAccount( $user_id, TTUUID::castUUID( $pfp_obj->getAccrualPolicyAccount() ) );
 				Debug::Text('Accrual Policy Records: '. $aplf->getRecordCount() .' User ID: '. $user_id .' Accrual Policy Account: '. $pfp_obj->getAccrualPolicyAccount(), __FILE__, __LINE__, __METHOD__, 10);
 				if ( $aplf->getRecordCount() > 0 ) {
 					$ulf = TTnew( 'UserListFactory' );

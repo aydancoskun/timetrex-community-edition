@@ -5021,8 +5021,8 @@ class SetupPresets extends Factory {
 									'status_id'                      => 10, //Enabled
 									'type_id'                        => 20, //Deduction
 									'name'                           => 'Loan Repayment',
-									'calculation_id'                 => 52,
-									'calculation_order'              => 200, //Fixed Amount w/Target
+									'calculation_id'                 => 52, //Fixed Amount w/Target
+									'calculation_order'              => 200,
 									'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Loan Repayment' ),
 									'user_value1'                    => 25, //Fixed amount to repay each pay period.
 									'user_value2'                    => 0,

@@ -18,6 +18,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		this.navigation_label = $.i18n._( 'Accrual Balance' ) + ':';
 		this.api = new (APIFactory.getAPIClass( 'APIAccrualBalance' ))();
 		this.accrual_api = new (APIFactory.getAPIClass( 'APIAccrual' ))();
+		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
 		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
 
 		this.invisible_context_menu_dic[ContextMenuIconName.edit] = true; //Hide some context menus
@@ -57,6 +58,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 	initOptions: function() {
 		var $this = this;
 
+		this.initDropDownOption( 'status', 'user_status_id', this.user_api, null, 'user_status_array' );
 		this.user_group_api.getUserGroup( '', false, false, {
 			onResult: function( res ) {
 
@@ -118,6 +120,17 @@ AccrualBalanceViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Employee Status' ),
+				in_column: 1,
+				field: 'user_status_id',
+				multiple: true,
+				basic_search: true,
+				adv_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 

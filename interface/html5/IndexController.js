@@ -495,9 +495,10 @@ var ApplicationRouter = Backbone.Router.extend( {
 						var check_connection_timer = setInterval( function() {
 							if ( !is_testing_internet_connection ) {
 								clearInterval( check_connection_timer );
-								if ( internet_connection_available ) {
-									Global.topContainer().append( chat );
-									Global.loadScript( 'global/widgets/live-chat/live-chat.js' );
+								if ( internet_connection_available && current_user ) {
+									require(['live-chat'], function(){
+										Global.topContainer().append( chat );
+									});
 								}
 							}
 						}, 500 );
@@ -599,19 +600,15 @@ IndexViewController = Backbone.View.extend( {
 } );
 
 IndexViewController.goToView = function( view_name, filter ) {
-	TTPromise.add( 'base', 'closeEditViews');
-	Global.closeEditViews();
-	TTPromise.wait( 'base', 'closeEditViews', function( cancel_yes ) {
-		if ( cancel_yes == true ) {
-			if ( TopMenuManager.selected_sub_menu_id ) {
-				$('#' + TopMenuManager.selected_sub_menu_id).removeClass('selected-menu');
-			}
-
-			$('#' + view_name).addClass('selected-menu');
-			LocalCacheData.default_filter_for_next_open_view = filter;
-
-			TopMenuManager.goToView(view_name, true);
+	Global.closeEditViews( function( ) {
+		if ( TopMenuManager.selected_sub_menu_id ) {
+			$('#' + TopMenuManager.selected_sub_menu_id).removeClass('selected-menu');
 		}
+
+		$('#' + view_name).addClass('selected-menu');
+		LocalCacheData.default_filter_for_next_open_view = filter;
+
+		TopMenuManager.goToView(view_name, true);
 	});
 
 };
@@ -713,9 +710,7 @@ IndexViewController.openWizardController = function( wizardName ) {
 };
 
 IndexViewController.openReport = function( parent_view_controller, view_name, id, tab_name ) {
-	TTPromise.add( 'base', 'closeEditViews');
-	Global.closeEditViews();
-	TTPromise.wait( 'base', 'closeEditViews', function( cancel_yes ) {
+	Global.closeEditViews( function( ) {
 		var view_controller = null;
 
 		if (LocalCacheData.current_open_report_controller) {
@@ -773,76 +768,89 @@ IndexViewController.openReport = function( parent_view_controller, view_name, id
 };
 
 //Open edit view
-IndexViewController.openEditView = function (parent_view_controller, view_name, id, action_function) {
-	var view_controller = null;
+IndexViewController.openEditView = function ( parent_view_controller, view_name, id, action_function ) {
+	if  ( LocalCacheData.current_open_report_controller ) { //don't allow editviews over report views.
+		LocalCacheData.current_open_report_controller.onCancelClick( null, null, function() {
+			Global.closeEditViews(function(){
+				IndexViewController.openEditView( parent_view_controller, view_name, id, action_function );
+			});
+		});
+		return;
+	} else if ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.viewId && LocalCacheData.current_open_edit_only_controller.viewId == view_name ) { //Stop edit only views from overlaying themselves with the same view and disconnecting others from the menu
+		LocalCacheData.current_open_edit_only_controller.setEditMenu(); //display the right edit menu
+	} else {
+		doNext();
+	}
 
-	if (!PermissionManager.checkTopLevelPermission(view_name) && view_name !== 'Map') {
-		if (LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView') {
-			if (LocalCacheData.getLoginUserPreference().default_login_screen) {
-				TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
-			} else {
-				TopMenuManager.goToView('Home');
-			}
-		} else {
-			TAlertManager.showAlert('Permission denied', 'ERROR', function () {
+
+	function doNext() {
+		var view_controller = null;
+
+		if (!PermissionManager.checkTopLevelPermission(view_name) && view_name !== 'Map') {
+			if (LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId && LocalCacheData.current_open_primary_controller.viewId == 'LoginView') {
 				if (LocalCacheData.getLoginUserPreference().default_login_screen) {
 					TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
 				} else {
 					TopMenuManager.goToView('Home');
 				}
-			});
-		}
-		Debug.Text('Navigation permission denied. View: ' + view_name, 'IndexController.js', 'IndexController', 'openEditView', 10);
-		return;
-	}
-
-	if ( view_name == 'Request' ) {
-		action_function = 'openAddView';
-	}
-
-	if (!action_function) {
-		action_function = 'openEditView';
-	}// Added originally in 83a1df72 for issue #1805 but caused a bug mentioned in issue #2091 the steps to reproduce the bug are as follows:
-	// 1. Go to invoice > client contacts and highlite a Client Contact 2. Click the "Edit Client" button on the ribbon menu
-	// 3. Click the Invoices tab 4. Edit an invoice 5. Click Payment on the ribbon menu 6. Click Cancel to bring you back to the invoice edit scren, then Cancel again to go back to the Invoices tab on the client screen.
-	// 7. You won't be back there. The Client screen will be missing.
-	//if ( LocalCacheData.current_open_edit_only_controller ) {
-	//LocalCacheData.current_open_edit_only_controller.onCancelClick();
-	//}
-
-	// track edit view only view
-	Global.trackView(view_name);
-
-
-
-	Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
-		/* jshint ignore:start */
-		view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
-		/* jshint ignore:end */
-
-		TTPromise.wait('BaseViewController', 'initialize', function () {
-
-			view_controller.parent_view_controller = parent_view_controller;
-
-
-			view_controller[action_function](id);
-			if (TTUUID.isUUID(id)) {
-				var current_url = window.location.href;
-				if (current_url.indexOf('&sm') > 0) {
-					current_url = current_url.substring(0, current_url.indexOf('&sm'));
-				}
-				if (id && _.isString(id)) {
-					current_url = current_url + '&sm=' + view_name + '&sid=' + id;
-				} else {
-					current_url = current_url + '&sm=' + view_name;
-				}
-
-				Global.setURLToBrowser(current_url);
+			} else {
+				TAlertManager.showAlert('Permission denied', 'ERROR', function () {
+					if (LocalCacheData.getLoginUserPreference().default_login_screen) {
+						TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
+					} else {
+						TopMenuManager.goToView('Home');
+					}
+				});
 			}
+			Debug.Text('Navigation permission denied. View: ' + view_name, 'IndexController.js', 'IndexController', 'openEditView', 10);
+			return;
+		}
 
-		LocalCacheData.current_open_edit_only_controller = view_controller;
+		if (view_name == 'Request') {
+			action_function = 'openAddView';
+		}
+
+		if (!action_function) {
+			action_function = 'openEditView';
+		}// Added originally in 83a1df72 for issue #1805 but caused a bug mentioned in issue #2091 the steps to reproduce the bug are as follows:
+		// 1. Go to invoice > client contacts and highlite a Client Contact 2. Click the "Edit Client" button on the ribbon menu
+		// 3. Click the Invoices tab 4. Edit an invoice 5. Click Payment on the ribbon menu 6. Click Cancel to bring you back to the invoice edit scren, then Cancel again to go back to the Invoices tab on the client screen.
+		// 7. You won't be back there. The Client screen will be missing.
+		//if ( LocalCacheData.current_open_edit_only_controller ) {
+		//LocalCacheData.current_open_edit_only_controller.onCancelClick();
+		//}
+
+		// track edit view only view
+		Global.trackView(view_name);
+
+
+		Global.loadViewSource(view_name, view_name + 'ViewController.js', function () {
+			/* jshint ignore:start */
+			view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
+			/* jshint ignore:end */
+
+			TTPromise.wait('BaseViewController', 'initialize', function () {
+				view_controller.parent_view_controller = parent_view_controller;
+
+				view_controller[action_function](id);
+				if (TTUUID.isUUID(id)) {
+					var current_url = window.location.href;
+					if (current_url.indexOf('&sm') > 0) {
+						current_url = current_url.substring(0, current_url.indexOf('&sm'));
+					}
+					if (id && _.isString(id)) {
+						current_url = current_url + '&sm=' + view_name + '&sid=' + id;
+					} else {
+						current_url = current_url + '&sm=' + view_name;
+					}
+
+					Global.setURLToBrowser(current_url);
+				}
+
+				LocalCacheData.current_open_edit_only_controller = view_controller;
+			});
 		});
-	});
+	}
 };
 
 IndexViewController.setNotificationBar = function( target ) {

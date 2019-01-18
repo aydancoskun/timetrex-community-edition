@@ -36,6 +36,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'status', 'user_status_id', this.user_api );
 		this.initDropDownOption( 'filtered_status', 'status_id' );
+
 		this.user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
 			res = res.getResult();
 
@@ -45,6 +46,18 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
 				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
 				$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+			}
+
+		}} );
+
+		this.api.getOptions( 'status', false, false, {onResult: function( res ) {
+			var status_array = Global.buildRecordArray( res.getResult() );
+
+			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['status_id'] ) {
+				$this.basic_search_field_ui_dic['status_id'].setSourceData( status_array );
+				if ( $this.adv_search_field_ui_dic['status_id'] ) {
+					$this.adv_search_field_ui_dic['status_id'].setSourceData(status_array);
+				}
 			}
 
 		}} );
@@ -445,10 +458,10 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	/* jshint ignore:start */
 	setDefaultMenu: function( doNotSetFocus ) {
 
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
-        if (!this.context_menu_array) {
-            return;
-        }
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if (!this.context_menu_array) {
+			return;
+		}
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
@@ -544,6 +557,15 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.setContextMenuGroupVisibility();
 
 	},
+
+	//Remove the copy button as it can never work due to API unique constraints.
+	setDefaultMenuCopyIcon: function( context_btn, grid_selected_length, pId ) {
+		context_btn.addClass( 'invisible-image' );
+	},
+	setEditMenuCopyIcon: function( context_btn, grid_selected_length, pId ) {
+		context_btn.addClass( 'invisible-image' );
+	},
+
 	/* jshint ignore:end */
 	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
 
@@ -894,35 +916,12 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	},
 
 	setCurrentEditRecordData: function() {
-
-
 		// When mass editing, these fields may not be the common data, so their value will be undefined, so this will cause their change event cannot work properly.
 		this.setDefaultData( {
 			'type_id': 10
 		} );
 
-		//Set current edit record data to all widgets
-		var widget;
-		for ( var key in this.current_edit_record ) {
-			widget = this.edit_view_ui_dic[key];
-			if ( Global.isSet( widget ) ) {
-				switch ( key ) {
-					default:
-						widget.setValue( this.current_edit_record[key] );
-						break;
-				}
-
-			}
-		}
-
-		if ( this.current_edit_record.rate || this.current_edit_record.units ) {
-			widget = this.edit_view_ui_dic['amount'];
-			widget.setReadOnly( true );
-		}
-
-		this.collectUIDataToCurrentEditRecord();
-
-		this.setEditViewDataDone();
+		this._super('setCurrentEditRecordData');
 	},
 
 	setEditViewDataDone: function() {
@@ -944,17 +943,21 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		if ( this.is_mass_editing ) {
 			for ( var key in this.edit_view_ui_dic ) {
-				var widget = this.edit_view_ui_dic[key];
+				//#2536 - Never send status_id to the API.
+				if ( key != 'status_id' ) {
+					var widget = this.edit_view_ui_dic[key];
 
-				if ( Global.isSet( widget.isChecked ) ) {
-					if ( widget.isChecked() && widget.getEnabled() ) {
-						record[key] = widget.getValue();
+					if ( Global.isSet( widget.isChecked ) ) {
+						if (widget.isChecked() && widget.getEnabled()) {
+							record[key] = widget.getValue();
+						}
+
 					}
 				}
 			}
 
 		} else {
-			record = this.current_edit_record;
+			record = this.uniformVariable(this.current_edit_record);
 		}
 
 		var record = this.processMassAdd(record);
@@ -981,7 +984,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				}
 				this.setEditMenu();
 
-				return records_data;
+				return this.uniformVariable(records_data);
 
 			} else {
 				record.user_id = record.user_id.toString();
@@ -989,7 +992,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		}
 
-		return record;
+		return this.uniformVariable(record);
 	},
 
 	onSaveAndContinue: function( ignoreWarning ) {
@@ -1133,7 +1136,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn, pId );
 
-		if ( this.is_mass_adding || this.is_mass_editing || this.is_viewing || (Global.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 1) ) {
+		if ( this.is_mass_adding || this.is_mass_editing || this.is_viewing || (this.current_edit_record && Global.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 1) ) {
 			context_btn.addClass( 'disable-image' );
 		}
 	},
@@ -1192,12 +1195,6 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		form_item_input.setDefaultArgs( default_args );
 
 		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_pay_stub_amendment_column1, '' );
-
-		// Status
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.filtered_status_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_amendment_column1 );
 
 		var args = {};
 		var filter_data = {};
@@ -1309,9 +1306,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee Status' ),
+			new SearchField( {label: $.i18n._( 'Status' ),
 				in_column: 1,
-				field: 'user_status_id',
+				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1353,6 +1350,14 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
+				form_item_type: FormItemType.AWESOME_BOX} ),
+			new SearchField( {label: $.i18n._( 'Employee Status' ),
+				in_column: 2,
+				field: 'user_status_id',
+				multiple: true,
+				basic_search: true,
+				adv_search: true,
+				layout_name: ALayoutIDs.OPTION_COLUMN,
 				form_item_type: FormItemType.AWESOME_BOX} ),
 			new SearchField( {label: $.i18n._( 'Group' ),
 				in_column: 2,
@@ -1402,6 +1407,20 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX} )
 		];
+	},
+
+	uniformVariable: function(data){
+		if( data.status_id ) {
+			delete data.status_id;
+		}
+		return this._super('uniformVariable', data);
+	},
+
+	preCopyAsNew: function( data ) {
+		data = this.uniformVariable( data );
+		data.id = null;
+		data.effective_date = (new Date).format( Global.getLoginUserDateFormat() );
+		return data;
 	}
 
 

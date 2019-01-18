@@ -256,9 +256,16 @@ class TTMail {
 		return TRUE;
 	}
 
-	//Extracts just the email address part from a string that may contain the name part, etc...
+	/**
+	 * Adds a plain text body to an HTML email stating that it contains HTML content.
+	 * @return mixed
+	 */
+	function setDefaultTXTBody() {
+		return @$this->getMIMEObject()->setTXTBody( TTi18n::getText('This email contains HTML content, please open in a HTML enabled email viewer.') ); //Having a text/plain body helps reduce spam score.
+	}
 
 	/**
+	 * Extracts just the email address part from a string that may contain the name part, etc...
 	 * @param $address
 	 * @return mixed
 	 */
@@ -309,6 +316,7 @@ class TTMail {
 
 		$this->data['headers']['X-TimeTrex-Version'] = APPLICATION_VERSION;
 		$this->data['headers']['X-TimeTrex-Edition'] = getTTProductEditionName();
+		$this->data['headers']['X-TimeTrex-Hostname'] = Misc::getURLProtocol() .'://'.Misc::getHostName( TRUE ).Environment::getBaseURL();
 
 		if ( !is_array( $this->getTo() ) ) {
 			$to = array( $this->getTo() );

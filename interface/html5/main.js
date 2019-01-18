@@ -1036,10 +1036,6 @@ require( [
 
 		];
 
-		if ( LocalCacheData.productEditionId > 10 ) {
-			require_array.push('live-chat');
-		}
-
 		//do not load interact on mobile.
 		if ( Global.detectMobileBrowser() == true ) {
 			require_array.splice( require_array.indexOf('interact'), 1);

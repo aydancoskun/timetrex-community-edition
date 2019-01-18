@@ -215,7 +215,7 @@ class USPayrollDeductionTest2018 extends PHPUnit_Framework_TestCase {
 					}
 
 					Debug::text($i.'. Amount: This Year: '. $row['provincial_deduction'] .' Last Year: '. $pd_obj->getStatePayPeriodDeductions() .' Diff Amount: '. $amount_diff .' Percent: '. $amount_diff_percent .'%', __FILE__, __LINE__, __METHOD__, 10);
-					if ( $row['province'] != 'CA' AND $row['province'] != 'DC' AND $amount_diff > 5 ) { //Some states had significant changes.
+					if ( $row['province'] != 'CA' AND $row['province'] != 'DC' AND $row['province'] != 'OR' AND $amount_diff > 5 ) { //Some states had significant changes.
 						$this->assertLessThan( 33, $amount_diff_percent ); //Reasonable margin of error.
 						$this->assertGreaterThan( 0, $amount_diff_percent );
 					}
@@ -251,7 +251,7 @@ class USPayrollDeductionTest2018 extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '576.92' );
 		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '44.83' );
-		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '38.78' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '38.59' );
 		$this->assertEquals( $this->mf( $pd_obj->getEmployeeSocialSecurity() ), '35.77' );
 	}
 

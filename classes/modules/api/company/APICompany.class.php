@@ -99,7 +99,7 @@ class APICompany extends APIFactory {
 		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		if ( !$this->getPermissionObject()->Check('company', 'view') ) {
+		if ( !( $this->getPermissionObject()->Check('company', 'view') AND $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID ) ) {
 			//Force ID to current company.
 			$data['filter_data']['id'] = $this->getCurrentCompanyObject()->getId();
 		}
@@ -205,7 +205,7 @@ class APICompany extends APIFactory {
 					//Modifying existing object.
 					//Get company object, so we can only modify just changed data for specific records if needed.
 					//$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
-					if ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] )	{
+					if ( $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID )	{
 						$lf->getById( $row['id'] );
 					} else {
 						$lf->getByIdAndCompanyId( $row['id'], $this->getCurrentCompanyObject()->getId() );
@@ -242,7 +242,9 @@ class APICompany extends APIFactory {
 					Debug::Text('Attempting to save data...', __FILE__, __LINE__, __METHOD__, 10);
 
 					//Don't allow changing edition, status unless they can edit all companies, or its the primary company (for On-Site installs)
-					if ( !( ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) OR $this->getPermissionObject()->Check('company', 'edit') ) ) {
+					//if ( !( $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID OR $this->getPermissionObject()->Check('company', 'edit') ) ) {
+					if ( !( ( DEPLOYMENT_ON_DEMAND == TRUE AND $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID AND $this->getPermissionObject()->Check('company', 'edit') )
+							OR ( DEPLOYMENT_ON_DEMAND == FALSE AND $this->getPermissionObject()->Check('company', 'edit') ) ) ) {
 						unset($row['product_edition_id'], $row['status_id']);
 						if ( DEPLOYMENT_ON_DEMAND == TRUE ) { //When On-Demand, prevent changing of company name unless its by a Master Admin.
 							unset($row['name']);
@@ -339,7 +341,7 @@ class APICompany extends APIFactory {
 				if ( $id != '' ) {
 					//Modifying existing object.
 					//Get company object, so we can only modify just changed data for specific records if needed.
-					if ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] )	{
+					if ( $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID )	{
 						$lf->getById( $id );
 					} else {
 						$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );

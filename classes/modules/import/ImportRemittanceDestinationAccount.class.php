@@ -199,8 +199,8 @@ class ImportRemittanceDestinationAccount extends Import {
 	 * @return array|bool|mixed
 	 */
 	function parse_ach_transaction_type( $input, $default_value = NULL, $parse_hint = NULL ) {
-		$rsaf = TTnew('RemittanceSourceAccountFactory');
-		$options = $rsaf->getOptions( 'ach_transaction_type' );
+		$rdaf = TTnew('RemittanceDestinationAccountFactory');
+		$options = $rdaf->getOptions( 'ach_transaction_type' );
 
 		if ( isset($options[$input]) ) {
 			return $input;
@@ -208,7 +208,7 @@ class ImportRemittanceDestinationAccount extends Import {
 			if ( $this->getImportOptions('fuzzy_match') == TRUE ) {
 				return $this->findClosestMatch( $input, $options, 50 );
 			} else {
-				return array_search( strtolower($input), array_map('strtolower', $options) );
+				return array_search( strtolower($input), array_map('strtolower', (array)$options) );
 			}
 		}
 	}

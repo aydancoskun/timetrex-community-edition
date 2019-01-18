@@ -856,7 +856,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				$xml->Return->T4->addChild( 'T4Slip' );
 
 				$xml->Return->T4->T4Slip[ $e ]->addChild( 'EMPE_NM' ); //Employee name
-				$xml->Return->T4->T4Slip[ $e ]->EMPE_NM->addChild( 'snm', $this->last_name ); //Surname
+				$xml->Return->T4->T4Slip[ $e ]->EMPE_NM->addChild( 'snm', substr( $this->last_name, 0, 20 ) ); //Surname
 				$xml->Return->T4->T4Slip[ $e ]->EMPE_NM->addChild( 'gvn_nm', substr( $this->first_name, 0, 12 ) ); //Given name
 				if ( $this->filterMiddleName( $this->middle_name ) != '' ) {
 					$xml->Return->T4->T4Slip[ $e ]->EMPE_NM->addChild( 'init', $this->filterMiddleName( $this->middle_name ) );
@@ -884,7 +884,7 @@ class GovernmentForms_CA_T4 extends GovernmentForms_CA {
 				if ( $this->employee_number != '' ) {
 					$xml->Return->T4->T4Slip[ $e ]->addChild( 'empe_nbr', substr( $this->employee_number, 0, 20 ) );
 				}
-				$xml->Return->T4->T4Slip[ $e ]->addChild( 'bn', str_replace( ' ', '', $this->payroll_account_number ) ); //Payroll Account Number. Remove any spaces from the number.
+				$xml->Return->T4->T4Slip[ $e ]->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) ); //Payroll Account Number. Remove any spaces from the number.
 				if ( isset( $this->l50 ) AND $this->l50 != '' ) {
 					$xml->Return->T4->T4Slip[ $e ]->addChild( 'rpp_dpsp_rgst_nbr', substr( $this->l50, 0, 7 ) );
 				}

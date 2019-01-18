@@ -1962,7 +1962,7 @@ class StationFactory extends Factory {
 					$sf->setBranchSelectionType( 10 ); //All allowed
 					$sf->setDepartmentSelectionType( 10 ); //All allowed
 
-					$sf->setModeFlag( array( 16, 4096 ) ); //Default Facial Recognition, Capture Images in KIOSK mode.
+					$sf->setModeFlag( array( 16, 4096, 8192 ) ); //Default Facial Recognition, Capture Images in KIOSK mode, Disable Screensaver.
 
 					if ( is_object( $sf->getCompanyObject() ) AND is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {
 						$sf->setTimeZone( $sf->getCompanyObject()->getUserDefaultObject()->getTimeZone() );

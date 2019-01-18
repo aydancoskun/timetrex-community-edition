@@ -149,7 +149,7 @@ class CompanyGenericTagMapFactory extends Factory {
 				if ( isset($parsed_tags['delete']) ) {
 					foreach( $parsed_tags['delete'] as $del_tag ) {
 						$del_tag = strtolower($del_tag);
-						if ( isset($existing_tags[$del_tag]) AND $existing_tags[$del_tag] > 0 ) {
+						if ( isset($existing_tags[$del_tag]) AND TTUUID::isUUID( $existing_tags[$del_tag] ) AND $existing_tags[$del_tag] != TTUUID::getZeroID() ) {
 							$del_tag_ids[] = $existing_tags[$del_tag];
 						}
 					}
@@ -169,7 +169,7 @@ class CompanyGenericTagMapFactory extends Factory {
 						$obj->Delete();
 					} else {
 						//Save ID's that need to be updated.
-						Debug::text('NOT Deleting : '. $id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text('NOT Deleting: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 						$tmp_ids[] = $id;
 					}
 				}

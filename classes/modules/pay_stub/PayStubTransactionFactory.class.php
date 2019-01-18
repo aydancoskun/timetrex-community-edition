@@ -867,10 +867,11 @@ class PayStubTransactionFactory extends Factory {
 		}
 
 		$eft->compile();
-		$file_name = $this->formatFileName( $rs_obj, $next_transaction_number, 'EFT', 'txt' );
+		$file_name = $this->formatFileName( $rs_obj, $next_transaction_number, 'EFT', NULL ); //Don't specify file extension, this forces IE to save the file rather than open it, hopefully preventing users from losing the file by clicking "OPEN", opening in notepad.exe, then closing notepad and having the file end up in IEs temporary "APP DATA" folder.
+
 
 		Debug::Text( 'EFT File name : ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
-		$output[$rs_obj->getId()] = array('file_name' => $file_name, 'mime_type' => 'Application/Text', 'data' => $eft->getCompiledData());
+		$output[$rs_obj->getId()] = array( 'file_name' => $file_name, 'mime_type' => 'Application/Text', 'data' => $eft->getCompiledData() );
 
 		//rs_obj cleared on save unless passed false
 		$rs_obj->setLastTransactionNumber( $next_transaction_number );
@@ -889,9 +890,22 @@ class PayStubTransactionFactory extends Factory {
 	 * @param $extension
 	 * @return string
 	 */
-	function formatFileName( $rs_obj, $transaction_number, $prefix, $extension ) {
+	function formatFileName( $rs_obj, $transaction_number, $prefix, $extension = NULL ) {
 		//Don't use users preferred date format, as it could contain spaces.
-		$file_name = $prefix . '_' . substr( preg_replace('/[^A-Za-z0-9_-]/', '', str_replace( ' ', '_', $rs_obj->getName() ) ), 0, 20 ) . '_' . (int)$transaction_number . '_' . TTDate::getISODateStamp( time() ) . '.' . $extension;
+		$file_name = $prefix . '_' . substr( preg_replace('/[^A-Za-z0-9_-]/', '', str_replace( ' ', '_', $rs_obj->getName() ) ), 0, 20 ) . '_' . (int)$transaction_number . '_' . TTDate::getHumanReadableDateStamp( time() );
+
+		//Since we don't include the file extension in all cases (this helps prevent IE from opening the file), append the file format to the end of the file as a pseudo extension.
+		if ( $rs_obj->getType() == 3000 ) {
+			if ( $rs_obj->getDataFormat() == 10 ) { //ACH
+				$file_name .= '_ACH';
+			} else { //EFT
+				$file_name .= '_EFT';
+			}
+		}
+
+		if ( $extension != '' ) {
+			$file_name .= '.'. $extension;
+		}
 
 		return $file_name;
 	}

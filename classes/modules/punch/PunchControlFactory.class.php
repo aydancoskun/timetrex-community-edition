@@ -2073,9 +2073,8 @@ class PunchControlFactory extends Factory {
 		return $retval;
 	}
 
-	//When passed a punch_control_id, if it has two punches assigned to it, a new punch_control_id row is created and the punches are split between the two.
-
 	/**
+	 * When passed a punch_control_id, if it has two punches assigned to it, a new punch_control_id row is created and the punches are split between the two.
 	 * @param string $punch_control_id UUID
 	 * @return bool
 	 */
@@ -2115,7 +2114,9 @@ class PunchControlFactory extends Factory {
 								$pc_obj->setEnableCalcWeeklySystemTotalTime( FALSE ); //Do this for In punch only.
 								$pc_obj->setEnableCalcUserDateTotal( TRUE );
 								$pc_obj->setEnableCalcException( TRUE );
-								$retval = $pc_obj->Save( TRUE, TRUE ); //Force isNew() lookup.
+								if ( $pc_obj->isValid() ) {
+									$retval = $pc_obj->Save( TRUE, TRUE ); //Force isNew() lookup.
+								}
 							}
 						}
 					} else {
@@ -2130,7 +2131,9 @@ class PunchControlFactory extends Factory {
 						$pc_obj->setEnableCalcWeeklySystemTotalTime( TRUE );
 						$pc_obj->setEnableCalcUserDateTotal( TRUE );
 						$pc_obj->setEnableCalcException( TRUE );
-						$retval = $pc_obj->Save();
+						if ( $pc_obj->isValid() ) {
+							$retval = $pc_obj->Save();
+						}
 					}
 
 					$i++;

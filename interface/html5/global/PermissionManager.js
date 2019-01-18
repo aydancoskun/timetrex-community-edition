@@ -120,14 +120,6 @@ var PermissionManager = (function() {
 					result = true;
 				}
 				break;
-			case 'CompanyBankAccount':
-			case 'LoginUserBankAccount':
-				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
-					result = false;
-				} else if ( PermissionManager.validate( permission_section, 'edit_own_bank' ) ) {
-					result = true;
-				}
-				break;
 			case 'LegalEntity':
 			case 'PayrollRemittanceAgency':
 			case 'RemittanceSourceAccount':
@@ -818,15 +810,11 @@ var PermissionManager = (function() {
 			case 'UserGroup':
 			case 'EthnicGroup':
 			case 'LoginUserContact':
-			case 'LoginUserBankAccount':
 			case 'ChangePassword':
 				permission_section = 'user';
 				break;
 			case 'LegalEntity':
 				permission_section = 'legal_entity';
-				break;
-			case 'CompanyBankAccount':
-				permission_section = 'company';
 				break;
 			case 'PayrollRemittanceAgency':
 				permission_section = 'payroll_remittance_agency';

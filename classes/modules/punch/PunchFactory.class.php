@@ -751,7 +751,6 @@ class PunchFactory extends Factory {
 
 							//Get day total time prior to this punch control.
 							$pclf = TTnew( 'PunchControlListFactory' );
-							//$pclf->getByUserDateId( $plf->getCurrent()->getPunchControlObject()->getUserDateID() );
 							$pclf->getByUserIdAndDateStamp( $this->getUser(), $plf->getCurrent()->getPunchControlObject()->getDateStamp() );
 							if ( $pclf->getRecordCount() > 0 ) {
 								$day_total_time = ( $epoch - $plf->getCurrent()->getTimeStamp() );
@@ -766,10 +765,13 @@ class PunchFactory extends Factory {
 
 								//Take into account paid meal/breaks when doing day total rounding...
 								//  Since we don't know what time will be added/deducted when creating a new punch, but it has already happened when editing an existing punch,
-								//  the calculations should be based on the RAW time only. So we need to add back in any meal/break time taken but not auto-deducted/added.
+								//  the calculations should be based on the RAW time taken only. So we need to add back in any meal/break time taken but not auto-deducted/added.
+								//  **If the Meal/Break policy active after setting is greater than the first part of the shift before lunch, then when creating a new punch the rounding will not work, because the policy hasn't been calculated yet.
+								//      So if the rounding isn't being calculated correctly, they may need to set the active after setting lower, to ensure the meal policy is calculated before the last punch of the day.
+								//  See testRoundingDayTotal*() unit tests.
 								$meal_and_break_adjustment = 0;
 								$udtlf = TTnew( 'UserDateTotalListFactory' );
-								$udtlf->getByUserIdAndDateStampAndObjectType( $this->getUser(), $plf->getCurrent()->getPunchControlObject()->getDateStamp(), array(101, 111) );
+								$udtlf->getByUserIdAndDateStampAndObjectType( $this->getUser(), $plf->getCurrent()->getPunchControlObject()->getDateStamp(), array(100, 110) ); //Only consider time calculated from meal/break policies. Not time taken.
 								if ( $udtlf->getRecordCount() > 0 ) {
 									foreach( $udtlf as $udt_obj ) {
 										$meal_and_break_adjustment += $udt_obj->getTotalTime();

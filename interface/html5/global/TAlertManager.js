@@ -5,7 +5,15 @@ var TAlertManager = (function() {
 	var isShownNetworkAlert = false;
 
 	var showNetworkErrorAlert = function( jqXHR, textStatus, errorThrown ) {
-		if ( textStatus == "parsererror" || jqXHR.status == 0 ) {
+		//#2514 - status 0 is caused by browser cancelling the request. There is no status because there was no request.
+		if ( jqXHR.status == 0 ) {
+			if ( APIGlobal.pre_login_data.production !== true ) {
+				console.error('Browser cancelled request... jqXHR: Status=0')
+			}
+			return;
+		}
+
+		if ( textStatus == "parsererror" ) {
 			Global.sendErrorReport(textStatus + ' ('+ jqXHR.status +'): ' + errorThrown + " ~FROM TAlertManager::showNetworkErrorAlert()~", false, false, jqXHR);
 			return;
 		}

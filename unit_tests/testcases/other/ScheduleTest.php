@@ -413,7 +413,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 												'object_type_id' => $udt_obj->getObjectType(),
 												'pay_code_id' => $udt_obj->getPayCode(),
 
-												'branch_id' => (int)$udt_obj->getBranch(),
+												'branch_id' => $udt_obj->getBranch(),
 												'department_id' => $udt_obj->getDepartment(),
 												'total_time' => $udt_obj->getTotalTime(),
 												'name' => $udt_obj->getName(),

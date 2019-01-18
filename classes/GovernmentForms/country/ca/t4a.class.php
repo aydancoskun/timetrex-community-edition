@@ -662,7 +662,7 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 				$xml->Return->T4A->addChild( 'T4ASlip' );
 
 				$xml->Return->T4A->T4ASlip[ $e ]->addChild( 'RCPNT_NM' ); //Employee name
-				$xml->Return->T4A->T4ASlip[ $e ]->RCPNT_NM->addChild( 'snm', $this->last_name ); //Surname
+				$xml->Return->T4A->T4ASlip[ $e ]->RCPNT_NM->addChild( 'snm', substr( $this->last_name, 0, 20 )  ); //Surname
 				$xml->Return->T4A->T4ASlip[ $e ]->RCPNT_NM->addChild( 'gvn_nm', substr( $this->first_name, 0, 12 ) ); //Given name
 				if ( $this->filterMiddleName( $this->middle_name ) != '' ) {
 					$xml->Return->T4A->T4ASlip[ $e ]->RCPNT_NM->addChild( 'init', $this->filterMiddleName( $this->middle_name ) );
@@ -691,7 +691,7 @@ class GovernmentForms_CA_T4A extends GovernmentForms_CA {
 					$xml->Return->T4A->T4ASlip[ $e ]->addChild( 'rcpnt_nbr', substr( $this->employee_number, 0, 20 ) );
 				}
 				$xml->Return->T4A->T4ASlip[ $e ]->addChild( 'rcpnt_bn', '000000000RP0000' ); //Individual only
-				$xml->Return->T4A->T4ASlip[ $e ]->addChild( 'bn', $this->payroll_account_number ); //Payroll Account Number
+				$xml->Return->T4A->T4ASlip[ $e ]->addChild( 'bn', $this->formatPayrollAccountNumber( $this->payroll_account_number ) ); //Payroll Account Number
 				$xml->Return->T4A->T4ASlip[ $e ]->addChild( 'rpt_tcd', $this->getStatus() ); //Report Type Code: O = Originals, A = Amendment, C = Cancel
 
 				$xml->Return->T4A->T4ASlip[ $e ]->addChild( 'T4A_AMT' ); //T4A Amounts

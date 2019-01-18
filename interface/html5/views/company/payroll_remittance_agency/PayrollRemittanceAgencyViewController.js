@@ -23,7 +23,6 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 	date_api: null,
 
 	init: function() {
-		//this._super('initialize' );
 		this.edit_view_tpl = 'PayrollRemittanceAgencyEditView.html';
 		this.permission_id = 'payroll_remittance_agency';
 		this.viewId = 'PayrollRemittanceAgency';
@@ -361,32 +360,15 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 		switch ( key ) {
 			case 'country':
-				if ( c_value.toString() === this.current_edit_record[key].toString() ) {
-					break;
-				}
-//				var widget = this.edit_view_ui_dic['province'];
-//				var widget2 = this.edit_view_ui_dic['district'];
-//				widget.setValue( null );
-//				widget2.setValue( null );
-				this.eSetProvince( c_value );
-//				var p = widget.getValue();
-//				this.current_edit_record.province = p;
-				this.setDistrict( c_value, this.current_edit_record.province );
-
-//				this.current_edit_record.district = widget2.getValue();
-				break;
 			case 'province':
 				if ( c_value.toString() === this.current_edit_record[key].toString() ) {
-					break;
+					return;
 				}
-
-//				widget = this.edit_view_ui_dic['district'];
-//				widget.setValue( null );
-//				var c = this.edit_view_ui_dic['country'].getValue();
-				this.setDistrict( this.current_edit_record.country, c_value );
-//				this.current_edit_record.district = widget.getValue();
 				break;
 			case 'type_id':
+				if ( c_value.toString() === this.current_edit_record[key].toString() ) {
+					return;
+				}
 				this.onTypeChange( c_value );
 				break;
 			case 'agency_id':
@@ -398,13 +380,30 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 		if ( key === 'country' || key === 'type_id' || key === 'province' || key === 'district' ) {
 			this.getAgencyOptions();
+			if ( key != 'province' ) {
+				this.detachElement('province');
+				this.eSetProvince(this.current_edit_record['country']);
+			}
+			if ( key != 'district' ) {
+				this.detachElement('district');
+				this.setDistrict(this.current_edit_record['country'], this.current_edit_record['province']);
+			}
+
+			this.current_edit_record['type_id'] = this.edit_view_ui_dic['type_id'].getValue();
+			this.current_edit_record['country'] = this.edit_view_ui_dic['country'].getValue();
+			this.current_edit_record['province'] = this.edit_view_ui_dic['province'].getValue() ? this.edit_view_ui_dic['province'].getValue() : '00';
+			this.current_edit_record['district'] = this.edit_view_ui_dic['district'].getValue() ? this.edit_view_ui_dic['district'].getValue() : '00';
+
+			this.getAgencyOptions();
 		}
 
 		if ( key === 'legal_entity_id' ) {
 			this.getRemittanceSourceAccount();
 		}
 
-		this.validate();
+		if ( !doNotValidate ) {
+			this.validate();
+		}
 
 	},
 
@@ -432,7 +431,6 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			'district': this.current_edit_record['district']
 		};
 		var $this = this;
-
 		this.api.getOptions( 'agency', params,  { async:false,
 			onResult: function( res ) {
 				var result = res.getResult();
@@ -498,58 +496,55 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 			arg = this.current_edit_record['type_id'];
 		}
-		this.detachElement( 'province' );
-		this.detachElement( 'district' );
-
-		if ( arg == 20 || arg == 40 ) {
-			this.attachElement( 'province' );
-
-		} else if ( arg == 30 ) {
-
-			this.attachElement( 'province' );
-			this.attachElement( 'district' );
-		}
-
-		if ( this.edit_view_ui_dic['province'].is(':visible') ) {
-			this.current_edit_record['province'] = this.edit_view_ui_dic['province'].getValue();
-		} else {
-			this.current_edit_record['province'] = '00';
-		}
-
-		if ( this.edit_view_ui_dic['district'].is(':visible') ) {
-			this.current_edit_record['district'] = this.edit_view_ui_dic['district'].getValue();
-		} else {
-			this.current_edit_record['district'] = '00';
-		}
 
 		this.editFieldResize();
+
 	},
 
 	setDistrict: function( c, p ) {
 		var $this = this;
 
-		this.api.getDistrictOptions( c, p, { async: false, onResult: function( res ) {
-			res = res.getResult();
+		if ( this.edit_view_ui_dic.type_id.getValue() == 30 ) {
+			this.api.getDistrictOptions(c, p, {
+				async: false, onResult: function (res) {
+					res = res.getResult();
+					//#2486 When there are no provinces for 3rd party agencies in countries outside those with scripted agencies, we must hide the field
+					if ( Object.keys(res).length == 0 || Object.keys(res).length == 1 && res['00'] ) {
+						$this.current_edit_record['district'] = '00';
+						return;
+					}
 
-			if ( !res ) {
-				res = [];
-			}
-			$this.district_array = Global.buildRecordArray( res );
-			$this.edit_view_ui_dic['district'].setSourceData( $this.district_array );
+					if (!res) {
+						res = [];
+					}
+					$this.attachElement('district');
 
-			if ( $this.current_edit_record['district'] && res[$this.current_edit_record['district']] ) {
-				$this.edit_view_ui_dic['district'].setValue( $this.current_edit_record['district'] );
-			} else {
 
-				var district  = $this.edit_view_ui_dic['district'].getValue();
-				if ( district == TTUUID.not_exist_id || district == TTUUID.zero_id || district == false || district == null ) {
-					district = '00';
-					$this.edit_view_ui_dic['district'].setValue(district);
+					var first_element = null;
+					if (res.length <= 1) {
+						first_element = { label: '-- '+$.i18n._('Other')+' --', value: '00', fullValue: '00', orderValue: -1, id: '00' }
+					}
+					$this.district_array = Global.buildRecordArray(res, first_element);
+
+					$this.edit_view_ui_dic['district'].setSourceData($this.district_array);
+
+					if ($this.current_edit_record['district'] && res[$this.current_edit_record['district']]) {
+						$this.edit_view_ui_dic['district'].setValue($this.current_edit_record['district']);
+					} else {
+
+						var district = $this.edit_view_ui_dic['district'].getValue();
+						if (district == TTUUID.not_exist_id || district == TTUUID.zero_id || district == false || district == null) {
+							district = '00';
+							$this.edit_view_ui_dic['district'].setValue(district);
+						}
+						$this.current_edit_record['district'] = district;
+					}
 				}
-				$this.current_edit_record['district'] = district;
-			}
-
-		}} );
+			});
+		} else {
+			$this.current_edit_record['province'] = '00';
+			$this.edit_view_ui_dic['district'].setValue( '00 ');
+		}
 	},
 
 	setCurrentEditRecordData: function() {
@@ -560,25 +555,10 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				continue;
 			}
 
-			//Make sure reset data source everytime.
-//			this.edit_view_ui_dic['province'].setSourceData( null );
-//			this.edit_view_ui_dic['district'].setSourceData( null );
 
 			var widget = this.edit_view_ui_dic[key];
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
-					case 'country': //popular case
-						this.eSetProvince( this.current_edit_record[key] );
-						widget.setValue( this.current_edit_record[key] );
-						break;
-					case 'province': //popular case
-						this.setDistrict( this.current_edit_record['country'], this.current_edit_record[key] );
-//						this.current_edit_record.district = this.edit_view_ui_dic['district'].getValue();
-						widget.setValue( this.current_edit_record[key] );
-						break;
-					case '': //popular case
-						widget.setValue( this.current_edit_record[key] );
-						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
 						break;
@@ -591,37 +571,64 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		this.setEditViewDataDone();
 	},
 
-
 	eSetProvince: function( val, refresh ) {
 		var $this = this;
 
-		this.api.getProvinceOptions( val, { async:false, onResult: function( res ) {
-			res = res.getResult();
-			if ( !res ) {
-				res = [];
-			}
+		if ( this.edit_view_ui_dic.type_id.getValue() > 10 ) {
+			this.api.getProvinceOptions(val, {
+				async: false, onResult: function (result) {
+					result = result.getResult();
 
-			$this.province_array = Global.buildRecordArray( res );
-			$this.edit_view_ui_dic['province'].setSourceData( $this.province_array );
+					if (!result) {
+						result = [];
+					}
 
-			if ( $this.current_edit_record['province'] && Global.isSet( res[$this.current_edit_record['province']] ) ) {
-				$this.edit_view_ui_dic['province'].setValue( $this.current_edit_record['province'] );
-			} else {
-				var province  = $this.edit_view_ui_dic['province'].getValue();
-				if ( province == TTUUID.not_exist_id || province == TTUUID.zero_id || province == false || province == null ) {
-					province = '00';
+					//#2486 When there are no provinces for 3rd party agencies in countries outside those with scripted agencies, we must hide the field
+					if ($this.edit_view_ui_dic.type_id.getValue() < 20 || ( Object.keys(result).length == 0 || Object.keys(result).length == 1 && result['00'] )) {
+						$this.current_edit_record['province'] = '00';
+						//Field stays hidden. value is set to '00'
+						return;
+					}
+
+					$this.attachElement('province');
+
+					var first_element = null;
+					if (result.length <= 1) {
+						first_element = { label: '-- '+$.i18n._('Other')+' --', value: '00', fullValue: '00', orderValue: -1, id: '00' }
+					}
+					$this.province_array = Global.buildRecordArray( result, first_element );
+					$this.edit_view_ui_dic['province'].setSourceData( $this.province_array );
+
+					if ($this.current_edit_record['province'] && Global.isSet(result[$this.current_edit_record['province']])) {
+						$this.edit_view_ui_dic['province'].setValue($this.current_edit_record['province']);
+					} else {
+						var province = $this.edit_view_ui_dic['province'].getValue();
+						if (province == TTUUID.not_exist_id || province == TTUUID.zero_id || province == false || province == null) {
+							province = '00';
+						}
+						$this.current_edit_record['province'] = province;
+
+					}
+
 				}
-				$this.current_edit_record['province'] = province;
-
-			}
-
-		}} );
+			});
+		} else {
+			$this.current_edit_record['province'] = '00';
+			$this.edit_view_ui_dic['province'].setValue( '00 ');
+		}
 	},
 
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
 		this.onTypeChange();
 		this.getAgencyOptions();
+		var $this = this
+		TTPromise.wait( null, null, function(){
+			$this.detachElement('province');
+			$this.detachElement('district');
+			$this.eSetProvince($this.current_edit_record['country']);
+			$this.setDistrict( $this.current_edit_record['country'], $this.current_edit_record['province'] );
+		})
 	},
 
 	buildEditViewUI: function() {
@@ -707,6 +714,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		// Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {
+			set_empty: false,
 			field: 'country'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
@@ -715,7 +723,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		// Province/State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {
-			set_empty: true,
+			set_empty: false,
 			field: 'province'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
@@ -724,7 +732,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		// District
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {
-			set_empty: true,
+			set_empty: false,
 			field: 'district'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
@@ -734,6 +742,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		// Agency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {
+			set_empty: false,
 			field: 'agency_id'
 		} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
@@ -812,6 +821,10 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Recurring Holidays' ), form_item_input, tab_payroll_remittance_agency_column2 );
 
+		//prevent flashing province and district on addclick.
+		this.detachElement('province');
+		this.detachElement('district');
+
 	},
 
 	setProvince: function( val, m ) {
@@ -823,7 +836,6 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			this.basic_search_field_ui_dic['province'].setSourceData( [] );
 
 		} else {
-
 			this.company_api.getOptions( 'province', val, { async: false,
 				onResult: function( res ) {
 					res = res.getResult();
@@ -831,7 +843,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 						res = [];
 					}
 
-					$this.province_array = Global.buildRecordArray( res );
+					$this.province_array = Global.buildRecordArray( res,{label: '-- '+$.i18n._('Other')+' --', value: '00', fullValue: '00', orderValue: -1, id: '00'} );
 					$this.adv_search_field_ui_dic['province'].setSourceData( $this.province_array );
 					$this.basic_search_field_ui_dic['province'].setSourceData( $this.province_array );
 
@@ -1034,16 +1046,23 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				data.id = false;
 			}
 
-			if (this.is_mass_editing != true) {
+			if ( this.is_mass_editing != true ) {
 				data.payroll_remittance_agency_id = this.parent_value;
 
-				if (data.district == TTUUID.not_exist_id || data.district == TTUUID.zero_id || data.district == false || data.district == null) {
+				if (data.type_id != 30 || data.district == TTUUID.not_exist_id || data.district == TTUUID.zero_id || data.district == false || data.district == null) {
 					data.district = '00';
 				}
 
-				if (data.province == TTUUID.not_exist_id || data.province == TTUUID.zero_id || data.province == false || data.province == null) {
-					data.province = false;
+				if (data.type_id <= 10 || data.province == TTUUID.not_exist_id || data.province == TTUUID.zero_id || data.province == false || data.province == null) {
+					data.province = '00';
 				}
+
+
+				var agency_identifier = '0000';
+				if(data.agency_id) {
+					agency_identifier = data.agency_id.slice(-4);
+				}
+				data.agency_id = data.type_id +':'+ data.country +':'+ data.province +':'+ data.district +':'+ agency_identifier;
 			}
 		}
 

@@ -122,7 +122,7 @@ class Form1099MiscReport extends Report {
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
 										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 
-										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+										//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),

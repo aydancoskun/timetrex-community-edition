@@ -429,7 +429,7 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 						),
 				),
 				'l78'             => array(
-						'function'    => array('filterL78', 'drawSegments'),
+						'function'    => array('filterphone', 'drawSegments'),
 						'coordinates' => array(
 								array(
 										'x'      => 335,
@@ -474,11 +474,14 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 		}
 	}
 
-	function filterL78( $value ) {
+	function filterPhone( $value ) {
 		//Strip non-digits.
 		$value = $this->stripNonNumeric( $value );
+		if ( $value != '' ) {
+			return array(substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ));
+		}
 
-		return array(substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ));
+		return FALSE;
 	}
 
 	function calcL80( $value, $schema ) {
@@ -532,11 +535,17 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 
 			$xml->Return->T4->T4Summary->addChild( 'CNTC' ); //Contact Name
 			$xml->Return->T4->T4Summary->CNTC->addChild( 'cntc_nm', $this->l76 );
-			$phone_arr = $this->filterL78( $this->l78 );
+
+			if ( $this->l78 != '' ) {
+				$phone_arr = $this->filterPhone( $this->l78 );
+			} else {
+				$phone_arr = $this->filterPhone( '000-000-0000' );
+			}
+
 			if ( is_array( $phone_arr ) ) {
 				$xml->Return->T4->T4Summary->CNTC->addChild( 'cntc_area_cd', $phone_arr[0] );
 				$xml->Return->T4->T4Summary->CNTC->addChild( 'cntc_phn_nbr', $phone_arr[1] . '-' . $phone_arr[2] );
-				//$xml->Return->T4->T4Summary->CNTC->addChild('cntc_extn_nbr', '' );
+				//$xml->Return->T4->T4Summary->CNTC->addChild( 'cntc_extn_nbr', '' );
 			}
 
 

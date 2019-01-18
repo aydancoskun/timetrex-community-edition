@@ -72,14 +72,14 @@ class PayStubAmendmentFactory extends Factory {
 				break;
 			case 'status':
 				$retval = array(
-										10 => TTi18n::gettext('NEW'),
-										20 => TTi18n::gettext('OPEN'),
-										30 => TTi18n::gettext('PENDING AUTHORIZATION'),
-										40 => TTi18n::gettext('AUTHORIZATION OPEN'),
+										//10 => TTi18n::gettext('NEW'),
+										//20 => TTi18n::gettext('OPEN'),
+										//30 => TTi18n::gettext('PENDING AUTHORIZATION'),
+										//40 => TTi18n::gettext('AUTHORIZATION OPEN'),
 										50 => TTi18n::gettext('ACTIVE'),
 										52 => TTi18n::gettext('IN USE'),
 										55 => TTi18n::gettext('PAID'),
-										60 => TTi18n::gettext('DISABLED')
+										//60 => TTi18n::gettext('DISABLED')
 									);
 				break;
 			case 'type':

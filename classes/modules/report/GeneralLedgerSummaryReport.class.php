@@ -111,12 +111,13 @@ class GeneralLedgerSummaryReport extends Report {
 										'-2050-exclude_user_id' => TTi18n::gettext('Employee Exclude'),
 										'-2060-default_branch_id' => TTi18n::gettext('Default Branch'),
 										'-2070-default_department_id' => TTi18n::gettext('Default Department'),
+										'-2080-currency_id' => TTi18n::gettext('Currency'),
 										'-2100-custom_filter' => TTi18n::gettext('Custom Filter'),
 
 										'-2205-pay_stub_type_id' => TTi18n::gettext('Pay Stub Type'),
 										'-2210-pay_stub_run_id' => TTi18n::gettext('Payroll Run'),
 
-										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+										//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'), //No longer supported.
 
 										'-5000-columns' => TTi18n::gettext('Display Columns'), //No Columns for this report.
 										'-5010-group' => TTi18n::gettext('Group By'),
@@ -199,6 +200,9 @@ class GeneralLedgerSummaryReport extends Report {
 
 										'-2010-account' => TTi18n::gettext('Account'),
 										'-3000-pay_stub_account' => TTi18n::gettext('Pay Stub Account'),
+
+										'-9100-debit_account' => TTi18n::gettext('Debit Account'), //Mainly used for worksheet
+										'-9110-credit_account' => TTi18n::gettext('Credit Account'), //Mainly used for worksheet
 								);
 
 				$retval = array_merge( $retval, $this->getOptions('date_columns'), (array)$this->getOptions('report_static_custom_column') );
@@ -207,8 +211,8 @@ class GeneralLedgerSummaryReport extends Report {
 			case 'dynamic_columns':
 				$retval = array(
 										//Dynamic - Aggregate functions can be used
-										'-2100-debit_amount' => TTi18n::gettext('Debit'),
-										'-2110-credit_amount' => TTi18n::gettext('Credit'),
+										'-2100-debit_amount' => TTi18n::gettext('Debit Amount'),
+										'-2110-credit_amount' => TTi18n::gettext('Credit Amount'),
 
 										'-3100-amount' => TTi18n::gettext('Amount'),
 							);
@@ -287,7 +291,7 @@ class GeneralLedgerSummaryReport extends Report {
 										'-1150-by_branch_by_department' => TTi18n::gettext('by Branch/Department'),
 										'-1160-by_pay_period' => TTi18n::gettext('by Pay Period'),
 
-										'-3000-by_employee+pay_stub_account' => TTi18n::gettext('Template by Employee'),
+										'-3000-by_employee+pay_stub_account' => TTi18n::gettext('Worksheet for General Ledger Mapping'),
 								);
 
 				break;
@@ -311,8 +315,9 @@ class GeneralLedgerSummaryReport extends Report {
 									$retval['columns'][] = 'full_name';
 									$retval['columns'][] = 'pay_stub_account';
 									$retval['columns'][] = 'amount';
-									$retval['columns'][] = 'account';
+									$retval['columns'][] = 'debit_account';
 									$retval['columns'][] = 'debit_amount';
+									$retval['columns'][] = 'credit_account';
 									$retval['columns'][] = 'credit_amount';
 
 									$retval['include_user_id'] = array(); //They will likely want to run this for just a few employees.
@@ -525,6 +530,12 @@ class GeneralLedgerSummaryReport extends Report {
 		$columns = $this->getColumnDataConfig();
 		$filter_data = $this->getFilterConfig();
 
+		//$currency_convert_to_base = $this->getCurrencyConvertToBase();
+		$currency_convert_to_base = FALSE; //Never convert currencies, as the accounting software needs to handle that on its side based on the chart of accounts, and its unlikely the amounts will balance anyways.
+		$base_currency_obj = $this->getBaseCurrencyObject();
+		$this->handleReportCurrency( $currency_convert_to_base, $base_currency_obj, $filter_data );
+		$currency_options = $this->getOptions('currency');
+
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		$this->enable_time_based_distribution = FALSE;
@@ -547,13 +558,6 @@ class GeneralLedgerSummaryReport extends Report {
 
 		$crlf = TTnew( 'CurrencyListFactory' );
 		$crlf->getByCompanyId( $this->getUserObject()->getCompany() );
-
-		//Get Base Currency
-		$crlf->getByCompanyIdAndBase( $this->getUserObject()->getCompany(), TRUE );
-		if ( $crlf->getRecordCount() > 0 ) {
-			$base_currency_obj = $crlf->getCurrent();
-		}
-		$currency_convert_to_base = TRUE;
 
 		//Debug::Text(' Permission Children: '. count($permission_children_ids) .' Wage Children: '. count($wage_permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($permission_children_ids, 'Permission Children: '. count($permission_children_ids), __FILE__, __LINE__, __METHOD__, 10);
@@ -660,6 +664,8 @@ class GeneralLedgerSummaryReport extends Report {
 								if ( $pse_obj->getAmount() > 0 ) {
 									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
 											'account'       => trim( $debit_account ),
+											'debit_account' => trim( $debit_account ),
+											'credit_account'=> NULL,
 											'debit_amount'  => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE ),
 											'credit_amount' => NULL,
 									);
@@ -667,6 +673,8 @@ class GeneralLedgerSummaryReport extends Report {
 									Debug::Text( 'Negative debit amount, switching to credit: ' . $pse_obj->getAmount() . ' Debit Account: ' . $debit_account . ' User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
 											'account'       => trim( $debit_account ),
+											'debit_account' => NULL,
+											'credit_account'=> trim( $debit_account ),
 											'debit_amount'  => NULL,
 											'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs( $pse_obj->getAmount() ), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE ),
 									);
@@ -685,6 +693,8 @@ class GeneralLedgerSummaryReport extends Report {
 								if ( $pse_obj->getAmount() > 0 ) {
 									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
 											'account'       => trim( $credit_account ),
+											'debit_account'=> NULL,
+											'credit_account'=> trim( $credit_account ),
 											'debit_amount'  => NULL,
 											'credit_amount' => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( $pse_obj->getAmount(), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE ),
 									);
@@ -692,6 +702,8 @@ class GeneralLedgerSummaryReport extends Report {
 									Debug::Text( 'Negative credit amount, switching to debit: ' . $pse_obj->getAmount() . ' Credit Account: ' . $credit_account . ' User ID: ' . $user_id, __FILE__, __LINE__, __METHOD__, 10 );
 									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ][ $run_id ]['psen_ids'][] = array(
 											'account'       => trim( $credit_account ),
+											'debit_account' => trim( $credit_account ),
+											'credit_account' => NULL,
 											'debit_amount'  => Misc::MoneyFormat( $base_currency_obj->getBaseCurrencyAmount( abs( $pse_obj->getAmount() ), $pse_obj->getColumn( 'currency_rate' ), $currency_convert_to_base ), FALSE ),
 											'credit_amount' => NULL,
 									);
@@ -1214,9 +1226,9 @@ class GeneralLedgerSummaryReport extends Report {
 				//Debug::Arr($row, 'GL Export Row: Group Key: "'. $group_key .'" Prev Group Key: "'. $prev_group_key .'"', __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $prev_group_key === NULL OR $prev_group_key != $group_key ) {
-					if ( $i > 0 ) {
+					if ( $i > 0 AND is_object( $je ) ) {
 						Debug::Text('Ending previous JE: Group Key: '. $group_key, __FILE__, __LINE__, __METHOD__, 10);
-						$gle->setJournalEntry($je); //Add previous JE before starting a new one.
+						$gle->setJournalEntry( $je ); //Add previous JE before starting a new one.
 					}
 
 					Debug::Text('Starting new JE: Group Key: '. $group_key, __FILE__, __LINE__, __METHOD__, 10);
@@ -1260,7 +1272,7 @@ class GeneralLedgerSummaryReport extends Report {
 				$prev_group_key = $group_key;
 				$i++;
 			}
-			if ( isset($je) ) {
+			if ( isset( $je ) AND is_object( $je ) ) {
 				$gle->setJournalEntry( $je ); //Handle last JE here
 			}
 

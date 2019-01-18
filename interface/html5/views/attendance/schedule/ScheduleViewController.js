@@ -121,6 +121,7 @@ ScheduleViewController = BaseViewController.extend( {
 		this.initPermission();
 		this.render();
 		this.buildContextMenu();
+
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
 
@@ -3875,9 +3876,12 @@ ScheduleViewController = BaseViewController.extend( {
 
 		this.setSearchPanelFilter( true );
 
-		this.search( false, true );
+		var $this = this;
+		TTPromise.wait( 'BaseViewController', 'initialize', function() {
+			$this.search( false, true );
 
-		this.setDefaultMenu( true );
+			$this.setDefaultMenu( true );
+		});
 
 	},
 

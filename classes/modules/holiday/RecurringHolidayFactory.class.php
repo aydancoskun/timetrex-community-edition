@@ -514,78 +514,99 @@ class RecurringHolidayFactory extends Factory {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
+
 		// Company
 		$clf = TTnew( 'CompanyListFactory' );
 		$this->Validator->isResultSetWithRows(	'company',
 														$clf->getByID($this->getCompany()),
 														TTi18n::gettext('Company is invalid')
 													);
-		// Special Day
-		$this->Validator->inArrayKey(	'special_day',
-												$this->getSpecialDay(),
-												TTi18n::gettext('Incorrect Special Day'),
-												$this->getOptions('special_day')
-											);
-		// Type
-		if ( $this->getType() !== FALSE ) {
-			$this->Validator->inArrayKey(	'type',
-													$this->getType(),
-													TTi18n::gettext('Incorrect Type'),
-													$this->getOptions('type')
-												);
-		}
-		// Pivot Day Direction
-		if ( $this->getPivotDayDirection() !== FALSE ) {
-			$this->Validator->inArrayKey(	'pivot_day_direction',
-													$this->getPivotDayDirection(),
-													TTi18n::gettext('Incorrect Pivot Day Direction'),
-													$this->getOptions('pivot_day_direction')
-												);
-		}
+
 		// Name
 		if ( $this->getName() !== FALSE ) {
-			$this->Validator->isLength(	'name',
-												$this->getName(),
-												TTi18n::gettext('Name is invalid'),
-												2, 50
-											);
-			if ( $this->Validator->isError('name') == FALSE ) {
-				$this->Validator->isTrue(		'name',
-														$this->isUniqueName($this->getName()),
-														TTi18n::gettext('Name is already in use')
-													);
+			$this->Validator->isLength( 'name',
+										$this->getName(),
+										TTi18n::gettext( 'Name is invalid' ),
+										2, 50
+			);
+			if ( $this->Validator->isError( 'name' ) == FALSE ) {
+				$this->Validator->isTrue( 'name',
+										  $this->isUniqueName( $this->getName() ),
+										  TTi18n::gettext( 'Name is already in use' )
+				);
 			}
 		}
-		// Week Interval
-		$this->Validator->isNumeric(		'week_interval',
-													$this->getWeekInterval(),
-													TTi18n::gettext('Incorrect Week Interval')
-												);
-		// Day Of Week
-		$this->Validator->isNumeric(		'day_of_week',
-													$this->getDayOfWeek(),
-													TTi18n::gettext('Incorrect Day Of Week')
-												);
-		// Day Of Month
-		$this->Validator->isNumeric(		'day_of_month',
-													$this->getDayOfMonth(),
-													TTi18n::gettext('Incorrect Day Of Month')
-												);
-		// Month
-		$this->Validator->isNumeric(		'month',
-													$this->getMonth(),
-													TTi18n::gettext('Incorrect Month')
-												);
-		// Always on week day adjustment
-		$this->Validator->inArrayKey(	'always_week_day_id',
-												$this->getAlwaysOnWeekDay(),
-												TTi18n::gettext('Incorrect always on week day adjustment'),
-												$this->getOptions('always_week_day')
-											);
 
+		// Special Day
+		$this->Validator->inArrayKey( 'special_day',
+									  $this->getSpecialDay(),
+									  TTi18n::gettext( 'Incorrect Special Day' ),
+									  $this->getOptions( 'special_day' )
+		);
+
+		// Type
+		if ( $this->getType() !== FALSE ) {
+			$this->Validator->inArrayKey( 'type',
+										  $this->getType(),
+										  TTi18n::gettext( 'Incorrect Type' ),
+										  $this->getOptions( 'type' )
+			);
+		}
+
+//			10 => TTi18n::gettext('Static'),
+//										20 => TTi18n::gettext('Dynamic: Week Interval'),
+//										30 => TTi18n::gettext('Dynamic: Pivot Day')
+
+
+		if ( in_array( $this->getType(), array( 20 ) ) ) { //20=Dynamic: Week Interval
+			// Week Interval
+			$this->Validator->isNumeric( 'week_interval',
+										 $this->getWeekInterval(),
+										 TTi18n::gettext( 'Incorrect Week Interval' )
+			);
+
+			// Day Of Week
+			$this->Validator->isNumeric( 'day_of_week',
+										 $this->getDayOfWeek(),
+										 TTi18n::gettext( 'Incorrect Day Of Week' )
+			);
+		}
+
+		// Pivot Day Direction
+		if ( in_array( $this->getType(), array( 30 ) ) AND $this->getPivotDayDirection() !== FALSE ) { //30=Dynamic: Pivot Day
+			$this->Validator->inArrayKey( 'pivot_day_direction',
+										  $this->getPivotDayDirection(),
+										  TTi18n::gettext( 'Incorrect Pivot Day Direction' ),
+										  $this->getOptions( 'pivot_day_direction' )
+			);
+		}
+
+		if ( in_array( $this->getType(), array( 10, 30 ) ) ) { //10=Static, 30=Dynamic: Pivot Day
+			// Day Of Month
+			$this->Validator->isNumeric( 'day_of_month',
+										 $this->getDayOfMonth(),
+										 TTi18n::gettext( 'Incorrect Day Of Month' )
+			);
+
+		}
+
+
+		// Month
+		$this->Validator->isNumeric( 'month',
+									 $this->getMonth(),
+									 TTi18n::gettext( 'Incorrect Month' )
+		);
+
+		// Always on week day adjustment
+		$this->Validator->inArrayKey( 'always_week_day_id',
+									  $this->getAlwaysOnWeekDay(),
+									  TTi18n::gettext( 'Incorrect always on week day adjustment' ),
+									  $this->getOptions( 'always_week_day' )
+		);
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
 		return TRUE;
 	}
 

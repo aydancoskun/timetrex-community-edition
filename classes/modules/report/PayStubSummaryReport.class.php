@@ -127,7 +127,7 @@ class PayStubSummaryReport extends Report {
 										'-2205-pay_stub_type_id' => TTi18n::gettext('Pay Stub Type'),
 										'-2210-pay_stub_run_id' => TTi18n::gettext('Payroll Run'),
 
-										'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
+										//'-4020-exclude_ytd_adjustment' => TTi18n::gettext('Exclude YTD Adjustments'),
 
 										'-5000-columns' => TTi18n::gettext('Display Columns'),
 										'-5010-group' => TTi18n::gettext('Group By'),
@@ -902,85 +902,13 @@ class PayStubSummaryReport extends Report {
 	}
 
 	/**
-	 * @param $format
-	 * @return array|bool
-	 */
-	function _outputExportPayStub( $format ) {
-		Debug::Text(' Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
-
-		$filter_data = $this->getFilterConfig();
-
-		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )
-				OR !( $this->getPermissionObject()->Check('pay_stub', 'view', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() ) OR $this->getPermissionObject()->Check('pay_stub', 'view_own', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() ) OR $this->getPermissionObject()->Check('pay_stub', 'view_child', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() )  ) ) {
-			return $this->getPermissionObject()->PermissionDenied();
-		}
-		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getId(), $this->getUserObject()->getCompany() );
-
-		//Debug::Arr($filter_data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
-		$pslf = TTnew( 'PayStubListFactory' );
-		$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text('Record Count: '. $pslf->getRecordCount() .' Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
-		if ( $pslf->getRecordCount() > 0 ) {
-			$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
-			$pslf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
-
-			$this->form_data = range( 0, $pslf->getRecordCount() ); //Set this so hasData() thinks there is data to report.
-			$output = $pslf->exportPayStub( $pslf, $format, $this->getUserObject()->getCompanyObject() );
-
-			if ( $output != '' ) {
-				if ( stristr( $format, 'cheque') ) {
-					$file_name = 'checks_'.date('Y_m_d').'.pdf';
-					$mime_type = 'application/pdf';
-				} else {
-					//Include file creation number in the exported file name, so the user knows what it is without opening the file,
-					//and can generate multiple files if they need to match a specific number.
-					$ugdlf = TTnew( 'UserGenericDataListFactory' );
-					$ugdlf->getByCompanyIdAndScriptAndDefault( $this->getUserObject()->getCompany(), 'PayStubFactory', TRUE );
-					if ( $ugdlf->getRecordCount() > 0 ) {
-						$ugd_obj = $ugdlf->getCurrent();
-						$setup_data = $ugd_obj->getData();
-					}
-
-					if ( isset($setup_data) ) {
-						$file_creation_number = $setup_data['file_creation_number']++;
-					} else {
-						$file_creation_number = 0;
-					}
-
-					$file_name = 'eft_'.$file_creation_number.'_'.date('Y_m_d').'.txt';
-					$mime_type = 'application/text';
-				}
-
-				return array( 'file_name' => $file_name, 'mime_type' => $mime_type, 'data' => $output );
-			} else {
-				return array(
-								'api_retval' => FALSE,
-								'api_details' => array(
-												'code' => 'VALIDATION',
-												'description' => TTi18n::getText('ERROR: No data to export...'),
-												)
-								);
-			}
-		}
-
-		Debug::Text('No data to return...', __FILE__, __LINE__, __METHOD__, 10);
-		return FALSE;
-	}
-
-	/**
 	 * @param null $format
 	 * @return array|bool
 	 */
 	function _output( $format = NULL ) {
-		$psf = TTnew( 'PayStubFactory' );
-		$export_type_options = Misc::trimSortPrefix( $psf->getOptions('export_type') );
-		//Debug::Arr($export_type_options, 'Format: '. $format, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $format == 'pdf_employee_pay_stub' OR $format == 'pdf_employee_pay_stub_print'
 				OR $format == 'pdf_employer_pay_stub' OR $format == 'pdf_employer_pay_stub_print' ) {
 			return $this->_outputPDFPayStub( $format );
-		} elseif ( strlen( $format ) >= 4 AND isset( $export_type_options[$format] ) ) {
-			return $this->_outputExportPayStub( $format );
 		} else {
 			return parent::_output( $format );
 		}

@@ -179,12 +179,15 @@ class LogRotate {
 
 				if ( $new_extension > $history AND is_writable( $filename ) ) {
 					Debug::Text(' Found last file in history, delete rather then rename: '. $filename, __FILE__, __LINE__, __METHOD__, 10);
-					unlink( $filename );
+					@unlink( $filename );
 				} else {
 					if ( file_exists( $filename ) AND !file_exists( $new_file ) ) {
 						Debug::Text(' Renaming: '. $filename .' To: '. $new_file, __FILE__, __LINE__, __METHOD__, 10);
 
-						rename( $filename, $new_file );
+						$retval = @rename( $filename, $new_file );
+						if ( $retval === FALSE ) {
+							Debug::Arr( error_get_last(), 'ERROR: Unable to rename file, likely permission or access problem?: ' . $filename, __FILE__, __LINE__, __METHOD__, 10 );
+						}
 					} else {
 						Debug::Text(' Unable to rename file, file does not exist or new name does exist or we do not have permission: '. $new_file, __FILE__, __LINE__, __METHOD__, 10);
 					}

@@ -431,9 +431,8 @@ class Report {
 		return $this->permission_obj;
 	}
 
-	//Object of the currency used in the report, we use this to base currency column formats on.
-
 	/**
+	 * Object of the currency used in the report, we use this to base currency column formats on.
 	 * @return bool
 	 */
 	function getCurrencyConvertToBase() {
@@ -3270,7 +3269,7 @@ class Report {
 							if ( ( isset($row['_subtotal']) AND $row['_subtotal'] == TRUE ) ) {
 								//Debug::Text(' SubTotal Row... SI: '. $sub_total_columns_count .' Pos: '. $sub_total_column_label_position .' C: '. $c .' Row SI: '. $total_row_sub_total_columns, __FILE__, __LINE__, __METHOD__, 10);
 								//Need to display "SubTotal" before the column that is being sub-totaled.
-								if ( $sub_total_column_label_position !== FALSE AND $c == $sub_total_column_label_position ) {
+								if ( $sub_total_column_label_position !== FALSE AND $c == $sub_total_column_label_position AND isset($sub_total_rows[$total_row_sub_total_columns]) ) {
 									$value = TTi18n::getText('SubTotal').'['. $sub_total_rows[$total_row_sub_total_columns] .']:';
 								} elseif ( $c < ($total_row_sub_total_columns - 1) ) {
 									$value = '';
@@ -4171,7 +4170,7 @@ class Report {
 							if ( ( isset($row['_subtotal']) AND $row['_subtotal'] == TRUE ) ) {
 								//Debug::Text(' SubTotal Row... SI: '. $sub_total_columns_count .' Pos: '. $sub_total_column_label_position .' C: '. $c .' Row SI: '. $total_row_sub_total_columns, __FILE__, __LINE__, __METHOD__, 10);
 								//Need to display "SubTotal" before the column that is being sub-totaled.
-								if ( $sub_total_column_label_position !== FALSE AND $c == $sub_total_column_label_position ) {
+								if ( $sub_total_column_label_position !== FALSE AND $c == $sub_total_column_label_position AND isset($sub_total_rows[$total_row_sub_total_columns]) ) {
 									$value = TTi18n::getText('SubTotal').'['. $sub_total_rows[$total_row_sub_total_columns] .']:';
 								} elseif ( $c < ($total_row_sub_total_columns - 1) ) {
 									$value = '';

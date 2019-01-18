@@ -1358,63 +1358,15 @@ class CompanyFactory extends Factory {
 				break;
 			case 'district':
 				$retval = array(
-										'US' => array(
-													'AL' => array( '00' => TTi18n::gettext('--Other--') ),
-													'AK' => array( '00' => TTi18n::gettext('--Other--') ),
-													'AZ' => array( '00' => TTi18n::gettext('--Other--') ),
-													'AR' => array( '00' => TTi18n::gettext('--Other--') ),
-													'CA' => array( '00' => TTi18n::gettext('--Other--') ),
-													'CO' => array( '00' => TTi18n::gettext('--Other--') ),
-													'CT' => array( '00' => TTi18n::gettext('--Other--') ),
-													'DE' => array( '00' => TTi18n::gettext('--Other--') ),
-													'DC' => array( '00' => TTi18n::gettext('--Other--') ),
-													'FL' => array( '00' => TTi18n::gettext('--Other--') ),
-													'GA' => array( '00' => TTi18n::gettext('--Other--') ),
-													'HI' => array( '00' => TTi18n::gettext('--Other--') ),
-													'ID' => array( '00' => TTi18n::gettext('--Other--') ),
-													'IL' => array( '00' => TTi18n::gettext('--Other--') ),
-													'IN' => array( 'ALL' => TTi18n::gettext('--Other--') ),
-													'IA' => array( '00' => TTi18n::gettext('--Other--') ),
-													'KS' => array( '00' => TTi18n::gettext('--Other--') ),
-													'KY' => array( '00' => TTi18n::gettext('--Other--') ),
-													'LA' => array( '00' => TTi18n::gettext('--Other--') ),
-													'ME' => array( '00' => TTi18n::gettext('--Other--') ),
-													'MD' => array( 'ALL' => TTi18n::gettext('--Other--') ),
-													'MA' => array( '00' => TTi18n::gettext('--Other--') ),
-													'MI' => array( '00' => TTi18n::gettext('--Other--') ),
-													'MN' => array( '00' => TTi18n::gettext('--Other--') ),
-													'MS' => array( '00' => TTi18n::gettext('--Other--') ),
-													'MO' => array( '00' => TTi18n::gettext('--Other--') ),
-													'MT' => array( '00' => TTi18n::gettext('--Other--') ),
-													'NE' => array( '00' => TTi18n::gettext('--Other--') ),
-													'NV' => array( '00' => TTi18n::gettext('--Other--') ),
-													'NH' => array( '00' => TTi18n::gettext('--Other--') ),
-													'NM' => array( '00' => TTi18n::gettext('--Other--') ),
-													'NJ' => array( '00' => TTi18n::gettext('--Other--') ),
-													'NY' => array(
-																'NYC' => TTi18n::gettext('New York City'),
-																'YONKERS' => TTi18n::gettext('Yonkers')
-															),
-													'NC' => array( '00' => TTi18n::gettext('--Other--') ),
-													'ND' => array( '00' => TTi18n::gettext('--Other--') ),
-													'OH' => array( '00' => TTi18n::gettext('--Other--') ),
-													'OK' => array( '00' => TTi18n::gettext('--Other--') ),
-													'OR' => array( '00' => TTi18n::gettext('--Other--') ),
-													'PA' => array( '00' => TTi18n::gettext('--Other--') ),
-													'RI' => array( '00' => TTi18n::gettext('--Other--') ),
-													'SC' => array( '00' => TTi18n::gettext('--Other--') ),
-													'SD' => array( '00' => TTi18n::gettext('--Other--') ),
-													'TN' => array( '00' => TTi18n::gettext('--Other--') ),
-													'TX' => array( '00' => TTi18n::gettext('--Other--') ),
-													'UT' => array( '00' => TTi18n::gettext('--Other--') ),
-													'VT' => array( '00' => TTi18n::gettext('--Other--') ),
-													'VA' => array( '00' => TTi18n::gettext('--Other--') ),
-													'WA' => array( '00' => TTi18n::gettext('--Other--') ),
-													'WV' => array( '00' => TTi18n::gettext('--Other--') ),
-													'WI' => array( '00' => TTi18n::gettext('--Other--') ),
-													'WY' => array( '00' => TTi18n::gettext('--Other--') ),
-													),
-										);
+									'US' => array(
+												'IN' => array( 'ALL' => TTi18n::gettext('Other') ),
+												'MD' => array( 'ALL' => TTi18n::gettext('Other') ),
+												'NY' => array(
+															'NYC' => TTi18n::gettext('New York City'),
+															'YONKERS' => TTi18n::gettext('Yonkers')
+														),
+												),
+									);
 				break;
 			case 'industry':
 				//2007 NAICS

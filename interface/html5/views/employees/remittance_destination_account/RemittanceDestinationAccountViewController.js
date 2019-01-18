@@ -540,6 +540,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		// Remittance Source Account
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
+			api_class: (APIFactory.getAPIClass( 'APIRemittanceSourceAccount' )),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT,
 			field: 'remittance_source_account_id',

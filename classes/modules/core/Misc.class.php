@@ -692,27 +692,15 @@ class Misc {
 	 * @param $size
 	 * @return bool
 	 */
-	static function FileDownloadHeader( $file_name, $type, $size) {
+	static function FileDownloadHeader( $file_name, $type, $size ) {
 		if ( $file_name == '' OR $size == '') {
 			return FALSE;
 		}
 
-		Header('Content-Type: '. $type);
-
-		$agent = ( isset($_SERVER['HTTP_USER_AGENT']) ) ? trim($_SERVER['HTTP_USER_AGENT']) : '';
-		if ( preg_match( '|MSIE ([0-9.]+)|', $agent, $version) OR preg_match( '|Internet Explorer/([0-9.]+)|', $agent, $version) ) {
-			//header('Content-Type: application/x-msdownload');
-			if ( $version == '5.5' ) {
-				Header('Content-Disposition: filename="'.$file_name.'"');
-			} else {
-				Header('Content-Disposition: attachment; filename="'.$file_name.'"');
-			}
-		} else {
-			//Header('Content-disposition: inline; filename='.$file_name); //Displays document inline (in browser window) if available
-			Header('Content-Disposition: attachment; filename="'.$file_name.'"'); //Forces document to download
-		}
-
-		Header('Content-Length: '. $size);
+		Header( 'Content-Type: '. $type );
+		//Header('Content-disposition: inline; filename='.$file_name); //Displays document inline (in browser window) if available
+		Header( 'Content-Disposition: attachment; filename="'. $file_name .'"'); //Forces document to download
+		Header( 'Content-Length: '. $size );
 
 		return TRUE;
 	}
@@ -1074,7 +1062,7 @@ class Misc {
 		$ob_contents = ob_get_contents();
 		ob_end_clean();
 
-		if ( file_put_contents($file_name, $ob_contents) > 0 ) {
+		if ( @file_put_contents($file_name, $ob_contents) > 0 ) {
 			//echo "Writing file successfull<Br>\n";
 			return TRUE;
 		} else {
@@ -1979,7 +1967,7 @@ class Misc {
 
 			if ( is_writable( dirname( $file_name ) ) == TRUE AND ( file_exists( $file_name ) == FALSE OR ( file_exists( $file_name ) == TRUE AND is_writable( $file_name ) ) ) ) {
 				// Open file to write
-				$fp = fopen( $file_name, 'w+' );
+				$fp = @fopen( $file_name, 'w+' );
 				if ( $fp !== FALSE ) {
 					$curl = curl_init();
 
@@ -2011,7 +1999,7 @@ class Misc {
 
 					return FALSE;
 				} else {
-					Debug::Text( 'ERROR: Unable to open file for download/writing, likely permission problem?: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+					Debug::Arr( error_get_last(), 'ERROR: Unable to open file for download/writing, likely permission problem?: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
 
 					return FALSE;
 				}
@@ -2020,7 +2008,12 @@ class Misc {
 			}
 		} else {
 			Debug::Text( 'Using PHP streams for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
-			return @file_put_contents( $file_name, fopen( $url, 'r' ) );
+			$retval = @file_put_contents( $file_name, fopen( $url, 'r' ) );
+			if ( $retval === FALSE ) {
+				Debug::Arr( error_get_last(), 'ERROR: Unable to save/download file, likely permission or network access problem?: ' . $file_name, __FILE__, __LINE__, __METHOD__, 10 );
+			}
+
+			return $retval;
 		}
 	}
 

@@ -1906,7 +1906,10 @@ class UserFactory extends Factory {
 	 */
 	function setBirthDate( $value ) {
 		//Allow for negative epochs, for birthdates less than 1960's
-		return $this->setGenericDataValue( 'birth_date', ( $value != 0 AND $value != '' ) ? TTDate::getMiddleDayEpoch( $value ) : '' ); //Allow blank birthdate.
+		if ( $value == '' ) {
+			$value = NULL; //Force to NULL if no birth date is set, this prevents "0" from being entered and causing problems with "is NULL" SQL queries.
+		}
+		return $this->setGenericDataValue( 'birth_date', ( $value != 0 AND $value != '' ) ? TTDate::getMiddleDayEpoch( $value ) : NULL );
 	}
 
 	/**
@@ -1995,7 +1998,7 @@ class UserFactory extends Factory {
 		if ( $value == '' ) {
 			$value = NULL; //Force to NULL if no termination date is set, this prevents "0" from being entered and causing problems with "is NULL" SQL queries.
 		}
-		return $this->setGenericDataValue( 'termination_date', $value );
+		return $this->setGenericDataValue( 'termination_date', ( $value != 0 AND $value != '' ) ? TTDate::getEndDayEpoch( $value ) : NULL );
 	}
 
 	/**
@@ -2311,6 +2314,7 @@ class UserFactory extends Factory {
 				$mail->setHeaders( $headers );
 
 				@$mail->getMIMEObject()->setHTMLBody($body);
+				$mail->setDefaultTXTBody();
 
 				$mail->setBody( $mail->getMIMEObject()->get( $mail->default_mime_config ) );
 				$retval = $mail->Send();
@@ -4014,7 +4018,11 @@ class UserFactory extends Factory {
 							$data[$variable] = TTDate::getAPIDate( 'DATE+TIME', TTDate::strtotime( $this->getColumn( $variable ) ) );
 							break;
 						case 'birth_date_age':
-							$data[$variable] = (int)floor( TTDate::getYearDifference( TTDate::getBeginDayEpoch( $this->getBirthDate() ), TTDate::getEndDayEpoch( time() ) ) );
+							if ( $this->getBirthDate() != '' AND $this->getBirthDate() != 0 ) {
+								$data[$variable] = (int)floor( TTDate::getYearDifference( TTDate::getBeginDayEpoch( $this->getBirthDate() ), TTDate::getEndDayEpoch( time() ) ) );
+							} else {
+								$data[$variable] = NULL;
+							}
 							break;
 						case 'hire_date_age':
 							if ( $this->getTerminationDate() != '' ) {

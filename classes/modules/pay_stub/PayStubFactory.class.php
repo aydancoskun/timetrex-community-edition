@@ -106,7 +106,7 @@ class PayStubFactory extends Factory {
 										'-2011-export_csv_flat' => TTi18n::gettext('Excel (CSV) [Flat]'),
 										'-2020-quickbooks' => TTi18n::gettext('Quickbooks GL'),
 										'-2030-simply' => TTi18n::gettext('Sage 50 GL'), //Was Simply Accounting
-										'-2040-sage300' => TTi18n::gettext('Sage 300 (Accpac)'),
+										'-2040-sage300' => TTi18n::gettext('Sage 300 GL'),
 									);
 				break;
 			case 'columns':
@@ -1347,7 +1347,7 @@ class PayStubFactory extends Factory {
 			}
 		}
 
-		//Make sure transaction date is not earlier than a pay stub in the same pay period but having an high payroll run.
+		//Make sure transaction date is not earlier than a pay stub in the same pay period but having an higher payroll run.
 		// However ignore these checks if its a temporary pay stub and we're just doing a post-adjustment carry-forward, otherwise it will fail everytime if the transaction date of the original pay stub was moved ahead by 1+ days.
 		$pslf = TTNew('PayStubListFactory');
 		if ( TTUUID::isUUID( $this->getUser() ) AND $this->getUser() != TTUUID::getZeroID() AND $this->getUser() != TTUUID::getNotExistID()
@@ -1510,7 +1510,7 @@ class PayStubFactory extends Factory {
 			$this->reCalculateCurrentYTD(); //Recalculate the current pay stub as well, in case they changed the transaction date into the next year without modifying entries.
 		}
 
-		if ( $this->getEnableCalcYTD() == TRUE ) {
+		if ( $this->getTemp() == FALSE AND $this->getEnableCalcYTD() == TRUE ) { //Don't recalculate YTD amounts on a temporary pay stub that is likely just used for creating carry-forward pay stub amendment records.
 			$this->reCalculateYTD();
 		}
 
@@ -1618,7 +1618,7 @@ class PayStubFactory extends Factory {
 		//a PS amendment ID assigned to them, change the status.
 		if ( is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
 			foreach( $this->tmp_data['current_pay_stub']['entries'] as $entry_arr ) {
-				if ( isset($entry_arr['user_expense_id']) AND $entry_arr['user_expense_id'] != '' ) {
+				if ( isset($entry_arr['user_expense_id']) AND TTUUID::isUUID( $entry_arr['user_expense_id'] ) AND $entry_arr['user_expense_id'] != TTUUID::getZeroID() ) {
 					Debug::Text('aFound User Expenses to change status on... ID: '. $entry_arr['user_expense_id'], __FILE__, __LINE__, __METHOD__, 10);
 					$user_expense_ids[] = $entry_arr['user_expense_id'];
 				}
@@ -1630,7 +1630,7 @@ class PayStubFactory extends Factory {
 			$pself = TTnew( 'PayStubEntryListFactory' );
 			$pself->getByPayStubId( $this->getId() );
 			foreach($pself as $pay_stub_entry_obj) {
-				if ( $pay_stub_entry_obj->getUserExpense() != FALSE ) {
+				if ( TTUUID::isUUID( $pay_stub_entry_obj->getUserExpense() ) AND $pay_stub_entry_obj->getUserExpense() != TTUUID::getZeroID() ) {
 					Debug::Text('bFound User Expense to change status on... ID: '. $pay_stub_entry_obj->getUserExpense(), __FILE__, __LINE__, __METHOD__, 10);
 					$user_expense_ids[] = $pay_stub_entry_obj->getUserExpense();
 				}

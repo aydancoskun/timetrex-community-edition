@@ -176,7 +176,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 						lef.company_id = ?
 						AND a.status_id = 10
 						AND ( a.next_reminder_date IS NOT NULL AND a.next_reminder_date <= ? )
-						AND (a.last_reminder_date IS NULL OR a.last_reminder_date < a.next_reminder_date)
+						AND ( a.last_reminder_date IS NULL OR a.last_reminder_date < a.next_reminder_date )
 						AND ( a.deleted = 0 AND praf.deleted = 0 AND lef.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );

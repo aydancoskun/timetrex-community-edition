@@ -1,12 +1,12 @@
 <?php
-require_once('../../classes/modules/api/client/TimeTrexClientAPI.class.php');
+require_once( '../../classes/modules/api/client/TimeTrexClientAPI.class.php' );
 
 /*
  Global variables
 */
-$TIMETREX_URL = 'https://demo.timetrex.com/api/soap/api.php';
-$TIMETREX_USERNAME = 'demoadmin';
-$TIMETREX_PASSWORD = 'demo283920';
+$TIMETREX_URL = 'https://demo.timetrex.com/next-release/api/soap/api.php';
+$TIMETREX_USERNAME = 'demoadmin1';
+$TIMETREX_PASSWORD = 'demo';
 
 $api_session = new TimeTrexClientAPI();
 $api_session->Login( $TIMETREX_USERNAME, $TIMETREX_PASSWORD );
@@ -17,150 +17,409 @@ if ( $TIMETREX_SESSION_ID == FALSE ) {
 echo "Session ID: $TIMETREX_SESSION_ID<br>\n";
 
 //
-//Get data for two employees by primary key/ID.
-// - Many other filter methods can be used, such as branch, department, user_name, province, state, etc...
+//Get data for two employees by user_name or primary key/ID.
+// - Many other filter methods can be used, such as branch, department, province, state, etc...
 //
 $user_obj = new TimeTrexClientAPI( 'User' );
 $result = $user_obj->getUser(
-									array('filter_data' => array(
-																//'id' => array(1023,11353)
-																'user_name' => 'john.doe567',
-															)
-									)
-								);
+		array(
+				'filter_data' => array(
+					//'id' => array('11e817cb-7dcc-7130-b939-5431e6810149','11e817cb-8385-8e50-97f3-5431e6810149')
+					'user_name' => array('jane.doe1', 'tristen.braun1'),
+				),
+		)
+);
 
 $user_data = $result->getResult();
 print $result;
 
 /* //Example returned data: )
-Array
-(
-    [0] => Array
-        (
-            [id] => 1023
-            [company_id] => 1001
-            [status_id] => 10
-            [status] => Active
-            [group_id] => 0
-            [group] =>
-            [user_name] => demoadmin1
-            [phone_id] => 12345
-            [phone_password] => 12345
-            [employee_number] => 10
-            [title_id] => 0
-            [title] =>
-            [default_branch_id] => 0
-            [default_branch] =>
-            [default_department_id] => 1
-            [default_department] => Administration
-            [permission_control_id] => 7
-            [permission_control] => Administrator (92) #1
-            [pay_period_schedule_id] => 260
-            [pay_period_schedule] => USBiWeekly
-            [policy_group_id] => 9
-            [policy_group] => Default
-            [first_name] => Demo
-            [middle_name] => J
-            [last_name] => Admin
-            [second_last_name] =>
-            [sex_id] => 10
-            [sex] => MALE
-            [address1] => Blah
-            [address2] =>
-            [city] => Kelowna
-            [country] => CA
-            [province] => BC
-            [postal_code] => V4T1E3
-            [work_phone] => 555-555-5555
-            [work_phone_ext] =>
-            [home_phone] => 555-555-5555
-            [mobile_phone] => 555-555-5555
-            [fax_phone] =>
-            [home_email] => test@democo.com
-            [work_email] => test@democo.com
-            [birth_date] => 07-Nov-04
-            [hire_date] => 07-Nov-04
-            [termination_date] =>
-            [currency_id] => 3
-            [currency] => CAD
-            [sin] => 1XXXXX789
-            [note] =>
-            [deleted] =>
-            [created_by_id] => 1
-            [created_by] =>
-            [created_date] => 08-Nov-04 11:18 AM
-            [updated_by_id] => 1023
-            [updated_by] => Demo Admin
-            [updated_date] => 01-Oct-08 12:49 PM
-        )
+array(2) {
+  [0]=>
+  array(98) {
+	["id"]=>
+	string(36) "11e7fa4c-f3fd-2d90-b320-21ea65522ba3"
+	["company_id"]=>
+	string(36) "11e7fa4c-e7b5-37d0-87c6-21ea65522ba3"
+	["company"]=>
+	string(15) "ABC Company (1)"
+	["legal_entity_id"]=>
+	string(36) "11e7fa4c-e825-8050-8e4a-21ea65522ba3"
+	["legal_name"]=>
+	string(18) "ACME USA East Inc."
+	["status_id"]=>
+	string(2) "10"
+	["status"]=>
+	string(6) "Active"
+	["group_id"]=>
+	string(36) "11e7fa4c-e980-6090-adff-21ea65522ba3"
+	["user_group"]=>
+	string(9) "Corporate"
+	["ethnic_group_id"]=>
+	string(36) "11e7fa4c-e9a8-2880-9b0d-21ea65522ba3"
+	["ethnic_group"]=>
+	string(5) "White"
+	["user_name"]=>
+	string(14) "tristen.braun1"
+	["phone_id"]=>
+	string(0) ""
+	["employee_number"]=>
+	int(13)
+	["title_id"]=>
+	string(36) "11e7fa4c-e98e-4fb0-8cc1-21ea65522ba3"
+	["title"]=>
+	string(9) "Carpenter"
+	["default_branch_id"]=>
+	string(36) "11e7fa4c-e857-84b0-9ebc-21ea65522ba3"
+	["default_branch"]=>
+	string(8) "New York"
+	["default_branch_manual_id"]=>
+	string(1) "1"
+	["default_department_id"]=>
+	string(36) "11e7fa4c-e870-7660-b2a1-21ea65522ba3"
+	["default_department"]=>
+	string(12) "Construction"
+	["default_department_manual_id"]=>
+	string(1) "2"
+	["default_job_id"]=>
+	string(36) "00000000-0000-0000-0000-000000000000"
+	["default_job"]=>
+	bool(false)
+	["default_job_manual_id"]=>
+	bool(false)
+	["default_job_item_id"]=>
+	string(36) "00000000-0000-0000-0000-000000000000"
+	["default_job_item"]=>
+	bool(false)
+	["default_job_item_manual_id"]=>
+	bool(false)
+	["permission_control_id"]=>
+	string(36) "11e7fa4c-e7bb-a9b0-a40e-21ea65522ba3"
+	["permission_control"]=>
+	string(31) "Regular Employee (Punch In/Out)"
+	["pay_period_schedule_id"]=>
+	string(36) "11e7fa4d-0208-8360-a212-21ea65522ba3"
+	["pay_period_schedule"]=>
+	string(9) "Bi-Weekly"
+	["policy_group_id"]=>
+	string(36) "11e7fa4d-025e-93e0-bc8b-21ea65522ba3"
+	["policy_group"]=>
+	string(7) "Default"
 
-    [1] => Array
-        (
-            [id] => 11353
-            [company_id] => 1001
-            [status_id] => 10
-            [status] => Active
-            [group_id] => 0
-            [group] =>
-            [user_name] => payroll
-            [phone_id] =>
-            [phone_password] =>
-            [employee_number] => 16
-            [title_id] => 0
-            [title] =>
-            [default_branch_id] => 297
-            [default_branch] => Mississauga
-            [default_department_id] => 0
-            [default_department] =>
-            [permission_control_id] => 7
-            [permission_control] => Administrator (92) #1
-            [pay_period_schedule_id] => 260
-            [pay_period_schedule] => USBiWeekly
-            [policy_group_id] => 9
-            [policy_group] => Default
-            [first_name] => Mrs. Payroll
-            [middle_name] =>
-            [last_name] => Admin
-            [second_last_name] =>
-            [sex_id] => 10
-            [sex] => MALE
-            [address1] =>
-            [address2] =>
-            [city] =>
-            [country] => CA
-            [province] => ON
-            [postal_code] =>
-            [work_phone] =>
-            [work_phone_ext] =>
-            [home_phone] =>
-            [mobile_phone] =>
-            [fax_phone] =>
-            [home_email] =>
-            [work_email] =>
-            [birth_date] => 13-Aug-09
-            [hire_date] => 01-Aug-08
-            [termination_date] =>
-            [currency_id] => 3
-            [currency] => CAD
-            [sin] =>
-            [note] =>
-            [deleted] =>
-            [created_by_id] => 1023
-            [created_by] => Demo Admin
-            [created_date] => 13-Aug-09 8:09 PM
-            [updated_by_id] => 1023
-            [updated_by] => Demo Admin
-            [updated_date] => 13-Aug-09 8:09 PM
-        )
-)
+	["first_name"]=>
+	string(7) "Tristen"
+	["first_name_metaphone"]=>
+	string(5) "TRSTN"
+	["middle_name"]=>
+	bool(false)
+	["last_name"]=>
+	string(6) "BraunD"
+	["last_name_metaphone"]=>
+	string(4) "BRNT"
+	["full_name"]=>
+	string(15) "BraunD, Tristen"
+	["second_last_name"]=>
+	bool(false)
+	["sex_id"]=>
+	string(2) "20"
+	["sex"]=>
+	string(6) "Female"
+	["address1"]=>
+	string(13) "9289 Ethel St"
+	["address2"]=>
+	string(9) "Unit #560"
+	["city"]=>
+	string(8) "New York"
+	["country"]=>
+	string(2) "US"
+	["province"]=>
+	string(2) "NY"
+	["postal_code"]=>
+	string(5) "00521"
+	["work_phone"]=>
+	string(12) "417-268-2473"
+	["work_phone_ext"]=>
+	string(3) "204"
+	["home_phone"]=>
+	string(12) "567-570-8135"
+	["mobile_phone"]=>
+	bool(false)
+	["fax_phone"]=>
+	bool(false)
+	["home_email"]=>
+	bool(false)
+	["home_email_is_valid"]=>
+	bool(true)
+	["home_email_is_valid_key"]=>
+	bool(false)
+	["home_email_is_valid_date"]=>
+	bool(false)
+	["feedback_rating"]=>
+	bool(false)
+	["work_email"]=>
+	string(30) "tristen.braun1@abc-company.com"
+	["work_email_is_valid"]=>
+	bool(true)
+	["work_email_is_valid_key"]=>
+	bool(false)
+	["work_email_is_valid_date"]=>
+	bool(false)
+	["birth_date"]=>
+	string(9) "01-Jun-88"
+	["birth_date_age"]=>
+	int(29)
+	["hire_date"]=>
+	string(9) "26-May-13"
+	["hire_date_age"]=>
+	string(4) "4.74"
+	["termination_date"]=>
+	NULL
+	["currency_id"]=>
+	string(36) "11e7fa4c-e80b-8110-97b4-21ea65522ba3"
+	["currency"]=>
+	string(9) "US Dollar"
+	["currency_rate"]=>
+	string(12) "1.0000000000"
+	["sin"]=>
+	string(9) "401240815"
+	["other_id1"]=>
+	bool(false)
+	["other_id2"]=>
+	bool(false)
+	["other_id3"]=>
+	bool(false)
+	["other_id4"]=>
+	bool(false)
+	["other_id5"]=>
+	bool(false)
+	["note"]=>
+	bool(false)
+	["longitude"]=>
+	bool(false)
+	["latitude"]=>
+	bool(false)
+	["tag"]=>
+	string(0) ""
+	["last_login_date"]=>
+	NULL
+	["max_punch_time_stamp"]=>
+	NULL
+	["deleted"]=>
+	bool(false)
+	["is_owner"]=>
+	bool(false)
+	["is_child"]=>
+	bool(true)
+	["created_by_id"]=>
+	string(36) "11e7fa4c-e9e5-4bb0-90f9-21ea65522ba3"
+	["created_by"]=>
+	string(18) "Mr. AdministratorC"
+	["created_date"]=>
+	string(17) "15-Jan-18 3:36 PM"
+	["updated_by_id"]=>
+	string(36) "11e7fa4c-e9e5-4bb0-90f9-21ea65522ba3"
+	["updated_by"]=>
+	string(18) "Mr. AdministratorC"
+	["updated_date"]=>
+	string(17) "15-Feb-18 3:04 PM"
+  }
+  [1]=>
+  array(98) {
+	["id"]=>
+	string(36) "11e7fa4c-f8c2-f040-8ad8-21ea65522ba3"
+	["company_id"]=>
+	string(36) "11e7fa4c-e7b5-37d0-87c6-21ea65522ba3"
+	["company"]=>
+	string(15) "ABC Company (1)"
+	["legal_entity_id"]=>
+	string(36) "11e7fa4c-e833-0860-9978-21ea65522ba3"
+	["legal_name"]=>
+	string(18) "ACME USA West Inc."
+	["status_id"]=>
+	string(2) "10"
+	["status"]=>
+	string(6) "Active"
+	["group_id"]=>
+	string(36) "11e7fa4c-e985-7df0-85ed-21ea65522ba3"
+	["user_group"]=>
+	string(15) "Human Resources"
+	["ethnic_group_id"]=>
+	string(36) "11e7fa4c-e9b2-5420-8bd5-21ea65522ba3"
+	["ethnic_group"]=>
+	string(6) "Indian"
+	["user_name"]=>
+	string(9) "jane.doe1"
+	["phone_id"]=>
+	string(5) "12341"
+	["employee_number"]=>
+	int(20)
+	["title_id"]=>
+	string(36) "11e7fa4c-e993-9320-8ba8-21ea65522ba3"
+	["title"]=>
+	string(15) "General Laborer"
+	["default_branch_id"]=>
+	string(36) "11e7fa4c-e85c-3ba0-b7aa-21ea65522ba3"
+	["default_branch"]=>
+	string(7) "Seattle"
+	["default_branch_manual_id"]=>
+	string(1) "2"
+	["default_department_id"]=>
+	string(36) "11e7fa4c-e870-7660-b2a1-21ea65522ba3"
+	["default_department"]=>
+	string(12) "Construction"
+	["default_department_manual_id"]=>
+	string(1) "2"
+	["default_job_id"]=>
+	string(36) "00000000-0000-0000-0000-000000000000"
+	["default_job"]=>
+	bool(false)
+	["default_job_manual_id"]=>
+	bool(false)
+	["default_job_item_id"]=>
+	string(36) "00000000-0000-0000-0000-000000000000"
+	["default_job_item"]=>
+	bool(false)
+	["default_job_item_manual_id"]=>
+	bool(false)
+	["permission_control_id"]=>
+	string(36) "11e7fa4c-e7bb-a9b0-a40e-21ea65522ba3"
+	["permission_control"]=>
+	string(31) "Regular Employee (Punch In/Out)"
+	["pay_period_schedule_id"]=>
+	string(36) "11e7fa4d-0208-8360-a212-21ea65522ba3"
+	["pay_period_schedule"]=>
+	string(9) "Bi-Weekly"
+	["policy_group_id"]=>
+	string(36) "11e7fa4d-025e-93e0-bc8b-21ea65522ba3"
+	["policy_group"]=>
+	string(7) "Default"
+
+	["first_name"]=>
+	string(4) "Jane"
+	["first_name_metaphone"]=>
+	string(2) "JN"
+	["middle_name"]=>
+	bool(false)
+	["last_name"]=>
+	string(3) "Doe"
+	["last_name_metaphone"]=>
+	string(1) "T"
+	["full_name"]=>
+	string(9) "Doe, Jane"
+	["second_last_name"]=>
+	bool(false)
+	["sex_id"]=>
+	string(2) "20"
+	["sex"]=>
+	string(6) "Female"
+	["address1"]=>
+	string(15) "4936 Ontario St"
+	["address2"]=>
+	string(9) "Unit #993"
+	["city"]=>
+	string(7) "Seattle"
+	["country"]=>
+	string(2) "US"
+	["province"]=>
+	string(2) "WA"
+	["postal_code"]=>
+	string(5) "98867"
+	["work_phone"]=>
+	string(12) "558-301-1737"
+	["work_phone_ext"]=>
+	string(3) "308"
+	["home_phone"]=>
+	string(12) "464-312-4450"
+	["mobile_phone"]=>
+	bool(false)
+	["fax_phone"]=>
+	bool(false)
+	["home_email"]=>
+	bool(false)
+	["home_email_is_valid"]=>
+	bool(true)
+	["home_email_is_valid_key"]=>
+	bool(false)
+	["home_email_is_valid_date"]=>
+	bool(false)
+	["feedback_rating"]=>
+	bool(false)
+	["work_email"]=>
+	string(25) "jane.doe1@abc-company.com"
+	["work_email_is_valid"]=>
+	bool(true)
+	["work_email_is_valid_key"]=>
+	bool(false)
+	["work_email_is_valid_date"]=>
+	bool(false)
+	["birth_date"]=>
+	string(9) "24-Dec-70"
+	["birth_date_age"]=>
+	int(47)
+	["hire_date"]=>
+	string(9) "15-Sep-09"
+	["hire_date_age"]=>
+	string(4) "8.44"
+	["termination_date"]=>
+	NULL
+	["currency_id"]=>
+	string(36) "11e7fa4c-e813-c120-9c2c-21ea65522ba3"
+	["currency"]=>
+	string(15) "Canadian Dollar"
+	["currency_rate"]=>
+	string(12) "1.2000000000"
+	["sin"]=>
+	string(9) "695238280"
+	["other_id1"]=>
+	bool(false)
+	["other_id2"]=>
+	bool(false)
+	["other_id3"]=>
+	bool(false)
+	["other_id4"]=>
+	bool(false)
+	["other_id5"]=>
+	bool(false)
+	["note"]=>
+	bool(false)
+	["longitude"]=>
+	bool(false)
+	["latitude"]=>
+	bool(false)
+	["tag"]=>
+	string(5) "check"
+	["last_login_date"]=>
+	NULL
+	["max_punch_time_stamp"]=>
+	NULL
+	["deleted"]=>
+	bool(false)
+	["is_owner"]=>
+	bool(false)
+	["is_child"]=>
+	bool(true)
+	["created_by_id"]=>
+	string(36) "11e7fa4c-e9e5-4bb0-90f9-21ea65522ba3"
+	["created_by"]=>
+	string(18) "Mr. AdministratorC"
+	["created_date"]=>
+	string(17) "15-Jan-18 3:36 PM"
+	["updated_by_id"]=>
+	string(36) "11e7fa4c-e9e5-4bb0-90f9-21ea65522ba3"
+	["updated_by"]=>
+	string(18) "Mr. AdministratorC"
+	["updated_date"]=>
+	string(17) "15-Feb-18 3:04 PM"
+  }
+}
 */
 
 //
 //Update data for the second employee, mark their status as Terminated and update Termination Date
 //
-if ( isset($user_data[1]) ) {
+if ( isset( $user_data[1] ) ) {
 	$user_data[1]['status_id'] = 20; //Terminated
-	$user_data[1]['termination_date'] = '01-Jul-09';
+	$user_data[1]['termination_date'] = '02-Jan-18';
 
 	$result = $user_obj->setUser( $user_data[1] );
 	if ( $result->isValid() === TRUE ) {
@@ -175,9 +434,9 @@ if ( isset($user_data[1]) ) {
 //Update employee record in a single operation. Several records can be updated in a single operation as well.
 //
 $user_data = array(
-					'id' => 11353,
-					'termination_date' => '02-Jul-09'
-					);
+		'id'               => $user_data[1]['id'], //UUID: 11e7fa4c-f8c2-f040-8ad8-21ea65522ba3
+		'termination_date' => '02-Jan-18',
+);
 
 $result = $user_obj->setUser( $user_data );
 if ( $result->isValid() === TRUE ) {
@@ -188,17 +447,25 @@ if ( $result->isValid() === TRUE ) {
 }
 
 //
+//Get new hire defaults so we pull data from that rather than have to manually specify it each time.
+//
+$new_hire_defaults_obj = new TimeTrexClientAPI( 'UserDefault' );
+$new_hire_defaults = $new_hire_defaults_obj->getUserDefault()->getResult()[0];
+
+
+//
 //Add new employee, several new employees can be added in a single operation as well.
 //
 $user_data = array(
-					'status_id' => 10, //Active
-					'first_name' => 'Michael',
-					'last_name' => 'Jackson',
-					'employee_number' => 239842,
-					'user_name' => 'mjackson',
-					'password' => 'whiteglove123',
-					'hire_date' => '01-Oct-09'
-					);
+		'status_id'       => 10, //Active
+		'first_name'      => 'Michael',
+		'last_name'       => 'Jackson',
+		'employee_number' => rand( 10000, 99999 ),
+		'user_name'       => 'mjackson_' . rand( 10000, 99999 ),
+		'password'        => 'whiteglove123',
+		'hire_date'       => '01-Oct-09',
+		'currency_id'     => $new_hire_defaults['currency_id'],
+);
 
 $result = $user_obj->setUser( $user_data );
 if ( $result->isValid() === TRUE ) {
@@ -211,31 +478,22 @@ if ( $result->isValid() === TRUE ) {
 
 
 //
-//Get TimeSheet Summary report data in raw PHP native array format. 'csv' and 'pdf' are also valid formats.
-//
-$report_obj = new TimeTrexClientAPI( 'TimesheetSummaryReport' );
-$config = $report_obj->getTemplate( 'by_employee+regular+overtime+premium+absence' )->getResult();
-$result = $report_obj->getTimesheetSummaryReport( $config, 'raw' );
-echo "Report Data: <br>\n";
-print $result;
-
-//
 //Add punch for employee
 //
 $punch_obj = new TimeTrexClientAPI( 'Punch' );
 $punch_data = array(
-					'user_id' => 1023,
+		'user_id' => $insert_id, //ID from above newly added employee
 
-					'type_id' => 10, //Normal
-					'status_id' => 20, //In
+		'type_id'   => 10, //Normal
+		'status_id' => 20, //In
 
-					'time_stamp' => strtotime('19-Aug-2013 5:50PM'),
+		'time_stamp' => strtotime( '19-Aug-2013 5:50PM' ),
 
-					'branch_id' => 296, //Branch
-					'department_id' => 896, //Department
-					'job_id' => 610, //Job
-					'job_item_id' => 9, //Task
-					);
+		'branch_id'     => $new_hire_defaults['default_branch_id'], //Branch
+		'department_id' => $new_hire_defaults['default_department_id'], //Department
+		'job_id'        => $new_hire_defaults['default_job_id'], //Job
+		'job_item_id'   => $new_hire_defaults['default_job_item_id'], //Task
+);
 
 $result = $punch_obj->setPunch( $punch_data );
 if ( $result->isValid() === TRUE ) {
@@ -246,4 +504,12 @@ if ( $result->isValid() === TRUE ) {
 	print $result; //Show error messages
 }
 
+//
+//Get TimeSheet Summary report data in raw PHP native array format. 'csv' and 'pdf' are also valid formats.
+//
+$report_obj = new TimeTrexClientAPI( 'TimesheetSummaryReport' );
+$config = $report_obj->getTemplate( 'by_employee+all_time' )->getResult();
+$result = $report_obj->getTimesheetSummaryReport( $config, 'raw' )->getResult();
+echo "Report Data: <br>\n";
+var_dump( $result );
 ?>

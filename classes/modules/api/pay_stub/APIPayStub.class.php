@@ -515,6 +515,19 @@ class APIPayStub extends APIFactory {
 										$pst_obj->setRemittanceDestinationAccount($pay_stub_transaction['remittance_destination_account_id']);
 									}
 
+									//Make sure remittance source account and currency is set so we don't have to rely on preSave(), which causes issues with validation.
+									if ( is_object( $pst_obj->getRemittanceDestinationAccountObject() ) ) {
+										$pst_obj->setRemittanceSourceAccount( $pst_obj->getRemittanceDestinationAccountObject()->getRemittanceSourceAccount() );
+									}
+
+									if ( $pst_obj->getCurrency() == FALSE ) {
+										if ( is_object( $pst_obj->getRemittanceSourceAccountObject() ) ) {
+											$pst_obj->setCurrency( $pst_obj->getRemittanceSourceAccountObject()->getCurrency() );
+										} elseif ( is_object( $pst_obj->getPayStubObject() ) )  {
+											$pst_obj->setCurrency( $pst_obj->getPayStubObject()->getCurrency() );
+										}
+									}
+
 									if ( isset( $pay_stub_transaction['transaction_date'] ) ) {
 										$pst_obj->setTransactionDate( TTDate::parseDateTime($pay_stub_transaction['transaction_date']) );
 									}
@@ -527,19 +540,6 @@ class APIPayStub extends APIFactory {
 
 									if ( isset( $pay_stub_transaction['note'] ) ) {
 										$pst_obj->setNote($pay_stub_transaction['note']);
-									}
-
-									//Make sure remittance source account and currency is set so we don't have to rely on preSave(), which causes issues with validation.
-									if ( $pst_obj->getRemittanceSourceAccount() == FALSE AND is_object( $pst_obj->getRemittanceDestinationAccountObject() ) ) {
-										$pst_obj->setRemittanceSourceAccount( $pst_obj->getRemittanceDestinationAccountObject()->getRemittanceSourceAccount() );
-									}
-
-									if ( $pst_obj->getCurrency() == FALSE ) {
-										if ( is_object( $pst_obj->getRemittanceSourceAccountObject() ) ) {
-											$pst_obj->setCurrency( $pst_obj->getRemittanceSourceAccountObject()->getCurrency() );
-										} elseif ( is_object( $pst_obj->getPayStubObject() ) )  {
-											$pst_obj->setCurrency( $pst_obj->getPayStubObject()->getCurrency() );
-										}
 									}
 								}
 

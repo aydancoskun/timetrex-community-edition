@@ -422,7 +422,6 @@ class APIRemittanceSourceAccount extends APIFactory {
 				$record = $pstf->getEFTRecord( $eft, $pstf, $ps_obj, $rs_obj, $this->getCurrentUserObject(), $confirmation_number );
 				$eft->setRecord( $record );
 				$output = $pstf->endEFTFile( $eft, $rs_obj, $this->getCurrentUserObject(), $ps_obj, $this->getCurrentCompanyObject()->getId(),  $pstf->getAmount(), $next_transaction_number, $output );
-
 			}
 
 			if ( $rs_obj->getType() == 2000 ) {
@@ -442,7 +441,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 		}
 
 		if ( is_array($output) AND count($output) > 0 ) {
-			$filename = 'pay_stub_transactions_test_'.TTDate::getDate( 'DATE', time() ).'.zip';
+			$filename = 'sample_transaction_file_'.TTDate::getDate( 'DATE', time() ).'.zip';
 			$zip_file = Misc::zip($output, $filename, TRUE);
 			return Misc::APIFileDownload($zip_file['file_name'], $zip_file['mime_type'], $zip_file['data'] );
 		} else {

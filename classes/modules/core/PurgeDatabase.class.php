@@ -1107,6 +1107,12 @@ class PurgeDatabase {
 
 			//$db->FailTrans();
 			$db->CompleteTrans();
+
+			//Since deleting a lot of records especially in system_log can cause large planning times of queries that select from that table. This manifested itself in the Audit tab taking 2-3 seconds to load.
+			// Therefore force a regular vacuum to run on the entire database once we are done. We could also tune the autovacuum parameters more for these tables to be extra sure.
+			Debug::text('  Start VACUUM...', __FILE__, __LINE__, __METHOD__, 10);
+			$db->Execute( 'VACUUM ANALYZE' );
+			Debug::text('  Done VACUUM...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 		unset($purge_tables, $current_tables, $query);
 		Debug::Text('Purging database tables complete: '. TTDate::getDate('DATE+TIME', time() ), __FILE__, __LINE__, __METHOD__, 10);

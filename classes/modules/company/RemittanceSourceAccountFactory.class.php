@@ -145,6 +145,7 @@ class RemittanceSourceAccountFactory extends Factory {
 					'-1030-legal_name' => TTi18n::gettext('Legal Entity Name'),
 					'-1040-name' => TTi18n::gettext('Name'),
 					'-1050-description' => TTi18n::gettext('Description'),
+					'-1060-country' => TTi18n::gettext('Country'),
 					'-1150-data_format' => TTi18n::gettext('Data Format'),
 					'-1160-last_transaction_number' => TTi18n::gettext('Last Transaction Number'),
 					'-1900-in_use' => TTi18n::gettext('In Use'),
@@ -164,6 +165,7 @@ class RemittanceSourceAccountFactory extends Factory {
 					'legal_name',
 					'name',
 					'description',
+					'country', //This is needed by JS to determine which fields to show, so users without access to view remittance source accounts doesn't break the UI.
 				);
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.

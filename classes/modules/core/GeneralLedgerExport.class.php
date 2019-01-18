@@ -94,8 +94,7 @@ class GeneralLedgerExport {
 	 */
 	function setJournalEntry( $obj ) {
 		//Make sure accounts balance.
-
-		if ( $obj->checkBalance() == TRUE AND $obj->combineRecords() == TRUE) {
+		if ( is_object( $obj ) AND $obj->checkBalance() == TRUE AND $obj->combineRecords() == TRUE) {
 			$this->data[] = $obj;
 
 			return TRUE;

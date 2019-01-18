@@ -876,7 +876,7 @@ RequestViewController = RequestViewCommonController.extend( {
 	},
 
 	setEditMenuSendIcon: function( context_btn, pId ) {
-		if ( ((pId && !this.addPermissionValidate( pId )) || this.edit_only_mode) && !this.is_add ) {
+		if ( ((pId && !this.addPermissionValidate( pId )) || !this.edit_only_mode) && !this.is_add ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 

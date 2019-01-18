@@ -717,7 +717,10 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	buildContextMenu: function( setFocus ) {
-		var $this = this;
+		if ( this.current_edit_record && this.edit_only_mode == true && LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.viewId != LocalCacheData.current_open_edit_only_controller.viewId ) { // #2542 - prevent early menu setup for views that have not been loaded into memory yet.
+			return null;
+		}
+			var $this = this;
 		if ( !Global.isSet( setFocus ) ) {
 			setFocus = true;
 		}
@@ -824,9 +827,14 @@ BaseViewController = Backbone.View.extend( {
 
 		if ( setFocus ) {
 //
-
 			this.need_switch_to_context_menu = true;
-			this.selectContextMenu()
+
+			//#2530 - stop the flashing!!!
+			if ( this.edit_only_mode == true ) {
+				this.setEditMenu(); //prevents some flashing of edit-only view context menus
+			} else {
+				this.selectContextMenu();
+			}
 			//Don't select context menu until search complete
 
 		}
@@ -1838,7 +1846,7 @@ BaseViewController = Backbone.View.extend( {
 
 	},
 
-	onCancelClick: function( force_no_confirm, cancel_all ) {
+	onCancelClick: function( force_no_confirm, cancel_all, callback ) {
 		TTPromise.add('base','onCancelClick');
 		var $this = this;
 		//#2342 This logic is also in onSubMenuClick click in RibbonViewController
@@ -1859,23 +1867,23 @@ BaseViewController = Backbone.View.extend( {
 		if ( this.confirm_on_exit == true ) {
 			TAlertManager.showConfirmAlert( Global.modify_alert_message, null, function( clicked_yes ) {
 				if ( clicked_yes === true ) {
-					doNext( force_no_confirm, cancel_all );
+					doNext( force_no_confirm, cancel_all, callback );
 				} else {
 					TTPromise.reject('base','onCancelClick');
 				}
 			});
 		} else {
-			doNext( force_no_confirm, cancel_all );
+			doNext( force_no_confirm, cancel_all, callback );
 		}
 
-		function doNext( force_no_confirm, cancel_all ) {
+		function doNext( force_no_confirm, cancel_all, callback ) {
 			if ( !$this.edit_view && $this.parent_view_controller && $this.sub_view_mode ) {
 				$this.parent_view_controller.is_changed = false;
 				$this.parent_view_controller.confirm_on_exit = false;
 				$this.parent_view_controller.buildContextMenu( true );
 				$this.parent_view_controller.onCancelClick( true ); //Force no confirm so we don't get two messages when cancelling from Edit Employee -> Wage (tab) -> Edit Wage.
 			} else {
-				$this.removeEditView();
+				$this.removeEditView( true );
 			}
 
 			if ( cancel_all ) {
@@ -1888,6 +1896,9 @@ BaseViewController = Backbone.View.extend( {
 				} else if (LocalCacheData.current_open_report_controller ) {
 					LocalCacheData.current_open_report_controller.onCancelClick(force_no_confirm, cancel_all);
 				}
+			}
+			if ( callback ) {
+				callback();
 			}
 			TTPromise.resolve('base', 'onCancelClick');
 		}
@@ -3227,20 +3238,27 @@ BaseViewController = Backbone.View.extend( {
 				if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
 					continue;
 				}
-
-				var widget = this.edit_view_ui_dic[key];
-				if ( Global.isSet( widget.setMassEditMode ) ) {
-					widget.setMassEditMode( true );
+				//JS Exception: "this.unique_columns.indexOf is not a function"
+				if ( this.unique_columns && this.unique_columns.length > 0 && this.unique_columns.indexOf(key) != -1 ) {
+					$this.edit_view_ui_dic[key].css('opacity','0');
+					if ( $this.edit_view_ui_dic[key].setEnabled ) {
+						$this.edit_view_ui_dic[key].setEnabled(false);
+					}
+					if ( $this.edit_view_ui_dic[key].setMassEditMode ) {
+						$this.edit_view_ui_dic[key].setMassEditMode(false);
+					}
+				} else {
+					var widget = this.edit_view_ui_dic[key];
+					if (Global.isSet(widget.setMassEditMode)) {
+						widget.setMassEditMode(true);
+					}
+					$this.edit_view_ui_dic[key].css('opacity','1');
 				}
-
 			}
-			$.each( this.unique_columns, function( index, value ) {
-				if ( Global.isSet( $this.edit_view_ui_dic[value] ) && Global.isSet( $this.edit_view_ui_dic[value].setEnabled ) ) {
-					$this.edit_view_ui_dic[value].setEnabled( false );
-				}
-
-			} );
-
+		} else {
+			for ( var key in this.edit_view_ui_dic ) {
+				$this.edit_view_ui_dic[key].css('opacity', '1');
+			}
 		}
 
 		this.setNavigationArrowsStatus();
@@ -3572,6 +3590,10 @@ BaseViewController = Backbone.View.extend( {
 			this.onEditClick( next_select_item.id ); //Dont refresh UI
 		}
 		this.setNavigationArrowsEnabled();
+		if ( this.sub_log_view_controller ) {
+			this.sub_log_view_controller.search();
+		}
+
 	},
 
 	setParentContextMenuAfterSubViewClose: function() {
@@ -3847,9 +3869,9 @@ BaseViewController = Backbone.View.extend( {
 			context_btn.addClass( 'invisible-image' );
 		}
 
-		if ( this.is_changed ) {
+		//if ( this.is_changed ) {
 			context_btn.addClass( 'disable-image' );
-		}
+		//}
 	},
 
 	setEditMenuEditIcon: function( context_btn, pId ) {
@@ -3858,9 +3880,9 @@ BaseViewController = Backbone.View.extend( {
 			context_btn.addClass( 'invisible-image' );
 		}
 
-		if ( !this.is_viewing || !this.editOwnerOrChildPermissionValidate( pId ) ) {
+		//if ( !this.is_viewing || !this.editOwnerOrChildPermissionValidate( pId ) ) {
 			context_btn.addClass( 'disable-image' );
-		}
+		//}
 	},
 
 	setEditMenuNavEditIcon: function( context_btn, pId ) {
@@ -4092,6 +4114,7 @@ BaseViewController = Backbone.View.extend( {
 			var context_btn = this.context_menu_array[i];
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
+			context_btn.removeClass( 'invisible-image' );
 
 			if ( this.is_mass_editing ) {
 				switch ( id ) {
@@ -6249,6 +6272,9 @@ BaseViewController = Backbone.View.extend( {
 				onGetUserGenericDataResult( LocalCacheData.view_layout_cache[$this.script_name] );
 			}, 0 );
 		} else {
+			if ( !this.user_generic_data_api)  {
+				this.user_generic_data_api =  new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
+			}
 			this.user_generic_data_api.getUserGenericData( {filter_data: {script: this.script_name, deleted: false}}, {
 				onResult: function( results ) {
 					onGetUserGenericDataResult( results );
@@ -6853,7 +6879,7 @@ BaseViewController = Backbone.View.extend( {
 
 			var tab = $this.edit_view_tab.find('#' + tab_id);
 			var firstColumn = tab.find('.first-column-sub-view');
-			LogViewController.loadSubView(firstColumn, beforeLoadView, afterLoadView);
+			this.sub_log_view_controller.search();
 		} else {
 
 			Global.loadScript('views/core/log/LogViewController.js', function () {

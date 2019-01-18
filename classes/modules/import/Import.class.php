@@ -351,7 +351,7 @@ class Import {
 	 * @param $import_map_arr
 	 * @return bool
 	 */
-	function setColumnMap( $import_map_arr) {
+	function setColumnMap( $import_map_arr ) {
 		//
 		// Array(
 		//			$column_name => array( 'map_column_name' => 'user_name', 'default_value' => 'blah', 'parse_hint' => 'm/d/y' ),
@@ -360,20 +360,22 @@ class Import {
 		//
 		// This must support columns that may not exist in the actual system, so they can be converted to ones that do.
 		$filtered_import_map = array();
-		foreach( $import_map_arr as $import_column => $map_cols ) {
-			if ( ( isset( $map_cols['map_column_name'] ) AND isset( $map_cols['default_value'] ) )
-					AND ( $map_cols['map_column_name'] != '' OR $map_cols['default_value'] != '' ) ) {
-				Debug::Text('Import Column: '. $import_column .' => '. $map_cols['map_column_name'] .' Default: '. $map_cols['default_value'], __FILE__, __LINE__, __METHOD__, 10);
+		if ( is_array( $import_map_arr ) ) {
+			foreach ( $import_map_arr as $import_column => $map_cols ) {
+				if ( ( isset( $map_cols['map_column_name'] ) AND isset( $map_cols['default_value'] ) )
+						AND ( $map_cols['map_column_name'] != '' OR $map_cols['default_value'] != '' ) ) {
+					Debug::Text( 'Import Column: ' . $import_column . ' => ' . $map_cols['map_column_name'] . ' Default: ' . $map_cols['default_value'], __FILE__, __LINE__, __METHOD__, 10 );
 
-				$filtered_import_map[$import_column] = array(
-												'import_column' => $import_column,
-												'map_column_name' => $map_cols['map_column_name'],
-												'default_value' => $map_cols['default_value'],
-												'parse_hint' => $map_cols['parse_hint'],
-												);
+					$filtered_import_map[ $import_column ] = array(
+							'import_column'   => $import_column,
+							'map_column_name' => $map_cols['map_column_name'],
+							'default_value'   => $map_cols['default_value'],
+							'parse_hint'      => $map_cols['parse_hint'],
+					);
 
-			} else {
-				Debug::Text('Import Column: '. $import_column .' Skipping...', __FILE__, __LINE__, __METHOD__, 10);
+				} else {
+					Debug::Text( 'Import Column: ' . $import_column . ' Skipping...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
 			}
 		}
 

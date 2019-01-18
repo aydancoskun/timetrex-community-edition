@@ -1606,14 +1606,14 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						foreach( $ulf as $u_obj ) {
 							if ( $earliest_hire_date == FALSE OR $u_obj->getHireDate() < $earliest_hire_date ) {
 								$earliest_hire_date = $u_obj->getHireDate();
-								Debug::Text( '    Setting earliest Hire Date: '. TTDate::getDATE('DATE+TIME', $u_obj->getHireDate() ), __FILE__, __LINE__, __METHOD__, 10 );
+								Debug::Text( '    Setting earliest Hire Date: '. TTDate::getDATE('DATE+TIME', $u_obj->getHireDate() ). ' User ID: '.$u_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 							}
 						}
 						$start_date = TTDate::getBeginDayEpoch( $earliest_hire_date );
 						$end_date = TTDate::getEndDayEpoch( TTDate::incrementDate( $start_date, ($this->getDueDateDelayDays() - 1), 'day' ) );
 
 						$retval = array(
-								'due_date'   => ( $end_date + 86400 ),
+								'due_date'   => TTDate::incrementDate( $start_date, $this->getDueDateDelayDays(), 'day' ),
 								'start_date' => $start_date,
 								'end_date'   => $end_date,
 						);
@@ -1668,7 +1668,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						$end_date = TTDate::getEndDayEpoch( TTDate::incrementDate( $start_date, ($this->getDueDateDelayDays() - 1), 'day' ) );
 
 						$retval = array(
-								'due_date'   => ( $end_date + 86400 ),
+								'due_date'   => TTDate::incrementDate( $start_date, $this->getDueDateDelayDays(), 'day' ),
 								'start_date' => $start_date,
 								'end_date'   => $end_date,
 						);

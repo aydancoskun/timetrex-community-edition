@@ -2965,10 +2965,11 @@ PayStubViewController = BaseViewController.extend( {
 						$this.insideTransactionEditorAddRow( {}, $( this ).parents('tr').index() );
 					} );
 				} else {
+					//#2548 - Do not show plus button in view mode (when paystub is marked paid)
 					row.children().last().find( '.minus-icon' ).remove();
-					if ( data.status_id != 20 ) {
+					//if ( data.status_id != 20 ) {
 						row.children().last().find('.plus-icon').remove();
-					}
+					//}
 				}
 
 			}

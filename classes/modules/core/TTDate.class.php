@@ -735,6 +735,16 @@ class TTDate {
 	 * @param int $epoch EPOCH
 	 * @return false|string
 	 */
+	public static function getHumanReadableDateStamp( $epoch ) {
+		$format = 'd-M-Y'; //ie: 01-Jan-2018
+
+		return date( $format, $epoch);
+	}
+
+	/**
+	 * @param int $epoch EPOCH
+	 * @return false|string
+	 */
 	public static function getISODateStamp( $epoch ) {
 		$format = 'Ymd';
 

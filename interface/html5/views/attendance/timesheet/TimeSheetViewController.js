@@ -138,8 +138,10 @@ TimeSheetViewController = BaseViewController.extend( {
 		this._super('initEditView');
 	},
 
-	onSubViewRemoved: function() {
-		this.search();
+	onSubViewRemoved: function( is_cancel ) {
+		if( !is_cancel ) {
+			this.search();
+		}
 
 		if ( !this.edit_view ) {
 			this.setDefaultMenu();
@@ -2221,11 +2223,16 @@ TimeSheetViewController = BaseViewController.extend( {
 			grid = $( this.el ).find( '#' + this.ui_id + '_accumulated_total_grid' );
 		}
 
+		var  punch_column_width = 100;
+		if ( this.wage_btn.getValue( true ) ) {
+			punch_column_width = null;
+		}
+
 		var punch_in_out_column = {
 			name: 'punch_info',
 			index: 'punch_info',
 			label: ' ',
-			width: 100,
+			width: punch_column_width,
 			sortable: false,
 			title: false,
 			formatter: this.onCellFormat
@@ -2328,14 +2335,16 @@ TimeSheetViewController = BaseViewController.extend( {
 
 			if ( date && date.getYear() > 0 ) {
 				$this.setDatePickerValue( date.format( Global.getLoginUserDateFormat() ) );
-
 				$this.highLightSelectDay();
 				$this.reLoadSubGridsSource();
+				//select first punch cell when clicking the header row
+				$( $('.timesheet-grid tr#1 td')[ $('th.highlight-header').index() ] ).click();
 			}
 
 		}
 
 	},
+
 
 	checkIsSelectedAbsenceCell: function( row_id, cell_index ) {
 		for ( var i = 0, m = this.absence_select_cells_Array.length; i < m; i++ ) {
@@ -2543,7 +2552,6 @@ TimeSheetViewController = BaseViewController.extend( {
 		this.grid_div.scroll( function( e ) {
 			$this.scroll_position = $this.grid_div.scrollTop();
 		} );
-
 	},
 
 	onGridDblClickRow: function(name) {
@@ -3817,8 +3825,24 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 		}
 
-		//Manual punch grid
+		$this.selectTimesheetGridTd();
+	},
 
+	//Ensure that a td is selected to give us edit menu options
+	selectTimesheetGridTd: function() {
+		if ($('.edit-view:visible').length == 0 && $('.timesheet-punch-grid-wrapper th.highlight-header').length == 1 && $('.timesheet-grid tr#1 td.ui-state-highlight').length == 0) {
+			doNext();
+		} else {
+			var $this = this;
+			// Since the actual render of the grid is detached, it behaves like async code. We must do a timer loop to ensure that a gridcell is selected on loading the timesheet.
+			window.setTimeout( function() {
+				$this.selectTimesheetGridTd();
+			}, 500 );
+		}
+
+		function doNext() {
+			$($('.timesheet-grid tr#1 td')[$('th.highlight-header').index()]).click();
+		}
 	},
 
 	searchDone: function() {
@@ -4681,7 +4705,11 @@ TimeSheetViewController = BaseViewController.extend( {
 			}
 		}
 		/* jshint ignore:end */
-		this.setDefaultMenu();
+		if ( $('.edit-view:visible').length == 0 ) {
+			this.setDefaultMenu();
+		} else {
+			this.setEditMenu();
+		}
 	},
 
 	unsetSelectedCells: function( grid_id ) {
@@ -8717,8 +8745,10 @@ TimeSheetViewController = BaseViewController.extend( {
 			context_btn.addClass( 'invisible-image' );
 		}
 
-		if ( !this.getPayPeriod() ) {
-			context_btn.addClass( 'disable-image' );
+		var $this = this;
+		context_btn.addClass( 'disable-image' );
+		if ( $this.getPayPeriod() ) {
+			context_btn.removeClass( 'disable-image' );
 		}
 	},
 

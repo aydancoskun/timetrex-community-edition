@@ -279,9 +279,9 @@ class CalculatePolicy {
 		return FALSE;
 	}
 
-	//Check if past date calculation is required.
-	//This is based on PayFormulas that use average calculations.
 	/**
+	 * Check if past date calculation is required.
+	 * This is based on PayFormulas that use average calculations.
 	 * @return bool
 	 */
 	function isPastDateCalculationRequired() {
@@ -296,11 +296,11 @@ class CalculatePolicy {
 		return FALSE;
 	}
 
-	//Since handling auto-deduct meal policies (negative total time) is virtually impossible to handle by itself
-	//when it comes to overtime/premium policies that adjust the total time themselves,
-	//this function will roll the meal/break policy time into the source record before being calculated for Reg/OT/Prem.
-	//This way Reg/OT/Prem. calculation functions don't need to worry about negative total times at all.
 	/**
+	 * Since handling auto-deduct meal policies (negative total time) is virtually impossible to handle by itself
+	 * when it comes to overtime/premium policies that adjust the total time themselves,
+	 * this function will roll the meal/break policy time into the source record before being calculated for Reg/OT/Prem.
+	 * This way Reg/OT/Prem. calculation functions don't need to worry about negative total times at all.
 	 * @param int $user_date_total_rows EPOCH
 	 * @return array|bool
 	 */
@@ -2654,9 +2654,8 @@ class CalculatePolicy {
 		return FALSE;
 	}
 
-	//This must be done after all other policies are calculated so any average calculations can include premium time wages.
-
 	/**
+	 * This must be done after all other policies are calculated so any average calculations can include premium time wages.
 	 * @param int $user_date_total_records EPOCH
 	 * @return bool
 	 */

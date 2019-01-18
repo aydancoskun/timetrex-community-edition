@@ -405,6 +405,7 @@ class APIPayStubAmendment extends APIFactory {
 			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $src_rows as $key => $row ) {
 				unset($src_rows[$key]['id'] ); //Clear fields that can't be copied
+				$src_rows[$key]['status_id']  = 50; //Set status to ACTIVE (50)
 			}
 			unset($row); //code standards
 			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);

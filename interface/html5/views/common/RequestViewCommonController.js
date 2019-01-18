@@ -23,6 +23,7 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	onCancelClick: function( force, cancel_all ) {
+		TTPromise.add('base', 'onCancelClick');
 		var $this = this;
 		if ( this.current_edit_record.id ) {
 			var $record_id = this.current_edit_record.id;
@@ -60,6 +61,10 @@ RequestViewCommonController = BaseViewController.extend( {
 
 		}
 
+	},
+
+	onCloseIconClick: function(){
+		this.onCancelClick();
 	},
 
 	openEditView: function() {
