@@ -16,6 +16,9 @@ InOutViewController = BaseViewController.extend( {
 	show_transfer_ui: false,
 	show_node_ui: false,
 
+	original_note: false,
+	new_note: false,
+
 	initialize: function( options ) {
 		Global.setUINotready(true);
 		this._super( 'initialize', options );
@@ -403,6 +406,16 @@ InOutViewController = BaseViewController.extend( {
 				this.current_edit_record.status_id = this.old_type_status.status_id;
 			}
 
+		}
+		
+		if ( value == true ) {
+			this.original_note = this.edit_view_ui_dic.note.getValue();
+			this.edit_view_ui_dic.note.setValue( this.new_note ? this.new_note : '' );
+			this.current_edit_record.note = this.new_note ? this.new_note : '';
+		} else {
+			this.new_note = this.edit_view_ui_dic.note.getValue();
+			this.edit_view_ui_dic.note.setValue( this.original_note ? this.original_note : '' );
+			this.current_edit_record.note = this.original_note ? this.original_note : '';
 		}
 	},
 
@@ -843,6 +856,7 @@ InOutViewController = BaseViewController.extend( {
 		//The API will return if transfer should be enabled/disabled by default.
 		if ( this.show_transfer_ui && this.edit_view_ui_dic['transfer'] ) {
 			this.edit_view_ui_dic['transfer'].setValue( this.current_edit_record['transfer'] );
+			this.onTransferChanged( this.current_edit_record['transfer'] );
 		}
 
 		this.collectUIDataToCurrentEditRecord();
@@ -852,7 +866,6 @@ InOutViewController = BaseViewController.extend( {
 
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
-		this.onTransferChanged( this.current_edit_record['transfer'] );
 		this.confirm_on_exit = true; //confirm on leaving even if no changes have been made so users can't accidentally not save punches by logging out without clicking save for example
 	}
 } );

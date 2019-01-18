@@ -58,8 +58,8 @@ class CompanyFactory extends Factory {
 				$retval = array(
 										10 => TTi18n::gettext('ACTIVE'),
 										20 => TTi18n::gettext('HOLD'),
-										23 => TTi18n::gettext('EXPIRED'), //Trial Expired
-										28 => TTi18n::gettext('MIGRATED'), //Account migrated to different server.
+										23 => TTi18n::gettext('EXPIRED'), //Trial Expired, treated like HOLD
+										28 => TTi18n::gettext('MIGRATED'), //Account migrated to different server. Treated like cancelled.
 										30 => TTi18n::gettext('CANCELLED')
 									);
 				break;

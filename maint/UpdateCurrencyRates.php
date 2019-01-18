@@ -45,10 +45,10 @@ require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR
 //Debug::setVerbosity(11);
 
 $clf = new CompanyListFactory();
-$clf->getByStatusID( array(10,20,23), NULL, array('a.id' => 'asc') );
+$clf->getByStatusID( array(10, 20, 23), NULL, array('a.id' => 'asc') );
 if ( $clf->getRecordCount() > 0 ) {
 	foreach ( $clf as $c_obj ) {
-		if ( $c_obj->getStatus() != 30 ) {
+		if ( in_array( $c_obj->getStatus(), array(10, 20, 23) ) ) { //10=Active, 20=Hold, 23=Expired
 			CurrencyFactory::updateCurrencyRates( $c_obj->getId() );
 		}
 	}

@@ -729,7 +729,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 																		)
 																	)
 						WHERE ( epf.type_id in (\'S4\', \'S6\', \'C1\') AND epf.active = 1 AND ( epf.type_id != \'C1\' OR ( epf.type_id = \'C1\' AND epf.grace > 0 ) ) )
-							AND ( uf.status_id = 10 AND cf.status_id != 30 ) ';
+							AND ( uf.status_id = 10 AND cf.status_id in (10, 20, 23) ) ';
 
 		if (  $user_id > 0 ) {
 			$query .= ' AND uf.id = '. (int)$user_id;
@@ -2575,6 +2575,7 @@ class UserDateTotalListFactory extends UserDateTotalFactory implements IteratorA
 		$query .= ( isset($filter_data['object_type_id']) ) ? $this->getWhereClauseSQL( 'a.object_type_id', $filter_data['object_type_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['src_object_id']) ) ? $this->getWhereClauseSQL( 'a.src_object_id', $filter_data['src_object_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_code_id']) ) ? $this->getWhereClauseSQL( 'a.pay_code_id', $filter_data['pay_code_id'], 'numeric_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['override']) ) ? $this->getWhereClauseSQL( 'a.override', $filter_data['override'], 'boolean', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['user_status_id']) ) ? $this->getWhereClauseSQL( 'd.status_id', $filter_data['user_status_id'], 'numeric_list', $ph ) : NULL;
 

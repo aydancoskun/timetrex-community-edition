@@ -37,25 +37,41 @@
 //Allow only CLI PHP binaries to call maint scripts. To avoid a remote party from running them from hitting a URL.
 if ( PHP_SAPI != 'cli' ) {
 	echo "This script can only be called from the Command Line. (". PHP_SAPI .")\n";
-	exit;
+	exit(1);
 }
 
 //There appears to be cases where ARGC/ARGV may not be set, so check those too. Fixes: PHP ERROR - NOTICE(8): Undefined variable: argc File: C:\TimeTrex\timetrex\tools\unattended_install.php Line: 31
 if ( !isset($argc) OR !isset($argv) ) {
 	echo "This script can only be called from the Command Line. (args)\n";
-	exit;
+	exit(1);
 }
 
 if ( version_compare( PHP_VERSION, 5, '<') == 1 ) {
 	echo "You are currently using PHP v". PHP_VERSION ." TimeTrex requires PHP v5 or greater!\n";
-	exit;
+	exit(1);
 }
 
 //Allow CLI scripts to run much longer. ie: Purging database could takes hours.
 ini_set( 'max_execution_time', 43200 );
 
-//Check post install requirements, because PHP CLI usually uses a different php.ini file.
 $install_obj = new Install();
+
+//Make sure CLI tools are not being run as root, otherwise show error message and attempt to down-grade users.
+if ( Misc::isCurrentOSUserRoot() == TRUE ) {
+	fwrite(STDERR, 'ERROR: Running as \'root\' forbidden! To avoid permission conflicts, must run as the web-server user instead.'."\n" );
+	fwrite(STDERR, '       Example: su www-data -c "'. ( ( isset($config_vars['path']['php_cli']) ) ? $config_vars['path']['php_cli'] : 'php' ) .' '. implode(' ', ( ( isset($argv) ) ? $argv : array() ) ) .'"'."\n" );
+	Debug::Text('WARNING: Running as OS user \'root\' forbidden!', __FILE__, __LINE__, __METHOD__, 10);
+
+	//Before we down-grade user privileges, check to make sure we can read/write all necessary files.
+	$install_obj->checkFilePermissions();
+	if ( Misc::setProcessUID( Misc::findWebServerOSUser() ) != TRUE ) {
+		Debug::Display();
+		Debug::writeToLog();
+		exit(1);
+	}
+}
+
+//Check post install requirements, because PHP CLI usually uses a different php.ini file.
 if ( $install_obj->checkAllRequirements( TRUE ) == 1 ) {
 	$failed_requirements = $install_obj->getFailedRequirements( TRUE );
 	unset($failed_requirements[0]);

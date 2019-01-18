@@ -1016,10 +1016,8 @@ class TimesheetDetailReport extends Report {
 		}
 		//Debug::Arr($this->tmp_data['user_date_total'], 'User Date Total Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( strpos($format, 'pdf_') === FALSE AND ( isset($columns['schedule_working']) OR isset($columns['schedule_working_diff']) OR isset($columns['schedule_absence']) ) ) {
+		if ( strpos($format, 'pdf_') === FALSE AND count( array_intersect( array('schedule_working', 'schedule_working_diff', 'schedule_absence', 'min_schedule_time_stamp', 'max_schedule_time_stamp' ), array_keys( $columns ) ) ) > 0 ) {
 			$slf = TTnew( 'ScheduleListFactory' );
-			//$slf->getDayReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-			//$slf->getScheduleSummaryReportByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			$slf->getSearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 			if ( $slf->getRecordCount() > 0 ) {
 				foreach($slf as $s_obj) {
@@ -1047,7 +1045,6 @@ class TimesheetDetailReport extends Report {
 							//Normalize the timestamps to the same day, otherwise min/max aggregates will always use what times are on the first/last days.
 							'min_schedule_time_stamp' => ( $s_obj->getColumn('status_id') == 10 AND $s_obj->getColumn('start_time') != '' ) ? TTDate::getTimeLockedDate( strtotime( $s_obj->getColumn('start_time') ), 86400) : NULL,
 							'max_schedule_time_stamp' => ( $s_obj->getColumn('status_id') == 10 AND $s_obj->getColumn('end_time') != '' ) ? TTDate::getTimeLockedDate( strtotime( $s_obj->getColumn('end_time') ), 86400) : NULL,
-
 							);
 					} else {
 						if ( $s_obj->getColumn('status_id') == 10 AND ( $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['min_schedule_time_stamp'] == '' OR TTDate::getTimeLockedDate( strtotime( $s_obj->getColumn('start_time') ), 86400 ) < $this->tmp_data['user_date_total'][$user_id][$date_stamp][$branch_id][$department_id]['min_schedule_time_stamp'] ) ) {

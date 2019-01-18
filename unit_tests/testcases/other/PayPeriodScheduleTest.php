@@ -77,7 +77,6 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 	function createPayPeriodSchedule($type, $start_dow, $transaction_dow, $primary_dom, $secondary_dom, $primary_transaction_dom, $secondary_transaction_dom, $transaction_bd, $day_start_time = '00:00' ) {
 		$ppsf = new PayPeriodScheduleFactory();
 		$ppsf->setCompany( $this->company_id );
-		Debug::text('zzzCompany ID: '. $this->company_id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$ppsf->setName( 'test_'.rand(1000, 99999) );
 		$ppsf->setDescription( 'test' );

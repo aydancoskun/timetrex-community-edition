@@ -466,7 +466,7 @@ class CalculatePolicy {
 		return FALSE;
 	}
 
-	function isConflictingUserDateTotal( $date_stamp, $object_type_id, $pay_code_id = NULL, $branch_id = NULL, $department_id = NULL, $job_id = NULL, $job_item_id = NULL ) {
+	function isConflictingUserDateTotal( $date_stamp, $object_type_id, $pay_code_id = NULL, $branch_id = NULL, $department_id = NULL, $job_id = NULL, $job_item_id = NULL, $override = NULL ) {
 		if ( is_array($this->user_date_total) ) {
 			$date_stamp = TTDate::getMiddleDayEpoch( $date_stamp ); //Optimization - Move outside of loop.
 			foreach( $this->user_date_total as $udt_key => $udt_obj ) {
@@ -482,7 +482,8 @@ class CalculatePolicy {
 							( $job_id === NULL OR $udt_obj->getJob() == $job_id )
 							AND
 							( $job_item_id === NULL OR $udt_obj->getJobItem() == $job_item_id )
-
+							AND
+							( $override === NULL OR $udt_obj->getOverride() == $override ) //Only check override=TRUE records.
 						) {
 						Debug::text('Found conflicting UserDateTotal row: '. $udt_key, __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
@@ -7521,10 +7522,14 @@ class CalculatePolicy {
 
 				//Check for conflicting/overridden records, so we don't double up on the time.
 				//This policy could calculate 9.52hrs, but the user could override it to 9hrs, so if that happens simply skip calculating the holiday time again.
+				//  There could be a case where there are two holiday policies, one applies in one situation and another in a different situation.
+				//  When it doesn't apply it still tries to create a 0hr entry, which then conflicts with the 2nd policy which may apply for X hours.
+				//  To handle this we only check isConflicting on records where override=TRUE.
+				// 		calculateScheduleAbsence() already checks for any conflicting record, so a holiday absence on the schedule won't override a differing holiday policy average amount already.
 				if ( is_object( $holiday_obj->getHolidayPolicyObject() )
 						AND $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() != FALSE
 						AND is_object( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject() )
-						AND $this->isConflictingUserDateTotal( $date_stamp, array(25, 50), (int)$holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayCode() ) == FALSE
+						AND $this->isConflictingUserDateTotal( $date_stamp, array(25, 50), (int)$holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayCode(), NULL, NULL, NULL, NULL, TRUE ) == FALSE
 				) {
 
 					//Skip calculating holidays before the employees hire date, as in some cases if they were hired the day after the holiday it would try to put a 0hr absence on the holiday before their hire date.
@@ -7719,11 +7724,14 @@ class CalculatePolicy {
 		if ( $hlf->getRecordCount() > 0 ) {
 			Debug::text('Found holiday rows: '. $hlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $hlf as $h_obj ) {
-				//Allow duplicate holidays with the same date to be assigned to this array
+				//Allow duplicate holidays (as long as they are different IDs) with the same date to be assigned to this array
 				//As there may be cases where multiple holiday policies are assigned to the employee (through contributing shifts and policy groups)
 				// where some are active  and some are not. If we don't allow duplicates it may always be denied or accepted when it shouldn't be.
+				//In some cases where this function is called multiple times, its possible the data overlaps (due to the start/end date being adjusted above)
+				//   and duplicate (by ID) holiday are returned. Make sure we unique on ID to avoid this.
 				//$this->holiday[$h_obj->getDateStamp()] = $h_obj;
-				$this->holiday[] = $h_obj;
+				//$this->holiday[] = $h_obj;
+				$this->holiday[$h_obj->getId()] = $h_obj;
 
 				if ( $enable_recalculate_holiday == TRUE AND $this->getFlag('holiday') == TRUE ) { //Don't add holidays to pending dates if we aren't calculating them to begin with.
 					$this->addPendingCalculationDate( $h_obj->getDateStamp() ); //Add each holiday to the pending calculation list.

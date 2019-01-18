@@ -313,7 +313,7 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 			$pseal_obj->setEmployeeCPP( CompanyDeductionFactory::getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName($this->company_id, 20, 'CPP') );
 			$pseal_obj->Save();
 		} else {
-			Debug::text('zzzPayStubEntryAccountLink ID: FAILED!', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('PayStubEntryAccountLink ID: FAILED!', __FILE__, __LINE__, __METHOD__, 10);
 		}
 		*/
 

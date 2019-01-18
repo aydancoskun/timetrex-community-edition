@@ -5983,15 +5983,13 @@ ScheduleViewController = BaseViewController.extend( {
 					time_span = $( "<span class='schedule-time total'></span>" );
 					time_span.text( cell_value );
 					content_div.prepend( time_span );
-				} else if ( Global.strToDate( col_model.index ) ) {
-
+				} else if ( col_model.display_total_column == true ) {
 					currency = LocalCacheData.getCurrentCurrencySymbol();
-					time_span = $( "<span class='schedule-time total'></span>" );
-					time_span.text( 'S: 0 A: 0 00:00 = ' + currency + '0.00' );
+					time_span = $("<span class='schedule-time total'></span>");
+					time_span.text('S: 0 A: 0 00:00 = ' + currency + '0.00');
 
-					content_div.prepend( time_span );
-					content_div.css( 'height', 'auto' );
-
+					content_div.prepend(time_span);
+					content_div.css('height', 'auto');
 				}
 
 				break;
@@ -6860,7 +6858,6 @@ ScheduleViewController = BaseViewController.extend( {
 	},
 
 	buildDayColumns: function() {
-
 		var $this = this;
 		this.schedule_columns = [];
 
@@ -6879,6 +6876,7 @@ ScheduleViewController = BaseViewController.extend( {
 			width: 122,
 			sortable: false,
 			title: false,
+			display_total_column: true,
 			formatter: function() {
 
 				return $this.onCellFormat( arguments[0], arguments[1], arguments[2], arguments[3] )

@@ -2085,6 +2085,103 @@ class AccrualPolicyTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals( $accrual_balance, ( (109 * 3600) + (60 * 34) + 10 ) ); //109:34:10
 	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOnHireDateA
+	 */
+	function testCalendarAccrualOnHireDateA() {
+		global $dd;
+
+		$u_obj = $this->getUserObject( $this->user_id );
+		$u_obj->data['hire_date'] = TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) + ( 86400 * 10 ); //15-Mar-2001
+		$u_obj->Save();
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 310, $accrual_policy_account_id ); //15th of each month.
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   array($this->user_id),
+								   NULL,
+								   array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getMiddleDayEpoch( ( $current_epoch + 86400 * 45) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (6 * 3600) + (60 * 40) + 0 ) ); //6:40
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOnHireDateB
+	 */
+	function testCalendarAccrualOnHireDateB() {
+		global $dd;
+
+		$u_obj = $this->getUserObject( $this->user_id );
+		$u_obj->data['hire_date'] = TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) + ( 86400 * 9 ); //14-Mar-2001 (day before the frequency date)
+		$u_obj->Save();
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 310, $accrual_policy_account_id ); //15th of each month.
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   array($this->user_id),
+								   NULL,
+								   array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getMiddleDayEpoch( ( $current_epoch + 86400 * 45) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (6 * 3600) + (60 * 40) + 0 ) ); //6:40
+	}
+
+	/**
+	 * @group AccrualPolicy_testCalendarAccrualOnHireDateC
+	 */
+	function testCalendarAccrualOnHireDateC() {
+		global $dd;
+
+		$u_obj = $this->getUserObject( $this->user_id );
+		$u_obj->data['hire_date'] = TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) + ( 86400 * 11 ); //16-Mar-2001 (day after the frequency date)
+		$u_obj->Save();
+
+		$hire_date = $this->getUserObject( $this->user_id )->getHireDate();
+		$current_epoch = $hire_date;
+
+		$accrual_policy_account_id = $this->createAccrualPolicyAccount( $this->company_id, 10 );
+		$accrual_policy_id = $this->createAccrualPolicy( $this->company_id, 310, $accrual_policy_account_id ); //15th of each month.
+		$dd->createPolicyGroup( 	$this->company_id,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   NULL,
+								   array($this->user_id),
+								   NULL,
+								   array( $accrual_policy_id ) );
+
+		$this->calcAccrualTime( $this->company_id, $accrual_policy_id, $current_epoch, TTDate::getMiddleDayEpoch( ( $current_epoch + 86400 * 45) ) );
+		$accrual_balance = $this->getCurrentAccrualBalance( $this->user_id, $accrual_policy_account_id );
+
+		$this->assertEquals( $accrual_balance, ( (3 * 3600) + (60 * 20) + 0 ) ); //3:20
+	}
+
 	/**
 	 * @group AccrualPolicy_testCalendarAccrualOpeningBalanceA
 	 */

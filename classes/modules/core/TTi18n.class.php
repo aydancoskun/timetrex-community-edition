@@ -1020,6 +1020,10 @@ class TTi18n {
 	 */
 	public static function parseFloat( $value ) {
 		if ( is_float( $value ) === TRUE OR is_int( $value ) === TRUE ) {
+			if ( is_infinite( $value ) OR is_nan( $value ) ) { //Check for INF, -INF, +INF and NaN so we just return 0 instead.
+				return 0;
+			}
+
 			return $value;
 		} elseif ( is_string( $value ) ) {
 			if ( $value == '' ) {

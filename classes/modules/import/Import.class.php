@@ -64,6 +64,8 @@ class Import {
 	public $job_item_options = FALSE;
 	public $job_item_manual_id_options = FALSE;
 
+	protected $search_column_priority = NULL;
+
 	function getObject() {
 		if ( !is_object($this->obj) ) {
 			$this->obj = TTnew( $this->class_name );
@@ -215,10 +217,10 @@ class Import {
 	//Generates a "best fit" column map array.
 	function generateColumnMap() {
 		$raw_data_columns = $this->getRawDataColumns();
-		//Debug::Arr($raw_data_columns, 'Raw Data Columns:', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr($raw_data_columns, 'Raw Data Columns:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$columns = Misc::trimSortPrefix( $this->getOptions('columns') );
-		//Debug::Arr($columns, 'Object Columns:', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr($columns, 'Object Columns:', __FILE__, __LINE__, __METHOD__, 10);
 
 		//unset($columns['middle_name']); //This often conflicts with Last Name, so ignore mapping it by default. But then it won't work even for an exact match.
 
@@ -712,17 +714,40 @@ class Import {
 		//update process will not work.
 		//Actually, the above is no longer the case.
 		//  **Make sure data is mapped before passed into this function, otherwise it will fail completely. We added mapRowData() to handle this and it should be called before preParseData() is now.
-		if ( isset($raw_row['user_name']) AND $raw_row['user_name'] != '' ) {
-			$filter_data = array( 'user_name' => $raw_row['user_name'] );
-			Debug::Text('Searching for existing record based on User Name: '. $raw_row['user_name'], __FILE__, __LINE__, __METHOD__, 10);
-		} elseif ( isset($raw_row['sin']) AND $raw_row['sin'] != '' ) {
-			//Search for SIN before employee_number, as employee numbers are more likely to change.
-			$filter_data = array( 'sin' => $raw_row['sin'] );
-			Debug::Text('Searching for existing record based on SIN: '. (int)$raw_row['sin'], __FILE__, __LINE__, __METHOD__, 10);
-		} elseif ( isset($raw_row['employee_number']) AND $raw_row['employee_number'] != '' ) {
-			$filter_data = array( 'employee_number' => (int)$raw_row['employee_number'] );
-			Debug::Text('Searching for existing record based on Employee Number: '. (int)$raw_row['employee_number'], __FILE__, __LINE__, __METHOD__, 10);
-		} else {
+		//  If they want to import/update the user_name, they can't, since its the 1st priority and used to find the employee record, but it wouldn't exist as they would be importing the new value.
+		//    So maybe we could use the order specified in the mapping to define the priority to be used during searches?
+
+		//Cache the $this->search_column_priority in the object so we aren't doing this work on every row.
+		if ( $this->search_column_priority == NULL ) {
+			//Possible search columns, in priority order.
+			$search_columns = array('user_name', 'sin', 'employee_number');
+
+			//Loop over column map to find any $search_columns in the order specified in the map "parse hint" column, ie: 1, 2, 3
+			$column_map = Sort::arrayMultiSort( $this->getColumnMap(), array('parse_hint' => SORT_ASC) );
+			foreach ( $column_map as $key => $map_data ) {
+				if ( in_array( (string)$map_data['import_column'], $search_columns ) ) { //Cast to string to avoid (int)0 matching in every case.
+					$this->search_column_priority[] = $map_data['import_column'];
+				}
+			}
+
+			//If no search columns are found in the map, just use defaults.
+			if ( !is_array( $this->search_column_priority ) ) {
+				$this->search_column_priority = $search_columns;
+			}
+
+			Debug::Arr($this->search_column_priority, 'Search Column Priority Arr: ', __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		$filter_data = NULL;
+		foreach( $this->search_column_priority as $search_column ) {
+			if ( isset($raw_row[$search_column]) AND $raw_row[$search_column] != '' ) {
+				$filter_data = array( $search_column => $raw_row[$search_column] );
+				Debug::Text('Searching for existing record based on Column: '. $search_column .' Value: '. $raw_row[$search_column], __FILE__, __LINE__, __METHOD__, 10);
+				break;
+			}
+		}
+
+		if ( !isset($filter_data) ) {
 			Debug::Text('No suitable columns for identifying the employee were specified... ', __FILE__, __LINE__, __METHOD__, 10);
 		}
 

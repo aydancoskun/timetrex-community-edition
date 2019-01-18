@@ -228,10 +228,16 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTI18n::parseFloat('0.00'), '0' );
 		$this->assertEquals( TTI18n::parseFloat('0'), '0' );
 		$this->assertEquals( TTI18n::parseFloat(0), '0' );
+
 		$this->assertEquals( TTI18n::parseFloat(''), '0' );
 		$this->assertEquals( TTI18n::parseFloat( TRUE ), '0' );
 		$this->assertEquals( TTI18n::parseFloat( FALSE ), '0' );
 		$this->assertEquals( TTI18n::parseFloat( NULL ), '0' );
+
+		$this->assertEquals( TTI18n::parseFloat( INF ), '0' );
+		$this->assertEquals( TTI18n::parseFloat( -INF ), '0' );
+		$this->assertEquals( TTI18n::parseFloat( +INF ), '0' );
+		$this->assertEquals( TTI18n::parseFloat( acos(8) ), '0' ); //acos(8) = NaN
 
 		TTi18n::setLocale( 'fr_CA' );
 		$this->assertEquals( TTI18n::parseFloat('1 234,123'), '1234.123' );

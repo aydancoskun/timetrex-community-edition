@@ -1619,7 +1619,8 @@ class UserDateTotalFactory extends Factory {
 											'branch_id' => (int)$this->getBranch(),
 											'department_id' => (int)$this->getDepartment(),
 											'job_id' => (int)$this->getJob(),
-											'job_item_id' => (int)$this->getJobItem()
+											'job_item_id' => (int)$this->getJobItem(),
+											'override' => 1, //To allow multiple holiday policies to be calculated on the same day, we need to only check for conflicts when override=1
 										);
 					$udtlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
 				}

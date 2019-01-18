@@ -66,6 +66,18 @@ class PayPeriodScheduleFactory extends Factory {
 											200	=> TTi18n::gettext('Bi-Weekly (27/year)'),
 										);
 				break;
+			case 'annual_pay_periods_per_type':
+				//Mostly used for ROEs to determine pay period schedule type from manual pay period schedules.
+				$retval = array(
+						52 => 10, //Weekly (52/year)
+						26 => 20, //Bi-Weekly (26/year)
+						24 => 30, //Semi-Monthly (24/year)
+						12 => 50, //Monthly (12/year)
+						53 => 100, //Weekly (53/year)
+						27 => 200, //Bi-Weekly (27/year)
+				);
+
+				break;
 			case 'start_week_day':
 				$retval = array(
 											0 => TTi18n::gettext('Sunday-Saturday'),

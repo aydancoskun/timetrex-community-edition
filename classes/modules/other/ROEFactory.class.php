@@ -363,7 +363,7 @@ class ROEFactory extends Factory {
 		if	(	$this->Validator->isDate(		'final_pay_stub_end_date',
 												$epoch,
 												TTi18n::gettext('Invalid final pay stub end date')) ) {
-			
+
 			$this->data['final_pay_stub_end_date'] = $epoch;
 
 			return TRUE;
@@ -545,10 +545,16 @@ class ROEFactory extends Factory {
 								50	=> 13, //'Monthly'
 								100	=> 53, //'Weekly',
 								200	=> 27, //'Bi-Weekly',
-								);			
+								);
 		}
 
-		$retval = $report_period_arr[$this->getPayPeriodType()];
+		if ( isset($report_period_arr[$this->getPayPeriodType()]) ) {
+			$retval = $report_period_arr[$this->getPayPeriodType()];
+		} else {
+			//Likely a manual pay period, try to determine based off annual pay periods.
+			Debug::Text('  WARNING: Unable to determine pay period schedule type...', __FILE__, __LINE__, __METHOD__, 10);
+			$retval = FALSE;
+		}
 
 		Debug::Text('Pay Periods: '. $retval .' Line: '. $line .' Type: '. $this->getPayPeriodType(), __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
@@ -775,13 +781,29 @@ class ROEFactory extends Factory {
 
 	function calculatePayPeriodType( $date ) {
 		$user_id = $this->getUser();
-		
+
 		$plf = TTnew( 'PayPeriodListFactory' );
 		$pay_period_obj = $plf->getByUserIdAndEndDate( $user_id, $date )->getCurrent();
 
 		$pay_period_type_id = FALSE;
 		if ( is_object( $pay_period_obj->getPayPeriodScheduleObject() ) ) {
 			$pay_period_type_id = $pay_period_obj->getPayPeriodScheduleObject()->getType();
+			if ( $pay_period_type_id == 5 ) { //5=Manual
+				$annual_pay_periods = (int)$pay_period_obj->getPayPeriodScheduleObject()->getAnnualPayPeriods();
+				$annual_pay_periods_per_type = $pay_period_obj->getPayPeriodScheduleObject()->getOptions('annual_pay_periods_per_type');
+				if ( isset($annual_pay_periods_per_type[$annual_pay_periods]) ) {
+					$pay_period_type_id = $annual_pay_periods_per_type[$annual_pay_periods];
+				} else {
+					$pay_period_type_id = FALSE;
+				}
+				Debug::Text('  Found Manual Pay Period Schedule, detecting pay period schedule of type_id: '. $pay_period_type_id .' based on annual PPs of: '. $annual_pay_periods, __FILE__, __LINE__, __METHOD__, 10);
+
+			}
+		}
+
+		if ( $pay_period_type_id == FALSE  ) {
+			$pay_period_type_id = 10; //Default to Weekly at the very least, so we don't trigger a validation error on FALSE that doesn't make sense to the user.
+			Debug::Text('  Defaulting to Weekly PP schedule, as nothing else was found...', __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		$pay_period_end_date = $pay_period_obj->getEndDate();
@@ -818,12 +840,12 @@ class ROEFactory extends Factory {
 	}
 
 	function combinePostTerminationPayPeriods( $data ) {
-		
+
 		$retarr = array();
 		if ( is_array($data ) AND count($data) > 0 ) {
 			$tmp_data = array_reverse( $data, TRUE );
 			$prev_pay_period_id = FALSE;
-			
+
 			foreach( $tmp_data as $pay_period_id => $pp_data ) {
 				if ( $pp_data['after_last_date'] == TRUE ) {
 					$retarr[$prev_pay_period_id]['amount'] += $pp_data['amount'];
@@ -864,13 +886,13 @@ class ROEFactory extends Factory {
 			$this->pay_period_earnings = $this->initial_pay_period_earnings;
 			foreach( $pself as $pse_obj ) {
 				$pay_period_id = (int)$pse_obj->getColumn('pay_period_id');
-				
+
 				if ( $this->getLastDate() < strtotime( $pse_obj->getColumn('pay_period_start_date') ) ) {
 					$tmp_after_last_date = TRUE;
 				} else {
 					$tmp_after_last_date = FALSE;
 				}
-				
+
 				$this->pay_period_earnings[$pay_period_id] = array(
 																		'amount' => $pse_obj->getColumn('amount'),
 																		'units' => $pse_obj->getColumn('units'),
@@ -879,7 +901,7 @@ class ROEFactory extends Factory {
 																		'after_last_date' => $tmp_after_last_date,
 																	);
 				//Debug::Arr($this->pay_period_earnings[$pay_period_id], 'Pay Period Start Date: '. TTDate::getDate('DATE', strtotime($pse_obj->getColumn('pay_period_start_date')) ) .' End Date: '. TTDate::getDate('DATE', strtotime($pse_obj->getColumn('pay_period_start_date')) ), __FILE__, __LINE__, __METHOD__, 10);
-				
+
 				$pay_periods_with_earnings++;
 			}
 		}
@@ -920,7 +942,7 @@ class ROEFactory extends Factory {
 		$setup_data = $this->getSetupData();
 
 		//Get last pay period id
-		$pay_period_earnings = $this->getInsurableEarningsByPayPeriod( '15b' ); 
+		$pay_period_earnings = $this->getInsurableEarningsByPayPeriod( '15b' );
 		if ( is_array( $pay_period_earnings ) ) {
 			$last_pay_period_ids = array();
 
@@ -999,7 +1021,7 @@ class ROEFactory extends Factory {
 		//Get insurable hours, earnings, and vacation pay now that the final pay stub is generated
 		$setup_data = $this->getSetupData();
 		$absence_policy_ids = $setup_data['absence_policy_ids'];
-		
+
 		//Find out the date of how far back we have to go to get insurable values.
 		//Insurable Hours
 		$insurable_hours_start_date = $this->getInsurablePayPeriodStartDate( $this->getInsurableHoursReportPayPeriods() );
@@ -1080,7 +1102,7 @@ class ROEFactory extends Factory {
 
 		return $this->form_obj['roe'];
 	}
-	
+
 	function Validate( $ignore_warning = TRUE ) {
 		//Make sure Final Pay Stub Transaction Date is equal or after Final End Date
 		if ( $this->getFinalPayStubTransactionDate() < $this->getFinalPayStubEndDate() ) {
@@ -1150,7 +1172,7 @@ class ROEFactory extends Factory {
 				UserGenericStatusFactory::queueGenericStatus( $this->getUserObject()->getFullName(TRUE).' - '. TTi18n::gettext('Record of Employment'), 20, TTi18n::gettext('Pay stub exists after final pay stub transaction date, therefore this ROE may not be accurate'), NULL );
 			}
 			unset($pslf);
-			
+
 			$this->ReCalculate();
 		}
 
@@ -1240,7 +1262,7 @@ class ROEFactory extends Factory {
 							break;
 						case 'final_pay_stub_transaction_date':
 							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->getFinalPayStubTransactionDate() );
-							break;						
+							break;
 						case 'insurable_earnings':
 							$data[$variable] = $this->getInsurableEarnings();
 							break;

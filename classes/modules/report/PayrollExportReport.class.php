@@ -873,7 +873,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				}
 
 				$file_name = 'EPI000000.csv';
-				if ( isset( $tmp_rows) ) {
+				if ( isset( $tmp_rows[0] ) ) {
 					//File format supports multiple entries per employee (file #) all using the same columns. No need to jump through nasty hoops to fit everyone one row.
 					$file_name = 'EPI'. $tmp_rows[0]['company_code'] . $tmp_rows[0]['batch_id'] .'.csv';
 
@@ -2256,7 +2256,6 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					);
 
 					foreach( $setup_data['meditech']['columns'] as $column_id => $column_data ) {
-						//Debug::Arr( $column_data, 'zzzMeditech Column ID: '. $column_id, __FILE__, __LINE__, __METHOD__, 10);
 
 						if ( isset( $row[$column_id.'_time'] ) AND trim($column_data['hour_code']) != '' ) {
 							$tmp_row['employee_number'] = str_pad( ( isset($row[$employee_number_column]) ) ? substr( $row[$employee_number_column], 0, 14) : NULL, 14, ' ', STR_PAD_RIGHT);

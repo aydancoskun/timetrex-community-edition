@@ -64,7 +64,7 @@ $flags = array(
 				'overtime' => FALSE,
 				'premium' => FALSE,
 				'accrual' => FALSE,
-	
+
 				'exception' => TRUE,
 				//Exception options
 				'exception_premature' => TRUE, //Calculates premature exceptions
@@ -76,12 +76,12 @@ $flags = array(
 
 $udtlf = new UserDateTotalListFactory();
 //Use optimized query to speed this process up significantly.
-$udtlf->getMidDayExceptionsByStartDateAndEndDateAndPayPeriodStatus( $start_date, $end_date, array(10,12,15,30) );
-Debug::text(' calcQuickExceptions: Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ) .' Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__,5);
+$udtlf->getMidDayExceptionsByStartDateAndEndDateAndPayPeriodStatus( $start_date, $end_date, array(10, 12, 15, 30) );
+Debug::text(' calcQuickExceptions: Start Date: '. TTDate::getDate('DATE+TIME', $start_date ) .' End Date: '. TTDate::getDate('DATE+TIME', $end_date ) .' Rows: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 5);
 if ( $udtlf->getRecordCount() > 0 ) {
 	$i = 0;
 	foreach ($udtlf as $udt_obj) {
-		Debug::text('('.$i.'). User: '. $udt_obj->getUser() .' Start Date: '. TTDate::getDate('DATE+TIME', strtotime( $udt_obj->getColumn('start_date') ) ) .' End Date: '. TTDate::getDate('DATE+TIME', strtotime( $udt_obj->getColumn('end_date') ) ), __FILE__, __LINE__, __METHOD__,5);
+		Debug::text('('.$i.'). User: '. $udt_obj->getUser() .' Start Date: '. TTDate::getDate('DATE+TIME', strtotime( $udt_obj->getColumn('start_date') ) ) .' End Date: '. TTDate::getDate('DATE+TIME', strtotime( $udt_obj->getColumn('end_date') ) ), __FILE__, __LINE__, __METHOD__, 5);
 
 		if ( is_object( $udt_obj->getUserObject() ) ) {
 			//Calculate pre-mature exceptions, so pre-mature Missing Out Punch exceptions arn't made active until they are ready.
@@ -99,7 +99,7 @@ if ( $udtlf->getRecordCount() > 0 ) {
 		$i++;
 	}
 }
-Debug::text(' calcQuickExceptions: Done', __FILE__, __LINE__, __METHOD__,5);
+Debug::text(' calcQuickExceptions: Done', __FILE__, __LINE__, __METHOD__, 5);
 
 Debug::writeToLog();
 Debug::Display();

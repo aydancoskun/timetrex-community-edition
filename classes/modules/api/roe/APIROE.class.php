@@ -107,7 +107,6 @@ class APIROE extends APIFactory {
 			);
 		}
 
-		Debug::Arr($data, 'zzz9Getting roe default data... User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->returnHandler( $data );
 	}
 

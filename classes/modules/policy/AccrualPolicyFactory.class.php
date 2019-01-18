@@ -810,7 +810,7 @@ class AccrualPolicyFactory extends Factory {
 				} else {
 					Debug::Text('Static Date', __FILE__, __LINE__, __METHOD__, 10);
 					$year_epoch = mktime( 0, 0, 0, $this->getApplyFrequencyMonth(), $this->getApplyFrequencyDayOfMonth(), TTDate::getYear( $current_epoch ) );
-					if ( $year_epoch < $u_obj->getHireDate() ) {
+					if ( TTDate::getMiddleDayEpoch( $year_epoch ) < TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) ) {
 						$year_epoch = strtotime('+1 year', $year_epoch);
 					}
 				}
@@ -854,7 +854,7 @@ class AccrualPolicyFactory extends Factory {
 				}
 
 				$month_epoch = mktime( 0, 0, 0, TTDate::getMonth( $current_epoch ), $apply_frequency_day_of_month, TTDate::getYear( $current_epoch ) );
-				if ( $month_epoch < $u_obj->getHireDate() ) {
+				if ( TTDate::getMiddleDayEpoch( $month_epoch ) < TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) ) {
 					$month_epoch = strtotime('+1 month', $month_epoch);
 				}
 
@@ -930,15 +930,26 @@ class AccrualPolicyFactory extends Factory {
 			//if ( $apply_frequency_dates['end_date'] >= ($current_epoch - $offset) AND $apply_frequency_dates['end_date'] <= $current_epoch ) {
 			if ( $current_epoch >= ( $apply_frequency_dates['end_date'] - $before_offset ) AND $current_epoch <= ( $apply_frequency_dates['end_date'] + $after_offset ) ) {
 				//Make sure that if enable opening balance is FALSE, we never apply on the hire date.
-				if ( $this->getEnableOpeningBalance() == FALSE
-					AND ( is_object($u_obj) AND TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) == TTDate::getMiddleDayEpoch( $current_epoch ) )
-					AND $this->isInitialApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $u_obj ) == TRUE ) {
-					return FALSE;
-				} else {
-					return TRUE;
-				}
+				//  What if the frequency is monthly on the 1st and the hire date is also the 1st (employee record was created in advance, hire date post dated to the 1st?)
+				//  However to make this work we need to ensure that if the employee record is created on the 1st with the 1st being the hire date, it still accrues when the maintenance jobs run the next day.
+				//I think we should accrue on all frequency dates as long as the criteria (ie: minimum employed days) is met.
+				//  If they don't want to accrue on the hire date in this case they could just set the minimum employed days to 1.
+				//  Unfortunately in the opposite case, where they want to accure on the hire date if its a normal frequency date, there is no work-around.
+				//  See #2334
+				Debug::Text('    In Apply Frequency...', __FILE__, __LINE__, __METHOD__, 10);
+				return TRUE;
+
+//				if ( $this->getEnableOpeningBalance() == FALSE
+//					AND ( is_object($u_obj) AND TTDate::getMiddleDayEpoch( $u_obj->getHireDate() ) == TTDate::getMiddleDayEpoch( $current_epoch ) )
+//					AND $this->isInitialApplyFrequencyWindow( $current_epoch, $offset, $pay_period_dates, $u_obj ) == TRUE ) {
+//					return FALSE;
+//				} else {
+//					return TRUE;
+//				}
 			}
 		}
+
+		Debug::Text('    NOT In Apply Frequency...', __FILE__, __LINE__, __METHOD__, 10);
 
 		return FALSE;
 	}

@@ -538,7 +538,7 @@ class PunchFactory extends Factory {
 			$is_rounded_timestamp = FALSE;
 			//Loop over each rounding policy testing the conditionals and rounding the punch if necessary.
 			foreach( $riplf as $round_policy_obj ) {
-				Debug::text(' Found Rounding Policy: '. $round_policy_obj->getId() .' Punch Type: '. $round_policy_obj->getPunchType() .' Conditional Type: '. $round_policy_obj->getConditionType(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text(' Found Rounding Policy: '. $round_policy_obj->getName() .'('. $round_policy_obj->getId() .') Punch Type: '. $round_policy_obj->getPunchType() .' Conditional Type: '. $round_policy_obj->getConditionType(), __FILE__, __LINE__, __METHOD__, 10);
 
 				//FIXME: It will only do proper total rounding if they edit the Lunch Out punch.
 				//We need to account for cases when they edit just the Lunch In Punch.
@@ -741,18 +741,19 @@ class PunchFactory extends Factory {
 								}
 
 								//Take into account paid meal/breaks when doing day total rounding...
+								//  Since we don't know what time will be added/deducted when creating a new punch, but it has already happened when editing an existing punch,
+								//  the calculations should be based on the RAW time only. So we need to add back in any meal/break time taken but not auto-deducted/added.
 								$meal_and_break_adjustment = 0;
 								$udtlf = TTnew( 'UserDateTotalListFactory' );
-								//$udtlf->getByUserDateIdAndStatusAndType( $plf->getCurrent()->getPunchControlObject()->getUserDateID(), 10, array(100, 110) );
-								$udtlf->getByUserIdAndDateStampAndObjectType( $this->getUser(), $plf->getCurrent()->getPunchControlObject()->getDateStamp(), array(100, 110) );
+								$udtlf->getByUserIdAndDateStampAndObjectType( $this->getUser(), $plf->getCurrent()->getPunchControlObject()->getDateStamp(), array(101, 111) );
 								if ( $udtlf->getRecordCount() > 0 ) {
 									foreach( $udtlf as $udt_obj ) {
 										$meal_and_break_adjustment += $udt_obj->getTotalTime();
 									}
 									Debug::text('Meal and Break Adjustment: '. $meal_and_break_adjustment .' Records: '. $udtlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 								}
-
 								$day_total_time += $meal_and_break_adjustment;
+
 								$original_day_total_time = $day_total_time;
 
 								Debug::text('cDay Total Time: '. $day_total_time, __FILE__, __LINE__, __METHOD__, 10);
@@ -775,7 +776,11 @@ class PunchFactory extends Factory {
 											//Because auto-deduct meal/break policies are already accounted for in the total schedule time, they will be automatically
 											//deducted once the punch is saved. So if we don't add them back in here they will be deducted twice.
 											//The above happens when adding new punches, but editing existing punches need to account for any already deducted meal/break time.
-											$schedule_day_total_time += ( $s_obj->getTotalTime() + abs($s_obj->getMealPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + abs($s_obj->getBreakPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + $meal_and_break_adjustment );
+											//  This was causing problems with auto-deduct meal policies where the user punched for part of the meal time, and it auto-deducted the rest.
+											//  Since we don't know what time will be added/deducted when creating a new punch, but it has already happened when editing an existing punch,
+											//  the calculations should be based on the RAW time only.
+											//$schedule_day_total_time += ( $s_obj->getTotalTime() + abs($s_obj->getMealPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + abs($s_obj->getBreakPolicyDeductTime( $s_obj->calcRawTotalTime(), 10 )) + $meal_and_break_adjustment );
+											$schedule_day_total_time += $s_obj->calcRawTotalTime();
 										}
 										Debug::text('Before Grace: '. $day_total_time .' Schedule Day Total: '. $schedule_day_total_time, __FILE__, __LINE__, __METHOD__, 10);
 										$day_total_time = TTDate::graceTime($day_total_time, $round_policy_obj->getGrace(), $schedule_day_total_time );
@@ -822,16 +827,20 @@ class PunchFactory extends Factory {
 				} else {
 					Debug::text('NOT Total Rounding: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 
-					if ( $this->inScheduleStartStopWindow( $epoch, $this->getStatus() ) AND $round_policy_obj->getGrace() > 0 )	 {
+					$in_schedule_window = $this->inScheduleStartStopWindow( $epoch, $this->getStatus() );
+					//Test rounding condition, needs to happen after we attempt to get the schedule at least, which inScheduleStartStopWindow() does for us.
+					// But this also needs to ahppen before we apply the grace period below,
+					//   otherwise the epoch will already be adjusted, and makes it hard to predict what the condition will be testing against.
+					if ( $round_policy_obj->isConditionTrue( $epoch, $this->getScheduleWindowTime() ) == FALSE ) {
+						continue;
+					}
+
+					if ( $in_schedule_window == TRUE AND $round_policy_obj->getGrace() > 0 )	 {
 						Debug::text(' Applying Grace Period: ', __FILE__, __LINE__, __METHOD__, 10);
 						$epoch = TTDate::graceTime($epoch, $round_policy_obj->getGrace(), $this->getScheduleWindowTime() );
 						Debug::text('After Grace: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					}
-
-					//Test rounding condition, needs to happen after we attempt to get the schedule at least.
-					if ( $round_policy_obj->isConditionTrue( $epoch, $this->getScheduleWindowTime() ) == FALSE ) {
-						continue;
-					}
+					unset($in_schedule_window);
 
 					$grace_time = $round_policy_obj->getGrace();
 					//If strict scheduling is enabled, handle grace times differently.
@@ -1609,8 +1618,18 @@ class PunchFactory extends Factory {
 			//Don't enable transfer by default if the previous punch was any OUT punch.
 			//Transfer does the OUT punch for them, so if the previous punch is an OUT punch
 			//we don't gain anything anyways.
-			if ( is_object($permission_obj) AND $permission_obj->Check('punch', 'default_transfer')
-					AND ( isset($prev_punch_obj) AND is_object($prev_punch_obj) AND $prev_punch_obj->getStatus() == 10 ) ) {
+			$default_transfer_on = ( is_object($permission_obj) ) ? $permission_obj->Check('punch', 'default_transfer', $user_obj->getId(), $user_obj->getCompany() ) : FALSE; //User/Company need to be passed into here otherwise its always false if called from APIClientStationUnAuthenticated
+
+			//Check for "Disable: Default Transfer On" station flag and set default_transfer_on = FALSE if it is set.
+			if ( $default_transfer_on == TRUE ) {
+				$mode_flags = $station_obj->getModeFlag();
+				if ( is_array($mode_flags) AND in_array(16384, $mode_flags) ) {
+					$default_transfer_on = FALSE;
+					Debug::Text( ' Turning off Transfer due to Station Flag: Disable: Default Transfer On ...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			}
+
+			if ( $default_transfer_on == TRUE AND ( isset($prev_punch_obj) AND is_object($prev_punch_obj) AND $prev_punch_obj->getStatus() == 10 ) ) {
 				//Check to see if the employee is scheduled, if they are past their scheduled out time, then don't default to transfer.
 				//If they are not scheduled default to transfer though.
 				if ( !isset($s_obj) ) {
@@ -1620,6 +1639,8 @@ class PunchFactory extends Factory {
 				if ( !is_object( $s_obj ) OR ( is_object( $s_obj ) AND $epoch < $s_obj->getEndTime() ) ) {
 					$transfer = TRUE;
 				}
+			} else {
+				Debug::Text(' Not setting Transfer: On...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			$next_type = (int)$prev_punch_obj->getNextType( $epoch ); //Detects breaks/lunches too.

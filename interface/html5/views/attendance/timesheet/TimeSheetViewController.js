@@ -1354,6 +1354,11 @@ TimeSheetViewController = BaseViewController.extend( {
 			if ( key === 'total_time' ) {
 				c_value = this.api_date.parseTimeUnit( c_value, {async: false} ).getResult();
 				this.current_edit_record[key] = c_value;
+
+				//When handling absences, always remove the start/end time stamps otherwise they may be incorrect and trigger a validation error, as the user doesn't see them anyways.
+				// The API will automatically calculated these on save anyways.
+				this.current_edit_record['start_time_stamp'] = false;
+				this.current_edit_record['end_time_stamp'] = false;
 			} else {
 				this.current_edit_record[key] = c_value;
 			}
@@ -3953,13 +3958,18 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	setTimeSheetGridHolidayHeaders: function() {
 		var holiday_name_map = {};
-
 		if ( this.full_timesheet_data.holiday_data ) {
 			for ( var i = 0; i < this.full_timesheet_data.holiday_data.length; i++ ) {
 				var item = this.full_timesheet_data.holiday_data[i];
 				var standard_date = Global.strToDate( item.date_stamp ).format( this.full_format );
 
-				var cell = $( 'div[id="jqgh_' + this.ui_id + '_grid_' + standard_date + '"]' );
+				var cell = $('<div/>');
+				if ( this.getPunchMode() === 'manual' ) {
+					cell = $('.manual_grid_day_'+standard_date);
+				} else {
+					cell = $('div[id="jqgh_' + this.ui_id + '_grid_' + standard_date + '"]');
+				}
+
 				if ( cell && !holiday_name_map[item.name] ) {
 					cell.html( cell.html() + '<br>' + item.name );
 					holiday_name_map[item.name] = true;
@@ -7285,7 +7295,7 @@ TimeSheetViewController = BaseViewController.extend( {
 			}}
 		);
 	},
-	
+
 	getPayPeriod: function( date ) {
 
 		var current_date = this.getSelectDate();

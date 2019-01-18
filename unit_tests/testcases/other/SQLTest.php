@@ -419,7 +419,7 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 					$columns = array_fill_keys( array_keys( array_flip( array_keys( Misc::trimSortPrefix( $lf->getOptions('columns') ) ) ) ), 'asc'); //Set sort order to ASC for all columns.
 					if ( is_array($columns) ) {
 						try {
-							//$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, array('a.zzz' => 'asc') );
+							//$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, array('a.bogus' => 'asc') );
 							$retarr = $lf->getAPISearchByCompanyIdAndArrayCriteria( $this->company_id, array(), 1, 1, NULL, $columns );
 							$this->assertNotEquals( $retarr, FALSE );
 							$this->assertTrue( is_object( $retarr ), TRUE );

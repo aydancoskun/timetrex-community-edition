@@ -199,7 +199,8 @@ class APIAuthentication extends APIFactory {
 					$error_message = TTi18n::gettext('Sorry, your trial period has expired, please contact our sales department to reactivate your account');
 				} elseif ( $c_obj->getStatus() == 28 ) {
 					if ( $c_obj->getMigrateURL() != '' ) {
-						$error_message = TTi18n::gettext('To better serve our customers your account has been migrated, please update your bookmarks to use the following URL from now on') . ': ' . 'http://'. $c_obj->getMigrateURL();
+						$migrate_url = ( Misc::isSSL() == TRUE ) ? 'https://'. $c_obj->getMigrateURL() : 'http://'. $c_obj->getMigrateURL();
+						$error_message = TTi18n::gettext('To better serve our customers your account has been migrated, please update your bookmarks to use the following URL from now on') . ': ' . '<a href="'. $migrate_url .'">'. $migrate_url .'</a>';
 					} else {
 						$error_message = TTi18n::gettext('To better serve our customers your account has been migrated, please contact customer support immediately.');
 					}

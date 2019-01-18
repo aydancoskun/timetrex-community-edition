@@ -1215,7 +1215,9 @@ progress::-moz-progress-bar {
 
 .edit-view .widget-h-box .a-combobox {
     position: relative;
-    top: -2px;
+    top: 0px;
+    /** #2339 - fixing bad awesomebox alignment on in/out screen when Home View is the parent view controller. **/
+    display: inline-block;
 }
 
 .edit-view .widget-h-box > span {

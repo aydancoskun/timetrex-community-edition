@@ -108,7 +108,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 					LEFT JOIN '. $uf->getTable() .' as uf_b ON ( a.billing_contact = uf_b.id )
 					LEFT JOIN '. $uf->getTable() .' as uf_c ON ( a.support_contact = uf_c.id )
 					WHERE
-						a.status_id = 10
+						a.status_id in (10, 20, 23)
 						AND (
 								( uf_a.id is NULL OR uf_b.id is NULL OR uf_c.id is NULL )
 								OR ( uf_a.deleted = 1 OR uf_b.deleted = 1 OR uf_c.deleted = 1 )
@@ -206,7 +206,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		return $this;
 	}
-	
+
 	function getByShortName($short_name, $where = NULL, $order = NULL) {
 		if ( $short_name == '' ) {
 			return FALSE;
@@ -290,7 +290,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 
 		return $this;
 	}
-	
+
 	function getArrayByListFactory($lf, $include_blank = TRUE, $include_disabled = TRUE ) {
 		if ( !is_object($lf) ) {
 			return FALSE;
@@ -324,7 +324,7 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 	static function getAllArray() {
 		$clf = new CompanyListFactory();
 		$clf->getAll();
-		
+
 		$company_list = array( 0 => '--' );
 		foreach ($clf as $company) {
 			$company_list[$company->getID()] = $company->getName();

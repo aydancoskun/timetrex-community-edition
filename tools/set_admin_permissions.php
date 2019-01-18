@@ -87,7 +87,6 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	}
 }
 
-echo "WARNING: Clear TimeTrex cache after running this.\n";
 //Debug::Display();
 Debug::writeToLog();
 ?>

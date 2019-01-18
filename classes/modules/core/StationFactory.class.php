@@ -219,7 +219,7 @@ class StationFactory extends Factory {
 												2048	=> TTi18n::gettext('Disable: GPS'),
 												4096	=> TTi18n::gettext('Enable: Punch Images'),
 												8192	=> TTi18n::gettext('Disable: Screensaver'),
-												//16384		=>
+												16384	=> TTi18n::gettext('Disable: Default Transfer On'), //This is not synchronized with mobile app, its handled server side currently.
 												//32768		=> TTi18n::gettext('Enable: WIFI Detection - Punch'),
 												//65536		=> TTi18n::gettext('Enable: WIFI Detection - Alert'),
 

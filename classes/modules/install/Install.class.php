@@ -908,6 +908,12 @@ class Install {
 			return 0; //Skip permission checks.
 		}
 
+		$is_root_user = Misc::isCurrentOSUserRoot();
+		if ( $is_root_user == TRUE ) {
+			$web_server_user = Misc::findWebServerOSUser();
+			Debug::Text('Current user is root, attempt to fix any permissions that fail... New User: '. $web_server_user, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		$dirs = array();
 
 		//Make sure we check all files inside the log, storage, and cache directories, in case some files were created with the incorrect permissions and can't be overwritten.
@@ -921,7 +927,7 @@ class Install {
 			$dirs[] = $this->config_vars['path']['storage'];
 		}
 
-		$dirs[] = dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR;
+		$dirs[] = realpath( dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR );
 
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), 9000, NULL, TTi18n::getText('Check File Permission...') );
 		$i = 0;
@@ -933,6 +939,7 @@ class Install {
 					foreach ( new RecursiveIteratorIterator( $rdi ) as $file_name => $cur ) {
 						if ( strcmp( basename($file_name), '.') == 0
 								OR strcmp( basename($file_name), '..' ) == 0
+								OR strpos( $file_name, '.git' ) !== FALSE
 								OR strcmp( basename($file_name), '.htaccess' ) == 0 ) { //.htaccess files often aren't writable by the webserver.
 							continue;
 						}
@@ -940,6 +947,12 @@ class Install {
 						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
 
 						$i++;
+
+						if ( $is_root_user == TRUE AND fileowner( $file_name ) === 0 ) { //Check if file is owned by root.
+							Debug::Text('Changing ownership of: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+							chown( $file_name, $web_server_user );
+							chgrp( $file_name, $web_server_user );
+						}
 
 						//Debug::Text('Checking readable/writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 						if ( is_readable( $file_name ) == FALSE ) {
@@ -1160,18 +1173,7 @@ class Install {
 	}
 
 	function getWebServerUser() {
-		if ( OPERATING_SYSTEM == 'LINUX' ) {
-			if ( function_exists('posix_geteuid') AND function_exists('posix_getpwuid') ) {
-				$user = posix_getpwuid( posix_geteuid() );
-				Debug::text('Webserver running as User: '. $user['name'], __FILE__, __LINE__, __METHOD__, 9);
-
-				return $user['name'];
-			} else {
-				Debug::text('POSIX extension not installed, unable to determine webserver user...', __FILE__, __LINE__, __METHOD__, 9);
-			}
-		}
-
-		return FALSE;
+		return Misc::getCurrentOSUser();
 	}
 
 	function getScheduleMaintenanceJobsCommand() {

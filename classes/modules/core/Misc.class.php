@@ -1529,35 +1529,40 @@ class Misc {
 	static function downloadHTTPFile( $url, $file_name ) {
 		if ( function_exists('curl_exec') ) {
 			Debug::Text( 'Using CURL for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
-			// open file to write
+			// Open file to write
 			$fp = fopen( $file_name, 'w+' );
+			if ( $fp !== FALSE ) {
+				$curl = curl_init();
 
-			$curl = curl_init();
+				//Don't require SSL verification, as the SSL certs may be out-of-date: http://stackoverflow.com/questions/316099/cant-connect-to-https-site-using-curl-returns-0-length-content-instead-what-c
+				curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
+				curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, FALSE );
 
-			//Don't require SSL verification, as the SSL certs may be out-of-date: http://stackoverflow.com/questions/316099/cant-connect-to-https-site-using-curl-returns-0-length-content-instead-what-c
-			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
-			curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, FALSE );
+				curl_setopt( $curl, CURLOPT_URL, $url );
+				curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
+				curl_setopt( $curl, CURLOPT_RETURNTRANSFER, FALSE ); // Set return transfer to false
+				curl_setopt( $curl, CURLOPT_BINARYTRANSFER, TRUE );
+				curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
+				curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 10 );
+				curl_setopt( $curl, CURLOPT_TIMEOUT, 0); //Never timeout
+				curl_setopt( $curl, CURLOPT_FILE, $fp ); // Write data to local file
+				curl_exec( $curl );
+				curl_close( $curl );
+				fclose( $fp );
 
-			curl_setopt( $curl, CURLOPT_URL, $url );
-			curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
-			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, FALSE ); // Set return transfer to false
-			curl_setopt( $curl, CURLOPT_BINARYTRANSFER, TRUE );
-			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
-			curl_setopt( $curl, CURLOPT_CONNECTTIMEOUT, 10 );
-			curl_setopt( $curl, CURLOPT_TIMEOUT, 0); //Never timeout
-			curl_setopt( $curl, CURLOPT_FILE, $fp ); // Write data to local file
-			curl_exec( $curl );
-			curl_close( $curl );
-			fclose( $fp );
-
-			if ( file_exists( $file_name ) ) {
-				$file_size = filesize( $file_name );
-				if ( $file_size > 0 ) {
-					return (int)$file_size;
+				if ( file_exists( $file_name ) ) {
+					$file_size = filesize( $file_name );
+					if ( $file_size > 0 ) {
+						return (int)$file_size;
+					}
 				}
-			}
 
-			return FALSE;
+				Debug::Text( 'ERROR: File download failed: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+				return FALSE;
+			} else {
+				Debug::Text( 'ERROR: Unable to open file for download/writing, likely permission problem?: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+				return FALSE;
+			}
 		} else {
 			Debug::Text( 'Using PHP streams for HTTP...', __FILE__, __LINE__, __METHOD__, 10);
 			return @file_put_contents( $file_name, fopen( $url, 'r' ) );
@@ -2349,6 +2354,64 @@ class Misc {
 		$retval = $mail->Send( $force );
 
 		return $retval;
+	}
+
+	static function isCurrentOSUserRoot() {
+		$user = self::getCurrentOSUser();
+		if ( $user == 'root' ) {
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	static function getCurrentOSUser() {
+		if ( OPERATING_SYSTEM == 'LINUX' ) {
+			if ( function_exists('posix_geteuid') AND function_exists('posix_getpwuid') ) {
+				$user = posix_getpwuid( posix_geteuid() );
+				Debug::text('Running as OS User: '. $user['name'], __FILE__, __LINE__, __METHOD__, 9);
+
+				return $user['name'];
+			} else {
+				Debug::text('POSIX extension not installed, unable to determine webserver user...', __FILE__, __LINE__, __METHOD__, 9);
+			}
+		}
+
+		return FALSE;
+	}
+
+	static function setProcessUID( $uid ) {
+		if ( OPERATING_SYSTEM == 'LINUX' ) {
+			if ( function_exists( 'posix_setuid' ) ) {
+				if ( $uid > 0 ) {
+					Debug::text( 'WARNING: Downgrading process UID to: '. $uid, __FILE__, __LINE__, __METHOD__, 9 );
+					return posix_setuid( $uid );
+				} else {
+					Debug::text( 'UID is invalid or 0 (root), skipping...', __FILE__, __LINE__, __METHOD__, 9 );
+				}
+			}
+		}
+
+		return FALSE;
+	}
+
+	static function findWebServerOSUser() {
+		if ( OPERATING_SYSTEM == 'LINUX' ) {
+			if ( function_exists( 'posix_getpwnam' ) ) {
+				$users = array( 'www-data', 'apache' );
+				foreach( $users as $tmp_user ) {
+					$user_data = posix_getpwnam( $tmp_user );
+					if ( $user_data !== FALSE AND isset($user_data['uid']) AND isset($user_data['name']) ) {
+						//return array('uid' => $user_data['uid'], 'name' => $user_data['name']);
+						Debug::text( 'Found web server user: '. $tmp_user .' UID: '. $user_data['uid'], __FILE__, __LINE__, __METHOD__, 9 );
+						return $user_data['uid'];
+					}
+				}
+			}
+		}
+
+		Debug::text( 'No eb server user found...', __FILE__, __LINE__, __METHOD__, 9 );
+		return FALSE;
 	}
 
 	static function disableCaching( $email_notification = TRUE ) {

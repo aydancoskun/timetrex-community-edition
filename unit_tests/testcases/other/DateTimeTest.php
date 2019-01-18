@@ -456,10 +456,7 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		Debug::text('Testing Date Format: m-d-y', __FILE__, __LINE__, __METHOD__, 10);
 
 		TTDate::setDateFormat('m-d-y');
-		//Debug::text('zzz1: ', date_default_timezone_get(), __FILE__, __LINE__, __METHOD__, 10);
-
 		TTDate::setTimeZone('PST8PDT'); //Force to non-DST timezone. 'PST' isnt actually valid.
-		//Debug::text('zzz2: ', date_default_timezone_get(), __FILE__, __LINE__, __METHOD__, 10);
 
 		TTDate::setTimeFormat('g:i A');
 		$this->assertEquals( TTDate::parseDateTime('02-25-2005'), 1109318400 );

@@ -85,7 +85,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 			//} else {
 				$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
 			//}
-			//Debug::Arr( $db_connection_obj,  'zzzAdding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+			//Debug::Arr( $db_connection_obj,  'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
 			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
 			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";
@@ -136,7 +136,7 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 			//} else {
 				$db_connection_obj = new ADOdbLoadBalancerConnection( $config_vars['database']['type'], $db_host_arr[1], $db_host_arr[2], (bool)$config_vars['database']['persistent_connections'], $db_host_arr[0], $config_vars['database']['user'], $config_vars['database']['password'], $config_vars['database']['database_name'] );
 			//}
-			//Debug::Arr( $db_connection_obj,  'zzzAdding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
+			//Debug::Arr( $db_connection_obj,  'Adding DB Connection...', __FILE__, __LINE__, __METHOD__, 1);
 			$db_connection_obj->getADODbObject()->SetFetchMode(ADODB_FETCH_ASSOC);
 			$db_connection_obj->getADODbObject()->noBlobs = TRUE; //Optimization to tell ADODB to not bother checking for blobs in any result set.
 			$db_connection_obj->getADODbObject()->fmtTimeStamp = "'Y-m-d H:i:s'";

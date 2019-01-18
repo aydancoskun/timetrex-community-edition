@@ -304,6 +304,12 @@ switch ($object_type) {
 		}
 		break;
 	case 'license':
+		//Always enable debug logging during license upload.
+		Debug::setEnable(TRUE);
+		Debug::setBufferOutput(TRUE);
+		Debug::setEnableLog(TRUE);
+		Debug::setVerbosity(10);
+
 		$max_upload_file_size = 50000;
 
 		if ( getTTProductEdition() > 10 ) {
@@ -318,21 +324,24 @@ switch ($object_type) {
 						@mkdir( $dir, 0700, TRUE );
 
 						if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
-							$upload_result = $upload->upload( "filedata", $dir );
+							$upload_result = $upload->upload( 'filedata', $dir );
 							//var_dump($upload ); //file data
 							if ( $upload_result ) {
-								$success = $upload_result . ' ' . TTi18n::gettext( 'Successfully Uploaded' );
+								$success = $upload_result . ' ' . TTi18n::gettext( 'Successfully Uploaded!' );
 							} else {
 								$error = $upload->get_error();
 							}
+						} else {
+							Debug::Text('Upload Failed: Not enough disk space available...', __FILE__, __LINE__, __METHOD__, 10);
+							$error = TTi18n::gettext('File is too large to be uploaded at this time.');
 						}
 					}
+
 					Debug::Text( 'Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10 );
 					if ( isset( $success ) AND $success != '' ) {
 						$clf = new CompanyListFactory();
 						$clf->getById( $config_vars['other']['primary_company_id'] );
 						if ( $clf->getRecordCount() == 1 ) {
-
 							$ttsc = new TimeTrexSoapClient();
 							if ( $ttsc->Ping() == TRUE ) {
 								Debug::Text( 'Initial Communication to license server successful!', __FILE__, __LINE__, __METHOD__, 10 );
@@ -342,7 +351,7 @@ switch ($object_type) {
 								$license = new TTLicense();
 								$retval = $license->getLicenseFile( TRUE, $license_data ); //Download updated license file if one exists.
 								if ( $retval === FALSE ) {
-									$error = TTi18n::gettext( 'Invalid license file or unable to activate license' );
+									$error = TTi18n::gettext( 'Invalid license file or unable to activate license.' );
 									unset( $success );
 								}
 							} else {
@@ -364,7 +373,6 @@ switch ($object_type) {
 		} else {
 			$error = TTi18n::gettext('ERROR: Product Edition is invalid, must not be Community Edition.');
 		}
-		Debug::Text( $error, __FILE__, __LINE__, __METHOD__, 10);
 		break;
 	case 'import':
 		$max_upload_file_size = 128000000;
