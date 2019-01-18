@@ -50,6 +50,22 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	*/
 	var $basic_claim_code_options = array(
 		//Make sure updateCompanyDeductionForTaxYear() is run in the installer so it updates the Tax/Deduction records properly.
+		20180101 => array( //01-Jan-2018:
+						   'CA' => 11809, //Federal
+						   'BC' => 10412,
+						   'AB' => 18915,
+						   'SK' => 16065,
+						   'MB' => 9382,
+						   'QC' => 0,
+						   'ON' => 10354,
+						   'NL' => 9247,
+						   'NB' => 10043,
+						   'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
+						   'PE' => 8160,
+						   'NT' => 14492,
+						   'YT' => 11809,
+						   'NU' => 13325,
+		),
 		20170701 => array( //01-Jul-2017:
 						   'CA' => 11635, //Federal
 						   'BC' => 10208,
@@ -344,6 +360,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		CPP settings
 	*/
 	var $cpp_options = array(
+			20180101 => array( //2018
+							   'maximum_pensionable_earnings'  => 55900,
+							   'basic_exemption'               => 3500,
+							   'employee_rate'                 => 0.0495,
+							   'employee_maximum_contribution' => 2593.80,
+			),
 			20170101 => array( //2017
 							   'maximum_pensionable_earnings'  => 55300,
 							   'basic_exemption'               => 3500,
@@ -434,6 +456,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		EI settings
 	*/
 	var $ei_options = array(
+			20180101 => array( //2018
+							   'maximum_insurable_earnings'    => 51700,
+							   'employee_rate'                 => 0.0166,
+							   'employee_maximum_contribution' => 858.22,
+							   'employer_rate'                 => 1.4,
+			),
 			20170101 => array( //2017
 							   'maximum_insurable_earnings'    => 51300,
 							   'employee_rate'                 => 0.0163,
@@ -524,6 +552,7 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal employment credit
 	*/
 	var $federal_employment_credit_options = array(
+			20180101 => array('credit' => 1195),
 			20170101 => array('credit' => 1178),
 			20160101 => array('credit' => 1161),
 			20150101 => array('credit' => 1146),
@@ -542,6 +571,13 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal Income Tax Rates
 	*/
 	var $federal_income_tax_rate_options = array(
+			20180101 => array(
+					array('income' => 46605, 'rate' => 15, 'constant' => 0),
+					array('income' => 93208, 'rate' => 20.5, 'constant' => 2563),
+					array('income' => 144489, 'rate' => 26, 'constant' => 7690),
+					array('income' => 205842, 'rate' => 29, 'constant' => 12024),
+					array('income' => 205842, 'rate' => 33, 'constant' => 20258),
+			),
 			20170101 => array(
 					array('income' => 45916, 'rate' => 15, 'constant' => 0),
 					array('income' => 91831, 'rate' => 20.5, 'constant' => 2525),

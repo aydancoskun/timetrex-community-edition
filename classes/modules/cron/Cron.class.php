@@ -126,7 +126,7 @@ class Cron {
 	 */
 	static function arrayToScheduleString( $arr, $type ) {
 		if ( !is_array($arr) ) {
-			if ( $arr == '' ) {
+			if ( $arr !== 0 AND $arr !== '0' AND empty($arr) ) {
 				$arr = '*';
 			}
 			$arr = array($arr);
@@ -159,7 +159,7 @@ class Cron {
 	 * @return array
 	 */
 	static function parseScheduleString( $str, $type ) {
-		if ( $str == '' ) {
+		if ( $str !== 0 AND $str !== '0' AND empty($str) ) {
 			$str = '*';
 		}
 

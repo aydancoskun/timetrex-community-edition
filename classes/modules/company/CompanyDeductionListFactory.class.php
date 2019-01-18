@@ -461,6 +461,41 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 
 	/**
 	 * @param string $company_id UUID
+	 * @param string $pay_stub_entry_account_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyDeductionListFactory
+	 */
+	function getByCompanyIdAndPayStubEntryAccountId( $company_id, $pay_stub_entry_account_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_stub_entry_account_id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID($company_id),
+		);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where	company_id = ?
+						AND pay_stub_entry_account_id in ('. $this->getListSQL( $pay_stub_entry_account_id, $ph, 'uuid' ) .')
+						AND deleted = 0
+					ORDER BY calculation_order ASC';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $company_id UUID
 	 * @param int $status_id
 	 * @param int $type_id
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )

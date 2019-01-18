@@ -200,7 +200,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			this.attachElement( 'wage_group_id' );
 			this.attachElement( 'wage_source_type_id' );
 
-		} else if ( this.current_edit_record['pay_type_id'] == 30 || this.current_edit_record['pay_type_id'] == 40 ) {
+		} else if ( this.current_edit_record['pay_type_id'] == 30 || this.current_edit_record['pay_type_id'] == 34 || this.current_edit_record['pay_type_id'] == 40 ) {
 			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
 			this.attachElement( 'wage_group_id' );
@@ -244,9 +244,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 
 	onWageSourceTypeChange: function() {
 		if ( this.current_edit_record['wage_source_type_id'] == 10 ) {
-
 			this.detachElement( 'wage_source_contributing_shift_policy_id' );
-
 			this.detachElement( 'time_source_contributing_shift_policy_id' );
 
 			if ( this.current_edit_record['pay_type_id'] == 32 ) {
@@ -256,13 +254,10 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			}
 
 		} else if ( this.current_edit_record['wage_source_type_id'] == 20 ) {
-
 			this.detachElement( 'wage_source_contributing_shift_policy_id' );
 			this.detachElement( 'time_source_contributing_shift_policy_id' );
 			this.detachElement( 'wage_group_id' );
-
 		} else if ( this.current_edit_record['wage_source_type_id'] == 30 ) {
-
 			if ( this.edit_view_form_item_dic['wage_source_type_id'].css( 'display' ) === 'block' ) {
 				this.attachElement( 'wage_source_contributing_shift_policy_id' );
 				this.attachElement( 'time_source_contributing_shift_policy_id' );

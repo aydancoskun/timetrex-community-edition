@@ -411,7 +411,7 @@ class PayStubEntryFactory extends Factory {
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 		$this->Validator->isResultSetWithRows(	'pay_stub_entry_name_id',
 														$psealf->getById($this->getPayStubEntryNameId()),
-														TTi18n::gettext('Invalid Entry Account Id')
+														TTi18n::gettext('Invalid Pay Stub Account')
 													);
 		// Expense
 		if ( $this->getUserExpense() !== FALSE AND $this->getUserExpense() != TTUUID::getZeroID() ) {
@@ -538,7 +538,7 @@ class PayStubEntryFactory extends Factory {
 			Debug::text('PayStubEntryNameID is NULL: ', __FILE__, __LINE__, __METHOD__, 10);
 			$this->Validator->isTrue(		'pay_stub_entry_name_id',
 											FALSE,
-											TTi18n::gettext('Invalid Entry Account Id'));
+											TTi18n::gettext('Invalid Pay Stub Account'));
 		}
 
 		/*

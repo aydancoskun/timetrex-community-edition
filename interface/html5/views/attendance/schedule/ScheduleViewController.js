@@ -248,9 +248,11 @@ ScheduleViewController = BaseViewController.extend( {
 
 	setToggleButtonValue: function( val ) {
 
-		this.toggle_button.setValue( val );
+		if ( this.toggle_button ) {
+			this.toggle_button.setValue(val);
 
-		this.setToggleButtonUrl();
+			this.setToggleButtonUrl();
+		}
 	},
 
 	setToggleButtonUrl: function() {
@@ -1570,7 +1572,7 @@ ScheduleViewController = BaseViewController.extend( {
 					var target_data = $this.getDataByCellIndex( target_row_index, target_cell_index );
 					var target_row = $this.schedule_source[target_row_index];
 
-					if ( !target_row.user_id ) {
+					if ( !target_row || !target_row.user_id ) {
 						target_empty_row = true;
 					}
 					continue;
@@ -3594,7 +3596,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 	setDefaultMenuEditTimesheetIcon: function( context_btn, grid_selected_length, pId ) {
 
-		if ( this.select_cells_Array.length === 1 && this.select_cells_Array[0].user_id != TTUUID.zero_id ) {
+		if ( this.select_cells_Array.length === 1 && TTUUID.isUUID( this.select_cells_Array[0].user_id ) && this.select_cells_Array[0].user_id != TTUUID.zero_id ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
@@ -3607,7 +3609,7 @@ ScheduleViewController = BaseViewController.extend( {
 			context_btn.addClass( 'invisible-image' );
 		}
 
-		if ( this.select_cells_Array.length === 1 && this.select_cells_Array[0].user_id != TTUUID.zero_id ) {
+		if ( this.select_cells_Array.length === 1 && TTUUID.isUUID( this.select_cells_Array[0].user_id ) && this.select_cells_Array[0].user_id != TTUUID.zero_id ) {
 			context_btn.removeClass( 'disable-image' );
 		} else {
 			context_btn.addClass( 'disable-image' );
@@ -6346,7 +6348,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 			//If the click is inside the existing selection, truncate the existing selection to the click.
 			//Check in TimeSheetViewController.js for related change
-			if ( cells_array[cells_array.length - 1].cell_index >= cell_index && cells_array[0].cell_index <= cell_index &&  cells_array[cells_array.length - 1].row_id >= row_id && cells_array[0].row_id <= row_id ) {
+			if ( cells_array[cells_array.length - 1] && cells_array[0] && cells_array[cells_array.length - 1].cell_index >= cell_index && cells_array[0].cell_index <= cell_index &&  cells_array[cells_array.length - 1].row_id >= row_id && cells_array[0].row_id <= row_id ) {
 				end_row_index = row_id;
 				end_cell_index = cell_index;
 			}
@@ -7177,6 +7179,14 @@ ScheduleViewController = BaseViewController.extend( {
 
 	},
 
+	clearSelection: function(){
+		this.grid.jqGrid('resetSelection');
+		this.select_cells_Array = [];
+		this.select_cellls_and_shifts_array = [];
+		this.select_all_shifts_array = [],
+		this.setDefaultMenu();
+	},
+
 	render: function() {
 		var $this = this;
 		this._super( 'render' );
@@ -7202,9 +7212,10 @@ ScheduleViewController = BaseViewController.extend( {
 		date_left_arrow.bind( 'click', function() {
 
 			var mode = $this.getMode();
-
-			var select_date = $this.start_date;
 			var new_date;
+			var select_date = $this.start_date;
+
+			$this.clearSelection();
 
 			if ( !select_date ) {
 				return;
@@ -7214,16 +7225,16 @@ ScheduleViewController = BaseViewController.extend( {
 				case ScheduleViewControllerMode.DAY:
 					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() - 1 ) );
 					break;
-				case ScheduleViewControllerMode.WEEK:
-					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() - 7 ) );
-					break;
 				case ScheduleViewControllerMode.MONTH:
 					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() - 1 ) );
 					break;
 				case ScheduleViewControllerMode.YEAR:
 					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() - 32 ) );
 					break;
-
+				case ScheduleViewControllerMode.WEEK:
+				default:
+					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() - 7 ) );
+					break;
 			}
 			$this.setDatePickerValue( new_date.format() );
 			//$this.setDateUrl();
@@ -7241,17 +7252,20 @@ ScheduleViewController = BaseViewController.extend( {
 				return;
 			}
 
+			$this.clearSelection();
+
 			switch ( mode ) {
 				case ScheduleViewControllerMode.DAY:
-					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() + 1 ) );
-					break;
-				case ScheduleViewControllerMode.WEEK:
 					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() + 1 ) );
 					break;
 				case ScheduleViewControllerMode.MONTH:
 					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() + 1 ) );
 					break;
 				case ScheduleViewControllerMode.YEAR:
+					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() + 1 ) );
+					break;
+				case ScheduleViewControllerMode.WEEK:
+				default:
 					new_date = new Date( new Date( select_date.getTime() ).setDate( select_date.getDate() + 1 ) );
 					break;
 
@@ -7266,6 +7280,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 		this.start_date_picker.bind( 'formItemChange', function() {
 			//$this.setDateUrl();
+			$this.clearSelection();
 			$this.search( false, true );
 		} );
 

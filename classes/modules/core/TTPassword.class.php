@@ -63,8 +63,8 @@ class TTPassword {
 		return trim($retval);
 	}
 
-	static function generateRandomPassword() {
-		$password = substr( sha1( uniqid( self::getPasswordSalt(), TRUE ) ), 0, 12 ); //12 digit random password.
+	static function generateRandomPassword( $length = 12 ) {
+		$password = substr( sha1( uniqid( self::getPasswordSalt(), TRUE ) ), 0, $length ); //12 digit random password.
 
 		return $password;
 	}

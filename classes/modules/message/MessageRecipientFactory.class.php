@@ -225,11 +225,16 @@ class MessageRecipientFactory extends Factory {
 														);
 		}
 		// Message Sender
-		$mslf = TTnew( 'MessageSenderListFactory' );
-		$this->Validator->isResultSetWithRows(	'message_sender_id',
-														$mslf->getByID($this->getMessageSender()),
-														TTi18n::gettext('Message Sender is invalid')
-													);
+		if ( $this->isNew() == TRUE ) { //If the sender deletes their sent message, this validation will fail if the receiving tries to view/mark the message as read.
+			if ( $this->getMessageSender() !== FALSE ) {
+				$mslf = TTnew( 'MessageSenderListFactory' );
+				$this->Validator->isResultSetWithRows( 'message_sender_id',
+													   $mslf->getByID( $this->getMessageSender() ),
+													   TTi18n::gettext( 'Message Sender is invalid' )
+				);
+			}
+		}
+
 		// Message Control
 		if ( $this->getMessageControl() !== FALSE ) {
 			$mclf = TTnew( 'MessageControlListFactory' );
@@ -263,6 +268,7 @@ class MessageRecipientFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
 		return TRUE;
 	}
 	/**

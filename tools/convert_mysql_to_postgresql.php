@@ -37,33 +37,10 @@
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'CLI.inc.php');
 
-//
 /*
-
-*******************************************************************************
-************** WARNING: THIS IS NOT FULLY TESTED OR SUPPORTED *****************
-*******************************************************************************
-
  Proceedure to Convert MySQL to PostgreSQL:
 
- 1. Upgrade to latest version of TimeTrex still using MySQL.
-
- 2. Run: convert_mysql_to_postgresql.php truncate > delete_all_data.sql
-
- 3. Dump MySQL database with the following command:
-	mysqldump -t --tz-utc=true --skip-add-locks --compatible=postgresql --complete-insert <TimeTrex_Database_Name> > timetrex_mysql.sql
-
- 4. Add "SET TIME ZONE 'UTC'" to top of timetrex_mysql.sql file so both databases are using consistent timezones.
-
- 5. Install a fresh copy of TimeTrex on PostgreSQL, make sure its the latest version of TimeTrex and it matches the version
-	currently installed and running on MySQL.
-
- 6. Run: psql <TimeTrex_Database_Name> < delete_all_data.sql
-
- 7. Run: psql <TimeTrex_Database_Name> < timetrex_mysql.sql.
-
- 9. Done!
-
+ For instructions, please see: https://forums.timetrex.com/viewtopic.php?f=6&t=7519&p=23173
 */
 
 
@@ -75,9 +52,9 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	//Handle command line arguments
 	$last_arg = count($argv)-1;
 
-	if ( isset($db) AND is_object($db) AND strncmp($db->databaseType,'mysql',5) == 0) {
-		echo "This script must be run on MySQL only!";
-		exit;
+	if ( isset($db) AND is_object($db) AND strncmp($db->databaseType,'mysql',5) != 0) {
+		echo "ERROR: This script must be run on MySQL only!";
+		exit(255);
 	}
 
 	if ( isset($argv[$last_arg]) AND $argv[$last_arg] != '' ) {

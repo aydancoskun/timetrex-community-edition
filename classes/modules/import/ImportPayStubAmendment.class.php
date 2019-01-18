@@ -148,7 +148,7 @@ class ImportPayStubAmendment extends Import {
 	 */
 	function parse_pay_stub_entry_name( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //Default Wage Group
+			return TTUUID::getZeroID(); //Default Wage Group
 		}
 
 		if ( !is_array( $this->pay_stub_account_options ) ) {

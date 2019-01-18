@@ -64,7 +64,11 @@ class InstallSchema_1000A extends InstallSchema_Base {
 		Debug::text('Initializing database, after first schema file executed, setting registration key/UUID seed...', __FILE__, __LINE__, __METHOD__, 9);
 		$ttsc = new TimeTrexSoapClient();
 		$ttsc->saveRegistrationKey();
-		TTUUID::generateSeed(); //Generate UUID seed and save it to config file.
+
+		if ( TTUUID::generateSeed() === FALSE ) { //Generate UUID seed and save it to config file.
+			Debug::text('ERROR: Failed writing seed to config file... Failing!', __FILE__, __LINE__, __METHOD__, 9);
+			return FALSE;
+		}
 
 		$maint_base_path = Environment::getBasePath() . DIRECTORY_SEPARATOR .'maint'. DIRECTORY_SEPARATOR;
 		if ( PHP_OS == 'WINNT' ) {

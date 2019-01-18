@@ -608,6 +608,11 @@ class Import {
 //				}
 //			}
 
+			//each row needs to carry the overwrite flag
+			if ( $this->getImportOptions('overwrite') ) {
+				$parsed_data[$x]['overwrite'] = TRUE;
+			}
+
 			if ( is_array($raw_row) ) {
 				foreach( $raw_row as $import_column => $import_data ) {
 					//Debug::Arr($import_data, 'Import Data X: '. $x .' Column: '. $import_column .' File Column Name: '. $import_data['map_column_name'], __FILE__, __LINE__, __METHOD__, 10);
@@ -1258,7 +1263,7 @@ class Import {
 	 */
 	function parse_branch( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No branch
+			return TTUUID::getZeroID(); //No branch
 		}
 
 		if ( !is_array( $this->branch_options ) ) {
@@ -1306,7 +1311,7 @@ class Import {
 	 */
 	function parse_department( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No department
+			return TTUUID::getZeroID(); //No department
 		}
 
 		if ( !is_array( $this->department_options ) ) {
@@ -1355,7 +1360,7 @@ class Import {
 	 */
 	function parse_job( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No job
+			return TTUUID::getZeroID(); //No job
 		}
 
 		if ( !is_array( $this->job_options ) ) {
@@ -1403,7 +1408,7 @@ class Import {
 	 */
 	function parse_job_item( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No job_item
+			return TTUUID::getZeroID(); //No job_item
 		}
 
 		if ( !is_array( $this->job_item_options ) ) {

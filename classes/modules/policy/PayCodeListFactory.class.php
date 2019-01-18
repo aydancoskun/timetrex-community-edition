@@ -222,6 +222,48 @@ class PayCodeListFactory extends PayCodeFactory implements IteratorAggregate {
 	}
 
 	/**
+	 * @param string $id UUID
+	 * @param string $pay_stub_entry_account_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayCodeListFactory
+	 */
+	function getByCompanyIdAndPayStubEntryAccountID( $id, $pay_stub_entry_account_id, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $pay_stub_entry_account_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.name' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'id' => TTUUID::castUUID($id),
+		);
+
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .' as a
+					where	company_id = ?
+						AND pay_stub_entry_account_id in ('. $this->getListSQL( $pay_stub_entry_account_id, $ph, 'uuid' ) .')
+						AND deleted = 0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $company_id UUID
 	 * @param string $pay_stub_entry_account_id UUID
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )

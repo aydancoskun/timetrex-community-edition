@@ -399,9 +399,9 @@ class Install {
 						}
 					}
 
-					Debug::text('Modified Config File!', __FILE__, __LINE__, __METHOD__, 9);
 					//Debug::Arr($data, 'New Config File!', __FILE__, __LINE__, __METHOD__, 9);
 					$retval = $config->writeConfig( CONFIG_FILE, 'inicommented' );
+					Debug::text('Modified Config File! writeConfig Result: '. $retval, __FILE__, __LINE__, __METHOD__, 9);
 
 					//Make sure the first line in the file contains "die".
 					$contents = file_get_contents( CONFIG_FILE );
@@ -633,7 +633,7 @@ class Install {
 	 * @return bool
 	 */
 	function createSchemaRange( $start_version = NULL, $end_version = NULL, $group = array('A', 'B', 'C', 'D') ) {
-		global $cache, $progress_bar, $config_vars, $PRIMARY_KEY_IS_UUID;
+		global $cache, $config_vars, $PRIMARY_KEY_IS_UUID;
 
 		if ( $this->checkDatabaseSchema() == 1 ) {
 			return FALSE;
@@ -676,7 +676,10 @@ class Install {
 				$PRIMARY_KEY_IS_UUID = FALSE;
 				$config_vars['other']['disable_audit_log'] = TRUE; //After v11, when UUID is disabled, disable all audit logging too.
 			}
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_schema_versions, NULL, $msg );
+
+			if ( PHP_SAPI != 'cli' ) { //Don't bother updating progress bar when being run from the CLI.
+				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_schema_versions, NULL, $msg );
+			}
 
 			//Sequences are no longer used after the change to UUID in v11.
 			$this->initializeSequences(); //Initialize sequences before we start the schema upgrade to hopefully avoid duplicate key errors.
@@ -694,12 +697,9 @@ class Install {
 
 					$create_schema_result = $this->createSchema( $schema_version );
 
-					if ( is_object($progress_bar) ) {
-						$progress_bar->setValue( Misc::calculatePercent( $x, $total_schema_versions ) );
-						$progress_bar->display();
+					if ( PHP_SAPI != 'cli' ) {
+						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
 					}
-
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
 
 					if ( $create_schema_result === FALSE ) {
 						Debug::text('CreateSchema Failed! On Version: '. $schema_version, __FILE__, __LINE__, __METHOD__, 9);
@@ -717,7 +717,10 @@ class Install {
 
 				$x++;
 			}
-			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+			if ( PHP_SAPI != 'cli' ) {
+				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			}
 
 			//Sequences are no longer used after the change to UUID in v11.
 			$this->initializeSequences(); //Initialize sequences after we finish as well just in case new errors were created during upgrade...
@@ -1061,21 +1064,21 @@ class Install {
 	 */
 	function getDatabaseTypeArray() {
 		$retval = array();
-
-		if ( function_exists('pg_connect') ) {
-			$retval['postgres8'] = 'PostgreSQL v9.1+';
-
-			// set edb_redwood_date = 'off' must be set, otherwise enterpriseDB
-			// changes all date columns to timestamp columns and breaks TimeTrex.
-			//$retval['enterprisedb'] = 'EnterpriseDB (DISABLE edb_redwood_date)';
-		}
-		if ( function_exists('mysqli_real_connect') ) {
-			$retval['mysqli'] = 'DEPRECATED - MySQLi (v5.5+ w/InnoDB)';
-		}
-		//MySQLt driver is no longer supported, as it causes conflicts with ADODB and complex queries.
-		if ( function_exists('mysql_connect') ) {
-			$retval['mysqlt'] = 'DEPRECATED - MySQL (Legacy Driver - NOT SUPPORTED, use MYSQLi instead!)';
-		}
+		$retval['postgres8'] = 'PostgreSQL';
+//		if ( function_exists('pg_connect') ) {
+//			$retval['postgres8'] = 'PostgreSQL v9.1+';
+//
+//			// set edb_redwood_date = 'off' must be set, otherwise enterpriseDB
+//			// changes all date columns to timestamp columns and breaks TimeTrex.
+//			//$retval['enterprisedb'] = 'EnterpriseDB (DISABLE edb_redwood_date)';
+//		}
+//		if ( function_exists('mysqli_real_connect') ) {
+//			$retval['mysqli'] = 'NOT SUPPORTED - MySQLi (v5.5+ w/InnoDB)';
+//		}
+//		//MySQLt driver is no longer supported, as it causes conflicts with ADODB and complex queries.
+//		if ( function_exists('mysql_connect') ) {
+//			$retval['mysqlt'] = 'NOT SUPPORTED - MySQL (Legacy Driver - NOT SUPPORTED, use MYSQLi instead!)';
+//		}
 
 		return $retval;
 	}
@@ -1114,7 +1117,10 @@ class Install {
 
 		$dirs[] = realpath( dirname( __FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR );
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), 9000, NULL, TTi18n::getText('Check File Permission...') );
+		if ( PHP_SAPI != 'cli' ) { //Don't bother updating progress bar when being run from the CLI.
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), 10000, NULL, TTi18n::getText( 'Check File Permission...' ) );
+		}
+
 		$i = 0;
 		foreach( $dirs as $dir ) {
 			Debug::Text('Checking directory readable/writable: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
@@ -1122,25 +1128,23 @@ class Install {
 				try {
 					$rdi = new RecursiveDirectoryIterator( $dir, RecursiveIteratorIterator::SELF_FIRST );
 					foreach ( new RecursiveIteratorIterator( $rdi ) as $file_name => $cur ) {
-						if ( strcmp( basename($file_name), '.') == 0
+						if (
+								//strcmp( basename($file_name), '.') == 0 OR //Make sure we do check "." (the current directory). As permissions could be denied on it, but allowed on all sub-dirs/files.
+								file_exists( $file_name ) == FALSE //Its possible if it takes a long time to iterate the files, they could be gone by the time we get to them, so just check them again.
 								OR strcmp( basename($file_name), '..' ) == 0
 								OR strpos( $file_name, '.git' ) !== FALSE
 								OR strcmp( basename($file_name), '.htaccess' ) == 0 ) { //.htaccess files often aren't writable by the webserver.
 							continue;
 						}
 
-						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
-
-						$i++;
-
-						if ( $is_root_user == TRUE AND $web_server_user != FALSE AND @fileowner( $file_name ) === 0 ) { //Check if file is owned by root.
+						if ( $is_root_user == TRUE AND $web_server_user != FALSE AND @fileowner( $file_name ) === 0 ) { //Check if file is owned by root. If so, change the owner before we check is readable/writable.
 							Debug::Text('  Changing ownership of: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 							@chown( $file_name, $web_server_user );
 							@chgrp( $file_name, $web_server_user );
 						}
 
 						//Debug::Text('Checking readable/writable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
-						if ( is_readable( $file_name ) == FALSE ) {
+						if ( file_exists( $file_name ) AND is_readable( $file_name ) == FALSE ) {
 							Debug::Text('File or directory is not readable: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 							$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not Readable: '. $file_name );
 							return 1; //Invalid
@@ -1151,21 +1155,33 @@ class Install {
 							$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not writable: '. $file_name );
 							return 1; //Invalid
 						}
+
+						//Do this last, as it can take a long time on some systems using a slow file system.
+						if ( PHP_SAPI != 'cli' AND ( $i % 100 ) == 0 )  {
+							$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+						}
+
+						$i++;
 					}
 					unset($cur); //code standards
 				} catch( Exception $e ) {
 					Debug::Text('Failed opening/reading file or directory: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
 					return 1;
 				}
+			} else {
+				Debug::Text('Failed reading directory: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
+				$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not Readable: '. $dir );
+				return 1;
 			}
-
 		}
 
-		$this->getProgressBarObject()->set( $this->getAMFMessageID(), 9000 );
+		if ( PHP_SAPI != 'cli' ) {
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), 10000 );
 
-		$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+		}
 
-		Debug::Text('All Files/Directories are readable/writable!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('All Files/Directories ('. $i .') are readable/writable!', __FILE__, __LINE__, __METHOD__, 10);
 		return 0;
 	}
 
@@ -1193,7 +1209,9 @@ class Install {
 			unset($checksum_data);
 			if ( is_array($checksums) ) {
 
-				$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($checksums), NULL, TTi18n::getText('Check File Checksums...') );
+				if ( PHP_SAPI != 'cli' ) { //Don't bother updating progress bar when being run from the CLI.
+					$this->getProgressBarObject()->start( $this->getAMFMessageID(), count( $checksums ), NULL, TTi18n::getText( 'Check File Checksums...' ) );
+				}
 
 				$i = 0;
 				foreach($checksums as $checksum_line ) {
@@ -1239,12 +1257,18 @@ class Install {
 						unset($split_line, $file_name, $checksum);
 					}
 
-					$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+					if ( PHP_SAPI != 'cli' AND ( $i % 100 ) == 0 ) {
+						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+					}
 
 					$i++;
 
 				}
-				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+
+				if ( PHP_SAPI != 'cli' ) {
+					$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
+				}
+
 				return 0; //OK
 			}
 		} else {
@@ -1263,16 +1287,15 @@ class Install {
 		//
 		// 0 = OK
 		// 1 = Invalid
-		// 2 = Unsupported
+		// 2 = mysql type in ini
 
 		$retval = 1;
 
-		if ( function_exists('pg_connect') ) {
-			$retval = 0;
-		} elseif ( function_exists('mysqli_real_connect') ) {
-			$retval = 0;
-		} elseif ( function_exists('mysql_connect') ) {
+		global $config_vars;
+		if ( isset($config_vars['database']['type']) AND strncmp($config_vars['database']['type'], 'mysql', 5) == 0 ) {
 			$retval = 2;
+		} elseif ( function_exists('pg_connect') ) {
+			$retval = 0;
 		}
 
 		return $retval;
@@ -1292,50 +1315,51 @@ class Install {
 			if ( $db_version == NULL OR version_compare( $db_version, '9.1', '>=') == 1 ) {
 				return 0;
 			}
-		} elseif ( $this->getDatabaseType() == 'mysql' ) {
-			if ( version_compare( $db_version, '5.5.0', '>=') == 1 ) {
-				return 0;
-			}
 		}
+//		elseif ( $this->getDatabaseType() == 'mysql' ) {
+//			if ( version_compare( $db_version, '5.5.0', '>=') == 1 ) {
+//				return 0;
+//			}
+//		}
 
 		Debug::Text('ERROR: Database version failed!', __FILE__, __LINE__, __METHOD__, 10);
 		return 1;
 	}
 
-	/**
-	 * @return bool
-	 */
-	function checkDatabaseEngine() {
-		//
-		// For MySQL only, this checks to make sure InnoDB is enabled!
-		//
-		Debug::Text('Checking DatabaseEngine...', __FILE__, __LINE__, __METHOD__, 10);
-		if ($this->getDatabaseType() != 'mysql' ) {
-			return TRUE;
-		}
-
-		$db_conn = $this->getDatabaseConnection();
-		if ( $db_conn == FALSE ) {
-			Debug::text('No Database Connection.', __FILE__, __LINE__, __METHOD__, 9);
-			return FALSE;
-		}
-
-		$query = 'show engines';
-		$storage_engines = $db_conn->getAll($query);
-		//Debug::Arr($storage_engines, 'Available Storage Engines:', __FILE__, __LINE__, __METHOD__, 9);
-		if ( is_array($storage_engines) ) {
-			foreach( $storage_engines as $data ) {
-				Debug::Text('Engine: '. $data['Engine'] .' Support: '. $data['Support'], __FILE__, __LINE__, __METHOD__, 10);
-				if ( strtolower($data['Engine']) == 'innodb' AND ( strtolower($data['Support']) == 'yes' OR strtolower($data['Support']) == 'default' )	 ) {
-					Debug::text('InnoDB is available!', __FILE__, __LINE__, __METHOD__, 9);
-					return TRUE;
-				}
-			}
-		}
-
-		Debug::text('InnoDB is NOT available!', __FILE__, __LINE__, __METHOD__, 9);
-		return FALSE;
-	}
+//	/**
+//	 * @return bool
+//	 */
+//	function checkDatabaseEngine() {
+//		//
+//		// For MySQL only, this checks to make sure InnoDB is enabled!
+//		//
+//		Debug::Text('Checking DatabaseEngine...', __FILE__, __LINE__, __METHOD__, 10);
+//		if ($this->getDatabaseType() != 'mysql' ) {
+//			return TRUE;
+//		}
+//
+//		$db_conn = $this->getDatabaseConnection();
+//		if ( $db_conn == FALSE ) {
+//			Debug::text('No Database Connection.', __FILE__, __LINE__, __METHOD__, 9);
+//			return FALSE;
+//		}
+//
+//		$query = 'show engines';
+//		$storage_engines = $db_conn->getAll($query);
+//		//Debug::Arr($storage_engines, 'Available Storage Engines:', __FILE__, __LINE__, __METHOD__, 9);
+//		if ( is_array($storage_engines) ) {
+//			foreach( $storage_engines as $data ) {
+//				Debug::Text('Engine: '. $data['Engine'] .' Support: '. $data['Support'], __FILE__, __LINE__, __METHOD__, 10);
+//				if ( strtolower($data['Engine']) == 'innodb' AND ( strtolower($data['Support']) == 'yes' OR strtolower($data['Support']) == 'default' )	 ) {
+//					Debug::text('InnoDB is available!', __FILE__, __LINE__, __METHOD__, 9);
+//					return TRUE;
+//				}
+//			}
+//		}
+//
+//		Debug::text('InnoDB is NOT available!', __FILE__, __LINE__, __METHOD__, 9);
+//		return FALSE;
+//	}
 
 	/**
 	 * @return bool|int
@@ -1547,7 +1571,7 @@ class Install {
 		if ( $this->checkPHPCLIBinary() === 0 ) {
 			$command = $this->getPHPCLIRequirementsCommand();
 			exec( $command, $output, $exit_code );
-			Debug::Arr($output, 'PHP CLI Requirements Command: '. $command .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Arr($output, 'PHP CLI Requirements Command: '. $command .' Exit Code: '. $exit_code .' Output: ', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $exit_code == 0 ) {
 				return 0;
 			} else {

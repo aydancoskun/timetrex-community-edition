@@ -155,7 +155,7 @@ BaseViewController = Backbone.View.extend( {
 
 	/**
 	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
-	 * BaseViewController, HomeViewController, BaseWizardController
+	 * BaseViewController, HomeViewController, BaseWizardController, QuickPunchBaseViewControler
 	 *
 	 * @returns {Array}
 	 */
@@ -1648,15 +1648,22 @@ BaseViewController = Backbone.View.extend( {
 		}
 	},
 
+	preCopyAsNew: function (data) {
+		//override where needed.
+		data.id = '';
+		return data;
+	},
+
 	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
-			this.current_edit_record.id = '';
+			this.current_edit_record = this.preCopyAsNew( this.current_edit_record );
 			var navigation_div = this.edit_view.find( '.navigation-div' );
 			navigation_div.css( 'display', 'none' );
 			this.setEditMenu();
+			this.setCurrentEditRecordData();
 			this.setTabStatus();
 			this.is_changed = false;
 			ProgressBar.closeOverlay();
@@ -1681,26 +1688,25 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	onCopyAsNewResult: function( result ) {
-		var $this = this;
 		var result_data = result.getResult();
 
 		if ( typeof result_data != 'object' ) {
-			$this.onAddClick()
+			this.onAddClick()
 			return;
 		}
 
-		$this.openEditView(); // Put it here is to avoid if the selected one is not existed in data or have deleted by other pragram. in this case, the edit view should not be opend.
+		this.openEditView(); // Put it here is to avoid if the selected one is not existed in data or have deleted by other pragram. in this case, the edit view should not be opend.
 
 		result_data = result_data[0];
 
-		result_data.id = '';
+		result_data = this.preCopyAsNew( result_data );
 
-		if ( $this.sub_view_mode && $this.parent_key ) {
-			result_data[$this.parent_key] = $this.parent_value;
+		if ( this.sub_view_mode && this.parent_key ) {
+			result_data[this.parent_key] = this.parent_value;
 		}
 
-		$this.current_edit_record = result_data;
-		$this.initEditView();
+		this.current_edit_record = result_data;
+		this.initEditView();
 	},
 
 	/*
@@ -5702,7 +5708,7 @@ BaseViewController = Backbone.View.extend( {
 		//select_layout will not be null, it's set in setSelectLayout function
 		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
 		//Error: Uncaught TypeError: Cannot read property 'data' of null
-		if ( typeof this.select_layout != 'undefined' ) {
+		if ( this.select_layout && this.select_layout.data ) {
 		filter.filter_sort = this.select_layout.data.filter_sort;
 		}
 

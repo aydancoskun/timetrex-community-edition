@@ -403,7 +403,7 @@ InstallWizardController = BaseWizardController.extend( {
 					requirements_column2.removeClass( 'all-ok' );
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'database_engine'} );
-					this.addEditFieldToColumn( $.i18n._( 'Database Engine' ), form_item_input, requirements_column2, '', null, true, true );
+					this.addEditFieldToColumn( $.i18n._( 'PostgreSQL Enabled' ), form_item_input, requirements_column2, '', null, true, true );
 
 					form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
 					form_item_input.TText( {field: 'bcmath'} );
@@ -1340,11 +1340,11 @@ InstallWizardController = BaseWizardController.extend( {
 							if ( stepData[key] == 0 ) {
 								widget.html( $.i18n._( 'OK' ) );
 							} else if ( stepData[key] == 1 ) {
-								widget.html( $.i18n._( 'Invalid, PGSQL or MySQLi PHP extensions are required' ) );
-								widget.addClass( 'dataError' );
+								widget.html($.i18n._('Not Installed. (PGSQL extension must be enabled)'));
+								widget.addClass('dataError');
 							} else if ( stepData[key] == 2 ) {
-								widget.html( $.i18n._( 'Unsupported, upgrade to MySQLi PHP extension instead.' ) );
-								widget.addClass( 'dataWarning' );
+								widget.html( $.i18n._( 'MySQL is not supported. (Database type must be "postgres" in timetrex.ini.php)' ) );
+								widget.addClass( 'dataError' );
 							}
 							break;
 						case 'bcmath':

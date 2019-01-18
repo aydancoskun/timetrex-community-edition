@@ -2353,7 +2353,7 @@ class CompanyDeductionFactory extends Factory {
 			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 			foreach ($ids as $id) {
-				if ( $id != FALSE AND isset($ids) AND !in_array($id, $tmp_ids) ) {
+				if ( $id != FALSE AND isset($ids) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() AND !in_array($id, $tmp_ids) ) {
 					$cdpseaf = TTnew( 'CompanyDeductionPayStubEntryAccountFactory' );
 					$cdpseaf->setCompanyDeduction( $this->getId() );
 					$cdpseaf->setType(10); //Include
@@ -2456,7 +2456,7 @@ class CompanyDeductionFactory extends Factory {
 			$psealf = TTnew( 'PayStubEntryAccountListFactory' );
 
 			foreach ($ids as $id) {
-				if ( $id != FALSE AND isset($ids) AND !in_array($id, $tmp_ids) ) {
+				if ( $id != FALSE AND isset($ids) AND $id != TTUUID::getZeroID() AND $id != TTUUID::getNotExistID() AND !in_array($id, $tmp_ids) ) {
 					$cdpseaf = TTnew( 'CompanyDeductionPayStubEntryAccountFactory' );
 					$cdpseaf->setCompanyDeduction( $this->getId() );
 					$cdpseaf->setType(20); //Include

@@ -41,6 +41,7 @@
 class PayrollDeduction_US_CO extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			//2018 - No Change
 			20170101 => array(
 					10 => array(
 							array('income' => 2300, 'rate' => 0, 'constant' => 0),
@@ -114,6 +115,7 @@ class PayrollDeduction_US_CO extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			//2018 - No Change
 			20170101 => array( //2017
 							   'allowance' => 4050,
 			),

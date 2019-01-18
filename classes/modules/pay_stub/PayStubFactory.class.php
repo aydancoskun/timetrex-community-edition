@@ -773,6 +773,27 @@ class PayStubFactory extends Factory {
 	/**
 	 * @return bool
 	 */
+	function getIsReCalculatingYTD() {
+		if ( isset($this->is_recalc_ytd) ) {
+			return $this->is_recalc_ytd;
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $bool
+	 * @return bool
+	 */
+	function setIsReCalculatingYTD( $bool) {
+		$this->is_recalc_ytd = (bool)$bool;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getEnableEmail() {
 		if ( isset($this->email) ) {
 			return $this->email;
@@ -998,14 +1019,16 @@ class PayStubFactory extends Factory {
 		if ( $pay_stub_id != '' ) {
 			Debug::text('Attempting to recalculate pay stub YTD for pay stub id: '. $pay_stub_id, __FILE__, __LINE__, __METHOD__, 10);
 			$pslf = TTnew( 'PayStubListFactory' );
-			$pslf->getById( $pay_stub_id );
+			$pslf->StartTransaction();
 
+			$pslf->getById( $pay_stub_id );
 			if ( $pslf->getRecordCount() == 1 ) {
 				$pay_stub = $pslf->getCurrent();
 
 				$pay_stub->loadPreviousPayStub();
 				if ( $pay_stub->loadCurrentPayStubEntries() == TRUE ) {
 					$pay_stub->setEnableProcessEntries(TRUE);
+					$pay_stub->setIsReCalculatingYTD(TRUE);
 					$pay_stub->processEntries();
 
 					$pay_stub->setEnableEmail( $enable_email );
@@ -1013,12 +1036,18 @@ class PayStubFactory extends Factory {
 						Debug::text('Pay Stub is valid, final save.', __FILE__, __LINE__, __METHOD__, 10);
 						$pay_stub->Save();
 
+						$pslf->CommitTransaction();
 						return TRUE;
+					} else {
+						$pslf->FailTransaction();
+						Debug::text('ERROR: Failed validation calculating YTD amounts!', __FILE__, __LINE__, __METHOD__, 10);
 					}
 				} else {
 					Debug::text('Failed loading current pay stub entries.', __FILE__, __LINE__, __METHOD__, 10);
 				}
 			}
+
+			$pslf->CommitTransaction();
 		}
 
 		return FALSE;
@@ -1225,7 +1254,7 @@ class PayStubFactory extends Factory {
 			if ( $pstlf->getRecordCount() > 0 ) {
 				$this->Validator->isTrue( 'status_id',
 										  FALSE,
-										  TTi18n::gettext( 'This pay stub cannot be deleted as it has paid transactions.' ) );
+										  TTi18n::gettext( 'This pay stub cannot be deleted as it has paid transactions' ) );
 			}
 		}
 
@@ -1359,7 +1388,9 @@ class PayStubFactory extends Factory {
 			$this->ValidateEntries();
 		}
 
-		if ( $this->Validator->getValidateOnly() == FALSE AND ( $this->getStatus() == 40 OR $this->getEnableProcessTransactions() == TRUE ) ) { //40=Paid  -- Only check if we aren't mass editing, as we don't load transactions in that case anyways.
+		//40=Paid  -- Only check if we aren't mass editing, as we don't load transactions in that case anyways.
+		// Also don't validate transactions when recalculating YTD amounts on newer pay stubs, as pre v11 they won't have transactions, so validation will always fail.
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getIsReCalculatingYTD() == FALSE AND ( $this->getStatus() == 40 OR $this->getEnableProcessTransactions() == TRUE ) ) {
 			$this->ValidateTransactions();
 		}
 
@@ -1418,17 +1449,21 @@ class PayStubFactory extends Factory {
 		//Allow Opening Balance pay stubs to have no transactions.
 		// Only show transaction errors if their are actually earnings
 		if ( $this->Validator->isError('earnings') == FALSE ) {
-			if ( $this->getStatus() != 100 ) { //100=Opening Balance
+			//Make sure if net pay is greater than zero, at least one transaction must exist.
+			//  Need to allow $0 net pay, pay stubs with no transactions though.
+			$net_pay_arr = $this->getNetPaySum();
+			if ( isset($net_pay_arr['amount']) AND $net_pay_arr['amount'] > 0 ) {
 				$this->Validator->isTrue( 'transactions',
 						( ( $this->getTotalTransactions() > 0 ) ? TRUE : FALSE ),
-										  TTi18n::gettext( 'No transactions exist' ) );
+										  TTi18n::gettext( 'No transactions exists, or employee does not have any payment methods' ) );
+
 			}
 
 			//Check if any transactions are PENDING state and that total of paid transactions matches net pay
 			if ( $this->getStatus() == 40 AND $this->Validator->isError( 'transactions' ) == FALSE ) { //40=Paid
 				$this->Validator->isTrue( 'status_id',
 											( ( $this->getTotalPendingTransactions() > 0 ) ? FALSE : TRUE ),
-										  	TTi18n::gettext( 'This pay stub can\'t be marked paid as it has pending transactions.' ) );
+										  	TTi18n::gettext( 'This pay stub can\'t be marked paid as it has pending transactions' ) );
 			}
 
 			if ( $this->Validator->isError( 'transactions' ) == FALSE AND $this->Validator->isError( 'status_id' ) == FALSE ) {
@@ -1455,6 +1490,7 @@ class PayStubFactory extends Factory {
 
 		if ( $this->getEnableProcessTransactions() == TRUE ) {
 			if ( $this->savePayStubTransactions() == FALSE ) {
+				Debug::Text('ERROR: Unable to save pay stub transactions, rolling back transaction...', __FILE__, __LINE__, __METHOD__, 10);
 				$this->FailTransaction(); //Fail transaction as one of the PS entries was not saved.
 			}
 		}
@@ -1853,7 +1889,7 @@ class PayStubFactory extends Factory {
 			}
 		}
 
-		Debug::Text('Loading current pay stub transactions failed!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('No current pay stub transactions to load...', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 
@@ -1913,8 +1949,8 @@ class PayStubFactory extends Factory {
 					return TRUE;
 				}
 			}
-
 		}
+
 		Debug::Text('Loading current pay stub entries failed!', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
@@ -2013,7 +2049,7 @@ class PayStubFactory extends Factory {
 	 */
 	function addEntry( $pay_stub_entry_account_id, $amount, $units = NULL, $rate = NULL, $description = NULL, $ps_amendment_id = NULL, $ytd_amount = NULL, $ytd_units = NULL, $ytd_adjustment = FALSE, $user_expense_id = NULL ) {
 		Debug::text('Add Entry: PSE Account ID: '. $pay_stub_entry_account_id .' Amount: '. $amount .' YTD Amount: '. $ytd_amount .' Pay Stub Amendment Id: '. $ps_amendment_id .' User Expense: '. $user_expense_id, __FILE__, __LINE__, __METHOD__, 10);
-		if ( $pay_stub_entry_account_id == '' ) {
+		if ( $pay_stub_entry_account_id == '' OR TTUUID::isUUID( $pay_stub_entry_account_id ) == FALSE OR $pay_stub_entry_account_id == TTUUID::getZeroID() OR $pay_stub_entry_account_id == TTUUID::getNotExistID() ) {
 			return FALSE;
 		}
 
@@ -2539,9 +2575,9 @@ class PayStubFactory extends Factory {
 		return TRUE;
 	}
 
-	//Returns TRUE unless Amount explicitly does not match Gross Pay
-	//use checkNoEarnings to see if any earnings exist or not.
 	/**
+	 * Returns TRUE unless Amount explicitly does not match Gross Pay
+	 * use checkNoEarnings to see if any earnings exist or not.
 	 * @return bool
 	 */
 	function checkEarnings() {
@@ -2629,10 +2665,9 @@ class PayStubFactory extends Factory {
 				}
 			}
 
-			return TRUE;
 		}
 
-		return FALSE;
+		return TRUE;
 	}
 
 	/**
@@ -3984,15 +4019,9 @@ class PayStubFactory extends Factory {
 					$net_pay_amount = TTi18n::formatNumber( $pay_stub_entries[40][0]['amount'], TRUE, $pay_stub_obj->getCurrencyObject()->getRoundDecimalPlaces() );
 				}
 
-				if ( isset($pay_stub_entries[65]) AND count($pay_stub_entries[65]) > 0 ) {
-					$net_pay_label = TTi18n::gettext('Balance');
-				} else {
-					$net_pay_label = TTi18n::gettext('Net Pay');
-				}
-
 				$pdf->SetFont('', 'B', 12);
 				$pdf->setXY( Misc::AdjustXY(75, $adjust_x), Misc::AdjustXY( ($block_adjust_y + 9), $adjust_y) );
-				$pdf->Cell(100, 5, $net_pay_label.': '. $pay_stub_obj->getCurrencyObject()->getSymbol() . $net_pay_amount . ' ' . $pay_stub_obj->getCurrencyObject()->getISOCode(), $border, 1, 'R', FALSE, '', 1);
+				$pdf->Cell(100, 5, TTi18n::gettext('Net Pay') .': '. $pay_stub_obj->getCurrencyObject()->getSymbol() . $net_pay_amount . ' ' . $pay_stub_obj->getCurrencyObject()->getISOCode(), $border, 1, 'R', FALSE, '', 1);
 
 				//Display additional employee information on the pay stub such as job title, SIN, hire date.
 				$block_adjust_y = ($block_adjust_y + 12);

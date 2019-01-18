@@ -274,8 +274,10 @@ class PunchFactory extends Factory {
 			} else {
 				$pps_obj = TTnew('PayPeriodScheduleFactory');
 				$maximum_shift_time = ( 3600 * 16 );
+				$pps_obj->setMaximumShiftTime( $maximum_shift_time );
 			}
 			$shift_data = $pps_obj->getShiftData( NULL, $user_id, $epoch, 'nearest_shift', NULL, NULL, NULL, NULL, $ignore_future_punches );
+			unset($pps_obj);
 
 			$last_punch_id = FALSE;
 			if ( isset($shift_data) AND is_array($shift_data) ) {

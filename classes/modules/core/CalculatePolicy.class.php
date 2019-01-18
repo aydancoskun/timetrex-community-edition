@@ -7963,19 +7963,56 @@ class CalculatePolicy {
 			//Make sure we get all UserDateTotal data going back to the number of days to average the time over.
 			$this->getUserDateTotalData( ( $date_stamp - ( 86400 * $this->holiday_before_days ) ), ( $date_stamp - 86400 ) );
 
+			if ( $holiday_policy_obj->getAverageTimeFrequencyType() == 20 ) { //Pay Periods
+				$pplf = TTNew('PayPeriodListFactory');
+				$pplf->getByPayPeriodScheduleIdAndEndDateBefore( $this->pay_period_schedule_obj->getId(), $date_stamp, $holiday_policy_obj->getAverageTimeDays() );
+				if ( $pplf->getRecordCount() > 0 ) {
+					$filter_start_date = FALSE;
+					$filter_end_date = FALSE;
+					foreach( $pplf as $pp_obj ) {
+						if ( $filter_start_date == FALSE OR $pp_obj->getStartDate() < $filter_start_date ) {
+							$filter_start_date = $pp_obj->getStartDate();
+						}
+						if ( $filter_end_date == FALSE OR $pp_obj->getEndDate() > $filter_end_date ) {
+							$filter_end_date = $pp_obj->getEndDate();
+						}
+					}
+					Debug::text('Total time over Pay Periods: '. $holiday_policy_obj->getAverageTimeDays() .' Found Pay Periods: '. $pplf->getRecordCount() .' Start Date: '. TTDate::getDate('DATE', $filter_start_date ) .' End Date: '. TTDate::getDate('DATE', $filter_end_date ), __FILE__, __LINE__, __METHOD__, 10);
+				} else {
+					Debug::text('ERROR: No pay period found, unable to calculate holiday time!', __FILE__, __LINE__, __METHOD__, 10);
+					return 0;
+				}
+				unset($pplf, $pp_obj);
+			} else { //Days
+				if ( $holiday_policy_obj->getAverageTimeDays() >= 0 ) {
+					$filter_start_date = ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400 ) );
+					$filter_end_date = ( $date_stamp - 86400 );
+				} else {
+					//Allow setting a "Total Time Over" value to -1 along with Average Time Over: -1 to return the time worked on the holiday day itself.
+					$filter_start_date = $date_stamp;
+					$filter_end_date = ( $date_stamp + ( ( abs( $holiday_policy_obj->getAverageTimeDays() ) - 1 ) * 86400 ) );
+				}
+			}
+
 			//Debug::text('Start Date: '. TTDate::getDate('DATE', ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400) ) ) .' End: '. TTDate::getDate('DATE', ( $date_stamp - 86400 ) ), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $holiday_policy_obj->getAverageTimeWorkedDays() == TRUE ) {
-				$last_days_worked_count = count( $this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400) ), ( $date_stamp - 86400 ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(20, 25, 30, 40, 100, 110 ) ) ) ); //Don't include Absence, Lunch, Break (Taken).
+				//$last_days_worked_count = count( $this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400) ), ( $date_stamp - 86400 ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(20, 25, 30, 40, 100, 110 ) ) ) ); //Don't include Absence, Lunch, Break (Taken).
+				$last_days_worked_count = count( $this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $filter_start_date, $filter_end_date, $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(20, 25, 30, 40, 100, 110 ) ) ) ); //Don't include Absence, Lunch, Break (Taken).
 			} else {
 				$last_days_worked_count = abs( $holiday_policy_obj->getAverageDays() ); //Allow -1 for getting time worked on the current day.
 			}
 			Debug::text('Average time over days: '. $last_days_worked_count, __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( $holiday_policy_obj->getAverageTimeDays() >= 0 ) {
-				$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400 ) ), ( $date_stamp - 86400 ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(20, 25, 30, 40, 100, 110) ) );
+				//$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400 ) ), ( $date_stamp - 86400 ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(20, 25, 30, 40, 100, 110) ) );
+				$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $filter_start_date, $filter_end_date, $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(20, 25, 30, 40, 100, 110) ) );
 			} elseif ( $holiday_policy_obj->getAverageTimeDays() < 0 ) { //Allow setting a "Total Time Over" value to -1 along with Average Time Over: -1 to return the time worked on the holiday day itself.
-				$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, ( $date_stamp + ( ( abs( $holiday_policy_obj->getAverageTimeDays() ) - 1 ) * 86400 ) ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(10, 20, 25, 30, 40, 100, 110) ) ); //Must include 10=Worked Time, as this happens before RegularTime/OverTime is calculated.
+				//$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, ( $date_stamp + ( ( abs( $holiday_policy_obj->getAverageTimeDays() ) - 1 ) * 86400 ) ), $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(10, 20, 25, 30, 40, 100, 110) ) ); //Must include 10=Worked Time, as this happens before RegularTime/OverTime is calculated.
+				$total_seconds_worked = $this->getSumUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $filter_start_date, $filter_end_date, $this->contributing_shift_policy[$holiday_policy_obj->getContributingShiftPolicy()], array(10, 20, 25, 30, 40, 100, 110) ) ); //Must include 10=Worked Time, as this happens before RegularTime/OverTime is calculated.
 			}
+
+			unset($filter_start_date, $filter_end_date);
+
 
 			if ( $last_days_worked_count > 0 ) {
 				$avg_seconds_worked_per_day = bcdiv($total_seconds_worked, $last_days_worked_count);

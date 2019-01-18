@@ -58,36 +58,37 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 		this.setTitle( this.getWizardObject().wizard_name );
 
 		if ( this.prae_grid_source_data.length > 0 ) {
-			this.setInstructions( $.i18n._( 'Select one of the event(s) below to process' ) +': ' );
+			var $this = this;
+			this.setInstructions( $.i18n._( 'Select one of the event(s) below to process' ) +': ', function(){
+				var grid_id = 'payroll_remittance_agency_events';
+				var grid_div = $("<div class='grid-div wizard-grid-div'></div>");
+				var grid_table = $("<table id='" + grid_id + "'></table>");
+				grid_div.append(grid_table);
 
-			var grid_id = 'payroll_remittance_agency_events';
-			var grid_div = $("<div class='grid-div wizard-grid-div'></div>");
-			var grid_table = $("<table id='" + grid_id + "'></table>");
-			grid_div.append(grid_table);
+				$this.grid = $this.setGrid( grid_id, grid_div );
 
-			this.grid = this.setGrid( grid_id, grid_div );
+				$this.grid.clearGridData();
+				$this.grid.setGridParam({data: $this.prae_grid_source_data});
+				$this.grid.trigger('reloadGrid');
 
-			this.grid.clearGridData();
-			this.grid.setGridParam({data: this.prae_grid_source_data});
-			this.grid.trigger('reloadGrid');
+				$this.colorGrid();
 
-			this.colorGrid();
+				$this.setGridAutoHeight($this.grid, $this.prae_grid_source_data.length);
 
-			this.setGridAutoHeight(this.grid, this.prae_grid_source_data.length);
+				if (TTUUID.isUUID($this.getWizardObject().selected_remittance_agency_event_id)) {
+					$this.grid.setSelection($this.getWizardObject().selected_remittance_agency_event_id);
+				} else {
+					//select the first row on load.
+					$this.grid.setSelection($this.grid.find('tbody:first-child tr:nth-child(2)').attr('id'));
+					$this.getWizardObject().selected_remittance_agency_event_id = $this.grid.find('tbody:first-child tr:nth-child(2)').attr('id');
+				}
 
-			if (TTUUID.isUUID(this.getWizardObject().selected_remittance_agency_event_id)) {
-				this.grid.setSelection(this.getWizardObject().selected_remittance_agency_event_id);
-			} else {
-				//select the first row on load.
-				this.grid.setSelection(this.grid.find('tbody:first-child tr:nth-child(2)').attr('id'));
-				this.getWizardObject().selected_remittance_agency_event_id = this.grid.find('tbody:first-child tr:nth-child(2)').attr('id');
-			}
-
-			this.addButton( 'PayrollRemittanceAgency',
-				Icons.view_detail,
-				$.i18n._('Edit Remittance Agency'),
-				$.i18n._('In the event of incorrect dates, edit the selected remittance agency and its events to make corrections.')
-			);
+				$this.addButton( 'PayrollRemittanceAgency',
+					Icons.view_detail,
+					$.i18n._('Edit Remittance Agency'),
+					$.i18n._('In the event of incorrect dates, edit the selected remittance agency and its events to make corrections.')
+				);
+			} );
 
 		} else {
 			var message = $('<div/>');

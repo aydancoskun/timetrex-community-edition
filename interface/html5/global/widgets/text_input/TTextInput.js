@@ -417,6 +417,7 @@
 			} );
 
 			$( this ).change( function() {
+				$this.trigger( 'keyup', [$this] );
 				//#2226 - When datetime or time unit fields specify need_parser_date or need_parser_sec it does not set disable_keyup_event == true. To validate those fields on change we need to check for those values.
 				if ( disable_keyup_event || need_parser_date || need_parser_sec ) {
 					$this.trigger( 'formItemChange', [$this] );

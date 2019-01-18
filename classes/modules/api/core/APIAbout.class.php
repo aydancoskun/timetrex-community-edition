@@ -169,6 +169,8 @@ class APIAbout extends APIFactory {
 			}
 		}
 
+		$data['system_version'] = $data['system_version'].' ( '.TTDate::getDate('DATE+TIME', $data['system_version_install_date']) . ' )';
+
 		//Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		return $this->returnHandler( $data );
 	}

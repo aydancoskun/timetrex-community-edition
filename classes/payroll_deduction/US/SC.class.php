@@ -41,8 +41,18 @@
 class PayrollDeduction_US_SC extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20180101 => array(
+					0 => array( //Uses Subtraction method constants.
+							array('income' => 2290, 'rate' => 1.4, 'constant' => 0),
+							array('income' => 4580, 'rate' => 3, 'constant' => 36.64),
+							array('income' => 6870, 'rate' => 4, 'constant' => 82.44),
+							array('income' => 9160, 'rate' => 5, 'constant' => 151.14),
+							array('income' => 11450, 'rate' => 6, 'constant' => 242.74),
+							array('income' => 11450, 'rate' => 7, 'constant' => 357.24),
+					),
+			),
 			20170101 => array(
-					0 => array(
+					0 => array( //Uses Subtraction method constants.
 							array('income' => 2140, 'rate' => 1.7, 'constant' => 0),
 							array('income' => 4280, 'rate' => 3, 'constant' => 27.82),
 							array('income' => 6420, 'rate' => 4, 'constant' => 70.62),
@@ -52,7 +62,7 @@ class PayrollDeduction_US_SC extends PayrollDeduction_US {
 					),
 			),
 			20060101 => array(
-					0 => array(
+					0 => array( //Uses Subtraction method constants.
 							array('income' => 2000, 'rate' => 2, 'constant' => 0),
 							array('income' => 4000, 'rate' => 3, 'constant' => 20),
 							array('income' => 6000, 'rate' => 4, 'constant' => 60),
@@ -64,6 +74,11 @@ class PayrollDeduction_US_SC extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20180101 => array(
+					'standard_deduction_rate'    => 10,
+					'standard_deduction_maximum' => 3150,
+					'allowance'                  => 2440,
+			),
 			20170101 => array(
 					'standard_deduction_rate'    => 10,
 					'standard_deduction_maximum' => 2860,

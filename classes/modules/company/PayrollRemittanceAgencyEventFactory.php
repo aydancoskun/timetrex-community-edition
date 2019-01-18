@@ -1131,26 +1131,29 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				$last_due_date -= 86400;
 				/** @var PayPeriodListFactory $pplf */
 				$pplf = TTnew('PayPeriodListFactory');
-				if( is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() ) ) {
+				if ( is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() ) ) {
 					$le_obj  = $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject();
-					if( is_object( $le_obj ) ) {
+					if ( is_object( $le_obj ) ) {
 						$pplf->getByRemittanceAgencyIdAndCompanyIdAndTransactionDateAndPayPeriodSchedule( $this->getPayrollRemittanceAgencyId(), $le_obj->getCompany(), $last_due_date, $this->getPayPeriodSchedule() );
 
 						if ( $pplf->getRecordCount() > 0 ) {
-
-							Debug::Text( 'Looping obver Pay Periods.', __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::Text( 'Looping over Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 							foreach ( $pplf as $pp_obj ) {
 								//#1187 - Pay period based event dates are all based on the relevant pay period transaction dates because that's what the subsequent reports will need to see
 								//The event starts at the beginning of the transaction date day and ends at the end of transaction date day
 								//The due date is the transaction date day plus the current event's due date delay days
-								$retval = array(
-										'due_date'   => TTDate::incrementDate( $pp_obj->getTransactionDate(), $this->getDueDateDelayDays() ? $this->getDueDateDelayDays() : 0, 'day' ),
-										'start_date' => TTDate::getBeginDayEpoch( $pp_obj->getTransactionDate() ),
-										'end_date'   => TTDate::getEndDayEpoch( $pp_obj->getTransactionDate() ),
-										'pay_period_id' => $pp_obj->getId(),
-								);
 								if ( $pp_obj->getStartDate() <= $last_due_date AND $pp_obj->getEndDate() >= $last_due_date ) {
+									Debug::Text( 'Found: Pay Period: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ) , __FILE__, __LINE__, __METHOD__, 10 );
+									$retval = array(
+											'start_date' => TTDate::getBeginDayEpoch( $pp_obj->getTransactionDate() ),
+											'end_date'   => TTDate::getEndDayEpoch( $pp_obj->getTransactionDate() ),
+											'due_date'   => TTDate::incrementDate( $pp_obj->getTransactionDate(), $this->getDueDateDelayDays() ? $this->getDueDateDelayDays() : 0, 'day' ),
+											'pay_period_id' => $pp_obj->getId(),
+									);
+
 									break;
+								} else {
+									Debug::Text( 'Skipping: Pay Period: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 								}
 							}
 						}
@@ -1180,10 +1183,10 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				);
 				break;
 			case 2100: //year to date
-				$last_due_date -= 86400;
-				$end_date = mktime(0, 0, 0, $this->getPrimaryMonth(), $this->getPrimaryDayOfMonth(), date('Y', $last_due_date) );
+				//$last_due_date -= 86400; //This prevents a last_due_date on the same day as the previous due_date from pushing it over into the next year.
+				$end_date = mktime(0, 0, 0, $this->getPrimaryMonth(), $this->getPrimaryDayOfMonth(), date('Y', ( $last_due_date - 86400 ) ) );
 
-				if ( TTDate::getMiddleDayEpoch($end_date) <= TTDate::getMiddleDayEpoch($last_due_date) ){
+				if ( TTDate::getMiddleDayEpoch($end_date) <= TTDate::getMiddleDayEpoch($last_due_date) ) {
 					$end_date = TTDate::incrementDate($end_date, 1, 'year');
 				}
 
@@ -1874,7 +1877,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				'#due_date#',
 		);
 
-		$replace_arr = array(
+		$replace_arr = array( //If changed, update $replace_arr references below.
 				$u_obj->getFirstName(),
 				$u_obj->getLastName(),
 				( is_object( $pra_obj ) ) ? $pra_obj->getName() : NULL,
@@ -1896,8 +1899,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 		$email_body .= TTi18n::gettext('Link') .': <a href="'. Misc::getURLProtocol() .'://'. Misc::getHostName().Environment::getDefaultInterfaceBaseURL().'">'.APPLICATION_NAME.' '. TTi18n::gettext('Login') .'</a>'."\n\n";
 		$email_body .= TTi18n::gettext('Due Date').': '.TTDate::getDate("DATE", $this->getDueDate() )."\n";
-		$email_body .= TTi18n::gettext('Legal Entity').': '.$replace_arr[4]."\n";
-		$email_body .= TTi18n::gettext('Company').': '.$replace_arr[3]."\n\n";
+		$email_body .= TTi18n::gettext('Legal Entity').': '.$replace_arr[6]."\n";
+		$email_body .= TTi18n::gettext('Company').': '.$replace_arr[5]."\n\n";
 		$email_body .= TTi18n::gettext('Email Sent').': '.TTDate::getDate( 'DATE', time() )."\n";
 
 		$subject = str_replace( $search_arr, $replace_arr, $email_subject );

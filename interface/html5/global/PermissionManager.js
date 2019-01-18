@@ -641,6 +641,15 @@ var PermissionManager = (function() {
 					result = true;
 				}
 				break;
+			case 'GeneratePayStubs':
+				if ( PermissionManager.validate( 'pay_period_schedule', 'enabled' )
+					&& ( PermissionManager.validate( 'pay_period_schedule', 'edit' ) || PermissionManager.validate( 'pay_period_schedule', 'edit_own' ) )
+					&& ( PermissionManager.validate( 'pay_stub', 'view' ) || PermissionManager.validate( 'pay_stub', 'view_child' ) ) ) {
+					result = true;
+				} else {
+					result = false;
+				}
+				break;
 			default :
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;

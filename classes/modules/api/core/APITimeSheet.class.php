@@ -127,7 +127,7 @@ class APITimeSheet extends APIFactory {
 
 		$pplf->StartTransaction();
 		//Make sure we all pay periods that fall within the start/end date, so we can properly display the timesheet range at the top.
-		$primary_pay_period_id = 0;
+		$primary_pay_period_id = TTUUID::getZeroID();
 		$pay_period_ids = array();
 		$pplf->getByUserIdAndOverlapStartDateAndEndDate( $user_id, $timesheet_dates['start_date'], $timesheet_dates['end_date'] );
 		if ( $pplf->getRecordCount() > 0 ) {

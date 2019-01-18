@@ -2856,3 +2856,7 @@ progress::-moz-progress-bar {
     border: 5px solid red;
     width: (100vw - 10px) !important;
 }
+
+#tab_pay_stub .t-text-input-readonly{
+    background-color:#fff;
+}

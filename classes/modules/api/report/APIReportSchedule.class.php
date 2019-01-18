@@ -165,7 +165,8 @@ class APIReportSchedule extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
-						$row = array_merge( $lf->getCurrent()->getObjectAsArray(), $row );
+						$lf = $lf->getCurrent(); //Make the current $lf variable the current object, otherwise getDataDifferences() fails to function.
+						$row = array_merge( $lf->getObjectAsArray(), $row );
 					} else {
 						//Object doesn't exist.
 						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );

@@ -66,6 +66,7 @@ class PayFormulaPolicyFactory extends Factory {
 										//20 => TTi18n::gettext('Premium Only'), //Just the specified premium amount. This is now #32 though as that makes more sense.
 										30 => TTi18n::gettext('Flat Hourly Rate (Relative to Wage)'), //This is a relative rate based on their hourly rate.
 										32 => TTi18n::gettext('Flat Hourly Rate'), //NOT relative to their default rate.
+										34 => TTi18n::gettext('Flat Hourly Rate (w/Default)'), //Uses the hourly rate in the pay formula as the default, unless a wage record exists, then it uses that instead, even if its lower or higher.
 										40 => TTi18n::gettext('Minimum Hourly Rate (Relative to Wage)'), //Pays whichever is greater, this rate or the employees original rate.
 										42 => TTi18n::gettext('Minimum Hourly Rate'), //Pays whichever is greater, this rate or the employees original rate.
 										50 => TTi18n::gettext('Pay + Premium'),
@@ -386,6 +387,14 @@ class PayFormulaPolicyFactory extends Factory {
 				//$rate = $original_hourly_rate;
 				//In v7 this was the above, which isn't correct and unexpected for the user.
 				$rate = $this->getRate();
+				break;
+			case 34: //Flat Hourly Rate (w/Default)
+				//If a wage record ($original_hourly_rate) is specified, use it, otherwise use the default flat hourly rate specified in the pay formula policy.
+				if ( $original_hourly_rate != 0 ) {
+					$rate = $original_hourly_rate;
+				} else {
+					$rate = $this->getRate();
+				}
 				break;
 			case 40: //Minimum/Prevailing wage (relative)
 				if ( $this->getRate() > $original_hourly_rate ) {

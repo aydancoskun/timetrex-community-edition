@@ -1183,21 +1183,20 @@ class ScheduleSummaryReport extends Report {
 						$lines_per_day = 0;
 						if ( isset($schedule_data[$date_stamp]) ) {
 							$lines_per_day += count($schedule_data[$date_stamp]);
+							$unique_branch = ( $unique_branch + array_flip( array_keys( $schedule_data[$date_stamp] ) ) ); //Don't use array_merge here, as it breaks due to integer keys not being overwritten but combined/added.
 							foreach( $schedule_data[$date_stamp] as $branch => $level_2 ) {
-								$unique_branch[$branch] = TRUE;
 
 								$lines_per_day += count($level_2);
+								$unique_department = ( $unique_department + array_flip( array_keys( $level_2 ) ) );
 								foreach( $level_2 as $department => $level_3 ) {
-									$unique_department[$department] = TRUE;
 
 									$lines_per_day += count($level_3);
+									$unique_job = ( $unique_job + array_flip( array_keys( $level_3 ) ) );
 									foreach( $level_3 as $job => $level_4 ) {
-										$unique_job[$job] = TRUE;
 
 										$lines_per_day += count($level_4);
+										$unique_job_item = ( $unique_job_item + array_flip( array_keys( $level_4 ) ) );
 										foreach( $level_4 as $job_item => $level_5 ) {
-											$unique_job_item[$job_item] = TRUE;
-
 											$lines_per_day += count($level_5);
 											if ( $user_id == FALSE AND isset($level_5[0]['user_id']) ) {
 												$user_id = $level_5[0]['user_id'];

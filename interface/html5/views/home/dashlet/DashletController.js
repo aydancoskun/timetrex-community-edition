@@ -1002,7 +1002,7 @@ DashletController = Backbone.View.extend( {
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.status_id == 20 ) {
-					$( this.el ).find( "tr[id='" + item.id + "']" ).addClass( 'red-absence' );
+					$( $( this.el ).find( "tr" )[ i + 2 ] ).addClass( 'red-absence' ); //Do not use ids or coloring gets broken by recurring schedules without ids
 				}
 			}
 		}

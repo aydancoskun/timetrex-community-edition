@@ -35,8 +35,7 @@ php_cli = /usr/bin/php
 ; Database connection settings. These can be set from the installer.
 ;
 [database]
-type = postgres8
-;type = mysqli
+type = postgres
 
 host = localhost
 database_name = timetrex

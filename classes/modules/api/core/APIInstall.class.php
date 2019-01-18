@@ -389,7 +389,7 @@ class APIInstall extends APIFactory {
 			}
 
 			//Make sure InnoDB engine exists on MySQL
-			if ( $install_obj->getDatabaseType() != 'mysql' OR ( $install_obj->getDatabaseType() == 'mysql' AND $install_obj->checkDatabaseEngine() == TRUE ) ) {
+			//if ( $install_obj->getDatabaseType() != 'mysql' OR ( $install_obj->getDatabaseType() == 'mysql' AND $install_obj->checkDatabaseEngine() == TRUE ) ) {
 				//Check again to make sure database exists.
 				$install_obj->setNewDatabaseConnection($data['final_type'], $host, $tmp_user_name, $tmp_password, $data['database_name']);
 				if ( $install_obj->checkDatabaseExists($data['database_name']) == TRUE ) {
@@ -410,10 +410,10 @@ class APIInstall extends APIFactory {
 				} else {
 					Debug::Text('zDatabase does not exist.', __FILE__, __LINE__, __METHOD__, 10);
 				}
-			} else {
-				$database_engine = FALSE;
-				Debug::Text('MySQL does not support InnoDB storage engine!', __FILE__, __LINE__, __METHOD__, 10);
-			}
+//			} else {
+//				$database_engine = FALSE;
+//				Debug::Text('MySQL does not support InnoDB storage engine!', __FILE__, __LINE__, __METHOD__, 10);
+//			}
 
 			$test_connection = NULL;
 			$test_priv_connection = NULL;

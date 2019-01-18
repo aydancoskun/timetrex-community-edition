@@ -1269,8 +1269,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 								LEFT JOIN '. $rscf->getTable() .' as rscf ON rsf.recurring_schedule_control_id = rscf.id
 								LEFT JOIN '. $uf->getTable() .' as uf_b ON rsf.user_id = uf_b.id
 								LEFT JOIN '. $ppsuf->getTable() .' as ppsuf ON ( rsf.user_id = ppsuf.user_id )
-								LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id )
-								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date )
+								LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id AND ppsf.deleted = 0 )
+								LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppf.pay_period_schedule_id = ppsuf.pay_period_schedule_id AND rsf.date_stamp >= ppf.start_date AND rsf.date_stamp <= ppf.end_date AND ppf.deleted = 0 )
 								LEFT JOIN schedule as sf_b ON (
 																( sf_b.user_id != \''. TTUUID::getZeroID() .'\' AND sf_b.user_id = rsf.user_id ) ';
 

@@ -361,7 +361,6 @@ class PayStubTransactionFactory extends Factory {
 		return $this->setGenericDataValue( 'remittance_destination_account_id', $value );
 	}
 
-
 	/**
 	 * @return bool|mixed
 	 */
@@ -655,6 +654,7 @@ class PayStubTransactionFactory extends Factory {
 				default:
 					break;
 			}
+
 			Debug::Text( '  Old Status ID: '. $old_status_id .' Status ID: '. $this->getStatus(), __FILE__, __LINE__, __METHOD__, 10 );
 			$this->Validator->inArrayKey(	'status_id',
 											 $this->getStatus(),
@@ -862,7 +862,8 @@ class PayStubTransactionFactory extends Factory {
 	 * @return string
 	 */
 	function formatFileName( $rs_obj, $transaction_number, $prefix, $extension ) {
-		$file_name = $prefix . '_' . substr( $this->Validator->stripNonAlphaNumeric( $rs_obj->getName() ), 0, 20 ) . '_' . (int)$transaction_number . '_' . TTDate::getDate( 'DATE', time() ) . '.' . $extension;
+		//Don't use users preferred date format, as it could contain spaces.
+		$file_name = $prefix . '_' . substr( preg_replace('/[^A-Za-z0-9_-]/', '', str_replace( ' ', '_', $rs_obj->getName() ) ), 0, 20 ) . '_' . (int)$transaction_number . '_' . TTDate::getISODateStamp( time() ) . '.' . $extension;
 
 		return $file_name;
 	}
@@ -1033,7 +1034,7 @@ class PayStubTransactionFactory extends Factory {
 					//clone the object and create a new one to provide history
 					if ( $pst_obj->getStatus() == 200 ) {
 						if ( $pst_obj->getType() == 10 AND ( $this->getParent() == FALSE OR $this->getParent() == TTUUID::getZeroID() ) ) {
-							Debug::Text( '  Found stop payment, re-issing...', __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::Text( '  Found stop payment, re-issuing...', __FILE__, __LINE__, __METHOD__, 10 );
 							//Stop payment. Mark this record disabled and add a new transaction to the parent chain.
 							$old_obj = clone $pst_obj; //clone old object
 							$old_obj->clearOldData(); //Clear out old data so its like starting from scratch. This prevents some validation failures on setStatus() changes.
@@ -1048,6 +1049,15 @@ class PayStubTransactionFactory extends Factory {
 							$pst_obj->setParent( $pst_obj->getId() );
 							$pst_obj->setId( FALSE ); //Now that parent id is set, clear the id to make this a new record.
 							$pst_obj->setStatus( 10 ); //Pending
+
+							//Make sure we update some key pieces of information when cloning the object.
+							if ( is_object( $pst_obj->getPayStubObject() ) ) {
+								$pst_obj->setTransactionDate( $pst_obj->getPayStubObject()->getTransactionDate() ); //Allow the transaction date to change based on the pay stub transaction date. Since they have no other chance to change the date.
+							}
+							$pst_obj->setCreatedDate();
+							$pst_obj->setCreatedBy();
+							$pst_obj->setUpdatedDate();
+							$pst_obj->setUpdatedBy();
 						}
 					}
 

@@ -323,7 +323,11 @@ class RemittanceDestinationAccountFactory extends Factory {
 	function isUniqueName( $name) {
 		$name = trim($name);
 
-		$company_id = $this->getUserObject()->getCompany();
+		if ( is_object( $this->getUserObject() ) ) {
+			$company_id = $this->getUserObject()->getCompany();
+		} else {
+			return FALSE;
+		}
 
 		if ( $name == '' ) {
 			return FALSE;
@@ -334,9 +338,9 @@ class RemittanceDestinationAccountFactory extends Factory {
 		}
 
 		$ph = array(
-			'name' => $name,
-			'user_id' => TTUUID::castUUID($this->getUser()),
 			'company_id' => TTUUID::castUUID($company_id),
+			'user_id' => TTUUID::castUUID($this->getUser()),
+			'name' => $name,
 		);
 
 		$uf = TTnew( 'UserFactory' );
@@ -344,9 +348,9 @@ class RemittanceDestinationAccountFactory extends Factory {
 		$query = 'SELECT a.id
 					FROM '. $this->getTable() .' as a
 					LEFT JOIN ' . $uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
-					WHERE lower(a.name) = lower(?)
+					WHERE uf.company_id = ?
 						AND a.user_id = ?
-						AND uf.company_id = ?
+						AND lower(a.name) = lower(?)
 						AND a.deleted = 0';
 
 		$name_id = $this->db->GetOne($query, $ph);
@@ -1029,13 +1033,14 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 		if ( $this->getDeleted() == TRUE ) {
 			$pstlf = TTnew( 'PayStubTransactionListFactory' );
-			$pstlf->getByRemittanceSourceAccountId($this->getId());
+			$pstlf->getByRemittanceDestinationAccountId($this->getId());
 			if ( $pstlf->getRecordCount() > 0 ) {
-				Debug::Text('Pay Stub Transactions exist for Remittance Source Account ID: '. $this->getID(). ' disabled instead of deleted', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text('Pay Stub Transactions exist for Remittance Destination Account ID: '. $this->getID(). ' disabled instead of deleted', __FILE__, __LINE__, __METHOD__, 10);
 				$this->setDeleted( FALSE );
 				$this->setStatus( 20 );
 			}
 		}
+
 		return TRUE;
 	}
 

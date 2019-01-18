@@ -375,7 +375,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		LocalCacheData.current_doing_context_action = 'edit';
 		$this.openEditView();
 
-		if ( selectedId > 0 ) {
+		if ( TTUUID.isUUID(selectedId) && selectedId != TTUUID.not_exist_id && selectedId != TTUUID.zero_id ) {
 
 			var filter = {};
 

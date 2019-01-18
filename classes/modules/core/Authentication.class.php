@@ -513,7 +513,6 @@ class Authentication {
 	 * @return string
 	 */
 	private function genSessionID() {
-		//return sha1( uniqid( dechex( mt_rand() ), TRUE ) );
 		return sha1( Misc::getUniqueID() );
 	}
 

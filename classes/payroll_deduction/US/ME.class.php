@@ -41,6 +41,30 @@
 class PayrollDeduction_US_ME extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20180101 => array(
+					10 => array(
+							array('income' => 21450, 'rate' => 5.8, 'constant' => 0),
+							array('income' => 50750, 'rate' => 6.75, 'constant' => 1244),
+							array('income' => 50750, 'rate' => 7.15, 'constant' => 3222),
+					),
+					20 => array(
+							array('income' => 42900, 'rate' => 5.8, 'constant' => 0),
+							array('income' => 101550, 'rate' => 6.75, 'constant' => 2488),
+							array('income' => 101550, 'rate' => 7.15, 'constant' => 6447),
+					),
+			),
+			20170801 => array(
+					10 => array(
+							array('income' => 21100, 'rate' => 5.8, 'constant' => 0),
+							array('income' => 50000, 'rate' => 6.75, 'constant' => 1224),
+							array('income' => 50000, 'rate' => 7.15, 'constant' => 3175),
+					),
+					20 => array(
+							array('income' => 42250, 'rate' => 5.8, 'constant' => 0),
+							array('income' => 100000, 'rate' => 6.75, 'constant' => 2451),
+							array('income' => 100000, 'rate' => 7.15, 'constant' => 6349),
+					),
+			),
 			20170101 => array(
 					10 => array(
 							array('income' => 21100, 'rate' => 5.8, 'constant' => 0),
@@ -195,6 +219,17 @@ class PayrollDeduction_US_ME extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20180101 => array( //01-Jan-18
+							   'allowance'                    => 4150,
+							   'standard_deduction'           => array(
+									   '10' => 8950,
+									   '20' => 20750,
+							   ),
+							   'standard_deduction_threshold' => array(
+									   '10' => array(71100, 142200, 75000), //Min/Max/Divisor
+									   '20' => array(142200, 292200, 150000), //Min/Max/Divsor
+							   ),
+			),
 			20170101 => array( //01-Jan-17 - Standard Deduction formula seems to have changed slightly in 2017.
 							   'allowance'                    => 4050,
 							   'standard_deduction'           => array(

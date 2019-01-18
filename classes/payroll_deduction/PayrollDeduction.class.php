@@ -42,8 +42,8 @@ class PayrollDeduction {
 	var $obj = NULL;
 	var $data = NULL;
 
-	protected $version = '1.0.39';
-	protected $data_version = '20170701';
+	protected $version = '1.0.40';
+	protected $data_version = '20180101';
 
 	function __construct( $country, $province, $district = NULL) {
 		$this->setCountry( $country );

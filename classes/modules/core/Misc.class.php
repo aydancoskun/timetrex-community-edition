@@ -2577,21 +2577,27 @@ class Misc {
 		return TRUE;
 	}
 
-	//If rename fails for some reason, attempt a copy instead as that might work, specifically on windows where if the file is in use.
-	//  Might fix possible "Access is denied. (code: 5)" errors on Windows when using PHP v5.2 (https://bugs.php.net/bug.php?id=43817)
 	/**
-	 * @param $oldname
-	 * @param $newname
+	 * If rename fails for some reason, attempt a copy instead as that might work, specifically on windows where if the file is in use.
+	 * Might fix possible "Access is denied. (code: 5)" errors on Windows when using PHP v5.2 (https://bugs.php.net/bug.php?id=43817)
+	 * @param $old_name
+	 * @param $new_name
 	 * @return bool
 	 */
-	static function rename( $oldname, $newname ) {
-		if ( @rename( $oldname, $newname ) == FALSE ) {
-			Debug::Text('ERROR: Unable to rename: '. $oldname .' to: '. $newname, __FILE__, __LINE__, __METHOD__, 10);
-			if ( is_dir( $oldname ) == FALSE AND copy( $oldname, $newname ) == TRUE ) {
-				@unlink( $oldname );
+	static function rename( $old_name, $new_name ) {
+		$new_dir = dirname( $new_name );
+		if ( file_exists( $new_dir ) == FALSE ) {
+			@mkdir( $new_dir, 0755, TRUE );
+		}
+
+		if ( @rename( $old_name, $new_name ) == FALSE ) {
+			Debug::Text( 'ERROR: Unable to rename: '. $old_name .' to: '. $new_name, __FILE__, __LINE__, __METHOD__, 10);
+			if ( is_dir( $old_name ) == FALSE AND @copy( $old_name, $new_name ) == TRUE ) {
+				@unlink( $old_name );
+
 				return TRUE;
 			} else {
-				Debug::Text('ERROR: Unable to copy after rename failure: '. $oldname .' to: '. $newname, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'ERROR: Unable to copy after rename failure: '. $old_name .' to: '. $new_name, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			return FALSE;
@@ -2775,7 +2781,7 @@ class Misc {
 	static function getSystemLoad() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			$loadavg_file = '/proc/loadavg';
-			if ( file_exists( $loadavg_file ) AND is_readable( $loadavg_file ) ) {
+			if ( @file_exists( $loadavg_file ) AND is_readable( $loadavg_file ) ) {
 				//$buffer = '0 0 0';
 				$buffer = file_get_contents( $loadavg_file );
 				$load = explode(' ', $buffer);
@@ -3013,7 +3019,7 @@ class Misc {
 			}
 		}
 
-		Debug::text( 'No eb server user found...', __FILE__, __LINE__, __METHOD__, 9 );
+		Debug::text( 'No web server user found...', __FILE__, __LINE__, __METHOD__, 9 );
 		return FALSE;
 	}
 
@@ -3486,12 +3492,13 @@ class Misc {
 	}
 
 	/**
+	 * Checks to see if a file/directory is writable.
 	 * @param $path
 	 * @return bool
 	 */
-	static function isWritable( $path) {
-		if ( $path[(strlen($path) - 1)] == '/' ) {
-			return self::isWritable( $path . uniqid( mt_rand() ).'.tmp' );
+	static function isWritable( $path ) {
+		if ( substr($path, -1) == DIRECTORY_SEPARATOR OR substr($path, -1) == '.' ) {
+			return self::isWritable( dirname( $path ) . DIRECTORY_SEPARATOR . uniqid( mt_rand() ).'.tmp' );
 		}
 
 		if ( file_exists($path) ) {
@@ -3723,8 +3730,8 @@ class Misc {
 			$salt = uniqid( dechex( mt_rand() ), TRUE );
 		}
 
-		if ( function_exists('mcrypt_create_iv') ) {
-			$retval = $salt . bin2hex( mcrypt_create_iv( 128, MCRYPT_DEV_URANDOM ) ); //Use URANDOM as it wont block if there isn't enough entropy.
+		if ( function_exists('openssl_random_pseudo_bytes') ) {
+			$retval = $salt . bin2hex( openssl_random_pseudo_bytes( 128 ) );
 		} else {
 			$retval = uniqid( $salt . dechex( mt_rand() ), TRUE );
 		}

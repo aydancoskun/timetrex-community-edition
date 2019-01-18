@@ -237,7 +237,7 @@ class ImportUser extends Import {
 				$raw_row['employee_number'] = ( $default_data['employee_number'] + $row_number ); //Auto increment manual_id automatically.
 			}
 			if ( !isset($raw_row['password']) ) {
-				$raw_row['password'] = TTPassword::generateRandomPassword(); //Default to a unique password.
+				$raw_row['password'] = TTPassword::generateRandomPassword( 50 ); //Default to a unique password, make it really long so it always passes the password strength checker.
 			}
 
 			if ( !isset($raw_row['user_name']) OR ( isset($raw_row['user_name']) AND $raw_row['user_name'] == '' ) ) {
@@ -339,7 +339,7 @@ class ImportUser extends Import {
 	 */
 	function parse_permission_control( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No Permission Group
+			return TTUUID::getZeroID(); //No Permission Group
 		}
 
 		if ( !is_array( $this->permission_control_options ) ) {
@@ -375,7 +375,7 @@ class ImportUser extends Import {
 	 */
 	function parse_policy_group( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No Permission Group
+			return TTUUID::getZeroID(); //No Permission Group
 		}
 
 		if ( !is_array( $this->policy_group_options ) ) {
@@ -411,7 +411,7 @@ class ImportUser extends Import {
 	 */
 	function parse_pay_period_schedule( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No Permission Group
+			return TTUUID::getZeroID(); //No Permission Group
 		}
 
 		if ( !is_array( $this->pay_period_schedule_options ) ) {
@@ -447,7 +447,7 @@ class ImportUser extends Import {
 	 */
 	function parse_title( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No title
+			return TTUUID::getZeroID(); //No title
 		}
 
 		if ( !is_array( $this->title_options ) ) {
@@ -548,7 +548,7 @@ class ImportUser extends Import {
 	 */
 	function parse_user_group( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No group
+			return TTUUID::getZeroID(); //No group
 		}
 
 		if ( !is_array( $this->user_group_options ) ) {
@@ -601,7 +601,7 @@ class ImportUser extends Import {
 	 */
 	function parse_ethnic_group( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No group
+			return TTUUID::getZeroID(); //No group
 		}
 
 		if ( !is_array( $this->user_group_options ) ) {
@@ -653,7 +653,7 @@ class ImportUser extends Import {
 	 */
 	function parse_hierarchy_control_display( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //No Hierarchy
+			return TTUUID::getZeroID(); //No Hierarchy
 		}
 
 		if ( !is_array( $this->hierarchy_control_options ) ) {

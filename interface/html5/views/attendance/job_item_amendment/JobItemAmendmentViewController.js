@@ -399,7 +399,7 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 	setJobItemAmendmentDefaultData: function() {
 		var $this = this;
 		var job_item_id;
-		if ( this.current_edit_record.item_id > 0 && this.is_add ) {
+		if ( TTUUID.isUUID( this.current_edit_record.item_id ) && this.current_edit_record.item_id != TTUUID.zero_id && this.is_add ) {
 			job_item_id = this.current_edit_record.item_id;
 			this.api['get' + this.api.key_name + 'DefaultData']( job_item_id, {
 				onResult: function( result ) {

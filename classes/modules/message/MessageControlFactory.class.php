@@ -591,7 +591,9 @@ class MessageControlFactory extends Factory {
 		if ( $mrlf->getRecordCount() > 0 ) {
 			foreach( $mrlf as $mr_obj ) {
 				$mr_obj->setStatus( 20 ); //Read
-				$mr_obj->Save();
+				if ( $mr_obj->isValid() ) {
+					$mr_obj->Save();
+				}
 			}
 		}
 

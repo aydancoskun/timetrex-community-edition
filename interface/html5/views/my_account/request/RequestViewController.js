@@ -965,12 +965,10 @@ RequestViewController = RequestViewCommonController.extend( {
 
 	onAvailableBalanceChange: function() {
 		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
-			if (this.edit_view_ui_dic.absence_policy_id.getValue() != 0) {
+			if ( this.edit_view_ui_dic && this.edit_view_ui_dic.absence_policy_id && this.edit_view_ui_dic.absence_policy_id.getValue() != 0 ) {
 				this.getAvailableBalance();
-			} else {
-				if (this.edit_view_ui_dic.available_balance) {
-					this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
-				}
+			} else if ( this.edit_view_ui_dic && this.edit_view_ui_dic.available_balance ) {
+				this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
 			}
 		}
 	},

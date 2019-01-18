@@ -1490,7 +1490,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							LEFT JOIN '. $utf->getTable() .' as gg ON cc.title_id = gg.id
 							LEFT JOIN (
 								SELECT
-								  CAST( MIN( CAST(jj.payroll_remittance_agency_id AS VARCHAR(36)) ) AS UUID ) as payroll_remittance_agency_id,
+								  CAST( MIN( CAST(jj.payroll_remittance_agency_id AS CHAR(36)) ) AS '. ( ( $this->getDatabaseType() == 'mysql' ) ? 'CHAR(36)' : 'UUID' ) .' ) as payroll_remittance_agency_id,
 								  jj.pay_stub_entry_account_id,
 								  jj.legal_entity_id
 								FROM company_deduction AS jj

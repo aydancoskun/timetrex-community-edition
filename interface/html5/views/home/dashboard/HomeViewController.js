@@ -15,7 +15,7 @@ HomeViewController = Backbone.View.extend( {
 
 	/**
 	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
-	 * BaseViewController, HomeViewController, BaseWizardController
+	 * BaseViewController, HomeViewController, BaseWizardController, QuickPunchBaseViewControler
 	 *
 	 * @returns {Array}
 	 */

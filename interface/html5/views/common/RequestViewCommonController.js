@@ -145,7 +145,7 @@ RequestViewCommonController = BaseViewController.extend( {
 			var advanced_field_names = this.getAdvancedFieldNames();
 			if ( this.edit_view_ui_dic ) {
 				for ( var i = 0; i < advanced_field_names.length; i++ ) {
-					if( advanced_field_names[i] == 'absence_policy_id' && this.edit_view_ui_dic.request_schedule_status_id.getValue() != 20 ){
+					if( advanced_field_names[i] == 'absence_policy_id' && this.edit_view_ui_dic.request_schedule_status_id && this.edit_view_ui_dic.request_schedule_status_id.getValue() != 20 ){
 						this.edit_view_ui_dic[advanced_field_names[i]].parents('.edit-view-form-item-div').hide();
 						continue;
 					}
@@ -185,7 +185,9 @@ RequestViewCommonController = BaseViewController.extend( {
 				}
 			}
 		} else{
-			this.edit_view_ui_dic.date_stamp.parents('.edit-view-form-item-div').show();
+			if ( this.edit_view_ui_dic.date_stamp ) {
+				this.edit_view_ui_dic.date_stamp.parents('.edit-view-form-item-div').show();
+			}
 			this.hideAdvancedFields();
 		}
 	},
@@ -349,11 +351,13 @@ RequestViewCommonController = BaseViewController.extend( {
 					total_time,
 					{
 						onResult: function (result) {
-							$this.getBalanceHandler(result, date_stamp);
-							if ( result && $this.selected_absence_policy_record ) {
-								$this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').show();
-							} else {
-								$this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
+							if ( $this.edit_view_ui_dic && $this.edit_view_ui_dic.available_balance ) {
+								$this.getBalanceHandler(result, date_stamp);
+								if (result && $this.selected_absence_policy_record) {
+									$this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').show();
+								} else {
+									$this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
+								}
 							}
 						}
 					}

@@ -3166,7 +3166,7 @@ class UserFactory extends Factory {
 		}
 
 
-		if ( ( $this->isNew( TRUE ) == TRUE AND TTUUID::isUUID( $this->getLegalEntity() ) == FALSE ) OR $this->getLegalEntity() == TTUUID::getZeroID() OR $this->getLegalEntity() == TTUUID::getNotExistID()) {
+		if ( $this->getLegalEntity() !== FALSE AND ( ( $this->isNew( TRUE ) == TRUE AND TTUUID::isUUID( $this->getLegalEntity() ) == FALSE ) OR $this->getLegalEntity() == TTUUID::getZeroID() OR $this->getLegalEntity() == TTUUID::getNotExistID() ) ) {
 			$this->Validator->isTrue(		'legal_entity_id',
 											 FALSE,
 											 TTi18n::gettext('Legal entity is invalid'));
@@ -3615,7 +3615,7 @@ class UserFactory extends Factory {
 				if ( is_array( $company_deduction_ids ) AND count( $company_deduction_ids ) > 0 ) {
 					//UserDefaults should be able to select Tax/Deduction records from *any* legal entity, and we will just filter them out to the proper legal entity here.
 					$cdlf = TTNew('CompanyDeductionListFactory');
-					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'legal_entity_id' =>  $this->getLegalEntity(), 'id' => $company_deduction_ids ) );
+					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'legal_entity_id' => $this->getLegalEntity(), 'id' => $company_deduction_ids ) );
 					if ( $cdlf->getRecordCount() > 0 ) {
 						foreach( $cdlf as $cd_obj ) {
 							$udf = TTnew( 'UserDeductionFactory' );
@@ -3627,7 +3627,7 @@ class UserFactory extends Factory {
 						}
 					}
 				}
-				unset( $company_deduction_ids, $company_deduction_id, $udf, $cdlf, $cd_obj );
+				unset( $company_deduction_ids, $udf, $cdlf, $cd_obj );
 
 				Debug::text('Inserting Default Prefs (a)...', __FILE__, __LINE__, __METHOD__, 10);
 				$upf = TTnew( 'UserPreferenceFactory' );

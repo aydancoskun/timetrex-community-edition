@@ -147,7 +147,7 @@ class ImportUserWage extends Import {
 	 */
 	function parse_wage_group( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' OR trim(strtolower($input)) == 'default' ) {
-			return 0; //Default Wage Group
+			return TTUUID::getZeroID(); //Default Wage Group
 		}
 
 		if ( !is_array( $this->wage_group_options ) ) {

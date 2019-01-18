@@ -239,7 +239,6 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	uniformVariable: function( records ) {
-
 		if ( !records.hasOwnProperty( 'time_stamp' ) ) {
 			records.time_stamp = false;
 		}
@@ -2036,7 +2035,7 @@ PunchesViewController = BaseViewController.extend( {
 
 		switch ( key ) {
 			case 'user_id':
-				if( $.isArray(this.current_edit_record.user_id) && this.current_edit_record.user_id.length > 1) {
+				if( $.isArray(this.current_edit_record.user_id) ) {
 					this.is_mass_adding = true;
 				} else {
 					this.is_mass_adding = false;

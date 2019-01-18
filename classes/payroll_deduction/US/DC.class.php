@@ -218,6 +218,9 @@ class PayrollDeduction_US_DC extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20180101 => array( //01-Jan-2018
+							   'allowance' => 4150,
+			),
 			20150101 => array( //01-Jan-2015
 							   'allowance' => 1775,
 			),

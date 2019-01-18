@@ -532,10 +532,10 @@ class PayStubEntryAccountFactory extends Factory {
 												);
 		}
 
-
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
 		if ( $this->getType() == 50 ) {
 			//If the PSE account is an accrual, it can't link to one as well.
 			$this->setAccrual(NULL);
@@ -547,6 +547,26 @@ class PayStubEntryAccountFactory extends Factory {
 													FALSE,
 													TTi18n::gettext('Accrual account is invalid')
 												);
+		}
+
+		if ( $this->getDeleted() == TRUE ) {
+			//Check to make sure nothing else references this policy, so we can be sure its okay to delete it.
+			// The isInUse() check in preSave() already looks for pay stubs, pay stub amendments, and if those exist it should never get here.
+			$pclf = TTnew( 'PayCodeListFactory' );
+			$pclf->getByCompanyIdAndPayStubEntryAccountID( $this->getCompany(), $this->getId(), 1 );
+			if ( $pclf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by pay codes' ) );
+			}
+
+			$cdlf = TTnew( 'CompanyDeductionListFactory' );
+			$cdlf->getByCompanyIdAndPayStubEntryAccountId( $this->getCompany(), $this->getId(), 1 );
+			if ( $cdlf->getRecordCount() > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This policy is currently in use' ) . ' ' . TTi18n::gettext( 'by Tax/Deductions' ) );
+			}
 		}
 
 		//Make sure PS order is correct, in that types can't be separated by total or accrual accounts.
@@ -705,6 +725,7 @@ class PayStubEntryAccountFactory extends Factory {
 	 */
 	function preSave() {
 		if ( $this->getDeleted() == TRUE ) {
+			//Validate() checks for pay codes, Tax/Deductions etc...
 			Debug::text('Attempting to delete PSE Account', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $this->isInUse( $this->getId() ) ) {
 				Debug::text('PSE Account is in use by Pay Stubs... Disabling instead.', __FILE__, __LINE__, __METHOD__, 10);

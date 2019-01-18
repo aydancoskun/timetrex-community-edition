@@ -3,7 +3,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 	_required_files: {
 		10: ['APIPolicyGroup', 'APIExceptionPolicyControl', 'APIOvertimePolicy', 'APIRoundIntervalPolicy', 'APIAbsencePolicy', 'APIAccrualPolicy', 'APIPremiumPolicy', 'APIHolidayPolicy', 'APIRegularTimePolicy', 'APIMealPolicy', 'APIBreakPolicy'],
-		20: ['APIExpensePolicy']
+		25: ['APIExpensePolicy']
 	},
 
 	sub_document_view_controller: null,

@@ -300,6 +300,17 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 	},
 
+	preCopyAsNew: function record(record) {
+		record['id'] = '';
+		record['start_date'] = '';
+		record['end_date'] = '';
+		record['due_date'] = '';
+		record['last_due_date'] = '';
+		record['next_reminder_date'] = '';
+		record['last_reminder_date'] = '';
+		return record;
+	},
+
 	onContextMenuClick: function( context_btn, menu_name ) {
 		this._super( 'onContextMenuClick', context_btn, menu_name );
 		var id;

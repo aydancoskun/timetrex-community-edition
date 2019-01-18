@@ -46,7 +46,9 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 
 		require_once( Environment::getBasePath().'/classes/payroll_deduction/PayrollDeduction.class.php');
 
-		$this->tax_table_file = dirname(__FILE__).'/../payroll_deduction/CAPayrollDeductionTest2017.csv';
+		$this->year = 2018;
+
+		$this->tax_table_file = dirname(__FILE__).'/../payroll_deduction/CAPayrollDeductionTest'. $this->year .'.csv';
 
 		$this->company_id = PRIMARY_COMPANY_ID;
 
@@ -80,11 +82,13 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 
 		try {
 			if ( $this->selenium_test_case_runs == 0 ) {
-				$url = 'http://www.cra-arc.gc.ca/esrvc-srvce/tx/bsnss/pdoc-eng.html';
+				$url = 'https://www.canada.ca/en/revenue-agency/services/e-services/e-services-businesses/payroll-deductions-online-calculator.html';
 				Debug::text( 'Navigating to URL: ' . $url, __FILE__, __LINE__, __METHOD__, 10 );
 				$this->url( $url );
 
-				$ae = $this->byXPath( "//*[@class='col-md-9 col-md-push-3']/p[7]/a[@class='btn btn-primary']" );
+
+				//$this->waitForElementPresent('/html/body/main/div[1]/div[7]/p/a[1]' );
+				$ae = $this->byXPath( "/html/body/main/div[1]/div[7]/p/a[1]" );
 				Debug::text( 'Active Element Text: ' . $ae->text(), __FILE__, __LINE__, __METHOD__, 10 );
 				$ae->click();
 
@@ -283,22 +287,37 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 		return Misc::MoneyFormat($amount, FALSE);
 	}
 
-	//
-	// January 2017
-	//
 	function testCRAFromCSVFile() {
 		$this->assertEquals( file_exists($this->tax_table_file), TRUE);
+
+		$this->cra_deduction_test_csv_file = dirname($this->tax_table_file). DIRECTORY_SEPARATOR . 'CAPayrollDeductionCRATest'. $this->year .'.csv';
+		if ( file_exists($this->cra_deduction_test_csv_file) ) {
+			$file = new \SplFileObject( $this->cra_deduction_test_csv_file, 'r');
+			$file->seek(PHP_INT_MAX);
+
+			$total_compare_lines = $file->key() + 1;
+			unset($file);
+			Debug::text('Found existing CRATest file with Lines: '. $total_compare_lines, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 
 		$test_rows = Misc::parseCSV( $this->tax_table_file, TRUE );
 
 		$total_rows = ( count($test_rows) + 1 );
 		$i = 2;
 		foreach( $test_rows as $row ) {
+			if ( isset($total_compare_lines) AND $i < $total_compare_lines ) {
+				Debug::text('  Skipping to line: '. $total_compare_lines .'/'. $i, __FILE__, __LINE__, __METHOD__, 10);
+				$i++;
+				continue;
+			}
+
 			Debug::text('Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($row['gross_income']) AND isset($row['low_income']) AND isset($row['high_income'])
 					AND $row['gross_income'] == '' AND $row['low_income'] != '' AND $row['high_income'] != '' ) {
 				$row['gross_income'] = ( $row['low_income'] + ( ($row['high_income'] - $row['low_income']) / 2 ) );
 			}
+
 			if ( $row['country'] != '' AND $row['gross_income'] != '' ) {
 				//echo $i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'] ."\n";
 				Debug::text($i.'/'.$total_rows.'. Testing Province: '. $row['province'] .' Income: '. $row['gross_income'], __FILE__, __LINE__, __METHOD__, 10);
@@ -333,19 +352,23 @@ class CAPayrollDeductionCRACompareTest extends PHPUnit_Extensions_Selenium2TestC
 			$i++;
 		}
 
-		//generate column array.
-		$column_keys = array_keys($retarr[0]);
-		foreach( $column_keys as $column_key ) {
-			$columns[$column_key] = $column_key;
+		if ( isset($retarr) ) {
+			//generate column array.
+			$column_keys = array_keys( $retarr[0] );
+			foreach ( $column_keys as $column_key ) {
+				$columns[ $column_key ] = $column_key;
+			}
+
+			//var_dump($test_data);
+			//var_dump($retarr);
+			//echo Misc::Array2CSV( $retarr, $columns, FALSE, TRUE );
+			file_put_contents( $this->cra_deduction_test_csv_file, Misc::Array2CSV( $retarr, $columns, FALSE, TRUE ), FILE_APPEND );
+
+			//Make sure all rows are tested.
+			$this->assertEquals( $total_rows, ( $i - 1 ) );
+		} else {
+			$this->assertEquals( TRUE, FALSE );
 		}
-
-		//var_dump($test_data);
-		//var_dump($retarr);
-		//echo Misc::Array2CSV( $retarr, $columns, FALSE, TRUE );
-		file_put_contents( dirname($this->tax_table_file). DIRECTORY_SEPARATOR . 'CAPayrollDeductionCRATest2017.csv',Misc::Array2CSV( $retarr, $columns, FALSE, TRUE ), FILE_APPEND );
-
-		//Make sure all rows are tested.
-		$this->assertEquals( $total_rows, ( $i - 1 ));
 
 	}
 

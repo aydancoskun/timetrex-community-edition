@@ -404,11 +404,10 @@ class APISchedule extends APIFactory {
 	 * Set schedule data for one or more schedulees.
 	 * @param array $data schedule data
 	 * @param bool $validate_only
-	 * @param bool $overwrite
 	 * @param bool $ignore_warning
 	 * @return array
 	 */
-	function setSchedule( $data, $validate_only = FALSE, $overwrite = FALSE, $ignore_warning = TRUE ) {
+	function setSchedule( $data, $validate_only = FALSE, $ignore_warning = TRUE ) {
 		$validate_only = (bool)$validate_only;
 		$ignore_warning = (bool)$ignore_warning;
 
@@ -491,29 +490,10 @@ class APISchedule extends APIFactory {
 				$is_valid = $primary_validator->isValid( $ignore_warning );
 				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
 
-					if ( $overwrite == TRUE AND isset($row['user_id']) AND isset($row['start_time']) AND isset($row['end_time']) ) {
-						Debug::Text('Overwriting Existing Shifts Enabled...', __FILE__, __LINE__, __METHOD__, 10);
-						$slf = TTnew( 'ScheduleListFactory' );
-						$slf->getConflictingByUserIdAndStartDateAndEndDate( $row['user_id'], $row['start_time'], $row['end_time'] );
-						if ( $slf->getRecordCount() > 0 ) {
-							Debug::Text('Found Conflicting Shift!!', __FILE__, __LINE__, __METHOD__, 10);
-							foreach( $slf as $s_obj ) {
-								Debug::Text('Deleting Schedule Shift ID: '. $s_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
-								$s_obj->setDeleted(TRUE);
-								if ( $s_obj->isValid() ) {
-									$s_obj->Save( TRUE, TRUE );
-								}
-							}
-						} else {
-							Debug::Text('NO Conflicting Shift found...', __FILE__, __LINE__, __METHOD__, 10);
-						}
-						unset($slf, $s_obj);
-					}
-
-					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
-
 					$row['company_id'] = $this->getCurrentCompanyObject()->getId();	 //This prevents a validation error if company_id is FALSE.
 					$lf->setObjectFromArray( $row );
+
+					Debug::Text('Setting object data...', __FILE__, __LINE__, __METHOD__, 10);
 
 					$lf->Validator->setValidateOnly( $validate_only );
 

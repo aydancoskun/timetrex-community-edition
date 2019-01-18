@@ -146,7 +146,7 @@ class ImportAccrual extends Import {
 	 */
 	function parse_accrual_policy_account( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
-			return 0; //Default Wage Group
+			return TTUUID::getZeroID(); //Default Wage Group
 		}
 
 		if ( !is_array( $this->accrual_policy_account_options ) ) {

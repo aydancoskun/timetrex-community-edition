@@ -547,7 +547,7 @@ InOutViewController = BaseViewController.extend( {
 
 					$this.removeEditView();
 
-					if ( LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
+					if ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
 						LocalCacheData.current_open_primary_controller.search();
 					}
 

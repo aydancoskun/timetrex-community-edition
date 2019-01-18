@@ -75,23 +75,28 @@ class InstallSchema_1101A extends InstallSchema_Base {
 			return FALSE;
 		}
 
-		$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root_path, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
-		foreach ( $files as $file_obj ) {
-			if ( $file_obj->isDir() == FALSE ) {
-				$file = $file_obj->getRealPath();
-				$file_chunks = explode( DIRECTORY_SEPARATOR, $file );
-				$total_file_chunks = count( $file_chunks );
-				if ($total_file_chunks > 1) {
-					$company_file_chunk = ( $total_file_chunks - 2 );
+		try {
+			$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root_path, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
+			foreach ( $files as $file_obj ) {
+				if ( $file_obj->isDir() == FALSE ) {
+					$file = $file_obj->getRealPath();
+					$file_chunks = explode( DIRECTORY_SEPARATOR, $file );
+					$total_file_chunks = count( $file_chunks );
+					if ($total_file_chunks > 1) {
+						$company_file_chunk = ( $total_file_chunks - 2 );
 
-					//only convert the path if it's still an int
-					if ( TTUUID::isUUID( $file_chunks[ $company_file_chunk ] ) == FALSE ) {
-						$file_chunks[ $company_file_chunk ] = TTUUID::convertIntToUUID( $file_chunks[ $company_file_chunk ] );
-						$new_path = implode( $file_chunks, DIRECTORY_SEPARATOR );
-						$this->renameFile( $file, $new_path );
+						//only convert the path if it's still an int
+						if ( TTUUID::isUUID( $file_chunks[ $company_file_chunk ] ) == FALSE ) {
+							$file_chunks[ $company_file_chunk ] = TTUUID::convertIntToUUID( $file_chunks[ $company_file_chunk ] );
+							$new_path = implode( $file_chunks, DIRECTORY_SEPARATOR );
+							$this->renameFile( $file, $new_path );
+						}
 					}
 				}
 			}
+		} catch( Exception $e ) {
+			Debug::Text('Failed opening/reading file or directory: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
 		}
 
 		return TRUE;
@@ -106,37 +111,42 @@ class InstallSchema_1101A extends InstallSchema_Base {
 
 		$changed = FALSE;
 
-		$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root_path, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
-		foreach ( $files as $file_obj ) {
-			if ( $file_obj->isDir() == FALSE ) {
-				$file = $file_obj->getRealPath();
-				$file_chunks = explode( DIRECTORY_SEPARATOR, $file );
-				$total_file_chunks = count( $file_chunks );
+		try {
+			$files = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root_path, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
+			foreach ( $files as $file_obj ) {
+				if ( $file_obj->isDir() == FALSE ) {
+					$file = $file_obj->getRealPath();
+					$file_chunks = explode( DIRECTORY_SEPARATOR, $file );
+					$total_file_chunks = count( $file_chunks );
 
-				if ($total_file_chunks > 1) {
-					$company_file_chunk = ( $total_file_chunks - 2 );
-					$filename_chunk = count( $file_chunks ) - 1;
-					$filename_chunks = explode( '.', $file_chunks[ $filename_chunk ] );
-					$user_id = $filename_chunks[0];
-					$extension = $filename_chunks[1];
+					if ($total_file_chunks > 1) {
+						$company_file_chunk = ( $total_file_chunks - 2 );
+						$filename_chunk = count( $file_chunks ) - 1;
+						$filename_chunks = explode( '.', $file_chunks[ $filename_chunk ] );
+						$user_id = $filename_chunks[0];
+						$extension = $filename_chunks[1];
 
-					//only convert the path if it's still an int
-					if ( TTUUID::isUUID( $file_chunks[ $company_file_chunk ] ) == FALSE ) {
-						$file_chunks[ $company_file_chunk ] = TTUUID::convertIntToUUID( $file_chunks[ $company_file_chunk ] );
-						$changed = TRUE;
-					}
+						//only convert the path if it's still an int
+						if ( TTUUID::isUUID( $file_chunks[ $company_file_chunk ] ) == FALSE ) {
+							$file_chunks[ $company_file_chunk ] = TTUUID::convertIntToUUID( $file_chunks[ $company_file_chunk ] );
+							$changed = TRUE;
+						}
 
-					if ( TTUUID::isUUID( $user_id ) == FALSE ) {
-						$file_chunks[ $filename_chunk ] = TTUUID::convertIntToUUID( $user_id ) . '.' . $extension;
-						$changed = TRUE;
-					}
+						if ( TTUUID::isUUID( $user_id ) == FALSE ) {
+							$file_chunks[ $filename_chunk ] = TTUUID::convertIntToUUID( $user_id ) . '.' . $extension;
+							$changed = TRUE;
+						}
 
-					if ( $changed == TRUE ) {
-						$new_path = implode( $file_chunks, DIRECTORY_SEPARATOR );
-						$this->renameFile( $file, $new_path );
+						if ( $changed == TRUE ) {
+							$new_path = implode( $file_chunks, DIRECTORY_SEPARATOR );
+							$this->renameFile( $file, $new_path );
+						}
 					}
 				}
 			}
+		} catch( Exception $e ) {
+			Debug::Text('Failed opening/reading file or directory: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
 		}
 
 		return TRUE;

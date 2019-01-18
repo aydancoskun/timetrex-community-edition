@@ -159,7 +159,8 @@
         <% } %>
         <div class="form-group">
             <div class="col-xs-8 col-xs-offset-4 input-panel">
-                <button tabindex="0" tab-end class="btn btn-lg btn-primary btn-block" style="width: 50%;" type="button"><%= $.i18n._('Save') %> <span id="timedRedirect"></span></button>
+                <button id="save_btn" tabindex="5000"  class="btn btn-lg btn-primary" style="width: 45%;  display:inline-block" type="button"><%= $.i18n._('Save') %> <span id="timedRedirect"></span></button>
+                <button id="cancel_btn" tabindex="5001" tab-end class="btn btn-lg btn-danger" style="width: 45%; display:inline-block;" type="button"><%= $.i18n._('Cancel') %><span>&nbsp;</span></button>
             </div>
         </div>
     </form>

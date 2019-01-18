@@ -68,6 +68,14 @@ class HolidayPolicyFactory extends Factory {
 										30 => TTi18n::gettext('Advanced: Average'),
 									);
 				break;
+			case 'average_time_frequency_type':
+				$retval = array(
+						10 => TTi18n::gettext('Day(s)'), //Default
+						20 => TTi18n::gettext('Pay Period(s)'), //Used by Ontario.
+						//20 => TTi18n::gettext('Week'),
+						//30 => TTi18n::gettext('Month'),
+				);
+				break;
 			case 'scheduled_day':
 				$retval = array(
 										0 => TTi18n::gettext('Calendar Days'),
@@ -158,6 +166,7 @@ class HolidayPolicyFactory extends Factory {
 										'minimum_worked_after_period_days' => 'MinimumWorkedAfterPeriodDays',
 										'minimum_worked_after_days' => 'MinimumWorkedAfterDays',
 										'worked_after_scheduled_days' => 'WorkedAfterScheduledDays',
+										'average_time_frequency_type_id' => 'AverageTimeFrequencyType',
 										'average_time_days' => 'AverageTimeDays',
 										'average_days' => 'AverageDays',
 										'average_time_worked_days' => 'AverageTimeWorkedDays',
@@ -465,6 +474,22 @@ class HolidayPolicyFactory extends Factory {
 	/**
 	 * @return bool|int
 	 */
+	function getAverageTimeFrequencyType() {
+		return $this->getGenericDataValue( 'average_time_frequency_type_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setAverageTimeFrequencyType( $value ) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'average_time_frequency_type_id', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
 	function getAverageTimeDays() {
 		return $this->getGenericDataValue( 'average_time_days' );
 	}
@@ -478,9 +503,8 @@ class HolidayPolicyFactory extends Factory {
 		return $this->setGenericDataValue( 'average_time_days', $value );
 	}
 
-	//This is the divisor in the time averaging formula, as some provinces total time over 30 days and divide by 20 days.
-
 	/**
+	 * This is the divisor in the time averaging formula, as some provinces total time over 30 days and divide by 20 days.
 	 * @return bool|int
 	 */
 	function getAverageDays() {
@@ -496,9 +520,9 @@ class HolidayPolicyFactory extends Factory {
 		return $this->setGenericDataValue( 'average_days', $value );
 	}
 
-	//If true, uses only worked days to average time over.
-	//If false, always uses the above average days to average time over.
 	/**
+	 * If true, uses only worked days to average time over.
+	 * If false, always uses the above average days to average time over.
 	 * @return bool
 	 */
 	function getAverageTimeWorkedDays() {
@@ -564,32 +588,6 @@ class HolidayPolicyFactory extends Factory {
 		}
 		return $this->setGenericDataValue( 'round_interval_policy_id', $value );
 	}
-/*
-	function getTime() {
-		if ( isset($this->data['time']) ) {
-			return (int)$this->data['time'];
-		}
-
-		return FALSE;
-	}
-	function setTime($int) {
-		$int = trim($int);
-
-		if	( empty($int) ) {
-			$int = 0;
-		}
-
-		if	(	$this->Validator->isNumeric(		'time',
-													$int,
-													TTi18n::gettext('Incorrect Time')) ) {
-			$this->setGenericDataValue( 'time', $int );
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-*/
 
 	/**
 	 * @return bool|mixed
@@ -629,9 +627,8 @@ class HolidayPolicyFactory extends Factory {
 		return $this->setGenericDataValue( 'contributing_shift_policy_id', $value );
 	}
 
-	//Count all paid absence time as worked time.
-
 	/**
+	 * Count all paid absence time as worked time.
 	 * @return bool
 	 */
 	function getPaidAbsenceAsWorked() {
@@ -646,9 +643,8 @@ class HolidayPolicyFactory extends Factory {
 		return $this->setGenericDataValue( 'paid_absence_as_worked', $this->toBool($value) );
 	}
 
-	//Always applies over time policy even if they are not eligible for the holiday.
-
 	/**
+	 * Always applies over time policy even if they are not eligible for the holiday.
 	 * @return bool
 	 */
 	function getForceOverTimePolicy() {
@@ -916,6 +912,7 @@ class HolidayPolicyFactory extends Factory {
 														TTi18n::gettext('Incorrect Eligibility Type')
 													);
 		}
+
 		// Days to Total Time over
 		if ( $this->getAverageTimeDays() !== FALSE ) {
 			$this->Validator->isNumeric(		'average_time_days',
@@ -923,6 +920,15 @@ class HolidayPolicyFactory extends Factory {
 														TTi18n::gettext('Incorrect Days to Total Time over')
 													);
 		}
+		// Average Time Over Frequency Type
+		if ( $this->getAverageTimeFrequencyType() !== FALSE ) {
+			$this->Validator->inArrayKey(	'average_time_frequency_type_id',
+											 $this->getAverageTimeFrequencyType(),
+											 TTi18n::gettext('Incorrect Total Time Over Frequency'),
+											 $this->getOptions('average_time_frequency_type')
+			);
+		}
+
 		// Days to Average Time over
 		$this->Validator->isNumeric(		'average_days',
 													$this->getAverageDays(),

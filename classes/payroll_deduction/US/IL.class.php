@@ -41,6 +41,11 @@
 class PayrollDeduction_US_IL extends PayrollDeduction_US {
 
 	var $state_options = array(
+			20170701 => array( // 01-Jul-2017
+							   'rate'             => 4.95,
+							   'line_1_allowance' => 2175,
+							   'line_2_allowance' => 1000,
+			),
 			20160101 => array( // 01-Jan-2016
 							   'rate'             => 3.75,
 							   'line_1_allowance' => 2175,

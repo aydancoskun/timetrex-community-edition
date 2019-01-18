@@ -31,6 +31,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 	initOptions: function() {
 		var $this = this;
 		this.initDropDownOption( 'type' );
+		this.initDropDownOption( 'average_time_frequency_type' );
 		this.initDropDownOption( 'default_schedule_status' );
 		this.initDropDownOption( 'shift_on_holiday_type' );
 		this.initDropDownOption( 'scheduled_day', 'worked_scheduled_days', null, function( res ) {
@@ -213,16 +214,22 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[2].push( tab_holiday_time_column1 );
 
+
 		// Total Time over
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( {field: 'average_time_days', width: 30} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> (" + $.i18n._( 'days' ) + ")</span>" );
+		var form_item_average_time_frequency_combobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_average_time_frequency_combobox.TComboBox( {field: 'average_time_frequency_type_id'} );
+		form_item_average_time_frequency_combobox.setSourceData( Global.addFirstItemToArray( $this.average_time_frequency_type_array ) );
+
+		var widgetContainer = $( "<div class='widget-h-box'></div>" );
 
 		widgetContainer.append( form_item_input );
-		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Total Time over' ), form_item_input, tab_holiday_time_column1, '', widgetContainer, true );
+		widgetContainer.append( form_item_average_time_frequency_combobox );
+
+		this.addEditFieldToColumn( $.i18n._( 'Total Time Over' ), [form_item_input, form_item_average_time_frequency_combobox ], tab_holiday_time_column1, '', widgetContainer, true );
+
 
 		// Average Time over
 		var form_item_average_time_worked_days_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
@@ -245,7 +252,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		this.average_days_widgets = [label_2, form_item_average_days_input, label_3];
 
-		this.addEditFieldToColumn( $.i18n._( 'Average Time over' ), [form_item_average_time_worked_days_checkbox, form_item_average_days_input], tab_holiday_time_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Average Time Over' ), [form_item_average_time_worked_days_checkbox, form_item_average_days_input], tab_holiday_time_column1, '', widgetContainer, true );
 
 		// Contributing Shift
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );

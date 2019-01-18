@@ -2004,9 +2004,11 @@ TimeSheetViewController = BaseViewController.extend( {
 
 		function doNext() {
 			LocalCacheData.last_timesheet_selected_date = start_date_string;
-			LocalCacheData.last_timesheet_selected_user = $this.getSelectEmployee( true );
-			LocalCacheData.last_timesheet_selected_show_wage = $this.wage_btn.getValue( true );
-			LocalCacheData.last_timesheet_selected_punch_mode = $this.toggle_button.getValue();
+			LocalCacheData.last_timesheet_selected_user = $this.getSelectEmployee(true);
+			LocalCacheData.last_timesheet_selected_show_wage = ($this.wage_btn) ? $this.wage_btn.getValue(true) : false;
+			if ( $this.toggle_button ) {
+				LocalCacheData.last_timesheet_selected_punch_mode = $this.toggle_button.getValue();
+			}
 			var args = {filter_data: filter_data};
 			ProgressBar.showOverlay();
 			//Error: TypeError: this.api_timesheet.getTimeSheetData is not a function in /interface/html5/framework/jquery.min.js?v=8.0.0-20141117-155153 line 2 > eval line 1885
@@ -6242,7 +6244,9 @@ TimeSheetViewController = BaseViewController.extend( {
 		if (this.search_panel) {
 			//Set Previous Saved layout combobox in layout panel
 			var layouts_array = this.search_panel.getLayoutsArray();
-			this.previous_saved_layout_selector.empty();
+			if ( this.previous_saved_layout_selector ) {
+				this.previous_saved_layout_selector.empty();
+			}
 			if (layouts_array && layouts_array.length > 0) {
 				this.previous_saved_layout_div.css('display', 'inline');
 
@@ -6678,7 +6682,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	getSelectEmployee: function( full_item ) {
 		var user;
-		if ( this.show_navigation_box && this.employee_nav ) {
+		if ( this.show_navigation_box && this.employee_nav && typeof this.employee_nav.getValue == 'function' ) {
 			user = this.employee_nav.getValue( full_item );
 		} else {
 			if ( full_item ) {
@@ -7254,7 +7258,10 @@ TimeSheetViewController = BaseViewController.extend( {
 				this.onAccumulatedTimeClick( id );
 				break;
 			case 'AddRequest':
-				this.addRequestFromTimesheetCell( id );
+				// Preventing TypeError: Cannot read property 'date' of undefined
+				if ( this.select_cells_Array.length > 0 ) {
+					this.addRequestFromTimesheetCell(id);
+				}
 				break;
 		}
 	},
@@ -8205,7 +8212,12 @@ TimeSheetViewController = BaseViewController.extend( {
 	},
 
 	setLocationValue: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10
+			&& this.edit_view_ui_dic['latitude']
+			&& this.edit_view_ui_dic['longitude']
+			&& this.edit_view_ui_dic['position_accuracy']
+		) {
+
 			this.edit_view_ui_dic['latitude'].setValue(this.current_edit_record.latitude);
 			this.edit_view_ui_dic['longitude'].setValue(this.current_edit_record.longitude);
 			this.edit_view_ui_dic['position_accuracy'].setValue(this.current_edit_record.position_accuracy ? this.current_edit_record.position_accuracy : 0);
@@ -8676,7 +8688,7 @@ TimeSheetViewController = BaseViewController.extend( {
 
 	setDefaultMenuGeneratePayStubIcon: function( context_btn, grid_selected_length, pId ) {
 
-		if ( !PermissionManager.checkTopLevelPermission( 'PayPeriodSchedule' ) ) {
+		if ( !PermissionManager.checkTopLevelPermission('GeneratePayStubs') ) {
 			context_btn.addClass( 'invisible-image' );
 		}
 

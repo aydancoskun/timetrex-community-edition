@@ -2418,7 +2418,7 @@ class SetupPresets extends Factory {
 			Debug::text( '    Total Legal Entities: ' . $lelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 			foreach ( $lelf as $le_obj ) {
 				//Determine Source Account to use, if EFT exists, use it.
-				$remittance_source_account_id = 0;
+				$remittance_source_account_id = TTUUID::getZeroID();
 				$rsalf = TTnew( 'RemittanceSourceAccountListFactory' );
 				$rsalf->getByLegalEntityId( $le_obj->getId(), NULL, array('type_id' => 'DESC') );  //Order EFT first.
 				if ( $rsalf->getRecordCount() > 0 ) {
@@ -3040,6 +3040,7 @@ class SetupPresets extends Factory {
 						case 'bc':
 						case 'ab':
 						case 'mb':
+						case 'on':
 						case 'qc':
 						case 'nu':
 						case 'nt':
@@ -3058,7 +3059,6 @@ class SetupPresets extends Factory {
 									'secondary_length_of_service' => 8, //After 8th year
 							);
 							break;
-						case 'on':
 						case 'yt':
 							$vacation_data = array(
 									'primary_percent'             => 4,
@@ -3082,7 +3082,7 @@ class SetupPresets extends Factory {
 							break;
 					}
 
-					if ( !in_array( $province, array('on', 'yt') ) ) {
+					if ( !in_array( $province, array('yt') ) ) {
 						$this->createCompanyDeduction(
 								array(
 										'company_id'                        => $this->getCompany(),
@@ -3138,7 +3138,7 @@ class SetupPresets extends Factory {
 									'user_value1'                       => $vacation_data['secondary_percent'],
 							)
 					);
-					if ( !in_array( $province, array('on', 'yt') ) ) {
+					if ( !in_array( $province, array('yt') ) ) {
 						$this->createCompanyDeduction(
 								array(
 										'company_id'                        => $this->getCompany(),
@@ -3350,7 +3350,7 @@ class SetupPresets extends Factory {
 						case 'ak': //alaska
 							//Unemployment Insurance - Employee
 							//Unemployment Insurance - Employer
-							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 39800;
+							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 39500; //Rate for: 20180101
 							break;
 						case 'az': //arizona
 							//Unemployment Insurance - Employee
@@ -3383,7 +3383,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ar': //arkansas
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 12000;
+							$state_unemployment_wage_base = 10000; //Rate for: 20180101
 
 							break;
 						case 'ca': //california
@@ -3403,7 +3403,7 @@ class SetupPresets extends Factory {
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - Disability Insurance' ),
 											'user_value1'                    => 0.9, //Percent
-											'user_value2'                    => 106742, //WageBase
+											'user_value2'                    => 110902, //WageBase
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
 											'exclude_pay_stub_entry_account' => array(
@@ -3442,7 +3442,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'co': //colorado
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 12500;
+							$state_unemployment_wage_base = 12600; //Rate for: 20180101
 
 							break;
 						case 'ct': //connecticut
@@ -3451,7 +3451,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'de': //delaware
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 18500;
+							$state_unemployment_wage_base = 16500; //Rate for: 20180101
 							break;
 						case 'dc': //d.c.
 							//Unemployment Insurance - Employee
@@ -3518,7 +3518,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'hi': //hawaii
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 44000;
+							$state_unemployment_wage_base = 45900; //Rate for: 20180101
 
 							//E&T Assessment
 							$this->createCompanyDeduction(
@@ -3598,7 +3598,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'id': //idaho
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 37800;
+							$state_unemployment_wage_base = 38200; //Rate for: 20180101
 
 							//Administrative Reserve
 							$this->createCompanyDeduction(
@@ -3673,7 +3673,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ia': //iowa
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 29300;
+							$state_unemployment_wage_base = 29900; //Rate for: 20180101
 
 							//Reserve Fund
 							$this->createCompanyDeduction(
@@ -3888,11 +3888,11 @@ class SetupPresets extends Factory {
 							break;
 						case 'mo': //missouri
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 13000;
+							$state_unemployment_wage_base = 12500; //Rate for: 20180101
 							break;
 						case 'mt': //montana
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 31400;
+							$state_unemployment_wage_base = 32000; //Rate for: 20180101
 
 							//Administrative Fund
 							$this->createCompanyDeduction(
@@ -3950,7 +3950,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'nv': //nevada
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 29500;
+							$state_unemployment_wage_base = 30500; //Rate for: 20180101
 
 							//Career Enhancement
 							$this->createCompanyDeduction(
@@ -4009,7 +4009,7 @@ class SetupPresets extends Factory {
 						case 'nj': //new jersey
 							//Unemployment Insurance - Employee
 							//Unemployment Insurance - Employer
-							$state_unemployment_wage_base = 33500;
+							$state_unemployment_wage_base = 33700; //Rate for: 20180101
 
 							//Disability Insurance - Employee
 							$this->createCompanyDeduction(
@@ -4189,7 +4189,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'nm': //new mexico
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 24300;
+							$state_unemployment_wage_base = 24200; //Rate for: 20180101
 
 							//State Trust Fund
 							$this->createCompanyDeduction(
@@ -4218,7 +4218,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ny': //new york
 							//Unemployment Insurance - Employee
-							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 10700;
+							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 11100; //Rate for: 20180101
 
 							//Reemployment Service Fund
 							$this->createCompanyDeduction(
@@ -4404,23 +4404,23 @@ class SetupPresets extends Factory {
 							break;
 						case 'nc': //north carolina
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 23100;
+							$state_unemployment_wage_base = 23500; //Rate for: 20180101
 							break;
 						case 'nd': //north dakota
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 35100;
+							$state_unemployment_wage_base = 35500; //Rate for: 20180101
 							break;
 						case 'oh': //ohio
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 9000;
+							$state_unemployment_wage_base = 9500; //Rate for: 20180101
 							break;
 						case 'ok': //oklahoma
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 17700;
+							$state_unemployment_wage_base = 17600; //Rate for: 20180101
 							break;
 						case 'or': //oregon
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 38400;
+							$state_unemployment_wage_base = 39300; //Rate for: 20180101
 
 							//Workers Benefit - Employee
 							$this->createCompanyDeduction(
@@ -4484,7 +4484,7 @@ class SetupPresets extends Factory {
 											'calculation_id'                 => 15,
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper( $province ) . ' - Tri-Met Transit District' ),
-											'user_value1'                    => 0.7237, //Percent
+											'user_value1'                    => 0.7537, //Percent
 											'user_value2'                    => 0, //WageBase
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
@@ -4509,7 +4509,7 @@ class SetupPresets extends Factory {
 											'calculation_id'                 => 15,
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper( $province ) . ' - Lane Transit District' ),
-											'user_value1'                    => 0.70, //Percent
+											'user_value1'                    => 0.73, //Percent
 											'user_value2'                    => 0, //WageBase
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
@@ -4551,7 +4551,7 @@ class SetupPresets extends Factory {
 							//Unemployment Insurance - Employee
 							//Unemployment Insurance - Employer
 							$state_unemployment_wage_base = 0;
-							$company_state_unemployment_wage_base = 9750;
+							$company_state_unemployment_wage_base = 10000; //Rate for: 20180101
 							break;
 						case 'ri': //rhode island
 							//**Unemployement is called "Job Development Fund, enter wage base for it.**
@@ -4569,7 +4569,7 @@ class SetupPresets extends Factory {
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper( $province ) . ' - Employment Security' ),
 											'user_value1'                    => 0.00, //Percent
-											'user_value2'                    => 22400, //WageBase
+											'user_value2'                    => 23000, //WageBase Rate for: 20180101
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
 											'exclude_pay_stub_entry_account' => array(
@@ -4594,7 +4594,7 @@ class SetupPresets extends Factory {
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper( $province ) . ' - Job Development Fund' ),
 											'user_value1'                    => 0.21, //Percent
-											'user_value2'                    => 22400, //WageBase
+											'user_value2'                    => 23000, //WageBase Rate for: 20180101
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
 											'exclude_pay_stub_entry_account' => array(
@@ -4799,11 +4799,11 @@ class SetupPresets extends Factory {
 							break;
 						case 'ut': //utah
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 33100;
+							$state_unemployment_wage_base = 34300; //Rate for: 20180101
 							break;
 						case 'vt': //vermont
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 17300;
+							$state_unemployment_wage_base = 17600; //Rate for: 20180101
 							break;
 						case 'va': //virginia
 							//Unemployment Insurance - Employee
@@ -4811,7 +4811,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'wa': //washington
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 45000;
+							$state_unemployment_wage_base = 47300; //Rate for: 20180101
 
 							//Industrial Insurance - Employee
 							$this->createCompanyDeduction(
@@ -4898,7 +4898,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'wy': //wyoming
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 25400;
+							$state_unemployment_wage_base = 24700; //Rate for: 20180101
 
 							//Employment Support Fund
 							$this->createCompanyDeduction(
@@ -9756,9 +9756,9 @@ class SetupPresets extends Factory {
 								'minimum_employed_days'            => 0,
 
 								//Prior to the holiday
-								'minimum_worked_days'              => 5, //Employee must work at least
-								'minimum_worked_period_days'       => 9, //Of the last X days
-								'worked_scheduled_days'            => 2, //Holiday week days
+								'minimum_worked_days'              => 1, //Employee must work at least
+								'minimum_worked_period_days'       => 1, //Of the last X days
+								'worked_scheduled_days'            => 1,
 
 								//After the holiday
 								'minimum_worked_after_period_days' => 1,
@@ -9766,9 +9766,9 @@ class SetupPresets extends Factory {
 								'worked_after_scheduled_days'      => 1,
 
 								//Averaging
-								'average_time_days'                => 63, //Days to average time over
-								'average_time_worked_days'         => TRUE, //Only days worked
-								'average_days'                     => 0, //Divsor for average formula.
+								'average_time_days'                => 28, //Days to average time over (4 weeks)
+								'average_time_worked_days'         => FALSE, //Only days worked
+								'average_days'                     => 20, //Divsor for average formula. X * 5% is the same as X / 20.
 
 								'minimum_time' => 0,
 								'maximum_time' => 0,
@@ -9776,8 +9776,8 @@ class SetupPresets extends Factory {
 								'include_paid_absence_time'             => FALSE,
 								'absence_policy_id'                     => $this->getAbsencePolicyByCompanyIDAndTypeAndName( 'Statutory Holiday' ),
 								'recurring_holiday_id'                  => (array)$this->RecurringHolidaysByRegion( $country, $province ),
-								'contributing_shift_policy_id'          => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + OT + Paid Absence' ),
-								'eligible_contributing_shift_policy_id' => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + OT + Paid Absence' ),
+								'contributing_shift_policy_id'          => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + Paid Absence' ), //Was: 'Regular Time + OT + Paid Absence'
+								'eligible_contributing_shift_policy_id' => $this->getContributingShiftPolicyByCompanyIDAndName( 'Regular Time + Paid Absence' ),
 						)
 				);
 			}
@@ -9873,9 +9873,10 @@ class SetupPresets extends Factory {
 								'worked_after_scheduled_days'      => 1,
 
 								//Averaging
-								'average_time_days'                => 28, //Days to average time over
-								'average_time_worked_days'         => FALSE, //Only days worked
-								'average_days'                     => 20, //Divsor for average formula.
+								'average_time_days'                => 1, //1 Pay Period to average time over
+								'average_time_frequency_type_id'   => 20, //Pay Periods
+								'average_time_worked_days'         => TRUE, //Only days worked
+								'average_days'                     => 0, //Divsor for average formula.
 
 								'minimum_time' => 0,
 								'maximum_time' => 0,

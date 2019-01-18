@@ -256,11 +256,11 @@ class StationListFactory extends StationFactory implements IteratorAggregate {
 	 * @return bool|StationListFactory
 	 */
 	function getByStationIdAndCompanyId( $station_id, $company_id, $order = NULL) {
-		if ( $station_id == '') {
+		if ( $station_id == '' ) {
 			return FALSE;
 		}
 
-		if ( $company_id == '') {
+		if ( $company_id == '' ) {
 			return FALSE;
 		}
 

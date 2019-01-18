@@ -3163,44 +3163,44 @@ ALTER TABLE `wage_group` DROP COLUMN `deleted_by`,
   CHANGE `new_deleted_by` `deleted_by` char(36);
 
 ALTER TABLE `pay_stub_entry_account_link` ADD COLUMN `new_total_gross` char(36) AFTER `total_gross`;
-UPDATE `pay_stub_entry_account_link` set `new_total_gross` = CASE WHEN ( `new_total_gross` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_total_gross` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_total_gross`, 12, '0') ) END END;
+UPDATE `pay_stub_entry_account_link` set `new_total_gross` = CASE WHEN ( `total_gross` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `total_gross` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`total_gross`, 12, '0') ) END END;
 ALTER TABLE `pay_stub_entry_account_link` DROP COLUMN `total_gross`,
   CHANGE `new_total_gross` `total_gross` char(36),
   ADD COLUMN `new_total_employee_deduction` char(36) AFTER `total_employee_deduction`;
-UPDATE `pay_stub_entry_account_link` set `new_total_employee_deduction` = CASE WHEN ( `new_total_employee_deduction` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_total_employee_deduction` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_total_employee_deduction`, 12, '0') ) END END;
+UPDATE `pay_stub_entry_account_link` set `new_total_employee_deduction` = CASE WHEN ( `total_employee_deduction` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `total_employee_deduction` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`total_employee_deduction`, 12, '0') ) END END;
 ALTER TABLE `pay_stub_entry_account_link` DROP COLUMN `total_employee_deduction`,
   CHANGE `new_total_employee_deduction` `total_employee_deduction` char(36),
   ADD COLUMN `new_total_employer_deduction` char(36) AFTER `total_employer_deduction`;
-UPDATE `pay_stub_entry_account_link` set `new_total_employer_deduction` = CASE WHEN ( `new_total_employer_deduction` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_total_employer_deduction` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_total_employer_deduction`, 12, '0') ) END END;
+UPDATE `pay_stub_entry_account_link` set `new_total_employer_deduction` = CASE WHEN ( `total_employer_deduction` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `total_employer_deduction` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`total_employer_deduction`, 12, '0') ) END END;
 ALTER TABLE `pay_stub_entry_account_link` DROP COLUMN `total_employer_deduction`,
   CHANGE `new_total_employer_deduction` `total_employer_deduction` char(36),
   ADD COLUMN `new_total_net_pay` char(36) AFTER `total_net_pay`;
-UPDATE `pay_stub_entry_account_link` set `new_total_net_pay` = CASE WHEN ( `new_total_net_pay` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_total_net_pay` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_total_net_pay`, 12, '0') ) END END;
+UPDATE `pay_stub_entry_account_link` set `new_total_net_pay` = CASE WHEN ( `total_net_pay` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `total_net_pay` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`total_net_pay`, 12, '0') ) END END;
 ALTER TABLE `pay_stub_entry_account_link` DROP COLUMN `total_net_pay`,
   CHANGE `new_total_net_pay` `total_net_pay` char(36),
   ADD COLUMN `new_regular_time` char(36) AFTER `regular_time`;
-UPDATE `pay_stub_entry_account_link` set `new_regular_time` = CASE WHEN ( `new_regular_time` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_regular_time` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_regular_time`, 12, '0') ) END END;
+UPDATE `pay_stub_entry_account_link` set `new_regular_time` = CASE WHEN ( `regular_time` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `regular_time` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`regular_time`, 12, '0') ) END END;
 ALTER TABLE `pay_stub_entry_account_link` DROP COLUMN `regular_time`,
   CHANGE `new_regular_time` `regular_time` char(36),
   ADD COLUMN `new_employee_cpp` char(36) AFTER `employee_cpp`;
-UPDATE `pay_stub_entry_account_link` set `new_employee_cpp` = CASE WHEN ( `new_employee_cpp` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_employee_cpp` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_employee_cpp`, 12, '0') ) END END;
+UPDATE `pay_stub_entry_account_link` set `new_employee_cpp` = CASE WHEN ( `employee_cpp` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `employee_cpp` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`employee_cpp`, 12, '0') ) END END;
 ALTER TABLE `pay_stub_entry_account_link` DROP COLUMN `employee_cpp`,
   CHANGE `new_employee_cpp` `employee_cpp` char(36),
   ADD COLUMN `new_employee_ei` char(36) AFTER `employee_ei`;
-UPDATE `pay_stub_entry_account_link` set `new_employee_ei` = CASE WHEN ( `new_employee_ei` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_employee_ei` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_employee_ei`, 12, '0') ) END END;
+UPDATE `pay_stub_entry_account_link` set `new_employee_ei` = CASE WHEN ( `employee_ei` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `employee_ei` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`employee_ei`, 12, '0') ) END END;
 ALTER TABLE `pay_stub_entry_account_link` DROP COLUMN `employee_ei`,
   CHANGE `new_employee_ei` `employee_ei` char(36);
 
 ALTER TABLE `company` ADD COLUMN `new_admin_contact` char(36) AFTER `admin_contact`;
-UPDATE `company` set `new_admin_contact` = CASE WHEN ( `new_admin_contact` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_admin_contact` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_admin_contact`, 12, '0') ) END END;
+UPDATE `company` set `new_admin_contact` = CASE WHEN ( `admin_contact` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `admin_contact` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`admin_contact`, 12, '0') ) END END;
 ALTER TABLE `company` DROP COLUMN `admin_contact`,
   CHANGE `new_admin_contact` `admin_contact` char(36),
   ADD COLUMN `new_billing_contact` char(36) AFTER `billing_contact`;
-UPDATE `company` set `new_billing_contact` = CASE WHEN ( `new_billing_contact` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_billing_contact` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_billing_contact`, 12, '0') ) END END;
+UPDATE `company` set `new_billing_contact` = CASE WHEN ( `billing_contact` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `billing_contact` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`billing_contact`, 12, '0') ) END END;
 ALTER TABLE `company` DROP COLUMN `billing_contact`,
   CHANGE `new_billing_contact` `billing_contact` char(36),
   ADD COLUMN `new_support_contact` char(36) AFTER `support_contact`;
-UPDATE `company` set `new_support_contact` = CASE WHEN ( `new_support_contact` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `new_support_contact` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`new_support_contact`, 12, '0') ) END END;
+UPDATE `company` set `new_support_contact` = CASE WHEN ( `support_contact` = 0 ) THEN '00000000-0000-0000-0000-000000000000' ELSE CASE WHEN ( `support_contact` = -1 ) THEN 'ffffffff-ffff-ffff-ffff-ffffffffffff' ELSE CONCAT('#UUID_PREFIX#-', lpad(`support_contact`, 12, '0') ) END END;
 ALTER TABLE `company` DROP COLUMN `support_contact`,
   CHANGE `new_support_contact` `support_contact` char(36);
 

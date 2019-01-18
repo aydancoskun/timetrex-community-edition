@@ -1000,7 +1000,9 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.is_changed = false;
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
-		this.api['set' + this.api.key_name]( this.current_edit_record, false, ignoreWarning, {onResult: function( result ) {
+
+		var record = this.processMassAdd( this.current_edit_record );
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			$this.onSaveAndContinueResult( result );
 
 		}} );
@@ -1039,7 +1041,7 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 			record = this.current_edit_record;
 		}
 
-		var record = this.processMassAdd(record);
+		record = this.processMassAdd(record);
 
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 			if ( result.isValid() ) {

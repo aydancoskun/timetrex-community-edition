@@ -40,6 +40,14 @@
  */
 class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
+			20180101 => array(
+					array('income' => 39676, 'rate' => 5.06, 'constant' => 0),
+					array('income' => 79353, 'rate' => 7.7, 'constant' => 1047),
+					array('income' => 91107, 'rate' => 10.5, 'constant' => 3269),
+					array('income' => 110630, 'rate' => 12.29, 'constant' => 4900),
+					array('income' => 150000, 'rate' => 14.7, 'constant' => 7566),
+					array('income' => 150000, 'rate' => 16.8, 'constant' => 10716),
+			),
 			20170101 => array(
 					array('income' => 38898, 'rate' => 5.06, 'constant' => 0),
 					array('income' => 77797, 'rate' => 7.7, 'constant' => 1027),
@@ -188,6 +196,12 @@ class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 		Provincial tax reduction
 	*/
 	var $provincial_tax_reduction_options = array(
+			20180101 => array( //2018
+							   'income1' => 20144,
+							   'income2' => 32868.72,
+							   'amount'  => 453,
+							   'rate'    => 0.0356,
+			),
 			20170101 => array( //2017
 							   'income1' => 19749,
 							   'income2' => 32220.91,

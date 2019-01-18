@@ -122,6 +122,16 @@ class APINotification extends APIFactory {
 										);
 				}
 
+				//Warn that MySQL database support is deprecated.
+				if ( strncmp($config_vars['database']['type'], 'mysql', 5) == 0 AND ( time() > strtotime('22-Jan-2018') OR $this->getPermissionObject()->getLevel() >= 20 ) ) {
+					$retarr[] = array(
+							'delay' => -1, //0= Show until clicked, -1 = Show until next getNotifications call.
+							'bg_color' => '#FF0000', //Red
+							'message' => TTi18n::getText('WARNING: MySQL database support has been deprecated and migration to PostgreSQL is required. Click here for instructions.', APPLICATION_NAME ),
+							'destination' => 'https://forums.timetrex.com/viewtopic.php?f=6&t=7519',
+					);
+				}
+
 				//Give early warning to installs using older stack components before the next version is released that forces the upgrade.
 				if ( version_compare( PHP_VERSION, '5.4.0', '<' ) == TRUE ) {
 					if ( OPERATING_SYSTEM == 'WIN' ) {

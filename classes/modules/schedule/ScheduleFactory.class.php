@@ -47,6 +47,7 @@ class ScheduleFactory extends Factory {
 	protected $absence_policy_obj = NULL;
 	protected $branch_obj = NULL;
 	protected $department_obj = NULL;
+	protected $pay_period_obj = NULL;
 	protected $pay_period_schedule_obj = NULL;
 
 	/**
@@ -213,6 +214,8 @@ class ScheduleFactory extends Factory {
 										'other_id4' => 'OtherID4',
 										'other_id5' => 'OtherID5',
 
+										'overwrite' => 'EnableOverwrite',
+
 										'recurring_schedule_template_control_id' => 'RecurringScheduleTemplateControl',
 
 										'note' => 'Note',
@@ -346,7 +349,7 @@ class ScheduleFactory extends Factory {
 	 * @param string $value UUID
 	 * @return bool
 	 */
-	function setPayPeriod( $value = NULL) {
+	function setPayPeriod( $value = NULL ) {
 		if ( $value == NULL AND $this->getUser() != '' AND $this->getUser() != TTUUID::getZeroID() ) { //Don't attempt to find pay period if user_id is not specified.
 			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
@@ -405,7 +408,10 @@ class ScheduleFactory extends Factory {
 			$value = TTDate::getMiddleDayEpoch( $value );
 		}
 
-		return $this->setGenericDataValue( 'date_stamp', $value );
+		$retval = $this->setGenericDataValue( 'date_stamp', $value );
+		$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
+
+		return $retval;
 	}
 
 	//
@@ -1344,7 +1350,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setEnableOverwrite( $bool) {
-		$this->overwrite = $bool;
+		$this->overwrite = (bool)$bool;
 
 		return TRUE;
 	}
@@ -1570,9 +1576,7 @@ class ScheduleFactory extends Factory {
 										  TTi18n::gettext( 'Incorrect date' ) . '(a)'
 				);
 				if ( $this->Validator->isError( 'date_stamp' ) == FALSE ) {
-					if ( $this->getDateStamp() > 0 ) {
-						$this->setPayPeriod(); //Force pay period to be set as soon as the date is.
-					} else {
+					if ( $this->getDateStamp() <= 0 ) {
 						$this->Validator->isTRUE( 'date_stamp',
 												  FALSE,
 												  TTi18n::gettext( 'Incorrect date' ) . '(b)'
@@ -1727,20 +1731,12 @@ class ScheduleFactory extends Factory {
 		Debug::Text('User ID: '. $this->getUser() .' DateStamp: '. $this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->handleDayBoundary();
-
 		$this->findUserDate();
-		Debug::Text('User ID: '. $this->getUser() .' DateStamp: '. $this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $this->getUser() === FALSE AND $this->Validator->getValidateOnly() == FALSE ) { //Use === so we still allow OPEN shifts (user_id=0)
 			$this->Validator->isTRUE(	'user_id',
 										FALSE,
 										TTi18n::gettext('Employee is not specified') );
-		}
-
-		//Check to make sure EnableOverwrite isn't enabled when editing an existing record.
-		if ( $this->isNew() == FALSE AND $this->getEnableOverwrite() == TRUE ) {
-			Debug::Text('Overwrite enabled when editing existing record, disabling overwrite.', __FILE__, __LINE__, __METHOD__, 10);
-			$this->setEnableOverwrite( FALSE );
 		}
 
 		if ( $this->getDateStamp() == FALSE AND $this->Validator->getValidateOnly() == FALSE ) {
@@ -1876,10 +1872,11 @@ class ScheduleFactory extends Factory {
 			$this->setStatus( 10 ); //Default to working.
 		}
 
-		if ( $this->getEnableOverwrite() == TRUE AND $this->isNew() == TRUE ) {
+		if ( $this->getEnableOverwrite() == TRUE ) {
 			//Delete any conflicting schedule shift before saving.
 			$slf = TTnew( 'ScheduleListFactory' );
-			$slf->getConflictingByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getStartTime(), $this->getEndTime() );
+
+			$slf->getConflictingByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getStartTime(), $this->getEndTime(), $this->getId() ); //Don't consider the current record to be conflicting with itself (by passing id argument)
 			if ( $slf->getRecordCount() > 0 ) {
 				Debug::Text( 'Found Conflicting Shift!!', __FILE__, __LINE__, __METHOD__, 10 );
 				//Delete shifts.
@@ -1964,7 +1961,7 @@ class ScheduleFactory extends Factory {
 			$data_diff = $this->getDataDifferences();
 
 			//When comparing data_diff with timestamp columns in the DB, we need to convert them to epoch then compare again to make sure they are in fact different.
-			if ( isset($data_diff['date_stamp']) AND TTDate::getMiddleDayEpoch( $this->getDateStamp() ) !=  TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $data_diff['date_stamp'] ) ) ) {
+			if ( isset($data_diff['date_stamp']) AND TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( TTDate::parseDateTime( $data_diff['date_stamp'] ) ) ) {
 				$data_diff['date_stamp'] = TTDate::parseDateTime( $data_diff['date_stamp'] );
 			} else {
 				$data_diff['date_stamp'] = NULL;
@@ -2018,9 +2015,7 @@ class ScheduleFactory extends Factory {
 				Debug::text(' NOT CALLING setUserDate or setUserDateID!', __FILE__, __LINE__, __METHOD__, 10);
 			}
 */
-			if ( isset($data['overwrite']) ) {
-				$this->setEnableOverwrite( TRUE );
-			}
+
 
 			$variable_function_map = $this->getVariableToFunctionMap();
 			foreach( $variable_function_map as $key => $function ) {

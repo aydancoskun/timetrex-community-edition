@@ -2335,6 +2335,14 @@ class PayPeriodScheduleFactory extends Factory {
 		}
 
 		if ( $this->getDeleted() == TRUE ) {
+			//Delete all users assigned to this pay period. This helps prevent duplicate rows from appearing in recurring schedules and such, since joins may match on these, before they get to the pay period schedule row to detect if its deleted or not.
+			$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
+			$ppsulf->getByPayPeriodScheduleId( $this->getID() );
+			if ( $ppsulf->getRecordCount() > 0 ) {
+				$ppsulf->bulkDelete( $this->getIDSByListFactory( $ppsulf ) ); //Can't use setDeleted() here as the PP schedule user table doesn't have a deleted column.
+			}
+			unset($ppsulf);
+
 			//Delete all pay periods related to this pay period schedule. This will not delete data within those pay periods though.
 			$pplf = TTnew( 'PayPeriodListFactory' );
 			$pplf->getByPayPeriodScheduleId( $this->getID() );
@@ -2346,6 +2354,7 @@ class PayPeriodScheduleFactory extends Factory {
 					}
 				}
 			}
+			unset($pplf, $pp_obj);
 
 			//Remove from User Defaults.
 			$udlf = TTnew( 'UserDefaultListFactory' );
@@ -2358,6 +2367,7 @@ class PayPeriodScheduleFactory extends Factory {
 					}
 				}
 			}
+			unset($udlf, $udf_obj);
 		}
 
 		$this->CommitTransaction();

@@ -28,6 +28,8 @@ PayStubViewController = BaseViewController.extend( {
 
 	pseal_link: false,
 
+	original_status_id: 10,
+
 	init: function( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PayStubEditView.html';
@@ -59,6 +61,15 @@ PayStubViewController = BaseViewController.extend( {
 			$this.completeInit();
 		});
 
+	},
+
+	isEditMode: function() {
+		if ( this.is_add
+			|| ( this.is_edit && this.original_status_id == 25 )
+		) {
+			return true;
+		}
+		return false;
 	},
 
 	preloadTransactionOptions: function(dfd) {
@@ -787,14 +798,8 @@ PayStubViewController = BaseViewController.extend( {
 	},
 
 	setEditMenuGeneratePayStubIcon: function( context_btn, grid_selected_length, pId ) {
-		if ( !this.endOfPayValidate() ) {
+		if ( !PermissionManager.checkTopLevelPermission('GeneratePayStubs') ) {
 			context_btn.addClass( 'invisible-image' );
-		}
-
-		if ( this.current_edit_record.id ) {
-			context_btn.removeClass( 'disable-image' );
-		} else {
-			context_btn.addClass( 'disable-image' );
 		}
 	},
 
@@ -807,14 +812,8 @@ PayStubViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenuGeneratePayStubIcon: function( context_btn, grid_selected_length, pId ) {
-		if ( !this.endOfPayValidate() ) {
+		if ( !PermissionManager.checkTopLevelPermission('GeneratePayStubs') ) {
 			context_btn.addClass( 'invisible-image' );
-		}
-
-		if ( grid_selected_length > 0 ) {
-			context_btn.removeClass( 'disable-image' );
-		} else {
-			context_btn.addClass( 'disable-image' );
 		}
 	},
 
@@ -904,12 +903,16 @@ PayStubViewController = BaseViewController.extend( {
 	initInsideTransactionEditorData: function() {
 		var $this = this;
 		if ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.copied_record_id ) {
-			this.getPayStubTransactionDefaultData( function( data ) {
-				$this.editor.insideTransactionEditorSetValue( data );
-			} );
+			this.getPayStubTransactionDefaultData(function (data) {
+				if ( $this.isEditMode() == true || data.length > 0 ) {
+					$this.editor.insideTransactionEditorSetValue(data);
+				}
+			});
 		} else {
 			this.getPayStubTransaction( function( data ) {
-				$this.editor.insideTransactionEditorSetValue( data );
+				if ( $this.isEditMode() == true || data.length > 0 ) {
+					$this.editor.insideTransactionEditorSetValue(data);
+				}
 			} )
 		}
 	},
@@ -1169,16 +1172,41 @@ PayStubViewController = BaseViewController.extend( {
 			$this.rows_widgets_array.push( true );
 		}
 
-		setEarnings( val[10] );
-		setDeductions( val[20] );
-		setNetPay( val[40] );
-		setMiscellaneous( val[80] );
-		setEmployerContributions( val[30] );
-		setAccrual( val[50] );
+		if ( this.parent_controller.isEditMode() == true || this.parent_controller.checkForNonHeaderData(val[10]) ) {
+			setEarnings(val[10]);
+		}
+
+		if ( this.parent_controller.isEditMode() == true || this.parent_controller.checkForNonHeaderData(val[20]) ) {
+			setDeductions(val[20]);
+		}
+
+		setNetPay(val[40]);
+
+		if ( this.parent_controller.isEditMode() == true || this.parent_controller.checkForNonHeaderData(val[80])  ) {
+			setMiscellaneous(val[80]);
+		}
+
+		if ( this.parent_controller.isEditMode() == true || this.parent_controller.checkForNonHeaderData(val[30])  ) {
+			setEmployerContributions(val[30]);
+		}
+
+		if ( this.parent_controller.isEditMode() == true || this.parent_controller.checkForNonHeaderData(val[50])  ) {
+			setAccrual(val[50]);
+		}
 
 		this.calcTotal();
 		// render inside pay stub transaction
 		this.parent_controller.initInsideTransactionEditorData();
+	},
+
+	checkForNonHeaderData: function(data){
+		for ( var n in data ) {
+			if( TTUUID.isUUID( data[n].id ) == true ){
+				return true;
+			}
+		}
+
+		return false;
 	},
 
 	insideEntryEditorAddRow: function( data, index ) {
@@ -1224,9 +1252,9 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				// if the pay_stub_amendment_id and user_expense_id all >0 how to display the right label?
-				if ( pay_stub_amendment_id > 0 ) {
+				if ( TTUUID.isUUID( pay_stub_amendment_id ) && pay_stub_amendment_id != TTUUID.zero_id ) {
 					right_label = $( "<span class='widget-right-label'> (" + $.i18n._( 'Amendment' ) + ")</span>" );
-				} else if ( user_expense_id > 0 ) {
+				} else if ( TTUUID.isUUID( user_expense_id ) && user_expense_id != TTUUID.zero_id ) {
 					right_label = $( "<span class='widget-right-label'> (" + $.i18n._( 'Expense' ) + ")</span>" );
 				}
 
@@ -1254,13 +1282,13 @@ PayStubViewController = BaseViewController.extend( {
 
 				// Note(description)
 				var form_item_note_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				form_item_note_input.TTextInput( {field: 'description', width: 300} );
+				form_item_note_input.TTextInput( { field: 'description', width: 300, display_na:false } );
 				form_item_note_input.setValue( data.description );
 				form_item_note_input.attr( 'editable', true );
 
 				var form_item_note_text = Global.loadWidgetByName( FormItemType.TEXT );
-				form_item_note_text.TText( {field: 'description'} );
-				form_item_note_text.setValue( data.description );
+				form_item_note_text.TText( {field: 'description', display_na:false} );
+				form_item_note_text.setValue( data.description ? data.description : ' ' );
 
 				// Rate
 				var form_item_rate_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -1364,7 +1392,7 @@ PayStubViewController = BaseViewController.extend( {
 					row.children().eq( 0 ).append( widgetContainer );
 
 				} else {
-					if ( Global.isSet( index ) || is_add || ( _.size( data ) === 1 && pay_stub_status_id == 25 ) ) {
+					if ( Global.isSet( index ) || is_add || ( _.size( data ) === 1 && ( $this.parent_controller.isEditMode() == true ) ) ) {
 
 						if (  data['type_id'] == 40 || data.total_row === true  ) {
 							form_item_name_text.css( 'font-weight', 'bold' );
@@ -1395,8 +1423,8 @@ PayStubViewController = BaseViewController.extend( {
 
 				// Note
 				if ( ( data['type_id'] == type.toString() || data['type_id'] === type) && type != 40 && !data.total_row ) {
-					if ( pay_stub_status_id == 25 ) {
-						if ( (pay_stub_amendment_id > 0 || user_expense_id > 0) && data.description  ) {
+					if ( $this.parent_controller.isEditMode() == true ) {
+						if ( ( ( TTUUID.isUUID( pay_stub_amendment_id ) && pay_stub_amendment_id != TTUUID.zero_id ) || ( TTUUID.isUUID( user_expense_id ) && user_expense_id != TTUUID.zero_id ) ) ) {
 							form_item_note_input.setReadOnly( true );
 						}
 						widgets[form_item_note_input.getField()] = form_item_note_input;
@@ -1407,7 +1435,7 @@ PayStubViewController = BaseViewController.extend( {
 						row.children().eq( 1 ).append( form_item_note_text );
 					}
 				} else {
-					if ( Global.isSet( index ) || is_add || ( _.size( data) === 1 && pay_stub_status_id == 25 ) ) {
+					if ( Global.isSet( index ) || is_add || ( _.size( data) === 1 && ( $this.parent_controller.isEditMode() == true ) ) ) {
 //						if ( (data['type_id'] === '40' || data['type_id'] == 40) && ( type == 20 || type == 30 || type == 50 || type == 80 ) ) {
 //							widgets[form_item_note_text.getField()] = form_item_note_text;
 //							row.children().eq( 1 ).append( form_item_note_text );
@@ -1430,8 +1458,8 @@ PayStubViewController = BaseViewController.extend( {
 
 				// amount
 				if ( ( data['type_id'] === type.toString() || data['type_id'] === type ) && type != 40 && !data.total_row) {
-					if ( pay_stub_status_id == 25 ) {
-						if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+					if ( $this.parent_controller.isEditMode() == true ) {
+						if ( ( TTUUID.isUUID( pay_stub_amendment_id ) && pay_stub_amendment_id != TTUUID.zero_id ) || ( TTUUID.isUUID( user_expense_id ) && user_expense_id != TTUUID.zero_id ) ) {
 							form_item_amount_input.setReadOnly( true );
 						}
 						widgets[form_item_amount_input.getField()] = form_item_amount_input;
@@ -1450,7 +1478,7 @@ PayStubViewController = BaseViewController.extend( {
 
 					}
 				} else {
-					if ( (Global.isSet( index ) || is_add || ( _.size( data) === 1 && pay_stub_status_id == 25 ) ) && type != 40 && !data.total_row ) {
+					if ( (Global.isSet( index ) || is_add || ( _.size( data) === 1 && ( $this.parent_controller.isEditMode() == true ) ) ) && type != 40 && !data.total_row ) {
 
 						if ( data['type_id'] == 40 ) {
 							form_item_amount_text.css( 'font-weight', 'bold' );
@@ -1502,8 +1530,8 @@ PayStubViewController = BaseViewController.extend( {
 
 					// rate
 					if ( data['type_id'] == 10 && !data.total_row) {
-						if ( pay_stub_status_id == 25 ) {
-							if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+						if ( $this.parent_controller.isEditMode() == true ) {
+							if ( ( TTUUID.isUUID( pay_stub_amendment_id ) && pay_stub_amendment_id != TTUUID.zero_id ) || ( TTUUID.isUUID( user_expense_id ) && user_expense_id != TTUUID.zero_id ) ) {
 								form_item_rate_input.setReadOnly( true );
 							}
 							widgets[form_item_rate_input.getField()] = form_item_rate_input;
@@ -1526,8 +1554,8 @@ PayStubViewController = BaseViewController.extend( {
 
 					// units
 					if ( data['type_id'] == 10 && !data.total_row ) {
-						if ( pay_stub_status_id == 25 ) {
-							if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+						if ( $this.parent_controller.isEditMode() == true ) {
+							if ( ( TTUUID.isUUID( pay_stub_amendment_id ) && pay_stub_amendment_id != TTUUID.zero_id ) || ( TTUUID.isUUID( user_expense_id ) && user_expense_id != TTUUID.zero_id ) ) {
 								form_item_units_input.setReadOnly( true );
 							}
 							widgets[form_item_units_input.getField()] = form_item_units_input;
@@ -1557,8 +1585,7 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				//Build row widgets
-
-				if ( pay_stub_amendment_id > 0 || user_expense_id > 0 ) {
+				if ( ( TTUUID.isUUID( pay_stub_amendment_id ) && pay_stub_amendment_id != TTUUID.zero_id ) || ( TTUUID.isUUID( user_expense_id ) && user_expense_id != TTUUID.zero_id ) ) {
 					row.children().last().find( '.minus-icon ' ).hide();
 				}
 
@@ -1583,14 +1610,18 @@ PayStubViewController = BaseViewController.extend( {
 					$this.rows_widgets_array.push( widgets );
 				}
 
-				if ( pay_stub_status_id == 25 && typeof widgets.total_row == 'undefined' && data['type_id'] != 40) {
+				if ( $this.parent_controller.isEditMode() == true ) {
 					$this.addIconsEvent( row ); //Bind event to add and minus icon
 				} else {
 					row.children().last().empty();
 				}
 
-			}
+				if ( data.total_row || data.type_id == 40 ) {
+					row.find( '.plus-icon' ).remove()
+					row.find( '.minus-icon' ).remove()
+				}
 
+			}
 
 			if ( data['type_id'] == 10 ) {
 				renderColumns( data, 10, index );
@@ -1796,6 +1827,11 @@ PayStubViewController = BaseViewController.extend( {
 
 	},
 
+	initEditView: function(){
+		this.original_status_id = this.current_edit_record.status_id;
+		this._super('initEditView');
+	},
+
 	onCopyAsNewResult: function( result ) {
 		var $this = this;
 		var result_data = result.getResult();
@@ -1832,6 +1868,8 @@ PayStubViewController = BaseViewController.extend( {
 		this.is_add = false;
 		LocalCacheData.current_doing_context_action = 'save_and_continue';
 		var record = this.current_edit_record;
+		this.original_status_id = record.status_id;
+
 		record = this.uniformVariable( record );
 
 		this.savePayStub(record,function() {
@@ -2466,6 +2504,7 @@ PayStubViewController = BaseViewController.extend( {
 			var total_ytd_amount = 0;
 			var net_pay_amount = 0;
 			var net_pay_ytd_amount = 0;
+			var total_units_blank = true;
 
 			for ( var i = 0; i < this.rows_widgets_array.length; i++ ) {
 				var row = this.rows_widgets_array[i];
@@ -2482,7 +2521,11 @@ PayStubViewController = BaseViewController.extend( {
 					}
 
 					if ( Global.isSet( row['units'] ) ) {
-						row['units'].setValue( Global.removeTrailingZeros( total_units) );
+						if (total_units_blank == false) {
+							row['units'].setValue(Global.MoneyRound(total_units));
+						} else if (total_units_blank) {
+							row['units'].setValue('-');
+						}
 					}
 					row['amount'].setValue( Global.MoneyRound( parseFloat(total_amount) ) );
 					row['ytd_amount'].setValue( Global.MoneyRound( parseFloat(total_ytd_amount) ) );
@@ -2506,13 +2549,15 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				var current_units = 0;
-				if ( Global.isSet( row['units']) &&  !isNaN(row['units'].getValue())  ){
-					current_units = parseFloat(row['units'].getValue())
+				if ( Global.isSet( row['units']) &&  parseFloat( row['units'].getValue() ) > 0 ){
+					current_units = Global.MoneyRound(parseFloat(row['units'].getValue()))
+					total_units_blank = false;
 				}
 
 				var current_total_amount = 0;
 				if ( Global.isSet( row['amount']) &&  !isNaN(row['amount'].getValue())  ){
-					current_total_amount = parseFloat(row['amount'].getValue())
+					current_total_amount = parseFloat(row['amount'].getValue());
+					total_units_blank = false;
 				}
 
 				var current_ytd_total = 0;
@@ -2520,8 +2565,11 @@ PayStubViewController = BaseViewController.extend( {
 					current_ytd_total = parseFloat(row['ytd_amount'].getValue())
 				}
 
-
-				total_units = total_units + current_units;
+				if ( total_units_blank == false ) {
+					total_units = parseFloat(total_units) + parseFloat(current_units);
+				} else {
+					total_units = '';
+				}
 				total_amount = total_amount + current_total_amount;
 				total_ytd_amount = total_ytd_amount + current_ytd_total;
 			}
@@ -2536,7 +2584,7 @@ PayStubViewController = BaseViewController.extend( {
 			if ( !this.parent_controller['current_edit_record']['id'] && !this.parent_controller.copied_record_id  ) {
 				is_add = true;
 			}
-			if ( !is_add && pay_stub_status_id == 25 && this.show_cover ) {
+			if ( !is_add && ( pay_stub_status_id == 25 ) && this.show_cover ) {
 				this.cover = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
 				this.cover.NoResultBox( {
 					related_view_controller: this,
@@ -2547,7 +2595,7 @@ PayStubViewController = BaseViewController.extend( {
 			var render = this.getRender(); //get render, should be a table
 			var headerRow = Global.loadWidget( 'views/payroll/pay_stub/PayStubTransactionViewInsideEditorColumnHeader.html' );
 			var args = {
-				col1: $.i18n._( 'Destination Account' ),
+				col1: $.i18n._( 'Payment Method' ),
 				col2: $.i18n._( 'Note' ),
 				col3: $.i18n._( 'Status' ),
 				col4: $.i18n._( 'Payment Date' ),
@@ -2760,9 +2808,13 @@ PayStubViewController = BaseViewController.extend( {
 				// Note
 				// writable
 				var form_item_note_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				form_item_note_input.TTextInput( {field: 'note', width: 300} );
+				form_item_note_input.TTextInput( {field: 'note', width: 300,  display_na: false} );
 				form_item_note_input.setValue( data.note );
 				form_item_note_input.attr( 'editable', true );
+				//readable
+				var form_item_note_text = Global.loadWidgetByName( FormItemType.TEXT );
+				form_item_note_text.TText( {field: 'description', display_na:false} );
+				form_item_note_text.setValue( data.description );
 
 				// Transaction Status
 				// writable
@@ -2813,13 +2865,15 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_amount_text.TText( {field: 'amount'} );
 				form_item_amount_text.setValue( data.amount ? Global.removeTrailingZeros(data.amount) : '' );
 
-				if ( pay_stub_status_id == 25 && ( data.status_id == 10 || data.id === false ) ) {
+				if ( $this.parent_controller.isEditMode() ) {
 					//status is pending. form is set up.
 				} else {
 					//status is not pending. disable editing the row.
 					form_item_remittance_destination_account_input.setEnabled(false);
 					form_item_transaction_date_input.setEnabled(false);
 					form_item_amount_input.setEnabled(false);
+					form_item_note_input.setEnabled(false);
+					form_item_input = form_item_note_text; //only way to hide the N/A is to swap in a Text Field in view mode.
 				}
 
 				//actually append the row to the DOM
@@ -2848,18 +2902,19 @@ PayStubViewController = BaseViewController.extend( {
 					$this.rows_widgets_array.push( widgets );
 				}
 
-				if ( pay_stub_status_id == 25 && (data.status_id == 10 || data.status_id == undefined) ) {
+				if (  $this.parent_controller.isEditMode() == true ) {
 					var minus_icon = row.find( '.minus-icon' );
 					minus_icon.click( function() {
 						$this.insideTransactionEditorRemoveRow( row );
 					} );
+					var plus_icon = row.find( '.plus-icon' );
+					plus_icon.click( function() {
+						$this.insideTransactionEditorAddRow( {}, $( this ).parents('tr').index() );
+					} );
 				} else {
 					row.children().last().find( '.minus-icon' ).remove();
+					row.children().last().find( '.plus-icon' ).remove();
 				}
-				var plus_icon = row.find( '.plus-icon' );
-				plus_icon.click( function() {
-					$this.insideTransactionEditorAddRow( {}, $( this ).parents('tr').index() );
-				} );
 			}
 		};
 		inside_pay_stub_entry_editor_div.append( this.editor );
@@ -3239,54 +3294,6 @@ PayStubViewController = BaseViewController.extend( {
 			case ContextMenuIconName.export_excel:
 				this.onExportClick('export' + this.api.key_name )
 				break;
-//			case 'CostaRicaSTDForm1':
-//				post_data = {0: args, 1: true, 2: '-2050-cheque_cr_standard_form_1'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CostaRicaSTDForm2':
-//				post_data = {0: args, 1: true, 2: '-2060-cheque_cr_standard_form_2'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'NEBS9085':
-//				post_data = {0: args, 1: true, 2: '-2010-cheque_9085'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'NEBS9209P':
-//				post_data = {0: args, 1: true, 2: '-2020-cheque_9209p'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'NEBSDLT103':
-//				post_data = {0: args, 1: true, 2: '-2030-cheque_dlt103'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'NEBSDLT104':
-//				post_data = {0: args, 1: true, 2: '-2040-cheque_dlt104'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'Beanstream':
-//				post_data = {0: args, 1: true, 2: '-1050-eft_BEANSTREAM'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CanadaEFT105':
-//				post_data = {0: args, 1: true, 2: '-1030-eft_105'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CanadaEFT1464':
-//				post_data = {0: args, 1: true, 2: '-1020-eft_1464'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CanadaEFTCIBC':
-//				post_data = {0: args, 1: true, 2: '-1022-eft_1464_cibc'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'CanadaHSBCEFTPC':
-//				post_data = {0: args, 1: true, 2: '-1040-eft_HSBC'};
-//				this.doFormIFrameCall( post_data );
-//				break;
-//			case 'UnitedStatesACH':
-//				post_data = {0: args, 1: true, 2: '-1010-eft_ACH'};
-//				this.doFormIFrameCall( post_data );
-//				break;
 
 		}
 

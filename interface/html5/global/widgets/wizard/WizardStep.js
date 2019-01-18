@@ -46,13 +46,17 @@ WizardStep = Backbone.View.extend({
 		el.html( title );
 	},
 
-	setInstructions: function( instructions ) {
+	setInstructions: function( instructions, callback ) {
 		// if( typeof instructions == 'undefined' ){
 		// 	instructions = this.instructions;
 		// }
 		var el = $('<p class="instructions"/>');
 		el.html( instructions );
 		this.el.append(el);
+
+		if ( typeof callback == 'function' ) {
+			callback();
+		}
 	},
 
 

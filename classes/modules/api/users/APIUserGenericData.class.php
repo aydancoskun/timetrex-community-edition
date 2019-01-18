@@ -127,7 +127,8 @@ class APIUserGenericData extends APIFactory {
 					$lf->getByCompanyIdAndUserIdAndId( $row['company_id'], $row['user_id'], $row['id'] );
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
-						$row = array_merge( $lf->getCurrent()->getObjectAsArray(), $row );
+						$lf = $lf->getCurrent(); //Make the current $lf variable the current object, otherwise getDataDifferences() fails to function.
+						$row = array_merge( $lf->getObjectAsArray(), $row );
 					} else {
 						//Object doesn't exist.
 						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, employee does not exist') );

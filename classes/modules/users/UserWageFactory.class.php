@@ -734,10 +734,10 @@ class UserWageFactory extends Factory {
 		//
 		// Employee
 		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record..
-			if ( $this->getUser() == TTUUID::getZeroID() ) {
+			if ( $this->getUser() == '' OR $this->getUser() == TTUUID::getZeroID() ) {
 				$this->Validator->isTRUE(	'user_id',
-												FALSE,
-													TTi18n::gettext('No employee specified')
+											FALSE,
+											TTi18n::gettext('No employee specified')
 				);
 			}
 		}
@@ -829,7 +829,7 @@ class UserWageFactory extends Factory {
 			if ( $this->Validator->isError('effective_date') == FALSE ) {
 				$this->Validator->isTrue(		'effective_date',
 														$this->isUniqueEffectiveDate($this->getEffectiveDate()),
-														TTi18n::gettext('Employee already has a wage entry on this date for the same wage group. Try using a different date instead.')
+														TTi18n::gettext('Employee already has a wage entry on this date for the same wage group. Try using a different date instead')
 													);
 			}
 		}

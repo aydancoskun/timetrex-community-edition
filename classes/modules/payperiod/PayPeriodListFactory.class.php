@@ -1009,6 +1009,52 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	/**
+	 * @param string $id UUID
+	 * @param int $start_transaction_date EPOCH
+	 * @param int $end_transaction_date EPOCH
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayPeriodListFactory
+	 */
+	function getByPayPeriodScheduleIdAndEndDateBefore( $id, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL) {
+		if ( $id == '' ) {
+			return FALSE;
+		}
+
+		if ( $end_date == '' ) {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'a.transaction_date' => 'desc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'id' => TTUUID::castUUID($id),
+				'end_date' => $this->db->BindTimeStamp( $end_date ),
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+
+					where	a.pay_period_schedule_id = ?
+						AND a.end_date < ?
+						AND a.deleted=0';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		//Debug::Text('Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
+
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $company_id UUID
 	 * @param string $id UUID
 	 * @param int $start_transaction_date EPOCH
@@ -1343,28 +1389,6 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	}
 
 	/**
-	 * @param string $user_id UUID
-	 * @param int $transaction_date EPOCH
-	 * @return mixed
-	 */
-	function getPayPeriodEndDateByUserIdAndTransactionDate( $user_id, $transaction_date = NULL ) {
-		if ($transaction_date == '' ) {
-			$transaction_date = TTDate::getTime();
-		}
-
-		$pay_period_obj = $this->getByUserIdAndTransactionDate( $user_id, $transaction_date )->getCurrent();
-
-		if ( $pay_period_obj->getAdvanceTransactionDate() !== FALSE
-				AND $pay_period_obj->getAdvanceTransactionDate() > TTDate::getTime() ) {
-			$epoch = $pay_period_obj->getAdvanceEndDate();
-		} else {
-			$epoch = $pay_period_obj->getEndDate();
-		}
-
-		return $epoch;
-	}
-
-	/**
 	 * @param string $id UUID
 	 * @return bool|PayPeriodListFactory
 	 */
@@ -1670,7 +1694,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 	 */
 	function getByRemittanceAgencyIdAndCompanyIdAndTransactionDateAndPayPeriodSchedule( $id, $company_id, $transaction_date = NULL, $pay_period_schedule = NULL, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 
-		Debug::Text( 'Remittance Agency Id: '.$id. ' company: '.$company_id. ' t_date: '.$transaction_date, __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text( 'Remittance Agency Id: '. $id .' Company Id: '. $company_id .' Transaction Date: '. $transaction_date, __FILE__, __LINE__, __METHOD__, 10);
 
 		if ( $id == '' ) {
 			return FALSE;
@@ -1680,18 +1704,25 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 			return FALSE;
 		}
 
+		if ( $order == NULL ) {
+			$order = array( 'pp.transaction_date' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
 		$udf = new UserDeductionFactory();
 		$cdf = new CompanyDeductionFactory();
 		$ppsuf = new PayPeriodScheduleUserFactory();
 
 		$ph = array(
 				'payroll_remittance_agency_id' => TTUUID::castUUID($id),
-				'transaction_date' => date('r', $transaction_date ),
+				'transaction_date' => $this->db->BindTimeStamp( $transaction_date ),
 				'company_id' => TTUUID::castUUID($company_id),
 		);
 
 		$query = '
-				SELECT pp.* FROM '. $this->getTable() .' AS pp
+				SELECT DISTINCT pp.* FROM '. $this->getTable() .' AS pp
 				  LEFT JOIN '. $ppsuf->getTable() .' AS ppsu ON pp.pay_period_schedule_id = ppsu.pay_period_schedule_id
 				  LEFT JOIN '.$udf->getTable().' AS ud ON ppsu.user_id = ud.user_id
 				  LEFT JOIN '.$cdf->getTable().' AS cd ON ud.company_deduction_id = cd.id
@@ -1707,7 +1738,7 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		$query .= 'AND pp.deleted = 0';
 
 		$query .= $this->getWhereSQL( $where );
-		$query .= $this->getSortSQL( $order );
+		$query .= $this->getSortSQL( $order, $strict );
 
 		$this->ExecuteSQL( $query, $ph );
 
@@ -1715,9 +1746,8 @@ class PayPeriodListFactory extends PayPeriodFactory implements IteratorAggregate
 		return $this;
 	}
 
-	//Get last 6mths worth of pay periods and prepare a JS array so they can be highlighted in the calendar.
-
 	/**
+	 * Get last 6mths worth of pay periods and prepare a JS array so they can be highlighted in the calendar.
 	 * @param bool $include_all_pay_period_schedules
 	 * @return bool|mixed
 	 */

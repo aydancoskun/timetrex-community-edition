@@ -1052,7 +1052,8 @@ class PunchControlFactory extends Factory {
 	 * @param $bool
 	 * @return bool
 	 */
-	function setEnableStrictJobValidation( $bool) {
+	function setEnableStrictJobValidation( $bool ) {
+		$this->is_valid = FALSE; //Force revalidation when data is changed.
 		$this->strict_job_validiation = $bool;
 
 		return TRUE;
@@ -1483,7 +1484,7 @@ class PunchControlFactory extends Factory {
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE
 				AND TTUUID::isUUID( $this->getJob() ) AND $this->getJob() != TTUUID::getZeroID()
 				AND ( $this->getJobItem() == TTUUID::getZeroID() OR $this->getJobItem() == '' ) ) {
-			Debug::text(' Job is set ('.$this->getJob().'), but no task is... Using default job item...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text(' Job is set ('. $this->getJob() .'), but no task is... Using default job item...', __FILE__, __LINE__, __METHOD__, 10);
 
 			if ( is_object( $this->getJobObject() ) ) {
 				Debug::text(' Default Job Item: '. $this->getJobObject()->getDefaultItem(), __FILE__, __LINE__, __METHOD__, 10);

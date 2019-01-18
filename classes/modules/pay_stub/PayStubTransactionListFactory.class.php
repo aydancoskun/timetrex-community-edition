@@ -110,13 +110,53 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		);
 
 		$psf = new PayStubFactory();
+		$rsaf = new RemittanceSourceAccountFactory();
+		$rdaf = new RemittanceDestinationAccountFactory();
 
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
-						LEFT JOIN '. $psf->getTable() .' as psf on psf.id = a.pay_stub_id
+					LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
+					LEFT JOIN '. $rdaf->getTable() .' as rdaf ON ( a.remittance_destination_account_id = rdaf.id)
+					LEFT JOIN '. $psf->getTable() .' as psf on psf.id = a.pay_stub_id
 					where	a.remittance_source_account_id = ?
-						AND (a.deleted = 0 AND psf.deleted = 0)';
+						AND (a.deleted = 0 AND psf.deleted = 0 AND rsaf.deleted = 0 AND rdaf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph, $limit);
+
+		return $this;
+	}
+
+	/**
+	 * @param string $id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayStubTransactionListFactory
+	 */
+	function getByRemittanceDestinationAccountId( $id, $limit = NULL, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+				'remittance_source_account_id' => TTUUID::castUUID($id),
+		);
+
+		$psf = new PayStubFactory();
+		$rsaf = new RemittanceSourceAccountFactory();
+		$rdaf = new RemittanceDestinationAccountFactory();
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
+					LEFT JOIN '. $rdaf->getTable() .' as rdaf ON ( a.remittance_destination_account_id = rdaf.id)
+					LEFT JOIN '. $psf->getTable() .' as psf on psf.id = a.pay_stub_id
+					where	a.remittance_destination_account_id = ?
+						AND (a.deleted = 0 AND psf.deleted = 0 AND rsaf.deleted = 0 AND rdaf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
@@ -147,14 +187,16 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 				'id' => TTUUID::castUUID($id),
 		);
 
+		$rsaf = new RemittanceSourceAccountFactory();
 		$rdaf = new RemittanceDestinationAccountFactory();
 
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
+					LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
 					LEFT JOIN '. $rdaf->getTable() .' as b ON ( a.remittance_destination_account_id = b.id)
 					where	a.pay_stub_id = ?
-						AND ( a.deleted = 0 AND b.deleted = 0 )';
+						AND ( a.deleted = 0 AND rsaf.deleted = 0 AND b.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
@@ -181,6 +223,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 
 		$lef = new LegalEntityFactory();
 		$rsaf = new RemittanceSourceAccountFactory();
+		$rdaf = new RemittanceDestinationAccountFactory();
 
 		$ph = array(
 				'id' => TTUUID::castUUID($id),
@@ -191,10 +234,11 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
+						LEFT JOIN '. $rdaf->getTable() .' as rdaf ON ( a.remittance_destination_account_id = rdaf.id AND rdaf.deleted = 0 )
 						LEFT JOIN '. $lef->getTable() .' as lef ON ( rsaf.legal_entity_id = lef.id AND lef.deleted = 0 )
 					where	a.id = ?
 						AND lef.company_id = ?
-						AND ( a.deleted = 0 )';
+						AND ( a.deleted = 0 AND rsaf.deleted = 0 AND rdaf.deleted = 0 AND lef.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
@@ -216,14 +260,17 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 
 		$lef = new LegalEntityFactory();
 		$rsaf = new RemittanceSourceAccountFactory();
+		$rdaf = new RemittanceDestinationAccountFactory();
+
 		$ph = array('company_id' => TTUUID::castUUID($company_id));
 
 		$query = 'select a.*
 					from	' . $this->getTable() . ' as a
-						LEFT JOIN ' . $rsaf->getTable() . ' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
-						LEFT JOIN ' . $lef->getTable() . ' as lef ON ( rsaf.legal_entity_id = lef.id AND lef.deleted = 0 )
+						LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
+						LEFT JOIN '. $rdaf->getTable() .' as rdaf ON ( a.remittance_destination_account_id = rdaf.id AND rdaf.deleted = 0 )
+						LEFT JOIN '. $lef->getTable() .' as lef ON ( rsaf.legal_entity_id = lef.id AND lef.deleted = 0 )
 					where lef.company_id = ?
-						AND ( a.deleted = 0 )';
+						AND ( a.deleted = 0 AND rsaf.deleted = 0 AND rdaf.deleted = 0 AND lef.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
@@ -255,16 +302,21 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 			$strict = TRUE;
 		}
 
+		$rsaf = new RemittanceSourceAccountFactory();
+		$rdaf = new RemittanceDestinationAccountFactory();
+
 		$ph = array(
 				'pay_stub_id' => TTUUID::castUUID($pay_stub_id),
 		);
 
 		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	pay_stub_id = ?
-						AND	status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
-						AND deleted = 0';
+					select	pstf.*
+					from	'. $this->getTable() .' as pstf
+					LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( pstf.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
+					LEFT JOIN '. $rdaf->getTable() .' as rdaf ON ( pstf.remittance_destination_account_id = rdaf.id AND rdaf.deleted = 0 )
+					where	pstf.pay_stub_id = ?
+						AND	pstf.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND ( pstf.deleted = 0 AND rsaf.deleted = 0 AND rdaf.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
@@ -302,17 +354,22 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 			$strict = TRUE;
 		}
 
+		$rsaf = new RemittanceSourceAccountFactory();
+		$rdaf = new RemittanceDestinationAccountFactory();
+
 		$ph = array(
 				'pay_stub_id' => TTUUID::castUUID($pay_stub_id),
 		);
 
 		$query = '
-					select	*
-					from	'. $this->getTable() .'
-					where	pay_stub_id = ?
-						AND	type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
-						AND	status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
-						AND deleted = 0';
+					select	pstf.*
+					from	'. $this->getTable() .' as pstf
+					LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( pstf.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
+					LEFT JOIN '. $rdaf->getTable() .' as rdaf ON ( pstf.remittance_destination_account_id = rdaf.id AND rdaf.deleted = 0 )
+					where	pstf.pay_stub_id = ?
+						AND	pstf.type_id in ('. $this->getListSQL( $type_id, $ph, 'int' ) .')
+						AND	pstf.status_id in ('. $this->getListSQL( $status_id, $ph, 'int' ) .')
+						AND ( pstf.deleted = 0 AND rsaf.deleted = 0 AND rdaf.deleted = 0 ) ';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict );
 
@@ -348,10 +405,10 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$order = array('pay_period_id' => 'desc');
 		$strict = FALSE;
 
-		$pst = new PayStubTransactionFactory();
-		$rsa = new RemittanceSourceAccountFactory();
-		$ps = new PayStubFactory();
-		$pp = new PayPeriodFactory();
+		$pstf = new PayStubTransactionFactory();
+		$rsaf = new RemittanceSourceAccountFactory();
+		$psf = new PayStubFactory();
+		$ppf = new PayPeriodFactory();
 
 		$query = 'SELECT
 					pp.id AS pay_period_id,
@@ -361,11 +418,11 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 					SUM ( a.amount ) AS total_amount,
 					COUNT ( DISTINCT a.id ) AS total_transactions
 
-					FROM  '. $pst->getTable() .' AS a
+					FROM  '. $pstf->getTable() .' AS a
 
-					LEFT JOIN '. $rsa->getTable() .' AS rsa ON a.remittance_source_account_id = rsa.id
-					LEFT JOIN '. $ps->getTable() .' AS ps ON ps.id = a.pay_stub_id
-					LEFT JOIN '. $pp->getTable() .' AS pp ON ps.pay_period_id = pp.id
+					LEFT JOIN '. $rsaf->getTable() .' AS rsa ON a.remittance_source_account_id = rsa.id
+					LEFT JOIN '. $psf->getTable() .' AS ps ON ps.id = a.pay_stub_id
+					LEFT JOIN '. $ppf->getTable() .' AS pp ON ps.pay_period_id = pp.id
 
 					WHERE 
 					pp.company_id = ? ';
@@ -479,10 +536,8 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 							lef.trade_name as legal_entity_trade_name,
 
 							rsaf.type_id as remittance_source_account_type_id,
-							rsaf.id as remittance_source_account_id,
 							rsaf.name as remittance_source_account,
 
-							rdaf.id as remittance_destination_account_id,
 							rdaf.user_id as user_id,
 							uf.first_name as destination_user_first_name,
 							uf.last_name as destination_user_last_name,
@@ -498,7 +553,6 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 
 							psf.run_id as pay_stub_run_id,
 
-							psf.id as pay_stub_id,
 							psf.status_id as pay_stub_status_id,
 							psf.start_date as pay_stub_start_date,
 							psf.end_date as pay_stub_end_date,

@@ -279,7 +279,10 @@ class TTUUID {
 
 				$tmp_config_data['other']['primary_company_id'] = $uuid_primary_company_id;
 			}
-			$install_obj->writeConfigFile( $tmp_config_data );
+
+			if ( $install_obj->writeConfigFile( $tmp_config_data ) !== TRUE ) {
+				return FALSE;
+			}
 
 			return $uuid_seed;
 		}

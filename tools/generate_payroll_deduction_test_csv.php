@@ -48,15 +48,6 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$cf = new CompanyFactory();
 	$province_arr = $cf->getOptions('province');
 
-
-	//
-	//
-	//TESTING
-	//
-	//
-	unset($province_arr['AK']);
-
-
 	if ( !isset($province_arr[$country]) ) {
 		echo "Country does not have any province/states.\n";
 	}
@@ -263,7 +254,7 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 						if ( $tax_row['income'] == 0 ) {
 							continue;
 						}
-						
+
 						//Test $100 less then the first bracket, and $100 more then all other brackets for each status.
 						$income = round($tax_row['income'] / $pay_periods);
 						$variance = round(100 / $pay_periods);
@@ -290,7 +281,7 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 				foreach( $test_data[$country][$province_code]['provincial_claim'] as $provincial_claim ) {
 					foreach( $test_data[$country][$province_code]['federal_claim'] as $federal_claim ) {
 						foreach( $test_data[$country][$province_code]['income'] as $income ) {
-							$pd_obj = new PayrollDeduction( $country, $province_code);
+							$pd_obj = new PayrollDeduction( $country, $province_code );
 							$pd_obj->setDate( $effective_date );
 							$pd_obj->setAnnualPayPeriods( $pay_periods );
 							$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.

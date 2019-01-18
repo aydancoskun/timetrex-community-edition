@@ -78,8 +78,8 @@ class APIPunch extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		if ( TTUUID::isUUID( $station_id ) == FALSE ) {
-			$station_id = getStationID(); //API.inc
+		if ( $station_id == NULL ) { //This is not a UUID, but the public station_id typically from the browser cookie.
+			$station_id = getStationID(); //getStationID() from includes/API.inc.php
 		}
 
 		//Must call APIStation->getCurrentStation( $station_id = NULL ) first, so the Station ID cookie can be set and passed to this.
@@ -95,7 +95,7 @@ class APIPunch extends APIFactory {
 
 		Debug::Text('Station ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_object($current_station) AND $current_station->checkAllowed( $user_id, $station_id, $station_type ) == TRUE ) {
-			Debug::Text('Station Allowed! ID: '. $station_id .' User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('Station Allowed! ID: '. $current_station->getId() .' ('. $station_id .') User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 			//Get user object from ID.
 			$ulf = TTNew('UserListFactory');
 			$ulf->getByIdAndCompanyId( $user_id, $company_id );
@@ -583,7 +583,8 @@ class APIPunch extends APIFactory {
 							//If we make the current object be $lf, it fails saving the punch because extra columns exist.
 							//$lf = $lf->getCurrent();
 							//$row = array_merge( $lf->getObjectAsArray( array('id' => TRUE, 'user_id' => TRUE, 'transfer' => TRUE, 'type_id' => TRUE, 'status_id' => TRUE, 'time_stamp' => TRUE, 'punch_control_id' => TRUE, 'actual_time_stamp' => TRUE, 'original_time_stamp' => TRUE, 'schedule_id' => TRUE, 'station_id' => TRUE, 'longitude' => TRUE, 'latitude' => TRUE, 'deleted' => TRUE) ), $row );
-							$row = array_merge( $lf->getCurrent()->getObjectAsArray(), $row );
+							$lf = $lf->getCurrent(); //Make the current $lf variable the current object, otherwise getDataDifferences() fails to function.
+							$row = array_merge( $lf->getObjectAsArray(), $row );
 						} else {
 							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Edit permission denied') );
 						}

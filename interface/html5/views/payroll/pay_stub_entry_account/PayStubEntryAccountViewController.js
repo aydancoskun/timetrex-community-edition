@@ -74,7 +74,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	},
 	onAccrualPayStubEntryAccountChange: function() {
-		if ( this.current_edit_record.accrual_pay_stub_entry_account_id > 0 ) {
+		if ( TTUUID.isUUID( this.current_edit_record.accrual_pay_stub_entry_account_id ) && this.current_edit_record.accrual_pay_stub_entry_account_id != TTUUID.zero_id ) {
 			this.attachElement( 'accrual_type_id' );
 		} else {
 			this.detachElement( 'accrual_type_id' )

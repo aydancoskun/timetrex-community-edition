@@ -906,8 +906,8 @@ class MessageControlListFactory extends MessageControlFactory implements Iterato
 									OR ( b.parent_id = ? )
 								)
 							AND ( b.user_id = ? OR c.user_id = ? )
-							AND ( a.deleted = 0 AND c.deleted = 0 )
-					';
+							AND ( a.deleted = 0 )
+					'; //Don't check c.deleted = 0 (message recipient table), as the recipient could delete the message and that would cause the sender to no longer be able to view it.
 
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, array('from_last_name', 'to_last_name') );

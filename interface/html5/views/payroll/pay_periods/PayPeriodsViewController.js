@@ -36,6 +36,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 		}
 
 		//call init data in parent view
+
 		if ( !this.sub_view_mode ) {
 			this.initData();
 		}
@@ -726,6 +727,11 @@ PayPeriodsViewController = BaseViewController.extend( {
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
 		var c_value = target.getValue();
+
+		if ( !this.current_edit_record ) {
+			this.current_edit_record = {};
+		}
+
 		this.current_edit_record[key] = c_value;
 
 		if ( key === 'status_id' ) {
@@ -739,13 +745,14 @@ PayPeriodsViewController = BaseViewController.extend( {
 	},
 
 	setDateColumnStatus: function( value, disabled ) {
-
-		if ( disabled ) {
-			this.edit_view_ui_dic[value].find( 'input' ).attr( 'disabled', 'disabled' );
-			this.edit_view_ui_dic[value].find( 'img' ).unbind( 'click' );
-		} else {
-			this.edit_view_ui_dic[value].find( 'input' ).removeAttr( 'disabled' );
-			this.edit_view_ui_dic[value].find( 'img' ).bind( 'click' );
+		if ( this.edit_view_ui_dic[value] ) {
+			if (disabled) {
+				this.edit_view_ui_dic[value].find('input').attr('disabled', 'disabled');
+				this.edit_view_ui_dic[value].find('img').unbind('click');
+			} else {
+				this.edit_view_ui_dic[value].find('input').removeAttr('disabled');
+				this.edit_view_ui_dic[value].find('img').bind('click');
+			}
 		}
 	},
 
@@ -763,7 +770,7 @@ PayPeriodsViewController = BaseViewController.extend( {
 	},
 
 	isEditChange: function() {
-		if ( this.current_edit_record.id ) {
+		if ( this.current_edit_record &&  this.current_edit_record.id ) {
 			this.attachElement( 'pay_period_schedule' );
 			this.detachElement( 'pay_period_schedule_id' );
 		} else if ( this.is_mass_editing ) {

@@ -388,11 +388,13 @@ class APIPayStub extends APIFactory {
 								Debug::Text( 'Pay Stub Entry ID: ' . $pay_stub_entry['id'] . ' Amount: ' . $pay_stub_entry['amount'] . ' Pay Stub ID: ' . $row['id'], __FILE__, __LINE__, __METHOD__, 10 );
 
 								//Populate $pay_stub_entry_obj so we can find validation errors before postSave() is called.
-								if ( isset($pay_stub_entry['id']) AND $pay_stub_entry['id'] != '' ) {
+								if ( isset($pay_stub_entry['id']) AND $pay_stub_entry['id'] != '' AND TTUUID::isUUID( $pay_stub_entry['id'] ) ) {
 									$pself = TTnew( 'PayStubEntryListFactory' );
 									$pself->getById( $pay_stub_entry['id'] );
 									if ( $pself->getRecordCount() > 0 ) {
 										$pay_stub_entry_obj = $pself->getCurrent();
+									} else {
+										$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' );
 									}
 								} else {
 									$pay_stub_entry_obj = TTnew( 'PayStubEntryListFactory' );
@@ -694,8 +696,9 @@ class APIPayStub extends APIFactory {
 		global $profiler;
 		Debug::Text('Generate Pay Stubs!', __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( !$this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
-				OR !( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') ) ) {
+		if ( !( $this->getPermissionObject()->Check('pay_period_schedule', 'enabled')
+				AND ( $this->getPermissionObject()->Check('pay_period_schedule', 'edit') OR $this->getPermissionObject()->Check('pay_period_schedule', 'edit_own') )
+				AND ( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_child') ) ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 

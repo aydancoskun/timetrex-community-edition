@@ -685,10 +685,10 @@ CompanyViewController = BaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Logo' ), this.file_browser, tab_company_column2, '', null, false, true );
 
-		// Enable Second Surname
-		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_second_last_name'} );
-		this.addEditFieldToColumn( $.i18n._( 'Enable Second Surname' ), form_item_input, tab_company_column2, '' );
+		// // Enable Second Surname
+		// form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
+		// form_item_input.TCheckbox( {field: 'enable_second_last_name'} );
+		// this.addEditFieldToColumn( $.i18n._( 'Enable Second Surname' ), form_item_input, tab_company_column2, '' );
 
 		//Tab 1 start
 

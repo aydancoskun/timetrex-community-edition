@@ -52,7 +52,7 @@ if ( version_compare( PHP_VERSION, 5, '<') == 1 ) {
 }
 
 //Allow CLI scripts to run much longer. ie: Purging database could takes hours.
-ini_set( 'max_execution_time', 43200 );
+ini_set( 'max_execution_time', 86000 ); //Just less than 24hrs, so scripts that run daily can't build up.
 
 $install_obj = new Install();
 

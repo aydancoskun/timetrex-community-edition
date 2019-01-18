@@ -552,8 +552,6 @@ class RecurringScheduleTemplateFactory extends Factory {
 		return FALSE;
 	}
 
-	//function getShifts( $start_date, $end_date, &$holiday_data = array(), &$branch_options = array(), &$department_options = array(), &$n, &$shifts = array(), &$shifts_index = array(), $open_shift_conflict_index = array(), $permission_children_ids = NULL ) {
-
 	/**
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
@@ -622,7 +620,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 
 					$iso_date_stamp = TTDate::getISODateStamp( $ppsf->getShiftAssignedDate( $start_time, $end_time, $this->getColumn('shift_assigned_day_id') ) );
 
-					$open_shift_multiplier = ( $this->getColumn('user_id') == 0 ) ? ( ( getTTProductEdition() == TT_PRODUCT_COMMUNITY OR $this->getRecurringScheduleTemplateControlObject()->getCompanyObject()->getProductEdition() == 10 ) ) ? 0 : $this->getOpenShiftMultiplier() : 1;
+					$open_shift_multiplier = ( $this->getColumn('user_id') == TTUUID::getZeroID() ) ? ( ( getTTProductEdition() == TT_PRODUCT_COMMUNITY OR $this->getRecurringScheduleTemplateControlObject()->getCompanyObject()->getProductEdition() == 10 ) ) ? 0 : $this->getOpenShiftMultiplier() : 1;
 					//Debug::text('Open Shift Multiplier: '. $open_shift_multiplier, __FILE__, __LINE__, __METHOD__, 10);
 					for( $x = 0; $x < $open_shift_multiplier; $x++ ) {
 						//Check all non-OPEN shifts for conflicts.

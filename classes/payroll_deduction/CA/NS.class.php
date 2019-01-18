@@ -62,33 +62,36 @@ class PayrollDeduction_CA_NS extends PayrollDeduction_CA {
 			),
 	);
 
-//	function getProvincialSurtax() {
-//		/*
-//			V1 =
-//			For NS
-//				Where T4 <= 10000
-//				V1 = 0
-//
-//				Where T4 > 10000
-//				V1 = 0.10 * ( T4 - 10000 )
-//		*/
-//
-//		$T4 = $this->getProvincialBasicTax();
-//		$V1 = 0;
-//
-//		//This was phased at some point, but not 100% sure when.
-//		if ( $this->getDate() >= 20080101 ) {
-//			if ( $T4 <= 10000 ) {
-//				$V1 = 0;
-//			} elseif ( $T4 > 10000 ) {
-//				$V1 = bcmul( 0.10, bcsub( $T4, 10000 ) );
-//			}
-//		}
-//
-//		Debug::text('V1: '. $V1, __FILE__, __LINE__, __METHOD__, 10);
-//
-//		return $V1;
-//	}
-}
+	function getProvincialTotalClaimAmount() {
+		/*
+		BPA = 	Where A ≤ $25,000, BPA is equal to $11,481;
+				Where A > $25,000 < $75,000, BPA is equal to:
+				$11,481 – [(A – $25,000) × 6%)];*
+				Where A ≥ $75,000, BPA is equal to $8,481
 
+		$11,481 High Basic Claim Amount -- **This should be set in Data.class.php**
+		$8,481 Low Basic Claim Amount
+		*/
+
+		$BPA = parent::getProvincialTotalClaimAmount();
+		if ( $this->getDate() >= 20180101 AND $BPA > 0 ) {
+			$high_claim_amount = $this->getBasicProvinceClaimCodeAmount();
+			$low_claim_amount = 8481;
+
+			$A = $this->getAnnualTaxableIncome();
+
+			if ( $A <= 25000 ) {
+				$BPA = $high_claim_amount;
+			} elseif ( $A > 25000 AND $A < 75000 ) {
+				$BPA = $high_claim_amount - ( ( $A - 25000 ) * 0.06 );
+			} elseif ( $A > 75000 ) {
+				$BPA = $low_claim_amount;
+			}
+
+			Debug::text('BPA: '. $BPA .' Claim Amount: High: '. $high_claim_amount .' Low: '. $low_claim_amount .' A: '. $A, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return $BPA;
+	}
+}
 ?>

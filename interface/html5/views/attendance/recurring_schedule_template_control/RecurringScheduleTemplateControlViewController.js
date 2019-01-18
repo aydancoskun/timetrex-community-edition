@@ -1,7 +1,10 @@
 RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	el: '#recurring_schedule_template_control_view_container',
 
-	_required_files: ['APIRecurringScheduleTemplateControl', 'APISchedule', 'APIRecurringScheduleTemplate'],
+	_required_files: {
+		10: ['APIRecurringScheduleTemplateControl', 'APISchedule', 'APIRecurringScheduleTemplate', 'APIBranch', 'APIDepartment', 'APIAbsencePolicy', 'APISchedulePolicy'],
+		20: ['APIJob', 'APIJobItem']
+	},
 	sub_document_view_controller: null,
 
 	document_object_type_id: null,
