@@ -6,6 +6,8 @@ InstallWizardController = BaseWizardController.extend( {
 
 	country_array: null,
 
+	time_zone_array: null,
+
 	external_installer: null,
 
 	company_id: null,
@@ -132,6 +134,7 @@ InstallWizardController = BaseWizardController.extend( {
 					onResult: function( res ) {
 						if ( res.isValid() ) {
 							$this.stepsDataDic[$this.current_step] = res.getResult();
+							$this.time_zone_array = res.getResult().time_zone_options;
 							$this._initCurrentStep();
 						} else {
 							$this.current_step = 'license';
@@ -751,11 +754,11 @@ InstallWizardController = BaseWizardController.extend( {
 				widgetContainer.append( form_item_host_input );
 
 				var form_item_url_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				form_item_url_input.TTextInput( {field: 'base_url', width: 400} );
+				form_item_url_input.TTextInput( {field: 'base_url', width: 200} );
 
 				widgetContainer.append( form_item_url_input );
 
-				var ie_label = $( "<span class='widget-right-label'>( " + $.i18n._( 'No trailing slash' ) + " )</span>" );
+				var ie_label = $( "<span class='widget-right-label'> (" + $.i18n._( 'No trailing slash' ) + ")</span>" );
 
 				widgetContainer.append( ie_label );
 				this.addEditFieldToColumn( $.i18n._( 'URL' ), [form_item_host_input, form_item_url_input], systemSettings_column1, '', widgetContainer, null, true );
@@ -770,7 +773,7 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input.TTextInput( {field: 'storage_dir', width: 400} );
 
 				var widgetContainer = $( "<div class='widget-h-box'></div>" );
-				var label = $( "<span class='widget-right-label'> ( " + $.i18n._( 'for things like attachments, logos, etc...' ) + " )</span>" );
+				var label = $( "<span class='widget-right-label'> (" + $.i18n._( 'for things like attachments, logos, etc...' ) + ")</span>" );
 
 				widgetContainer.append( form_item_input );
 				widgetContainer.append( label );
@@ -781,6 +784,12 @@ InstallWizardController = BaseWizardController.extend( {
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 				form_item_input.TTextInput( {field: 'cache_dir', width: 400} );
 				this.addEditFieldToColumn( $.i18n._( 'Cache Directory' ), form_item_input, systemSettings_column1 );
+
+				// System timezone
+				form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+				form_item_input.TComboBox( {field: 'time_zone'} );
+				form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
+				this.addEditFieldToColumn( $.i18n._( 'Server Time Zone' ), form_item_input, systemSettings_column1 );
 
 				systemSettings.show();
 				break;

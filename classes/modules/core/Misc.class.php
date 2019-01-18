@@ -1578,7 +1578,7 @@ class Misc {
 		//mime_content_type is being deprecated in PHP, and it doesn't work properly on Windows. So if its not available just accept any file type.
 		if ( function_exists('mime_content_type') ) {
 			$mime_type = mime_content_type($file);
-			if ( $mime_type !== FALSE AND !in_array( $mime_type, array('text/plain', 'plain/text', 'text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'text/x-c') ) ) {
+			if ( $mime_type !== FALSE AND !in_array( $mime_type, array( 'text/plain', 'plain/text', 'text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'text/x-c', 'application/octet-stream' ) ) ) { //This should match upload_file.php
 				Debug::text('Invalid MIME TYPE: '. $mime_type, __FILE__, __LINE__, __METHOD__, 10);
 				return FALSE;
 			}
@@ -2296,23 +2296,7 @@ class Misc {
 	}
 
 	/**
-	 * @param $str
-	 * @param $array
-	 * @return bool|int|string
-	 */
-	static function array_isearch( $str, $array ) {
-		foreach ( $array as $key => $value ) {
-			if ( strtolower( $value ) == strtolower( $str ) ) {
-				return $key;
-			}
-		}
-
-		return FALSE;
-	}
-
-	//Accepts a search_str and key=>val array that it searches through, to return the array key of the closest fuzzy match.
-
-	/**
+	 * Accepts a search_str and key=>val array that it searches through, to return the array key of the closest fuzzy match.
 	 * @param $search_str
 	 * @param $search_arr
 	 * @param int $minimum_percent_match

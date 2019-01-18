@@ -1165,9 +1165,22 @@ class SetupPresets extends Factory {
 					//Unemployment Insurance - Employee
 					//Workers Benefit - Employee
 					//Workers Benefit - Employer
+					//Statewide Transit Tax
 					//Tri-Met Transit District
 					//Lane Transit District
 					//Special Payroll Tax offset
+					$this->createPayStubAccount(
+							array(
+									'company_id'     => $this->getCompany(),
+									'status_id'      => 10,
+									'type_id'        => 20, //Employee Deduction
+									'name'           => strtoupper( $province ) . ' - Statewide Transit Tax',
+									'ps_order'       => 211,
+									'debit_account'  => '',
+									'credit_account' => 'Statewide Transit Tax'. $gl_account_payable_suffix,
+							)
+					);
+
 					$this->createPayStubAccount(
 							array(
 									'company_id'     => $this->getCompany(),
@@ -1223,7 +1236,6 @@ class SetupPresets extends Factory {
 									'credit_account' => 'Special Payroll Tax Offset'. $gl_account_payable_suffix, //2184
 							)
 					);
-
 					break;
 				case 'pa': //pennsylvania
 					//Unemployment Insurance - Employee
@@ -3534,8 +3546,8 @@ class SetupPresets extends Factory {
 											'calculation_id'                 => 15,
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - Disability Insurance' ),
-											'user_value1'                    => 0.9, //Percent
-											'user_value2'                    => 110902, //WageBase
+											'user_value1'                    => 1.0, //Percent
+											'user_value2'                    => 114967, //WageBase
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
 											'exclude_pay_stub_entry_account' => array(
@@ -4667,6 +4679,31 @@ class SetupPresets extends Factory {
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, strtoupper( $province ) . ' - Special Payroll Tax Offset' ),
 											'user_value1'                    => 0.09, //Percent
+											'user_value2'                    => 0, //WageBase
+											'user_value3'                    => 0,
+											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+											'exclude_pay_stub_entry_account' => array(
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+													//$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, '401(k)' ),
+											),
+									)
+							);
+
+							//Statewide Transit Tax
+							$this->createCompanyDeduction(
+									array(
+											'company_id'                     => $this->getCompany(),
+											'legal_entity_id'                => $le_obj->getID(),
+											'status_id'                      => 10, //Enabled
+											'type_id'                        => 10, //Tax
+											'payroll_remittance_agency_id'   => $this->getPayrollRemittanceAgencyByLegalEntityAndAgencyID( $le_obj->getId(), '20:US:' . strtoupper( $province ) . ':00:0010' ), //Must go before name
+											'name'                           => strtoupper( $province ) . ' - Statewide Transit Tax',
+											'calculation_id'                 => 15,
+											'calculation_order'              => 186,
+											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - Statewide Transit Tax' ),
+											'user_value1'                    => 0.10, //Percent
 											'user_value2'                    => 0, //WageBase
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),

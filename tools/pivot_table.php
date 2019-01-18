@@ -40,9 +40,9 @@ require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR
 if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 	$help_output = "Usage: pivot_table.php [OPTIONS] [Input CSV File] [Output CSV File]\n";
 	$help_output .= "  Options:\n";
-	$help_output .= "    -pivot_column [Column to pivot on]\n";
-	$help_output .= "    -category_column [Column name for categories]\n";
-	$help_output .= "    -data_column [Column name for data]\n";
+	$help_output .= "    -pivot_column [Existing column to pivot on]\n";
+	$help_output .= "    -category_column [New column name for categories. ie: 'Pay Stub Accounts']\n";
+	$help_output .= "    -data_column [New column name for data. ie: 'Amount']\n";
 
 	echo $help_output;
 } else {

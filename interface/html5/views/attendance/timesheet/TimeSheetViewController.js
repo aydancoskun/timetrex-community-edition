@@ -6757,7 +6757,7 @@ TimeSheetViewController = BaseViewController.extend( {
 		}
 
 		//default to currently logged in user
-		if ( ( user != null && typeof user != 'object' && TTUUID.isUUID(user) == false ) || ( typeof user == 'object' && TTUUID.isUUID(user.id) == false ) ) {
+		if ( ( user != null && ( ( typeof user != 'object' && TTUUID.isUUID(user) == false ) || ( typeof user == 'object' && TTUUID.isUUID(user.id) == false ) ) ) ) {
 			user = LocalCacheData.getLoginUser();
 
 			if ( user != null && typeof user != 'object' || ( typeof user == 'object' && TTUUID.isUUID(user.id) == false ) ) {

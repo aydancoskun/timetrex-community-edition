@@ -52,3 +52,4 @@ datepicker	            interface/html5/framework/widgets/datepicker/jquery-ui-ti
 jqgrid	                interface/html5/framework/widgets/jqgrid/jquery.jqGrid.src.js	        4.4.1	    5.2.1	        MIT/GPL2 http://www.trirand.com
 grid.locale-en.js	    interface/html5/framework/widgets/jqgrid/grid.locale-en.js	            ??	        ??	            ??	        ?
 jquery-tagsinput.js	    interface/html5/framework/widgets/tag_input/jquery.tagsinput.min.js	    1.3.3	    ??	            MIT	    http://xoxco.com/clickable/jquery-tags-input
+analytics.js            interface/html5/framework/google/analytics/analytics.js                 16-Aug-18   ??              ??      https://www.google-analytics.com/analytics.js -- We load this locally instead of remotely to catch script errors.

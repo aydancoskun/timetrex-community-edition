@@ -414,7 +414,6 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Distance Units' ), form_item_input, tab_preferences_column1 );
 
 		// Time Zone
-
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {field: 'time_zone'} );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );

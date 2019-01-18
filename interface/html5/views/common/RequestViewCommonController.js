@@ -2,6 +2,7 @@ RequestViewCommonController = BaseViewController.extend( {
 
 	authorization_history:null,
 	selected_absence_policy_record: null,
+	enable_edit_view_ui:false,
 
 	setGridCellBackGround: function() {
 		var data = this.grid.getGridParam( 'data' );
@@ -503,6 +504,55 @@ RequestViewCommonController = BaseViewController.extend( {
 		} );
 
 
+	},
+
+	initSubLogView: function( tab_id ) {
+		var $this = this;
+		if ( this.sub_log_view_controller ) {
+			this.sub_log_view_controller.buildContextMenu( true );
+			this.sub_log_view_controller.setDefaultMenu();
+			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+
+				filter['table_name_object_id'] = {
+					'request': [this.parent_edit_record.id],
+					'request_schedule': [this.parent_edit_record.request_schedule_id]
+				};
+
+				return filter;
+			};
+
+			$this.sub_log_view_controller.initData();
+			return;
+		}
+
+		Global.loadScript( 'views/core/log/LogViewController.js', function() {
+			var tab = $this.edit_view_tab.find( '#' + tab_id );
+			var firstColumn = tab.find( '.first-column-sub-view' );
+			Global.trackView( 'Sub' + 'Log' + 'View' );
+			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+		} );
+
+		function beforeLoadView() {
+
+		}
+
+		function afterLoadView( subViewController ) {
+			$this.sub_log_view_controller = subViewController;
+			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+				filter['table_name_object_id'] = {
+					'request': [this.parent_edit_record.id],
+					'request_schedule': [this.parent_edit_record.request_schedule_id]
+				};
+
+				return filter;
+			};
+			$this.sub_log_view_controller.parent_view_controller = $this;
+			$this.sub_log_view_controller.postInit = function() {
+				this.initData();
+			}
+		}
 	},
 
 	/**
@@ -1015,6 +1065,7 @@ RequestViewCommonController = BaseViewController.extend( {
 
 	initPermission: function(){
 		// this._super( 'initPermission' );
+
 		if ( PermissionManager.validate( this.permission_id, 'view' ) || PermissionManager.validate( this.permission_id, 'view_child' ) ) {
 			this.show_search_tab = true;
 		} else {
@@ -1079,6 +1130,13 @@ RequestViewCommonController = BaseViewController.extend( {
 	setEditMenuEditIcon: function( context_btn, pId ) {
 		if ( !this.editPermissionValidate( pId )  ) {
 			context_btn.addClass( 'invisible-image' );
+		}
+
+		//If edit_child is FALSE and this is a child record, inputs should be read-only.
+		if ( this.editOwnerOrChildPermissionValidate( pId ) ) {
+			this.enable_edit_view_ui = true;
+		} else {
+			this.enable_edit_view_ui = false;
 		}
 
 		if ( !this.editOwnerOrChildPermissionValidate( pId ) || this.is_add || this.is_edit ) {

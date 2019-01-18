@@ -672,7 +672,6 @@ RequestViewController = RequestViewCommonController.extend( {
 
 	},
 
-
 	initViewingView: function() {
 		this._super('initViewingView');
 		if (this.edit_view_ui_dic.message) {

@@ -642,6 +642,14 @@ var PermissionManager = (function() {
 					result = false;
 				}
 				break;
+			case 'PayStubTransaction':
+				if ( PermissionManager.validate( 'pay_stub', 'enabled' )
+					&& ( PermissionManager.validate( 'pay_stub', 'view' ) || PermissionManager.validate( 'pay_stub', 'view_child' ) ) ) {
+					result = true;
+				} else {
+					result = false;
+				}
+				break;
 			default :
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;

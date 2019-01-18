@@ -1969,6 +1969,17 @@ class CalculatePolicy {
 		$user_date_total_rows = $this->filterUserDateTotalDataByObjectTypeIDs( $date_stamp, $date_stamp, array( 50 ) );
 		if ( is_array($user_date_total_rows) ) {
 			foreach( $user_date_total_rows as $udt_key => $udt_obj ) {
+
+				//Absence records of 0hrs can have negative affects on calculating OT since the first OT policy bases the start_time of all other OT policies on the start time of the first UDT record,
+				// which is often absence records manually entered on the timesheet.
+				// See function: calculateOverTimePolicyForTriggerTime, this line: $current_trigger_time_arr['start_time_stamp'] = ( ( ( $user_date_total_rows[key($user_date_total_rows)]->getStartTimeStamp() != '' ) ? $user_date_total_rows[key($user_date_total_rows)]->getStartTimeStamp() : TTDate::getBeginDayEpoch( $user_date_total_rows[key($user_date_total_rows)]->getDateStamp() ) ) + $current_trigger_time_arr['trigger_time'] );
+				// We can't filter out 0hr UDT records in the filterUserDateTotalDataByObjectTypeIDs() function, as we have chained UDT records that reference other ones, so 0hrs is a valid situation in those cases.
+				// This was replicated with a Weekly > 40 and Weekly > 48 OT policy, on the last day of the week where the time should be split 4hrs to one and 4hrs to other, then add a 0hr Vacation absence to the day, and 1hr Jury Duty absence as well.
+				if ( $udt_obj->getTotalTime() == 0 ) {
+					Debug::text('Skipping absence records of 0 hours...', __FILE__, __LINE__, __METHOD__, 10);
+					continue;
+				}
+
 				$ap_obj = $udt_obj->getSourceObjectObject();
 
 				Debug::text('Generating UserDateTotal object from Absence Time Policy, ID: '. $this->user_date_total_insert_id .' Object Type ID: '. 25 .' Pay Code ID: '. $udt_obj->getPayCode() .' Total Time: '. $udt_obj->getTotalTime() .' UDT Key: '. $udt_key, __FILE__, __LINE__, __METHOD__, 10);
@@ -5954,7 +5965,9 @@ class CalculatePolicy {
 			if ( $csplf->getRecordCount() > 0 ) {
 				Debug::text('Found contributing shift policy rows: '. $csplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 
-				//$this->contributing_shift_policy_rs = $csplf;
+				//Just in case a zero UUID gets through, make sure we don't trigger a PHP notice.
+				$this->contributing_shift_policy[TTUUID::getZeroID()] = NULL;
+
 				foreach( $csplf as $csp_obj ) {
 					$this->contributing_shift_policy[$csp_obj->getId()] = $csp_obj;
 				}
@@ -5976,7 +5989,9 @@ class CalculatePolicy {
 		$csplf = $this->contributing_shift_policy;
 		if ( is_array( $csplf ) AND count( $csplf ) > 0 ) {
 			foreach( $csplf as $csp_obj ) {
-				$this->contributing_pay_code_policy_ids[] = $csp_obj->getContributingPayCodePolicy();
+				if ( is_object( $csp_obj ) ) {
+					$this->contributing_pay_code_policy_ids[] = $csp_obj->getContributingPayCodePolicy();
+				}
 			}
 			unset($csp_obj);
 
@@ -7516,7 +7531,7 @@ class CalculatePolicy {
 
 						//Use SourceObject by default if its defined, as an Absence Policy may have an override Pay Formula which accrues instead of the pay code itself.
 						//If SourceObject is not defined, then fall back to the PayCode pay formula. For cases where the user adds an override UDT record directly.
-						if ( $udt_obj->getSourceObject() > 0 ) {
+						if ( TTUUID::isUUID( $udt_obj->getSourceObject() ) AND $udt_obj->getSourceObject() != TTUUID::getZeroID() ) {
 							$policy_object = $udt_obj->getSourceObjectObject();
 						} else {
 							$policy_object = $udt_obj->getPayCodeObject();

@@ -161,9 +161,8 @@ class APIAuthentication extends APIFactory {
 		}
 	}
 
-	//Default username=NULL to prevent argument warnings messages if its not passed from the API.
-
 	/**
+	 * Default username=NULL to prevent argument warnings messages if its not passed from the API.
 	 * @param null $user_name
 	 * @param null $password
 	 * @param string $type
@@ -308,9 +307,8 @@ class APIAuthentication extends APIFactory {
 		return FALSE;
 	}
 
-	//Accepts user_id or user_name.
-
 	/**
+	 * Accepts user_id or user_name.
 	 * @param string $user_id UUID
 	 * @return bool
 	 */
@@ -740,10 +738,8 @@ class APIAuthentication extends APIFactory {
 		);
 	}
 
-
-	//Function that HTML5 interface can call when an irrecoverable error or uncaught exception is triggered.
-
 	/**
+	 * Function that HTML5 interface can call when an irrecoverable error or uncaught exception is triggered.
 	 * @param null $data
 	 * @param null $screenshot
 	 * @return string
@@ -927,13 +923,8 @@ class APIAuthentication extends APIFactory {
 		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), array('error' => $validator->getErrorsArray()), array('total_records' => 1, 'valid_records' => 0) );
 	}
 
-	/*
-	 * Reset the password if users forgotten their password
-	 * @param string $key
-	 * @param string $password
-	 * @param string $password2
-	 * */
 	/**
+	 * Reset the password if users forgotten their password
 	 * @param $key
 	 * @param $password
 	 * @param $password2
@@ -996,9 +987,9 @@ class APIAuthentication extends APIFactory {
 		return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('INVALID DATA'), array('error' => $validator->getErrorsArray()), array('total_records' => 1, 'valid_records' => 0) );
 	}
 
-	//Ping function is also in APIMisc for when the session timesout is valid.
-	//Ping no longer can tell if the session is timed-out, must use "isLoggedIn(FALSE)" instead.
 	/**
+	 * Ping function is also in APIMisc for when the session timesout is valid.
+	 * Ping no longer can tell if the session is timed-out, must use "isLoggedIn(FALSE)" instead.
 	 * @return bool
 	 */
 	function Ping() {

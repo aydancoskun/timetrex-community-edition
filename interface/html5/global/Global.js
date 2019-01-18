@@ -109,22 +109,30 @@ Global.sendErrorReport = function() {
 		var error;
 
 		//BUG#2066 - allow this function to be called earlier.
-		var script_name = "~unknown~";
+		var script_name = '~unknown~';
 		if ( Global.isSet(LocalCacheData) && Global.isSet(LocalCacheData.current_open_primary_controller) && Global.isSet(LocalCacheData.current_open_primary_controller.script_name) ) {
 			script_name = LocalCacheData.current_open_primary_controller.script_name;
 		}
 
+
+		if ( Global.isSet(LocalCacheData) && LocalCacheData['current_company'] ) { //getCurrentCompany() which in turn calls getRequiredLocalCache(), which can call sendErroReport causing a loop. So try to prevent that by checking LocalCacheData['current_company'] first.
+			current_company_obj = LocalCacheData.getCurrentCompany();
+		} else {
+			current_company_obj = null;
+		}
+
 		if ( login_user && Debug.varDump ) {
-			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' +
-				script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' +
-				'\n\nUser: ' + login_user.user_name + ' ' +
-				'\n\nURL: ' + window.location.href + ' ' +
+			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build +
+				'\n\nUncaught Error From: ' + script_name +
+				'\n\nError: ' + error_string + ' in: ' + from_file + ' line: ' + line +
+				'\n\nUser: ' + login_user.user_name +
+				'\n\nURL: ' + window.location.href +
 				'\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie +
 				'\n\nCurrent Ping: '+ Global.current_ping +
 				'\n\nIdle Time: '+ Global.idle_time +
 				'\n\nSession ID Key: '+ LocalCacheData.getSessionID() +
-				'\n\nCurrent User Object: \n' + Debug.varDump(login_user) + ' ' +
-				'\n\nCurrent Company Object: \n' + Debug.varDump(LocalCacheData.getCurrentCompany()) + ' ';
+				'\n\nCurrent User Object: \n' + Debug.varDump( login_user ) +
+				'\n\nCurrent Company Object: \n' + Debug.varDump( current_company_obj ) + ' ';
 		} else {
 			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
 		}
@@ -137,8 +145,10 @@ Global.sendErrorReport = function() {
             alert('JAVASCRIPT EXCEPTION:\n---------------------------------------------\n'+ error +'\n---------------------------------------------' );
         }
 
-		if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
-			ga( 'send', 'exception', { 'exDescription': error_string + ' in ' + from_file + ' line ' + line, 'exFatal': false } ); // Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
+		if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
+			// Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
+			// Strip the domain part off the URL on 'from_file' to better account for similar errors.
+			ga( 'send', 'exception', { 'exDescription': error_string + ' in ' + ( ( from_file ) ? from_file.replace( Global.getBaseURL(), '') : 'N/A' ) + ' line ' + line, 'exFatal': false } );
 		}
 
 		//Don't send error report if exception not happens in our codes.
@@ -149,8 +159,8 @@ Global.sendErrorReport = function() {
 			return;
 		}
 
-		if ( LocalCacheData.getCurrentCompany() ) {
-			error = error + '\n\n' + 'Product Edition: ' + LocalCacheData.getCurrentCompany().product_edition_id;
+		if ( current_company_obj ) { //getCurrentCompany() which in turn calls getRequiredLocalCache(), which can call sendErroReport causing a loop. So try to prevent that by checking LocalCacheData['current_company'] first.
+			error = error + '\n\n' + 'Product Edition: ' + current_company_obj.product_edition_id;
 		}
 
 		error = error + '\n\n\n' + 'Clicked target stacks: ' + JSON.stringify( LocalCacheData.ui_click_stack, undefined, 2 );
@@ -174,7 +184,7 @@ Global.sendErrorReport = function() {
 								result = result.getResult();
 								var message = $.i18n._('Your web browser is caching incorrect data, please press the refresh button on your web browser or log out, clear your web browsers cache and try logging in again.') + '<br><br>' + $.i18n._('Local Version') + ':  ' + result + '<br>' + $.i18n._('Remote Version') + ': ' + APIGlobal.pre_login_data.application_build;
 								Global.dont_check_browser_cache = true;
-								Global.sendErrorReport('Your web browser is caching incorrect data. Local Version' + ':  ' + result + 'Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '');
+								Global.sendErrorReport('Your web browser is caching incorrect data. Local Version' + ':  ' + result + ' Remote Version' + ': ' + APIGlobal.pre_login_data.application_build, ServiceCaller.rootURL, '', '', '');
 
 								var timeout_handler = window.setTimeout( function() {
 									window.location.reload(true);
@@ -255,53 +265,54 @@ Global.getUpgradeMessage = function() {
 	return message;
 };
 
-Global.doPingIfNecessary = function() {
-	var api = new (APIFactory.getAPIClass( 'APIMisc' ))();
-	if ( Global.idle_time < 15 ) {
-		Global.idle_time = 0;
-			return;
-		}
+Global.doPingIfNecessary = function () {
+    var api = new (APIFactory.getAPIClass('APIMisc'))();
+    if ( Global.idle_time < Math.min( 15, APIGlobal.pre_login_data.session_idle_timeout / 60 ) ) { //idle_time is minutes, session_idle_timeout is seconds.
+        Global.idle_time = 0;
+        return;
+    }
 
-	Debug.Text( 'User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', 'Global.js', '', 'doPingIfNecessary', 1 );
-	Global.idle_time = 0;
+    Debug.Text('User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', 'Global.js', '', 'doPingIfNecessary', 1);
+    Global.idle_time = 0;
 
-		if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
-			return;
-		}
-		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
-		if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
-			return;
-		}
-		api.isLoggedIn( false, {
-			onResult: function( result ) {
-				var res_data = result.getResult();
+    if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
+        return;
+    }
 
-				if ( res_data !== true ) {
-					api.ping( {
-						onResult: function() {
+    //Error: Uncaught TypeError: undefined is not a function in /interface/html5/global/Global.js?v=8.0.0-20141230-124906 line 182
+    if ( !api || (typeof api.isLoggedIn) !== 'function' ) {
+        return;
+    }
 
-						}
-					} );
-				}
+    api.isLoggedIn(false, {
+        onResult: function (result) {
+            var res_data = result.getResult();
 
-			}
-		} );
+            if ( res_data !== true ) {
+                api.ping({
+                    onResult: function () {
+
+                    }
+                });
+            }
+
+        }
+    });
 }
 
 Global.setupPing = function() {
-
 	Global.idle_time = 0;
 	$( 'body' ).mousemove( function( e ) {
 		Global.doPingIfNecessary();
 	} );
 	$( 'body' ).keypress( function( e ) {
 		Global.doPingIfNecessary();
-
 	} );
+
 	setInterval( timerIncrement, 60000 ); // 1 minute
 	function timerIncrement() {
 		Global.idle_time = Global.idle_time + 1;
-		if ( Global.idle_time >= 15 ) {
+		if ( Global.idle_time >= Math.min( 15, APIGlobal.pre_login_data.session_idle_timeout / 60 ) ) {
 			Debug.Text( 'User is idle: ' + Global.idle_time, 'Global.js', '', 'setupPing', 1 );
 		}
 	}
@@ -1260,9 +1271,10 @@ Global.setSignalStrength = function() {
 		doPing();
 	}, 60000 );
 	function doPing() {
-		if ( Global.idle_time >= 15 || (LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'LoginView') ) {
+		if ( ( LocalCacheData.current_open_primary_controller && LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) || Global.idle_time >= Math.min( 15, APIGlobal.pre_login_data.session_idle_timeout / 60 ) )  {
 			return;
 		}
+
 		ping( ServiceCaller.orginalUrl + 'interface/ping.html?t=' + new Date().getTime(), function( time ) {
 			$( '.signal-strength-empty' ).removeClass( 'signal-strength-empty' );
 
@@ -2505,32 +2517,57 @@ Global.removeViewCss = function( viewId, fileName ) {
 	Global.removeCss( Global.getViewPathByViewId( viewId ) + fileName );
 };
 
+Global.sanitizeViewId = function( viewId ) {
+	if ( typeof viewId === 'string' || viewId instanceof String ) {
+		return viewId.replace('/', '').replace('\\', '');
+	}
+
+	return viewId;
+};
+
 Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
+	var viewId = Global.sanitizeViewId( viewId );
+	var path = Global.getViewPathByViewId( viewId );
+
 	if ( fileName.indexOf( '.js' ) > 0 ) {
-		var preloads = Global.getViewPreloadPathByViewId(viewId)
+		var preloads = Global.getViewPreloadPathByViewId( viewId );
 		if ( preloads.length > 0 ) {
 			for ( var p in preloads ) {
 				Global.loadScript( preloads[p] );
 			}
 		}
 
-		if ( sync ) {
-			return Global.loadScript( Global.getViewPathByViewId( viewId ) + fileName );
+		if ( path ) {
+			if (sync) {
+				return Global.loadScript( path + fileName );
+			} else {
+				Global.loadScript( path + fileName, onResult );
+			}
 		} else {
-			Global.loadScript( Global.getViewPathByViewId( viewId ) + fileName, onResult );
+			//Invalid viewId, redirect to home page?
+			console.debug( 'View does not exist! ViewId: '+ viewId +' File Name: '+ fileName );
+			if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
+				window.location.href = ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url;
+			}
 		}
 
 	} else if ( fileName.indexOf( '.css' ) > 0 ) {
-		Global.addCss( Global.getViewPathByViewId( viewId ) + fileName );
+		Global.addCss( path + fileName );
 	} else {
-		if ( sync ) {
-			return Global.loadPageSync( Global.getViewPathByViewId( viewId ) + fileName );
+		if ( path ) {
+			if (sync) {
+				return Global.loadPageSync(path + fileName);
+			} else {
+				Global.loadPage(path + fileName, onResult);
+			}
 		} else {
-			Global.loadPage( Global.getViewPathByViewId( viewId ) + fileName, onResult );
+			//Invalid viewId, redirect to home page?
+			console.debug( 'View does not exist! ViewId: '+ viewId +' File Name: '+ fileName );
+			if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
+				window.location.href = ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url;
+			}
 		}
-
 	}
-
 };
 
 Global.loadPageSync = function( url ) {
@@ -3246,25 +3283,29 @@ Global.trackView = function( name, action ) {
 
 Global.setAnalyticDimensions = function( user_name, company_name ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
-		if (typeof ga !== 'undefined') {
-			ga('set', 'dimension1', APIGlobal.pre_login_data.application_version);
-			ga('set', 'dimension2', APIGlobal.pre_login_data.http_host);
-			ga('set', 'dimension3', APIGlobal.pre_login_data.product_edition_name);
-			ga('set', 'dimension4', APIGlobal.pre_login_data.registration_key);
-			ga('set', 'dimension5', APIGlobal.pre_login_data.primary_company_name);
+		if ( typeof(ga) !== 'undefined' ) {
+			try {
+				ga('set', 'dimension1', APIGlobal.pre_login_data.application_version);
+				ga('set', 'dimension2', APIGlobal.pre_login_data.http_host);
+				ga('set', 'dimension3', APIGlobal.pre_login_data.product_edition_name);
+				ga('set', 'dimension4', APIGlobal.pre_login_data.registration_key);
+				ga('set', 'dimension5', APIGlobal.pre_login_data.primary_company_name);
 
-			if (user_name !== 'undefined' && user_name !== null) {
-				if (APIGlobal.pre_login_data.production !== true) {
-					Debug.Text('Analytics User: ' + user_name, 'Global.js', '', 'doPing', 1);
+				if (user_name !== 'undefined' && user_name !== null) {
+					if (APIGlobal.pre_login_data.production !== true) {
+						Debug.Text('Analytics User: ' + user_name, 'Global.js', '', 'doPing', 1);
+					}
+					ga('set', 'dimension6', user_name);
 				}
-				ga('set', 'dimension6', user_name);
-		}
 
-			if (company_name !== 'undefined' && company_name !== null) {
-				if (APIGlobal.pre_login_data.production !== true) {
-					Debug.Text('Analytics Company: ' + company_name, 'Global.js', '', 'setAnalyticDimensions', 1);
+				if (company_name !== 'undefined' && company_name !== null) {
+					if (APIGlobal.pre_login_data.production !== true) {
+						Debug.Text('Analytics Company: ' + company_name, 'Global.js', '', 'setAnalyticDimensions', 1);
+					}
+					ga('set', 'dimension7', company_name);
 				}
-				ga('set', 'dimension7', company_name);
+			} catch(e) {
+				throw e; //Attempt to catch any errors thrown by Google Analytics.
 			}
 		}
 	}
@@ -3273,9 +3314,13 @@ Global.setAnalyticDimensions = function( user_name, company_name ) {
 Global.sendAnalytics = function( track_address ) {
 	if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
 		// Call this delay so view load goes first
-		if ( typeof ga !== 'undefined' ) {
+		if ( typeof(ga) !== 'undefined' ) {
 			setTimeout( function() {
-				ga( 'send', 'pageview', track_address );
+				try {
+					ga('send', 'pageview', track_address);
+				} catch(e) {
+					throw e;
+				}
 			}, 500 )
 		}
 

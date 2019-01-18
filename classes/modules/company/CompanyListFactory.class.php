@@ -259,19 +259,21 @@ class CompanyListFactory extends CompanyFactory implements IteratorAggregate {
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|CompanyListFactory
 	 */
-	function getByShortName($short_name, $where = NULL, $order = NULL) {
+	function getByShortNameAndStatus($short_name, $status_id, $where = NULL, $order = NULL) {
 		if ( $short_name == '' ) {
 			return FALSE;
 		}
 
 		$ph = array(
 					'short_name' => strtolower($short_name),
+					'status_id' => (int)$status_id,
 					);
 
 		$query = '
 					select	*
 					from	'. $this->getTable() .'
 					where	lower(short_name) = ?
+						AND status_id = ?
 						AND deleted = 0';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );

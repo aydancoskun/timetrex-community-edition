@@ -1726,6 +1726,8 @@ class ScheduleFactory extends Factory {
 											TTi18n::gettext('Out Time not specified'));
 		}
 
+		//Make sure schedules aren't being added after the employees termination date.
+		//We must allow deleting schedules after their termination date so schedules can be cleaned up if necessary.
 		if ( $this->getDeleted() == FALSE AND $this->getDateStamp() != FALSE AND is_object( $this->getUserObject() ) ) {
 			if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
 				$this->Validator->isTRUE(	'date_stamp',

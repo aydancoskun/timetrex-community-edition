@@ -408,13 +408,22 @@ UserContactViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.TEXT_INPUT
 			} ),
 			new SearchField( {
-				label: $.i18n._( 'Home Phone' ),
+				label: $.i18n._( 'Phone' ),
 				in_column: 1,
-				field: 'home_phone',
+				field: 'any_phone',
 				basic_search: false,
 				adv_search: true,
 				form_item_type: FormItemType.TEXT_INPUT
 			} ),
+			new SearchField( {
+				label: $.i18n._( 'Email' ),
+				field: 'any_email',
+				basic_search: false,
+				adv_search: true,
+				in_column: 1,
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+
 			new SearchField( {
 				label: $.i18n._( 'Status' ),
 				in_column: 2,

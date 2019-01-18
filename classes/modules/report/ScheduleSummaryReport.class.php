@@ -1336,28 +1336,41 @@ class ScheduleSummaryReport extends Report {
 					$max_lines_per_day = 0;
 
 					//Keep track of unique branch/departments, if it exceeds 1 then always display them
+					//**This needs to be done across the entire week, as someone could have the first shift in the default branch, and the last shift in another branch
+					//  and the lines_per_day count would be wrong until it gets to the last branch.
 					$unique_branch = array();
 					$unique_department = array();
 					$unique_job_item = array();
 					$unique_job = array();
 					foreach( $calendar_array as $calendar_day ) {
 						$date_stamp = $calendar_day['date_stamp'];
-						$lines_per_day = 0;
 						if ( isset($schedule_data[$date_stamp]) ) {
-							$lines_per_day += count($schedule_data[$date_stamp]);
 							$unique_branch = ( $unique_branch + array_flip( array_keys( $schedule_data[$date_stamp] ) ) ); //Don't use array_merge here, as it breaks due to integer keys not being overwritten but combined/added.
 							foreach( $schedule_data[$date_stamp] as $branch => $level_2 ) {
-
-								$lines_per_day += count($level_2);
 								$unique_department = ( $unique_department + array_flip( array_keys( $level_2 ) ) );
 								foreach( $level_2 as $department => $level_3 ) {
-
-									$lines_per_day += count($level_3);
 									$unique_job = ( $unique_job + array_flip( array_keys( $level_3 ) ) );
 									foreach( $level_3 as $job => $level_4 ) {
-
-										$lines_per_day += count($level_4);
 										$unique_job_item = ( $unique_job_item + array_flip( array_keys( $level_4 ) ) );
+									}
+								}
+							}
+						}
+					}
+					unset( $date_stamp );
+
+					//Loop over all shifts again to count the lines_per_day.
+					foreach( $calendar_array as $calendar_day ) {
+						$date_stamp = $calendar_day['date_stamp'];
+						$lines_per_day = 0;
+						if ( isset($schedule_data[$date_stamp]) ) {
+							$lines_per_day += count($schedule_data[$date_stamp]); //This only counts the immediate number of branches
+							foreach( $schedule_data[$date_stamp] as $branch => $level_2 ) {
+								$lines_per_day += count($level_2);
+								foreach( $level_2 as $department => $level_3 ) {
+									$lines_per_day += count($level_3);
+									foreach( $level_3 as $job => $level_4 ) {
+										$lines_per_day += count($level_4);
 										foreach( $level_4 as $job_item => $level_5 ) {
 											$lines_per_day += count($level_5);
 											if ( $user_id == FALSE AND isset($level_5[0]['user_id']) ) {
@@ -1396,7 +1409,7 @@ class ScheduleSummaryReport extends Report {
 							}
 						}
 					}
-					unset($date_stamp );
+					unset( $date_stamp );
 					//Debug::Text('Max Lines Per Day: '. $max_lines_per_day .' User ID: '. $user_id .' Row: '. $row, __FILE__, __LINE__, __METHOD__, 10);
 
 					//Track if the user is assigned to multiple branches/departments, if we are going to display even one in the week, we may as well
@@ -1426,8 +1439,6 @@ class ScheduleSummaryReport extends Report {
 					}
 
 					if ( $s > 0 ) {
-						//$schedule_key = key($schedule_data);
-
 						if ( isset($this->form_data['user'][$user_id]) ) {
 							$user_data = $this->form_data['user'][$user_id];
 

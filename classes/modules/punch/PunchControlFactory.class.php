@@ -1034,7 +1034,7 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setEnableStrictJobValidation( $bool ) {
-		$this->is_valid = FALSE; //Force revalidation when data is changed.
+		$this->setIsValid( FALSE ); //Force revalidation when data is changed.
 		$this->strict_job_validiation = $bool;
 
 		return TRUE;
@@ -1227,6 +1227,7 @@ class PunchControlFactory extends Factory {
 
 		//Make sure the user isn't entering punches before the employees hire or after termination date, as its likely they wouldn't have a wage
 		//set for that anyways and wouldn't get paid for it.
+		//We must allow deleting punches after their termination date so timesheets can be cleaned up if necessary.
 		if ( ( $this->getDeleted() == FALSE AND ( is_object( $this->getPunchObject() ) AND $this->getPunchObject()->getDeleted() == FALSE ) ) AND $this->getDateStamp() != FALSE AND is_object( $this->getUserObject() ) ) {
 			if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
 				$this->Validator->isTRUE(	'date_stamp',
@@ -1529,8 +1530,6 @@ class PunchControlFactory extends Factory {
 						AND ( isset($shift_data['punches']) AND count($shift_data['punches']) % 2 == 0 ) ) {
 					Debug::Text('Assigning all punch_control_ids to User ID: '. $this->getUser() .' DateStamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
 
-					//$this->old_user_date_ids[] = $user_date_id;
-					//$this->old_user_date_ids[] = $this->getOldUserDateID();
 					$this->old_date_stamps[] = $date_stamp;
 					if ( $this->getOldDateStamp() != FALSE ) {
 						$this->old_date_stamps[] = $this->getOldDateStamp();
@@ -1548,9 +1547,12 @@ class PunchControlFactory extends Factory {
 
 								$this->old_date_stamps[] = $pc_obj->getDateStamp();
 								$pc_obj->setDateStamp( $date_stamp );
+								$pc_obj->setEnableStrictJobValidation( FALSE ); //Make sure we relax as many validation criteria as possible when making this change since its often called from PunchControlFactory->postSave() and we can't show the errors to the user.
 								$pc_obj->setEnableCalcUserDateTotal( TRUE );
 								$pc_obj->setEnableCalcTotalTime( TRUE ); //This is required to make sure Start/End timestamps are populated. This help fix strange bugs with OT being calculated incorrectly due to missing timestamps.
-								$pc_obj->Save();
+								if ( $pc_obj->isValid() == TRUE ) {
+									$pc_obj->Save();
+								}
 							} else {
 								Debug::Text(' NOT Saving Punch Control ID, as DateStamp didnt change: '. $punch_control_id, __FILE__, __LINE__, __METHOD__, 10);
 							}
@@ -1579,7 +1581,7 @@ class PunchControlFactory extends Factory {
 									if ( $src_punch_control_obj->isValid() == TRUE ) {
 										//We need to calculate new total time for the day and exceptions because we are never guaranteed that the gaps will be filled immediately after
 										//in the case of a drag & drop or something.
-										$src_punch_control_obj->setEnableStrictJobValidation( TRUE );
+										$src_punch_control_obj->setEnableStrictJobValidation( FALSE ); //Make sure we relax as many validation criteria as possible when making this change since its often called from PunchControlFactory->postSave() and we can't show the errors to the user.
 										$src_punch_control_obj->setEnableCalcUserDateID( FALSE );
 										$src_punch_control_obj->setEnableCalcTotalTime( TRUE );
 										$src_punch_control_obj->setEnableCalcSystemTotalTime( TRUE );
@@ -1618,7 +1620,7 @@ class PunchControlFactory extends Factory {
 						if ( $src_punch_control_obj->isValid() == TRUE ) {
 							//We need to calculate new total time for the day and exceptions because we are never guaranteed that the gaps will be filled immediately after
 							//in the case of a drag & drop or something.
-							$src_punch_control_obj->setEnableStrictJobValidation( TRUE );
+							$src_punch_control_obj->setEnableStrictJobValidation( FALSE ); //Make sure we relax as many validation criteria as possible when making this change since its often called from PunchControlFactory->postSave() and we can't show the errors to the user.
 							$src_punch_control_obj->setEnableCalcUserDateID( FALSE );
 							$src_punch_control_obj->setEnableCalcTotalTime( TRUE );
 							$src_punch_control_obj->setEnableCalcSystemTotalTime( TRUE );
@@ -1901,7 +1903,7 @@ class PunchControlFactory extends Factory {
 
 								//We need to calculate new total time for the day and exceptions because we are never guaranteed that the gaps will be filled immediately after
 								//in the case of a drag & drop or something.
-								$src_punch_control_obj->setEnableStrictJobValidation( TRUE );
+								$src_punch_control_obj->setEnableStrictJobValidation( FALSE ); //Make sure we relax as many validation criteria as possible when making this change since its often called from PunchControlFactory->postSave() and we can't show the errors to the user.
 								$src_punch_control_obj->setEnableCalcUserDateID( TRUE );
 								$src_punch_control_obj->setEnableCalcTotalTime( TRUE );
 								$src_punch_control_obj->setEnableCalcSystemTotalTime( TRUE );
@@ -1933,7 +1935,7 @@ class PunchControlFactory extends Factory {
 							if ( $src_punch_control_obj->isValid() == TRUE ) {
 								Debug::Text( ' Punch Control is valid, saving...: ', __FILE__, __LINE__, __METHOD__, 10 );
 								//Need to make sure we calculate the exceptions if they are moving punches from in/out, as there is likely to be a missing punch exception either way.
-								$src_punch_control_obj->setEnableStrictJobValidation( FALSE );
+								$src_punch_control_obj->setEnableStrictJobValidation( FALSE ); //Make sure we relax as many validation criteria as possible when making this change since its often called from PunchControlFactory->postSave() and we can't show the errors to the user.
 								$src_punch_control_obj->setEnableCalcUserDateID( FALSE );
 								$src_punch_control_obj->setEnableCalcTotalTime( FALSE );
 								$src_punch_control_obj->setEnableCalcSystemTotalTime( TRUE );
@@ -2035,7 +2037,7 @@ class PunchControlFactory extends Factory {
 
 								//We need to calculate new total time for the day and exceptions because we are never guaranteed that the gaps will be filled immediately after
 								//in the case of a drag & drop or something.
-								$dst_punch_control_obj->setEnableStrictJobValidation( TRUE );
+								$dst_punch_control_obj->setEnableStrictJobValidation( FALSE ); //Make sure we relax as many validation criteria as possible when making this change since its often called from PunchControlFactory->postSave() and we can't show the errors to the user.
 								$dst_punch_control_obj->setEnableCalcUserDateID( TRUE );
 								$dst_punch_control_obj->setEnableCalcTotalTime( TRUE );
 								$dst_punch_control_obj->setEnableCalcSystemTotalTime( TRUE );
@@ -2102,7 +2104,7 @@ class PunchControlFactory extends Factory {
 
 								//We need to calculate new total time for the day and exceptions because we are never guaranteed that the gaps will be filled immediately after
 								//in the case of a drag & drop or something.
-								$pc_obj->setEnableStrictJobValidation( TRUE );
+								$pc_obj->setEnableStrictJobValidation( FALSE ); //Make sure we relax as many validation criteria as possible when making this change since its often called from PunchControlFactory->postSave() and we can't show the errors to the user.
 								$pc_obj->setEnableCalcUserDateID( TRUE );
 								$pc_obj->setEnableCalcTotalTime( TRUE );
 								$pc_obj->setEnableCalcSystemTotalTime( FALSE ); //Do this for In punch only.
@@ -2119,7 +2121,7 @@ class PunchControlFactory extends Factory {
 						//for system totals so those are updated as well.
 						Debug::text(' ReCalculating total time for In punch...', __FILE__, __LINE__, __METHOD__, 10);
 						$pc_obj = $p_obj->getPunchControlObject();
-						$pc_obj->setEnableStrictJobValidation( TRUE );
+						$pc_obj->setEnableStrictJobValidation( FALSE ); //Make sure we relax as many validation criteria as possible when making this change since its often called from PunchControlFactory->postSave() and we can't show the errors to the user.
 						$pc_obj->setEnableCalcUserDateID( TRUE );
 						$pc_obj->setEnableCalcTotalTime( TRUE );
 						$pc_obj->setEnableCalcSystemTotalTime( TRUE );

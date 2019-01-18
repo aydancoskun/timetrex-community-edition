@@ -387,15 +387,21 @@ RibbonViewController = Backbone.View.extend( {
 	doLogout: function() {
 		//Don't wait for result of logout in case of slow or disconnected internet. Just clear local cookies and move on.
 		var current_user_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
-		current_user_api.Logout({onResult:function(){}})
+		if ( typeof current_user_api.Logout !== 'undefined' ) { //Fix JS exception: Uncaught TypeError: current_user_api.Logout is not a function -- Which can occur when offline and clicking Logout.
+			current_user_api.Logout({onResult: function () {}})
+		}
 
 		Global.setAnalyticDimensions();
-		if ( typeof(ga) != "undefined" && APIGlobal.pre_login_data.analytics_enabled === true ) {
-			ga('send', 'pageview', {'sessionControl': 'end'});
+		if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
+			try {
+				ga('send', 'pageview', {'sessionControl': 'end'});
+			} catch(e) {
+				throw e;
+			}
 		}
 
 		//A bare "if" wrapped around lh_inst doesn't work here for some reason.
-		if ( typeof(lh_inst) != "undefined" ) {
+		if ( typeof(lh_inst) != 'undefined' ) {
 			//stop the update loop for live chat with support
 			clearTimeout(lh_inst.timeoutStatuscheck);
 		}

@@ -816,29 +816,33 @@ require( [
 		function initAnalytics() {
 			/* jshint ignore:start */
 			if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
-				(function( i, s, o, g, r, a, m ) {
-					i['GoogleAnalyticsObject'] = r;
-					i[r] = i[r] || function() {
-						(i[r].q = i[r].q || []).push( arguments );
-					}, i[r].l = 1 * new Date();
-					a = s.createElement( o ),
-						m = s.getElementsByTagName( o )[0];
-					a.async = 1;
-					a.src = g;
-					m.parentNode.insertBefore( a, m );
-				})( window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga' );
-				//ga('set', 'sendHitTask', null); //disables sending hit data to Google. uncoment when debugging GA.
+				try {
+					(function (i, s, o, g, r, a, m) {
+						i['GoogleAnalyticsObject'] = r;
+						i[r] = i[r] || function () {
+							(i[r].q = i[r].q || []).push(arguments);
+						}, i[r].l = 1 * new Date();
+						a = s.createElement(o),
+							m = s.getElementsByTagName(o)[0];
+						a.async = 1;
+						a.src = g;
+						m.parentNode.insertBefore(a, m);
+					})(window, document, 'script', ServiceCaller.rootURL + loginData.base_url + 'html5/framework/google/analytics/analytics.js', 'ga');
+					//ga('set', 'sendHitTask', null); //disables sending hit data to Google. uncoment when debugging GA.
 
-				ga( 'create', APIGlobal.pre_login_data.analytics_tracking_code, 'auto' );
+					ga('create', APIGlobal.pre_login_data.analytics_tracking_code, 'auto');
 
-				//Do not check exitstance of LocalCacheData with if(LocalCacheData) or JS will execute the unnamed function it uses as a constructor
-				if ( LocalCacheData.loginUser ) {
-					var current_company = LocalCacheData.getCurrentCompany();
-					Global.setAnalyticDimensions(LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name);
-				} else {
-					Global.setAnalyticDimensions();
+					//Do not check exitstance of LocalCacheData with if(LocalCacheData) or JS will execute the unnamed function it uses as a constructor
+					if (LocalCacheData.loginUser) {
+						var current_company = LocalCacheData.getCurrentCompany();
+						Global.setAnalyticDimensions(LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name);
+					} else {
+						Global.setAnalyticDimensions();
+					}
+					ga('send', 'pageview', {'sessionControl': 'start'});
+				} catch(e) {
+					throw e; //Attempt to catch any errors thrown by Google Analytics.
 				}
-				ga('send', 'pageview', {'sessionControl': 'start'});
 			}
 			/* jshint ignore:end */
 		}
@@ -1114,10 +1118,18 @@ require.onError = function( err ) {
 		if ( require.script_error_shown == undefined ) {
 			require.script_error_shown = 1;
 			//There is no pretty errorbox at this time. You may only have basic javascript.
-			if ( confirm( "Unable to download required data. Your internet connection may have failed press Ok to reload." ) ) {
+			if ( confirm( 'Unable to download required data. Your internet connection may have failed press Ok to reload.' ) ) {
 				//For testing, so that there's time to turn internet back on after confirm is clicked.
 				//window.setTimeout(function() {window.location.reload()},5000);
-				window.location.reload();
+
+				//This can also happen if the user manually modifies the URL to be a bogus ViewId (ie: #!m=homeABC)
+				//So try to redirect back to the home page first, otherwise try to do a browser reload.
+				if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
+					window.location.href = ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url;
+				} else {
+					window.location.reload();
+				}
+
 			}
 		}
 		console.debug( err.message );

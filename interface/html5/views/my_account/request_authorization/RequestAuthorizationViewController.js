@@ -16,7 +16,6 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 	api_absence_policy: null,
 	message_control_api:null,
 
-
 	authorization_history_columns: [],
 
 	authorization_history_default_display_columns: [],
@@ -563,7 +562,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				if (result.isValid()) {
 					var id = $this.current_edit_record.id;
 
-					//see #2224 - Unable to get property 'find' of undefined 
+					//see #2224 - Unable to get property 'find' of undefined
 					$this.removeEditView();
 					$this.onViewClick( id );
 				} else {
@@ -589,40 +588,48 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			request_data = this.getSelectedItem();
 		}
 
-		$this.api_request['setRequest'](request_data,{
-			onResult: function(res){
-				if ( res.getResult() != false ) {
-					var filter = {};
-					filter.authorized = true;
-					filter.object_id = $this.current_edit_record.id;
-					filter.object_type_id = $this.current_edit_record.hierarchy_type_id;
+		//Check if Edit permissions exist, if not, only authorize the request to avoid a API permission error.
+		if ( this.enable_edit_view_ui == true ) {
+			$this.api_request['setRequest'](request_data, {
+				onResult: function (res) {
+					if (res.getResult() != false) {
+						authorizeRequest();
+					} else {
+						$this.setErrorMenu();
+						$this.setErrorTips(res, true);
+					}
+				},
+			});
+		} else {
+			authorizeRequest();
+		}
 
-					$this.authorization_api['setAuthorization']( [filter], {onResult: function( result ) {
-						var retval = result.getResult();
-						if ( retval != false ) {
-							$this.search(null, null, null, function (return_value) {
-								return_value = return_value.getResult();
-								if ( $.type(return_value) !== 'array' || return_value.length < 1 ) {
-									$this.onCancelClick(true);
-								} else {
-									$this.is_changed = false;
-									$this.onRightArrowClick();
-								}
-							});
-						} else {
-							$this.setErrorMenu();
-							$this.setErrorTips(result, true);
-						}
-					}} );
-				} else {
-					$this.setErrorMenu();
-					$this.setErrorTips(res, true);
+		function authorizeRequest() {
+			var filter = {};
+			filter.authorized = true;
+			filter.object_id = $this.current_edit_record.id;
+			filter.object_type_id = $this.current_edit_record.hierarchy_type_id;
+
+			$this.authorization_api['setAuthorization']([filter], {
+				onResult: function (result) {
+					var retval = result.getResult();
+					if (retval != false) {
+						$this.search(null, null, null, function (return_value) {
+							return_value = return_value.getResult();
+							if ($.type(return_value) !== 'array' || return_value.length < 1) {
+								$this.onCancelClick(true);
+							} else {
+								$this.is_changed = false;
+								$this.onRightArrowClick();
+							}
+						});
+					} else {
+						$this.setErrorMenu();
+						$this.setErrorTips(result, true);
+					}
 				}
-			},
-		});
-
-
-
+			});
+		}
 	},
 
 	onPassClick: function() {
@@ -1000,7 +1007,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 				}
 			}
 			if ( Global.isSet( widget.setEnabled ) ) {
-				widget.setEnabled( true );
+				widget.setEnabled( this.enable_edit_view_ui );
 			}
 		}
 	},

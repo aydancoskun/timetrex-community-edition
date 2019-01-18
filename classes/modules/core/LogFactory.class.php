@@ -81,6 +81,7 @@ class LogFactory extends Factory {
 											'accrual'							=> TTi18n::getText('Accrual'),
 											'authorizations'					=> TTi18n::getText('Authorizations'),
 											'request'							=> TTi18n::getText('Request'),
+											'request_schedule'					=> TTi18n::getText('Request - Schedule'),
 											//'message'							=> TTi18n::getText('Messages'), //Old version
 											'message_control'					=> TTi18n::getText('Messages'),
 											'holidays'							=> TTi18n::getText('Holidays'),
@@ -241,6 +242,7 @@ class LogFactory extends Factory {
 											'accrual'							=> array('accrual'),
 											'authorizations'					=> array('user'),
 											'request'							=> array('request'),
+											'request_schedule'					=> array('request'),
 											'message'							=> array('message'),
 											'message_control'					=> array('message'),
 											'holidays'							=> array('holiday_policy'),

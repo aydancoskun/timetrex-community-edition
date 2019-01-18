@@ -826,19 +826,23 @@ BaseViewController = Backbone.View.extend( {
 		$( '#ribbon_view_container' ).tabs( 'remove', ($( '#ribbon_view_container' ).tabs( 'length' ) - 1) );
 
 		if ( setFocus ) {
-//
 			this.need_switch_to_context_menu = true;
 
 			//#2530 - stop the flashing!!!
 			if ( this.edit_only_mode == true ) {
 				this.setEditMenu(); //prevents some flashing of edit-only view context menus
 			} else {
+				//Perform any context menu permission checks and set the default menu icons based on the fact that *no* records are selected in the grid yet.
+				// As long as this occurs before selectContextMenu() it helps prevent "flashing" of all icons down to just the icons they have permissions to see.
+				// Specifically when logged in as a regular employee and going to Payroll -> Pay Stubs, it would show all icons an Administrator would see, the hide most of them.
+				this.setDefaultMenu();
+
+				//Don't select context menu until search complete
 				this.selectContextMenu();
 			}
-			//Don't select context menu until search complete
+
 
 		}
-
 	},
 
 	getContextMenuGroupByName: function (menu, name, name_prefix){
@@ -3839,17 +3843,8 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	setDefaultMenuExportIcon: function( context_btn, grid_selected_length, pId ) {
-		//do not show for edit screens or non-grid screens.
-		if( this.edit_only_mode || this.grid == undefined || this.sub_view_mode ){
-			context_btn.addClass( 'invisible-image' );
-		} else if ( this.is_add ||this.is_viewing || this.is_mass_adding || this.is_edit ) {
+		if ( grid_selected_length == 0 || this.is_add || this.is_viewing || this.is_mass_adding || this.is_edit || this.grid == undefined ) {
 			context_btn.addClass('disable-image');
-		} else {
-			if ( this.sub_view_mode ) {
-				//commented out to always enable the excel button because we don't have a good way to trigger this when the grid data is fully loaded.
-				//FIXME: add callback to jqgrid when grid is fully loaded so that we can change menu icon statuses.
-				//context_btn.addClass('disable-image');
-			}
 		}
 	},
 
@@ -7248,7 +7243,7 @@ BaseViewController = Backbone.View.extend( {
 		}
 
 	},
-	
+
     parserDatesRange: function( date ) {
         var dates = date.split( " - " );
         var resultArray = [];

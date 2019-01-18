@@ -853,6 +853,17 @@ abstract class Factory {
 	}
 
 	/**
+	 * Sets the is_valid flag, mostly used to set it to FALSE to force a full re-validation.
+	 * Required because $this->is_valid is a private variable and should stay that way.
+	 * @param bool $is_valid
+	 * @return bool
+	 */
+	function setIsValid( $is_valid = FALSE ) {
+		$this->is_valid = $is_valid;
+		return TRUE;
+	}
+
+	/**
 	 * @param array $data
 	 * @param array $variable_to_function_map
 	 * @return bool
@@ -1506,9 +1517,18 @@ abstract class Factory {
 			case 'text':
 				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
-						$query_stub = 'lower('. $columns .') LIKE ?';
+						$columns = array($columns);
 					}
-					$ph[] = $this->handleSQLSyntax( TTi18n::strtolower($args) );
+
+					if ( $query_stub == '' AND is_array($columns) AND count($columns) > 0 ) {
+						foreach( $columns as $column ) {
+							$query_stub[] = 'lower(' . $column . ') LIKE ?';
+							$ph[] = $this->handleSQLSyntax( TTi18n::strtolower($args) );
+						}
+
+						$query_stub = implode( ' OR ', $query_stub );
+					}
+
 					$retval = $query_stub;
 				}
 				break;
@@ -1605,10 +1625,18 @@ abstract class Factory {
 			case 'phone':
 				if ( isset($args) AND !is_array($args) AND trim($args) != '' ) {
 					if ( $query_stub == '' AND !is_array($columns) ) {
-						$query_stub = "( replace( replace( replace( replace( replace( replace( ". $columns .", ' ', ''), '-', ''), '(', ''), ')', ''), '+', ''), '.', '') LIKE ? OR ". $columns ." LIKE ? )";
+						$columns = array($columns);
 					}
 
-					$ph[] = $ph[] = $this->handleSQLSyntax( preg_replace('/[^0-9\%\*\"]/', '', strtolower($args) ) ); //Need the same value twice for the query stub.
+					if ( $query_stub == '' AND is_array($columns) AND count($columns) > 0 ) {
+						foreach( $columns as $column ) {
+							$query_stub[] = "( replace( replace( replace( replace( replace( replace( ". $column .", ' ', ''), '-', ''), '(', ''), ')', ''), '+', ''), '.', '') LIKE ? OR ". $column ." LIKE ? )";
+							$ph[] = $ph[] = $this->handleSQLSyntax( preg_replace('/[^0-9\%\*\"]/', '', strtolower($args) ) ); //Need the same value twice for the query stub.
+						}
+
+						$query_stub = implode( ' OR ', $query_stub );
+					}
+
 					$retval = $query_stub;
 				}
 				break;

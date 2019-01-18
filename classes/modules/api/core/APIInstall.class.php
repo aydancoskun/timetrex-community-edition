@@ -94,8 +94,15 @@ class APIInstall extends APIFactory {
 			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array_merge( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'require'), $install_obj->getFailedRequirements( FALSE, array('clean_cache', 'file_permissions','file_checksums') ) ), 'pre_install.php'), "r");
 			@fclose($handle);
 
-			//Need to handle disabling any attempt to connect to the database, do this by using GET params on the URL like: db=0, then look for that in json/api.php
+			if ( $external_installer == 1 ) {
+				//When using the external installer, if no system_time_zone is defined in the .ini file, try to set it to the detected system timezone immediately, as the user won't get a chance to change it later on.
+				global $config_vars;
+				if ( !isset( $config_vars['other']['system_time_zone'] ) ) {
+					$install_obj->writeConfigFile( array('other' => array('system_time_zone' => TTDate::detectSystemTimeZone())) );
+				}
+			}
 
+			//Need to handle disabling any attempt to connect to the database, do this by using GET params on the URL like: db=0, then look for that in json/api.php
 			$check_all_requirements = $install_obj->checkAllRequirements();
 			if ( $external_installer == 1 AND $check_all_requirements == 0 AND $install_obj->checkTimeTrexVersion() == 0 ) {
 				//Using external installer and there is no missing requirements, automatically send to next page.
@@ -665,6 +672,10 @@ class APIInstall extends APIFactory {
 				$tmp_config_data['cache']['dir'] = $data['cache_dir'];
 			}
 
+			if ( isset($data['time_zone']) AND $data['time_zone'] != '' ) {
+				$tmp_config_data['other']['system_time_zone'] = $data['time_zone'];
+			}
+
 			$install_obj->writeConfigFile( $tmp_config_data );
 
 			//Write auto_update feature to system settings.
@@ -706,6 +717,11 @@ class APIInstall extends APIFactory {
 				'storage_dir' => $config_vars['path']['storage'],
 				'cache_dir' => $config_vars['cache']['dir'],
 			);
+
+			$upf = TTNew('UserPreferenceFactory');
+
+			$retval['time_zone'] = TTDate::detectSystemTimeZone(); //This is only used during initial install and not upgrades.
+			$retval['time_zone_options'] = Misc::trimSortPrefix( $upf->getOptions('time_zone') );
 
 			$handle = @fopen('http://www.timetrex.com/'.URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'system_setting'), 'pre_install.php'), "r");
 			@fclose($handle);

@@ -874,7 +874,7 @@ class Validator {
 	 * @return int
 	 */
 	function stripNon32bitInteger( $value) {
-		if ( $value > 2147483647 OR $value < -2147483648 ) {
+		if ( (int)$value >= 2147483647 OR (int)$value <= -2147483648 ) { //Make sure we cast $value to integer, otherwise its a string comparison which is not as intended.
 			return 0;
 		}
 

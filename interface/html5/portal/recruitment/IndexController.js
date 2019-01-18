@@ -52,7 +52,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			args = this.buildArgDic( viewName.split( '&' ) );
 		}
 		if ( viewName && viewName.indexOf( 'm=' ) >= 0 ) {
-			view_id = args.m;
+			view_id = Global.sanitizeViewId( args.m );
 		} else {
 			view_id = 'PortalJobVacancy';
 		}
@@ -684,7 +684,7 @@ IndexViewController.openEditView = function( parent_view_controller, view_name, 
 		TAlertManager.showAlert('Permission denied');
 		return;
 	}
-	
+
 	//Merge conflict from RecruitmentPortal. This seemed to have removed the permission check, but that would break the application UI?
 	//if ( LocalCacheData.current_open_edit_only_controller ) {
 	//	LocalCacheData.current_open_edit_only_controller.onCancelClick();

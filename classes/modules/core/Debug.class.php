@@ -586,10 +586,10 @@ class Debug {
 		if ( self::$email_log == TRUE ) {
 			//If the error log is too long, make sure we add important data to help trace it are included at the end of the log.
 			global $config_vars, $current_user, $current_company;
-			Debug::Text('URI: '. ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'N/A' ) .' IP Address: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
-			Debug::Text('USER-AGENT: '. ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
-			Debug::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' OS: '. OPERATING_SYSTEM .' Database: Type: '. ( isset($config_vars['database']['type']) ? $config_vars['database']['type'] : 'N/A' ) .' Name: '. ( isset($config_vars['database']['database_name']) ? $config_vars['database']['database_name'] : 'N/A' ) .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
-			Debug::text('Current User: '. ( ( isset($current_user) AND is_object($current_user) ) ? $current_user->getUserName() : 'N/A' ) .' (User ID: '. ( ( isset($current_user) AND is_object($current_user) ) ? $current_user->getID() : 'N/A' ) .') Company: '. ( ( isset($current_company) AND is_object($current_company) ) ? $current_company->getName() : 'N/A' ) .' (Company ID: '. ( ( isset($current_company) AND is_object($current_company) ) ? $current_company->getId() : 'N/A' ) .')', __FILE__, __LINE__, __METHOD__, 10);
+			self::Text('URI: '. ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'N/A' ) .' IP Address: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
+			self::Text('USER-AGENT: '. ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
+			self::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' OS: '. OPERATING_SYSTEM .' Database: Type: '. ( isset($config_vars['database']['type']) ? $config_vars['database']['type'] : 'N/A' ) .' Name: '. ( isset($config_vars['database']['database_name']) ? $config_vars['database']['database_name'] : 'N/A' ) .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
+			self::Text('Current User: '. ( ( isset($current_user) AND is_object($current_user) ) ? $current_user->getUserName() : 'N/A' ) .' (User ID: '. ( ( isset($current_user) AND is_object($current_user) ) ? $current_user->getID() : 'N/A' ) .') Company: '. ( ( isset($current_company) AND is_object($current_company) ) ? $current_company->getName() : 'N/A' ) .' (Company ID: '. ( ( isset($current_company) AND is_object($current_company) ) ? $current_company->getId() : 'N/A' ) .')', __FILE__, __LINE__, __METHOD__, 10);
 
 			self::Text('Detected PHP errors ('. self::$php_errors .'), emailing log...', __FILE__, __LINE__, __METHOD__, 0);
 			self::Text('---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '. getmypid() .') ]---------------', __FILE__, __LINE__, __METHOD__, 0);
@@ -620,6 +620,14 @@ class Debug {
 			}
 		}
 
+		//Must go after emailLog() and writeToLog() above, otherwise the log will get cleared out everytime this runs.
+		if ( PRODUCTION == FALSE AND function_exists('xdebug_get_gc_run_count') == TRUE AND xdebug_get_gc_run_count() > 0 ) {
+			self::Text( 'Garbage Collector Runs: ' . xdebug_get_gc_run_count() .' Collected Roots: '. xdebug_get_gc_total_collected_roots(), __FILE__, __LINE__, __METHOD__, 10 );
+			if ( file_exists( xdebug_get_gcstats_filename() ) ) {
+				self::Arr( file_get_contents( xdebug_get_gcstats_filename() ), 'Garbage Collection Report: ', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+			self::writeToLog();
+		}
 
 		return TRUE;
 	}
@@ -678,13 +686,6 @@ class Debug {
 			global $config_vars;
 
 			$eol = PHP_EOL;
-
-			if ( PRODUCTION == FALSE AND function_exists('xdebug_get_gc_run_count') == TRUE AND xdebug_get_gc_run_count() > 0 ) {
-				self::Text( 'Garbage Collector Runs: ' . xdebug_get_gc_run_count() .' Collected Roots: '. xdebug_get_gc_total_collected_roots(), __FILE__, __LINE__, __METHOD__, 0 );
-				if ( file_exists( xdebug_get_gcstats_filename() ) ) {
-					self::Arr( file_get_contents( xdebug_get_gcstats_filename() ), 'Garbage Collection Report:', __FILE__, __LINE__, __METHOD__, 0 );
-				}
-			}
 
 			if ( is_array( self::$debug_buffer ) ) {
 				$output = $eol.'---------------[ '. @date('d-M-Y G:i:s O') .' ['. $_SERVER['REQUEST_TIME_FLOAT'] .'] (PID: '. getmypid() .') ]---------------'.$eol;

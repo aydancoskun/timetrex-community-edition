@@ -519,7 +519,7 @@ switch ($object_type) {
 			$import->deleteLocalFile(); //Make sure we delete the original file upon uploading, so if there is an error and the file upload is denied we don't show old files.
 
 			//Sometimes Excel uploads .CSV files as application/vnd.ms-excel
-			$valid_mime_types = array('text/plain','plain/text','text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'application/octet-stream' );  // comma separated string, or array
+			$valid_mime_types = array( 'text/plain', 'plain/text', 'text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'text/x-c', 'application/octet-stream' );  // comma separated string, or array. Should match Misc::parseCSV()
 
 			//Debug::setVerbosity(11);
 			$upload->set_max_filesize($max_upload_file_size); //128mb or less, though I'm not 100% sure this is even working.

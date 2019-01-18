@@ -281,7 +281,7 @@ var ServiceCaller = Backbone.Model.extend( {
 			api_called_date: api_called_date.toISOString()
 		};
 
-		if ( LocalCacheData.api_stack.length === 8 ) {
+		if ( LocalCacheData.api_stack.length === 16 ) {
 			LocalCacheData.api_stack.pop();
 		}
 
@@ -302,7 +302,7 @@ var ServiceCaller = Backbone.Model.extend( {
 					//Encoding is a must, otherwise HTTP requests will be corrupted on some web browsers (ie: Mobile Safari)
 					//This caused the corrupted requests for things like: "POST_/api/json/api_php?Class"
 					//Also it must use dashes instead of underscores for separators.
-					"Request-Uri-Fragment": encodeURIComponent( LocalCacheData.fullUrlParameterStr ),
+					'Request-Uri-Fragment': encodeURIComponent( LocalCacheData.fullUrlParameterStr ),
 				},
 				type: 'POST',
 				async: async,

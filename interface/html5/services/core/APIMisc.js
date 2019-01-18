@@ -11,7 +11,7 @@ var APIMisc = ServiceCaller.extend( {
 
 	ping: function() {
 
-		return this.argumentsHandler( this.className, 'getRawData', arguments );
+		return this.argumentsHandler( this.className, 'ping', arguments );
 
 	}
 

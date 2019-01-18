@@ -2920,11 +2920,28 @@ EmployeeViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.TEXT_INPUT
 			} ),
 			new SearchField( {
-				label: $.i18n._( 'Home Phone' ),
-				field: 'home_phone',
+				label: $.i18n._( 'Employee Number' ),
+				field: 'employee_number',
 				basic_search: false,
 				adv_search: true,
 				in_column: 1,
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Phone' ),
+				field: 'any_phone',
+				basic_search: false,
+				adv_search: true,
+				in_column: 1,
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+
+			new SearchField( {
+				label: $.i18n._( 'Email' ),
+				field: 'any_email',
+				basic_search: false,
+				adv_search: true,
+				in_column: 2,
 				form_item_type: FormItemType.TEXT_INPUT
 			} ),
 
@@ -2936,14 +2953,6 @@ EmployeeViewController = BaseViewController.extend( {
 				in_column: 2,
 				object_type_id: 200,
 				form_item_type: FormItemType.TAG_INPUT
-			} ),
-			new SearchField( {
-				label: $.i18n._( 'Employee Number' ),
-				field: 'employee_number',
-				basic_search: false,
-				adv_search: true,
-				in_column: 2,
-				form_item_type: FormItemType.TEXT_INPUT
 			} ),
 			new SearchField( {
 				label: $.i18n._( 'Gender' ),

@@ -87,7 +87,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		}
 
 		$this.basic_search_field_ui_dic['remittance_source_account_id'].setSourceData( Global.buildRecordArray(empty) );
-		this.remittance_source_account_api.getRemittanceSourceAccount( '', false, false, {onResult: function( res ) {
+		this.remittance_source_account_api.getRemittanceSourceAccount( null, false, false, {onResult: function( res ) {
 			res = res.getResult();
 			var temp_arr = {};
 			$.each( res, function( key, item ) {
@@ -98,7 +98,7 @@ PayStubTransactionViewController = BaseViewController.extend( {
 		}} );
 
 		$this.basic_search_field_ui_dic['pay_period_id'].setSourceData( Global.buildRecordArray(empty) );
-		this.pay_period_api.getPayPeriod( '', false, false, {onResult: function( res ) {
+		this.pay_period_api.getPayPeriod( null, false, false, {onResult: function( res ) {
 			res = res.getResult();
 			var temp_arr = {};
 			$.each( res, function( key, item ) {

@@ -632,20 +632,21 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	onRowChanges: function( row_widgets ) {
 		var recurring_schedule_template_id = row_widgets.week.attr( 'recurring_schedule_template_id' );
 
-		var startTime = row_widgets['start_time' + recurring_schedule_template_id].getValue();
-		var endTime = row_widgets['end_time' + recurring_schedule_template_id].getValue();
+		if ( recurring_schedule_template_id ) {
+			var startTime = row_widgets['start_time' + recurring_schedule_template_id].getValue();
+			var endTime = row_widgets['end_time' + recurring_schedule_template_id].getValue();
 
-		var schedulePolicyId = row_widgets.schedule_policy_id.getValue();
+			var schedulePolicyId = row_widgets.schedule_policy_id.getValue();
 
-		if ( startTime !== '' && endTime !== '' && schedulePolicyId !== '' ) {
-			var total_time = this.schedule_api.getScheduleTotalTime( startTime, endTime, schedulePolicyId, {async: false} ).getResult();
-			row_widgets.total_time.setValue( Global.secondToHHMMSS( total_time ) );
+			if (startTime !== '' && endTime !== '' && schedulePolicyId !== '') {
+				var total_time = this.schedule_api.getScheduleTotalTime(startTime, endTime, schedulePolicyId, {async: false}).getResult();
+				row_widgets.total_time.setValue(Global.secondToHHMMSS(total_time));
+			}
+			this.validate();
 		}
-		this.validate();
 	},
 
 	insideEditorGetValue: function( current_edit_item_id ) {
-
 		var len = this.rows_widgets_array.length;
 
 		var result = [];
@@ -655,40 +656,41 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			var recurring_schedule_template_id = row.week.attr( 'recurring_schedule_template_id' );
 
-			var data = {
-				tue: row.tue.getValue(),
-				fri: row.fri.getValue(),
-				total_time: null,
-				absence_policy_id: row.absence_policy_id.getValue(),
-				status_id: row.status_id.getValue(),
-				mon: row.mon.getValue(),
-				schedule_policy_id: row.schedule_policy_id.getValue(),
-				week: row.week.getValue(),
-				thu: row.thu.getValue(),
-				department_id: row.department_id.getValue(),
-				start_time: row[ 'start_time' + recurring_schedule_template_id ].getValue(),
-				branch_id: row.branch_id.getValue(),
-				end_time: row[ 'end_time' + recurring_schedule_template_id ].getValue(),
-				sun: row.sun.getValue(),
-				sat: row.sat.getValue(),
-				wed: row.wed.getValue(),
-				id: recurring_schedule_template_id
-			};
+			if ( recurring_schedule_template_id ) {
+				var data = {
+					tue: row.tue.getValue(),
+					fri: row.fri.getValue(),
+					total_time: null,
+					absence_policy_id: row.absence_policy_id.getValue(),
+					status_id: row.status_id.getValue(),
+					mon: row.mon.getValue(),
+					schedule_policy_id: row.schedule_policy_id.getValue(),
+					week: row.week.getValue(),
+					thu: row.thu.getValue(),
+					department_id: row.department_id.getValue(),
+					start_time: row['start_time' + recurring_schedule_template_id].getValue(),
+					branch_id: row.branch_id.getValue(),
+					end_time: row['end_time' + recurring_schedule_template_id].getValue(),
+					sun: row.sun.getValue(),
+					sat: row.sat.getValue(),
+					wed: row.wed.getValue(),
+					id: recurring_schedule_template_id
+				};
 
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				data.open_shift_multiplier = row.open_shift_multiplier.getValue();
+				if (LocalCacheData.getCurrentCompany().product_edition_id > 10) {
+					data.open_shift_multiplier = row.open_shift_multiplier.getValue();
+				}
+
+				if ((LocalCacheData.getCurrentCompany().product_edition_id >= 20)) {
+
+					data.job_id = row.job_id.getValue();
+					data.job_item_id = row.job_item_id.getValue();
+
+				}
+
+				data.recurring_schedule_template_control_id = current_edit_item_id;
+				result.push(data);
 			}
-
-			if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-
-				data.job_id = row.job_id.getValue();
-				data.job_item_id = row.job_item_id.getValue();
-
-			}
-
-			data.recurring_schedule_template_control_id = current_edit_item_id;
-			result.push( data );
-
 		}
 
 		return result;
@@ -730,14 +732,31 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		return records;
 	},
 
+	renameObjectKey: function( obj, old_key, new_key ) {
+		if (old_key !== new_key) {
+			Object.defineProperty(obj, new_key,
+				Object.getOwnPropertyDescriptor(obj, old_key));
+			delete obj[old_key];
+		}
+	},
+
 	_continueDoCopyAsNew: function() {
 		var $this = this;
 		this.is_add = true;
 		LocalCacheData.current_doing_context_action = 'copy_as_new';
 		if ( Global.isSet( this.edit_view ) ) {
 			for ( var i = 0; i < this.editor.rows_widgets_array.length; i++ ) {
-				this.editor.rows_widgets_array[i].week.attr( 'recurring_schedule_template_id', '' );
+				//Fix JS exception: Uncaught TypeError: Cannot read property 'getValue' of undefined
+				//start_time,end_time object keys are appended with the recurring_schedule_template_id, so when copying records we need to rename them to use the new recurring_schedule_template_id
+				var new_uuid = TTUUID.generateUUID();
+				var old_recurring_schedule_template_id = this.editor.rows_widgets_array[i].week.attr( 'recurring_schedule_template_id' );
+
+				this.renameObjectKey( this.editor.rows_widgets_array[i], 'start_time'+ old_recurring_schedule_template_id, 'start_time'+ new_uuid );
+				this.renameObjectKey( this.editor.rows_widgets_array[i], 'end_time'+ old_recurring_schedule_template_id, 'end_time'+ new_uuid );
+
+				this.editor.rows_widgets_array[i].week.attr( 'recurring_schedule_template_id', new_uuid );
 			}
+
 			this.current_edit_record.id = '';
 			var navigation_div = this.edit_view.find( '.navigation-div' );
 			navigation_div.css( 'display', 'none' );

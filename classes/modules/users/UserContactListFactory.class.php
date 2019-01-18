@@ -552,6 +552,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 		$query .= ( isset($filter_data['full_name']) ) ? $this->getWhereClauseSQL( 'a.last_name', $filter_data['full_name'], 'text_metaphone', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_phone']) ) ? $this->getWhereClauseSQL( 'a.home_phone', $filter_data['home_phone'], 'phone', $ph ) : NULL;
 		$query .= ( isset($filter_data['work_phone']) ) ? $this->getWhereClauseSQL( 'a.work_phone', $filter_data['work_phone'], 'phone', $ph ) : NULL;
+		$query .= ( isset($filter_data['any_phone']) ) ? $this->getWhereClauseSQL( array('a.work_phone', 'a.home_phone', 'a.mobile_phone' ), $filter_data['any_phone'], 'phone', $ph ) : NULL;
 		$query .= ( isset($filter_data['country']) ) ? $this->getWhereClauseSQL( 'a.country', $filter_data['country'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['province']) ) ? $this->getWhereClauseSQL( 'a.province', $filter_data['province'], 'upper_text_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['city']) ) ? $this->getWhereClauseSQL( 'a.city', $filter_data['city'], 'text', $ph ) : NULL;
@@ -562,6 +563,7 @@ class UserContactListFactory extends UserContactFactory implements IteratorAggre
 
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'a.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['home_email']) ) ? $this->getWhereClauseSQL( 'a.home_email', $filter_data['home_email'], 'text', $ph ) : NULL;
+		$query .= ( isset($filter_data['any_email']) ) ? $this->getWhereClauseSQL( array('a.work_email', 'a.home_email' ), $filter_data['any_email'], 'text', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['tag']) ) ? $this->getWhereClauseSQL( 'a.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 230, 'tag' => $filter_data['tag'] ), 'tag', $ph ) : NULL;
 

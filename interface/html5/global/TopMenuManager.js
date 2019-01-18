@@ -644,7 +644,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		id: 'PayStubTransaction',
 		group: payrollSubMenuGroup,
 		icon: 'direct_deposit-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'PayStub' ),
+		permission_result: PermissionManager.checkTopLevelPermission( 'PayStubTransaction' ),
 		permission: permission.pay_stub
 	} );
 

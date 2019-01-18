@@ -155,7 +155,6 @@ PayStubViewController = BaseViewController.extend( {
 
 
 	buildContextMenuModels: function() {
-
 		//Context Menu
 		var menu = new RibbonMenu( {
 			label: this.context_menu_name,
@@ -345,7 +344,7 @@ PayStubViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		var transactions_csv = new RibbonSubMenu( {
+		var pay_stub_transactions = new RibbonSubMenu( {
 			label: $.i18n._( 'Pay Stub<br>Transactions' ),
 			id: ContextMenuIconName.pay_stub_transaction,
 			group: navigation_group,
@@ -402,12 +401,11 @@ PayStubViewController = BaseViewController.extend( {
 		} );
 
 
-		var direct_deposit = new RibbonSubMenu( {
+		var process_transactions = new RibbonSubMenu( {
 			label: $.i18n._( 'Process<br>Transactions' ),
 			id: ContextMenuIconName.direct_deposit,
 			group: other_group,
 			icon: 'direct_deposit-35x35.png',
-			//type: RibbonSubMenuType.NAVIGATION,
 			items: [],
 			permission_result: true,
 			permission: true
@@ -425,84 +423,10 @@ PayStubViewController = BaseViewController.extend( {
 			sort_order: 9000
 		} );
 
-//		var costa_rica_std_form_1 = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'Costa Rica - Std Form 1' ),
-//			id: 'CostaRicaSTDForm1',
-//			nav: print_checks
-//		} );
-//
-//		var costa_rica_std_form_2 = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'Costa Rica - Std Form 2' ),
-//			id: 'CostaRicaSTDForm2',
-//			nav: print_checks
-//		} );
-
-//		var nebs_9085 = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'NEBS #9085' ),
-//			id: 'NEBS9085',
-//			nav: print_checks
-//		} );
-//
-//		var nebs_9209p = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'NEBS #9209P' ),
-//			id: 'NEBS9209P',
-//			nav: print_checks
-//		} );
-//
-//		var nebs_dlt103 = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'NEBS #DLT103' ),
-//			id: 'NEBSDLT103',
-//			nav: print_checks
-//		} );
-//
-//		var nebs_dlt104 = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'NEBS #DLT104' ),
-//			id: 'NEBSDLT104',
-//			nav: print_checks
-//		} );
-
-//		var beanstream = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'Beanstream (CSV)' ),
-//			id: 'Beanstream',
-//			nav: direct_deposit
-//		} );
-//
-//		var canada_eft_105 = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'Canada - EFT (105-Byte)' ),
-//			id: 'CanadaEFT105',
-//			nav: direct_deposit
-//		} );
-//
-//		var canada_eft_1464 = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'Canada - EFT (1464-Byte)' ),
-//			id: 'CanadaEFT1464',
-//			nav: direct_deposit
-//		} );
-//
-//		var canada_eft_cibc = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'Canada - EFT CIBC (1464-Byte)' ),
-//			id: 'CanadaEFTCIBC',
-//			nav: direct_deposit
-//		} );
-//
-//		var canada_hsbc_eft_pc = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'Canada - HSBC EFT-PC (CSV)' ),
-//			id: 'CanadaHSBCEFTPC',
-//			nav: direct_deposit
-//		} );
-//
-//		var united_states_ach = new RibbonSubMenuNavItem( {
-//			label: $.i18n._( 'United States - ACH (94-Byte)' ),
-//			id: 'UnitedStatesACH',
-//			nav: direct_deposit
-//		} );
-
 		return [menu];
-
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
-
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
 			return;
@@ -571,6 +495,9 @@ PayStubViewController = BaseViewController.extend( {
 				case ContextMenuIconName.pay_stub_amendment:
 					this.setDefaultMenuViewIcon( context_btn, grid_selected_length, 'pay_stub_amendment' );
 					break;
+				case ContextMenuIconName.pay_stub_transaction:
+					this.setDefaultMenuViewIcon( context_btn, grid_selected_length, 'pay_stub_transaction' );
+					break;
 				case ContextMenuIconName.edit_employee:
 					this.setDefaultMenuEditEmployeeIcon( context_btn, grid_selected_length, 'user' );
 					break;
@@ -620,7 +547,14 @@ PayStubViewController = BaseViewController.extend( {
 
 	setDefaultMenuViewIcon: function( context_btn, grid_selected_length, pId ) {
 		if ( pId === 'punch' || pId === 'schedule' || pId === 'pay_stub_amendment' ) {
-			this._super( 'setDefaultMenuViewIcon', context_btn, grid_selected_length, pId );
+			this._super('setDefaultMenuViewIcon', context_btn, grid_selected_length, pId);
+		} else if ( pId === 'pay_stub_transaction' ) {
+			if ( PermissionManager.validate( 'pay_stub', 'enabled' )
+				&& ( PermissionManager.validate( 'pay_stub', 'view' ) || PermissionManager.validate( 'pay_stub', 'view_child' ) ) ) {
+				context_btn.removeClass( 'invisible-image' );
+			} else {
+				context_btn.addClass( 'invisible-image' );
+			}
 		} else {
 			if ( !this.viewPermissionValidate( pId ) || this.edit_only_mode ) {
 				context_btn.addClass( 'invisible-image' );
