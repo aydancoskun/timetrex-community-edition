@@ -465,7 +465,7 @@ class ScheduleTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 
-		return FALSE;
+		return array(); //Return blank array to make count() not complain about FALSE.
 	}
 
 	function getCurrentAccrualBalance( $user_id, $accrual_policy_account_id = NULL ) {

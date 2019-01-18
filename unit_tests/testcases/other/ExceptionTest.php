@@ -654,7 +654,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 
-		return FALSE;
+		return array(); //Return blank array to make count() not complain about FALSE.
 	}
 
 	function checkCalcQuickExceptions( $user_id, $start_date, $end_date, $check_date ) {
@@ -1385,7 +1385,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count($punch_arr[$date_epoch]) );
+		$this->assertEquals( 0, count( $punch_arr ) );
 		$this->assertEquals( TRUE, $this->checkCalcQuickExceptions( $this->user_id, ($date_epoch - 86400), ($date_epoch + 86400), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
@@ -1483,7 +1483,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count($punch_arr[$date_epoch]) );
+		$this->assertEquals( 0, count( $punch_arr ) );
 		$this->assertEquals( TRUE, $this->checkCalcQuickExceptions( $this->user_id, ($date_epoch - 86400), ($date_epoch + 86400), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
@@ -1887,7 +1887,7 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count($punch_arr[$date_epoch]) );
+		$this->assertEquals( 0, count( $punch_arr ) );
 		$this->assertEquals( FALSE, $this->checkCalcQuickExceptions( $this->user_id, ($date_epoch - 86400), ($date_epoch + 86400), $date_epoch ) );
 
 		//Calculate exceptions, and check to make sure the proper ones exist.
@@ -1978,9 +1978,9 @@ class ExceptionTest extends PHPUnit_Framework_TestCase {
 
 		//If this is run before 8AM, the In punch is on the previous day.
 		if ( TTDate::getBeginDayEpoch( time() ) > $date_epoch ) {
-			$this->assertEquals( 1, count($punch_arr[$date_epoch]) );
+			$this->assertEquals( 1, count( $punch_arr[$date_epoch] ) );
 		} else {
-			$this->assertEquals( 0, count($punch_arr[$date_epoch]) );
+			$this->assertEquals( 0, count( $punch_arr ) );
 		}
 		$this->assertEquals( TRUE, $this->checkCalcQuickExceptions( $this->user_id, ($date_epoch - 86400), ($date_epoch + 86400), $date_epoch ) );
 

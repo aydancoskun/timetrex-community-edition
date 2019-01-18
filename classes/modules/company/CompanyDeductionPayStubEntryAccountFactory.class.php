@@ -95,11 +95,7 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompanyDeduction( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		if ( $value != TTUUID::getZeroID() ) {
 			return $this->setGenericDataValue( 'company_deduction_id', $value );
@@ -136,11 +132,7 @@ class CompanyDeductionPayStubEntryAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayStubEntryAccount( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'pay_stub_entry_account_id', $value );
 	}

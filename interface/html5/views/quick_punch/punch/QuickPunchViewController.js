@@ -367,6 +367,12 @@ QuickPunchViewController = QuickPunchBaseViewController.extend({
 		var $this = this;
 		var row = Global.loadWidget( 'views/quick_punch/punch/QuickPunchView.html' );
 
+		//#2571 exception: null is not an object (evaluating 'this.current_edit_record['first_name']')
+		//cancel when error case is hit
+		if ( !this.current_edit_record ) {
+			this.onCancelClick();
+		}
+
 		this.setElement( _.template(row)({
 			show_job_ui: this.show_job_ui,
 			show_job_item_ui: this.show_job_item_ui,

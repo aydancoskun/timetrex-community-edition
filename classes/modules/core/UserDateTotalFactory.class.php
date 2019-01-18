@@ -310,11 +310,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
@@ -334,10 +330,7 @@ class UserDateTotalFactory extends Factory {
 		if ( $value == NULL ) {
 			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		//Allow NULL pay period, incase its an absence or something in the future.
 		//Cron will fill in the pay period later.
@@ -397,10 +390,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setPunchControlID( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'punch_control_id', $value );
 	}
 
@@ -510,10 +500,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setSourceObject( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Debug::Text('Object Type: '. $this->getObjectType() .' ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 
 		$retval = $this->setGenericDataValue( 'src_object_id', $value );
@@ -555,10 +542,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayCode( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'pay_code_id', $value );
 	}
 
@@ -648,10 +632,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setBranch( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultBranch();
@@ -672,10 +653,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setDepartment( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultDepartment();
@@ -696,10 +674,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setJob( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}
@@ -722,10 +697,7 @@ class UserDateTotalFactory extends Factory {
 	 * @return bool
 	 */
 	function setJobItem( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}

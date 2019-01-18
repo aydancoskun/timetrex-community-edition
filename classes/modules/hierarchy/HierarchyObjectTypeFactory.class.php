@@ -132,11 +132,7 @@ class HierarchyObjectTypeFactory extends Factory {
 	 * @return bool
 	 */
 	function setHierarchyControl( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Hierarchy Control ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'hierarchy_control_id', $value );
 	}

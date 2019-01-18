@@ -338,8 +338,17 @@ KPIGroupViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.TREE_COLUMN,
 			navigation_mode: true,
-			show_search_inputs: false
+			show_search_inputs: false,
+			on_tree_grid_row_select: function( id, tree_mode_collapse) {
+				$this.onTreeGridNavigationRowSelect( id, tree_mode_collapse );
+			}
 		} );
+
+		var left_click = navigation_div.find('.left-click');
+		var right_click = navigation_div.find('.right-click');
+		left_click.attr('src', Global.getRealImagePath('images/left_arrow.png'));
+		right_click.attr('src', Global.getRealImagePath('images/right_arrow.png'));
+
 
 		this.setNavigation();
 

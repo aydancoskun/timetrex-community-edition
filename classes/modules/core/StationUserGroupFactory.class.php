@@ -56,10 +56,7 @@ class StationUserGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setStation( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'station_id', $value );
 	}
 
@@ -93,10 +90,7 @@ class StationUserGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setGroup( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'group_id', $value );
 	}
 

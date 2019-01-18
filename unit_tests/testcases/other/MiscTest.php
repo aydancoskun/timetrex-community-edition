@@ -52,6 +52,11 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 * @group testEncryptionA
 	 */
 	function testEncryptionA() {
+		//PHP v7.2+ no longer has MCRYPT extension.
+		if ( version_compare( PHP_VERSION, '7.1', '>' ) ) {
+			return TRUE;
+		}
+
 		//Make sure we force the salt so its consistent even when the timetrex.ini.php is not.
 		global $config_vars;
 		$config_vars['other']['salt'] = 'f0328b0863222ff98b848537fe1038b2';
@@ -1221,6 +1226,27 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-9af4-7bc0-af20-999999191922', 12, FALSE ), '9af47bc0af20' );
 		$this->assertEquals( TTUUID::truncateUUID( '11e7b349-24dc-7bc0-af20-21ea65522ba3', 12, FALSE ), '24dc7bc0af20' );
 		$this->assertEquals( TTUUID::truncateUUID( '11e7a84a-9af4-e9e0-b077-21ea65522ba3', 12, FALSE ), '9af4e9e0b077' );
+	}
+
+	/**
+	 * @group testParsingUUID
+	 */
+	function testParsingUUID() {
+		//Make sure UUIDs converted from INTs still get the most unique UUID data first.
+		$this->assertEquals( TTUUID::castUUID( ' 11e7b349-9af4-7bc0-af20-999999191922 ' ), '11e7b349-9af4-7bc0-af20-999999191922' );
+		$this->assertEquals( TTUUID::castUUID( '11e7b349-9af4-7bc0-af20-999999191922' ), '11e7b349-9af4-7bc0-af20-999999191922' );
+		$this->assertEquals( TTUUID::castUUID( array( '11e7b349-9af4-7bc0-af20-999999191922' ) ), '00000000-0000-0000-0000-000000000000' );
+		$this->assertEquals( TTUUID::castUUID( '' ), '00000000-0000-0000-0000-000000000000' );
+		$this->assertEquals( TTUUID::castUUID( NULL, TRUE ), NULL ); //Allow NULLs
+		$this->assertEquals( TTUUID::castUUID( NULL, FALSE ), '00000000-0000-0000-0000-000000000000' ); //Don't allow NULLs
+		$this->assertEquals( TTUUID::castUUID( FALSE ), '00000000-0000-0000-0000-000000000000' );
+		$this->assertEquals( TTUUID::castUUID( TRUE ), '00000000-0000-0000-0000-000000000000' );
+		$this->assertEquals( TTUUID::castUUID( 0 ), '00000000-0000-0000-0000-000000000000' );
+		$this->assertEquals( TTUUID::castUUID( '0' ), '00000000-0000-0000-0000-000000000000' );
+
+		$this->assertEquals( TTUUID::isUUID( '11e7b349-9af4-7bc0-af20-999999191922' ), TRUE );
+		$this->assertEquals( TTUUID::isUUID( array( '11e7b349-9af4-7bc0-af20-999999191922' ) ), FALSE );
+		$this->assertEquals( TTUUID::isUUID( ' 11e7b349-9af4-7bc0-af20-999999191922 ' ), FALSE ); //This is not trimmed as it has to be able to go straight into PostgreSQL without complaint.
 	}
 
 	/**

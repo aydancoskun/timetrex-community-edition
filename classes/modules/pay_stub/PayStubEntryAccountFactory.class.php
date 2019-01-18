@@ -174,11 +174,7 @@ class PayStubEntryAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
@@ -400,10 +396,7 @@ class PayStubEntryAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrual( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'accrual_pay_stub_entry_account_id', $value );
 	}

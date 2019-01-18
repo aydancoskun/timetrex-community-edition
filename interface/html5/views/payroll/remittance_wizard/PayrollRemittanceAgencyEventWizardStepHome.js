@@ -5,6 +5,8 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 	prae_grid_source_data: null,
 	grid: null,
 
+	el: $('.wizard.process_transactions_wizard'),
+
 
 	init: function(){
 		filter_data = {
@@ -98,8 +100,6 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 
 		//If the wizard is closed, it reopens to the home step and must be told what the current step is.
 		this.getWizardObject().setCurrentStepName('home');
-
-		TTPromise.resolve('Wizard', 'initialize');
 
 	},
 

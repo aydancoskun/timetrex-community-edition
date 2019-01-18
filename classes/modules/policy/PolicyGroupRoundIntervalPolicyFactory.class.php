@@ -54,11 +54,7 @@ class PolicyGroupRoundIntervalPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setPolicyGroup( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'policy_group_id', $value );
 	}
 
@@ -74,10 +70,7 @@ class PolicyGroupRoundIntervalPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setRoundInterValPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'round_interval_policy_id', $value );
 	}
 	/**

@@ -61,11 +61,7 @@ class DepartmentBranchFactory extends Factory {
 	 * @return bool
 	 */
 	function setDepartment( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'department_id', $value );
 	}
 
@@ -81,11 +77,7 @@ class DepartmentBranchFactory extends Factory {
 	 * @return bool
 	 */
 	function setBranch( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'branch_id', $value );
 	}
 	/**

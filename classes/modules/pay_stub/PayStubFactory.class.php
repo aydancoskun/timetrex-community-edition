@@ -247,11 +247,7 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -278,11 +274,7 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayPeriod( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'pay_period_id', $value );
 	}
 
@@ -2132,7 +2124,7 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function processEntries() {
-		Debug::Text('Processing PayStub ('. count($this->tmp_data['current_pay_stub']['entries']) .') Entries...', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('Processing PayStub ('. count( (array)$this->tmp_data['current_pay_stub']['entries'] ) .') Entries...', __FILE__, __LINE__, __METHOD__, 10);
 		///Debug::Arr($this->tmp_data['current_pay_stub'], 'Current Entries...', __FILE__, __LINE__, __METHOD__, 10);
 
 		$this->deleteEntries( FALSE ); //Delete only total entries

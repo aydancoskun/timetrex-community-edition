@@ -69,7 +69,7 @@ LegalEntityViewController = BaseViewController.extend( {
 		return url;
 	},
 
-	setEditViewDataDone: function(){
+	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
 		this.file_browser.setImage( this.getLogoUrl() );
 	},
@@ -482,6 +482,19 @@ LegalEntityViewController = BaseViewController.extend( {
 
 			}} );
 		}
+
+
+		if ( this.is_edit ) {
+			this.file_browser.setEnableDelete(true);
+			this.file_browser.bind('deleteClick', function (e, target) {
+				$this.api.deleteImage($this.current_edit_record.id, {
+					onResult: function (result) {
+						$this.onDeleteImage();
+					}
+				});
+			});
+		}
+
 		this.addEditFieldToColumn( $.i18n._( 'Logo' ), this.file_browser, tab_legal_entity_column1, '', null, false, true );
 
 	},

@@ -104,10 +104,10 @@ class RemittanceSourceAccountFactory extends Factory {
 					switch( $params['type_id'] ) {
 						case 2000: //Check
 							$tmp_retval = array(
-								10 => TTi18n::gettext('NEBS #9085'), //cheque_9085 // SS9085 (still current for Sage 50 & Accpac)  https://www.nebs.ca/canEcat/products/product_detail.jsp?pc=SS9085
-								20 => TTi18n::gettext('NEBS #9209P'), //cheque_9209p // SS9209 (still current for Quickbooks)  https://www.nebs.ca/canEcat/products/product_detail.jsp?pc=SS9209
-								30 => TTi18n::gettext('NEBS #DLT103'), //cheque_dlt103 // DLT103 (fill-in lines on cheques)  https://www.deluxe.com/shopdeluxe/pd/laser-top-checks-lined/_/A-DLT103
-								40 => TTi18n::gettext('NEBS #DLT104'), //cheque_dlt104 // DLT104 ("$" & "Dollar" on cheques) https://www.deluxe.com/shopdeluxe/pd/laser-top-checks-lined/_/A-DLT104
+								10 => TTi18n::gettext('Top Check (Sage) [9085]'), //cheque_9085 // SS9085 (still current for Sage 50 & Accpac)  https://www.nebs.ca/canEcat/products/product_detail.jsp?pc=SS9085
+								20 => TTi18n::gettext('Top Check (QuickBooks) [9209P]'), //cheque_9209p // SS9209 (still current for Quickbooks)  https://www.nebs.ca/canEcat/products/product_detail.jsp?pc=SS9209
+								30 => TTi18n::gettext('Top Check Lined (QuickBooks) [DLT103]'), //cheque_dlt103 // DLT103 (fill-in lines on cheques)  https://www.deluxe.com/shopdeluxe/pd/laser-top-checks-lined/_/A-DLT103
+								40 => TTi18n::gettext('Top Check (QuickBooks) [DLT104]'), //cheque_dlt104 // DLT104 ("$" & "Dollar" on cheques) https://www.deluxe.com/shopdeluxe/pd/laser-top-checks-lined/_/A-DLT104
 							);
 							$valid_keys = array_keys($tmp_retval);
 							break;
@@ -185,6 +185,7 @@ class RemittanceSourceAccountFactory extends Factory {
 	function _getVariableToFunctionMap( $data ) {
 		$variable_function_map = array(
 			'id' => 'ID',
+			'company_id' => 'Company',
 			'legal_entity_id' => 'LegalEntity',
 			'status_id' => 'Status',
 			'status' => FALSE,
@@ -238,6 +239,13 @@ class RemittanceSourceAccountFactory extends Factory {
 	/**
 	 * @return bool
 	 */
+	function getCompanyObject() {
+		return $this->getGenericObject( 'CompanyListFactory', $this->getCompany(), 'company_obj' );
+	}
+
+	/**
+	 * @return bool
+	 */
 	function getCurrencyObject() {
 		return $this->getGenericObject( 'CurrencyListFactory', $this->getCurrency(), 'currency_obj' );
 	}
@@ -252,6 +260,23 @@ class RemittanceSourceAccountFactory extends Factory {
 	/**
 	 * @return bool|mixed
 	 */
+	function getCompany() {
+		return $this->getGenericDataValue( 'company_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setCompany( $value) {
+		$value = trim($value);
+		$value = TTUUID::castUUID( $value );
+		return $this->setGenericDataValue( 'company_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
 	function getLegalEntity() {
 		return $this->getGenericDataValue( 'legal_entity_id' );
 	}
@@ -261,11 +286,7 @@ class RemittanceSourceAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setLegalEntity( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'legal_entity_id', $value );
 	}
 
@@ -281,11 +302,7 @@ class RemittanceSourceAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setCurrency( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Currency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'currency_id', $value );
 	}
@@ -361,10 +378,7 @@ class RemittanceSourceAccountFactory extends Factory {
 	function isUniqueName( $name) {
 		$name = trim($name);
 
-		$company_id = FALSE;
-		if ( is_object( $this->getLegalEntityObject() ) ) {
-			$company_id = $this->getLegalEntityObject()->getCompany();
-		}
+		$company_id = $this->getCompany();
 
 		if ( $name == '' ) {
 			return FALSE;
@@ -376,18 +390,13 @@ class RemittanceSourceAccountFactory extends Factory {
 
 		$ph = array(
 			'company_id' => TTUUID::castUUID($company_id),
-			'legal_entity_id' => TTUUID::castUUID($this->getLegalEntity()),
 			'type_id' => (int)$this->getType(),
 			'name' => $name,
 		);
 
-		$lef = TTnew( 'LegalEntityFactory' );
-
 		$query = 'SELECT a.id
 					FROM '. $this->getTable() .' as a
-					LEFT JOIN ' . $lef->getTable() . ' as lef ON ( a.legal_entity_id = lef.id AND lef.deleted = 0  )
-					WHERE lef.company_id = ?
-					    AND lef.id = ?
+					WHERE a.company_id = ?
 					    AND a.type_id = ?
 					    AND LOWER(a.name) = LOWER(?)
 						AND a.deleted = 0';
@@ -1035,6 +1044,88 @@ class RemittanceSourceAccountFactory extends Factory {
 		return $this->setGenericDataValue( 'value30', $value );
 	}
 
+
+	/**
+	 * @return bool
+	 */
+	function isSignatureExists() {
+		return file_exists( $this->getSignatureFileName() );
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @param bool $include_default_signature
+	 * @return bool|string
+	 */
+	function getSignatureFileName( $company_id = NULL, $id = NULL ) {
+		if ( $id == NULL ) {
+			$id = $this->getId();
+		}
+
+		//Test for both jpg and png
+		$base_name = $this->getStoragePath( $company_id ) . DIRECTORY_SEPARATOR . $id;
+		if ( file_exists( $base_name.'.img') ) {
+			$signature_file_name = $base_name.'.img';
+		} else {
+			$signature_file_name = FALSE;
+		}
+
+		//Debug::Text('Logo File Name: '. $signature_file_name .' Base Name: '. $base_name .' User ID: '. $user_id .' Include Default: '. (int)$include_default_signature, __FILE__, __LINE__, __METHOD__, 10);
+		return $signature_file_name;
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @return bool
+	 */
+	function cleanStoragePath( $company_id = NULL, $id = NULL ) {
+		if ( $company_id == '' ) {
+			if ( is_object( $this->getLegalEntityObject() ) ) {
+				$company_id = $this->getLegalEntityObject()->getCompany();
+			}
+		}
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		$dir = $this->getStoragePath( $company_id ) . DIRECTORY_SEPARATOR;
+		if ( $dir != '' ) {
+			if ( $id != '' ) {
+				@unlink( $this->getSignatureFileName( $company_id, $id, FALSE ) ); //Delete just signature.
+			} else {
+				//Delete tmp files.
+				foreach(glob($dir.'*') as $filename) {
+					unlink($filename);
+					Misc::deleteEmptyDirectory( dirname( $filename ), 0 ); //Recurse to $user_id parent level and remove empty directories.
+				}
+			}
+		}
+
+		return TRUE;
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $id UUID
+	 * @return bool|string
+	 */
+	function getStoragePath( $company_id = NULL, $id = NULL ) {
+		if ( $company_id == '' ) {
+			if ( is_object( $this->getLegalEntityObject() ) ) {
+				$company_id = $this->getLegalEntityObject()->getCompany();
+			}
+		}
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		return Environment::getStorageBasePath() . DIRECTORY_SEPARATOR .'remittance_source_account'. DIRECTORY_SEPARATOR . $company_id;
+	}
+
 	/**
 	 * @param bool $ignore_warning
 	 * @return bool
@@ -1044,12 +1135,12 @@ class RemittanceSourceAccountFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Legal entity
-		if ( $this->getLegalEntity() !== FALSE ) {
+		if ( $this->getLegalEntity() !== FALSE AND $this->getLegalEntity() != TTUUID::getNotExistID() ) {
 			$llf = TTnew( 'LegalEntityListFactory' );
-			$this->Validator->isResultSetWithRows(	'legal_entity_id',
-															$llf->getByID($this->getLegalEntity()),
-															TTi18n::gettext('Legal entity is invalid')
-														);
+			$this->Validator->isResultSetWithRows( 'legal_entity_id',
+												   $llf->getByID( $this->getLegalEntity() ),
+												   TTi18n::gettext( 'Legal entity is invalid' )
+			);
 		}
 		// Currency
 		if ( $this->getCurrency() !== FALSE ) {
@@ -1375,51 +1466,52 @@ class RemittanceSourceAccountFactory extends Factory {
 			}
 		}
 
-		if ( $this->getType() == 2000 ) {
-			// when type is CHECK
-			if ( $this->getLastTransactionNumber() !== FALSE ) {
-				$value = $this->Validator->stripNonNumeric( $this->getLastTransactionNumber() );
-				$this->Validator->isFloat(
-										'last_transaction_number',
-												$value,
-												TTi18n::gettext('Incorrect last check number'));
-			}
-
-		} elseif ( $this->getType() == 3000 AND $this->getCountry() == 'US' ) {
-			// when type is ACH
-			if ( $this->getLastTransactionNumber() !== FALSE ) {
-				$value = $this->Validator->stripNonNumeric( $this->getLastTransactionNumber() );
-				$this->Validator->isFloat(
-										'last_transaction_number',
-												$value,
-											TTi18n::gettext('Incorrect last batch number'));
-			}
-			// Routing number
-			if ( $this->getValue2() !== FALSE ) {
-				if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-					$this->Validator->isTrue(		'value2',
-													FALSE,
-													TTi18n::gettext('Invalid routing number length'));
-				} else {
-					$this->Validator->isNumeric(	'value2',
-															$this->getValue2(),
-														TTi18n::gettext('Invalid routing number, must be digits only'));
+		if ( $this->getStatus() == 10 ) { //10=Enabled - Only validate when status is enabled, so records that are invalid but used in the past can always be disabled.
+			if ( $this->getType() == 2000 ) {
+				// when type is CHECK
+				if ( $this->getLastTransactionNumber() !== FALSE ) {
+					$value = $this->Validator->stripNonNumeric( $this->getLastTransactionNumber() );
+					$this->Validator->isFloat(
+							'last_transaction_number',
+							$value,
+							TTi18n::gettext( 'Incorrect last check number' ) );
 				}
-			}
-			// Account number
-			if ( $this->getValue3() !== FALSE ) {
-				if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-					$this->Validator->isTrue(		'value3',
-													FALSE,
-													TTi18n::gettext('Invalid account number length'));
-				} else {
-					$this->Validator->isNumeric(	'value3',
-															$this->getValue3(),
-															TTi18n::gettext('Invalid account number, must be digits only'));
-				}
-			}
 
-			//Not all companies have this specified and it causes problems during upgrade.
+			} elseif ( $this->getType() == 3000 AND $this->getCountry() == 'US' ) {
+				// when type is ACH
+				if ( $this->getLastTransactionNumber() !== FALSE ) {
+					$value = $this->Validator->stripNonNumeric( $this->getLastTransactionNumber() );
+					$this->Validator->isFloat(
+							'last_transaction_number',
+							$value,
+							TTi18n::gettext( 'Incorrect last batch number' ) );
+				}
+				// Routing number
+				if ( $this->getValue2() !== FALSE ) {
+					if ( strlen( $this->getValue2() ) != 9 ) {
+						$this->Validator->isTrue( 'value2',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid routing number length' ) );
+					} else {
+						$this->Validator->isNumeric( 'value2',
+													 $this->getValue2(),
+													 TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
+					}
+				}
+				// Account number
+				if ( $this->getValue3() !== FALSE ) {
+					if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 17 ) {
+						$this->Validator->isTrue( 'value3',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid account number length' ) );
+					} else {
+						$this->Validator->isNumeric( 'value3',
+													 $this->getValue3(),
+													 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+					}
+				}
+
+				//Not all companies have this specified and it causes problems during upgrade.
 //			if ( $this->getValue4() == '' ) {
 //				$this->Validator->isTrue(		'value4',
 //												FALSE,
@@ -1437,48 +1529,48 @@ class RemittanceSourceAccountFactory extends Factory {
 //												FALSE,
 //												TTi18n::gettext('Immediate destination not specified'));
 //			}
-		} elseif ( $this->getType() == 3000 AND $this->getCountry() == 'CA') {
-			// when type is EFT
-			if ( $this->getLastTransactionNumber() !== FALSE ) {
-				$this->Validator->isFloat(
-										'last_transaction_number',
-										$this->Validator->stripNonNumeric( $this->getLastTransactionNumber() ),
-										TTi18n::gettext('Incorrect last batch number'));
-			}
-			// Institution number
-			if ( $this->getValue1() !== FALSE ) {
-				if ( strlen( $this->getValue1() ) < 2 OR strlen( $this->getValue1() ) > 3 ) {
-					$this->Validator->isTrue(		'value1',
-													FALSE,
-													TTi18n::gettext('Invalid institution number length'));
+			} elseif ( $this->getType() == 3000 AND $this->getCountry() == 'CA' ) {
+				// when type is EFT
+				if ( $this->getLastTransactionNumber() !== FALSE ) {
+					$this->Validator->isFloat(
+							'last_transaction_number',
+							$this->Validator->stripNonNumeric( $this->getLastTransactionNumber() ),
+							TTi18n::gettext( 'Incorrect last batch number' ) );
 				}
-			}
-			// Transit number
-			if ( $this->getValue2() !== FALSE ) {
-				if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-					$this->Validator->isTrue(		'value2',
-													FALSE,
-													TTi18n::gettext('Invalid transit number length'));
-				} else {
-					$this->Validator->isNumeric(	'value2',
-															$this->getValue2(),
-															TTi18n::gettext('Invalid transit number, must be digits only'));
+				// Institution number
+				if ( $this->getValue1() !== FALSE ) {
+					if ( strlen( $this->getValue1() ) != 3 ) {
+						$this->Validator->isTrue( 'value1',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid institution number length' ) );
+					}
 				}
-			}
-			// Account number
-			if ( $this->getValue3() !== FALSE ) {
-				if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-					$this->Validator->isTrue(		'value3',
-														FALSE,
-														TTi18n::gettext('Invalid account number length'));
-				} else {
-					$this->Validator->isNumeric(	'value3',
-															$this->getValue3(),
-															TTi18n::gettext('Invalid account number, must be digits only'));
+				// Transit number
+				if ( $this->getValue2() !== FALSE ) {
+					if ( strlen( $this->getValue2() ) != 5 ) {
+						$this->Validator->isTrue( 'value2',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid transit number length' ) );
+					} else {
+						$this->Validator->isNumeric( 'value2',
+													 $this->getValue2(),
+													 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
+					}
 				}
-			}
+				// Account number
+				if ( $this->getValue3() !== FALSE ) {
+					if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 12 ) {
+						$this->Validator->isTrue( 'value3',
+												  FALSE,
+												  TTi18n::gettext( 'Invalid account number length' ) );
+					} else {
+						$this->Validator->isNumeric( 'value3',
+													 $this->getValue3(),
+													 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+					}
+				}
 
-			//Not all companies have this specified and it causes problems during upgrade.
+				//Not all companies have this specified and it causes problems during upgrade.
 //			if ( $this->getValue5() == '' ) {
 //				$this->Validator->isTrue(		'value5',
 //												FALSE,
@@ -1490,21 +1582,52 @@ class RemittanceSourceAccountFactory extends Factory {
 //												FALSE,
 //												TTi18n::gettext('Data center not specified'));
 //			}
+			}
 		}
 
-		if ( is_array($data_diff) AND isset($data_diff['legal_entity_id']) ) {
-			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory');
-			$rdalf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //limit 1.
-			if ( $rdalf->getRecordCount() > 0 ) {
-				$this->Validator->isTrue(		'legal_entity_id',
-												 FALSE,
-												 TTi18n::gettext('This remittance source account is currently in use employee by payment methods'));
+		//Make sure the name does not contain the account number for security reasons.
+		$this->Validator->isTrue(		'name',
+				( ( stripos( $this->getName(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
+										 TTi18n::gettext('Account number must not be a part of the Name') );
+
+		//Make sure the description does not contain the account number for security reasons.
+		$this->Validator->isTrue(		'description',
+				( ( stripos( $this->getDescription(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
+										 TTi18n::gettext('Account number must not be a part of the Description') );
+
+		if ( is_array($data_diff) AND isset($data_diff['legal_entity_id']) ) { //Legal entity has changed
+			//Cases to handle:
+			//  Always allow going from a specific legal entity to ANY without any additional validation checks.
+			//  Switching from a specific legal entity to another specific legal entity should check that destination accounts aren't assigned.
+			//  Switching from ANY legal enity to any specific legal entity, should ensure that all destination accounts are assigned to the same legal entity.
+			$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
+
+			if ( $this->getLegalEntity() != TTUUID::getNotExistID() AND $data_diff['legal_entity_id'] != TTUUID::getNotExistID() ) { //Switching from any specific legal entity to any other specific legal entity.
+				$rdalf->getByRemittanceSourceAccountId( $this->getId(), 1 ); //Limit 1.
+				if ( $rdalf->getRecordCount() > 0 ) {
+					$this->Validator->isTrue( 'legal_entity_id',
+											  FALSE,
+											  TTi18n::gettext( 'This remittance source account is currently in use by employee payment methods' ) );
+				}
+			} elseif ( $this->getLegalEntity() != TTUUID::getNotExistID() AND $data_diff['legal_entity_id'] == TTUUID::getNotExistID() ) { //Switching from ANY legal entity to a specific legal entity.
+				//Make sure all destination accounts users are assigned to the same legal entity and they are trying to switch to.
+				$rdalf->getByRemittanceSourceAccountIdAndNotUserLegalEntityId( $this->getId(), $this->getLegalEntity(), 1 ); //Limit 1
+				if ( $rdalf->getRecordCount() > 0 ) {
+					foreach( $rdalf as $rda_obj ) {
+							$this->Validator->isTrue( 'legal_entity_id',
+													  FALSE,
+													  TTi18n::gettext( 'This remittance source account is currently in use by employee payment methods assigned to a different legal entity. (%1)', $rda_obj->getUserObject()->getFullName() ) );
+							break;
+					}
+				}
 			}
-			unset($rdalf);
+
+			unset( $rdalf );
+
 		}
 
 		//Make sure these fields are always specified, but don't break mass edit.
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getLegalEntity() != TTUUID::getNotExistID() ) {
 			if ( $this->getLegalEntity() == FALSE AND $this->Validator->hasError('legal_entity_id') == FALSE ) {
 				$this->Validator->isTrue(		'legal_entity_id',
 												FALSE,

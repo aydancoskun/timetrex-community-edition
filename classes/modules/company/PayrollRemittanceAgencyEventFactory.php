@@ -286,11 +286,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayrollRemittanceAgencyId( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'payroll_remittance_agency_id', $value );
 	}
 
@@ -524,10 +520,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 * @return bool
 	 */
 	function setReminderUser( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'reminder_user_id', $value );
 	}
 
@@ -578,10 +571,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 * @return bool
 	 */
 	function setUserReportData( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_report_data_id', $value );
 	}
 	/**
@@ -744,7 +734,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 * @param bool $raw
 	 * @return bool|int
 	 */
-	function getEnableRecalculateDates( $raw = FALSE ) {
+	function getEnableRecalculateDates() {
 		return $this->getGenericTempDataValue( 'enable_recalculate_dates' );
 	}
 
@@ -2026,11 +2016,11 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						case 'T4':
 							switch ( $report_id ) {
 								case 'html':
-									$template_name = 'by_employee';
 								case 'pdf_form':
 								case 'pdf_form_government':
 								case 'efile_xml':
 								case 'pdf_form_publish_employee':
+									$template_name = 'by_employee';
 									$report_obj_name = 'T4SummaryReport';
 									break;
 								default:
@@ -2041,11 +2031,11 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						case 'T4A':
 							switch ( $report_id ) {
 								case 'html':
-									$template_name = 'by_employee';
 								case 'pdf_form':
 								case 'pdf_form_government':
 								case 'efile_xml':
 								case 'pdf_form_publish_employee':
+									$template_name = 'by_employee';
 									$report_obj_name = 'T4ASummaryReport';
 									break;
 								default:
@@ -2089,11 +2079,11 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						case 'F1099MISC':
 							switch ( $report_id ) {
 								case 'html':
-									$template_name = 'by_employee';
 								case 'pdf_form':
 								case 'pdf_form_government':
 								case 'efile':
 								case 'pdf_form_publish_employee':
+									$template_name = 'by_employee';
 									$report_obj_name = 'Form1099MiscReport';
 									break;
 							}
@@ -2105,11 +2095,11 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						case 'FW2':
 							switch ( $report_id ) {
 								case 'html':
-									$template_name = 'by_employee';
 								case 'pdf_form':
 								case 'pdf_form_government':
 								case 'efile':
 								case 'pdf_form_publish_employee':
+									$template_name = 'by_employee';
 									$report_obj_name = 'FormW2Report';
 									break;
 							}
@@ -2121,8 +2111,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						case 'PBJ':
 							switch ( $report_id ) {
 								case 'html':
-									$template_name = 'by_employee+all_time';
 								case 'payroll_export':
+									$template_name = 'by_employee+all_time';
 									$report_obj_name = 'PayrollExportReport';
 									break;
 							}
@@ -2136,11 +2126,11 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						case 'FW2': //State W2's
 							switch ( $report_id ) {
 								case 'html':
-									$template_name = 'by_employee';
 								case 'pdf_form':
 								case 'pdf_form_government':
 								case 'efile':
 								case 'pdf_form_publish_employee':
+									$template_name = 'by_employee';
 									$report_obj_name = 'FormW2Report';
 
 									$report_data_override['config']['form']['efile_state'] = $this->getPayrollRemittanceAgencyObject()->getProvince();

@@ -180,11 +180,7 @@ class AccrualFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue('user_id', $value);
 	}
 
@@ -200,11 +196,7 @@ class AccrualFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrualPolicyAccount( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue('accrual_policy_account_id', $value);
 	}
 
@@ -220,11 +212,7 @@ class AccrualFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrualPolicy( $value) {
-		$value = trim( $value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue('accrual_policy_id', $value);
 	}
 
@@ -267,11 +255,7 @@ class AccrualFactory extends Factory {
 	 * @return bool
 	 */
 	function setUserDateTotalID( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		return $this->setGenericDataValue('user_date_total_id', $value);
 	}

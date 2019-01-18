@@ -174,11 +174,7 @@ class RequestFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
@@ -198,10 +194,7 @@ class RequestFactory extends Factory {
 		if ( $value == NULL ) {
 			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Allow NULL pay period, incase its an absence or something in the future.
 		//Cron will fill in the pay period later.
 		return $this->setGenericDataValue( 'pay_period_id', $value );

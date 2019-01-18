@@ -359,6 +359,69 @@ switch ($object_type) {
 			}
 		}
 		break;
+	case 'remittance_source_account':
+		Debug::Text('Remittance Source Account Signature...', __FILE__, __LINE__, __METHOD__, 10);
+		$max_upload_file_size = 25000000;
+
+		if ( DEMO_MODE == FALSE AND ( $permission->Check('remittance_source_account', 'add') OR $permission->Check('remittance_source_account', 'edit') OR $permission->Check('remittance_source_account', 'edit_child') OR $permission->Check('remittance_source_account', 'edit_own') ) ) {
+			$permission_children_ids = $permission->getPermissionHierarchyChildren( $current_company->getId(), $current_user->getId() );
+
+			$rsalf = TTnew( 'RemittanceSourceAccountListFactory' );
+			$rsalf->getByIdAndCompanyId( $object_id, $current_company->getId() );
+			if ( $rsalf->getRecordCount() == 1
+					AND
+					( $permission->Check('remittance_source_account', 'edit')
+							OR ( $permission->Check('remittance_source_account', 'edit_own') AND $permission->isOwner( $rsalf->getCurrent()->getCreatedBy(), $rsalf->getCurrent()->getID() ) === TRUE )
+							OR ( $permission->Check('remittance_source_account', 'edit_child') AND $permission->isChild( $rsalf->getCurrent()->getId(), $permission_children_ids ) === TRUE ) ) ) {
+
+				if ( isset($_POST['file_data']) ) { //Only required for images due the image wizard.
+					Debug::Text('HTML5 Base64 encoded upload...', __FILE__, __LINE__, __METHOD__, 10);
+					$allowed_upload_content_types = array(FALSE, 'image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png');
+
+					if ( $rsalf->getRecordCount() == 1 ) {
+						$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
+						$rsaf->cleanStoragePath( $current_company->getId(), $object_id );
+						$dir = $rsaf->getStoragePath( $current_company->getId() );
+						Debug::Text('Storage Path: '. $dir, __FILE__, __LINE__, __METHOD__, 10);
+						if ( isset($dir) ) {
+							@mkdir($dir, 0700, TRUE);
+							if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 )
+									AND isset($_POST['mime_type'])
+									AND in_array( strtolower( trim($_POST['mime_type']) ), $allowed_upload_content_types ) ) {
+								$file_name = $dir . DIRECTORY_SEPARATOR . TTUUID::castUUID( $object_id ) .'.img';
+								$file_data = base64_decode( $_POST['file_data'] );
+								$file_size = strlen( $file_data );
+
+								if ( in_array( Misc::getMimeType( $file_data, TRUE ), $allowed_upload_content_types ) ) {
+									if ( $file_size <= $max_upload_file_size ) {
+										$success = file_put_contents( $file_name, $file_data );
+										if ( $success == FALSE ) {
+											Debug::Text('bUpload Failed! Unable to write data to: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
+											$error = TTi18n::gettext('Unable to upload signature');
+										}
+									} else {
+										Debug::Text('cUpload Failed! File too large: '. $file_size, __FILE__, __LINE__, __METHOD__, 10);
+										$error = TTi18n::gettext('File size is too large, must be less than %1 bytes', $max_upload_file_size );
+									}
+								} else {
+									Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
+									$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (b)';
+								}
+							} else {
+								Debug::Text('dUpload Failed! Incorrect mime_type: '. $_POST['mime_type'], __FILE__, __LINE__, __METHOD__, 10);
+								$error = TTi18n::gettext('Incorrect file type, must be a JPG or PNG image') .' (a)';
+							}
+						}
+					} else {
+						$error = TTi18n::gettext('Invalid Object ID');
+					}
+					unset($rsaf, $rsalf);
+				}
+			} else {
+				$error = TTi18n::gettext('Invalid Object ID');
+			}
+		}
+		break;
 	case 'license':
 		//Always enable debug logging during license upload.
 		Debug::setEnable(TRUE);

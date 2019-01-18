@@ -54,11 +54,7 @@ class PolicyGroupOverTimePolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setPolicyGroup( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'policy_group_id', $value );
 	}
 
@@ -74,10 +70,7 @@ class PolicyGroupOverTimePolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setOverTimePolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'over_time_policy_id', $value );
 	}
 	/**

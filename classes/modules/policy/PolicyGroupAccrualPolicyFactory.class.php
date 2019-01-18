@@ -54,11 +54,7 @@ class PolicyGroupAccrualPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setPolicyGroup( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'policy_group_id', $value );
 	}
 
@@ -74,10 +70,7 @@ class PolicyGroupAccrualPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrualPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'accrual_policy_id', $value );
 	}
 	/**

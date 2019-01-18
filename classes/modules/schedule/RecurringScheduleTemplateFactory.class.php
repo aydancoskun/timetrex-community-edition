@@ -180,10 +180,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 * @return bool
 	 */
 	function setRecurringScheduleTemplateControl( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'recurring_schedule_template_control_id', $value );
 	}
 
@@ -411,9 +408,6 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 */
 	function setSchedulePolicyID( $value ) {
 		$value = TTUUID::castUUID( $value );
-		if ( $value == NULL OR $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'schedule_policy_id', $value );
 	}
 
@@ -429,10 +423,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 * @return bool
 	 */
 	function setBranch( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::text('Branch ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		//not_exist_id is for user default branch.
 		return $this->setGenericDataValue( 'branch_id', $value );
@@ -450,11 +441,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 * @return bool
 	 */
 	function setDepartment( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		//-1 is for user default department.
 		return $this->setGenericDataValue( 'department_id', $value );
 	}
@@ -471,10 +458,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 * @return bool
 	 */
 	function setJob( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 
@@ -494,10 +478,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 * @return bool
 	 */
 	function setJobItem( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}
@@ -516,10 +497,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 * @return bool
 	 */
 	function setAbsencePolicyID( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'absence_policy_id', $value );
 	}
 

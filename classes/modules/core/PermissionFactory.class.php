@@ -1514,11 +1514,7 @@ class PermissionFactory extends Factory {
 	 * @return bool
 	 */
 	function setPermissionControl( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'permission_control_id', $value );
 	}
 

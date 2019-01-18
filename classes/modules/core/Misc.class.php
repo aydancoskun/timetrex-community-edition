@@ -1797,13 +1797,18 @@ class Misc {
 			switch ( $version ) {
 				case 1:
 					//backwards compatibility for v1 encryption.
-					$td = mcrypt_module_open( 'tripledes', '', 'ecb', '' );
-					$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $td ), MCRYPT_RAND );
-					$max_key_size = mcrypt_enc_get_key_size( $td );
-					mcrypt_generic_init( $td, substr( $key, 0, $max_key_size ), $iv );
-					$unencrypted_data = rtrim( mdecrypt_generic( $td, $encrypted_string ) );
-					mcrypt_generic_deinit( $td );
-					mcrypt_module_close( $td );
+					if ( function_exists('mcrypt_module_open') ) {
+						$td = mcrypt_module_open( 'tripledes', '', 'ecb', '' );
+						$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $td ), MCRYPT_RAND );
+						$max_key_size = mcrypt_enc_get_key_size( $td );
+						mcrypt_generic_init( $td, substr( $key, 0, $max_key_size ), $iv );
+						$unencrypted_data = rtrim( mdecrypt_generic( $td, $encrypted_string ) );
+						mcrypt_generic_deinit( $td );
+						mcrypt_module_close( $td );
+					} else {
+						Debug::Text( 'ERROR: MCRYPT extension is not installed!', __FILE__, __LINE__, __METHOD__, 10);
+						return FALSE;
+					}
 
 					break;
 				case 2: //'AES-256-CTR'
@@ -2442,14 +2447,14 @@ class Misc {
 		return $retval;
 	}
 
-	//Caller ID numbers can come in in all sorts of forms:
-	// 2505551234
-	// 12505551234
-	// +12505551234
-	// (250) 555-1234
-	//Parse out just the digits, and use only the last 10 digits.
-	//Currently this will not support international numbers
 	/**
+	 * Caller ID numbers can come in in all sorts of forms:
+	 * 2505551234
+	 * 12505551234
+	 * +12505551234
+	 * (250) 555-1234
+	 * Parse out just the digits, and use only the last 10 digits.
+	 * Currently this will not support international numbers
 	 * @param $number
 	 * @return bool|string
 	 */
@@ -3008,7 +3013,7 @@ class Misc {
 	static function findWebServerOSUser() {
 		if ( OPERATING_SYSTEM == 'LINUX' ) {
 			if ( function_exists( 'posix_getpwnam' ) ) {
-				$users = array( 'www-data', 'apache' );
+				$users = array( 'www-data', 'apache', 'wwwrun' ); //Debian/Ubuntu: www-data, CentOS/Fedora/RHEL: apache, SUSE: wwwrun
 				foreach( $users as $tmp_user ) {
 					$user_data = posix_getpwnam( $tmp_user );
 					if ( $user_data !== FALSE AND isset($user_data['uid']) AND isset($user_data['name']) ) {
@@ -3682,18 +3687,31 @@ class Misc {
 	 * @param bool $country
 	 * @return string
 	 */
-	static function formatAddress( $name, $address1 = FALSE, $address2 = FALSE, $city = FALSE, $province = FALSE, $postal_code = FALSE, $country = FALSE ) {
+	static function formatAddress( $name, $address1 = FALSE, $address2 = FALSE, $city = FALSE, $province = FALSE, $postal_code = FALSE, $country = FALSE, $condensed = FALSE ) {
 		$retarr = array();
 		$city_arr = array();
 		if ( $name != '' ) {
 			$retarr[] = $name;
 		}
 
-		if ( $address1 != '' ) {
-			$retarr[] = $address1;
-		}
-		if ( $address2 != '' ) {
-			$retarr[] = $address2;
+		if ( $condensed == TRUE ) { //Try to reduce the number of lines the address appears on for tight spaces like checks or windowed envelopes.
+			if ( $address1 != '' ) {
+				$address = $address1;
+			}
+			if ( $address2 != '' ) {
+				$address .= '  '. $address2;
+			}
+
+			if ( isset($address) ) {
+				$retarr[] = $address;
+			}
+		} else {
+			if ( $address1 != '' ) {
+				$retarr[] = $address1;
+			}
+			if ( $address2 != '' ) {
+				$retarr[] = $address2;
+			}
 		}
 
 		if ( $city != '' ) {

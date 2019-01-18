@@ -173,11 +173,7 @@ class AbsencePolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
@@ -257,10 +253,7 @@ class AbsencePolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayCode( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'pay_code_id', $value );
 	}
 
@@ -276,10 +269,7 @@ class AbsencePolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayFormulaPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'pay_formula_policy_id', $value );
 	}
 

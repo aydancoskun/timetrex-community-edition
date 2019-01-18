@@ -117,6 +117,15 @@ class TaxSummaryReport extends Report {
 			case 'date_columns':
 				$retval = TTDate::getReportDateOptions( 'transaction', TTi18n::getText('Transaction Date'), 13, TRUE );
 				break;
+			case 'custom_columns':
+				//Get custom fields for report data.
+				$oflf = TTnew( 'OtherFieldListFactory' );
+				//User and Punch fields conflict as they are merged together in a secondary process.
+				$other_field_names = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), array(10), array( 10 => '' ) );
+				if ( is_array($other_field_names) ) {
+					$retval = Misc::addSortPrefix( $other_field_names, 9000 );
+				}
+				break;
 			case 'report_custom_column':
 				if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					$rcclf = TTnew( 'ReportCustomColumnListFactory' );
@@ -170,9 +179,13 @@ class TaxSummaryReport extends Report {
 										'-1050-title' => TTi18n::gettext('Title'),
 										'-1052-ethnic_group' => TTi18n::gettext('Ethnicity'),
 										'-1053-sex' => TTi18n::gettext('Gender'),
+										'-1054-address1' => TTi18n::gettext('Address 1'),
+										'-1054-address2' => TTi18n::gettext('Address 2'),
 										'-1055-city' => TTi18n::gettext('City'),
 										'-1060-province' => TTi18n::gettext('Province/State'),
 										'-1070-country' => TTi18n::gettext('Country'),
+										'-1075-postal_code' => TTi18n::gettext('Postal Code'),
+										'-1078-home_phone' => TTi18n::gettext('Home Phone'),
 										'-1080-user_group' => TTi18n::gettext('Group'),
 										'-1090-default_branch' => TTi18n::gettext('Default Branch'),
 										'-1100-default_department' => TTi18n::gettext('Default Department'),
@@ -199,7 +212,7 @@ class TaxSummaryReport extends Report {
 
 								);
 
-				$retval = array_merge( $retval, $this->getOptions('date_columns'), (array)$this->getOptions('report_static_custom_column') );
+				$retval = array_merge( $retval, $this->getOptions('date_columns'), (array)$this->getOptions('custom_columns'), (array)$this->getOptions('report_static_custom_column') );
 				ksort($retval);
 				break;
 			case 'dynamic_columns':

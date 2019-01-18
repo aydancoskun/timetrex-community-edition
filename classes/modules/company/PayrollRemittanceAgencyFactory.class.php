@@ -1033,11 +1033,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 	 * @return bool
 	 */
 	function setLegalEntity( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'legal_entity_id', $value );
 	}
 
@@ -1053,10 +1049,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 	 * @return bool
 	 */
 	function setRemittanceSourceAccount( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'remittance_source_account_id', $value );
 	}
 
@@ -1389,10 +1382,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 	 * @return bool
 	 */
 	function setContactUser( $value) {
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'contact_user_id', $value );
 	}
 

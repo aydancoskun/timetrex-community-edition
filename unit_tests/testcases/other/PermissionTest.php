@@ -712,17 +712,17 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertArrayHasKey('hourly_rate', $output_data[1] );
 		//$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
-		$this->assertGreaterThanOrEqual( 21.00, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertGreaterThanOrEqual( 20.00, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 
 		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
 		//$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
-		$this->assertGreaterThanOrEqual( 21.00, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertGreaterThanOrEqual( 20.00, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
 
 		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
 		//$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
-		$this->assertGreaterThanOrEqual( 21.00, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertGreaterThanOrEqual( 20.00, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[4] );
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[5] );
@@ -787,19 +787,19 @@ class PermissionTest extends PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('employee_number', $output_data[0] );
 		$this->assertArrayHasKey('hourly_rate', $output_data[0] );
 		//$this->assertEquals( 21.50, $output_data[0]['hourly_rate'] );
-		$this->assertGreaterThanOrEqual( 21.00, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertGreaterThanOrEqual( 20.00, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[0]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayHasKey('hourly_rate', $output_data[1] );
 		//$this->assertEquals( 21.50, $output_data[1]['hourly_rate'] );
-		$this->assertGreaterThanOrEqual( 21.00, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertGreaterThanOrEqual( 20.00, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[1]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayHasKey('hourly_rate', $output_data[2] );
 		//$this->assertEquals( 21.50, $output_data[2]['hourly_rate'] );
-		$this->assertGreaterThanOrEqual( 21.00, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertGreaterThanOrEqual( 20.00, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[2]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertArrayHasKey('hourly_rate', $output_data[3] );
 		//$this->assertEquals( 21.50, $output_data[3]['hourly_rate'] );
-		$this->assertGreaterThanOrEqual( 21.00, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
+		$this->assertGreaterThanOrEqual( 20.00, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 		$this->assertLessThanOrEqual( 21.99, $output_data[3]['hourly_rate'] ); //Handle random wages within $1.
 
 		$this->assertArrayNotHasKey('hourly_rate', $output_data[4] );

@@ -122,10 +122,7 @@ class MessageFactory extends Factory {
 	 * @return bool
 	 */
 	function setParent( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'parent_id', $value );
 	}
 
@@ -184,11 +181,7 @@ class MessageFactory extends Factory {
 	 * @return bool
 	 */
 	function setObject( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'object_id', $value );
 	}
 

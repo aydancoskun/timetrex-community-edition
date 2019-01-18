@@ -85,8 +85,7 @@ TTUUID.fromParts = function(timeLow, timeMid, timeHiAndVersion, clockSeqHiAndRes
 		+ '-' + TTUUID.paddedString(timeLow.toString(16).substring(0,4), 4)
 		+ '-' + TTUUID.paddedString(timeLow.toString(16).substring(5,8), 4)
 		+ '-' + TTUUID.paddedString(clockSeqHiAndReserved.toString(16), 2) + TTUUID.paddedString(clockSeqLow.toString(16), 2)
-		+ '-'
-		+ node;
+		+ '-' + node.toString().substring(0,12);
 
 	return hex;
 };

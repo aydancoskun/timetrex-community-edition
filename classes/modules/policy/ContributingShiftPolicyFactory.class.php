@@ -270,11 +270,7 @@ class ContributingShiftPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
@@ -354,11 +350,7 @@ class ContributingShiftPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setContributingPayCodePolicy( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'contributing_pay_code_policy_id', $value );
 	}
 

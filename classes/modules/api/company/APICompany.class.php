@@ -770,5 +770,25 @@ class APICompany extends APIFactory {
 		return $retarr;
 	}
 
+
+	function deleteImage( $company_id ) {
+		//Permissions match setCompany
+		if ( !$this->getPermissionObject()->Check('company', 'enabled')
+				OR !( $this->getPermissionObject()->Check('company', 'edit') OR $this->getPermissionObject()->Check('company', 'edit_own') OR $this->getPermissionObject()->Check('company', 'edit_child') OR $this->getPermissionObject()->Check('company', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
+		$result = $this->stripReturnHandler( $this->getCompany( array('filter_data' => array( 'id' => $company_id ) ) ) );
+		if ( isset($result[0]) AND count($result[0]) > 0 ) {
+			/** @var CompanyFactory $f */
+			$f = TTnew( 'CompanyFactory' );
+			$file_name = $f->getLogoFileName( $company_id, FALSE );
+
+			if ( file_exists($file_name) ) {
+				unlink($file_name);
+			}
+		}
+	}
+
 }
 ?>

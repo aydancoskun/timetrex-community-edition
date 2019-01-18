@@ -767,11 +767,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setLegalEntity( $value) {
-		$value = trim( $value );
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Legal Entity ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'legal_entity_id', $value );
 	}
@@ -788,11 +784,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
@@ -809,8 +801,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayrollRemittanceAgency( $value) {
-		$value = trim( $value );
-		$value = TTUUID::castUUID($value);
+		$value = TTUUID::castUUID( $value );
 		if ( $value == '' ) {
 			//Must allow this to be NONE for upgrading purposes and for cases where the Tax/Deduction is not remitted at all.
 			$value = TTUUID::getZeroID();
@@ -1165,11 +1156,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setLengthOfServiceContributingPayCodePolicy( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'length_of_service_contributing_pay_code_policy_id', $value );
 	}
 
@@ -2086,11 +2073,7 @@ class CompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayStubEntryAccount( $value) {
-		$value = trim( $value );
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'pay_stub_entry_account_id', $value );
 	}
@@ -2917,7 +2900,7 @@ class CompanyDeductionFactory extends Factory {
 		// BELOW: Validation code moved from set*() functions.
 		//
 		// Legal Entity
-		if ( $this->getLegalEntity() != TTUUID::getZeroID() ) {
+		if ( $this->getLegalEntity() != TTUUID::getZeroID() AND $this->getLegalEntity() != TTUUID::getNotExistID() ) {
 			$clf = TTnew( 'LegalEntityListFactory' );
 			$this->Validator->isResultSetWithRows(	'legal_entity_id',
 														$clf->getByID($this->getLegalEntity()),

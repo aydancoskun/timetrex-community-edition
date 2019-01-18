@@ -482,7 +482,7 @@ class TTDate {
 				//do they can use hh:mm:ss instead.
 				//However accrual policies have to be second accurate (weekly accruals rounded to 1 minute can result in 52minute differences in a year),
 				//so we need a way to disable this rounding as well so the user can properly zero out an accrual balance if needed.
-				$seconds = ( $time_unit * 3600 );
+				$seconds = ( (float)$time_unit * 3600 );
 				if ( $enable_rounding == TRUE ) {
 					$seconds = self::roundTime( $seconds, 60 );
 				}

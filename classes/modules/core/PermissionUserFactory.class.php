@@ -71,11 +71,7 @@ class PermissionUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setPermissionControl( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'permission_control_id', $value );
 	}
 
@@ -113,11 +109,7 @@ class PermissionUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		/** @var UserListFactory $ulf */
 		if ( $value != TTUUID::getZeroID() ) {
 			return $this->setGenericDataValue( 'user_id', $value );

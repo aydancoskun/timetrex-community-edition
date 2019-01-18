@@ -247,10 +247,7 @@ class QualificationFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -266,10 +263,7 @@ class QualificationFactory extends Factory {
 	 * @return bool
 	 */
 	function setGroup( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('Group ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'group_id', $value );

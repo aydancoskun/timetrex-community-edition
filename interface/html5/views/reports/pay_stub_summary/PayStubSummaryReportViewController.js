@@ -133,25 +133,10 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 			id: ContextMenuIconName.direct_deposit,
 			group: export_group,
 			icon: 'direct_deposit-35x35.png',
-			type: RibbonSubMenuType.NAVIGATION,
 			items: [],
 			permission_result: true,
 			permission: true
 		} );
-
-		var direct_deposit_result = new (APIFactory.getAPIClass( 'APIPayStub' ))().getOptions( 'export_type', {async: false} ).getResult();
-		for ( var i = 0; i < direct_deposit_result.length; i++ ) {
-			var direct_deposit_item = direct_deposit_result[i];
-			var key;
-			for(var k in direct_deposit_item) {
-				key = k;
-			}
-			var value = direct_deposit_item[key]
-			var direct_deposit_btn = new RibbonSubMenuNavItem( {label: value,
-				id: key,
-				nav: direct_deposit
-			} );
-		}
 
 		return [menu];
 
@@ -261,6 +246,13 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 				break;
 			case ContextMenuIconName.employer_pay_stubs: //All report view
 				this.onViewClick( 'pdf_employer_pay_stub' )
+				break;
+			case ContextMenuIconName.direct_deposit:
+				if ( !this.validate( true ) ) {
+					return;
+				}
+
+				IndexViewController.openWizardController('ProcessTransactionsWizardController', {filter_data: this.visible_report_values} );
 				break;
 		}
 	}

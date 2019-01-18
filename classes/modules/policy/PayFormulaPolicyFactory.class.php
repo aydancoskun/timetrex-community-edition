@@ -205,11 +205,7 @@ class PayFormulaPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
@@ -337,10 +333,7 @@ class PayFormulaPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setWageSourceContributingShiftPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'wage_source_contributing_shift_policy_id', $value );
 	}
 
@@ -356,10 +349,7 @@ class PayFormulaPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setTimeSourceContributingShiftPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'time_source_contributing_shift_policy_id', $value );
 	}
 
@@ -458,10 +448,7 @@ class PayFormulaPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setWageGroup( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'wage_group_id', $value );
 	}
 
@@ -493,10 +480,7 @@ class PayFormulaPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrualPolicyAccount( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'accrual_policy_account_id', $value );
 	}
 

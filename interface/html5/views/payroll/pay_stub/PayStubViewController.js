@@ -407,25 +407,12 @@ PayStubViewController = BaseViewController.extend( {
 			id: ContextMenuIconName.direct_deposit,
 			group: other_group,
 			icon: 'direct_deposit-35x35.png',
-			type: RibbonSubMenuType.NAVIGATION,
+			//type: RibbonSubMenuType.NAVIGATION,
 			items: [],
 			permission_result: true,
 			permission: true
 		} );
 
-		var direct_deposit_result = new (APIFactory.getAPIClass( 'APIPayStub' ))().getOptions( 'export_type', {async: false} ).getResult();
-		for ( var i = 0; i < direct_deposit_result.length; i++ ) {
-			var direct_deposit_item = direct_deposit_result[i];
-			var key;
-			for(var k in direct_deposit_item) {
-				key = k;
-			}
-			var value = direct_deposit_item[key]
-			var direct_deposit_btn = new RibbonSubMenuNavItem( {label: value,
-				id: key,
-				nav: direct_deposit
-			} );
-		}
 
 		var export_csv = new RibbonSubMenu( {
 			label: $.i18n._( 'Export' ),
@@ -732,7 +719,8 @@ PayStubViewController = BaseViewController.extend( {
 				case ContextMenuIconName.employee_pay_stubs:
 				case ContextMenuIconName.print_checks:
 				case ContextMenuIconName.direct_deposit:
-					this.setEditMenuReportRelatedIcons( context_btn );
+					//this.setEditMenuReportRelatedIcons( context_btn );
+					this.setEditMenuEditIcon( context_btn );
 					break;
 				case ContextMenuIconName.generate_pay_stub:
 					this.setEditMenuGeneratePayStubIcon( context_btn );
@@ -1674,11 +1662,11 @@ PayStubViewController = BaseViewController.extend( {
 			row.remove();
 			if (this.rows_widgets_array[index - 1] === true && ( this.rows_widgets_array[index + 1]['total_row'] === true || this.rows_widgets_array[index + 1] === true )) {
 				this.addRow({id: '', type_id: type_id}, index - 1);
-				this.rows_widgets_array.splice(index + 1, 1);
+				this.rows_widgets_array.splice(index + 1, 1); //Remove from the array used in calcTotal()
 			} else {
-
-				this.rows_widgets_array.splice(index, 1);
+				this.rows_widgets_array.splice(index, 1); //Remove from the array used in calcTotal()
 			}
+
 		}
 		this.calcTotal();
 	},
@@ -1798,7 +1786,7 @@ PayStubViewController = BaseViewController.extend( {
 			this.current_edit_record.id = '';
 
 			this.edit_view_ui_dic.user_id.setEnabled( true );
-			if ( this.current_edit_record.status_id != 25 ) {
+			if ( !this.current_edit_record.status_id != 25 ) {
 				this.current_edit_record.status_id = 25;
 				this.edit_view_ui_dic.status_id.setValue( 25 );
 //				this.editor.show_cover = false;
@@ -2006,42 +1994,23 @@ PayStubViewController = BaseViewController.extend( {
 	},
 
 	saveInsideEntryEditorData: function( callBack ) {
+		//called by validation function
 		var $this = this;
 		var data = this.editor.getValue( $this.current_edit_record.id ? $this.current_edit_record.id : '' );
-		if ( data.length > 0 ) {
 
-			var remove_ids = $this.editor.delete_ids;
-
-			if ( remove_ids.length > 0 ) {
-				this.pay_stub_entry_api.deletePayStubEntry( remove_ids, {onResult: function( res ) {
-					$this.editor.delete_ids = [];
-				}} );
-			}
-
-//			this.pay_stub_entry_api.setPayStubEntry( data, {onResult: function( res ) {
-//				var res_data = res.getResult();
-//				if ( res_data ) {
-//					if ( Global.isSet( callBack ) ) {
-//						callBack();
-//					}
-//				} else {
-//					$this.setErrorTips( res );
-//					$this.setErrorMenu();
-//				}
-//
-//
-//			}} )
-
-
-		} else {
-
-			if ( Global.isSet( callBack ) ) {
-				callBack();
+		if ( this.editor.delete_ids.length > 0 ) {
+			for( var i = 0 ; i < this.editor.delete_ids.length; i++ ){
+				for ( var n = 0 ; n < data.length; n++) {
+					if( this.editor.delete_ids[i] == data[n].id ){
+						data[n].deleted = 1;
+					}
+				}
 			}
 		}
-
+		if ( callBack && typeof callBack == 'function' ) {
+			callBack();
+		}
 		return data;
-
 	},
 
 	insideEntryEditorGetValue: function( current_edit_item_id ) {
@@ -2743,7 +2712,6 @@ PayStubViewController = BaseViewController.extend( {
 			//count transaction rows.
 			var trows = $('.paystub_transaction_row:visible').length;
 
-
 			this.rows_widgets_array.splice( index, 1 );
 			if ( trows == 0 ) {
 				this.insideTransactionEditorAddRow( {}, index );
@@ -2911,17 +2879,25 @@ PayStubViewController = BaseViewController.extend( {
 				form_item_amount_text.TText( {field: 'amount'} );
 				form_item_amount_text.setValue( data.amount ? Global.removeTrailingZeros(data.amount) : '' );
 
+
+				if ( !data.status_id ) {
+					data.status_id = 10;
+				}
+
 				if ( $this.parent_controller.isEditMode() ) {
-					form_item_remittance_destination_account_input.setEnabled( data.status_id != 20 );
-					form_item_transaction_date_input.setEnabled( data.status_id != 20 );
-					form_item_amount_input.setReadOnly( data.status_id == 20 );
-					form_item_note_input.setReadOnly( data.status_id == 20 );
+					form_item_remittance_destination_account_input.setEnabled( data.status_id == 10 );
+					form_item_transaction_date_input.setEnabled( data.status_id == 10 );
+					form_item_amount_input.setReadOnly( data.status_id != 10 );
+					form_item_note_input.setReadOnly( data.status_id != 10 );
+					//form_item_status_input.setValue( 10 ); //set to pending
+					form_item_status_input.setEnabled( false );
 				} else {
 					//status is not pending. disable editing the row.
 					form_item_remittance_destination_account_input.setEnabled(false);
 					form_item_transaction_date_input.setEnabled(false);
 					form_item_amount_input.setEnabled(false);
 					form_item_note_input.setEnabled(false);
+					form_item_status_input.setEnabled( false );
 					form_item_input = form_item_note_text; //only way to hide the N/A is to swap in a Text Field in view mode.
 				}
 
@@ -2953,7 +2929,7 @@ PayStubViewController = BaseViewController.extend( {
 
 				if (  $this.parent_controller.isEditMode() == true  ) {
 					var minus_icon = row.find('.minus-icon');
-					if ( data.status_id == 20 ) {
+					if ( data.status_id != 10 ) {
 						minus_icon.remove();
 					}else{
 						minus_icon.click(function () {
@@ -3187,6 +3163,7 @@ PayStubViewController = BaseViewController.extend( {
 			case ContextMenuIconName.edit_pay_period:
 			case ContextMenuIconName.export_excel:
 			case ContextMenuIconName.pay_stub_transaction:
+			default:
 				this.onNavigationClick( id );
 				break;
 
@@ -3351,7 +3328,14 @@ PayStubViewController = BaseViewController.extend( {
 			case ContextMenuIconName.export_excel:
 				this.onExportClick('export' + this.api.key_name )
 				break;
-
+			case ContextMenuIconName.direct_deposit:
+				var data = {
+					filter_data:{
+						pay_stub_id: this.getGridSelectIdArray()
+					}
+				}
+				IndexViewController.openWizardController('ProcessTransactionsWizardController', data );
+				break;
 		}
 
 	},

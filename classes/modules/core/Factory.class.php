@@ -1141,8 +1141,7 @@ abstract class Factory {
 			//Append $array values to end of $ph, return
 			//one "?, " for each element in $array.
 
-			$array_count = count($array);
-			if ( is_array( $array ) AND $array_count > 0 ) {
+			if ( is_array( $array ) AND count( $array ) > 0 ) {
 				foreach( $array as $key => $val ) {
 					$ph_arr[] = '?';
 
@@ -1298,13 +1297,13 @@ abstract class Factory {
 		return FALSE;
 	}
 
-	///SQL where clause Syntax:
-	//	* or % as wildcard.
-	//	"<query>" as exact match, no default wildcard and no metaphone
-
-	//Handles '*' and '%' as wildcards, defaults to wildcard on the end always.
-	//If no wildcard is to be added, the last character should be |
 	/**
+	 * SQL where clause Syntax:
+	 *   or % as wildcard.
+	 *   "<query>" as exact match, no default wildcard and no metaphone
+	 *
+	 * Handles '*' and '%' as wildcards, defaults to wildcard on the end always.
+	 * If no wildcard is to be added, the last character should be |
 	 * @param string $arg
 	 * @return string
 	 */

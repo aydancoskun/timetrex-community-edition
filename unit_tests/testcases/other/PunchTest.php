@@ -621,7 +621,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 
-		return FALSE;
+		return array(); //Return blank array to make count() not complain about FALSE.
 	}
 
 	/*
@@ -3713,8 +3713,7 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch), TTDate::getEndDayEpoch($date_epoch) );
 		//print_r($punch_arr);
-		$this->assertEquals( 0, count($punch_arr[$date_epoch]) );
-		//$this->assertEquals( $date_epoch, $punch_arr[$date_epoch][0]['date_stamp'] );
+		$this->assertEquals( 0, count( $punch_arr ) );
 
 		return TRUE;
 	}
@@ -7576,12 +7575,9 @@ class PunchTest extends PHPUnit_Framework_TestCase {
 
 		$punch_arr = $this->getPunchDataArray( TTDate::getBeginDayEpoch($date_epoch, 1), TTDate::getEndDayEpoch($date_epoch2, 1) );
 		//print_r($punch_arr);
-
-		$this->assertEquals( 0, count($punch_arr[$date_epoch][0]['shift_data']['punches']) );
-		$this->assertEquals( 0, count($punch_arr[$date_epoch][0]['shift_data']['punch_control_ids']) );
+		$this->assertEquals( 0, count( $punch_arr ) );
 
 		$udt_arr = $this->getUserDateTotalArray( $date_epoch, $date_epoch2 );
-
 		$this->assertEquals( 0, count($udt_arr) );
 
 		return TRUE;

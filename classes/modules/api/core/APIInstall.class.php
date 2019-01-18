@@ -129,7 +129,7 @@ class APIInstall extends APIFactory {
 				$retval['soap'] = $install_obj->checkSOAP();
 				$retval['gd'] = $install_obj->checkGD();
 				$retval['json'] = $install_obj->checkJSON();
-				$retval['mcrypt'] = $install_obj->checkMCRYPT();
+				//$retval['mcrypt'] = $install_obj->checkMCRYPT();
 				$retval['simplexml'] = $install_obj->checkSimpleXML();
 				$retval['curl'] = $install_obj->checkCURL();
 				$retval['zip'] = $install_obj->checkZIP();

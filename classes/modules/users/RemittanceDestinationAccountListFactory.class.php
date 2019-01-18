@@ -123,6 +123,45 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 	}
 
 	/**
+	 * @param string $id UUID
+	 * @param string $legal_entity_id UUID
+	 * @param int $limit Limit the number of records returned
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|RemittanceDestinationAccountListFactory
+	 */
+	function getByRemittanceSourceAccountIdAndNotUserLegalEntityId( $id, $legal_entity_id, $limit = NULL, $where = NULL, $order = NULL) {
+		if ( $id == '') {
+			return FALSE;
+		}
+
+		if ( $legal_entity_id == '') {
+			return FALSE;
+		}
+
+		$ph = array(
+				'remittance_source_account_id' => TTUUID::castUUID($id),
+				'legal_entity_id' => TTUUID::castUUID($legal_entity_id),
+		);
+
+		$uf = new UserFactory();
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .' as rdaf
+					LEFT JOIN '. $uf->getTable() .' as uf ON ( rdaf.user_id = uf.id ) 
+					where	rdaf.remittance_source_account_id = ?
+						AND uf.legal_entity_id != ?
+						AND ( rdaf.deleted = 0 AND uf.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph, $limit);
+
+		return $this;
+	}
+
+	/**
 	 * @param string $user_id UUID
 	 * @param int $status_id
 	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
@@ -218,8 +257,6 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 			return FALSE;
 		}
 
-		$lef = new LegalEntityFactory();
-		$rsaf = new RemittanceSourceAccountFactory();
 		$uf = new UserFactory();
 
 		$ph = array(
@@ -228,18 +265,17 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		);
 
 		$query = '
-					select	a.*,
+					select a.*,
 						uf.legal_entity_id
 					from	'. $this->getTable() .' as a
 						LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id AND uf.deleted = 0 )
-						LEFT JOIN '. $rsaf->getTable() .' as rsaf ON ( a.remittance_source_account_id = rsaf.id AND rsaf.deleted = 0 )
-						LEFT JOIN '. $lef->getTable() .' as lef ON ( rsaf.legal_entity_id = lef.id AND lef.deleted = 0 )
 					where	a.id = ?
 						AND uf.company_id = ?
 						AND ( a.deleted = 0 )';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph );
 
 		return $this;
@@ -294,6 +330,7 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 		$uf = new UserFactory();
 		$lef = new LegalEntityFactory();
 		$rsaf = new RemittanceSourceAccountFactory();
+		$pstf = new PayStubTransactionFactory();
 
 		$ph = array(
 			'company_id' => TTUUID::castUUID($company_id),
@@ -301,6 +338,9 @@ class RemittanceDestinationAccountListFactory extends RemittanceDestinationAccou
 
 		$query = '
 					select	a.*,
+							(
+								CASE WHEN EXISTS ( select 1 from '. $pstf->getTable() .' as w where w.remittance_destination_account_id = a.id and a.deleted = 0 ) THEN 1 ELSE 0 END
+							) as in_use,					
 							rsaf.name as remittance_source_account,
 							rsaf.legal_entity_id as legal_entity_id,
 							uf.first_name as user_first_name,

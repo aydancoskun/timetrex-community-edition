@@ -668,7 +668,7 @@ IndexViewController.openWizard = function( wizardName, defaultData, callBack ) {
 
 
 //ATTN: New wizards should go through this
-IndexViewController.openWizardController = function( wizardName ) {
+IndexViewController.openWizardController = function( wizardName, filter_data, source_view ) {
 	Global.setUINotready();
 	// BaseWizardController.default_data = defaultData;
 	// BaseWizardController.call_back = callBack;
@@ -701,6 +701,15 @@ IndexViewController.openWizardController = function( wizardName ) {
 					var args = {};
 					var template = _.template( result );
 					$( 'body' ).append( template( args ) );
+
+					//#2422 - pass the data on to the process transactions wizard
+					// This must be here because we don't instantiate the WizardController ( the host view ) in the html file like we do with other views so that we can pass it constructor arguments
+					switch ( wizardName ) {
+						case 'ProcessTransactionsWizardController':
+							new ProcessTransactionsWizardController(filter_data);
+							break;
+					}
+
 					Global.setUIInitComplete();
 				} );
 			} );

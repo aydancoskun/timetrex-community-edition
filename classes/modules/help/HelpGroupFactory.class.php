@@ -54,11 +54,7 @@ class HelpGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setHelpGroupControl( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'help_group_control_id', $value );
 	}
 
@@ -74,11 +70,7 @@ class HelpGroupFactory extends Factory {
 	 * @return bool
 	 */
 	function setHelp( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'help_id', $value );
 	}
 

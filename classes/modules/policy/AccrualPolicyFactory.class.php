@@ -186,11 +186,7 @@ class AccrualPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
@@ -225,11 +221,7 @@ class AccrualPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrualPolicyAccount( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'accrual_policy_account_id', $value );
 	}
 
@@ -247,10 +239,7 @@ class AccrualPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setContributingShiftPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'contributing_shift_policy_id', $value );
 	}
 
@@ -268,10 +257,7 @@ class AccrualPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setLengthOfServiceContributingPayCodePolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'length_of_service_contributing_pay_code_policy_id', $value );
 	}
 
@@ -1501,7 +1487,7 @@ class AccrualPolicyFactory extends Factory {
 			Debug::Text('Found Policy Group...', __FILE__, __LINE__, __METHOD__, 10);
 			foreach( $pglf as $pg_obj ) {
 				//Get all users assigned to this policy group.
-				if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( -1, $user_ids ) ) {
+				if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) ) {
 					Debug::Text('Using users passed in by filter...', __FILE__, __LINE__, __METHOD__, 10);
 					$policy_group_users = array_intersect( (array)$pg_obj->getUser(), (array)$user_ids );
 				} else {

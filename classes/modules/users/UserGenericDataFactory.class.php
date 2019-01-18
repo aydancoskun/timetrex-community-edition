@@ -72,11 +72,7 @@ class UserGenericDataFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -92,10 +88,7 @@ class UserGenericDataFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 

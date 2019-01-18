@@ -13,6 +13,7 @@ StationViewController = BaseViewController.extend( {
 	time_zone_array: null,
 	time_clock_command_array: null,
 	mode_flag_array: null,
+	default_mode_flag_array: null,
 	poll_frequency_array: null,
 	push_frequency_array: null,
 	partial_push_frequency_array: null,
@@ -69,17 +70,6 @@ StationViewController = BaseViewController.extend( {
 			{option_name: 'department_selection_type', field_name: null, api: null}
 
 		];
-
-//		this.initDropDownOption( 'status' );
-//		this.initDropDownOption( 'type' );
-//		this.initDropDownOption( 'time_zone', 'time_zone', $this.user_preference_api );
-//		this.initDropDownOption( 'time_clock_command' );
-//		this.initDropDownOption( 'poll_frequency' );
-//		this.initDropDownOption( 'push_frequency' );
-//		this.initDropDownOption( 'partial_push_frequency' );
-//		this.initDropDownOption( 'group_selection_type' );
-//		this.initDropDownOption( 'branch_selection_type' );
-//		this.initDropDownOption( 'department_selection_type' );
 
 		this.initDropDownOptions( options, function( result ) {
 
@@ -293,10 +283,18 @@ StationViewController = BaseViewController.extend( {
 				this.detachElement( 'manual_command' );
 				this.detachElement( 'push_frequency' );
 				this.detachElement( 'partial_push_frequency' );
-
 			}
 
+
+
 			this.initModeFlag();
+
+			//#2590 - ensure field is only visible in valid types.
+			if ( parseInt( this.current_edit_record['type_id'] ) == 65 ) {
+				this.initDefaultModeFlag();
+			} else {
+				this.edit_view_ui_dic['default_mode_flag'].parents('.edit-view-form-item-div').hide();
+			}
 
 		} else {
 			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
@@ -316,6 +314,21 @@ StationViewController = BaseViewController.extend( {
 
 				$this.edit_view_ui_dic['mode_flag'].setSourceData( result_data );
 				$this.edit_view_ui_dic['mode_flag'].setValue( $this.current_edit_record.mode_flag );
+
+			}
+		} );
+	},
+
+	initDefaultModeFlag: function() {
+		var $this = this;
+		this.api.getOptions( 'default_mode_flag', this.current_edit_record.type_id, true, {
+			onResult: function( result ) {
+				var result_data = Global.buildRecordArray( result.getResult() );
+
+				$this.edit_view_ui_dic['default_mode_flag'].setSourceData( result_data );
+				var value = ( $this.current_edit_record.default_mode_flag != 0 ) ? $this.current_edit_record.default_mode_flag : TTUUID.zero_id;
+				$this.edit_view_ui_dic['default_mode_flag'].setValue( value );
+				$this.edit_view_ui_dic['default_mode_flag'].parents('.edit-view-form-item-div').show();
 
 			}
 		} );
@@ -929,6 +942,17 @@ StationViewController = BaseViewController.extend( {
 			field: 'mode_flag'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Configuration Modes' ), form_item_input, tab_time_clock_column2, '', null, null, true );
+
+		// Default Punch Mode
+		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		form_item_input.AComboBox( {
+			allow_multiple_selection: false,
+			layout_name: ALayoutIDs.OPTION_COLUMN,
+			show_search_inputs: true,
+			set_empty: true,
+			field: 'default_mode_flag'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Default Punch Mode' ), form_item_input, tab_time_clock_column2 ); //, '', null, null, true );
 	},
 
 	buildSearchFields: function() {

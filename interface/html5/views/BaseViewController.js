@@ -2010,7 +2010,10 @@ BaseViewController = Backbone.View.extend( {
 
 	hideErrorTips: function() {
 		for ( var key in this.edit_view_error_ui_dic ) {
-			this.edit_view_error_ui_dic[key].hideErrorTip();
+			//#2581 - Uncaught TypeError: this.edit_view_error_ui_dic[key].hideErrorTip is not a function
+			if ( typeof this.edit_view_error_ui_dic[key].hideErrorTip == 'function' ) {
+				this.edit_view_error_ui_dic[key].hideErrorTip();
+			}
 		}
 		this.removeEditViewErrorTip();
 	},
@@ -3419,6 +3422,9 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	setNavigationArrowsStatus: function() {
+		if ( !this.edit_view ) {
+			return;
+		}
 
 		var left_arrow = this.edit_view.find( '.left-click' );
 		var right_arrow = this.edit_view.find( '.right-click' );
@@ -3445,6 +3451,9 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	setNavigationArrowsEnabled: function() {
+		if ( !this.edit_view ) {
+			return;
+		}
 
 		var left_arrow = this.edit_view.find( '.left-click' );
 		var right_arrow = this.edit_view.find( '.right-click' );
@@ -5952,7 +5961,8 @@ BaseViewController = Backbone.View.extend( {
 			this.script_name === 'RecurringHolidayView' ||
 			this.script_name === 'LegalEntityView' ||
 			this.script_name === 'RemittanceSourceAccountView' ||
-			this.script_name === 'PayrollRemittanceAgencyView'
+			this.script_name === 'PayrollRemittanceAgencyView' ||
+			this.script_name === 'RemittanceDestinationAccountView'
 		) {
 
 			var data = this.grid.getGridParam( 'data' );
@@ -7210,6 +7220,31 @@ BaseViewController = Backbone.View.extend( {
 			$this.sub_document_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_document_view_controller.parent_view_controller = $this;
 			$this.sub_document_view_controller.initData();
+		}
+
+	},
+
+	onDeleteImage: function( callback ) {
+		var $this = this;
+		this.api.deleteImage(this.current_edit_record.id, {onResult:function(result) {
+			$this.onEditClick( $this.current_edit_record.id, true );
+		}});
+	},
+
+	onTreeGridNavigationRowSelect: function( id ) {
+		if ( !id ) {
+			return;
+		}
+
+		//don't close on collapse of tree mode element
+		if ( LocalCacheData.currently_collapsing_navigation_tree_element != true ) {
+			this.onEditClick(id);
+			$('.a-dropdown-div').remove();
+			LocalCacheData.openAwesomeBox = null;
+		} else {
+			LocalCacheData.currently_collapsing_navigation_tree_element = false;
+			this.onEditClick( id, true );
+			this.setNavigation();
 		}
 
 	},

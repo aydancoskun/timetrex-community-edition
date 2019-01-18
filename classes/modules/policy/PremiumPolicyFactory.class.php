@@ -286,11 +286,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
@@ -386,11 +382,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setContributingShiftPolicy( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'contributing_shift_policy_id', $value );
 	}
 
@@ -870,10 +862,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayCode( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'pay_code_id', $value );
 	}
 
@@ -889,10 +878,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayFormulaPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'pay_formula_policy_id', $value );
 	}
 
@@ -1596,7 +1582,7 @@ class PremiumPolicyFactory extends Factory {
 			//Debug::text(' I: '. TTDate::getDate('DATE+TIME', $i), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $this->getIncludeHolidayType() > 10 AND is_object( $calculate_policy_obj ) ) {
 				//$is_holiday = $this->isHoliday( $i, $user_id );
-				$is_holiday = ( $calculate_policy_obj->filterHoliday( $i ) !== FALSE ) ? TRUE : FALSE;
+				$is_holiday = ( count( $calculate_policy_obj->filterHoliday( $i ) ) > 0 ) ? TRUE : FALSE;
 			} else {
 				$is_holiday = FALSE;
 			}

@@ -2976,8 +2976,7 @@
                                 var data = $( ts ).jqGrid( 'getGridParam', 'data' );
                                 for ( i = startIndex; i < endIndex; i++ ) {
                                     var item = data[i];
-
-                                    if ( Global.isSet( item.id ) ) {
+                                    if ( item && Global.isSet( item.id ) ) {
                                         if(i === endIndex - 1){
                                             $( ts ).jqGrid( "setSelection", item.id, true, e );
                                         }else{

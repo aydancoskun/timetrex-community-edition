@@ -120,11 +120,7 @@ class HolidayFactory extends Factory {
 	 * @return bool
 	 */
 	function setHolidayPolicyID( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'holiday_policy_id', $value );
 	}
 

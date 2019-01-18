@@ -804,7 +804,7 @@ RequestViewController = RequestViewCommonController.extend( {
 					this.setEditMenuDeleteAndNextIcon( context_btn );
 					break;
 				case ContextMenuIconName.send:
-					this.setEditMenuSendIcon( context_btn );
+					this.setEditMenuSaveIcon( context_btn );
 					break;
 				case ContextMenuIconName.cancel:
 					break;
@@ -873,21 +873,6 @@ RequestViewController = RequestViewCommonController.extend( {
 		if ( this.is_edit || this.is_add ) {
 			context_btn.addClass( 'disable-image' );
 		}
-	},
-
-	setEditMenuSendIcon: function( context_btn, pId ) {
-		if ( ((pId && !this.addPermissionValidate( pId )) || !this.edit_only_mode) && !this.is_add ) {
-			context_btn.addClass( 'invisible-image' );
-		}
-
-		if ( !this.is_edit ) {
-			context_btn.addClass( 'disable-image' );
-		}
-
-		if ( this.is_add ) {
-			context_btn.removeClass( 'disable-image' );
-		}
-
 	},
 
 	 onTypeChanged: function(arg) {

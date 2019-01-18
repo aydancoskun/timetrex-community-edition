@@ -74,62 +74,6 @@ class APIPayStubEntry extends APIFactory {
 		Debug::Text('Getting pay stub entry default data...', __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this->returnHandler( FALSE );
-
-//		$pseallf = TTnew( 'PayStubEntryAccountLinkListFactory' );
-//		$pseallf->getByCompanyID( $this->getCurrentCompanyObject()->getId() );
-//		$pay_stub_entry_account_link_obj = FALSE;
-//		if ( $pseallf->getRecordCount() > 0 ) {
-//			$pay_stub_entry_account_link_obj = $pseallf->getCurrent();
-//		}
-//
-//		$data = FALSE;
-//		if( is_object( $pay_stub_entry_account_link_obj ) ) {
-//			$data = array(
-//					10 => array(
-//							array('tmp_type' => 10),
-//							array(
-//									'tmp_type' => 10,
-//									'type_id'  => 40,
-//									'name'     => TTi18n::getText( 'Total Gross' ),
-//									'pay_stub_entry_account_id' => $pay_stub_entry_account_link_obj->getTotalGross()
-//							),
-//					),
-//					20 => array(
-//							array('tmp_type' => 20),
-//							array(
-//									'tmp_type' => 20,
-//									'type_id'  => 40,
-//									'name'     => TTi18n::getText( 'Total Deductions' ),
-//									'pay_stub_entry_account_id' => $pay_stub_entry_account_link_obj->getTotalEmployeeDeduction()
-//							),
-//					),
-//					30 => array(
-//							array('tmp_type' => 30),
-//							array(
-//									'tmp_type' => 30,
-//									'type_id'  => 40,
-//									'name'     => TTi18n::getText( 'Employer Total Contributions' ),
-//									'pay_stub_entry_account_id' => $pay_stub_entry_account_link_obj->getTotalEmployerDeduction()
-//							),
-//					),
-//					40 => array(
-//							array(
-//									'tmp_type' => 40,
-//									'type_id'  => 40,
-//									'name'     => TTi18n::getText( 'Net Pay' ),
-//									'pay_stub_entry_account_id' => $pay_stub_entry_account_link_obj->getTotalNetPay()
-//							),
-//					),
-//					50 => array(
-//							array('tmp_type' => 50),
-//					),
-//					80 => array(
-//							array('tmp_type' => 80),
-//					),
-//			);
-//		}
-//
-//		return $this->returnHandler( $data );
 	}
 
 	/**
@@ -188,85 +132,86 @@ class APIPayStubEntry extends APIFactory {
 	 * @param array $data paystub_entry_account data
 	 * @return array|bool
 	 */
-	function deletePayStubEntry( $data ) {
-		//
-		//This is required by Edit Pay Stub view to delete individual Pay Stub entries.
-		//
-		if ( !is_array($data) ) {
-			$data = array($data);
-		}
-
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
-		}
-
-		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
-			OR !( $this->getPermissionObject()->Check('pay_stub', 'delete') OR $this->getPermissionObject()->Check('pay_stub', 'delete_own') OR $this->getPermissionObject()->Check('pay_stub', 'delete_child') ) ) {
-			return	$this->getPermissionObject()->PermissionDenied();
-		}
-
-		Debug::Text('Received data for: '. count($data) .' PayStubEntrys', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$total_records = count($data);
-		$validator = $save_result = $key = FALSE;
-		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
-		if ( is_array($data) AND $total_records > 0 ) {
-			foreach( $data as $key => $id ) {
-				$primary_validator = new Validator();
-				$lf = TTnew( 'PayStubEntryListFactory' );
-				$lf->StartTransaction();
-				if ( $id != '' ) {
-					//Modifying existing object.
-					//Get paystub_entry_account object, so we can only modify just changed data for specific records if needed.
-					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
-					if ( $lf->getRecordCount() == 1 ) {
-						//Object exists, check edit permissions
-						if ( $this->getPermissionObject()->Check('pay_stub', 'delete')
-							OR ( $this->getPermissionObject()->Check('pay_stub', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
-							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
-							$lf = $lf->getCurrent();
-						} else {
-							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
-						}
-					} else {
-						//Object doesn't exist.
-						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
-					}
-				} else {
-					$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
-				}
-
-				//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
-
-				$is_valid = $primary_validator->isValid();
-				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
-					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
-					$lf->setDeleted(TRUE);
-
-					$is_valid = $lf->isValid();
-					if ( $is_valid == TRUE ) {
-						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
-						$save_result[$key] = $lf->Save();
-						$validator_stats['valid_records']++;
-					}
-				}
-
-				if ( $is_valid == FALSE ) {
-					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
-
-					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
-
-					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
-				}
-
-				$lf->CommitTransaction();
-			}
-
-			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
-		}
-
-		return $this->returnHandler( FALSE );
-	}
+//	function deletePayStubEntry( $data ) {
+//		//
+//		//This is required by Edit Pay Stub view to delete individual Pay Stub entries.
+//		//  FIXME: It is broken though, since if they delete a pay stub entry, then a validation error occurs, the pay stub totals are out of sync.
+//		//
+//		if ( !is_array($data) ) {
+//			$data = array($data);
+//		}
+//
+//		if ( !is_array($data) ) {
+//			return $this->returnHandler( FALSE );
+//		}
+//
+//		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
+//			OR !( $this->getPermissionObject()->Check('pay_stub', 'delete') OR $this->getPermissionObject()->Check('pay_stub', 'delete_own') OR $this->getPermissionObject()->Check('pay_stub', 'delete_child') ) ) {
+//			return	$this->getPermissionObject()->PermissionDenied();
+//		}
+//
+//		Debug::Text('Received data for: '. count($data) .' PayStubEntrys', __FILE__, __LINE__, __METHOD__, 10);
+//		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
+//
+//		$total_records = count($data);
+//		$validator = $save_result = $key = FALSE;
+//		$validator_stats = array('total_records' => $total_records, 'valid_records' => 0 );
+//		if ( is_array($data) AND $total_records > 0 ) {
+//			foreach( $data as $key => $id ) {
+//				$primary_validator = new Validator();
+//				$lf = TTnew( 'PayStubEntryListFactory' );
+//				$lf->StartTransaction();
+//				if ( $id != '' ) {
+//					//Modifying existing object.
+//					//Get paystub_entry_account object, so we can only modify just changed data for specific records if needed.
+//					$lf->getByIdAndCompanyId( $id, $this->getCurrentCompanyObject()->getId() );
+//					if ( $lf->getRecordCount() == 1 ) {
+//						//Object exists, check edit permissions
+//						if ( $this->getPermissionObject()->Check('pay_stub', 'delete')
+//							OR ( $this->getPermissionObject()->Check('pay_stub', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+//							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+//							$lf = $lf->getCurrent();
+//						} else {
+//							$primary_validator->isTrue( 'permission', FALSE, TTi18n::gettext('Delete permission denied') );
+//						}
+//					} else {
+//						//Object doesn't exist.
+//						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+//					}
+//				} else {
+//					$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Delete permission denied, record does not exist') );
+//				}
+//
+//				//Debug::Arr($lf, 'AData: ', __FILE__, __LINE__, __METHOD__, 10);
+//
+//				$is_valid = $primary_validator->isValid();
+//				if ( $is_valid == TRUE ) { //Check to see if all permission checks passed before trying to save data.
+//					Debug::Text('Attempting to delete record...', __FILE__, __LINE__, __METHOD__, 10);
+//					$lf->setDeleted(TRUE);
+//
+//					$is_valid = $lf->isValid();
+//					if ( $is_valid == TRUE ) {
+//						Debug::Text('Record Deleted...', __FILE__, __LINE__, __METHOD__, 10);
+//						$save_result[$key] = $lf->Save();
+//						$validator_stats['valid_records']++;
+//					}
+//				}
+//
+//				if ( $is_valid == FALSE ) {
+//					Debug::Text('Data is Invalid...', __FILE__, __LINE__, __METHOD__, 10);
+//
+//					$lf->FailTransaction(); //Just rollback this single record, continue on to the rest.
+//
+//					$validator[$key] = $this->setValidationArray( $primary_validator, $lf );
+//				}
+//
+//				$lf->CommitTransaction();
+//			}
+//
+//			return $this->handleRecordValidationResults( $validator, $validator_stats, $key, $save_result );
+//		}
+//
+//		return $this->returnHandler( FALSE );
+//	}
 }
 ?>

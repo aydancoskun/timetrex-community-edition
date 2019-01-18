@@ -212,10 +212,7 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
@@ -235,10 +232,7 @@ class PunchControlFactory extends Factory {
 		if ( $value == NULL ) {
 			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Allow NULL pay period, incase its an absence or something in the future.
 		//Cron will fill in the pay period later.
 		return $this->setGenericDataValue( 'pay_period_id', $value );
@@ -443,10 +437,7 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setBranch( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultBranch();
@@ -467,10 +458,7 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setDepartment( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultDepartment();
@@ -491,10 +479,7 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setJob( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}
@@ -517,10 +502,7 @@ class PunchControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setJobItem( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}

@@ -25,7 +25,9 @@ RequestViewCommonController = BaseViewController.extend( {
 	onCancelClick: function( force, cancel_all ) {
 		TTPromise.add('base', 'onCancelClick');
 		var $this = this;
-		if ( this.current_edit_record.id ) {
+
+		//#2571 - Unable to get property 'id' of undefined or null reference
+		if ( this.current_edit_record && this.current_edit_record.id ) {
 			var $record_id = this.current_edit_record.id;
 		}
 
@@ -50,8 +52,9 @@ RequestViewCommonController = BaseViewController.extend( {
 
 			} else {
 				if ( $this.is_edit && $record_id ) {
-					$this.setCurrentEditViewState('view')
+					$this.setCurrentEditViewState('view');
 					$this.onViewClick( $record_id, true );
+					$this.setEditMenu();
 				} else {
 					$this.removeEditView();
 				}
@@ -65,12 +68,6 @@ RequestViewCommonController = BaseViewController.extend( {
 
 	onCloseIconClick: function(){
 		this.onCancelClick();
-	},
-
-	openEditView: function() {
-		if ( !this.edit_view ) {
-			this.initEditViewUI(this.viewId, this.edit_view_tpl);
-		}
 	},
 
 	buildDataForAPI: function( data ) {
@@ -447,6 +444,11 @@ RequestViewCommonController = BaseViewController.extend( {
 	},
 
 	onViewClick: function( editId, clear_edit_view ) {
+		if (clear_edit_view) {
+			this.clearEditView();
+			this.onViewClick(editId);
+			return;
+		}
 		var $this = this;
 		this.setCurrentEditViewState( 'view' );
 		this.openEditView(); //Make sure that this isn't in a callback or it causes navigation dropdown problems.
@@ -469,10 +471,6 @@ RequestViewCommonController = BaseViewController.extend( {
 		filter.filter_data.id = [selectedId];
 		this.api['get' + this.api.key_name]( filter, {
 			onResult: function( result ) {
-				if (clear_edit_view) {
-					//Clear the edit view without removing it.
-					$this.clearEditView();
-				}
 				var result_data = result.getResult();
 				if ( !result_data ) {
 					result_data = [];
@@ -564,6 +562,8 @@ RequestViewCommonController = BaseViewController.extend( {
 		this.initEditView();
 		//Clear last sent message body value.
 		this.edit_view_ui_dic.body.setValue('');
+		//ensure send button is available
+		this.setEditMenu();
 	},
 
 	buildViewUI: function() {

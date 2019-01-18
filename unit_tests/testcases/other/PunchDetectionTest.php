@@ -326,7 +326,7 @@ class PunchDetectionTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 
-		return FALSE;
+		return array(); //Return blank array to make count() not complain about FALSE.
 	}
 
 	function createMealPolicy( $company_id, $type ) {

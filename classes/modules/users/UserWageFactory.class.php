@@ -191,10 +191,7 @@ class UserWageFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -210,10 +207,7 @@ class UserWageFactory extends Factory {
 	 * @return bool
 	 */
 	function setWageGroup( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Wage Group ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'wage_group_id', $value );
 	}

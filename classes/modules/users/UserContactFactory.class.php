@@ -230,11 +230,7 @@ class UserContactFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -420,10 +416,7 @@ class UserContactFactory extends Factory {
 	 * @return bool
 	 */
 	function setEthnicGroup( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'ethnic_group_id', $value );
 	}
 

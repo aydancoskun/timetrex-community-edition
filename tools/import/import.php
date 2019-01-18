@@ -81,11 +81,22 @@ function Array2CSV( $data, $columns = NULL, $ignore_last_row = TRUE, $include_he
 	return FALSE;
 }
 
-function parseCSV($file, $head = FALSE, $first_column = FALSE, $delim="," , $len = 9216, $max_lines = NULL ) {
+function parseCSV( $file, $head = FALSE, $first_column = FALSE, $delim=',', $len = 9216, $max_lines = NULL ) {
 	if ( !file_exists($file) ) {
 		Debug::text('Files does not exist: '. $file, __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
+
+	//mime_content_type is being deprecated in PHP, and it doesn't work properly on Windows. So if its not available just accept any file type.
+	if ( function_exists('mime_content_type') ) {
+		$mime_type = mime_content_type($file);
+		if ( $mime_type !== FALSE AND !in_array( $mime_type, array('text/plain', 'plain/text', 'text/comma-separated-values', 'text/csv', 'application/csv', 'text/anytext', 'text/x-c') ) ) {
+			Debug::text('Invalid MIME TYPE: '. $mime_type, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+	}
+
+	ini_set('auto_detect_line_endings', TRUE); //PHP can have problems detecting MAC line endings in some case, this should help solve that.
 
 	$return = FALSE;
 	$handle = fopen($file, 'r');
@@ -93,7 +104,6 @@ function parseCSV($file, $head = FALSE, $first_column = FALSE, $delim="," , $len
 		if ( $first_column !== FALSE ) {
 			while ( ($header = fgetcsv($handle, $len, $delim) ) !== FALSE) {
 				if ( $header[0] == $first_column ) {
-					//echo "FOUND HEADER!<br>\n";
 					$found_header = TRUE;
 					break;
 				}
@@ -107,25 +117,35 @@ function parseCSV($file, $head = FALSE, $first_column = FALSE, $delim="," , $len
 		}
 	}
 
+	//Excel adds a Byte Order Mark (BOM) to the beginning of files with UTF-8 characters. That needs to be stripped off otherwise it looks like a space and columns don't match up.
+	if ( isset($header) AND isset($header[0]) ) {
+		$header[0] = str_replace( "\xEF\xBB\xBF", '', $header[0] );
+	}
+
 	$i = 1;
 	while ( ($data = fgetcsv($handle, $len, $delim) ) !== FALSE) {
-		if ( $head AND isset($header) ) {
-			foreach ($header as $key => $heading) {
-				$row[trim($heading)] = ( isset($data[$key]) ) ? $data[$key] : '';
+		if ( $data !== array( NULL ) ) { // Ignore blank lines
+			if ( $head == TRUE AND isset($header) ) {
+				$row = array();
+				foreach ( $header as $key => $heading ) {
+					$row[trim($heading)] = ( isset($data[$key]) ) ? $data[$key] : '';
+				}
+				$return[] = $row;
+			} else {
+				$return[] = $data;
 			}
-			$return[] = $row;
-		} else {
-			$return[] = $data;
-		}
 
-		if ( $max_lines !== NULL AND $max_lines != '' AND $i == $max_lines ) {
-			break;
-		}
+			if ( $max_lines !== NULL AND $max_lines != '' AND $i == $max_lines ) {
+				break;
+			}
 
-		$i++;
+			$i++;
+		}
 	}
 
 	fclose($handle);
+
+	ini_set('auto_detect_line_endings', FALSE);
 
 	return $return;
 }

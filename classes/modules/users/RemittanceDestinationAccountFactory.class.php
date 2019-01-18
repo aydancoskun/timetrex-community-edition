@@ -126,6 +126,8 @@ class RemittanceDestinationAccountFactory extends Factory {
 					'-1520-value3' => TTi18n::gettext('Account'),
 					'-1522-ach_transaction_type' => TTi18n::gettext('Account Type'),
 
+					'-1900-in_use' => TTi18n::gettext('In Use'),
+
 					'-2000-created_by' => TTi18n::gettext('Created By'),
 					'-2010-created_date' => TTi18n::gettext('Created Date'),
 					'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -197,6 +199,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 			'value9' => 'Value9',
 			'value10' => 'Value10',
 
+			'in_use' => FALSE,
 			'deleted' => 'Deleted',
 		);
 		return $variable_function_map;
@@ -228,10 +231,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setRemittanceSourceAccount( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'remittance_source_account_id', $value );
 	}
 
@@ -247,11 +247,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = trim($value);
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -278,10 +274,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function setCurrency( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Currency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'currency_id', $value );
 	}
@@ -543,7 +536,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 	}
 
 	/**
-	 * VALUE 3 is the account number. It must be stored encrypted.
+	 * VALUE 3 is the account number. It needs to be encrypted.
 	 * @param $value
 	 * @return bool
 	 */
@@ -554,13 +547,20 @@ class RemittanceDestinationAccountFactory extends Factory {
 		if ( stripos( $value, 'X') !== FALSE OR stripos( $value, ':') !== FALSE ) {
 			return FALSE;
 		}
+
 		$value = trim($value);
-		$encrypted_value = Misc::encrypt($value);
-		if ( $encrypted_value === FALSE ) {
-			return FALSE;
+		if ( $value != '' ) { //Make sure we can clear out the value if needed. Misc::encypt() will return FALSE on a blank value.
+			$encrypted_value = Misc::encrypt( $value );
+			if ( $encrypted_value === FALSE ) {
+				return FALSE;
+			}
+		} else {
+			$encrypted_value = $value;
 		}
+
 		return $this->setGenericDataValue( 'value3', $encrypted_value );
 	}
+
 
 	/**
 	 * @return bool
@@ -693,6 +693,78 @@ class RemittanceDestinationAccountFactory extends Factory {
 	 */
 	function setEnableBlankRemittanceSourceAccount( $bool) {
 		$this->enable_blank_remittance_source_account = $bool;
+		return TRUE;
+	}
+
+	/**
+	 * Migrates RemittanceDestinationAccount as best as it possibly can for an employee when switching legal entities.
+	 * @param $user_obj object
+	 * @param $data_diff array
+	 */
+	static function MigrateLegalEntity( $user_obj, $data_diff ) {
+		//Get all RemittanceSourceAccounts assign to the new legal entity so we can quickly loop over them.
+		$rsalf = TTnew('RemittanceSourceAccountListFactory');
+		$rsalf->StartTransaction();
+		$rsalf->getByCompanyId( $user_obj->getCompany() );
+
+
+		$rdalf = TTnew('RemittanceDestinationAccountListFactory');
+		$rdalf->getByUserIdAndCompany( $user_obj->getId(), $user_obj->getCompany() );
+		if ( $rdalf->getRecordCount() > 0 ) {
+			Debug::text('Legal Entity changed. Trying to match all RemittanceDestiationAccount data to new entity for user: '. $user_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+			foreach( $rdalf as $rda_obj ) {
+				if ( $rda_obj->getStatus() != 10 ) { //Skip disabled accounts.
+					Debug::text('  Skipping due to disabled RDA: '. $rda_obj->getName() .'('. $rda_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+					continue;
+				}
+
+				if ( is_object( $rda_obj->getRemittanceSourceAccountObject() ) AND $rda_obj->getRemittanceSourceAccountObject()->getLegalEntity() == TTUUID::getNotExistID() ) {
+					Debug::text('  Skipping due to source account assigned to ANY legal entity, no need to make a change: '. $rda_obj->getName() .'('. $rda_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+					continue;
+				}
+
+				$matched_remittance_source_account_id = array();
+
+				if ( $rsalf->getRecordCount() > 0 ) {
+					foreach( $rsalf as $rsa_obj ) {
+						if ( ( $rsa_obj->getLegalEntity() == $user_obj->getLegalEntity() OR $rsa_obj->getLegalEntity() == TTUUID::getNotExistID() )
+								AND $rda_obj->getType() == $rsa_obj->getType() ) {
+							Debug::text('  Match Found! Remittance Source Account: '. $rsa_obj->getName() .'('. $rsa_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+							$matched_remittance_source_account_id[] = $rsa_obj->getId();
+						} else {
+							Debug::text('  NOT a Match... Remittance Source Account: '. $rsa_obj->getName() .'('. $rsa_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+						}
+					}
+				}
+
+				if ( count( $matched_remittance_source_account_id ) == 1 ) {
+					//Create new RDA record because if the old one is assigned to any transactions it will fail anyways.
+					$tmp_rda_obj = clone $rda_obj;
+					$tmp_rda_obj->setId( FALSE );
+					$tmp_rda_obj->setName( Misc::generateCopyName( $tmp_rda_obj->getName() ) );
+					$tmp_rda_obj->setRemittanceSourceAccount( $matched_remittance_source_account_id[0] );
+					if ( $tmp_rda_obj->isValid() ) {
+						$tmp_rda_obj->Save();
+					}
+					unset($tmp_rda_obj);
+				} else {
+					Debug::text('  No Match Found ('. count( $matched_remittance_source_account_id ) .')! Disabling RemittanceDestinationAccount: '. $rda_obj->getName() .'('. $rda_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+				}
+
+				//Always disable the old RDA, as a new one is created above if necessary.
+				$rda_obj->setStatus( 20 ); //Disabled
+				if ( $rda_obj->isValid() ) {
+					$rda_obj->Save();
+				} else {
+					Debug::text('  ERROR! Validation failed when reassigning RemittanceDestination records: '. $rda_obj->getName() .'('. $rda_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			}
+		}
+
+		$rsalf->CommitTransaction();
+
+		unset($rsalf, $rdalf, $rda_obj, $rsa_obj );
+
 		return TRUE;
 	}
 
@@ -960,78 +1032,91 @@ class RemittanceDestinationAccountFactory extends Factory {
 		}
 
 		if ( $this->Validator->getValidateOnly() == FALSE ) { //Make sure we can mass edit type/source account, so validating these has to be delayed.
-			if ( $this->getType() == 2000 ) {
-				/**
-				 * Currently hiding these options from the UI because we aren't printing MICR codes yet so we don't want to validate them.
-				 */
+			if ( $this->getStatus() == 10 ) { //10=Enabled - Only validate when status is enabled, so records that are invalid but used in the past can always be disabled.
+				if ( $this->getType() == 2000 ) {
+					/**
+					 * Currently hiding these options from the UI because we aren't printing MICR codes yet so we don't want to validate them.
+					 */
 
-				//			if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-				//				$this->Validator->isTrue(		'value2',
-				//												FALSE,
-				//												TTi18n::gettext('Invalid routing number length'));
-				//			} else {
-				//				$this->Validator->isNumeric(	'value2',
-				//												$this->getValue2(),
-				//												TTi18n::gettext('Invalid routing number, must be digits only'));
-				//			}
-				//			if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-				//				$this->Validator->isTrue(		'value3',
-				//												FALSE,
-				//												TTi18n::gettext('Invalid account number length'));
-				//			} else {
-				//				$this->Validator->isNumeric(	'value3',
-				//												$this->getValue3(),
-				//												TTi18n::gettext('Invalid account number, must be digits only'));
-				//			}
-			} else {
-				if ( $this->getType() == 3000 AND $country == 'US' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
-					// value2
-					if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-						$this->Validator->isTrue( 'value2',
-												  FALSE,
-												  TTi18n::gettext( 'Invalid routing number length' ) );
-					} else {
-						$this->Validator->isNumeric( 'value2',
-													 $this->getValue2(),
-													 TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
-					}
+					//			if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
+					//				$this->Validator->isTrue(		'value2',
+					//												FALSE,
+					//												TTi18n::gettext('Invalid routing number length'));
+					//			} else {
+					//				$this->Validator->isNumeric(	'value2',
+					//												$this->getValue2(),
+					//												TTi18n::gettext('Invalid routing number, must be digits only'));
+					//			}
+					//			if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
+					//				$this->Validator->isTrue(		'value3',
+					//												FALSE,
+					//												TTi18n::gettext('Invalid account number length'));
+					//			} else {
+					//				$this->Validator->isNumeric(	'value3',
+					//												$this->getValue3(),
+					//												TTi18n::gettext('Invalid account number, must be digits only'));
+					//			}
+				} else {
+					if ( $this->getType() == 3000 AND $country == 'US' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
+						// value2
+						if ( strlen( $this->getValue2() ) != 9 ) {
+							$this->Validator->isTrue( 'value2',
+													  FALSE,
+													  TTi18n::gettext( 'Invalid routing number length' ) );
+						} else {
+							$this->Validator->isNumeric( 'value2',
+														 $this->getValue2(),
+														 TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
+						}
 
-					if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-						$this->Validator->isTrue( 'value3',
-												  FALSE,
-												  TTi18n::gettext( 'Invalid account number length' ) );
-					} else {
-						$this->Validator->isNumeric( 'value3',
-													 $this->getValue3(),
-													 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
-					}
-				} elseif ( $this->getType() == 3000 AND $country == 'CA' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
-					if ( strlen( $this->getValue1() ) < 2 OR strlen( $this->getValue1() ) > 3 ) {
-						$this->Validator->isTrue( 'value1',
-												  FALSE,
-												  TTi18n::gettext( 'Invalid institution number length' ) );
-					}
-					if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-						$this->Validator->isTrue( 'value2',
-												  FALSE,
-												  TTi18n::gettext( 'Invalid transit number length' ) );
-					} else {
-						$this->Validator->isNumeric( 'value2',
-													 $this->getValue2(),
-													 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
-					}
-					if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-						$this->Validator->isTrue( 'value3',
-												  FALSE,
-												  TTi18n::gettext( 'Invalid account number length' ) );
-					} else {
-						$this->Validator->isNumeric( 'value3',
-													 $this->getValue3(),
-													 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+						if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 17 ) {
+							$this->Validator->isTrue( 'value3',
+													  FALSE,
+													  TTi18n::gettext( 'Invalid account number length' ) );
+						} else {
+							$this->Validator->isNumeric( 'value3',
+														 $this->getValue3(),
+														 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+						}
+					} elseif ( $this->getType() == 3000 AND $country == 'CA' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
+						if ( strlen( $this->getValue1() ) != 3 ) {
+							$this->Validator->isTrue( 'value1',
+													  FALSE,
+													  TTi18n::gettext( 'Invalid institution number length' ) );
+						}
+						if ( strlen( $this->getValue2() ) != 5 ) {
+							$this->Validator->isTrue( 'value2',
+													  FALSE,
+													  TTi18n::gettext( 'Invalid transit number length' ) );
+						} else {
+							$this->Validator->isNumeric( 'value2',
+														 $this->getValue2(),
+														 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
+						}
+						if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 12 ) {
+							$this->Validator->isTrue( 'value3',
+													  FALSE,
+													  TTi18n::gettext( 'Invalid account number length' ) );
+						} else {
+							$this->Validator->isNumeric( 'value3',
+														 $this->getValue3(),
+														 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+						}
 					}
 				}
 			}
 		}
+
+		//Make sure the name does not contain the account number for security reasons.
+		$this->Validator->isTrue(		'name',
+										( ( stripos( $this->getName(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
+										TTi18n::gettext('Account number must not be a part of the Name') );
+
+		//Make sure the description does not contain the account number for security reasons.
+		$this->Validator->isTrue(		'description',
+										( ( stripos( $this->getDescription(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
+										TTi18n::gettext('Account number must not be a part of the Description') );
+
 
 		$pstlf = TTnew( 'PayStubTransactionListFactory' );
 		$pstlf->getByRemittanceDestinationAccountId($this->getId());
@@ -1141,6 +1226,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 					$function = 'get'.$function_stub;
 					switch( $variable ) {
+						case 'in_use':
 						case 'user_first_name':
 						case 'user_last_name':
 						case 'remittance_source_account':

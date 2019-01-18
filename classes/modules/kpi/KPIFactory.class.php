@@ -112,11 +112,7 @@ class KPIFactory extends Factory
 	 */
 	function setCompany( $value ) {
 
-		$value = trim( $value );
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text( 'Company ID: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 
 		Debug::Text( 'Setting company_id data...	   ' . $value, __FILE__, __LINE__, __METHOD__, 10 );

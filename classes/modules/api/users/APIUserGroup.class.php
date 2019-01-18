@@ -134,7 +134,7 @@ class APIUserGroup extends APIFactory {
 		} else {
 			$nodes = $uglf->getByCompanyIdArray( $company_id );
 			//Debug::Arr($nodes, ' Nodes: ', __FILE__, __LINE__, __METHOD__, 10);
-			Debug::Text('Record Count: '. count($nodes), __FILE__, __LINE__, __METHOD__, 10);
+			//Debug::Text('Record Count: '. count($nodes), __FILE__, __LINE__, __METHOD__, 10);
 			if ( isset($nodes) ) {
 				$retarr = TTTree::FormatArray( $nodes );
 				//Debug::Arr($retarr, ' Data: ', __FILE__, __LINE__, __METHOD__, 10);

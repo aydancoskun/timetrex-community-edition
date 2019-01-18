@@ -476,7 +476,7 @@ class InstallSchema_1093A extends InstallSchema_Base {
 					}
 					unset( $pclf, $pc_obj, $permission_control_user_ids );
 
-					//Create default remittenance agencies.
+					//Create default remittance agencies.
 					$sp = TTNew( 'SetupPresets' );
 					$sp->setCompany( $cf->getID() );
 					$sp->setUser( $admin_user_id );

@@ -213,10 +213,10 @@ class StationFactory extends Factory {
 												1		=> TTi18n::gettext('-- Default --'),
 												2		=> TTi18n::gettext('Punch Mode: Quick Punch'),
 												4		=> TTi18n::gettext('Punch Mode: QRCode'),
-												8		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'),
+												//8		=> TTi18n::gettext('Punch Mode: QRCode+Face Detection'), //Disabled in v4.0 of app, to simplify things.
 												16		=> TTi18n::gettext('Punch Mode: Facial Recognition'),
-												32		=> TTi18n::gettext('Punch Mode: Facial Recognition+QRCode'),
-												//64		=> TTi18n::gettext('Punch Mode: Facial Recognition+Quick Punch'),
+												//32		=> TTi18n::gettext('Punch Mode: Facial Recognition+QRCode'),  //Disabled in v4.0 of app, to simplify things.
+												//64		=> TTi18n::gettext('Punch Mode: Quick Punch+Facial Recognition'),
 												//128
 												//256
 												//512
@@ -269,6 +269,37 @@ class StationFactory extends Factory {
 							$retval[$parent][1024] = TTi18n::gettext('Enable: Bad Quantity');
 						}
 
+						break;
+				}
+
+				ksort($retval[$parent]);
+
+				//Handle cases where parent isn't defined properly.
+				if ( $parent == 0 ) {
+					$retval = $retval[$parent];
+				}
+				break;
+			case 'default_mode_flag':
+				Debug::Text('Mode Flag Type ID: '. $parent, __FILE__, __LINE__, __METHOD__, 10);
+				if ( $parent == '' ) {
+					$parent = 0;
+				}
+				switch ( (int)$parent ) { //Params should be the station type_id.
+					case 28: //Mobile App
+						$retval[$parent] = array();
+						break;
+					//case 61: //PC Station in KIOSK mode.
+					case 65: //Mobile App in KIOSK mode.
+						$retval[$parent] = array(
+								2		=> TTi18n::gettext('Punch Mode: Quick Punch'),
+								4		=> TTi18n::gettext('Punch Mode: QRCode'),
+								16		=> TTi18n::gettext('Punch Mode: Facial Recognition'),
+						);
+						break;
+					case 100: //TimeClock
+					case 150: //TimeClock
+					default:
+						$retval[$parent] = array();
 						break;
 				}
 
@@ -365,6 +396,7 @@ class StationFactory extends Factory {
 										'partial_push_frequency' => 'PartialPushFrequency',
 										'enable_auto_punch_status' => 'EnableAutoPunchStatus',
 										'mode_flag' => 'ModeFlag',
+										'default_mode_flag' => 'DefaultModeFlag',
 										'work_code_definition' => 'WorkCodeDefinition',
 										'last_punch_time_stamp' => 'LastPunchTimeStamp',
 										'last_poll_date' => 'LastPollDate',
@@ -403,11 +435,7 @@ class StationFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -539,10 +567,7 @@ class StationFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultBranch( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'branch_id', $value );
 	}
 
@@ -558,10 +583,7 @@ class StationFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultDepartment( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'department_id', $value );
 	}
 
@@ -577,10 +599,7 @@ class StationFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultJob( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Default Job ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
@@ -600,10 +619,7 @@ class StationFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultJobItem( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Default Job Item ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
@@ -1209,6 +1225,23 @@ class StationFactory extends Factory {
 	function setModeFlag( $arr) {
 		$value = Option::getBitMaskByArray( $arr, $this->getOptions('mode_flag', $this->getType() ) );
 		return $this->setGenericDataValue( 'mode_flag', $value );
+	}
+
+	/**
+	 * @return bool|int
+	 */
+	function getDefaultModeFlag() {
+		return $this->getGenericDataValue( 'default_mode_flag' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDefaultModeFlag( $value) {
+		$value = (int)$value;
+
+		return $this->setGenericDataValue( 'default_mode_flag', $value );
 	}
 
 	/**
@@ -1962,7 +1995,8 @@ class StationFactory extends Factory {
 					$sf->setBranchSelectionType( 10 ); //All allowed
 					$sf->setDepartmentSelectionType( 10 ); //All allowed
 
-					$sf->setModeFlag( array( 16, 4096, 8192 ) ); //Default Facial Recognition, Capture Images in KIOSK mode, Disable Screensaver.
+					$sf->setModeFlag( array( 2, 4, 16, 4096, 8192 ) ); //By default enable all punch modes, Capture Images in KIOSK mode, Disable Screensaver.
+					$sf->setDefaultModeFlag( 4 ); //Facial Recognition.
 
 					if ( is_object( $sf->getCompanyObject() ) AND is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {
 						$sf->setTimeZone( $sf->getCompanyObject()->getUserDefaultObject()->getTimeZone() );
@@ -2204,6 +2238,14 @@ class StationFactory extends Factory {
 				TTi18n::gettext( 'Incorrect Mode' )
 			);
 		}
+		if ( $this->getDefaultModeFlag() != '' ) {
+			// Default Mode
+			$this->Validator->isNumeric( 'default_mode_flag',
+										 $this->getDefaultModeFlag(),
+										 TTi18n::gettext( 'Incorrect Default Punch Mode' )
+			);
+		}
+
 		if ( $this->getLastPunchTimeStamp() != '' ) {
 			// last punch date
 			$this->Validator->isDate( 'last_punch_time_stamp',

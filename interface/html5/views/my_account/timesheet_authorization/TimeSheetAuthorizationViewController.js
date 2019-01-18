@@ -401,7 +401,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 					this.setDefaultMenuViewIcon( context_btn, grid_selected_length, 'schedule' );
 					break;
 				case ContextMenuIconName.edit_employee:
-					this.setDefaultMenuEditIcon( context_btn, grid_selected_length, 'user' );
+					this.setDefaultMenuViewIcon( context_btn, grid_selected_length, 'user' );
 					break;
 				case ContextMenuIconName.authorization_expense:
 					this.setDefaultMenuAuthorizationExpenseIcon( context_btn, grid_selected_length );
@@ -1011,12 +1011,6 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 				form_item_type: FormItemType.AWESOME_BOX
 			} )
 		];
-	},
-
-	openEditView: function() {
-
-		this.initEditViewUI( this.viewId, this.edit_view_tpl );
-
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {

@@ -56,10 +56,7 @@ class StationExcludeUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setStation( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'station_id', $value );
 	}
 
@@ -93,11 +90,7 @@ class StationExcludeUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setExcludeUser( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 	function Validate() {

@@ -172,10 +172,7 @@ class CompanyGenericMapFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -223,10 +220,7 @@ class CompanyGenericMapFactory extends Factory {
 	 * @return bool
 	 */
 	function setMapID( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'map_id', $value );
 	}
 

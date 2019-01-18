@@ -131,116 +131,177 @@ function runUnitTests() {
 		assert.ok(Global.MoneyRound(0.001, 2) == '0.00', 'Global.MoneyRound(0.001, 2) == 0.00 -- Passed!');
     });
 
-	QUnit.test("TTPromise Case 1: wait(category) on a single promise", function (assert) {
-        var done = assert.async();
 
-        TTPromise.clearAllPromises();
-        assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj length = 0.');
-        assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+	QUnit.test("Global.js sort-prefix", function (assert) {
+		var res = Global.removeSortPrefix('-1234-11111111-1111-1111-1111-111111111111')
+		assert.ok( res == '11111111-1111-1111-1111-111111111111' , 'stripped from synth uuid a.');
 
-        TTPromise.add('test','test1');
-        assert.ok( typeof(TTPromise.promises['test']) == 'object' , "TTPromise.promises['test'] exists.");
-        assert.ok( Object.keys(TTPromise.promises['test']).length == 1 , 'promises object length = 1.');
-        assert.ok( TTPromise.filterPromiseArray('test').length == 1, 'TTPromise.filterPromiseArray(test).length == 1');
+		var res = Global.removeSortPrefix('11111111-1111-1111-1111-111111111111')
+		assert.ok( res == '11111111-1111-1111-1111-111111111111' , 'stripped from synth uuid no sort-prefix.');
 
-        TTPromise.wait('test',null, function(){
-            //will be run on resolve()
-            assert.ok(1 == "1", "TEST Promise test resolved.");
-            assert.ok( typeof (TTPromise.promises['test']) == "undefined" , 'promises[test] is null.');
-            assert.ok( TTPromise.filterPromiseArray('test').length == 0, 'filterPromiseArray(test).length == 0.');
-            assert.ok( TTPromise.filterPromiseArray('test', 'test1') == false , 'filterPromiseArray("test","test1") length = 0.');
-            done();
-        });
+		var res = Global.removeSortPrefix('-1234-111')
+		assert.ok( res == '111' , 'stripped from int a.');
 
-        assert.ok( typeof (TTPromise.promises['test']['test1'])  == 'object', 'promises object length = 1.');
-        TTPromise.resolve('test','test1');
+		var res = Global.removeSortPrefix('111')
+		assert.ok( res == '111' , 'stripped from int with no sort-prefix.');
+
+		var res = Global.removeSortPrefix('-1234-testStringGalrblyBlah')
+		assert.ok( res == 'testStringGalrblyBlah' , 'stripped from string a.');
+
+		var res = Global.removeSortPrefix('testStringGalrblyBlah')
+		assert.ok( res == 'testStringGalrblyBlah' , 'stripped from string with no sort-prefix.');
+
+
+		var res = Global.removeSortPrefixFromArray({'-1112-testStringGalrblyBlah':'string', '-1113-1234':'int', '-1234-11111111-1111-1111-1111-111111111111':'uuid' });
+		var cnt = 0;
+
+		assert.ok( res['testStringGalrblyBlah'] == 'string' , 'prefix stripped properly');
+		assert.ok( res['1234'] == 'int' , 'prefix stripped properly');
+		assert.ok( res['11111111-1111-1111-1111-111111111111'] == 'uuid' , 'prefix stripped properly');
 	});
 
-    QUnit.test("TTPromise Case 2: wait('one_of_many_categories').", function (assert) {
-        var done = assert.async();
-        TTPromise.clearAllPromises();
+	var uuids = [];
+	QUnit.test( "uuuid TIGHTLOOP(default logged in user seed)", function (assert) {
+		var max = 3000;
+		for ( var i = 0; i< max; i++ ){
+			uuids.push ( TTUUID.generateUUID() );
+		}
+		assert.ok(  hasDuplicates(uuids) == false , 'has duplicates');
+		for ( var i = 0; i< max; i++ ){
+			assert.ok( TTUUID.isUUID( uuids[i] ), 'is UUID');
+		}
+	});
 
-        assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj empty.');
-        assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+	uuids = [];
+	QUnit.test( "uuuid TIGHTLOOP (random seed)", function (assert) {
+		var user_id = LocalCacheData.loginUser.id;
+		LocalCacheData.loginUser.id = null;
+		var max = 3000;
+		for ( var i = 0; i< max; i++ ){
+			uuids.push ( TTUUID.generateUUID() );
+		}
+		assert.ok(  hasDuplicates(uuids) == false , 'has duplicates');
+		for ( var i = 0; i< max; i++ ){
+			assert.ok( TTUUID.isUUID( uuids[i] ), 'is UUID');
+		}
+		LocalCacheData.loginUser.id = user_id;
+	});
 
-        TTPromise.add('testa','test1');
-        //debugger
-        assert.ok( TTPromise.filterPromiseArray('testa').length == 1, 'filterPromiseArray(testa).length == 1.');
-        assert.ok( TTPromise.filterPromiseArray('testa', 'test1').length == 1, 'filterPromiseArray("testa","test1") length = 1.');
+	/**
+	 *
+	 * ASYNCHRONOUS TESTS GO AT THE BOTTOM
+	 *
+	 */
 
-        TTPromise.add('testa','test2');
-        assert.ok( TTPromise.filterPromiseArray('testa').length == 2, 'filterPromiseArray(testa).length == 2.');
-        assert.ok( TTPromise.filterPromiseArray('testa', 'test2').length == 1, 'filterPromiseArray("testa","test1") length = 1.');
+	QUnit.test("TTPromise Case 1: wait(category) on a single promise", function (assert) {
+		var done = assert.async();
 
-        TTPromise.add('testb','test1b');
-        assert.ok( TTPromise.filterPromiseArray('testb').length == 1, 'filterPromiseArray(testb).length == 2.');
-        assert.ok( TTPromise.filterPromiseArray('testb', 'test1b').length == 1, 'filterPromiseArray("testb","test1b") length = 1.');
+		TTPromise.clearAllPromises();
+		assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj length = 0.');
+		assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
 
-        TTPromise.add('testb','test2b');
-        assert.ok( TTPromise.filterPromiseArray('testb').length ==2, 'filterPromiseArray(testb).length == 2.');
-        assert.ok( TTPromise.filterPromiseArray('testb', 'test1b').length == 1, 'filterPromiseArray("testb","test1b") length = 1.');
+		TTPromise.add('test','test1');
+		assert.ok( typeof(TTPromise.promises['test']) == 'object' , "TTPromise.promises['test'] exists.");
+		assert.ok( Object.keys(TTPromise.promises['test']).length == 1 , 'promises object length = 1.');
+		assert.ok( TTPromise.filterPromiseArray('test').length == 1, 'TTPromise.filterPromiseArray(test).length == 1');
+
+		TTPromise.wait('test',null, function(){
+			//will be run on resolve()
+			assert.ok(1 == "1", "TEST Promise test resolved.");
+			assert.ok( typeof (TTPromise.promises['test']) == "undefined" , 'promises[test] is null.');
+			assert.ok( TTPromise.filterPromiseArray('test').length == 0, 'filterPromiseArray(test).length == 0.');
+			assert.ok( TTPromise.filterPromiseArray('test', 'test1') == false , 'filterPromiseArray("test","test1") length = 0.');
+			done();
+		});
+
+		assert.ok( typeof (TTPromise.promises['test']['test1'])  == 'object', 'promises object length = 1.');
+		TTPromise.resolve('test','test1');
+	});
+
+	QUnit.test("TTPromise Case 2: wait('one_of_many_categories').", function (assert) {
+		var done = assert.async();
+		TTPromise.clearAllPromises();
+
+		assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj empty.');
+		assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+
+		TTPromise.add('testa','test1');
+		assert.ok( TTPromise.filterPromiseArray('testa').length == 1, 'filterPromiseArray(testa).length == 1.');
+		assert.ok( TTPromise.filterPromiseArray('testa', 'test1').length == 1, 'filterPromiseArray("testa","test1") length = 1.');
+
+		TTPromise.add('testa','test2');
+		assert.ok( TTPromise.filterPromiseArray('testa').length == 2, 'filterPromiseArray(testa).length == 2.');
+		assert.ok( TTPromise.filterPromiseArray('testa', 'test2').length == 1, 'filterPromiseArray("testa","test1") length = 1.');
+
+		TTPromise.add('testb','test1b');
+		assert.ok( TTPromise.filterPromiseArray('testb').length == 1, 'filterPromiseArray(testb).length == 2.');
+		assert.ok( TTPromise.filterPromiseArray('testb', 'test1b').length == 1, 'filterPromiseArray("testb","test1b") length = 1.');
+
+		TTPromise.add('testb','test2b');
+		assert.ok( TTPromise.filterPromiseArray('testb').length ==2, 'filterPromiseArray(testb).length == 2.');
+		assert.ok( TTPromise.filterPromiseArray('testb', 'test1b').length == 1, 'filterPromiseArray("testb","test1b") length = 1.');
 
 
-        TTPromise.wait('testa',null, function(){
-            //Debug.Arr(TTPromise,'Case2 TTPromise',null,null,null,10);
-            assert.ok(1 == "1", "TEST Promise testa resolved.");
-            //will be run on resolve()
-            assert.ok( typeof (TTPromise.promises['testa']) == "undefined" , 'promises[testa] is null.');
-            assert.ok( typeof (TTPromise.promises['testb']) == "object" , 'promises[testb] is not null.');
-            assert.ok( TTPromise.filterPromiseArray('testb').length == 2, 'filterPromiseArray(testb).length == '+TTPromise.filterPromiseArray('testb').length);
-            assert.ok( TTPromise.filterPromiseArray('testa', 'test1').length == 0, 'filterPromiseArray("testb","test1b") length = '+TTPromise.filterPromiseArray('testa', 'test1').length);
-            assert.ok( TTPromise.filterPromiseArray('testa', 'test2').length == 0, 'filterPromiseArray("testb","test1b") length = '+TTPromise.filterPromiseArray('testa', 'test2').length);
-            done();
-        });
+		TTPromise.wait('testa',null, function(){
+			//Debug.Arr(TTPromise,'Case2 TTPromise',null,null,null,10);
+			assert.ok(1 == "1", "TEST Promise testa resolved.");
+			//will be run on resolve()
+			assert.ok( typeof (TTPromise.promises['testa']) == "undefined" , 'promises[testa] is null.');
+			assert.ok( typeof (TTPromise.promises['testb']) == "object" , 'promises[testb] is not null.');
+			assert.ok( TTPromise.filterPromiseArray('testb').length == 2, 'filterPromiseArray(testb).length == '+TTPromise.filterPromiseArray('testb').length);
+			assert.ok( TTPromise.filterPromiseArray('testa', 'test1').length == 0, 'filterPromiseArray("testb","test1b") length = '+TTPromise.filterPromiseArray('testa', 'test1').length);
+			assert.ok( TTPromise.filterPromiseArray('testa', 'test2').length == 0, 'filterPromiseArray("testb","test1b") length = '+TTPromise.filterPromiseArray('testa', 'test2').length);
+			done();
+		});
 
-        TTPromise.resolve('testb','test1b');
-        TTPromise.resolve('testa','test1');
-        TTPromise.resolve('testa','test2');
-    });
+		TTPromise.resolve('testb','test1b');
+		TTPromise.resolve('testa','test1');
+		TTPromise.resolve('testa','test2');
+	});
 
-    QUnit.test("TTPromise Case 3: wait(null, null, callback) all cateogries.", function (assert) {
-        var done = assert.async();
+	QUnit.test("TTPromise Case 3: wait(null, null, callback) all cateogries.", function (assert) {
+		var done = assert.async();
 
-        TTPromise.clearAllPromises();
-        assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj empty.');
-        assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+		TTPromise.clearAllPromises();
+		assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj empty.');
+		assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
 
-        TTPromise.add('testc','test1');
-        assert.ok( TTPromise.filterPromiseArray('testc','test1').length == 1, 'TTPromise.filterPromiseArray(testc,test1).length == 1,.');
-        assert.ok( TTPromise.filterPromiseArray('testc').length == 1, 'TTPromise.filterPromiseArray(testc).length == 1,.');
+		TTPromise.add('testc','test1');
+		assert.ok( TTPromise.filterPromiseArray('testc','test1').length == 1, 'TTPromise.filterPromiseArray(testc,test1).length == 1,.');
+		assert.ok( TTPromise.filterPromiseArray('testc').length == 1, 'TTPromise.filterPromiseArray(testc).length == 1,.');
 
-        TTPromise.add('testc','test2');
-        assert.ok( TTPromise.filterPromiseArray('testc','test2').length == 1, 'TTPromise.filterPromiseArray(testc,test1).length == 1,.');
-        assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
+		TTPromise.add('testc','test2');
+		assert.ok( TTPromise.filterPromiseArray('testc','test2').length == 1, 'TTPromise.filterPromiseArray(testc,test1).length == 1,.');
+		assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
 
-        TTPromise.add('testd','test1b');
-        assert.ok( TTPromise.filterPromiseArray('testd','test1b').length == 1, 'TTPromise.filterPromiseArray(testd,test1b).length == 1,.');
-        assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
-        assert.ok( TTPromise.filterPromiseArray('testd').length == 1, 'TTPromise.filterPromiseArray(testd).length == 1,.');
+		TTPromise.add('testd','test1b');
+		assert.ok( TTPromise.filterPromiseArray('testd','test1b').length == 1, 'TTPromise.filterPromiseArray(testd,test1b).length == 1,.');
+		assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
+		assert.ok( TTPromise.filterPromiseArray('testd').length == 1, 'TTPromise.filterPromiseArray(testd).length == 1,.');
 
-        TTPromise.add('testd','test2b');
-        assert.ok( TTPromise.filterPromiseArray('testd','test2b').length == 1, 'TTPromise.filterPromiseArray(testd,test2b).length == 1,.');
-        assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
-        assert.ok( TTPromise.filterPromiseArray('testd').length == 2, 'TTPromise.filterPromiseArray(testd).length == 2,.');
+		TTPromise.add('testd','test2b');
+		assert.ok( TTPromise.filterPromiseArray('testd','test2b').length == 1, 'TTPromise.filterPromiseArray(testd,test2b).length == 1,.');
+		assert.ok( TTPromise.filterPromiseArray('testc').length == 2, 'TTPromise.filterPromiseArray(testc).length == 2,.');
+		assert.ok( TTPromise.filterPromiseArray('testd').length == 2, 'TTPromise.filterPromiseArray(testd).length == 2,.');
 
-        TTPromise.wait(null, null, function(){
-            //will be run on resolve()
-            assert.ok( typeof (TTPromise.promises['testc']) == "undefined", 'promises[testc] is null.');
-            assert.ok( typeof (TTPromise.promises['testd']) == "undefined", 'promises[testd] is  null.');
-            assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
-            assert.ok( TTPromise.filterPromiseArray('testc').length == 0, 'TTPromise.filterPromiseArray(testc).length == 0,.');
-            assert.ok( TTPromise.filterPromiseArray('testd').length == 0, 'TTPromise.filterPromiseArray(testd).length == 0,.');
-            done();
-        });
+		TTPromise.wait(null, null, function(){
+			//will be run on resolve()
+			assert.ok( typeof (TTPromise.promises['testc']) == "undefined", 'promises[testc] is null.');
+			assert.ok( typeof (TTPromise.promises['testd']) == "undefined", 'promises[testd] is  null.');
+			assert.ok( typeof(TTPromise.promises) == 'object' , "TTPromise.promises exists.");
+			assert.ok( TTPromise.filterPromiseArray('testc').length == 0, 'TTPromise.filterPromiseArray(testc).length == 0,.');
+			assert.ok( TTPromise.filterPromiseArray('testd').length == 0, 'TTPromise.filterPromiseArray(testd).length == 0,.');
+			done();
+		});
 
-        assert.ok( TTPromise.filterPromiseArray().length == 4 , 'TTPromise.filterPromiseArray().length == 4');
+		assert.ok( TTPromise.filterPromiseArray().length == 4 , 'TTPromise.filterPromiseArray().length == 4');
 
-        TTPromise.resolve('testd','test1b');
-        TTPromise.resolve('testd','test2b');
-        TTPromise.resolve('testc','test1');
-        TTPromise.resolve('testc','test2');
+		TTPromise.resolve('testd','test1b');
+		TTPromise.resolve('testd','test2b');
+		TTPromise.resolve('testc','test1');
+		TTPromise.resolve('testc','test2');
 
-    });
+	});
 
 	QUnit.test("TTPromise Case 4: wait(category, key) on a single promise", function (assert) {
 		var done = assert.async();
@@ -269,7 +330,7 @@ function runUnitTests() {
 
 	QUnit.test("TTPromise Case w: wait(category, key,function) vs wait(null,null,function)", function (assert) {
 		var done = assert.async();
-        var group_promise_test = 0;
+		var group_promise_test = 0;
 
 		TTPromise.clearAllPromises();
 		assert.ok( Object.keys(TTPromise.promises).length == 0 , 'Callback: promises obj length = 0.');
@@ -282,7 +343,7 @@ function runUnitTests() {
 
 		TTPromise.wait('groupone','one', function(){
 			//will be run on resolve()
-            Debug.Text('SINGLE PROMISE test resolved second.','','','',10);
+			Debug.Text('SINGLE PROMISE test resolved second.','','','',10);
 			assert.ok( group_promise_test == "1", "SINGLE PROMISE test resolved second.");
 			group_promise_test = 2;
 			done();
@@ -296,7 +357,7 @@ function runUnitTests() {
 			assert.ok(group_promise_test == "0", "ALL PROMISE test resolved first.");
 			group_promise_test = 1;
 			Debug.Text('ALL PROMISE test resolved first.','','','',10);
-        })
+		})
 
 		TTPromise.resolve('grouptwo','one');
 		TTPromise.resolve('grouptwo','two');
@@ -306,43 +367,19 @@ function runUnitTests() {
 
 		TTPromise.resolve('Reports','LoadReports');
 	});
+}
 
-
-	QUnit.test("Global.js sort-prefix", function (assert) {
-		var res = Global.removeSortPrefix('-1234-11111111-1111-1111-1111-111111111111')
-		assert.ok( res == '11111111-1111-1111-1111-111111111111' , 'stripped from synth uuid a.');
-
-		var res = Global.removeSortPrefix('11111111-1111-1111-1111-111111111111')
-		assert.ok( res == '11111111-1111-1111-1111-111111111111' , 'stripped from synth uuid no sort-prefix.');
-
-		var res = Global.removeSortPrefix('-1234-111')
-		assert.ok( res == '111' , 'stripped from int a.');
-
-		var res = Global.removeSortPrefix('111')
-		assert.ok( res == '111' , 'stripped from int with no sort-prefix.');
-
-		var res = Global.removeSortPrefix('-1234-testStringGalrblyBlah')
-		assert.ok( res == 'testStringGalrblyBlah' , 'stripped from string a.');
-
-		var res = Global.removeSortPrefix('testStringGalrblyBlah')
-		assert.ok( res == 'testStringGalrblyBlah' , 'stripped from string with no sort-prefix.');
-
-
-		var res = Global.removeSortPrefixFromArray({'-1112-testStringGalrblyBlah':'string', '-1113-1234':'int', '-1234-11111111-1111-1111-1111-111111111111':'uuid' });
-		var cnt = 0;
-		for( var key in res ) {
-			switch ( cnt ) {
-				case 0:
-					assert.ok( key == 'testStringGalrblyBlah' , 'strign passed');
-					assert.ok( res[key] == 'string' , 'value unaffected');
-					break;
-			}
-			cnt++;
+function hasDuplicates(array) {
+	var valuesSoFar = Object.create(null);
+	for (var i = 0; i < array.length; ++i) {
+		var value = array[i];
+		if (value in valuesSoFar) {
+			assert.ok( 1 == 2, value + ' is not unique' );
+			return true;
 		}
-		debugger
-
-
-	});
+		valuesSoFar[value] = true;
+	}
+	return false;
 }
 
 function output_system_data(val){

@@ -1,6 +1,7 @@
 PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend({
 	name: 'summary',
 	api:null,
+	el: $('.wizard.process_transactions_wizard'),
 
 	report_paths: {
 		'FormW2ReportViewController': 'views/reports/formw2/FormW2ReportViewController',
@@ -147,21 +148,42 @@ PayrollRemittanceAgencyEventWizardStepSubmit = WizardStep.extend({
 						$.i18n._('Navigate to the agency\'s website to file the necessary information.')
 					);
 					break;
+				case 'AUDIT':
+				case 'REPORT':
+					$this.addButton( ContextMenuIconName.tax_reports,
+						Icons.tax_reports,
+						$.i18n._('Report'),
+						$.i18n._('Generate the report to file manually.')
+					);
+					break;
+				case 'PAYMENT':
+				case 'REPORT+PAYMENT':
+					$this.addButton( ContextMenuIconName.tax_reports,
+						Icons.tax_reports,
+						$.i18n._('Report'),
+						$.i18n._('Generate the report to file manually.')
+					);
+
+					$this.addButton(ContextMenuIconName.payment_method,
+						Icons.payment_method,
+						$.i18n._('Make Payment'),
+						$.i18n._('Navigate to the agency\'s website to make a payment if necessary.')
+					);
+					break;
 				default:
 					$this.addButton( ContextMenuIconName.tax_reports,
 						Icons.tax_reports,
 						$.i18n._('Report'),
 						$.i18n._('Generate the report to file manually.')
 					);
-					$this.addButton( ContextMenuIconName.payment_method,
+
+					$this.addButton(ContextMenuIconName.payment_method,
 						Icons.payment_method,
 						$.i18n._('Make Payment'),
 						$.i18n._('Navigate to the agency\'s website to make a payment if necessary.')
 					);
 					break;
 			}
-
-			TTPromise.resolve('Wizard', 'initialize');
 		});
 	},
 

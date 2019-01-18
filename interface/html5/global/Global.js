@@ -1750,7 +1750,7 @@ Global.convertColumnsTojGridFormat = function( columns, layout_name, setWidthCal
 	return column_info_array;
 };
 /* jshint ignore:start */
-Global.loadWidgetByName = function( widgetName ) {
+Global.loadWidgetByName = function( widgetName, raw_text ) {
 	var input = false;
 	var widget_path = false;
 	var raw_text = false;
@@ -1865,7 +1865,12 @@ Global.loadWidgetByName = function( widgetName ) {
 		input = Global.loadWidget( widget_path );
 	}
 
-	if ( input.indexOf('<') != -1 ) {
+	if( input && raw_text == true ) {
+		return input;
+	}
+
+	//#2571 - Error: Unable to get property 'indexOf' of undefined or null reference
+	if ( input && input.indexOf('<') != -1 ) {
 		if ( !raw_text ) {
 			input = $(input);
 		}
@@ -2407,6 +2412,9 @@ Global.getViewPathByViewId = function( viewId ) {
 			break;
 		case 'PayrollRemittanceAgencyEventWizardController':
 			path = 'views/payroll/remittance_wizard/';
+			break;
+		case 'ProcessTransactionsWizardController':
+			path = 'views/payroll/process_transactions_wizard/';
 			break;
 		case 'ImportCSVWizard':
 			path = 'views/wizard/import_csv/';

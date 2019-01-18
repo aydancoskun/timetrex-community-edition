@@ -242,11 +242,13 @@ class Debug {
 		}
 
 		if ( empty($method) ) {
-			$method = '[Function]';
+			$method = 'GLOBAL: '; //Was: [Function]
+		} else {
+			$method = $method .'(): ';
 		}
 
 		//If text is too long, split it into an array.
-		$text_arr = self::splitInput( $text, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method .'(): ', PHP_EOL );
+		$text_arr = self::splitInput( $text, 'DEBUG [L'. str_pad( $line, 4, 0, STR_PAD_LEFT) .'] ['. str_pad( self::getExecutionTime(), 5, 0, STR_PAD_LEFT) .'ms]: '. $method, PHP_EOL );
 
 		if ( self::$buffer_output == TRUE ) {
 			foreach( $text_arr as $text_line ) {

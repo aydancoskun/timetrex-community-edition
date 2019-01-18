@@ -1127,7 +1127,10 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_wage_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_wage_view_controller.parent_view_controller = $this;
 			TTPromise.wait( 'BaseViewController', 'initialize', function() {
-				$this.sub_wage_view_controller.initData(); //Init data in this parent view
+				//#2581 - $this.sub_wage_view_controller is null
+				if ( $this.sub_wage_view_controller ) {
+					$this.sub_wage_view_controller.initData(); //Init data in this parent view
+				}
 			});
 		}
 	},
@@ -2538,8 +2541,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		if ( typeof FormData == "undefined" ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
-
-			this.file_browser = form_item_input.TImageBrowser( {field: '', default_width: 128, default_height: 128} );
+			this.file_browser = form_item_input.TImageBrowser( {field: '', default_width: 128, default_height: 128, enable_delete: true } );
 
 			this.file_browser.bind( 'imageChange', function( e, target ) {
 				new ServiceCaller().uploadFile( target.getValue(), 'object_type=user_photo&object_id=' + $this.current_edit_record.id, {
@@ -2553,12 +2555,16 @@ EmployeeViewController = BaseViewController.extend( {
 					}
 				} );
 
-			} )
+			} );
+
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_AVD_BROWSER );
-
 			this.file_browser = form_item_input.TImageAdvBrowser( {
-				field: '', default_width: 128, default_height: 128, callBack: function( form_data ) {
+				field: '',
+				default_width: 128,
+				default_height: 128,
+				enable_delete: true,
+				callBack: function( form_data ) {
 					new ServiceCaller().uploadFile( form_data, 'object_type=user_photo&object_id=' + $this.current_edit_record.id, {
 						onResult: function( result ) {
 
@@ -2570,8 +2576,23 @@ EmployeeViewController = BaseViewController.extend( {
 						}
 					} );
 
+				},
+				deleteImageHandler: function(e) {
+					$this.onDeleteImage();
 				}
 			} );
+
+		}
+
+		if ( this.is_edit ) {
+			this.file_browser.setEnableDelete(true);
+			this.file_browser.bind('deleteClick', function (e, target) {
+				$this.api.deleteImage($this.current_edit_record.id, {
+					onResult: function (result) {
+						$this.onDeleteImage();
+					}
+				});
+			});
 		}
 
 		this.addEditFieldToColumn( $.i18n._( 'Photo' ), this.file_browser, tab_contact_info_column1, '', null, false, true );

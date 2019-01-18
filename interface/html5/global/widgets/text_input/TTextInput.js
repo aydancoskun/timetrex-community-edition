@@ -225,6 +225,14 @@
 			}
 		};
 
+		this.setWidth = function( val ) {
+			if ( val && ( val > 0 || val.indexOf( '%' ) > 0) ) {
+				$this.width( val );
+				static_width = val;
+				is_static_width = true;
+			}
+		};
+
 		this.showErrorTip = function( sec ) {
 
 			if ( !Global.isSet( sec ) ) {

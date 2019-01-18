@@ -341,11 +341,18 @@ class DemoData {
 								array(33.910314751383,-103.76518249512)
 							);
 
+	protected $generated_sins = array();
+
 	/**
 	 * DemoData constructor.
 	 */
 	function __construct() {
 		$this->Validator = new Validator();
+
+		//get all sins from db once to ensure no duplicates
+		/** @var UserFactory $uf */
+		$uf = TTnew('UserFactory');
+		$this->generated_sins = $uf->db->GetAll( 'select sin from users', array() );
 	}
 
 	/**
@@ -3198,7 +3205,7 @@ class DemoData {
 			$ucf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
 			$ucf->setMobilePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
 			$ucf->setWorkEmail( $first_name.'.'.$last_name.'@abc-company.com' );
-			$ucf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
+			$ucf->setSIN( $this->generateSIN('US') );
 			$ucf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
 		}
 		unset($first_name, $last_name);
@@ -3643,6 +3650,61 @@ class DemoData {
 		return FALSE;
 	}
 
+	/**
+	 * Generate a unique sin
+	 * @return int|string
+	 */
+	function generateSIN( $country = 'CA' ){
+		$sanity_count = 0;
+		$sin = '';
+
+		while ( ($sin == '' OR in_array($sin, $this->generated_sins ) ) AND $sanity_count < 30 ) {
+			$sin = '';
+			if ( $country == 'US' ) {
+				for ( $x = 0; $x < 11; $x++ ) {
+					if ( $x == 3 || $x == 7 ) {
+						$sin .= '-';
+					} else {
+						$sin .= rand( 0, 9 );
+					}
+				}
+			} else {
+				//https://github.com/corbanworks/fng-sin-tools
+				$valid_first_char = array('1', '2', '3', '4', '5', '6', '7', '9' );
+				$sin = $valid_first_char[ rand(0, (sizeof($valid_first_char) -1 ) ) ];
+				$length = 9;
+				while ( strlen( $sin ) < ( $length - 1 ) ) {
+					$sin .= rand( 0, 9 );
+				}
+				$sum = 0;
+				$pos = 0;
+				$reversedSIN = strrev( $sin );
+				while ( $pos < $length - 1 ) {
+					$odd = $reversedSIN[ $pos ] * 2;
+					if ( $odd > 9 ) {
+						$odd -= 9;
+					}
+					$sum += $odd;
+					if ( $pos != ( $length - 2 ) ) {
+						$sum += $reversedSIN[ $pos + 1 ];
+					}
+					$pos += 2;
+				}
+				$checkdigit = ( ( floor( $sum / 10 ) + 1 ) * 10 - $sum ) % 10;
+				$sin .= $checkdigit;
+				$sin1 = substr( $sin, 0, 3 );
+				$sin2 = substr( $sin, 3, 3 );
+				$sin3 = substr( $sin, 6, 3 );
+				$sin = $sin1 . ' ' . $sin2 . ' ' . $sin3;
+			}
+			$sanity_count++;
+			if ( $sanity_count >= 10) {
+				$sin = '';
+			}
+		}
+		$this->generated_sins[] = $sin;
+		return $sin;
+	}
 
 	/**
 	 * @param string $company_id UUID
@@ -3722,7 +3784,8 @@ class DemoData {
 					$postal_code = 'V5A ' . rand( 1, 9 ) . 'A' . rand( 1, 9 );
 				}
 
-				$sin = array_rand( array('786 958 926' => TRUE, '764 746 855' => TRUE, '789 010 949' => TRUE, '111 667 374' => TRUE, '178 776 621' => TRUE, '178 776 621' => TRUE, '200 823 029' => TRUE, '754 585 453' => TRUE, '140 572 983' => TRUE, '667 044 044' => TRUE, '471 694 695' => TRUE ) );
+				//$sin = array_rand( array('786 958 926' => TRUE, '764 746 855' => TRUE, '789 010 949' => TRUE, '111 667 374' => TRUE, '178 776 621' => TRUE, '178 776 621' => TRUE, '200 823 029' => TRUE, '754 585 453' => TRUE, '140 572 983' => TRUE, '667 044 044' => TRUE, '471 694 695' => TRUE ) );
+				$sin = $this->generateSIN('CA');
 			} else {
 				if ( $type == 100 OR ( $type >= 10 AND $type <= 19 ) ) {
 					$country = 'US';
@@ -3736,7 +3799,8 @@ class DemoData {
 					$postal_code = rand(98000, 99499);
 				}
 
-				$sin = rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999);
+				//$sin = rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999);
+				$sin = $this->generateSIN('US');
 			}
 		} else {
 			Debug::Text('  ERROR: Legal entity is not defined or incorrect!', __FILE__, __LINE__, __METHOD__, 10);
@@ -4211,6 +4275,17 @@ class DemoData {
 
 	/**
 	 * @param string $company_id UUID
+	 * @return bool
+	 */
+	function createRecruitmentPortalConfig( $company_id ) {
+		$rpc_obj = TTNew('APIRecruitmentPortalConfig');
+		$rpc_obj->setRecruitmentPortalConfig( $rpc_obj->getRecruitmentPortalConfigDefaultData() );
+
+		return TRUE;
+	}
+
+	/**
+	 * @param string $company_id UUID
 	 * @param string $user_id UUID
 	 * @param int $user_title_id
 	 * @param int $default_branch_id
@@ -4236,12 +4311,12 @@ class DemoData {
 		$jvf->setBranch( $default_branch_id );
 		$jvf->setDepartment( $default_department_id );
 		$jvf->setTitle( $user_title_id );
-		$jvf->setLevel(array_rand( $jvf->getOptions( 'level' ) ));
-		$jvf->setType(array_rand( $jvf->getOptions( 'type' ) ));
-		$jvf->setEmploymentStatus(array_rand( $jvf->getOptions( 'employment_status' ) ));
-		$jvf->setStatus(array_rand( $jvf->getOptions( 'status' ) ));
-		$jvf->setWageType(array_rand( $jvf->getOptions( 'wage_type' ) ));
-		$jvf->setAvailability(array_rand( $jvf->getOptions( 'availability' ) ));
+		$jvf->setLevel( array_rand( $jvf->getOptions( 'level' ) ) );
+		$jvf->setType( array_rand( $jvf->getOptions( 'type' ) ) );
+		$jvf->setEmploymentStatus( array_rand( $jvf->getOptions( 'employment_status' ) ) );
+		$jvf->setStatus( array_rand( array( 20 => NULL, 40 => NULL ) ) ); //Allways choose a status so the protal preview is available.
+		$jvf->setWageType( array_rand( $jvf->getOptions( 'wage_type' ) ) );
+		$jvf->setAvailability( array_rand( array( 20 => NULL, 30 => NULL ) ) ); //Always choose an external facing vacancy so the protal preview is available.
 		$jvf->setMinimumWage('');
 		$jvf->setMaximumWage('');
 		$jvf->setName( $jvf->getTitleObject()->getName() );
@@ -4463,7 +4538,7 @@ class DemoData {
 			$jaf->setHomePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
 			$jaf->setMobilePhone( rand(403, 600).'-'. rand(250, 600).'-'. rand(1000, 9999) );
 			$jaf->setBirthDate( strtotime(rand(1970, 1990).'-'.rand(1, 12).'-'.rand(1, 28)) );
-			$jaf->setSIN( rand(100, 999).'-'. rand(100, 999).'-'. rand(100, 999) );
+			$jaf->setSIN( $this->generateSIN('US') );
 			$jaf->setAvailableMaximumHoursPerWeek(50);
 			$jaf->setAvailableMinimumHoursPerWeek(20);
 			$jaf->setPassword( 'demo' );
@@ -7870,35 +7945,36 @@ class DemoData {
 	 * @param $type
 	 * @return bool
 	 */
-	function createRemittanceSourceAccount( $legal_entity_id, $currency_id, $type ) {
+	function createRemittanceSourceAccount( $company_id, $legal_entity_id, $currency_id, $type ) {
 		$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
 		$rsaf->setLegalEntity( $legal_entity_id );
+		$rsaf->setCompany( $company_id );
 		$rsaf->setStatus( 10 ); //Enabled
 		$rsaf->setCurrency( $currency_id );
 		$rsaf->setLastTransactionNumber( rand(100, 999) );
 		switch( $type ) {
-			// the first one legal entity record
+			// First Legal Entity
 			case 10:
 				$rsaf->setType( 2000 ); //Check
 				$rsaf->setCountry('US');
-				$rsaf->setName( 'Corporate Checking (USD)' );
+				$rsaf->setName( 'Checks (USD)'. ' - '. $rsaf->getLegalEntityObject()->getLegalName() );
 				$rsaf->setDescription( '' );
 				$rsaf->setDataFormat( 10 );
 				$rsaf->setValue1( rand(100, 999) );
-				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue2( rand(100, 999) . rand(100, 999) . rand(100, 999) );
+				$rsaf->setValue3( rand(100, 999) . rand(100, 999) . rand(100, 999) );
 				$rsaf->setValue4( '' );
 				$rsaf->setValue5( '' );
 				break;
 			case 20:
-				$rsaf->setType( 3000 ); //US EFT
+				$rsaf->setType( 3000 ); //US ACH
 				$rsaf->setCountry('US');
-				$rsaf->setName( 'Corporate ACH (USD)' );
+				$rsaf->setName( 'ACH (USD)'. ' - '. $rsaf->getLegalEntityObject()->getLegalName() );
 				$rsaf->setDescription( '' );
 				$rsaf->setDataFormat( 10 );
 				$rsaf->setValue1( rand(100, 999) );
-				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue2( rand(100, 999) . rand(100, 999) . rand(100, 999) );
+				$rsaf->setValue3( rand(100, 999) . rand(100, 999) . rand(100, 999) );
 				$rsaf->setValue4( rand(100, 999) );
 				$rsaf->setValue5( rand(100, 999) );
 				$rsaf->setValue7( rand(100, 999) );
@@ -7906,51 +7982,12 @@ class DemoData {
 			case 30:
 				$rsaf->setType( 3000 );
 				$rsaf->setCountry('CA');
-				$rsaf->setName( 'Corporate ACH (CAD)' );
+				$rsaf->setName( 'EFT (CAD)'. ' - '. $rsaf->getLegalEntityObject()->getLegalName() );
 				$rsaf->setDescription( '' );
 				$rsaf->setDataFormat( 20 );
 				$rsaf->setValue1( rand(100, 999) );
-				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue4( rand(100, 999) );
-				$rsaf->setValue5( rand(100, 999) );
-				$rsaf->setValue7( rand(100, 999) );
-				break;
-			// the second one legal entity record
-			case 80:
-				$rsaf->setType( 2000 );
-				$rsaf->setCountry('CA');
-				$rsaf->setName( 'Corporate Checking (CAD)' );
-				$rsaf->setDescription( '' );
-				$rsaf->setDataFormat( 10 );
-				$rsaf->setValue1( rand(100, 999) );
-				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue4( '' );
-				$rsaf->setValue5( '' );
-				break;
-			case 90:
-				$rsaf->setType( 3000 );
-				$rsaf->setCountry('CA');
-				$rsaf->setName( 'Corporate EFT (CAD)' );
-				$rsaf->setDescription( '' );
-				$rsaf->setDataFormat( 20 );
-				$rsaf->setValue1( rand(100, 999) );
-				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue4( rand(100, 999) );
-				$rsaf->setValue5( rand(100, 999) );
-				$rsaf->setValue7( rand(100, 999) );
-				break;
-			case 100:
-				$rsaf->setType( 3000 );
-				$rsaf->setCountry('US'); //Country has to be US when using USD currency.
-				$rsaf->setName( 'Corporate EFT (USD)' );
-				$rsaf->setDescription( '' );
-				$rsaf->setDataFormat( 10 );
-				$rsaf->setValue1( rand(100, 999) );
-				$rsaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
-				$rsaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rsaf->setValue2( rand(10000, 99999) );
+				$rsaf->setValue3( rand(100, 999) . rand(100, 999) . rand(100, 999) );
 				$rsaf->setValue4( rand(100, 999) );
 				$rsaf->setValue5( rand(100, 999) );
 				$rsaf->setValue7( rand(100, 999) );
@@ -8018,15 +8055,23 @@ class DemoData {
 			case 20:
 				$rdaf->setType( 3000 );
 				$rdaf->setName( 'Saving Account' );
-				$rdaf->setValue1( rand( 10, 999) );
-				$rdaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rdaf->setValue1( rand(100, 999) );
+				if ( is_object( $rdaf->getRemittanceSourceAccountObject() ) AND $rdaf->getRemittanceSourceAccountObject()->getCountry() == 'CA' ) {
+					$rdaf->setValue2( rand( 10000, 99999 ) );
+				} else {
+					$rdaf->setValue2( rand( 100, 999 ) . rand( 100, 999 ) . rand( 100, 999 ) );
+				}
 				$rdaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
 				break;
 			case 30:
 				$rdaf->setType( 3000 );
 				$rdaf->setName( 'Retirement Savings' );
-				$rdaf->setValue1( rand( 10, 999) );
-				$rdaf->setValue2( rand(100, 999). rand(100, 999). rand(100, 999) );
+				$rdaf->setValue1( rand(100, 999) );
+				if ( is_object( $rdaf->getRemittanceSourceAccountObject() ) AND $rdaf->getRemittanceSourceAccountObject()->getCountry() == 'CA' ) {
+					$rdaf->setValue2( rand( 10000, 99999 ) );
+				} else {
+					$rdaf->setValue2( rand( 100, 999 ) . rand( 100, 999 ) . rand( 100, 999 ) );
+				}
 				$rdaf->setValue3( rand(100, 999). rand(100, 999). rand(100, 999) );
 				break;
 		}
@@ -8132,20 +8177,20 @@ class DemoData {
 			$this->createUserDefaults( $company_id, $legal_entity_ids[0] );
 
 			//Remittance Source Account - US
-			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[0], $currency_ids[0], 10  ); // Type=10 (Checking)
-			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[0], $currency_ids[0], 20  ); // type 20
-			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[0], $currency_ids[1], 30  ); // type 30
-			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[1], $currency_ids[0], 10  ); // Type=10 (Checking)
-			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[1], $currency_ids[0], 20  ); // type 20
-			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[1], $currency_ids[1], 30  ); // type 30
+			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[0], $currency_ids[0], 10 ); // Type=10 (Checking)
+			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[0], $currency_ids[0], 20 ); // Type=20
+			$remittance_source_account_ids[$legal_entity_ids[0]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[0], $currency_ids[1], 30 ); // Type=30
+			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[1], $currency_ids[0], 10 ); // Type=10 (Checking)
+			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[1], $currency_ids[0], 20 ); // Type=20
+			$remittance_source_account_ids[$legal_entity_ids[1]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[1], $currency_ids[1], 30 ); // Type=30
 
 			//Remittance Source Account - CA
-			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[2], $currency_ids[1], 80  ); // Type=10 (Checking)
-			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[2], $currency_ids[1], 90  ); // type 20
-			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[2], $currency_ids[0], 100  ); // type 30
-			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[3], $currency_ids[1], 80  ); // Type=10 (Checking)
-			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[3], $currency_ids[1], 90  ); // type 20
-			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $legal_entity_ids[3], $currency_ids[0], 100  ); // type 30
+			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[2], $currency_ids[1], 10 ); // Type=10 (Checking)
+			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[2], $currency_ids[1], 20 ); // Type=20
+			$remittance_source_account_ids[$legal_entity_ids[2]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[2], $currency_ids[0], 30 ); // Type=30
+			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[3], $currency_ids[1], 10 ); // Type=10 (Checking)
+			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[3], $currency_ids[1], 20 ); // Type=20
+			$remittance_source_account_ids[$legal_entity_ids[3]][] = $this->createRemittanceSourceAccount( $company_id, $legal_entity_ids[3], $currency_ids[0], 30 ); // Type=30
 
 			//Administrator User - Do this first so they can be used in SetupPresets
 			$current_user_id = $user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 100, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[4], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
@@ -8652,6 +8697,8 @@ class DemoData {
 				}
 
 				if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
+					$this->createRecruitmentPortalConfig( $company_id );
+
 					$x = 1;
 					while( $x <= 9 ) {
 						$interviewer_random_user_ids = array_rand( $user_ids, 3 );

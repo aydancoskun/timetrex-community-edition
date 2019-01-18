@@ -73,7 +73,7 @@ class PayStubSummaryReport extends Report {
 		$config = $this->getConfig();
 
 		//Make sure some time period is selected.
-		if ( !isset($config['filter']['time_period']) AND !isset($config['filter']['pay_period_id']) ) {
+		if ( ( !isset($config['filter']['time_period']) AND !isset($config['filter']['pay_period_id']) ) OR ( isset($config['filter']['time_period']) AND isset($config['filter']['time_period']['time_period']) AND $config['filter']['time_period']['time_period'] == TTUUID::getZeroId() ) ) {
 			$this->validator->isTrue( 'time_period', FALSE, TTi18n::gettext('No time period defined for this report') );
 		}
 
@@ -214,6 +214,7 @@ class PayStubSummaryReport extends Report {
 										'-1060-province' => TTi18n::gettext('Province/State'),
 										'-1070-country' => TTi18n::gettext('Country'),
 										'-1075-postal_code' => TTi18n::gettext('Postal Code'),
+										'-1078-home_phone' => TTi18n::gettext('Home Phone'),
 										'-1080-user_group' => TTi18n::gettext('Group'),
 										'-1090-default_branch' => TTi18n::gettext('Default Branch'),
 										'-1100-default_department' => TTi18n::gettext('Default Department'),

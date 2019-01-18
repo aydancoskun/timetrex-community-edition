@@ -11,10 +11,10 @@ PayrollRemittanceAgencyEventWizardController = BaseWindowController.extend({
 		if ( !this.wizard_obj && LocalCacheData[wizard_id] ) {
 			this.wizard_obj = LocalCacheData[wizard_id];
 			this.wizard_obj.initialize();
-			this.wizard_obj.setElement( $('.wizard') );
+			this.wizard_obj.setElement( $('.tax_wizard') );
 			delete LocalCacheData[wizard_id];
 		} else {
-			this.wizard_obj = new ( window[wizard_id] )({ el:$(".wizard") });
+			this.wizard_obj = new ( window[wizard_id] )({ el:$(".tax_wizard") });
 		}
 	},
 

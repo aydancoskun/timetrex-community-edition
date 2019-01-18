@@ -239,11 +239,7 @@ class HolidayPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
@@ -581,11 +577,7 @@ class HolidayPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setRoundIntervalPolicyID( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'round_interval_policy_id', $value );
 	}
 
@@ -601,10 +593,7 @@ class HolidayPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setEligibleContributingShiftPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == TTUUID::getZeroID() OR $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'eligible_contributing_shift_policy_id', $value );
 	}
 
@@ -620,10 +609,7 @@ class HolidayPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setContributingShiftPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'contributing_shift_policy_id', $value );
 	}
 
@@ -701,10 +687,7 @@ class HolidayPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setAbsencePolicyID( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'absence_policy_id', $value );
 	}
 

@@ -389,10 +389,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
@@ -409,7 +406,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setLegalEntity( $value ) {
-		$value = TTUUID::castUUID($value);
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('Legal Entity ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'legal_entity_id', $value );
@@ -453,10 +450,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setGroup( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'group_id', $value );
 	}
 
@@ -513,7 +507,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setPermissionControl( $value ) {
-		$value = TTUUID::castUUID($value);
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericTempDataValue( 'permission_control_id', $value );
 	}
 
@@ -543,10 +537,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayPeriodSchedule( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericTempDataValue( 'pay_period_schedule_id', $value );
 	}
 
@@ -576,10 +567,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setPolicyGroup( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericTempDataValue( 'policy_group_id', $value );
 	}
 
@@ -1242,10 +1230,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setTitle( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'title_id', $value );
 	}
 
@@ -1261,10 +1246,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setEthnicGroup( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'ethnic_group_id', $value );
 	}
 
@@ -1280,10 +1262,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultJob( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Default Job ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
@@ -1303,10 +1282,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultJobItem( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Default Job Item ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
@@ -1326,10 +1302,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultBranch( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'default_branch_id', $value );
 	}
 
@@ -1345,10 +1318,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultDepartment( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'default_department_id', $value );
 	}
 
@@ -2031,10 +2001,7 @@ class UserFactory extends Factory {
 	 * @return bool
 	 */
 	function setCurrency( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Currency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'currency_id', $value );
 	}
@@ -2077,6 +2044,35 @@ class UserFactory extends Factory {
 		$value = $this->Validator->stripNonAlphaNumeric( trim( $value ) );
 
 		return $this->setGenericDataValue( 'sin', $value );
+	}
+
+	function isUniqueSIN( $sin ) {
+		if ( $sin == '' ) {
+			return TRUE;
+		}
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID( $this->getCompany() ),
+				'legal_entity_id' => TTUUID::castUUID( $this->getLegalEntity() ),
+				'country_id' => $this->getCountry(),
+				'sin' => $sin,
+		);
+
+		// Unique to company, legal_entity and country.
+		$query = 'select id from '. $this->getTable() .' where company_id = ? AND legal_entity_id = ? AND country = ? AND sin = ? AND deleted = 0';
+
+		$user_id = $this->db->GetOne($query, $ph);
+		Debug::Arr($user_id, 'Unique SIN: '. $sin, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $user_id === FALSE ) {
+			return TRUE;
+		} else {
+			if ( $user_id == $this->getId() ) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -2386,6 +2382,10 @@ class UserFactory extends Factory {
 	 * @return bool|string
 	 */
 	function getPhotoFileName( $company_id = NULL, $user_id = NULL, $include_default_photo = TRUE ) {
+		if ( $user_id == NULL ) {
+			$user_id = $this->getId();
+		}
+
 		//Test for both jpg and png
 		$base_name = $this->getStoragePath( $company_id ) . DIRECTORY_SEPARATOR . $user_id;
 		if ( file_exists( $base_name.'.jpg') ) {
@@ -2533,19 +2533,33 @@ class UserFactory extends Factory {
 		//
 
 		// Company
-		$clf = TTnew( 'CompanyListFactory' );
-		$this->Validator->isResultSetWithRows(	'company',
-														$clf->getByID($this->getCompany()),
-														TTi18n::gettext('Company is invalid')
-													);
+		if ( TTUUID::isUUID( $this->getCompany() ) == FALSE OR $this->getCompany() == TTUUID::getZeroID() OR $this->getCompany() == TTUUID::getNotExistID() ) {
+			$this->Validator->isTrue(		'company_id',
+											 FALSE,
+											 TTi18n::gettext('Company must be specified'));
+		}
+		if ( $this->getCompany() !== FALSE AND $this->Validator->isError('company') == FALSE ) {
+			$clf = TTnew( 'CompanyListFactory' );
+			$this->Validator->isResultSetWithRows( 'company_id',
+												   $clf->getByID( $this->getCompany() ),
+												   TTi18n::gettext( 'Company is invalid' )
+			);
+		}
+
 		// Legal entity
-		if ( $this->getLegalEntity() !== FALSE ) {
+		if ( $this->getLegalEntity() !== FALSE AND ( ( $this->isNew( TRUE ) == TRUE AND TTUUID::isUUID( $this->getLegalEntity() ) == FALSE ) OR $this->getLegalEntity() == TTUUID::getZeroID() OR $this->getLegalEntity() == TTUUID::getNotExistID() ) ) {
+			$this->Validator->isTrue(		'legal_entity_id',
+											 FALSE,
+											 TTi18n::gettext('Legal entity must be specified'));
+		}
+		if ( $this->getLegalEntity() !== FALSE AND $this->Validator->isError('legal_entity_id') == FALSE ) {
 			$clf = TTnew( 'LegalEntityListFactory' );
 			$this->Validator->isResultSetWithRows(	'legal_entity_id',
 															$clf->getByID($this->getLegalEntity()),
 															TTi18n::gettext('Legal entity is invalid')
 														);
 		}
+
 		// Status
 		if ( $this->getStatus() !== FALSE ) {
 			$this->Validator->isTrue(		'status_id',
@@ -3098,6 +3112,7 @@ class UserFactory extends Factory {
 													$this->getCountry()
 												);
 		}
+
 		// Other ID 1
 		if ( $this->getOtherID1() != '' ) {
 			$this->Validator->isLength(	'other_id1',
@@ -3169,19 +3184,6 @@ class UserFactory extends Factory {
 
 		//Re-validate the province just in case the country was set AFTER the province.
 		//$this->setProvince( $this->getProvince() );
-
-		if ( TTUUID::isUUID( $this->getCompany() ) == FALSE OR $this->getCompany() == TTUUID::getZeroID() OR $this->getCompany() == TTUUID::getNotExistID()) {
-			$this->Validator->isTrue(		'company',
-											FALSE,
-											TTi18n::gettext('Company is invalid'));
-		}
-
-
-		if ( $this->getLegalEntity() !== FALSE AND ( ( $this->isNew( TRUE ) == TRUE AND TTUUID::isUUID( $this->getLegalEntity() ) == FALSE ) OR $this->getLegalEntity() == TTUUID::getZeroID() OR $this->getLegalEntity() == TTUUID::getNotExistID() ) ) {
-			$this->Validator->isTrue(		'legal_entity_id',
-											 FALSE,
-											 TTi18n::gettext('Legal entity is invalid'));
-		}
 
 		//When mass editing, don't require currency to be set.
 		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getCurrency() == FALSE ) {
@@ -3300,6 +3302,11 @@ class UserFactory extends Factory {
 			if ( $this->isUniqueHomeEmail( $this->getHomeEmail() ) == FALSE ) {
 				$this->Validator->Warning( 'home_email', TTi18n::gettext('Home email address is assigned to another employee, continuing will disable password reset functionality and may result in account lock-out' ) );
 			}
+
+			//Only when adding a new employee, check if SIN is used by another employee and warn the user in case they are not aware of that and may want to re-activate the existing employee, or not add duplicate employees.
+			if ( $this->isNew( TRUE ) == TRUE AND $this->isUniqueSIN( $this->getSIN() ) == FALSE ) {
+				$this->Validator->Warning( 'sin', TTi18n::gettext('SIN/SSN is assigned to another employee. Consider reactivating the existing employee instead of creating a new one' ) );
+			}
 		}
 																																												if ( ( $this->isNew( TRUE ) == TRUE OR $this->Validator->isValid() == TRUE ) AND $this->getStatus() == 10 ) { $obj_class = "\124\124\114\x69\x63\x65\x6e\x73\x65"; $obj_function = "\166\x61\154\x69\144\x61\164\145\114\x69\x63\145\x6e\x73\x65"; $obj_error_msg_function = "\x67\x65\x74\x46\x75\154\154\105\162\x72\x6f\x72\115\x65\x73\163\141\x67\x65"; @$obj = new $obj_class; $retval = $obj->{$obj_function}(NULL, array("\x65\x6d\x70\x6c\x6f\x79\x65\x65" => $this)); if ( $retval !== TRUE ) { $this->Validator->isTrue( 'status_id', FALSE, $obj->{$obj_error_msg_function}($retval) ); } }
 		return TRUE;
@@ -3403,42 +3410,6 @@ class UserFactory extends Factory {
 				}
 			}
 			unset($add_permission_control);
-
-			/**
-			 * If legal entity has been changed, then delete all related records from user_deductions and remove source data from the destination account.
-			 * FIXME: try to assign them to equivalent records for new legal entity instead.
-			 */
-
-			if ( $this->getLegalEntity() != $this->getGenericOldDataValue('legal_entity_id') ) {
-				/** @var UserDeductionListFactory $udlf */
-				$udlf = TTnew( 'UserDeductionListFactory' );
-				$udlf->getByCompanyIdAndUserId( $this->getCompany(), $this->getId() );
-				if( $udlf->getRecordCount() > 0 ) {
-					Debug::text('Legal Entity changed. Deleting all tax/deduction data for user: '. $this->getId(), __FILE__, __LINE__, __METHOD__, 10);
-					/** @var UserDeductionFactory $ud_obj */
-					foreach( $udlf as $ud_obj ){
-						$ud_obj->setDeleted( TRUE );
-						if( $ud_obj->isValid() ) {
-							$ud_obj->save();
-						}
-					}
-				}
-				unset( $udlf, $ud_obj );
-
-				/** @var RemittanceDestinationAccountListFactory $rdalf */
-				$rdalf = TTnew('RemittanceDestinationAccountListFactory');
-				$rdalf->getByUserIdAndCompany( $this->getId(), $this->getCompany() );
-				if ( $rdalf->getRecordCount() > 0 ) {
-					/** @var RemittanceDestinationAccountFactory $rda_obj */
-					foreach( $rdalf as $rda_obj ) {
-						$rda_obj->setRemittanceSourceAccount( TTUUID::getZeroID() );
-						if( $rda_obj->isValid() ) {
-							$rda_obj->save();
-						}
-					}
-				}
-				unset( $rdalf, $rda_obj );
-			}
 		}
 
 		if ( $this->getDeleted() == FALSE AND $this->getPayPeriodSchedule() !== FALSE ) {
@@ -3626,14 +3597,18 @@ class UserFactory extends Factory {
 				if ( is_array( $company_deduction_ids ) AND count( $company_deduction_ids ) > 0 ) {
 					//UserDefaults should be able to select Tax/Deduction records from *any* legal entity, and we will just filter them out to the proper legal entity here.
 					$cdlf = TTNew('CompanyDeductionListFactory');
-					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'legal_entity_id' => $this->getLegalEntity(), 'id' => $company_deduction_ids ) );
+					$cdlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompany(), array( 'id' => $company_deduction_ids ) );
 					if ( $cdlf->getRecordCount() > 0 ) {
 						foreach( $cdlf as $cd_obj ) {
-							$udf = TTnew( 'UserDeductionFactory' );
-							$udf->setUser( $this->getId() );
-							$udf->setCompanyDeduction( $cd_obj->getId() );
-							if ( $udf->isValid() ) {
-								$udf->Save();
+							if ( ( $cd_obj->getLegalEntity() == $this->getLegalEntity() OR $cd_obj->getLegalEntity() == TTUUID::getZeroID() ) ) {
+								$udf = TTnew( 'UserDeductionFactory' );
+								$udf->setUser( $this->getId() );
+								$udf->setCompanyDeduction( $cd_obj->getId() );
+								if ( $udf->isValid() ) {
+									$udf->Save();
+								}
+							} else {
+								Debug::text('  Skipping UserDefault Company Deduction due to mismatched Legal Entity: '. $cd_obj->getName() .' Legal Entity: '. $cd_obj0>getLegalEntity(), __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 					}
@@ -3809,28 +3784,12 @@ class UserFactory extends Factory {
 			$authentication->logoutUser( $this->getID() );
 		}
 
-		//legal entity has changed.
-		//must ensure that all remittance destination accounts are disassociated from the old source accounts
-		//must remove all deductions (user deductions) from the user as well as this is another point of relation to legal_entity
+		//Legal entity has changed. Migrate UserDeduction/RemittanceDestinationAccount's to the new legal entity whenever possible.
 		if ( is_array($data_diff) AND isset($data_diff['legal_entity_id']) ) {
 			Debug::Text('Legal entity changed from: '. $data_diff['legal_entity_id'] .' to: '. $this->getLegalEntity() .'...', __FILE__, __LINE__, __METHOD__, 10);
 
-			/** @var RemittanceDestinationAccountListFactory $rdalf  */
-			$rdalf = TTnew('RemittanceDestinationAccountListFactory');
-			$rdalf->getByUserIdAndCompany( $this->getId(), $this->getCompany() );
-			foreach ( $rdalf as $rda_obj ) {
-				/** @var RemittanceDestinationAccountFactory $rda_obj */
-				Debug::Text('Disconnecting RemittanceDestination ID: \''. TTUUID::castUUID($rda_obj->getId()) .'\'...', __FILE__, __LINE__, __METHOD__, 10);
-				//When migrating, allow the RemittanceSourceAccountId to be zero.
-				$rda_obj->setEnableBlankRemittanceSourceAccount(TRUE);
-				$rda_obj->setRemittanceSourceAccount( TTUUID::getZeroID() );
-				if ( $rda_obj->isValid() == TRUE ) {
-					$rda_obj->Save();
-				}
-			}
-			unset($rdalf);
-
-			UserDeductionFactory::MigrateLegalEntity($this, $data_diff);
+			UserDeductionFactory::MigrateLegalEntity( $this, $data_diff );
+			RemittanceDestinationAccountFactory::MigrateLegalEntity( $this, $data_diff );
 		}
 
 		return TRUE;

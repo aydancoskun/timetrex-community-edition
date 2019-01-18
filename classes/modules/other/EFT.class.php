@@ -1960,7 +1960,7 @@ class EFT_File_Format_ACH Extends EFT {
 				$line[] = $this->padRecord( $transaction_type, 2, 'N'); //Transaction code - 22=Deposit destined for checking account, 32=Deposit destined for savings account
 
 				$line[] = $this->padRecord( substr($record->getTransit(), 0, 8), 8, 'N'); //Transit
-				$line[] = $this->padRecord( substr($record->getTransit(), -1, 1), 1, 'AN'); //Check Digit
+				$line[] = $this->padRecord( substr($record->getTransit(), 8, 1), 1, 'N'); //Check Digit
 				$line[] = $this->padRecord( $record->getAccount(), 17, 'AN'); //Account number
 				$line[] = $this->padRecord( $this->removeDecimal( $record->getAmount() ), 10, 'N'); //Amount
 				$line[] = $this->padRecord( $record->getOriginatorReferenceNumber(), 15, 'AN'); //transaction identification number

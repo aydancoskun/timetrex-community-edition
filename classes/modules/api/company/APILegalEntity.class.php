@@ -377,5 +377,24 @@ class APILegalEntity extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
+
+	function deleteImage( $id ) {
+		//Permissions match setLegalEntity
+		if ( !$this->getPermissionObject()->Check('legal_entity', 'enabled')
+				OR !( $this->getPermissionObject()->Check('legal_entity', 'edit') OR $this->getPermissionObject()->Check('legal_entity', 'edit_own') OR $this->getPermissionObject()->Check('legal_entity', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
+		$result = $this->stripReturnHandler( $this->getLegalEntity( array('filter_data' => array( 'id' => $id ) ) ) );
+		if ( isset($result[0]) AND count($result[0]) > 0 ) {
+			/** @var LegalEntityFactory $f */
+			$f = TTnew( 'LegalEntityFactory' );
+			$file_name = $f->getLogoFileName( $id, FALSE );
+
+			if ( file_exists($file_name) ) {
+				unlink($file_name);
+			}
+		}
+	}
 }
 ?>

@@ -77,7 +77,7 @@ class PayStubTransactionSummaryReport extends Report {
 		$config = $this->getConfig();
 
 		//Make sure some time period is selected.
-		if ( !isset($config['filter']['time_period']) AND !isset($config['filter']['pay_period_id']) ) {
+		if ( ( !isset($config['filter']['time_period']) AND !isset($config['filter']['pay_period_id']) ) OR ( isset($config['filter']['time_period']) AND isset($config['filter']['time_period']['time_period']) AND $config['filter']['time_period']['time_period'] == TTUUID::getZeroId() ) ) {
 			$this->validator->isTrue( 'time_period', FALSE, TTi18n::gettext('No time period defined for this report') );
 		}
 

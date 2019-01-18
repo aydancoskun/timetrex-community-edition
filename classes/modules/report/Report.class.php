@@ -1469,11 +1469,11 @@ class Report {
 
 		$format_group_config = $this->formatGroupConfig();
 		if ( is_array( $format_group_config ) AND count( $format_group_config ) > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->data), NULL, TTi18n::getText('Grouping Data...') );
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, NULL, TTi18n::getText('Grouping Data...') );
 
 			$this->data = Group::GroupBy( $this->data, $format_group_config );
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), count($this->data) );
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
 			//Debug::Arr($format_group_config, 'Group Config: ', __FILE__, __LINE__, __METHOD__, 10);
 			//Debug::Arr($this->data, 'Group Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		}
@@ -1495,13 +1495,13 @@ class Report {
 
 		$this->profiler->startTimer( 'sort' );
 		if ( is_array( $this->getSortConfig() ) AND count( $this->getSortConfig() ) > 0 ) {
-			$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->data), NULL, TTi18n::getText('Sorting Data...') );
+			$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0, NULL, TTi18n::getText('Sorting Data...') );
 
 			Debug::Arr($this->getSortConfig(), 'Sort Config: ', __FILE__, __LINE__, __METHOD__, 10);
 
 			$this->data = Sort::arrayMultiSort( $this->data, $this->getSortConfig() );
 
-			$this->getProgressBarObject()->set( $this->getAMFMessageID(), count($this->data) );
+			$this->getProgressBarObject()->set( $this->getAMFMessageID(), ( is_array( $this->data ) ) ? count( $this->data ) : 0 );
 		}
 
 		$this->profiler->stopTimer( 'sort' );
@@ -1572,7 +1572,7 @@ class Report {
 			if ( $selected_static_columns > 0 ) {
 				$grand_total_column = $this->getReportColumns( $sub_total_columns_count );
 				if ( isset($static_column_options[$grand_total_column]) ) {
-					$total[0][$grand_total_column] = array('display' => TTi18n::getText('Grand Total').'['. count($this->data) .']:'); //Use 'display' array so column formatter isn't run on this.
+					$total[0][$grand_total_column] = array('display' => TTi18n::getText('Grand Total').'['. ( ( is_array( $this->data ) ) ? count( $this->data ) : 0 ) .']:'); //Use 'display' array so column formatter isn't run on this.
 				} else {
 					Debug::Text('Skipping Grand Total label due to not being static...', __FILE__, __LINE__, __METHOD__, 10);
 				}
@@ -2470,7 +2470,7 @@ class Report {
 				$file_extension = 'xml';
 			} elseif ( $format == 'json' ) {
 				//Include report name with non-alphanumerics stripped out.
-				$data = Misc::Array2JSON( $this->data, $columns, $this->getColumnFormatConfig(), FALSE, FALSE, preg_replace('/[^A-Za-z0-9]/', '', $this->config['other']['report_name'] ), 'row');
+				$data = Misc::Array2JSON( $this->data, $columns );
 				$file_extension = 'json';
 			}
 

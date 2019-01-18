@@ -313,11 +313,20 @@ class APIUserReportData extends APIFactory {
 				//Should we always disable the default setting?
 				//Should we copy any schedules that go along with each saved report? This could cause a lot of issues with mass emails being sent out without intention.
 
+				$urdf = TTnew('UserReportDataFactory');
+
 				//Copy to destination users.
 				if ( is_array($destination_user_ids) ) {
 					foreach( $destination_user_ids as $destination_user_id ) {
 						$dst_rows[$x] = $src_rows[$key];
 						$dst_rows[$x]['user_id'] = $destination_user_id;
+
+						$ulf = TTnew('UserListFactory');
+						$ulf->getByIdAndCompanyId( $destination_user_id, $this->getCurrentUserObject()->getCompany() );
+						if ( $ulf->getRecordCount() == 1 ) {
+							TTLog::addEntry( TTUUID::castUUID( $row['id'] ), 500, TTi18n::getText('Shared report with').': '. $ulf->getCurrent()->getFullName( FALSE, TRUE ), NULL, $urdf->getTable() );
+						}
+
 						$x++;
 					}
 				}

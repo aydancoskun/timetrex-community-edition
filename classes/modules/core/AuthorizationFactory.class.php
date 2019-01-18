@@ -454,11 +454,7 @@ class AuthorizationFactory extends Factory {
 	 * @return bool
 	 */
 	function setObject( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'object_id', $value );
 	}
 

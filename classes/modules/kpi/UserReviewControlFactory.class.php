@@ -185,11 +185,7 @@ class UserReviewControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		//$cgmlf = TTnew( 'CompanyGenericMapListFactory' );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
@@ -206,11 +202,7 @@ class UserReviewControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setReviewerUser( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'reviewer_user_id', $value );
 	}
 

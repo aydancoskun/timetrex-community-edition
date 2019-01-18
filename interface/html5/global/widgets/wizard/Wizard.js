@@ -12,23 +12,47 @@ Wizard = Backbone.View.extend({
 	step_history: {},
 	step_objects: {},
 	el: $('.wizard'),
+	previous_wizard: null,
+	_step_map: null,
+	do_not_initialize_onload: false, //when this flag is set, initialize will not be run automagically.
+	external_data: null,
 
-	initialize: function () {
-		this.el = $('.wizard:visible .content');
-		var $this = this;
+	initialize: function ( options ) {
+		if ( options && options.external_data) {
+			this.setExternalData( options.external_data );
+		}
 
-		this.initStepObject( ( this.getCurrentStepName() ? this.getCurrentStepName() : 'home' ), function(obj){
-			$this.init();
-			$this.render();
-			$this.enableButtons();
+		if ( !this.do_not_initialize_onload ) {
+			this.step_history = {};
+			this.step_objects = {};
+			var $this = this;
 
-			LocalCacheData.current_open_wizard_controller = $this;
-		});
+			this.initStepObject(( this.getCurrentStepName() ? this.getCurrentStepName() : 'home' ), function (obj) {
+				$this.init();
+				$this.render();
+				$this.enableButtons();
+
+				if (LocalCacheData.current_open_wizard_controller) {
+					$this.previous_wizard = LocalCacheData.current_open_wizard_controller;
+				} else {
+					$this.previous_wizard = false;
+				}
+				LocalCacheData.current_open_wizard_controller = $this;
+			});
+		}
 	},
 
 	//always override
 	init: function () {
 		return;
+	},
+
+	setExternalData: function ( data ) {
+		this.external_data = data;
+	},
+
+	getExternalData: function () {
+		return this.external_data;
 	},
 
 	events: {
@@ -111,7 +135,7 @@ Wizard = Backbone.View.extend({
 	* Clean up the markup.
 	*/
 	cleanUp: function () {
-		$('.wizard').remove();
+		$(this.el).remove();
 		for ( var n in  this.step_objects ) {
 			if ( this.step_objects[n] ) {
 				this.step_objects[n].reload = true;
@@ -128,12 +152,12 @@ Wizard = Backbone.View.extend({
 	 * @param callback
 	 */
 	initStepObject: function (name, callback) {
-		var $this = this
 		if ( this._step_map.hasOwnProperty(name) ) {
 			if (this.step_objects[name] == null || typeof this.step_objects[name] != 'object') {
+				var $this = this
 				Global.loadScript(this._step_map[name].script_path, function () {
 					$this.setCurrentStepName(name);
-					$('.wizard:visible .content').html('');
+					$($this.el).find('.content').html('');
 
 					var obj = new window[$this._step_map[name].object_name]($this);
 					obj.reload = false;
@@ -147,11 +171,11 @@ Wizard = Backbone.View.extend({
 				return;
 			} else {
 				//reopening a step
-				$this.setCurrentStepName(name);
+				this.setCurrentStepName(name);
 				if (typeof callback == 'function') {
 					var obj = this.step_objects[name];
 
-					$('.wizard:visible .content').html('');
+					$(this.el).find('.content').html('');
 					obj = new window[this._step_map[name].object_name](this);
 
 					//reopening a step that has been opened in a previously closed wizard.
@@ -179,21 +203,21 @@ Wizard = Backbone.View.extend({
 		var step = this.getStepObject();
 
 		if ( typeof step.getNextStepName() != 'string' ) {
-			$('.wizard .forward-btn').addClass('disable-image');
+			$(this.el).find('.forward-btn').addClass('disable-image');
 		} else {
-			$('.wizard .forward-btn').removeClass('disable-image');
+			$(this.el).find('.forward-btn').removeClass('disable-image');
 		}
 
 		if ( typeof step.getPreviousStepName() != 'string' ) {
-			$('.wizard .back-btn').addClass('disable-image');
+			$(this.el).find('.back-btn').addClass('disable-image');
 		} else {
-			$('.wizard .back-btn').removeClass('disable-image');
+			$(this.el).find('.back-btn').removeClass('disable-image');
 		}
 
 		if ( typeof step.getPreviousStepName() == 'string' && typeof step.getNextStepName() != 'string' ) {
-			$('.wizard .done-btn').removeClass('disable-image');
+			$(this.el).find('.done-btn').removeClass('disable-image');
 		} else {
-			$('.wizard .done-btn').addClass('disable-image');
+			$(this.el).find('.done-btn').addClass('disable-image');
 		}
 
 		this._enableButtons();
@@ -210,7 +234,7 @@ Wizard = Backbone.View.extend({
 		LocalCacheData.PayrollRemittanceAgencyEventWizard = this;
 		Global.addViewTab( this.wizard_id, this.wizard_name, window.location.href );
 		this.delegateEvents();
-		$('.wizard').remove();
+		$(this.el).remove();
 	},
 
 	reload: function(){

@@ -2,6 +2,7 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend({
 	name: 'review',
 	api: null,
 	_required_files: ['APIPayrollRemittanceAgencyEvent'],
+	el: $('.wizard.process_transactions_wizard'),
 
 	init: function(){
 		var $this = this;
@@ -183,8 +184,6 @@ PayrollRemittanceAgencyEventWizardStepReview = WizardStep.extend({
 			if ( tax_button != false ) {
 				$this.initRightClickMenuForTaxReportViewButton();
 			}
-
-			TTPromise.resolve('Wizard', 'initialize');
 		});
 
 	},

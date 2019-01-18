@@ -176,11 +176,7 @@ class UserSkillFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -196,11 +192,7 @@ class UserSkillFactory extends Factory {
 	 * @return bool
 	 */
 	function setQualification( $value ) {
-		$value = trim( $value );
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'qualification_id', $value );
 	}
 

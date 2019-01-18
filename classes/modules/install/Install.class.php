@@ -130,9 +130,9 @@ class Install {
 		return FALSE;
 	}
 
-	//Read .ini file.
-	//Make sure setup_mode is enabled.
 	/**
+	 * Read .ini file.
+	 * Make sure setup_mode is enabled.
 	 * @return bool
 	 */
 	function isInstallMode() {
@@ -923,7 +923,7 @@ class Install {
 		Debug::text('Comparing with Version: '. $php_version, __FILE__, __LINE__, __METHOD__, 9);
 
 		$min_version = '5.4.0';
-		$max_version = '7.0.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
+		$max_version = '7.2.99'; //Change install.php as well, as some versions break backwards compatibility, so we need early checks as well.
 
 		$unsupported_versions = array('');
 
@@ -1782,13 +1782,13 @@ class Install {
 	/**
 	 * @return int
 	 */
-	function checkMCRYPT() {
-		if ( function_exists('mcrypt_module_open') ) {
-			return 0;
-		}
-
-		return 1;
-	}
+	//function checkMCRYPT() {
+	//	if ( function_exists('mcrypt_module_open') ) {
+	//		return 0;
+	//	}
+	//
+	//	return 1;
+	//}
 
 	/**
 	 * @return int
@@ -2189,7 +2189,7 @@ class Install {
 
 		if ( $this->getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$retarr[$this->checkPEARValidate()]++;
-			$retarr[$this->checkMCRYPT()]++;
+			//$retarr[$this->checkMCRYPT()]++;
 		}
 
 		//Debug::Arr($retarr, 'RetArr: ', __FILE__, __LINE__, __METHOD__, 9);
@@ -2369,9 +2369,9 @@ class Install {
 				$retarr[] = 'PEARVal';
 			}
 
-			if ( $fail_all == TRUE OR $this->checkMCRYPT() != 0 ) {
-				$retarr[] = 'MCRYPT';
-			}
+			//if ( $fail_all == TRUE OR $this->checkMCRYPT() != 0 ) {
+			//	$retarr[] = 'MCRYPT';
+			//}
 		}
 
 		if ( isset($retarr) ) {

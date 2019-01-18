@@ -51,7 +51,7 @@ class ChequeForms {
 	function getFormObject( $form ) {
 		$class_name = 'ChequeForms';
 		$class_name .= '_'.$form;
-		
+
         $class_directory = dirname( __FILE__ );
 		$class_file_name = $class_directory . DIRECTORY_SEPARATOR . strtolower($form) .'.class.php';
 
@@ -90,8 +90,10 @@ class ChequeForms {
 		//Initialize PDF object so all subclasses can access it.
 		//Loop through all objects and combine the output from each into a single document.
 		if ( $type == 'pdf' ) {
-            $pdf = new TTPDF();
-			$pdf->setMargins(0, 0, 0, 0);
+			$pdf = new TTPDF( 'P', 'mm', array( 207, 268 ) ); //US Letter size (215.9mm x 279.4mm) reduced by 4% (8.9mm x 11.4mm) and rounded to nearest mm. This should avoid the 96%/97% resize issue with 1" margins.
+
+			$pdf->setMargins(0, 0, 0, 0); //Margins seem to only affect TCPDF, not actually how things are printed.
+
 			$pdf->SetAutoPageBreak(FALSE);
 			//$pdf->setFontSubsetting(FALSE);
 

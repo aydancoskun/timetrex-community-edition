@@ -99,7 +99,7 @@ class TTLog {
 				$ldf = TTnew( 'LogDetailFactory' );
 				$ldf->addLogDetail( $action_id, $insert_id, $object );
 			} else {
-				Debug::text('LogDetail Disabled... Object ID: '. $object_id .' Action ID: '. $action_id .' Table: '. $table .' Description: '. $description, __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('LogDetail Disabled... Object ID: '. $object_id .' Action ID: '. $action_id .' Table: '. $table .' Description: '. $description.' User ID: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
 				//Debug::text('LogDetail Disabled... Config: '. (int)$config_vars['other']['disable_audit_log_detail'] .' Function: '. (int)$object->getEnableSystemLogDetail(), __FILE__, __LINE__, __METHOD__, 10);
 			}
 

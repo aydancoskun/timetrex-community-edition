@@ -209,11 +209,7 @@ class ExceptionFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
@@ -234,10 +230,7 @@ class ExceptionFactory extends Factory {
 			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
 
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Allow NULL pay period, incase its an absence or something in the future.
 		//Cron will fill in the pay period later
 		return $this->setGenericDataValue( 'pay_period_id', $value );
@@ -284,10 +277,7 @@ class ExceptionFactory extends Factory {
 	 * @return bool
 	 */
 	function setExceptionPolicyID( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'exception_policy_id', $value );
 	}
 
@@ -303,10 +293,7 @@ class ExceptionFactory extends Factory {
 	 * @return bool
 	 */
 	function setPunchControlID( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'punch_control_id', $value );
 	}
 
@@ -322,10 +309,7 @@ class ExceptionFactory extends Factory {
 	 * @return bool
 	 */
 	function setPunchID( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'punch_id', $value );
 	}
 

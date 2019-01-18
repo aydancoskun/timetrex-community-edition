@@ -161,11 +161,7 @@ class PermissionControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -343,9 +339,9 @@ class PermissionControlFactory extends Factory {
 					$ulf->getById( $id );
 					if ( $ulf->getRecordCount() > 0 ) {
 						$obj = $ulf->getCurrent();
-						if ($this->Validator->isTrue(		'user',
+						if ( $this->Validator->isTrue(		'user',
 															 $puf->isValid(),
-															 TTi18n::gettext('Selected employee is invalid, or already assigned to another permission group').' ('. $obj->getFullName() .')' )) {
+															 TTi18n::gettext('Selected employee is already assigned to another permission group').' ('. $obj->getFullName() .')' )) {
 							$puf->save();
 						}
 					}
@@ -553,6 +549,18 @@ class PermissionControlFactory extends Factory {
 		//
 		// ABOVE: Validation code moved from set*() functions.
 		//
+
+		//Don't allow deleting permissions groups with users assigned to them, to prevent locking themselves out.
+		if ( $this->getDeleted() == TRUE ) {
+			$users = $this->getUser();
+			if ( is_array($users) AND count($users) > 0 ) {
+				$this->Validator->isTRUE( 'in_use',
+										  FALSE,
+										  TTi18n::gettext( 'This permission group is currently in use by employees' ) );
+			}
+			unset($users);
+		}
+
 		return TRUE;
 	}
 

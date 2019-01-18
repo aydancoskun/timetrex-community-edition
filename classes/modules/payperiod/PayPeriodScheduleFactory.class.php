@@ -216,11 +216,7 @@ class PayPeriodScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -814,7 +810,7 @@ class PayPeriodScheduleFactory extends Factory {
 
 		$user_ids = $this->getUser();
 
-		if ( count($user_ids) > 0 ) {
+		if ( is_array( $user_ids ) AND count( $user_ids ) > 0 ) {
 			$hlf = TTnew( 'HolidayListFactory' );
 			$hlf->getByPolicyGroupUserIdAndStartDateAndEndDate( $user_ids, ( $epoch - (86400 * 14) ), ( $epoch + (86400 * 2) ) );
 			if ( $hlf->getRecordCount() > 0 ) {
@@ -825,9 +821,9 @@ class PayPeriodScheduleFactory extends Factory {
 
 				//Debug::Arr($holiday_epochs, 'Holiday Epochs: ', __FILE__, __LINE__, __METHOD__, 10);
 			}
-
-			$epoch = TTDate::getNearestWeekDay( $epoch, $this->getTransactionDateBusinessDay(), $holiday_epochs );
 		}
+
+		$epoch = TTDate::getNearestWeekDay( $epoch, $this->getTransactionDateBusinessDay(), $holiday_epochs );
 
 		return $epoch;
 	}

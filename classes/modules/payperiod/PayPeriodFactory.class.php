@@ -199,11 +199,7 @@ class PayPeriodFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -237,10 +233,7 @@ class PayPeriodFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayPeriodSchedule( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'pay_period_schedule_id', $value );
 	}
 
@@ -545,6 +538,47 @@ class PayPeriodFactory extends Factory {
 		return TRUE;
 	}
 
+	function purgePayStubAmendments() {
+		if ( $this->getStatus() == 20 ) { //20=Closed
+			//Don't wrap this in a transaction in case something fails the pay period can't be closed then.
+			//$this->StartTransaction();
+
+			$psalf = TTnew( 'PayStubAmendmentListFactory' );
+			$psalf->getByCompanyIdAndPayPeriodScheduleIdAndStatusAndBeforeStartDate( $this->getCompany(), $this->getPayPeriodSchedule(), 50, $this->getStartDate() ); //50=Active
+			Debug::text( '  Active Pay Stub Amendments before this pay period: '. $psalf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+			if ( $psalf->getRecordCount() > 0 ) {
+				foreach ( $psalf as $psa_obj ) {
+					//Make sure the pay stub amendment isn't in use by a pay stub.
+					if ( is_object( $psa_obj->getPayStubObject() ) AND $psa_obj->getPayStubObject()->getStatus() == 40 ) {
+						//Help fix PSA that didn't get marked PAID previously for whatever reason. 
+						$psa_obj->setEnablePayStubStatusChange( TRUE ); //Tell PSA that its the pay stub changing the status, so we can ignore some validation checks.
+						$psa_obj->setStatus( 55 );
+						if ( $psa_obj->isValid() == TRUE ) {
+							Debug::text( '  Found pay stub amendment assigned to pay stub, marking as PAID: ' . $psa_obj->getId() . ' User ID: ' . $psa_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10 );
+							$psa_obj->Save();
+						}
+					} else {
+						$psa_obj->setDeleted( TRUE );
+						if ( $psa_obj->isValid() == TRUE ) {
+							Debug::text( '  Deleting ACTIVE pay stub amendment prior to this pay period: ' . $psa_obj->getId() . ' User ID: ' . $psa_obj->getUser(), __FILE__, __LINE__, __METHOD__, 10 );
+							$psa_obj->Save();
+						} else {
+							Debug::text( '  ERROR: Deleting ACTIVE pay stub amendment prior to this pay period failed, rolling back transaction! ID: ' . $psa_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+							//$this->FailTransaction();
+							//$this->CommitTransaction();
+
+							return FALSE;
+						}
+					}
+				}
+			}
+
+			//$this->CommitTransaction();
+		}
+
+		return TRUE;
+	}
+
 	/**
 	 * @return bool
 	 */
@@ -759,7 +793,7 @@ class PayPeriodFactory extends Factory {
 
 		$pps_obj = $this->getPayPeriodScheduleObject();
 
-		if ( is_object( $pps_obj ) AND count( $pps_obj->getUser() ) > 0 ) {
+		if ( is_object( $pps_obj ) AND is_array( $pps_obj->getUser() ) AND count( $pps_obj->getUser() ) > 0 ) {
 			$pplf = TTnew('PayPeriodListFactory');
 			$pplf->StartTransaction();
 
@@ -1436,6 +1470,10 @@ class PayPeriodFactory extends Factory {
 				//Mark pay stubs as PAID once the pay period is closed?
 				TTLog::addEntry( $this->getId(), 20, TTi18n::getText('Setting Pay Period to Closed'), NULL, $this->getTable() );
 				$this->setPayStubStatus(40);
+
+				//Delete pay stub amendemnts effective before this pay period started that are still active.
+				//  This will help clean-up records that will never be used and prevent warnings when generating pay stubs.
+				$this->purgePayStubAmendments();
 			} elseif ( $this->getStatus() == 30 ) {
 				TTLog::addEntry( $this->getId(), 20, TTi18n::getText('Setting Pay Period to Post-Adjustment'), NULL, $this->getTable() );
 			}

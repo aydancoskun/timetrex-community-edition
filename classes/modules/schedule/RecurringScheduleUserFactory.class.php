@@ -90,10 +90,7 @@ class RecurringScheduleUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 	/**

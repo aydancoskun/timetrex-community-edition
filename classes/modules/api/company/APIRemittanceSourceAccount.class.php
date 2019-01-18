@@ -214,6 +214,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 						$primary_validator->isTrue( 'id', FALSE, TTi18n::gettext('Edit permission denied, record does not exist') );
 					}
 				} else {
+					$row['company_id'] = $this->getCurrentCompanyObject()->getId();
 					//Adding new object, check ADD permissions.
 					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('remittance_source_account', 'add'), TTi18n::gettext('Add permission denied') );
 				}
@@ -394,6 +395,7 @@ class APIRemittanceSourceAccount extends APIFactory {
 		$filter_data = array(
 				'id' => $ids,
 		);
+
 		/** @var RemittanceSourceAccountListFactory $rsalf */
 		$rsalf = TTnew('RemittanceSourceAccountListFactory');
 		$rsalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data );
@@ -421,23 +423,28 @@ class APIRemittanceSourceAccount extends APIFactory {
 				$confirmation_number = strtoupper( substr( sha1( TTUUID::generateUUID() ), -8 ) );
 				$record = $pstf->getEFTRecord( $eft, $pstf, $ps_obj, $rs_obj, $this->getCurrentUserObject(), $confirmation_number );
 				$eft->setRecord( $record );
-				$output = $pstf->endEFTFile( $eft, $rs_obj, $this->getCurrentUserObject(), $ps_obj, $this->getCurrentCompanyObject()->getId(),  $pstf->getAmount(), $next_transaction_number, $output );
+				$output = $pstf->endEFTFile( $eft, $rs_obj, $this->getCurrentUserObject(), $ps_obj, $this->getCurrentCompanyObject()->getId(), $pstf->getAmount(), $next_transaction_number, $output );
 			}
 
 			if ( $rs_obj->getType() == 2000 ) {
 				$data_format_types = $rs_obj->getOptions('data_format_check_form');
 
 				$data_format_type_id = $rs_obj->getDataFormat();
-				$check_file_obj = new ChequeForms();
+				$check_file_obj = TTnew('ChequeForms');
 				$check_obj = $check_file_obj->getFormObject( strtoupper( $data_format_types[$data_format_type_id] ) );
+//				if ( PRODUCTION == FALSE AND Debug::getEnable() == TRUE ) {
+//					$check_obj->setDebug( TRUE );
+//				}
+
+				$check_obj->setPageOffsets( $rs_obj->getValue6(), $rs_obj->getValue5() ); //Value5=Vertical, Value6=Horizontal
+
 				$transaction_number = $rs_obj->getNextTransactionNumber();
-				$ps_data = $pstf->getChequeData( $ps_obj, $pstf, $this->getCurrentUserObject(), $transaction_number );
+				$ps_data = $pstf->getChequeData( $ps_obj, $pstf, $rs_obj, $this->getCurrentUserObject(), $transaction_number, TRUE ); //Draw alignment grid when testing check format.
 				$check_obj->addRecord( $ps_data );
 				$check_file_obj->addForm( $check_obj );
 				$transaction_number++;
 				$output = $pstf->endChequeFile( $rs_obj, $ps_obj, $transaction_number, $output, $check_file_obj );
 			}
-
 		}
 
 		if ( is_array($output) AND count($output) > 0 ) {
@@ -446,6 +453,27 @@ class APIRemittanceSourceAccount extends APIFactory {
 			return Misc::APIFileDownload($zip_file['file_name'], $zip_file['mime_type'], $zip_file['data'] );
 		} else {
 			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: No data to export...') );
+		}
+	}
+
+
+	function deleteImage( $id ) {
+		//permissions match setRemittanceSourceAccount()
+		if ( !$this->getPermissionObject()->Check('remittance_source_account', 'enabled')
+				OR !( $this->getPermissionObject()->Check('remittance_source_account', 'edit') OR $this->getPermissionObject()->Check('remittance_source_account', 'edit_own') OR $this->getPermissionObject()->Check('remittance_source_account', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
+
+		$result = $this->stripReturnHandler( $this->getRemittanceSourceAccount( array('filter_data' => array( 'id' => $id ) ) ) );
+		if ( isset($result[0]) AND count($result[0]) > 0 ) {
+			/** @var RemittanceSourceAccountFactory $uf */
+			$uf = TTnew( 'RemittanceSourceAccountFactory' );
+			$file_name = $uf->getSignatureFileName( $this->current_company->getId(), $id );
+
+			if ( file_exists($file_name) ) {
+				unlink($file_name);
+			}
 		}
 	}
 }

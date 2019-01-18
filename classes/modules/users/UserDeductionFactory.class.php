@@ -188,11 +188,7 @@ class UserDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -233,11 +229,7 @@ class UserDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompanyDeduction( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_deduction_id', $value );
 	}
@@ -1621,11 +1613,8 @@ class UserDeductionFactory extends Factory {
 
 				$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
-				if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() != '' ) {
-					Debug::Text('Found Employee CPP account link!: ', __FILE__, __LINE__, __METHOD__, 10);
-
-					$pd_obj->setYearToDateCPPContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
-				}
+				//Used to check $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() here, but that function has been deprecated to better support multiple legal entities.
+				$pd_obj->setYearToDateCPPContribution( $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );
 
@@ -1653,11 +1642,8 @@ class UserDeductionFactory extends Factory {
 
 				$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
-				if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() != '' ) {
-					Debug::Text('Found Employee EI account link!: ', __FILE__, __LINE__, __METHOD__, 10);
-
-					$pd_obj->setYearToDateEIContribution(  $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
-				}
+				//Used to check $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() here, but that function has been deprecated to better support multiple legal entities.
+				$pd_obj->setYearToDateEIContribution(  $cd_obj->getPayStubEntryAccountYTDAmount( $pay_stub_obj ) );
 
 				$pd_obj->setGrossPayPeriodIncome( $amount );
 
@@ -1711,17 +1697,20 @@ class UserDeductionFactory extends Factory {
 				if ( $this->getCompanyDeductionObject()->getCountry() == 'CA' ) {
 					//CA
 					$pd_obj->setFederalTotalClaimAmount( $user_value1 );
-
 					$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
-					if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() != '' ) {
+					$cdlf = TTnew('CompanyDeductionListFactory');
+					$cdlf->getByCompanyIdAndLegalEntityIdAndCalculationIdAndStatusId( $this->getCompanyDeductionObject()->getCompany(), $this->getCompanyDeductionObject()->getLegalEntity(), 90, 10); //90=CPP, 10=Enabled
+					if ( $cdlf->getRecordCount() == 1 ) {
+						$cd_obj = $cdlf->getCurrent();
 						Debug::Text('Found Employee CPP account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
 						//Check to see if CPP was calculated on the CURRENT pay stub, if not assume they are CPP exempt.
 						//Single this calculation formula doesn't know directly if the user was CPP exempt or not, we have to assume it by
 						//the calculate CPP on the current pay stub. However if the CPP calculation is done AFTER this, it may mistakenly assume they are exempt.
 						//Make sure we handle the maximum CPP contribution cases properly as well.
-						$current_cpp = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
+						//$current_cpp = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
+						$current_cpp = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $cd_obj->getPayStubEntryAccount() );
 						if ( isset($current_cpp['amount']) AND $current_cpp['amount'] == 0 ) {
 							Debug::Text('Current CPP: '. $current_cpp['amount'] .' Setting CPP exempt in Federal Income Tax calculation...', __FILE__, __LINE__, __METHOD__, 10);
 							$pd_obj->setCPPExempt( TRUE );
@@ -1729,19 +1718,23 @@ class UserDeductionFactory extends Factory {
 							$pd_obj->setEmployeeCPPForPayPeriod( $current_cpp['amount'] ); //Make sure we pass in the amount that was calculated, as it may have different include/exclude accounts than this.
 						}
 
-						$ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
+						//$ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
+						$ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $cd_obj->getPayStubEntryAccount() );
 
 						Debug::text('YTD CPP Contribution: '. $ytd_cpp_arr['ytd_amount'], __FILE__, __LINE__, __METHOD__, 10);
 
 						$pd_obj->setYearToDateCPPContribution( $ytd_cpp_arr['ytd_amount'] );
-						unset($ytd_cpp_arr, $current_cpp );
+						unset($ytd_cpp_arr, $current_cpp, $cd_obj );
 					}
 
-					if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() != '' ) {
+					$cdlf->getByCompanyIdAndLegalEntityIdAndCalculationIdAndStatusId( $this->getCompanyDeductionObject()->getCompany(), $this->getCompanyDeductionObject()->getLegalEntity(), 91, 10); //91=EI, 10=Enabled
+					if ( $cdlf->getRecordCount() == 1 ) {
+						$cd_obj = $cdlf->getCurrent();
 						Debug::Text('Found Employee EI account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
 						//See comment above regarding CPP exempt.
-						$current_ei = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
+						//$current_ei = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
+						$current_ei = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $cd_obj->getPayStubEntryAccount() );
 						if ( isset($current_ei['amount']) AND $current_ei['amount'] == 0 ) {
 							Debug::Text('Current EI: '. $current_ei['amount'] .' Setting EI exempt in Federal Income Tax calculation...', __FILE__, __LINE__, __METHOD__, 10);
 							$pd_obj->setEIExempt( TRUE );
@@ -1749,13 +1742,15 @@ class UserDeductionFactory extends Factory {
 							$pd_obj->setEmployeeEIForPayPeriod( $current_ei['amount'] ); //Make sure we pass in the amount that was calculated, as it may have different include/exclude accounts than this.
 						}
 
-						$ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
+						//$ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
+						$ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $cd_obj->getPayStubEntryAccount() );
 
 						Debug::text('YTD EI Contribution: '. $ytd_ei_arr['ytd_amount'], __FILE__, __LINE__, __METHOD__, 10);
 
 						$pd_obj->setYearToDateEIContribution( $ytd_ei_arr['ytd_amount'] );
-						unset($ytd_ei_arr, $current_ei);
+						unset($ytd_ei_arr, $current_ei, $cd_obj );
 					}
+					unset( $cdlf );
 				} elseif ( $this->getCompanyDeductionObject()->getCountry() == 'US' ) {
 					//US
 					$pd_obj->setFederalFilingStatus( $user_value1 );
@@ -1826,14 +1821,18 @@ class UserDeductionFactory extends Factory {
 
 					$pd_obj->setEnableCPPAndEIDeduction(TRUE);
 
-					if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() != '' ) {
+					$cdlf = TTnew('CompanyDeductionListFactory');
+					$cdlf->getByCompanyIdAndLegalEntityIdAndCalculationIdAndStatusId( $this->getCompanyDeductionObject()->getCompany(), $this->getCompanyDeductionObject()->getLegalEntity(), 90, 10); //90=CPP, 10=Enabled
+					if ( $cdlf->getRecordCount() == 1 ) {
+						$cd_obj = $cdlf->getCurrent();
 						Debug::Text('Found Employee CPP account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
 						//Check to see if CPP was calculated on the CURRENT pay stub, if not assume they are CPP exempt.
 						//Single this calculation formula doesn't know directly if the user was CPP exempt or not, we have to assume it by
 						//the calculate CPP on the current pay stub. However if the CPP calculation is done AFTER this, it may mistakenly assume they are exempt.
 						//Make sure we handle the maximum CPP contribution cases properly as well.
-						$current_cpp = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
+						//$current_cpp = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
+						$current_cpp = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $cd_obj->getPayStubEntryAccount() );
 						if ( isset($current_cpp['amount']) AND $current_cpp['amount'] == 0 ) {
 							Debug::Text('Current CPP: '. $current_cpp['amount'] .' Setting CPP exempt in Provincial Income Tax calculation...', __FILE__, __LINE__, __METHOD__, 10);
 							$pd_obj->setCPPExempt( TRUE );
@@ -1841,19 +1840,23 @@ class UserDeductionFactory extends Factory {
 							$pd_obj->setEmployeeCPPForPayPeriod( $current_cpp['amount'] ); //Make sure we pass in the amount that was calculated, as it may have different include/exclude accounts than this.
 						}
 
-						$ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
+						//$ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeCPP() );
+						$ytd_cpp_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $cd_obj->getPayStubEntryAccount() );
 
 						Debug::text('YTD CPP Contribution: '. $ytd_cpp_arr['ytd_amount'], __FILE__, __LINE__, __METHOD__, 10);
 
 						$pd_obj->setYearToDateCPPContribution( $ytd_cpp_arr['ytd_amount'] );
-						unset($ytd_cpp_arr, $current_cpp);
+						unset( $ytd_cpp_arr, $current_cpp, $cd_obj );
 					}
 
-					if ( $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() != '' ) {
+					$cdlf->getByCompanyIdAndLegalEntityIdAndCalculationIdAndStatusId( $this->getCompanyDeductionObject()->getCompany(), $this->getCompanyDeductionObject()->getLegalEntity(), 91, 10); //91=EI, 10=Enabled
+					if ( $cdlf->getRecordCount() == 1 ) {
+						$cd_obj = $cdlf->getCurrent();
 						Debug::Text('Found Employee EI account link!: ', __FILE__, __LINE__, __METHOD__, 10);
 
 						//See comment above regarding CPP exempt.
-						$current_ei = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
+						//$current_ei = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
+						$current_ei = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'current', NULL, $cd_obj->getPayStubEntryAccount() );
 						if ( isset($current_ei['amount']) AND $current_ei['amount'] == 0 ) {
 							Debug::Text('Current EI: '. $current_ei['amount'] .' Setting EI exempt in Provincial Income Tax calculation...', __FILE__, __LINE__, __METHOD__, 10);
 							$pd_obj->setEIExempt( TRUE );
@@ -1861,13 +1864,15 @@ class UserDeductionFactory extends Factory {
 							$pd_obj->setEmployeeEIForPayPeriod( $current_ei['amount'] ); //Make sure we pass in the amount that was calculated, as it may have different include/exclude accounts than this.
 						}
 
-						$ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
+						//$ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $this->getPayStubEntryAccountLinkObject()->getEmployeeEI() );
+						$ytd_ei_arr = $pay_stub_obj->getSumByEntriesArrayAndTypeIDAndPayStubAccountID( 'previous', NULL, $cd_obj->getPayStubEntryAccount() );
 
 						Debug::text('YTD EI Contribution: '. $ytd_ei_arr['ytd_amount'], __FILE__, __LINE__, __METHOD__, 10);
 
 						$pd_obj->setYearToDateEIContribution( $ytd_ei_arr['ytd_amount'] );
-						unset($ytd_ei_arr, $current_ei);
+						unset( $ytd_ei_arr, $current_ei, $cd_obj );
 					}
+					unset( $cdlf );
 
 					$retval = $pd_obj->getProvincialPayPeriodDeductions();
 				} elseif ( $this->getCompanyDeductionObject()->getCountry() == 'US' ) {
@@ -2032,9 +2037,8 @@ class UserDeductionFactory extends Factory {
 		return $retval;
 	}
 
-	//Returns the percent rate when specified.
-
 	/**
+	 * Returns the percent rate when specified.
 	 * @return bool|mixed
 	 */
 	function getRate() {
@@ -2061,66 +2065,83 @@ class UserDeductionFactory extends Factory {
 	}
 
 	/**
-	 * migrates UserDeductions for
-	 * @param $user
-	 * @param $old_data
+	 * Migrates UserDeductions as best as it possibly can for an employee when switching legal entities.
+	 * @param $user_obj object
+	 * @param $data_diff array
 	 */
-	static function MigrateLegalEntity( $user, $old_data ) {
-		$udlf = TTnew('UserDeductionListFactory');
+	static function MigrateLegalEntity( $user_obj, $data_diff ) {
+		//Get all CompanyDeduction records assigned to the new legal entity so we can quickly loop over them multiple times if needed.
 
-		Debug::Text('Searching for user deductions...', __FILE__, __LINE__, __METHOD__, 10);
+		/** @var CompanyDeductionListFactory $cdlf */
+		$cdlf = TTnew( 'CompanyDeductionListFactory' );
 
-		$udlf->getByCompanyIdAndUserId($user->getCompanyObject()->getId(), $user->getId());
-		foreach ( $udlf as $udf_obj ) {
-			Debug::Text('  Found existing UserDeduction record ID: \''. TTUUID::castUUID($udf_obj->getId()) .'\' CompanyDeduction ID: '. $udf_obj->getCompanyDeductionObject()->getId() .' Name: '. $udf_obj->getCompanyDeductionObject()->getName() .'...', __FILE__, __LINE__, __METHOD__, 10);
+		$cdlf->StartTransaction();
 
-			$cdlf = TTnew('CompanyDeductionListFactory');
-			$cdlf->getByLegalEntityIdAndName($user->getLegalEntity(), $udf_obj->getCompanyDeductionObject()->getName());
-			$cdf = $cdlf->getCurrent();
+		$cdlf->getByCompanyIdAndLegalEntityId( $user_obj->getCompany(), $user_obj->getLegalEntity() );
 
-			$cdlf_original = TTnew('CompanyDeductionListFactory');
-			$cdlf_original->getById($udf_obj->getCompanyDeduction());
-			$cdf_original = $cdlf_original->getCurrent();
+		/** @var UserDeductionListFactory $udlf */
+		$udlf = TTnew( 'UserDeductionListFactory' );
+		$udlf->getByCompanyIdAndUserId( $user_obj->getCompany(), $user_obj->getId() );
+		if ( $udlf->getRecordCount() > 0 ) {
+			Debug::text('Legal Entity changed. Trying to match all tax/deduction data to new entity for user: '. $user_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+			/** @var UserDeductionFactory $ud_obj */
+			foreach( $udlf as $ud_obj ) {
+				$matched_company_deduction_id = array();
 
-			Debug::Text($cdlf->getRecordCount().' match(es) found...', __FILE__, __LINE__, __METHOD__, 10);
-			if ( $cdlf->getRecordCount() == 1
-					AND $cdf_original->getCountry() == $cdf->getCountry()
-					AND $cdf_original->getProvince() == $cdf->getProvince()
-					AND $cdf_original->getDistrict() == $cdf->getDistrict() ) {
+				$cd_obj = $ud_obj->getCompanyDeductionObject();
 
-				Debug::Text('   Copying old record to CompanyDeduction ID: '. $cdf->getId() .'...', __FILE__, __LINE__, __METHOD__, 10);
-
-				//copy the object into a new user deduction factory.
-				$udf2 = TTnew ('UserDeductionFactory');
-				$udf2->setUser($user->getId());
-				$udf2->setCompanyDeduction($cdf->getId());
-				$udf2->setUserValue1($udf_obj->getUserValue1());
-				$udf2->setUserValue2($udf_obj->getUserValue2());
-				$udf2->setUserValue3($udf_obj->getUserValue3());
-				$udf2->setUserValue4($udf_obj->getUserValue4());
-				$udf2->setUserValue5($udf_obj->getUserValue5());
-				$udf2->setUserValue6($udf_obj->getUserValue6());
-				$udf2->setUserValue7($udf_obj->getUserValue7());
-				$udf2->setUserValue8($udf_obj->getUserValue8());
-				$udf2->setUserValue9($udf_obj->getUserValue9());
-				$udf2->setUserValue10($udf_obj->getUserValue10());
-
-				if ( $udf2->isValid() ) {
-					$insert_id = $udf2->Save();
-					Debug::Text('   New UserDeduction record saved ID: '. $insert_id .'...', __FILE__, __LINE__, __METHOD__, 10);
+				if ( is_object( $cd_obj ) AND $cd_obj->getLegalEntity() == TTUUID::getZeroId() ) {
+					Debug::text('  Skipping due to no legal entity assigned: '. $cd_obj->getName() .'('. $cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+					continue;
 				}
-			} else {
-				Debug::Text('   No exact match. Old: Country:'. $cdf_original->getCountry() .' Province: '.  $cdf_original->getProvince() .' District: '. $cdf_original->getDistrict() .' New: Country: '. $cdf->getCountry() .' Province: '.  $cdf->getProvince() .' District: '. $cdf->getDistrict() .'...', __FILE__, __LINE__, __METHOD__, 10);
-			}
 
-			Debug::Text('  Attempting to delete the old user deduction record...', __FILE__, __LINE__, __METHOD__, 10);
-			$udf_obj->setDeleted(TRUE);
-			if ( $udf_obj->isValid() ) {
-				$udf_obj->Save();
+				if ( is_object( $cd_obj ) AND $cd_obj->getLegalEntity() == $user_obj->getGenericOldDataValue('legal_entity_id') ) { //Only convert records assigned to the old legal entity. Skip records not assigned to any legal entity.
+					//Search for matching CompanyDeduction reocrd to try to re-assign them to.
+					//  Must Match: Calculate Type, Legal Entity -> User Legal Entity, Pay Stub Account
+					if ( $cdlf->getRecordCount() > 0 ) {
+						foreach( $cdlf as $tmp_cd_obj ) {
+							if ( $cd_obj->getCalculation() == $tmp_cd_obj->getCalculation()
+									AND $tmp_cd_obj->getLegalEntity() == $user_obj->getLegalEntity()
+									AND $cd_obj->getPayStubEntryAccount() == $tmp_cd_obj->getPayStubEntryAccount()
+								) {
+								Debug::text('  Match Found! Company Deduction: Old: '. $cd_obj->getName() .'('. $cd_obj->getId() .') New: '. $tmp_cd_obj->getName() .'('. $tmp_cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+								$matched_company_deduction_id[] = $tmp_cd_obj->getId(); //Use an array, if more than exactly one match, we can't migrate date to it.
+							} else {
+								Debug::text('  NOT a Match... Company Deduction: Old: '. $cd_obj->getName() .'('. $cd_obj->getId() .') New: '. $tmp_cd_obj->getName() .'('. $tmp_cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+							}
+						}
+						unset($tmp_cd_obj);
+					}
+				}
+
+				if ( count( $matched_company_deduction_id ) == 1 ) {
+					//Create new UserDeduction record so the audit log shows the employee being removed from one CompanyDeduction record and assigned to another.
+					$tmp_ud_obj = clone $ud_obj;
+					$tmp_ud_obj->setId( FALSE );
+					$tmp_ud_obj->setCompanyDeduction( $matched_company_deduction_id[0] );
+					if ( $tmp_ud_obj->isValid() ) {
+						$tmp_ud_obj->Save();
+					}
+					unset($tmp_ud_obj);
+				} else {
+					Debug::text('  No Match Found ('. count( $matched_company_deduction_id ) .')! Unassigning user from: '. $cd_obj->getName() .'('. $cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+				}
+
+				$ud_obj->setDeleted( TRUE );
+				if ( $ud_obj->isValid() ) {
+					$ud_obj->Save();
+				} else {
+					Debug::text('  ERROR! Validation failed when reassigning CompanyDeduction records... Company Deduction: '. $cd_obj->getName() .'('. $cd_obj->getId() .')', __FILE__, __LINE__, __METHOD__, 10);
+				}
+
 			}
-			unset($cdlf, $cdlf_original);
 		}
-		unset( $rdalf, $udlf );
+
+		$cdlf->CommitTransaction();
+
+		unset( $udlf, $ud_obj, $cd_obj, $cdlf, $matched_company_deduction_id );
+
+		return TRUE;
 	}
 
 	/**

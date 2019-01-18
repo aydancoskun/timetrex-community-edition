@@ -126,7 +126,7 @@ class TTUUID {
 	 * @param string $uuid UUID
 	 * @return int|string
 	 */
-	static function castUUID( $uuid ) {
+	static function castUUID( $uuid, $allow_null = FALSE ) {
 		//@see comment in isUUID
 
 		//During upgrade from V10.x (pre-UUID) to v11 (post-UUID), we need numeric IDs to be left as integers to avoid SQL errors.
@@ -135,8 +135,9 @@ class TTUUID {
 			return (int)$uuid;
 		}
 
-		//Allow nulls for cases where the column allows it.
-		if ( $uuid === NULL OR self::isUUID($uuid) == TRUE ) {
+		//Allow NULLs for cases where the column allows it.
+		$uuid = ( is_string( $uuid ) ) ? trim( $uuid ) : $uuid;
+		if ( ( $uuid === NULL AND $allow_null == TRUE ) OR self::isUUID( $uuid ) == TRUE ) {
 			return $uuid;
 		}
 

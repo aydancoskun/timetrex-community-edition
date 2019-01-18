@@ -9,7 +9,6 @@ WizardStep = Backbone.View.extend({
 	clicked_buttons: {},
 	reload: false,
 
-	el: null,
 	api: null,
 
 	//override in children
@@ -21,14 +20,7 @@ WizardStep = Backbone.View.extend({
 		this.buttons = {};
 		this.reload = false;
 		this.setWizardObject(wizard_obj);
-		this.el = $('.wizard:visible .content');
-		this.el.css( 'opacity', 0 );
 		var $this = this;
-		TTPromise.add('Wizard', 'initialize');
-		TTPromise.wait('Wizard', 'initialize', function() {
-			$this.el.css( 'opacity', 1 );
-		});
-
 		this.init();
 	},
 
@@ -38,21 +30,20 @@ WizardStep = Backbone.View.extend({
 	},
 
 	initCardsBlock: function(){
-		$('.wizard:visible #cards').html('');
+		$(this.wizard_obj.el).find('#cards').html('');
 	},
 
 	setTitle: function(title) {
-		var el = $('.wizard:visible .title-1');
-		el.html( title );
+		$(this.wizard_obj.el).find('.title-1').html( title );
 	},
 
 	setInstructions: function( instructions, callback ) {
-		// if( typeof instructions == 'undefined' ){
-		// 	instructions = this.instructions;
-		// }
-		var el = $('<p class="instructions"/>');
-		el.html( instructions );
-		this.el.append(el);
+
+		if ( $(this.el).find('.instructions').length == 0 ) {
+			$(this.el).find('.progress-bar').append('<p class="instructions"/>')
+		}
+
+	  	$(this.el).find('.progress-bar .instructions').html( instructions );
 
 		if ( typeof callback == 'function' ) {
 			callback();
@@ -95,11 +86,11 @@ WizardStep = Backbone.View.extend({
 	},
 
 	append: function( content ) {
-		$('.wizard:visible .content').append(content);
+		$(this.wizard_obj.el).find('.content').append(content);
 	},
 
 	appendButton: function( button ) {
-		$('.wizard:visible #cards').append(button);
+		$(this.wizard_obj.el).find('#cards').append(button);
 	},
 
 	setGrid: function( gridId, grid_div, allMultipleSelection ) {
@@ -162,8 +153,8 @@ WizardStep = Backbone.View.extend({
 
 
 	setGridSize: function( grid ) {
-		grid.setGridWidth( $('.wizard:visible .content .grid-div').width() - 11 );
-		grid.setGridHeight(  $('.wizard:visible .content').height() - 150 ); //During merge, this wasn't in MASTER branch.
+		grid.setGridWidth( $(this.wizard_obj.el).find('.content .grid-div').width() - 11 );
+		grid.setGridHeight(  $(this.wizard_obj.el).find('.content').height() - 150 ); //During merge, this wasn't in MASTER branch.
 	},
 
 	getRibbonButtonBox: function() {

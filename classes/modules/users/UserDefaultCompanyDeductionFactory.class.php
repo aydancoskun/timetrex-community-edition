@@ -54,11 +54,7 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setUserDefault( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'user_default_id', $value );
 	}
@@ -75,11 +71,7 @@ class UserDefaultCompanyDeductionFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompanyDeduction( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_deduction_id', $value );
 	}

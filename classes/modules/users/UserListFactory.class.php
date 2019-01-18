@@ -1587,7 +1587,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 			$strict = TRUE;
 		}
 		//Debug::Arr($order, 'Order Data:', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($filter_data, 'Filter Data:', __FILE__, __LINE__, __METHOD__, 10);
 
 		$compf = new CompanyFactory();
 		$bf = new BranchFactory();
@@ -1789,7 +1789,7 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['address2']) ) ? $this->getWhereClauseSQL( 'a.address2', $filter_data['address2'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['postal_code']) ) ? $this->getWhereClauseSQL( 'a.postal_code', $filter_data['postal_code'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['employee_number']) AND !is_array($filter_data['employee_number']) AND trim($filter_data['employee_number']) != '' ) ? $this->getWhereClauseSQL( 'a.employee_number', $filter_data['employee_number'], 'numeric', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_name']) ) ? $this->getWhereClauseSQL( 'a.user_name', $filter_data['user_name'], 'lower_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_name']) ) ? $this->getWhereClauseSQL( 'a.user_name', $filter_data['user_name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['sin']) ) ? $this->getWhereClauseSQL( 'a.sin', $filter_data['sin'], 'numeric_string', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['email']) AND !is_array($filter_data['email']) AND $filter_data['email'] != '' ) ? 'AND ('. $this->getWhereClauseSQL( 'a.work_email', $filter_data['email'], 'text', $ph, NULL, FALSE ).' OR '. $this->getWhereClauseSQL( 'a.home_email', $filter_data['email'], 'text', $ph, NULL, FALSE ) .')' : NULL;

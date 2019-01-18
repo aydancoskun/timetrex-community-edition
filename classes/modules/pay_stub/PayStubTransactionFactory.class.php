@@ -149,6 +149,7 @@ class PayStubTransactionFactory extends Factory {
 			'remittance_source_account_type' => FALSE,
 			'remittance_destination_account_id' => 'RemittanceDestinationAccount',
 			'remittance_destination_account' => FALSE,
+			'remittance_source_account_last_transaction_number' => FALSE,
 			'currency_id' => FALSE, //Always forced to pay stub currency in presave. Should never be set from UI.
 			'currency' => FALSE,
 			'currency_rate' => 'CurrencyRate',
@@ -298,11 +299,7 @@ class PayStubTransactionFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayStub( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'pay_stub_id', $value );
 	}
 
@@ -333,11 +330,7 @@ class PayStubTransactionFactory extends Factory {
 	 * @return bool
 	 */
 	function setRemittanceSourceAccount( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'remittance_source_account_id', $value );
 	}
 
@@ -353,11 +346,7 @@ class PayStubTransactionFactory extends Factory {
 	 * @return bool
 	 */
 	function setRemittanceDestinationAccount( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'remittance_destination_account_id', $value );
 	}
 
@@ -373,11 +362,7 @@ class PayStubTransactionFactory extends Factory {
 	 * @return bool
 	 */
 	function setCurrency( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Currency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 
 		$culf = TTnew( 'CurrencyListFactory' );
@@ -769,7 +754,7 @@ class PayStubTransactionFactory extends Factory {
 	 * @param object $rs_obj
 	 * @return EFT
 	 */
-	function startEFTFile($rs_obj) {
+	function startEFTFile( $rs_obj ) {
 		$data_format_type_id = $rs_obj->getDataFormat();
 		$data_format_types = $rs_obj->getOptions('data_format_eft_form');
 
@@ -782,7 +767,11 @@ class PayStubTransactionFactory extends Factory {
 		$eft->setDataCenter( $rs_obj->getValue7() );
 		$eft->setDataCenterName( $rs_obj->getValue8() ); //ACH
 
-		$eft->setOtherData('originator_long_name', $rs_obj->getLegalEntityObject()->getTradeName() ); //Originator Long name based on legal entity name. It will be trimmed automatically in EFT class.
+		if ( $rs_obj->getLegalEntity() == TTUUID::getNotExistID() AND is_object( $rs_obj->getCompanyObject() ) ) { //Source account assigned to "ANY" legal entity, fall back to company object for the long name.
+			$eft->setOtherData( 'originator_long_name', $rs_obj->getCompanyObject()->getName() ); //Originator Long name based on company name. It will be trimmed automatically in EFT class.
+		} elseif ( is_object( $rs_obj->getLegalEntityObject() ) ) {
+			$eft->setOtherData( 'originator_long_name', $rs_obj->getLegalEntityObject()->getTradeName() ); //Originator Long name based on legal entity name. It will be trimmed automatically in EFT class.
+		}
 		if ( $rs_obj->getValue6() != '' ) {
 			$eft->setOriginatorShortName( substr( $rs_obj->getValue6(), 0, 26 ) );
 		} else {
@@ -891,6 +880,9 @@ class PayStubTransactionFactory extends Factory {
 	 * @return string
 	 */
 	function formatFileName( $rs_obj, $transaction_number, $prefix, $extension = NULL ) {
+		//NOTE: At least one bank (Canadian Western Bank) do require a file extension (ie: .txt) before it allows you to upload a file.
+		//      Other systems like Bambora require the file name to be less than 32 chars and a .txt extension.
+
 		//Don't use users preferred date format, as it could contain spaces.
 		$file_name = $prefix . '_' . substr( preg_replace('/[^A-Za-z0-9_-]/', '', str_replace( ' ', '_', $rs_obj->getName() ) ), 0, 20 ) . '_' . (int)$transaction_number . '_' . TTDate::getHumanReadableDateStamp( time() );
 
@@ -941,7 +933,14 @@ class PayStubTransactionFactory extends Factory {
 	 * @param object $uf_obj
 	 * @return array
 	 */
-	function getChequeData( $ps_obj, $pst_obj, $uf_obj, $transaction_number ) {
+	function getChequeData( $ps_obj, $pst_obj, $rs_obj, $uf_obj, $transaction_number, $alignment_grid = FALSE ) {
+		if ( is_object( $uf_obj->getCompanyObject() ) ) {
+			$country_options = $uf_obj->getCompanyObject()->getOptions( 'country' );
+			$country = $country_options[$uf_obj->getCountry()];
+		} else {
+			$country = $uf_obj->getCountry();
+		}
+
 		return array(
 				'date'             => $ps_obj->getTransactionDate(),
 				'amount'           => $pst_obj->getAmount(),
@@ -954,9 +953,12 @@ class PayStubTransactionFactory extends Factory {
 				'stub_right_column' => TTi18n::gettext( 'Pay Start Date' ) . ': ' . TTDate::getDate( 'DATE', $ps_obj->getStartDate() ) . "\n" .
 						TTi18n::gettext( 'Pay End Date' ) . ': ' . TTDate::getDate( 'DATE', $ps_obj->getEndDate() ) . "\n" .
 						TTi18n::gettext( 'Payment Date' ) . ': ' . TTDate::getDate( 'DATE', $ps_obj->getTransactionDate() ),
+
 				'start_date'        => $ps_obj->getStartDate(),
 				'end_date'          => $ps_obj->getEndDate(),
+
 				'full_name'         => $uf_obj->getFullName(),
+				'full_address'      => Misc::formatAddress( $uf_obj->getFullName(), $uf_obj->getAddress1(), $uf_obj->getAddress2(), $uf_obj->getCity(), $uf_obj->getProvince(), $uf_obj->getPostalCode(), $country, TRUE ), //Condensed format.
 				'address1'          => $uf_obj->getAddress1(),
 				'address2'          => $uf_obj->getAddress2(),
 				'city'              => $uf_obj->getCity(),
@@ -967,6 +969,10 @@ class PayStubTransactionFactory extends Factory {
 				'company_name' => $uf_obj->getCompanyObject()->getName(),
 
 				'symbol' => $ps_obj->getCurrencyObject()->getSymbol(),
+
+				'signature' => ( ( $rs_obj->isSignatureExists() == TRUE ) ? $rs_obj->getSignatureFileName() : FALSE ),
+
+				'alignment_grid' => $alignment_grid
 		);
 	}
 
@@ -1021,7 +1027,7 @@ class PayStubTransactionFactory extends Factory {
 	 * @throws DBError
 	 * @throws GeneralError
 	 */
-	function exportPayStubTransaction( $pstlf = NULL, $export_type = NULL, $company_obj = NULL ) {
+	function exportPayStubTransaction( $pstlf = NULL, $export_type = NULL, $company_obj = NULL, $last_transaction_numbers = NULL ) {
 
 		require_once( Environment::getBasePath() . '/classes/ChequeForms/ChequeForms.class.php' );
 		$output = array();
@@ -1066,7 +1072,7 @@ class PayStubTransactionFactory extends Factory {
 					Debug::Text( 'PS Transaction ID: ' . $pst_obj->getId() . ' Amount: ' . $pst_obj->getAmount() .' Type: '. $pst_obj->getType() .' Status: '. $pst_obj->getStatus(), __FILE__, __LINE__, __METHOD__, 10 );
 
 					/** @var PayStubTransactionFactory $pst_obj */
-					//If the status is a Stop Payment - ReIssue (200), and still status=10 (Valid)
+					//If the status is a Stop Payment - ReIssue (200), and still type=10 (Valid)
 					//clone the object and create a new one to provide history
 					if ( $pst_obj->getStatus() == 200 ) {
 						if ( $pst_obj->getType() == 10 AND ( $this->getParent() == FALSE OR $this->getParent() == TTUUID::getZeroID() ) ) {
@@ -1114,6 +1120,11 @@ class PayStubTransactionFactory extends Factory {
 						if ( $n == 0 ) {
 							/** @var RemittanceSourceAccountFactory $rs_obj */
 							$rs_obj = $pst_obj->getRemittanceSourceAccountObject();
+
+							if ( isset( $last_transaction_numbers ) AND isset( $last_transaction_numbers[$rs_obj->getId()] ) AND count( $last_transaction_numbers ) > 0 ) {
+								Debug::Text( 'Overriding last transaction number for ' . $rs_obj->getName() . ' to: ' . $last_transaction_numbers[$rs_obj->getId()], __FILE__, __LINE__, __METHOD__, 10 );
+								$rs_obj->setLastTransactionNumber( $last_transaction_numbers[$rs_obj->getId()] );
+							}
 							Debug::Text( 'Starting New Batch! Name: [' . $rs_obj->getName() . '] ID: ' . $rs_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 
 							$data_format_types = $rs_obj->getOptions('data_format_check_form');
@@ -1121,7 +1132,7 @@ class PayStubTransactionFactory extends Factory {
 						Debug::Text( 'RSA: name: [' . $rs_obj->getName() . '] Type: '. $rs_obj->getType() .' ID: ' . $rs_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 
 						//EFT loop
-						if ( ( $export_type == 10 OR $export_type == 20 ) AND $rs_obj->getType() == 3000 ) {
+						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 3000 ) {
 							//START BATCH
 							if ( $n == 0 ) {
 								$next_transaction_number = $rs_obj->getNextTransactionNumber();
@@ -1145,17 +1156,18 @@ class PayStubTransactionFactory extends Factory {
 						} //end EFT loop
 
 						//CHECK loop
-						if ( ( $export_type == 10 OR $export_type == 30 ) AND $rs_obj->getType() == 2000 ) {
+						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 2000 ) {
 							//START BATCH
 							if ( $n == 0 ) {
 								$data_format_type_id = $rs_obj->getDataFormat();
-								$check_file_obj = new ChequeForms();
+								$check_file_obj = TTnew('ChequeForms');
 								$check_obj = $check_file_obj->getFormObject( strtoupper( $data_format_types[$data_format_type_id] ) );
+								$check_obj->setPageOffsets( $rs_obj->getValue6(), $rs_obj->getValue5() ); //Value5=Vertical, Value6=Horizontal
 								$transaction_number = $rs_obj->getNextTransactionNumber();
 								Debug::Text( 'New Cheque of type: ' . $data_format_types[$data_format_type_id], __FILE__, __LINE__, __METHOD__, 10 );
 							}
 
-							$ps_data = $this->getChequeData( $ps_obj, $pst_obj, $uf_obj, $transaction_number );
+							$ps_data = $this->getChequeData( $ps_obj, $pst_obj, $rs_obj, $uf_obj, $transaction_number );
 							$check_obj->addRecord( $ps_data );
 							Debug::Text( 'Row added to cheque' . $ps_obj->getId() . ' Transaction Number: ' . $transaction_number, __FILE__, __LINE__, __METHOD__, 10 );
 
@@ -1174,6 +1186,7 @@ class PayStubTransactionFactory extends Factory {
 						if ( isset($confirmation_number) ) { //If no confirmation is set, it likely didn't get paid since it wasn't with check or direct deposit.
 							$pst_obj->setConfirmationNumber( $confirmation_number );
 							$pst_obj->setStatus( 20 ); //20=Paid
+
 							if ( $pst_obj->isValid() ) {
 								$pst_obj->Save();
 							} else {
@@ -1283,6 +1296,7 @@ class PayStubTransactionFactory extends Factory {
 						case 'pay_period_id':
 						case 'destination_user_first_name':
 						case 'destination_user_last_name':
+						case 'remittance_source_account_last_transaction_number':
 						case 'remittance_destination_account':
 						case 'remittance_source_account':
 						case 'pay_stub_run_id':

@@ -220,10 +220,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -825,79 +822,83 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 			}
 		}
 
-		$time_sheet_verification_type_id = $this->getVerificationType();
-		if ( $time_sheet_verification_type_id > 10 ) { //10 = Disabled
+		if ( $this->getCurrentUser() != FALSE ) {
+			$time_sheet_verification_type_id = $this->getVerificationType();
+			if ( $time_sheet_verification_type_id > 10 ) { //10 = Disabled
 
-			$authorize_timesheet = FALSE;
-			if ( $time_sheet_verification_type_id == 20 ) { //Employee Only
-				$authorize_timesheet = TRUE;
-			} elseif ( $time_sheet_verification_type_id == 30 ) { //Superior Only
-				if ( $this->getStatus() == 30 AND $this->getCurrentUser() != FALSE ) { //Check on CurrentUser so we don't loop indefinitely through AuthorizationFactory.
-					Debug::Text(' aAuthorizing TimeSheet as superior...', __FILE__, __LINE__, __METHOD__, 10);
+				$authorize_timesheet = FALSE;
+				if ( $time_sheet_verification_type_id == 20 ) { //Employee Only
 					$authorize_timesheet = TRUE;
+				} elseif ( $time_sheet_verification_type_id == 30 ) { //Superior Only
+					if ( $this->getStatus() == 30 AND $this->getCurrentUser() != FALSE ) { //Check on CurrentUser so we don't loop indefinitely through AuthorizationFactory.
+						Debug::Text( ' aAuthorizing TimeSheet as superior...', __FILE__, __LINE__, __METHOD__, 10 );
+						$authorize_timesheet = TRUE;
+					}
+				} elseif ( $time_sheet_verification_type_id == 40 ) { //Superior & Employee
+					if ( $this->getStatus() == 30 AND $this->getCurrentUser() != FALSE AND $this->getCurrentUser() != $this->getUser() ) { //Check on CurrentUser so we don't loop indefinitely through AuthorizationFactory.
+						Debug::Text( ' bAuthorizing TimeSheet as superior...', __FILE__, __LINE__, __METHOD__, 10 );
+						$authorize_timesheet = TRUE;
+					}
 				}
-			} elseif ( $time_sheet_verification_type_id == 40 ) { //Superior & Employee
-				if ( $this->getStatus() == 30 AND $this->getCurrentUser() != FALSE AND $this->getCurrentUser() != $this->getUser() ) { //Check on CurrentUser so we don't loop indefinitely through AuthorizationFactory.
-					Debug::Text(' bAuthorizing TimeSheet as superior...', __FILE__, __LINE__, __METHOD__, 10);
-					$authorize_timesheet = TRUE;
-				}
-			}
 
-			if ( $authorize_timesheet == TRUE ) {
-				$af = TTnew( 'AuthorizationFactory' );
-				$af->setCurrentUser( $this->getCurrentUser() );
-				$af->setObjectType( 90 ); //TimeSheet
-				$af->setObject( $this->getId() );
-				$af->setAuthorized(TRUE);
-				if ( $af->isValid() ) {
-					$af->Save();
-				}
-			} else {
-				Debug::Text('Not authorizing timesheet...', __FILE__, __LINE__, __METHOD__, 10);
-
-				//Send initial Pending Authorization email to superiors. -- This should only happen on first save by the regular employee.
-				AuthorizationFactory::emailAuthorizationOnInitialObjectSave( $this->getCurrentUser(), 90, $this->getId() );
-			}
-
-			if ( $authorize_timesheet == TRUE OR $this->getAuthorized() == TRUE ) {
-				//Recalculate exceptions on the last day of pay period to remove any TimeSheet Not Verified exceptions.
-				//Get user_date_id.
-				if ( is_object( $this->getPayPeriodObject() ) ) {
-					$flags = array(
-									'meal' => FALSE,
-									'undertime_absence' => FALSE,
-									'break' => FALSE,
-									'holiday' => FALSE,
-									'schedule_absence' => FALSE,
-									'absence' => FALSE,
-									'regular' => FALSE,
-									'overtime' => FALSE,
-									'premium' => FALSE,
-									'accrual' => FALSE,
-
-									'exception' => TRUE,
-									//Exception options
-									'exception_premature' => FALSE, //Calculates premature exceptions
-									'exception_future' => FALSE, //Calculates exceptions in the future.
-
-									//Calculate policies for future dates.
-									'future_dates' => FALSE, //Calculates dates in the future.
-									'past_dates' => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
-									);
-
-					$cp = TTNew('CalculatePolicy');
-					$cp->setFlag( $flags );
-					$cp->setUserObject( $this->getUserObject() );
-					$cp->calculate( $this->getPayPeriodObject()->getEndDate() ); //This sets timezone itself.
-					$cp->Save();
+				if ( $authorize_timesheet == TRUE ) {
+					$af = TTnew( 'AuthorizationFactory' );
+					$af->setCurrentUser( $this->getCurrentUser() );
+					$af->setObjectType( 90 ); //TimeSheet
+					$af->setObject( $this->getId() );
+					$af->setAuthorized( TRUE );
+					if ( $af->isValid() ) {
+						$af->Save(); //AuthorizationFactory->postSave() re-saves the TimeSheetVerify record, and can cause recalculation to occur twice.
+					}
 				} else {
-					Debug::Text('No Pay Period found...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text( 'Not authorizing timesheet...', __FILE__, __LINE__, __METHOD__, 10 );
+
+					//Send initial Pending Authorization email to superiors. -- This should only happen on first save by the regular employee.
+					AuthorizationFactory::emailAuthorizationOnInitialObjectSave( $this->getCurrentUser(), 90, $this->getId() );
+				}
+
+				if ( $authorize_timesheet == TRUE OR $this->getAuthorized() == TRUE ) {
+					//Recalculate exceptions on the last day of pay period to remove any TimeSheet Not Verified exceptions.
+					//Get user_date_id.
+					if ( is_object( $this->getPayPeriodObject() ) ) {
+						$flags = array(
+								'meal'              => FALSE,
+								'undertime_absence' => FALSE,
+								'break'             => FALSE,
+								'holiday'           => FALSE,
+								'schedule_absence'  => FALSE,
+								'absence'           => FALSE,
+								'regular'           => FALSE,
+								'overtime'          => FALSE,
+								'premium'           => FALSE,
+								'accrual'           => FALSE,
+
+								'exception'           => TRUE,
+								//Exception options
+								'exception_premature' => FALSE, //Calculates premature exceptions
+								'exception_future'    => TRUE, //Calculates exceptions in the future. This is needed if the timesheet is authorized several days before the end of the pay period so the V1 exception goes away.
+
+								//Calculate policies for future dates.
+								'future_dates'        => FALSE, //Calculates dates in the future.
+								'past_dates'          => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
+						);
+
+						$cp = TTNew( 'CalculatePolicy' );
+						$cp->setFlag( $flags );
+						$cp->setUserObject( $this->getUserObject() );
+						$cp->calculate( $this->getPayPeriodObject()->getEndDate() ); //This sets timezone itself.
+						$cp->Save();
+					} else {
+						Debug::Text( 'No Pay Period found...', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+				} else {
+					Debug::Text( 'Not recalculating last day of pay period...', __FILE__, __LINE__, __METHOD__, 10 );
 				}
 			} else {
-				Debug::Text('Not recalculating last day of pay period...', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text( 'TimeSheet Verification is disabled...', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		} else {
-			Debug::Text('TimeSheet Verification is disabled...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text( 'CurrentUser() is not set, perhaps its being called a 2nd time from AuthorizationFactory postSave()?', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return TRUE;

@@ -90,8 +90,11 @@ var APIUser = ServiceCaller.extend( {
 
 	exportUser: function() {
 		return this.argumentsHandler( this.className, 'exportUser', arguments );
-	}
+	},
 
+	deleteImage: function() {
+		return this.argumentsHandler( this.className, 'deleteImage', arguments );
+	}
 
 
 } );

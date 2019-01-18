@@ -124,8 +124,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'state_filing_status' );
 		this.initDropDownOption( 'tax_formula_type' );
 
-		this.initDropDownOption( 'payroll_remittance_agency_id' );
-
 		this.company_api.getOptions( 'district', {
 			onResult: function( res ) {
 				res = res.getResult();
@@ -145,7 +143,6 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				$this.day_of_month_array = Global.buildRecordArray( res );
 			}
 		} );
-
 	},
 
 	hideSubViewTabs: function() {
@@ -1025,6 +1022,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			$this.collectUIDataToCurrentEditRecord();
 			$this.onLengthOfServiceChange();
 			$this.setEditViewDataDone();
+			$this.onLegalEntityChange();
 		} );
 
 		if ( this.sub_view_mode && ( !this.current_edit_record || !this.current_edit_record.id ) ) {
@@ -1039,40 +1037,48 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 		new_arg.filter_columns = this.edit_view_ui_dic.payroll_remittance_agency_id.getColumnFilter();
 
 		var $this = this;
-		this.payroll_remittance_agency_api.getPayrollRemittanceAgency( new_arg, {
-			onResult: function( task_result ) {
-				var data = task_result.getResult();
-				if ( data.length > 0 ) {
-					$this.edit_view_ui_dic.payroll_remittance_agency_id.setSourceData( data );
-					var id_in_result = false;
-					for ( var i in  data) {
-						if ( data[i].id == pra_value ) {
-							id_in_result = true;
-							break;
+		if ( this.edit_view_ui_dic.legal_entity_id.getValue() != TTUUID.zero_id ) {
+			this.payroll_remittance_agency_api.getPayrollRemittanceAgency(new_arg, {
+				onResult: function (task_result) {
+					var data = task_result.getResult();
+					if (data.length > 0) {
+						$this.edit_view_ui_dic.payroll_remittance_agency_id.setSourceData(data);
+						var id_in_result = false;
+						for (var i in  data) {
+							if (data[i].id == pra_value) {
+								id_in_result = true;
+								break;
+							}
 						}
-					}
-					if ( id_in_result === false ) {
-						pra_value = TTUUID.zero_id;
-					}
-					$this.current_edit_record.payroll_remittance_agency_id = pra_value;
-					$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue( pra_value );
+						if (id_in_result === false) {
+							pra_value = TTUUID.zero_id;
+						}
+						$this.current_edit_record.payroll_remittance_agency_id = pra_value;
+						$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue(pra_value);
 
-				} else {
-					$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue( TTUUID.zero_id );
+					} else {
+						$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue(TTUUID.zero_id);
+					}
+					$this.edit_view_ui_dic.payroll_remittance_agency_id.setEnabled( true );
+
 				}
-
-			}
-		} );
+			});
+		} else {
+			pra_value = TTUUID.zero_id;
+			$this.edit_view_ui_dic.payroll_remittance_agency_id.setSourceData( [ TTUUID.zero_id ] ); //wipe the box
+			$this.edit_view_ui_dic.payroll_remittance_agency_id.setValue(pra_value);
+			$this.edit_view_ui_dic.payroll_remittance_agency_id.setEnabled(false);
+		}
 	},
 
 	updateEmployeeData: function(){
 		var request_data = { filter_data: {} };
-		if( this.edit_view_ui_dic && this.edit_view_ui_dic.legal_entity_id && this.edit_view_ui_dic.legal_entity_id.getValue() ) {
+		if( this.edit_view_ui_dic && this.edit_view_ui_dic.legal_entity_id && this.edit_view_ui_dic.legal_entity_id.getValue() && this.edit_view_ui_dic.legal_entity_id.getValue() != TTUUID.zero_id ) {
 			request_data.filter_data.legal_entity_id = this.edit_view_ui_dic.legal_entity_id.getValue();
-			if ( this.edit_view_ui_dic.user ) {
-				this.edit_view_ui_dic.user.setDefaultArgs( request_data );
-				this.edit_view_ui_dic.user.setSourceData( null );
-			}
+		}
+		if ( this.edit_view_ui_dic.user ) {
+			this.edit_view_ui_dic.user.setDefaultArgs( request_data );
+			this.edit_view_ui_dic.user.setSourceData( null );
 		}
 	},
 
@@ -1097,7 +1103,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		var request_data = {
 			filter_data: {
-				legal_entity_id: this.parent_edit_record.legal_entity_id,
+				legal_entity_id: [this.parent_edit_record.legal_entity_id, TTUUID.zero_id, TTUUID.not_exist_id],
 				exclude_user_id: this.parent_edit_record.id //Don't show records the employee is already assinged to. Helps prevent duplicate mappings.
 			}
 		};
@@ -3687,7 +3693,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			show_search_inputs: false,
-			set_empty: false,
+			set_empty: true,
 			field: 'legal_entity_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Legal Entity' ), form_item_input, tab_tax_deductions_column1 );
@@ -3848,7 +3854,9 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					} );
 				}
 			} );
-				$this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
+
+			$this.detachElement('df_11')
+			$this.addEditFieldToColumn( 'df_11', form_item_input, tab_tax_deductions_column1, '', null, true );
 			form_item_input.parent().width( '45%' );
 				TTPromise.resolve('CompanyTaxDeduction','df_11');
 			} );

@@ -128,11 +128,7 @@ class AccrualBalanceFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
@@ -149,11 +145,7 @@ class AccrualBalanceFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrualPolicyAccount( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID( $value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'accrual_policy_account_id', $value );
 	}
 

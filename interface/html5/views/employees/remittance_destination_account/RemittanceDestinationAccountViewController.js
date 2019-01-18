@@ -85,6 +85,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				}
 			}
 		});
+
 	},
 
 	getDefaultDisplayColumns: function( callBack ) {
@@ -184,12 +185,12 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		this._super( 'setEditViewDataDone' );
 		this.getTypeOptions();
 		this.getRemittanceSourceAccount();
-		this.onTypeChange()
+		this.onTypeChange();
+		this.getRemittanceSourceAccount();
 		this.edit_view_ui_dic.legal_entity_id.setEnabled( false );
 	},
 
 	getTypeOptions: function() {
-
 		var $this = this;
 		var params = {
 			legal_entity_id: this.current_edit_record['legal_entity_id']
@@ -217,6 +218,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 	getLegalEntity: function() {
 		var $this = this;
+
 		if ( this.edit_view_ui_dic && this.edit_view_ui_dic['user_id'] && this.edit_view_ui_dic['user_id'].getValue() != TTUUID.zero_id ) {
 			var user_id = this.edit_view_ui_dic['user_id'].getValue();
 			if (!Global.isSet(user_id) || Global.isFalseOrNull(user_id)) {
@@ -232,15 +234,15 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 			user_args.filter_data.id = user_id;
 			this.user_api.getUser(user_args, {
 				async: false, onResult: function (res) {
-
 					if (res.isValid()) {
 						var result = res.getResult()[0];
 						if (Global.isSet(result.legal_entity_id) && result.legal_entity_id !== 0) {
 							$this.current_edit_record['legal_entity_id'] = result.legal_entity_id;
-							$this.edit_view_ui_dic.legal_entity_id.setValue(result.legal_entity_id);
+							$this.edit_view_ui_dic.legal_entity_id.setValue( result.legal_entity_id );
 						}
 						if (Global.isSet(result.currency_id) && !Global.isSet($this.current_edit_record['currency_id'])) {
 							$this.current_edit_record['currency_id'] = result.currency_id;
+							$this.edit_view_ui_dic.currency_id.setValue( result.currency_id );
 						}
 
 					}
@@ -250,12 +252,15 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 			if (!Global.isSet(this.current_edit_record['legal_entity_id']) || Global.isFalseOrNull(this.current_edit_record['legal_entity_id'])) {
 				this.user_default_api['get' + this.user_default_api.key_name]({
 					async: false, onResult: function (res) {
-
 						var result = res.getResult();
 						$this.current_edit_record['legal_entity_id'] = result[0]['legal_entity_id'];
+						$this.edit_view_ui_dic.legal_entity_id.setValue( result[0]['legal_entity_id'] );
 					}
 				})
 			}
+		} else {
+			$this.current_edit_record['legal_entity_id'] = TTUUID.zero_id;
+			$this.edit_view_ui_dic.legal_entity_id.setValue( TTUUID.zero_id );
 		}
 
 	},
@@ -275,52 +280,51 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		var source_account_args = {};
 		source_account_args.filter_data = {};
 		source_account_args.filter_data.type_id = type_id;
-		source_account_args.filter_data.legal_entity_id = legal_entity_id;
+		source_account_args.filter_data.legal_entity_id = [legal_entity_id, TTUUID.not_exist_id];
 
 		$this.edit_view_ui_dic['remittance_source_account_id'].setValue( 0 );
 		$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( null );
 		$this.edit_view_ui_dic['remittance_source_account_id'].setDefaultArgs( source_account_args );
 
-		if ( legal_entity_id && legal_entity_id != TTUUID.zero_id ) {
-			this.remittance_source_account_api.getRemittanceSourceAccount( source_account_args, {async:false, onResult: function(res) {
-				var result = res.getResult();
-				if ( !result ) {
-					result = [];
+		this.remittance_source_account_api.getRemittanceSourceAccount( source_account_args, {async:false, onResult: function(res) {
+			var result = res.getResult();
+			if ( !result ) {
+				result = [];
+			}
+			$this.remittance_source_account_array = result ;
+			$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( $this.remittance_source_account_array );
+
+			var key = false;
+			for ( var index in result ) {
+				if ( !result.hasOwnProperty( index ) ) {
+					continue;
 				}
-				$this.remittance_source_account_array = result ;
-				$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( $this.remittance_source_account_array );
-
-				var key = false;
-				for ( var index in result ) {
-					if ( !result.hasOwnProperty( index ) ) {
-						continue;
-					}
-
-					if ( result[index].id != TTUUID.zero_id&& result[index].id != TTUUID.not_exist_id && !key ) {
-						key = index;
-					}
-
-					if ( $this.current_edit_record['remittance_source_account_id'] ) {
-						if ( $this.current_edit_record['remittance_source_account_id'] == result[index].id ) {
-							$this.edit_view_ui_dic['remittance_source_account_id'].setValue( $this.current_edit_record['remittance_source_account_id'] );
-						}
-					}
-
+				if ( result[index].id != TTUUID.zero_id && result[index].id != TTUUID.not_exist_id && !key ) {
+					key = index;
 				}
 
-				if ( $this.is_first_load || $this.current_edit_record.type_id == 0) {
+				if ( $this.current_edit_record['remittance_source_account_id'] ) {
+					if ( $this.current_edit_record['remittance_source_account_id'] == result[index].id ) {
+						$this.edit_view_ui_dic['remittance_source_account_id'].setValue( $this.current_edit_record['remittance_source_account_id'] );
+					}
+				}
+
+			}
+
+			if ( typeof result == 'object' && !$this.current_edit_record.id ) {
+				if ($this.is_first_load || $this.current_edit_record.type_id == 0) {
 					$this.is_first_load = false;
-					if ( $this.edit_view_ui_dic['remittance_source_account_id'].getValue() !== 0 && Global.isFalseOrNull($this.edit_view_ui_dic['remittance_source_account_id'].getValue()) ) {
+					if ($this.edit_view_ui_dic['remittance_source_account_id'].getValue() !== 0 && Global.isFalseOrNull($this.edit_view_ui_dic['remittance_source_account_id'].getValue())) {
 						$this.edit_view_ui_dic['remittance_source_account_id'].setValue(result[key].id);
 					}
-				}else{
-					if ( Global.isFalseOrNull($this.edit_view_ui_dic['remittance_source_account_id'].getValue()) ) {
+				} else {
+					if (Global.isFalseOrNull($this.edit_view_ui_dic['remittance_source_account_id'].getValue())) {
 						$this.edit_view_ui_dic['remittance_source_account_id'].setValue(result[key].id);
 					}
 				}
+			}
 
-			}} );
-		}
+		}} );
 
 		$this.current_edit_record['remittance_source_account_id'] = $this.edit_view_ui_dic['remittance_source_account_id'].getValue();
 
@@ -329,10 +333,24 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 	uniformVariable: function( record ) {
 		//ensure that the variable variable fields are set to false if they aren't showing.
-		if ( this.edit_view_ui_dic ) {
+		if ( this.edit_view_ui_dic && this.current_edit_record.remittance_source_account_id != TTUUID.zero_id ) { //Keep accountd data if UUID == zero_id
 			for ( var i = 1; i <= 10; i++ ) {
-				if ( this.edit_view_ui_dic['value' + i] && this.edit_view_ui_dic['value' + i].is(':visible') == false ) {
-					record['value' + i] = false;
+				if ( i == 1 ) {
+					if (record['value1'] && ( typeof this.edit_view_ui_dic['value1_1'] == 'undefined' || ( this.edit_view_ui_dic['value1_1'] && this.edit_view_ui_dic['value1_1'].is(':visible') == false ) )) {
+						record['value1_1'] = false;
+					}
+					if (record['value1'] && ( typeof this.edit_view_ui_dic['value1_2'] == 'undefined' || ( this.edit_view_ui_dic['value1_2'] && this.edit_view_ui_dic['value1_2'].is(':visible') == false ) )) {
+						record['value1_2'] = false;
+					}
+
+					if ( record['value1_1'] === false && record['value1_2'] === false ) {
+						record['value1'] = false;
+					}
+
+				}else {
+					if (record['value' + i] && ( typeof this.edit_view_ui_dic['value' + i] == 'undefined' || ( this.edit_view_ui_dic['value' + i] && this.edit_view_ui_dic['value' + i].is(':visible') == false ) )) {
+						record['value' + i] = false;
+					}
 				}
 			}
 		}
@@ -349,9 +367,6 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		var key = target.getField();
 		var c_value = target.getValue();
 
-		if ( key === 'type_id' || key === 'user_id' ) {
-			this.getRemittanceSourceAccount();
-		}
 		switch ( key ) {
 			case 'value1_1':
 			case 'value1_2':
@@ -366,14 +381,16 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				this.getLegalEntity();
 				this.getTypeOptions();
 				this.edit_view_ui_dic['currency_id'].setValue( this.current_edit_record['currency_id'] );
-				this.getRemittanceSourceAccount();
 				break;
 			case 'amount_type_id':
 				this.onAmountTypeChange( c_value );
 				break;
 		}
 
-
+		//below the switch to ensure that fields are populated first.
+		if ( key === 'type_id' || key === 'user_id' ) {
+			this.getRemittanceSourceAccount();
+		}
 		this.current_edit_record[key] = c_value;
 
 		if ( !doNotValidate ) {
@@ -407,7 +424,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		this.detachElement( 'value10' );
 
 		var country = null;
-		if ( this.edit_view_ui_dic.type_id.getValue() == 3000 && this.edit_view_ui_dic.remittance_source_account_id.getValue() != TTUUID.zero_id) {
+		if ( this.edit_view_ui_dic.type_id.getValue() == 3000 && this.edit_view_ui_dic.remittance_source_account_id.getValue() != TTUUID.zero_id ) {
 			if ( this.edit_view_ui_dic.remittance_source_account_id.getValue() ) {
 				var rsa = this.remittance_source_account_api.getRemittanceSourceAccount({filter_data: {id: this.edit_view_ui_dic.remittance_source_account_id.getValue()}}, {async: false}).getResult()
 				country = rsa[0].country;
@@ -419,12 +436,14 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 					this.attachElement('value3').text($.i18n._('Account') + ':');
 					if (Global.isFalseOrNull(this.current_edit_record['value1'])) {
 						this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_2'].getValue();
+						this.current_edit_record['value1_2'] = this.edit_view_ui_dic['value1_2'].getValue();
 					}
 				} else if ( country == 'CA' ) {
 					this.attachElement('value1_1').text($.i18n._('Institution') + ':');
 					this.attachElement('value2').text($.i18n._('Bank Transit') + ':');
 					this.attachElement('value3').text($.i18n._('Account') + ':');
 					this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_1'].getValue();
+					this.current_edit_record['value1_1'] = this.edit_view_ui_dic['value1_1'].getValue();
 				}
 			}
 		}

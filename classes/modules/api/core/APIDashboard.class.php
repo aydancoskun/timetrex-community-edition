@@ -433,8 +433,10 @@ class APIDashboard extends APIFactory {
 		$parameters = array();
 		$parameters['filter_columns'] = array();
 		$parameters['filter_columns']['id'] = TRUE;
-		for ($i = 0; $i < count($display_columns); $i++) {
-			$parameters['filter_columns'][$display_columns[$i]] = TRUE;
+		if ( is_array($display_columns) ) {
+			for ($i = 0; $i < count($display_columns); $i++) {
+				$parameters['filter_columns'][$display_columns[$i]] = TRUE;
+			}
 		}
 		$parameters['filter_items_per_page'] = $rows_per_page;
 

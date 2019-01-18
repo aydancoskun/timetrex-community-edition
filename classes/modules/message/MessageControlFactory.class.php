@@ -297,10 +297,7 @@ class MessageControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setParent( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericTempDataValue( 'parent_id', $value );
 	}
 

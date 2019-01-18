@@ -354,22 +354,33 @@ class APIPayStubTransaction extends APIFactory {
 	}
 
 	/**
-	 * Summary of all pay period transactions
-	 * @param string $pay_period_ids UUID
+	 * Allow filters from Pay Stub Summary and Pay Stub Transaction Summary reports to return the transaction summary
+	 *
+	 * @param $filter_data
 	 * @return array|bool
 	 */
-	function getPayPeriodTransactionSummary( $pay_period_ids ) {
+	function getPayPeriodTransactionSummary( $filter_data ) {
 		if ( !$this->getPermissionObject()->Check('pay_stub', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_stub', 'view') OR $this->getPermissionObject()->Check('pay_stub', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
 
-		$permission_children_ids = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
-
 		/** @var PayStubTransactionListFactory $pstlf */
 		$pstlf = TTnew( 'PayStubTransactionListFactory' );
 		$company_id = $this->getCurrentCompanyObject()->getId();
-		$pstlf->getPayPeriodTransactionSummary( $company_id, $pay_period_ids, array(25), $permission_children_ids ); //25=OPEN (pay stubs)
+
+		if ( isset($filter_data['time_period']) AND is_array($filter_data['time_period']) ) {
+			$report_obj = TTnew('Report');
+			$report_obj->setUserObject( $this->getCurrentUserObject() );
+			$report_obj->setPermissionObject( $this->getPermissionObject() );
+			Debug::Text('Found TimePeriod...', __FILE__, __LINE__, __METHOD__, 10);
+			$filter_data = array_merge( $filter_data, (array)$report_obj->convertTimePeriodToStartEndDate( $filter_data['time_period'] ) );
+			unset($report_obj);
+		}
+
+		//SECURITY: Keep this line right before the API execution so nothing overwrites this filter by accident
+		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
+		$pstlf->getAPISummaryByCompanyIdAndArrayCriteria( $company_id, $filter_data );
 
 		$rsa_obj = TTnew( 'RemittanceSourceAccountFactory' );
 
@@ -379,6 +390,8 @@ class APIPayStubTransaction extends APIFactory {
 			$currency = $pst_obj->getCurrencyObject()->getName();
 			$retarr[] = array( 'pay_period_id' => $pst_obj->getPayPeriodID(),
 							   'currency' => $currency,
+							   'remittance_source_account_id' => $pst_obj->getRemittanceSourceAccount(),
+							   'remittance_source_account_last_transaction_number' => $pst_obj->getRemittanceSourceAccountObject()->getLastTransactionNumber(),
 							   'remittance_source_account_type' => Option::getByKey( $pst_obj->getRemittanceSourceAccountType(), $rsa_obj->getOptions('type') ),
 							   'remittance_source_account' => $pst_obj->getRemittanceSourceAccountName(),
 							   'total_amount' => Misc::removeTrailingZeros( $pst_obj->getColumn('total_amount') ),

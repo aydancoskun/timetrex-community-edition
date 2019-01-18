@@ -329,7 +329,6 @@ class PayrollRemittanceAgencyListFactory extends PayrollRemittanceAgencyFactory 
 
 		$uf = new UserFactory();
 		$lef = new LegalEntityFactory();
-		$cdf = new CompanyDeductionFactory();
 		$rsaf = new RemittanceSourceAccountFactory();
 
 		$ph = array(

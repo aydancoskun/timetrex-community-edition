@@ -55,10 +55,7 @@ class MessageSenderFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -74,10 +71,7 @@ class MessageSenderFactory extends Factory {
 	 * @return bool
 	 */
 	function setParent( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR empty($value) ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'parent_id', $value );
 	}
 
@@ -93,11 +87,7 @@ class MessageSenderFactory extends Factory {
 	 * @return bool
 	 */
 	function setMessageControl( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'message_control_id', $value );
 	}
 	/**

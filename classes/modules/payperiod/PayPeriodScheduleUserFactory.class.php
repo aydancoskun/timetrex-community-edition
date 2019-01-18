@@ -72,9 +72,6 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 */
 	function setPayPeriodSchedule( $value) {
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'pay_period_schedule_id', $value );
 	}
 
@@ -112,10 +109,7 @@ class PayPeriodScheduleUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 	/**

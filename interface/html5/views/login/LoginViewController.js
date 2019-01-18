@@ -2,7 +2,7 @@ LoginViewController = BaseViewController.extend( {
 
 	el: '#loginViewContainer', //Must set el here and can only set string, so events can work
 
-	_required_files: ['APICurrentUser', 'APICurrency', 'APIUserPreference', 'APIPermission'],
+	_required_files: ['APICurrentUser', 'APICurrency', 'APIUserPreference', 'APIPermission', 'APIDate' , 'APIAuthentication'],
 
 	authentication_api: null,
 	currentUser_api: null,

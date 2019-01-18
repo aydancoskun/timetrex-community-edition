@@ -159,11 +159,7 @@ class RecurringScheduleControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -179,11 +175,7 @@ class RecurringScheduleControlFactory extends Factory {
 	 * @return bool
 	 */
 	function setRecurringScheduleTemplateControl( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'recurring_schedule_template_control_id', $value );
 	}
 

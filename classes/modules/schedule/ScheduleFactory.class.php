@@ -309,11 +309,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
@@ -330,10 +326,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
@@ -353,10 +346,7 @@ class ScheduleFactory extends Factory {
 		if ( $value == NULL AND $this->getUser() != '' AND $this->getUser() != TTUUID::getZeroID() ) { //Don't attempt to find pay period if user_id is not specified.
 			$value = PayPeriodListFactory::findPayPeriod( $this->getUser(), $this->getDateStamp() );
 		}
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Allow NULL pay period, incase its an absence or something in the future.
 		//Cron will fill in the pay period later.
 		return $this->setGenericDataValue( 'pay_period_id', $value );
@@ -374,10 +364,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setReplacedId( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'replaced_id', $value );
 	}
 
@@ -644,10 +631,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setSchedulePolicyID( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'schedule_policy_id', $value );
 	}
 
@@ -663,10 +647,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setAbsencePolicyID( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'absence_policy_id', $value );
 	}
 
@@ -682,10 +663,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setBranch( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultBranch();
 			Debug::Text('Using Default Branch: '. $value, __FILE__, __LINE__, __METHOD__, 10);
@@ -709,10 +687,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setDepartment( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultDepartment();
@@ -738,10 +713,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setJob( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultJob();
 			Debug::Text('Using Default Job: '. $value, __FILE__, __LINE__, __METHOD__, 10);
@@ -768,10 +740,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setJobItem( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
 			$value = $this->getUserObject()->getDefaultJobItem();
 			Debug::Text('Using Default Job Item: '. $value, __FILE__, __LINE__, __METHOD__, 10);
@@ -798,10 +767,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setRecurringScheduleTemplateControl( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
 		return $this->setGenericDataValue( 'recurring_schedule_template_control_id', $value );
 	}

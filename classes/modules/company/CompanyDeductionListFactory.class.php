@@ -180,6 +180,65 @@ class CompanyDeductionListFactory extends CompanyDeductionFactory implements Ite
 	}
 
 	/**
+	 * @param string $company_id UUID
+	 * @param string $legal_entity_id UUID
+	 * @param $calculation_id INT
+	 * @param $status_id INT
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|CompanyDeductionListFactory
+	 * @throws DBError
+	 * @throws Exception
+	 */
+	function getByCompanyIdAndLegalEntityIdAndCalculationIdAndStatusId( $company_id, $legal_entity_id, $calculation_id, $status_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $legal_entity_id == '') {
+			return FALSE;
+		}
+
+		if ( $calculation_id == '') {
+			return FALSE;
+		}
+
+		if ( $status_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'status_id' => 'asc', 'calculation_order' => 'asc' );
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID($company_id),
+				'legal_entity_id' => TTUUID::castUUID($legal_entity_id),
+				'calculation_id' => (int)$calculation_id,
+				'status_id' => (int)$status_id,
+		);
+
+		$query = '
+					select	*
+					from	'. $this->getTable() .'
+					where	company_id = ?
+						AND legal_entity_id = ?
+						AND calculation_id = ?
+						AND status_id = ?
+						AND deleted = 0
+					';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $agency_id UUID
 	 * @param int $limit Limit the number of records returned
 	 * @param int $page Page number of records to return for pagination

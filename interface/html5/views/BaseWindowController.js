@@ -19,8 +19,8 @@ BaseWindowController = Backbone.View.extend( {
 		var $this = this;
 		var required_files = this.filterRequiredFiles();
 		require( required_files, function() {
-			if ( typeof $this.init() == 'function' ) {
-				$this.init();
+			if ( typeof $this.init == 'function' ) {
+				$this.init(options);
 			}
 		});
 	},

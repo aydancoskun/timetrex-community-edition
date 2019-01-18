@@ -821,5 +821,25 @@ class APIUser extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
+
+	function deleteImage( $employee_id ) {
+		//permissions match setUser()
+		if ( !$this->getPermissionObject()->Check('user', 'enabled')
+				OR !( $this->getPermissionObject()->Check('user', 'edit') OR $this->getPermissionObject()->Check('user', 'edit_own') OR $this->getPermissionObject()->Check('user', 'edit_child') OR $this->getPermissionObject()->Check('user', 'add') ) ) {
+			return	$this->getPermissionObject()->PermissionDenied();
+		}
+
+
+		$result = $this->stripReturnHandler( $this->getUser( array('filter_data' => array( 'id' => $employee_id ) ) ) );
+		if ( isset($result[0]) AND count($result[0]) > 0 ) {
+			/** @var UserFactory $uf */
+			$uf = TTnew( 'UserFactory' );
+			$file_name = $uf->getPhotoFileName( $this->current_company->getId(), $employee_id );
+
+			if ( file_exists($file_name) ) {
+				unlink($file_name);
+			}
+		}
+	}
 }
 ?>

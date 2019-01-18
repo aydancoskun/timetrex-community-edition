@@ -677,10 +677,7 @@ class LogFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR $value == NULL  ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -696,10 +693,7 @@ class LogFactory extends Factory {
 	 * @return bool
 	 */
 	function setObject( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR $value == NULL  ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'object_id', $value );
 	}
 

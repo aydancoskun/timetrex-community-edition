@@ -54,10 +54,7 @@ class LogDetailFactory extends Factory {
 	 * @return bool
 	 */
 	function setSystemLog( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' OR $value == NULL ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'system_log_id', $value );
 	}
 

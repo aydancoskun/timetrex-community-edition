@@ -687,6 +687,17 @@ CompanyViewController = BaseViewController.extend( {
 			}} );
 		}
 
+		if ( this.is_edit || this.edit_only_mode ) {
+			this.file_browser.setEnableDelete(true);
+			this.file_browser.bind('deleteClick', function (e, target) {
+				$this.api.deleteImage($this.current_edit_record.id, {
+					onResult: function (result) {
+						$this.initEditView(result);
+					}
+				});
+			});
+		}
+
 		this.addEditFieldToColumn( $.i18n._( 'Logo' ), this.file_browser, tab_company_column2, '', null, false, true );
 
 		// // Enable Second Surname

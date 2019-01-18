@@ -253,10 +253,12 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		this.current_edit_record[key] = c_value;
 
-		if ( key === 'type_id' ) {
-
+		if ( key == 'type_id' ) {
 			this.onTypeChange();
-		} else if ( key === 'timesheet_verify_type_id' ) {
+		}else if ( key == 'start_day_of_week' && ( !this.current_edit_record || !this.current_edit_record.id) ) {
+			this.edit_view_ui_dic.start_week_day_id.setValue( this.edit_view_ui_dic.start_day_of_week.getValue() );
+			this.current_edit_record.start_week_day_id = this.edit_view_ui_dic.start_day_of_week.getValue();
+		} else if ( key == 'timesheet_verify_type_id' ) {
 			this.onVerifyTypeChange();
 		}
 

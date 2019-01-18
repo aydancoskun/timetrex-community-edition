@@ -2760,6 +2760,12 @@ progress::-moz-progress-bar {
     margin-right: 0px;
 }
 
+#tinymce{
+    background:#fff;
+    padding:3px;
+    overflow: auto;
+}
+
 
 .UNIT_TEST_MODE * {
     font-smooth: never;
@@ -2859,4 +2865,86 @@ progress::-moz-progress-bar {
 
 #tab_pay_stub .t-text-input-readonly{
     background-color:#fff;
+}
+
+.wizard.process_transactions_wizard{
+    min-width: 550pt;
+    width:fit-content;
+    font-size:14px;
+    display:none;
+}
+
+#process_transactions_wizard_source_account_table{
+    margin: 0 auto;
+    text-align:left;
+}
+
+
+#process_transactions_wizard_source_account_table th{
+    text-align:center;
+}
+#process_transactions_wizard_source_account_table td{
+    font-weight:normal;
+    padding-right:10pt;
+    padding-left:3pt;
+}
+
+#process_transactions_wizard_source_account_table td input{
+    text-align:right;
+}
+
+.wizard.process_transactions_wizard .progress-bar{
+    display:none;
+}
+.wizard.process_transactions_wizard .confirm-buttons-div {
+    position:relative;
+    right:auto;
+}
+
+.wizard.process_transactions_wizard input[type="text"] {
+    width: 100px;
+    border: 1px solid #aaa;
+    font-size:14px;
+}
+
+.process_transactions_wizard .content{
+    width:100%;
+    height: calc(100% - 85px) !important;
+    overflow-y:scroll;
+    overflow-x:hidden;
+    border:#444;
+    top:8px !important;
+}
+
+.process_transactions_wizard {
+    height: 300px !important;
+    width: 400px !important;
+}
+
+.process_transactions_wizard .bottom-actions {
+    bottom: 10px !important;
+}
+
+.process_transactions_wizard input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    margin: 0;s
+}
+
+.process_transactions_wizard .download_warning {
+    position: absolute;
+    bottom:40px;
+    text-align:center;
+    width:550pt;
+    margin-bottom:8pt;
+    margin-bottom:5pt;
+    height:20pt;
+}
+
+.process_transactions_wizard .download_warning button {
+    height: 22px;
+    width: 22px;
+    background-size: contain;
+    background-repeat: no-repeat;
 }

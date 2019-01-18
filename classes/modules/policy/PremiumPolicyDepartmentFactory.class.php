@@ -74,10 +74,7 @@ class PremiumPolicyDepartmentFactory extends Factory {
 	 * @return bool
 	 */
 	function setPremiumPolicy( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'premium_policy_id', $value );
 	}
 
@@ -93,11 +90,7 @@ class PremiumPolicyDepartmentFactory extends Factory {
 	 * @return bool
 	 */
 	function setDepartment( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'department_id', $value );
 	}
 	/**

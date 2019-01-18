@@ -1657,10 +1657,7 @@ class CompanyFactory extends Factory {
 	 * @return bool
 	 */
 	function setParent( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'parent_id', $value );
 	}
 
@@ -2014,10 +2011,7 @@ class CompanyFactory extends Factory {
 	 * @return bool
 	 */
 	function setAdminContact( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'admin_contact', $value );
 
 	}
@@ -2034,10 +2028,7 @@ class CompanyFactory extends Factory {
 	 * @return bool
 	 */
 	function setBillingContact( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'billing_contact', $value );
 	}
 
@@ -2053,10 +2044,7 @@ class CompanyFactory extends Factory {
 	 * @return bool
 	 */
 	function setSupportContact( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'support_contact', $value );
 	}
 

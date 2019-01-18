@@ -124,11 +124,7 @@ class CurrencyRateFactory extends Factory {
 	 * @return bool
 	 */
 	function setCurrency( $value) {
-		$value = trim($value);
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Currency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'currency_id', $value );
 	}

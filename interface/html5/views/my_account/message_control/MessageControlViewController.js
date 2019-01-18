@@ -491,6 +491,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 			if ( $this.isReloadViewUI ) {
 				$this.isReloadViewUI = false;
+				$this.removeEditView();
 				$this.onViewClick( $this.current_select_message_control_data );
 
 			} else {
@@ -671,11 +672,6 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	setDefaultMenuSentIcon: function( context_btn, grid_selected_length, pId ) {
-
-	},
-
-	openEditView: function() {
-		this.initEditViewUI( this.viewId, this.edit_view_tpl );
 
 	},
 
@@ -1102,8 +1098,6 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	onEditClick: function( editId, noRefreshUI ) {
-
-		var $this = this;
 		this.is_viewing = false;
 		this.is_edit = true;
 		this.is_add = false;
@@ -1118,10 +1112,9 @@ MessageControlViewController = BaseViewController.extend( {
 			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
 		}
 
-		$this.openEditView();
-		$this.current_edit_record = selected_item;
-
-		$this.initEditView();
+		this.current_edit_record = selected_item;
+		this.initEditViewUI( this.viewId, this.edit_view_tpl );
+		this.initEditView();
 
 	},
 

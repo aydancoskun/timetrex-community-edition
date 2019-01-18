@@ -120,11 +120,7 @@ class UserReviewFactory extends Factory {
 	 * @return bool
 	 */
 	function setKPI( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'kpi_id', $value );
 	}
 

@@ -74,11 +74,7 @@ class RecurringPayStubAmendmentUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setRecurringPayStubAmendment( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'recurring_ps_amendment_id', $value );
 	}
 
@@ -94,11 +90,7 @@ class RecurringPayStubAmendmentUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 	/**

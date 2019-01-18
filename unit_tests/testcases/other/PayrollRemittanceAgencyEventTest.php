@@ -71,13 +71,14 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$user_obj = $this->getUserObject( $this->user_id );
 		//Use a consistent hire date, otherwise its difficult to get things correct due to the hire date being in different parts or different pay periods.
 		//Make sure it is not on a pay period start date though.
-		$user_obj->setHireDate( strtotime( '05-Mar-2018' ) );
+		$user_obj->setHireDate( strtotime( '05-Mar-2017' ) ); //Must not be in the future either, otherwise it could cause failures when the date passes into the past.
 		$user_obj->Save( FALSE );
 
 		/** @var RemittanceSourceAccountFactory $rsa_obj */
 		$rsa_obj = TTnew( 'RemittanceSourceAccountFactory' );
 		$rsa_obj->setName( 'Test source account' );
 		$rsa_obj->setLegalEntity( $this->legal_entity_id );
+		$rsa_obj->setCompany( $this->company_id );
 		$rsa_obj->setStatus( 10 );
 		$rsa_obj->setType( 2000 );
 		$rsa_obj->setCountry( 'US' );
@@ -687,7 +688,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( date( 'r', $result['start_date'] ), date( 'r', strtotime( '01-Jan-2017 12:00AM' ) ) );
 		$this->assertEquals( date( 'r', $result['end_date'] ), date( 'r', strtotime( '31-Dec-2017 11:59:59PM' ) ) );
 		$this->assertEquals( date( 'r', $result['due_date'] ), date( 'r', strtotime( '12-Feb-2018 12:00PM' ) ) );
-		
+
 		//chained loop test.
 		$praef->setPrimaryDayOfMonth( 10 );
 		$praef->setPrimaryMonth( 2 );
@@ -840,7 +841,7 @@ class PayrollRemittanceAgencyEventTest extends PHPUnit_Framework_TestCase {
 			if ( $praef->getEffectiveDate() != TTDate::getBeginQuarterEpoch( $praef->getEffectiveDate() ) ) {
 				$artificial_match_value = TTDate::incrementDate( $artificial_match_value, -1, 'quarter' );
 			}
-			
+
 			$start_date = TTDate::getBeginDayEpoch( TTDate::getBeginQuarterEpoch( $artificial_match_value ) );
 			$end_date = TTDate::getEndDayEpoch( TTDate::getEndQuarterEpoch( $artificial_match_value ) );
 			$due_date = TTDate::getDateOfNextQuarter( $artificial_match_value, $praef->getPrimaryDayOfMonth(), $praef->getQuarterMonth() );

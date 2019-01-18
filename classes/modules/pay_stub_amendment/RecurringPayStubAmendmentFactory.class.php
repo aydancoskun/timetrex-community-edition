@@ -195,11 +195,7 @@ class RecurringPayStubAmendmentFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
@@ -575,10 +571,7 @@ class RecurringPayStubAmendmentFactory extends Factory {
 	 * @return bool
 	 */
 	function setPercentAmountEntryNameId( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Not sure why we tried to use $result here, as if the ID passed is NULL, it causes a fatal error.
 		//$result = $psealf->getById( $id )->getCurrent();
 		return $this->setGenericDataValue( 'percent_amount_entry_name_id', $value );

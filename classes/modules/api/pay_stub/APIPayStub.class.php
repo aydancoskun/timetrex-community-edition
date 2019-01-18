@@ -139,7 +139,17 @@ class APIPayStub extends APIFactory {
 			$hide_employer_rows = TRUE;
 		}
 
-		if ( ($format == 10 OR $format == 20 OR $format == 30) AND $this->getPermissionObject()->Check( 'pay_stub', 'view' ) == TRUE ) {
+		if ( ( $format == 'export_transactions' ) AND $this->getPermissionObject()->Check( 'pay_stub', 'view' ) == TRUE ) {
+
+			if ( isset($data['filter_data']['time_period']) AND is_array($data['filter_data']['time_period']) ) {
+				$report_obj = TTnew('Report');
+				$report_obj->setUserObject( $this->getCurrentUserObject() );
+				$report_obj->setPermissionObject( $this->getPermissionObject() );
+				Debug::Text('Found TimePeriod...', __FILE__, __LINE__, __METHOD__, 10);
+				$data['filter_data'] = array_merge( $data['filter_data'], (array)$report_obj->convertTimePeriodToStartEndDate( $data['filter_data']['time_period'] ) );
+				unset($report_obj);
+			}
+
 			$data['filter_data']['transaction_status_id'] = array(10, 200); //10=Pending, 200=ReIssue
 			$data['filter_data']['transaction_type_id'] = 10; //10=Valid (Enabled)
 			if ( isset($data['filter_data']['id']) ) {
@@ -147,20 +157,12 @@ class APIPayStub extends APIFactory {
 			}
 			unset($data['filter_data']['id']);
 
-			if ( $format == 20 ) {
-				$data['filter_data']['remittance_destination_account_type_id'] = array(3000);
-			}
-
-			if ( $format == 30 ) {
-				$data['filter_data']['remittance_destination_account_type_id'] = array(2000);
-			}
-
 			//Specific sort order to ensure consistent transaction order in the EFT files. Keep in mind exportPayStubTransaction() sorts the transactions again too, but this helps.
 			$data['filter_sort'] = array( 'lef.id' => 'asc', 'rsaf.id' => 'asc', 'psf.transaction_date' => 'asc', 'destination_user_last_name' => 'asc', 'destination_first_last_name' => 'asc', 'rdaf.id' => 'asc' );
 
 			/** @var PayStubTransactionListFactory $pslf */
 			$pslf = TTnew( 'PayStubTransactionListFactory' );
-			$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+			$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentUserObject()->getCompany(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 			Debug::Text( 'PSTLF Record Count: ' . $pslf->getRecordCount() . ' Format: ' . $format, __FILE__, __LINE__, __METHOD__, 10 );
 		} else {
 			/** @var PayStubListFactory $pslf */
@@ -185,19 +187,19 @@ class APIPayStub extends APIFactory {
 					return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: No data to export...') );
 				}
 			}
-		} elseif ( ($format == 10 OR $format == 20 OR $format == 30) AND $this->getPermissionObject()->Check('pay_stub', 'view') == TRUE ) {
+		} elseif ( ( $format == 'export_transactions' ) AND $this->getPermissionObject()->Check('pay_stub', 'view') == TRUE ) {
 			if ( $pslf->getRecordCount() > 0 ) {
 				$this->getProgressBarObject()->setDefaultKey( $this->getAMFMessageID() );
 				$this->getProgressBarObject()->start( $this->getAMFMessageID(), $pslf->getRecordCount() );
 				$pslf->setProgressBarObject( $this->getProgressBarObject() ); //Expose progress bar object to pay stub object.
 
-				$output = $pslf->exportPayStubTransaction( $pslf, $format);
+				$output = $pslf->exportPayStubTransaction( $pslf, $format, NULL, $data['setup_last_check_number']);
 
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 				if ( is_array($output) AND count($output) > 0 ) {
 					$filename = FALSE;
-					if ( $format == 10 ) {
+					if ( $format == 'export_transactions' ) {
 						$filename = 'pay_stub_transactions_'.TTDate::getDate( 'DATE', time() ).'.zip';
 					}
 					$zip_file = Misc::zip($output, $filename, TRUE);
@@ -399,53 +401,64 @@ class APIPayStub extends APIFactory {
 									//$pay_stub_entry_obj->setPayStub( $lf->getId() ); //Don't set this here as it will cause validation failures. Its handled in addEntry instead.
 								}
 
-								if ( isset($pay_stub_entry['pay_stub_entry_name_id']) AND $pay_stub_entry['pay_stub_entry_name_id'] != '' ) {
-									$pay_stub_entry_obj->setPayStubEntryNameId( $pay_stub_entry['pay_stub_entry_name_id'] );
-								}
-
-								if ( isset( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != '' ) {
-									$pay_stub_entry_obj->setPayStubAmendment( $pay_stub_entry['pay_stub_amendment_id'], $lf->getStartDate(), $lf->getEndDate() );
-								}
-
-								if ( isset( $pay_stub_entry['rate'] ) AND $pay_stub_entry['rate'] != '' ) {
-									$pay_stub_entry_obj->setRate( $pay_stub_entry['rate'] );
-								}
-								if ( isset( $pay_stub_entry['units'] ) AND $pay_stub_entry['units'] != '' ) {
-									$pay_stub_entry_obj->setUnits( $pay_stub_entry['units'] );
-								}
-
-								if ( isset( $pay_stub_entry['amount'] ) AND $pay_stub_entry['amount'] != '' ) {
-									$pay_stub_entry_obj->setAmount( $pay_stub_entry['amount'] );
-								}
-
-								if ( !isset( $pay_stub_entry['units'] ) OR $pay_stub_entry['units'] == '' ) {
-									$pay_stub_entry['units'] = 0;
-								}
-								if ( !isset( $pay_stub_entry['rate'] ) OR $pay_stub_entry['rate'] == '' ) {
-									$pay_stub_entry['rate'] = 0;
-								}
-								if ( !isset( $pay_stub_entry['description'] ) OR $pay_stub_entry['description'] == '' ) {
-									$pay_stub_entry['description'] = NULL;
-								}
-								if ( !isset( $pay_stub_entry['pay_stub_amendment_id'] ) OR $pay_stub_entry['pay_stub_amendment_id'] == '' ) {
-									$pay_stub_entry['pay_stub_amendment_id'] = NULL;
-								}
-								if ( !isset( $pay_stub_entry['user_expense_id'] ) OR $pay_stub_entry['user_expense_id'] == '' ) {
-									$pay_stub_entry['user_expense_id'] = NULL;
-								}
-
-								$ytd_adjustment = FALSE;
-								if ( TTUUID::isUUID( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != TTUUID::getZeroID() AND $pay_stub_entry['pay_stub_amendment_id'] != TTUUID::getNotExistID() ) {
-									$psamlf = TTNew( 'PayStubAmendmentListFactory' );
-									$psamlf->getByIdAndCompanyId( TTUUID::castUUID($pay_stub_entry['pay_stub_amendment_id']), $this->getCurrentCompanyObject()->getId() );
-									if ( $psamlf->getRecordCount() > 0 ) {
-										$ytd_adjustment = $psamlf->getCurrent()->getYTDAdjustment();
+								if ( isset( $pay_stub_entry['deleted']) AND $pay_stub_entry['deleted'] == 1 ) {
+									// Deleted is set instead of populating the object to provide for the case where a
+									// user enters invalid data then deletes the row, removing it from the UI
+									$pay_stub_entry_obj->setDeleted( TRUE );
+								} else {
+									if ( isset($pay_stub_entry['pay_stub_entry_name_id']) AND $pay_stub_entry['pay_stub_entry_name_id'] != '' ) {
+										$pay_stub_entry_obj->setPayStubEntryNameId( $pay_stub_entry['pay_stub_entry_name_id'] );
 									}
-									Debug::Text( ' Pay Stub Amendment Id: ' . $pay_stub_entry['pay_stub_amendment_id'] . ' YTD Adjusment: ' . (int)$ytd_adjustment, __FILE__, __LINE__, __METHOD__, 10 );
+
+									if ( isset( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != '' ) {
+										$pay_stub_entry_obj->setPayStubAmendment( $pay_stub_entry['pay_stub_amendment_id'], $lf->getStartDate(), $lf->getEndDate() );
+									}
+
+									if ( isset( $pay_stub_entry['rate'] ) AND $pay_stub_entry['rate'] != '' ) {
+										$pay_stub_entry_obj->setRate( $pay_stub_entry['rate'] );
+									}
+									if ( isset( $pay_stub_entry['units'] ) AND $pay_stub_entry['units'] != '' ) {
+										$pay_stub_entry_obj->setUnits( $pay_stub_entry['units'] );
+									}
+
+									if ( isset( $pay_stub_entry['amount'] ) AND $pay_stub_entry['amount'] != '' ) {
+										$pay_stub_entry_obj->setAmount( $pay_stub_entry['amount'] );
+									}
+
+									if ( !isset( $pay_stub_entry['units'] ) OR $pay_stub_entry['units'] == '' ) {
+										$pay_stub_entry['units'] = 0;
+									}
+									if ( !isset( $pay_stub_entry['rate'] ) OR $pay_stub_entry['rate'] == '' ) {
+										$pay_stub_entry['rate'] = 0;
+									}
+									if ( !isset( $pay_stub_entry['description'] ) OR $pay_stub_entry['description'] == '' ) {
+										$pay_stub_entry['description'] = NULL;
+									}
+									if ( !isset( $pay_stub_entry['pay_stub_amendment_id'] ) OR $pay_stub_entry['pay_stub_amendment_id'] == '' ) {
+										$pay_stub_entry['pay_stub_amendment_id'] = NULL;
+									}
+									if ( !isset( $pay_stub_entry['user_expense_id'] ) OR $pay_stub_entry['user_expense_id'] == '' ) {
+										$pay_stub_entry['user_expense_id'] = NULL;
+									}
+
+									$ytd_adjustment = FALSE;
+									if ( TTUUID::isUUID( $pay_stub_entry['pay_stub_amendment_id'] ) AND $pay_stub_entry['pay_stub_amendment_id'] != TTUUID::getZeroID() AND $pay_stub_entry['pay_stub_amendment_id'] != TTUUID::getNotExistID() ) {
+										$psamlf = TTNew( 'PayStubAmendmentListFactory' );
+										$psamlf->getByIdAndCompanyId( TTUUID::castUUID($pay_stub_entry['pay_stub_amendment_id']), $this->getCurrentCompanyObject()->getId() );
+										if ( $psamlf->getRecordCount() > 0 ) {
+											$ytd_adjustment = $psamlf->getCurrent()->getYTDAdjustment();
+										}
+										Debug::Text( ' Pay Stub Amendment Id: ' . $pay_stub_entry['pay_stub_amendment_id'] . ' YTD Adjusment: ' . (int)$ytd_adjustment, __FILE__, __LINE__, __METHOD__, 10 );
+									}
 								}
 
 								if ( $pay_stub_entry_obj->isValid() == TRUE ) {
-									$lf->addEntry( $pay_stub_entry['pay_stub_entry_name_id'], $pay_stub_entry['amount'], $pay_stub_entry['units'], $pay_stub_entry['rate'], $pay_stub_entry['description'], $pay_stub_entry['pay_stub_amendment_id'], NULL, NULL, $ytd_adjustment, $pay_stub_entry['user_expense_id'] );
+									if (  $pay_stub_entry_obj->getDeleted() == TRUE ) {
+										//Since addEntry() doesn't get passed an object, it can't delete entries, so we need to handle it outside of that function instead.
+										$pay_stub_entry_obj->Save();
+									} else {
+										$lf->addEntry( $pay_stub_entry['pay_stub_entry_name_id'], $pay_stub_entry['amount'], $pay_stub_entry['units'], $pay_stub_entry['rate'], $pay_stub_entry['description'], $pay_stub_entry['pay_stub_amendment_id'], NULL, NULL, $ytd_adjustment, $pay_stub_entry['user_expense_id'] );
+									}
 									$processed_entries++;
 								} else {
 									Debug::Text( ' ERROR: Unable to save PayStubEntry... ', __FILE__, __LINE__, __METHOD__, 10 );

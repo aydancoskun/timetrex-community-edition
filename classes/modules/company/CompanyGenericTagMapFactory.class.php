@@ -120,7 +120,7 @@ class CompanyGenericTagMapFactory extends Factory {
 	 * @return bool
 	 */
 	function setTagID( $value) {
-		$value = TTUUID::castUUID($value);
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'tag_id', $value );
 	}
 

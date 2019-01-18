@@ -136,18 +136,21 @@ class LockFile {
 	 */
 	function create() {
 		//Attempt to create directory if it does not already exist.
-		if ( file_exists( dirname( $this->getFileName() ) ) == FALSE ) {
-			$mkdir_result = @mkdir( dirname( $this->getFileName() ), 0777, TRUE );
+		$dir = dirname( $this->getFileName() );
+		if ( file_exists( $dir ) == FALSE ) {
+			$mkdir_result = @mkdir( $dir, 0777, TRUE ); //ugo+rwx
 			if ( $mkdir_result == FALSE ) {
-				Debug::Text( 'ERROR: Unable to create lock file directory: ' . dirname( $this->getFileName() ), __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( 'ERROR: Unable to create lock file directory: ' . $dir, __FILE__, __LINE__, __METHOD__, 10 );
 			} else {
-				Debug::Text( 'WARNING: Created lock file directory as it didnt exist: ' . dirname( $this->getFileName() ), __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::Text( 'WARNING: Created lock file directory as it didnt exist: ' . $dir, __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		}
 
 		//Write current PID to file, so we can check if its still running later on.
-		//return @touch( $this->getFileName() );
-		return @file_put_contents( $this->getFileName(), $this->getCurrentPID() );
+		$retval = @file_put_contents( $this->getFileName(), $this->getCurrentPID() );
+		@chmod( $this->getFileName(), 0660 ); //ug+rw
+
+		return $retval;
 	}
 
 	/**

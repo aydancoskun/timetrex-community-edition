@@ -284,11 +284,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
 
@@ -304,10 +300,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
@@ -324,10 +317,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setRecurringScheduleControl( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
 		return $this->setGenericDataValue( 'recurring_schedule_control_id', $value );
 	}
@@ -344,10 +334,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setRecurringScheduleTemplateControl( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Need to be able to support user_id=0 for open shifts. But this can cause problems with importing punches with user_id=0.
 		return $this->setGenericDataValue( 'recurring_schedule_template_control_id', $value );
 	}
@@ -611,10 +598,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setSchedulePolicyID( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'schedule_policy_id', $value );
 	}
 
@@ -630,10 +614,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setAbsencePolicyID( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'absence_policy_id', $value );
 	}
 
@@ -649,10 +630,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setBranch( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Allow setting to Default (-1) so we can update it in real-time for the regular schedule view.
 		return $this->setGenericDataValue( 'branch_id', $value );
 	}
@@ -669,10 +647,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setDepartment( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//Allow setting to Default (-1) so we can update it in real-time for the regular schedule view.
 		return $this->setGenericDataValue( 'department_id', $value );
 	}
@@ -689,10 +664,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setJob( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}
@@ -712,10 +684,7 @@ class RecurringScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function setJobItem( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}

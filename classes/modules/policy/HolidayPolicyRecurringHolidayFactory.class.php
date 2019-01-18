@@ -75,9 +75,6 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	 */
 	function setHolidayPolicy( $value) {
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'holiday_policy_id', $value );
 	}
 
@@ -94,9 +91,6 @@ class HolidayPolicyRecurringHolidayFactory extends Factory {
 	 */
 	function setRecurringHoliday( $value) {
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'recurring_holiday_id', $value );
 	}
 

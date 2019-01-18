@@ -105,11 +105,7 @@ class PayStubEntryFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayStub( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'pay_stub_id', $value );
 	}
 
@@ -125,11 +121,7 @@ class PayStubEntryFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayStubEntryNameId( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 
 		Debug::text('Entry Account ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'pay_stub_entry_name_id', $value );
@@ -192,10 +184,7 @@ class PayStubEntryFactory extends Factory {
 	 * @return bool
 	 */
 	function setUserExpense( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::text('User Expense ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		if ( getTTProductEdition() < TT_PRODUCT_ENTERPRISE ) {

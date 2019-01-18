@@ -89,10 +89,7 @@ class HierarchyUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setHierarchyControl( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		//This is a sub-class, need to support setting HierachyControlID before its created.
 		return $this->setGenericDataValue( 'hierarchy_control_id', $value );
 	}
@@ -151,10 +148,7 @@ class HierarchyUserFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 	/**

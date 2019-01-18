@@ -289,11 +289,7 @@ class PayStubAmendmentFactory extends Factory {
 	 * @return bool
 	 */
 	function setUser( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'user_id', $value );
 	}
 
@@ -309,11 +305,7 @@ class PayStubAmendmentFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayStubEntryNameId( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		//$psenlf = TTnew( 'PayStubEntryNameListFactory' );
 		//Debug::Arr($result, 'Result: ID: '. $id .' Rows: '. $result->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'pay_stub_entry_name_id', $value );
@@ -354,10 +346,7 @@ class PayStubAmendmentFactory extends Factory {
 	 * @return bool
 	 */
 	function setRecurringPayStubAmendmentId( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		$rpsalf = TTnew( 'RecurringPayStubAmendmentListFactory' );
 		$rpsalf->getById( $value );
@@ -674,10 +663,7 @@ class PayStubAmendmentFactory extends Factory {
 	 * @return bool
 	 */
 	function setPercentAmountEntryNameId( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'percent_amount_entry_name_id', $value );
 	}
 
@@ -1301,7 +1287,7 @@ class PayStubAmendmentFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub Amendment - Employee').': '. UserListFactory::getFullNameById( $this->getUser() ) .' '.	TTi18n::getText('Amount').': '. $this->getAmount(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub Amendment - Employee').': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Effective Date').': '. TTDate::getDate('DATE', $this->getEffectiveDate() ) .' '. TTi18n::getText('Amount').': '. $this->getAmount(), NULL, $this->getTable(), $this );
 	}
 }
 ?>

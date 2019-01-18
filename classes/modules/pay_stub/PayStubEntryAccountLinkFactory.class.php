@@ -96,11 +96,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
@@ -117,10 +113,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setTotalGross( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'total_gross', $value );
 	}
@@ -137,10 +130,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setTotalEmployeeDeduction( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'total_employee_deduction', $value );
@@ -158,10 +148,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setTotalEmployerDeduction( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'total_employer_deduction', $value );
@@ -179,10 +166,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setTotalNetPay( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'total_net_pay', $value );
@@ -200,16 +184,14 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setRegularTime( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'regular_time', $value );
 	}
 
 	/**
+	 * DEPRECATED: UserDeductionFactory determines this from the CompanyDeduction record instead now.
 	 * @return bool|mixed
 	 */
 	function getEmployeeCPP() {
@@ -221,16 +203,14 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setEmployeeCPP( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'employee_cpp', $value );
 	}
 
 	/**
+	 * DEPRECATED: UserDeductionFactory determines this from the CompanyDeduction record instead now.
 	 * @return bool|mixed
 	 */
 	function getEmployeeEI() {
@@ -242,10 +222,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setEmployeeEI( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'employee_ei', $value );
 	}
@@ -262,10 +239,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setMonthlyAdvance( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'monthly_advance', $value );
@@ -283,10 +257,7 @@ class PayStubEntryAccountLinkFactory extends Factory {
 	 * @return bool
 	 */
 	function setMonthlyAdvanceDeduction( $value) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 
 		Debug::Text('ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		$psealf = TTnew( 'PayStubEntryAccountListFactory' );

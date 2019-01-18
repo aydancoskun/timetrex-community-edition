@@ -929,10 +929,6 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 		this.onTypeChange();
 	},
 
-	openEditView: function() {
-		this.initEditViewUI( this.viewId, this.edit_view_tpl );
-	},
-
 	validate: function() {
 
 		var $this = this;

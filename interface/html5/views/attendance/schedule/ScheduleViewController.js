@@ -427,7 +427,8 @@ ScheduleViewController = BaseViewController.extend( {
 
 					var result_data = result.getResult();
 
-					if ( !result_data ) {
+					//#2571 - result_data is undefined (when result_data === true there is no result[0])
+					if ( !result_data || result_data === true ) {
 						TAlertManager.showAlert( $.i18n._( 'Record does not exist' ) );
 						$this.onCancelClick();
 						return;
@@ -667,10 +668,10 @@ ScheduleViewController = BaseViewController.extend( {
 		'Are you sure you wish to continue?' ), null, function( result ) {
 
 			var remove_ids = [];
-			if ( $this.edit_view ) {
+			//#2571 - $this.current_edit_record is null
+			if ( $this.edit_view && $this.current_edit_record ) {
 				remove_ids.push( $this.current_edit_record.id );
 			} else {
-
 				remove_ids = $this.getGridSelectIdArray();
 			}
 
@@ -2462,7 +2463,8 @@ ScheduleViewController = BaseViewController.extend( {
 			onResult: function( result ) {
 				if ( result.isValid() ) {
 					var result_data = result.getResult();
-					if ( result_data === true ) {
+					//#2571 - Cannot read property 'id' of null
+					if ( result_data === true && $this.current_edit_record ) {
 						$this.refresh_id = $this.current_edit_record.id;
 					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 						$this.refresh_id = result_data
@@ -4141,7 +4143,11 @@ ScheduleViewController = BaseViewController.extend( {
 		if ( this.schedule_source.length === 1 && this.schedule_source[0].user_id != '' ) {
 			//case where only one user has a schedule on the sheet
 			default_user_id = this.schedule_source[0].user_id;
-		} else if ( this.schedule_source.length === 1 && this.filter_data && this.filter_data.include_user_ids && this.filter_data.include_user_id.value && this.filter_data.include_user_ids.value.length === 1 ) {
+		} else if ( this.schedule_source.length === 1
+			&& typeof this.filter_data == 'object' // #2571 - Uncaught TypeError: This.filter_data.include_user_id is undefined
+			&& typeof this.filter_data.include_user_ids == 'object' // #2571 - Uncaught TypeError: Cannot read property 'value' of undefined 
+			&& this.filter_data.include_user_ids.value
+			&& this.filter_data.include_user_ids.value.length === 1 ) {
 			//case where one user is selected in include_users but does not have a schedule attributed to them (new users for example)
 			default_user_id = this.filter_data.include_user_ids.value[0];
 		} else {

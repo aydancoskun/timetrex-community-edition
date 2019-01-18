@@ -692,10 +692,13 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		for ( var i = 0; i < len; i++ ) {
 			var row = this.editor.rows_widgets_array[i];
+
 			if ( this.current_edit_record['type_id'] == 30 ) {
-				row['accrual_rate'].setNeedParseSec( false );
+				row.accrual_rate_hourly.show();
+				row.accrual_rate_yearly.hide();
 			} else {
-				row['accrual_rate'].setNeedParseSec( true );
+				row.accrual_rate_yearly.show();
+				row.accrual_rate_hourly.hide();
 			}
 		}
 
@@ -832,20 +835,30 @@ AccrualPolicyViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label;
-		if ( this.parent_controller.current_edit_record.type_id == 30 ) {
-			form_item_input.TTextInput( {field: 'accrual_rate', width: 90, need_parser_sec: false} );
-			form_item_input.setPlaceHolder( '0.0192' );
-		} else {
-			form_item_input.TTextInput( {field: 'accrual_rate', width: 90, mode: 'time_unit', need_parser_sec: true} );
-		}
-		form_item_input.setValue( data.accrual_rate ? data.accrual_rate : '0' );
+		form_item_input.TTextInput( {field: 'accrual_rate_hourly', width: 90, need_parser_sec: false} );
+		form_item_input.setPlaceHolder( '' );
+		form_item_input.setValue( data.accrual_rate ? data.accrual_rate : '0.000' );
 		widgetContainer.append( form_item_input );
-
 		widgets[form_item_input.getField()] = form_item_input;
 		row.children().eq( 1 ).append( widgetContainer );
-
 		this.setWidgetEnableBaseOnParentController( form_item_input );
+
+		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( {field: 'accrual_rate_yearly', width: 90, mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.setValue( data.accrual_rate ? data.accrual_rate : '0' );
+		widgetContainer.append( form_item_input );
+		widgets[form_item_input.getField()] = form_item_input;
+		row.children().eq( 1 ).append( widgetContainer );
+		this.setWidgetEnableBaseOnParentController( form_item_input );
+
+		if ( data.type_id == 30 ) {
+			widgets.accrual_rate_hourly.show();
+			widgets.accrual_rate_yearly.hide();
+		} else {
+			widgets.accrual_rate_yearly.show();
+			widgets.accrual_rate_hourly.hide();
+		}
 
 		//Annual Accrual Maximum
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -922,10 +935,18 @@ AccrualPolicyViewController = BaseViewController.extend( {
 
 		for ( var i = 0; i < len; i++ ) {
 			var row = this.rows_widgets_array[i];
+			var accrual_rate = 0;
+
+			if ( this.parent_controller.current_edit_record.type_id == 30 ) {
+				accrual_rate = row.accrual_rate_hourly.getValue();
+			} else {
+				accrual_rate = row.accrual_rate_yearly.getValue();
+			}
+
 			var data = {
 				length_of_service: row.length_of_service.getValue(),
 				length_of_service_unit_id: row.length_of_service_unit_id.getValue(),
-				accrual_rate: row.accrual_rate.getValue(),
+				accrual_rate: accrual_rate,
 				maximum_time: row.maximum_time.getValue(),
 				rollover_time: row.rollover_time.getValue()
 

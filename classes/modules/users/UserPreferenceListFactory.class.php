@@ -592,7 +592,7 @@ class UserPreferenceListFactory extends UserPreferenceFactory implements Iterato
 		$query .= ( isset($filter_data['address2']) ) ? $this->getWhereClauseSQL( 'b.address2', $filter_data['address2'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['postal_code']) ) ? $this->getWhereClauseSQL( 'b.postal_code', $filter_data['postal_code'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['employee_number']) ) ? $this->getWhereClauseSQL( 'b.employee_number', $filter_data['employee_number'], 'numeric', $ph ) : NULL;
-		$query .= ( isset($filter_data['user_name']) ) ? $this->getWhereClauseSQL( 'b.user_name', $filter_data['user_name'], 'lower_text_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['user_name']) ) ? $this->getWhereClauseSQL( 'b.user_name', $filter_data['user_name'], 'text', $ph ) : NULL;
 		$query .= ( isset($filter_data['sin']) ) ? $this->getWhereClauseSQL( 'b.sin', $filter_data['sin'], 'numeric_string', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['work_email']) ) ? $this->getWhereClauseSQL( 'b.work_email', $filter_data['work_email'], 'text', $ph ) : NULL;

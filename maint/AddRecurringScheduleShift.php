@@ -88,7 +88,7 @@ if ( $clf->getRecordCount() > 0 ) {
 			//
 			$rsclf->getByCompanyIdAndStartDateAndEndDate( $c_obj->getId(), $initial_start_date, $initial_end_date );
 			if ( $rsclf->getRecordCount() > 0 ) {
-				Debug::text('Recurring Schedule Control List Record Count: '. $rsclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+				Debug::text('CRON: Recurring Schedule Control List Record Count: '. $rsclf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 				foreach( $rsclf as $rsc_obj ) {
 					$rsclf->StartTransaction(); // Wrap each individual schedule in its own transaction instead.
 
@@ -98,20 +98,20 @@ if ( $clf->getRecordCount() > 0 ) {
 					$rstc_obj = $rsc_obj->getRecurringScheduleTemplateControlObject();
 					if ( is_object( $rstc_obj ) ) {
 						Debug::text('Recurring Schedule Template Control last updated by: '. $rstc_obj->getUpdatedBy(), __FILE__, __LINE__, __METHOD__, 10);
-						if ( $rstc_obj->getUpdatedBy() > 0 ) {
+						if ( TTUUID::isUUID( $rstc_obj->getUpdatedBy() ) AND $rstc_obj->getUpdatedBy() != TTUUID::getZeroID() ) {
 							$ulf = TTnew( 'UserListFactory' );
 							$ulf->getById( $rstc_obj->getUpdatedBy() );
-							if ( $ulf->getRecordCount() > 0 ) {
+							if ( $ulf->getRecordCount() == 1 ) {
 								$ulf->getCurrent()->getUserPreferenceObject()->setTimeZonePreferences();
-							} else {
-								//Use system timezone.
-								TTDate::setTimeZone();
 							}
-						} else {
-							//Use system timezone.
-							TTDate::setTimeZone();
 						}
 					}
+
+					//Default to system timezone if no other timezone is specified.
+					if ( !isset($ulf) OR ( isset($ulf) AND $ulf->getRecordCount() != 1 ) ) {
+						TTDate::setTimeZone(); //Use system timezone.
+					}
+					unset($ulf);
 
 					//Make sure its always at least the display weeks based on the end of the current week.
 					$maximum_end_date = ( ( TTDate::getEndWeekEpoch($current_epoch) + 1 ) + ( $rsc_obj->getDisplayWeeks() * ( 86400 * 7 ) ) - 1 );

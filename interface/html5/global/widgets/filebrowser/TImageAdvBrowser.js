@@ -94,6 +94,17 @@
 
 		};
 
+
+		this.setEnableDelete = function(val) {
+			var image = $this.find( '.image' );
+			if ( !val ) {
+				image.removeAttr( 'enable-delete' );
+				return;
+			} else {
+				image.attr('enable-delete', 1);
+			}
+		};
+
 		this.each( function() {
 
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
@@ -126,6 +137,13 @@
 
 			if ( Global.isSet( accept_filter ) ) {
 				accept_filter = o.accept_filter;
+			}
+
+			if ( Global.isSet( o.deleteImageHandler ) ) {
+				$this.find( '.file-browser' ).on('deleteClick', function(){
+					o.deleteImageHandler();
+				});
+
 			}
 
 			var browser = $( this ).children().eq( 1 );

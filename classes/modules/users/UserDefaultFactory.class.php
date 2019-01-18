@@ -178,11 +178,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setCompany( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Company ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'company_id', $value );
 	}
@@ -199,11 +195,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setLegalEntity( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		Debug::Text('Legal Entity ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'legal_entity_id', $value );
 	}
@@ -220,11 +212,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setPermissionControl( $value ) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'permission_control_id', $value );
 	}
 
@@ -240,10 +228,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setPayPeriodSchedule( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'pay_period_schedule_id', $value );
 	}
 
@@ -259,10 +244,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setPolicyGroup( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		return $this->setGenericDataValue( 'policy_group_id', $value );
 	}
 
@@ -294,10 +276,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setTitle( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Title ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'title_id', $value );
 	}
@@ -314,10 +293,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultBranch( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Branch ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'default_branch_id', $value );
 	}
@@ -334,10 +310,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setDefaultDepartment( $value ) {
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Department ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'default_department_id', $value );
 	}
@@ -354,11 +327,7 @@ class UserDefaultFactory extends Factory {
 	 * @return bool
 	 */
 	function setCurrency( $value ) {
-		$value = trim($value);
-		$value = TTUUID::castUUID($value);
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
+		$value = TTUUID::castUUID( $value );
 		Debug::Text('Currency ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		return $this->setGenericDataValue( 'currency_id', $value );
 	}

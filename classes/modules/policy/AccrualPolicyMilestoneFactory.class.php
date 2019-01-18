@@ -160,11 +160,7 @@ class AccrualPolicyMilestoneFactory extends Factory {
 	 * @return bool
 	 */
 	function setAccrualPolicy( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'accrual_policy_id', $value );
 	}
 

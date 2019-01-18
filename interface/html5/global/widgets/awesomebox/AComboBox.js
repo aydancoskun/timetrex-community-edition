@@ -81,6 +81,8 @@
 
 		var tree_mode = false;
 
+		var on_tree_grid_row_select = false;
+
 		var key = 'id';
 
 		var error_string = '';
@@ -1319,7 +1321,13 @@
 				$this.setValue( select_items )
 			} else {
 				var select_item = a_dropdown.getSelectItem();
-				$this.setValue( select_item )
+				if ( select_item ) { // #2593 - null is not an object (evaluating 'select_item._id_')
+					if (!tree_mode) {
+						$this.setValue(select_item)
+					} else if (select_item._id_) {
+						$this.setValue(select_item._id_)
+					}
+				}
 			}
 			a_dropdown_div.remove();
 			is_mouse_over = false; //When close from esc, this maybe true
@@ -2227,6 +2235,10 @@
 				tree_mode = o.tree_mode;
 			}
 
+			if ( o.on_tree_grid_row_select ) {
+				on_tree_grid_row_select = o.on_tree_grid_row_select;
+			}
+
 			//Always set this true;
 			allow_drag_to_order = true;
 
@@ -2387,7 +2399,9 @@
 					tree_mode: tree_mode,
 					column_option_key: column_option_key,
 					api: api,
-					display_column_settings: $this.shouldInitColumns()
+					display_column_settings: $this.shouldInitColumns(),
+
+					on_tree_grid_row_select: on_tree_grid_row_select
 				} );
 
 				a_dropdown_div = $( "<div id='" + id + "a_dropdown_div' class='a-dropdown-div'></div>" );

@@ -852,10 +852,17 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 
 			//Process Payments Button Click
 			case ContextMenuIconName.direct_deposit:
-				var ids = this.stepsWidgetDic[this.current_step].pay_stub_transfer.jqGrid( 'getGridParam', 'selarrrow' );
-				var args = { filter_data: { pay_period_id: ids } }
-				var post_data = { 0: args, 1: true, 2: '10' };
-				Global.APIFileDownload( this.api_pay_stub.className, 'getPayStub' ,  post_data );
+				Global.addViewTab( this.wizard_id, 'Process Payroll', window.location.href );
+
+				var pay_stub_transfer_grid = current_step_ui.pay_stub_transfer;
+				var data = {
+					transaction_source_data: $this.transaction_source_data,
+					filter_data: {
+						pay_period_id: pay_stub_transfer_grid.jqGrid('getGridParam', 'selarrrow')
+					}
+				}
+				IndexViewController.openWizardController('ProcessTransactionsWizardController', data );
+				this.onCloseClick();
 				break;
 		}
 	},
@@ -906,7 +913,9 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 				this.content_div.find('#directDepositIcon').removeClass( 'disable-image' );
 				var $this = this;
 				var grid = current_step_ui.pay_stub_transaction;
-				this.api_pay_stub_transaction.getPayPeriodTransactionSummary( pay_period_ids, true, {
+
+				// A similar call to this api function is in the Process Transactions Popup
+				this.api_pay_stub_transaction.getPayPeriodTransactionSummary( {pay_period_id: pay_period_ids}, {
 					onResult: function( result ) {
 						$this.transaction_source_data = result.getResult();
 						if ( $this.transaction_source_data.length > 0 ) {
@@ -1144,7 +1153,7 @@ ProcessPayrollWizardController = BaseWizardController.extend( {
 								pay_period_ids.push(source_data[i].id);
 							}
 
-							$this.api_pay_stub_transaction.getPayPeriodTransactionSummary(pay_period_ids, true, {
+							$this.api_pay_stub_transaction.getPayPeriodTransactionSummary( { pay_period_id: pay_period_ids }, {
 								onResult: function (result) {
 									$this.transaction_source_data = result.getResult();
 									grid = current_step_ui.pay_stub_transaction;

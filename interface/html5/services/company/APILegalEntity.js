@@ -43,8 +43,10 @@ var APILegalEntity = ServiceCaller.extend( {
 
 		return this.argumentsHandler( this.className, 'copyLegalEntity', arguments );
 
+	},
+
+	deleteImage: function() {
+		return this.argumentsHandler( this.className, 'deleteImage', arguments );
 	}
-
-
 
 } );

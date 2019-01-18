@@ -634,7 +634,7 @@ DashletController = Backbone.View.extend( {
 		};
 		columns.push( column_1 );
 		columns.push( column_2 );
-		if ( !this.grid ) {
+		if ( !this.grid && grid ) { //#2571 - this.grid.jqGrid is not a function
 			this.grid = grid;
 			this.grid.jqGrid( {
 				altRows: true,
@@ -1118,7 +1118,7 @@ DashletController = Backbone.View.extend( {
 			column_info_array.push( column_info );
 		}
 
-		if ( !this.grid ) {
+		if ( !this.grid && grid ) { // #2571 -this.grid.jqGrid is not a function
 			this.grid = grid;
 			this.grid = this.grid.jqGrid( {
 				altRows: true,
@@ -1239,17 +1239,19 @@ DashletController = Backbone.View.extend( {
 
 	getAllColumns: function( callBack ) {
 		var $this = this;
-		this.api.getOptions( 'columns', {
-			onResult: function( columns_result ) {
-				var columns_result_data = columns_result.getResult();
-				$this.all_columns = Global.buildColumnArray( columns_result_data );
-				if ( callBack ) {
-					callBack();
+
+		if ( this.api ) { // #2571 - Cannot read property 'getOptions' of null
+			this.api.getOptions( 'columns', {
+				onResult: function( columns_result ) {
+					var columns_result_data = columns_result.getResult();
+					$this.all_columns = Global.buildColumnArray( columns_result_data );
+					if ( callBack ) {
+						callBack();
+					}
+
 				}
-
-			}
-		} );
-
+			} );
+		}
 	},
 
 	getDefaultDisplayColumns: function( callBack ) {

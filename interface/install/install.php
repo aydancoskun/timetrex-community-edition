@@ -65,7 +65,7 @@ if ( version_compare( PHP_VERSION, '5.4.0', '<') == 1 ) {
 	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v5.4</b> or greater!<br><br>\n";
 	$redir = FALSE;
 }
-if ( version_compare( PHP_VERSION, '7.0.99', '>') == 1 ) {
+if ( version_compare( PHP_VERSION, '7.2.99', '>') == 1 ) {
 	echo "You are currently using PHP v<b>". PHP_VERSION ."</b> TimeTrex requires PHP <b>v7.0.x</b> or earlier!<br><br>\n";
 	$redir = FALSE;
 }

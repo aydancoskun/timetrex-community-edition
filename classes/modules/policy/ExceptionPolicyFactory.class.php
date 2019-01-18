@@ -215,11 +215,7 @@ class ExceptionPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setExceptionPolicyControl( $value) {
-		$value = trim($value);
 		$value = TTUUID::castUUID( $value );
-		if ( $value == '' ) {
-			$value = TTUUID::getZeroID();
-		}
 		return $this->setGenericDataValue( 'exception_policy_control_id', $value );
 	}
 

@@ -310,6 +310,14 @@ RibbonViewController = Backbone.View.extend( {
 					}
 				} );
 				break;
+			case 'ProcessTransactionsWizard':
+				IndexViewController.openWizardController( 'ProcessTransactionsWizard', null, function() {
+					//Error: TypeError: LocalCacheData.current_open_primary_controller.search is not a function in interface/html5/framework/jquery.min.js?v=9.0.0-20151016-110437 line 2 > eval line 248
+					if ( LocalCacheData.current_open_primary_controller && typeof LocalCacheData.current_open_primary_controller.search === 'function' ) {
+						LocalCacheData.current_open_primary_controller.search();
+					}
+				} );
+				break;
 			case 'LegalEntity':
 				if (LocalCacheData.getCurrentCompany().product_edition_id > 10) {
 					TopMenuManager.goToView( TopMenuManager.selected_sub_menu_id );
@@ -392,6 +400,7 @@ RibbonViewController = Backbone.View.extend( {
 			clearTimeout(lh_inst.timeoutStatuscheck);
 		}
 
+		//This code is duplicated at LocalCacheData.getRequiredLocalCache()
 		Global.clearSessionCookie();
 		LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
 		LocalCacheData.setLoginUser(null);

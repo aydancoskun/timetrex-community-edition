@@ -135,13 +135,14 @@ class ChequeForms_Base {
     *
     */
     function filterAmountWords( $value ) {
-
         if ( isset( $this->amount ) ) {
             $numbers_words = new Numbers_Words();
             $value =  str_pad( ucwords( $numbers_words->toWords( floor($this->amount), 'en_US' ) ).' ', 65, "-", STR_PAD_RIGHT );
         }
+
         return $value;
     }
+
     /*
     *
     *
@@ -157,6 +158,7 @@ class ChequeForms_Base {
     function filterAmountWordsCents( $value ) {
         return $this->filterAmountWords($value) . TTi18n::gettext(' and ') . $this->filterAmountCents($value) .  ' *****';
     }
+
     /*
     *
     *
@@ -178,11 +180,12 @@ class ChequeForms_Base {
         }
         return $value;
     }
-    // Format date as the country
 
+    // Format date as the country
     function filterDate( $epoch ) {
 		return date( $this->getDateFormat(), $epoch );
     }
+
     function filterAddress( $value ) {
 		if ( isset( $this->address1 ) ) {
 		   $value = $this->address1 . ' ';
@@ -193,6 +196,7 @@ class ChequeForms_Base {
 
 		return $value;
     }
+
     function filterProvince( $value ) {
         if ( isset( $this->city ) ) {
             $value = $this->city;
@@ -216,6 +220,7 @@ class ChequeForms_Base {
 		$this->pdf_object = $obj;
 		return TRUE;
 	}
+
 	function getPDFObject() {
 		return $this->pdf_object;
 	}
@@ -224,14 +229,16 @@ class ChequeForms_Base {
 		$this->show_background = $bool;
 		return TRUE;
 	}
+
 	function getShowBackground() {
 		return $this->show_background;
 	}
 
 	function setPageOffsets( $x, $y ) {
-		$this->page_offsets = array( $x, $y );
+		$this->page_offsets = array( (float)$x, (float)$y );
 		return TRUE;
 	}
+
 	function getPageOffsets( $type = NULL ) {
 		switch ( strtolower($type) ) {
 			case 'x':
@@ -245,10 +252,12 @@ class ChequeForms_Base {
 				break;
 		}
 	}
+
 	function setTemplateOffsets( $x, $y ) {
 		$this->template_offsets = array( $x, $y );
 		return TRUE;
 	}
+
 	function getTemplateOffsets( $type = NULL ) {
 		switch ( strtolower($type) ) {
 			case 'x':
@@ -270,6 +279,7 @@ class ChequeForms_Base {
 		$this->current_template_index = NULL;
 		return TRUE;
 	}
+
     function getSchemaSpecificCoordinates( $schema, $key, $sub_key1 = NULL ) {
 
 		unset($schema['function']);
@@ -312,9 +322,10 @@ class ChequeForms_Base {
                 $this->Draw( $value, $mode );
             }
         }
-        return TRUE;
 
+        return TRUE;
     }
+
     //Draw each element of an array at different locations.
 	//Value must be an array.
 	function drawSegments( $value, $schema ) {
@@ -336,6 +347,83 @@ class ChequeForms_Base {
 		}
 
 		return FALSE;
+	}
+
+	function drawImage( $file_name, $schema) {
+		if ( $file_name == '' ) {
+			return FALSE;
+		}
+
+		$pdf = $this->getPDFObject();
+
+		if ( $this->getDebug() == TRUE ) { //Outline the image.
+			$pdf->setXY( ( $schema['coordinates']['x'] + $this->getPageOffsets( 'x' ) ), ( ( $schema['coordinates']['y'] + $this->getPageOffsets( 'y' ) ) ) );
+			$pdf->Cell( $schema['coordinates']['w'], $schema['coordinates']['h'], '', 1, 0, 'C', 0 );
+		}
+
+		$pdf->setImageScale( PDF_IMAGE_SCALE_RATIO );
+		$pdf->Image( $file_name, ( $schema['coordinates']['x'] + $this->getPageOffsets('x') ), ( $schema['coordinates']['y'] + $this->getPageOffsets('y') ), $schema['coordinates']['w'], $schema['coordinates']['h'], '', '', '', FALSE, 300, '', FALSE, FALSE, 0, TRUE);
+
+		return TRUE;
+	}
+
+	function drawAlignmentGrid( $value, $schema ) {
+		if ( $value !== TRUE ) {
+			return TRUE;
+		}
+
+		unset($schema['function']); //Strip off the function element to prevent infinite loop
+
+		$pdf = $this->getPDFObject();
+
+		$cell_size = 2; //In 'mm'
+
+		//Alignment Grid Label.
+		$pdf->setFontSize( 6 );
+		$pdf->setXY( ( $schema['coordinates']['x'] + $this->getPageOffsets('x') ), ( ( $schema['coordinates']['y'] + $this->getPageOffsets('y') ) - 3 ) );
+		$pdf->Cell( $schema['coordinates']['w'], 3, TTi18n::getText('Alignment Grid') .': '. $cell_size .' x '. $cell_size .'mm Offset: '. $this->getPageOffsets('x') .' x '. $this->getPageOffsets('y') .'mm', 1, 0, 'C', 0 );
+
+		//Blue
+		$pdf->SetTextColor( 0, 0, 255 );
+		$pdf->setFontSize( 0 );
+
+		$pdf->setCellPadding( 0 );
+		$pdf->SetLineWidth( 0.1 );
+
+		//Draw grid.
+		$x = $schema['coordinates']['x'];
+		$y = $schema['coordinates']['y'];
+
+		$w = $schema['coordinates']['w'];
+		$h = $schema['coordinates']['h'];
+
+
+		$i = 0;
+		while( TRUE AND $i < 1000000 ) {
+			if ( $x == $schema['coordinates']['x'] OR $x == ( $schema['coordinates']['x'] + ( $schema['coordinates']['w'] - $cell_size ) )
+					OR  $y == $schema['coordinates']['y'] OR $y == ( $schema['coordinates']['y'] + ( $schema['coordinates']['h'] - $cell_size ) ) ) {
+				$pdf->setDrawColor( 0, 0, 0 ); //Black - All cells on the border of the grid will be black, so we know its bounds.
+			} else {
+				$pdf->setDrawColor( 128, 128, 128 ); //Gray
+			}
+
+			$pdf->setXY( ( $x + $this->getPageOffsets('x') ), ( $y + $this->getPageOffsets('y') ) );
+			$pdf->Cell( $cell_size, $cell_size, '', 1, 0, 'L', 0 );
+
+			$x = ( $x + $cell_size );
+			if ( $x >= ( $schema['coordinates']['x'] + $w ) ) {
+				$x = $schema['coordinates']['x'];
+				$y = ( $y + $cell_size );
+			}
+
+			if ( $y >= ( $schema['coordinates']['y'] + $h ) ) {
+				break;
+			}
+
+			$i++;
+		}
+
+		return TRUE;
 	}
 
 	function addPage( $schema = NULL ) {
@@ -362,7 +450,6 @@ class ChequeForms_Base {
 			}
 		}
 		$this->current_template_index = $schema['template_page'];
-
 
 		return TRUE;
 	}
@@ -485,7 +572,6 @@ class ChequeForms_Base {
 		} else {
 			Debug::text('NOT Drawing Cell... Value: '. $value, __FILE__, __LINE__, __METHOD__, 10);
 		}
-
 
 		return TRUE;
 	}

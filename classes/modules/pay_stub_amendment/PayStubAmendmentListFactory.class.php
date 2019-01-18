@@ -777,6 +777,70 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 	}
 
 	/**
+	 * @param string $company_id UUID
+	 * @param string $pay_period_id UUID
+	 * @param $status_id INT
+	 * @param $start_date INT
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayStubAmendmentListFactory
+	 */
+	function getByCompanyIdAndPayPeriodScheduleIdAndStatusAndBeforeStartDate( $company_id, $pay_period_schedule_id, $status_id, $start_date, $where = NULL, $order = NULL ) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		$uf = new UserFactory();
+		$ppf = new PayPeriodFactory();
+		$ppsf = new PayPeriodScheduleFactory();
+		$ppsuf = new PayPeriodScheduleUserFactory();
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID($company_id),
+				'status_id' => (int)$status_id,
+				'start_date' => TTDate::getMiddleDayEpoch( (int)$start_date ),
+				'pay_period_schedule_id' => TTUUID::castUUID($pay_period_schedule_id),
+		);
+
+		//Make sure we double check that the pay period each PSA is assigned too is closed.
+		//  That way we don't delete PSA's in open pay periods that are in the past.
+		$query = '
+					select	a.*,
+
+							y.first_name as created_by_first_name,
+							y.middle_name as created_by_middle_name,
+							y.last_name as created_by_last_name,
+							z.first_name as updated_by_first_name,
+							z.middle_name as updated_by_middle_name,
+							z.last_name as updated_by_last_name
+					from	'. $this->getTable() .' as a
+						LEFT JOIN '. $uf->getTable() .' as b ON ( a.user_id = b.id AND b.deleted = 0 )
+
+						LEFT JOIN '. $ppsuf->getTable() .' as ppsuf ON ( a.user_id = ppsuf.user_id )
+						LEFT JOIN '. $ppsf->getTable() .' as ppsf ON ( ppsuf.pay_period_schedule_id = ppsf.id AND ppsf.deleted = 0 )
+						LEFT JOIN '. $ppf->getTable() .' as ppf ON ( ppsuf.pay_period_schedule_id = ppf.pay_period_schedule_id AND '. $this->getSQLToTimeStampFunction() .'(a.effective_date) >= ppf.start_date AND '. $this->getSQLToTimeStampFunction() .'(a.effective_date) <= ppf.end_date AND ppf.deleted = 0 )						
+
+						LEFT JOIN '. $uf->getTable() .' as y ON ( a.created_by = y.id AND y.deleted = 0 )
+						LEFT JOIN '. $uf->getTable() .' as z ON ( a.updated_by = z.id AND z.deleted = 0 )
+					where	b.company_id = ?						
+						AND a.status_id = ?												
+						AND a.effective_date < ?
+						AND ppsf.id = ?
+						AND ppf.status_id = 20	
+					';
+
+		//Need to account for employees being assigned to deleted pay period schedules.
+		$query .=	' AND ( ppsuf.id IS NULL OR ppsf.id IS NOT NULL ) AND a.deleted = 0 ';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
 	 * @param string $user_id UUID
 	 * @param string $name_id UUID
 	 * @param $authorized
@@ -975,6 +1039,5 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 
 		return $this;
 	}
-
 }
 ?>

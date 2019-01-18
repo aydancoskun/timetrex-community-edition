@@ -1,6 +1,7 @@
 PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend({
 	name: 'publish',
 	api: null,
+	el: $('.wizard.process_transactions_wizard'),
 
 	init: function(){
 		this.api = new (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' ))();
@@ -80,8 +81,6 @@ PayrollRemittanceAgencyEventWizardStepPublish = WizardStep.extend({
 					);
 					break;
 			}
-
-			TTPromise.resolve('Wizard', 'initialize');
 		});
 
 
