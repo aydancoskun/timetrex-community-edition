@@ -47,35 +47,40 @@ if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']
 } elseif ( isset($config_vars['other']['down_for_maintenance']) AND $config_vars['other']['down_for_maintenance'] == TRUE ) {
 	Debug::text( 'CRON: System is down for maintenance, skipping cron jobs for now...', __FILE__, __LINE__, __METHOD__, 0 );
 } else {
-	//$current_epoch = strtotime('28-Mar-08 1:30 PM');
-	$current_epoch = TTDate::getTime();
+	if ( isset($config_vars['path']['php_cli']) AND $config_vars['path']['php_cli'] != '' ) {
+		//$current_epoch = strtotime('28-Mar-08 1:30 PM');
+		$current_epoch = TTDate::getTime();
 
-	$executed_jobs = 0;
+		$executed_jobs = 0;
 
-	$cjlf = new CronJobListFactory();
-	$job_arr = $cjlf->getArrayByListFactory( $cjlf->getAll() );
-	$total_jobs = count($job_arr);
-	foreach( $job_arr as $job_id => $job_name ) {
-		//Get each cronjob row again individually incase the status has changed.
 		$cjlf = new CronJobListFactory();
-		$cjlf->getById( $job_id ); //Let Execute determine if job is running or not so it can find orphans.
-		if ( $cjlf->getRecordCount() > 0 ) {
-			foreach( $cjlf as $cjf_obj ) {
-				//Debug::text('Checking if Job ID: '. $job_id .' is scheduled to run...', __FILE__, __LINE__, __METHOD__, 0);
-				if ( $cjf_obj->isScheduledToRun( $current_epoch ) == TRUE ) {
-					$executed_jobs++;
-					$cjf_obj->Execute( $config_vars['path']['php_cli'], dirname(__FILE__) );
+		$job_arr = $cjlf->getArrayByListFactory( $cjlf->getAll() );
+		$total_jobs = count( $job_arr );
+		foreach ( $job_arr as $job_id => $job_name ) {
+			//Get each cronjob row again individually incase the status has changed.
+			$cjlf = new CronJobListFactory();
+			$cjlf->getById( $job_id ); //Let Execute determine if job is running or not so it can find orphans.
+			if ( $cjlf->getRecordCount() > 0 ) {
+				foreach ( $cjlf as $cjf_obj ) {
+					//Debug::text('Checking if Job ID: '. $job_id .' is scheduled to run...', __FILE__, __LINE__, __METHOD__, 0);
+					if ( $cjf_obj->isScheduledToRun( $current_epoch ) == TRUE ) {
+						$executed_jobs++;
+						$cjf_obj->Execute( $config_vars['path']['php_cli'], dirname( __FILE__ ) );
+					}
 				}
 			}
 		}
+		echo "NOTE: Jobs are scheduled to run at specific times each day, therefore it is normal for only some jobs to be executed each time this file is run.\n";
+		echo "Jobs Executed: $executed_jobs of $total_jobs\n";
+		Debug::text( 'CRON: Jobs Executed: ' . $executed_jobs . ' of ' . $total_jobs, __FILE__, __LINE__, __METHOD__, 0 );
+	} else {
+		echo "ERROR: timetrex.ini.php does not define 'php_cli' option in the [path] section. Unable to run maintenance jobs!\n";
+		Debug::text( 'PHP_CLI not defined in timetrex.ini.php file.', __FILE__, __LINE__, __METHOD__, 0 );
 	}
-	echo "NOTE: Jobs are scheduled to run at specific times each day, therefore it is normal for only some jobs to be executed each time this file is run.\n";
-	echo "Jobs Executed: $executed_jobs of $total_jobs\n";
-	Debug::text('CRON: Jobs Executed: '. $executed_jobs .' of '. $total_jobs, __FILE__, __LINE__, __METHOD__, 0);
 
 	//Save file to log directory with the last executed date, so we know if the CRON daemon is actually calling us.
-	$file_name = $config_vars['path']['log'] . DIRECTORY_SEPARATOR .'timetrex_cron_last_executed.log';
-	@file_put_contents( $file_name, TTDate::getDate('DATE+TIME', time() )."\n" );
+	$file_name = $config_vars['path']['log'] . DIRECTORY_SEPARATOR . 'timetrex_cron_last_executed.log';
+	@file_put_contents( $file_name, TTDate::getDate( 'DATE+TIME', time() ) . "\n" );
 }
 Debug::writeToLog();
 Debug::Display();

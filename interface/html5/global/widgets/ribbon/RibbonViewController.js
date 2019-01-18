@@ -287,15 +287,15 @@ RibbonViewController = Backbone.View.extend( {
 				this.doPortalLogout();
 				break;
 			case 'AdminGuide':
-				var url = 'https://www.timetrex.com/h.php?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				var url = 'https://www.timetrex.com/h?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'FAQS':
-				url = 'https://www.timetrex.com/h.php?id=faq&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				url = 'https://www.timetrex.com/h?id=faq&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'WhatsNew':
-				url = 'https://www.timetrex.com/h.php?id=changelog&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				url = 'https://www.timetrex.com/h?id=changelog&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'EmailHelp':
@@ -304,7 +304,7 @@ RibbonViewController = Backbone.View.extend( {
 					url = 'mailto:support@timetrex.com?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' +
 					'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
 				} else {
-					url = 'https://www.timetrex.com/r.php?id=29';
+					url = 'https://www.timetrex.com/r?id=29';
 				}
 
 				window.open( url, '_blank' );

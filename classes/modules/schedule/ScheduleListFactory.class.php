@@ -1026,7 +1026,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							uwf.id as user_wage_id,
 							uwf.hourly_rate as user_wage_hourly_rate,
 							uwf.labor_burden_percent as user_labor_burden_percent,
-							uwf.effective_date as user_wage_effective_date ';
+							uwf.effective_date as user_wage_effective_date, ';
+
+		$query .= Permission::getPermissionIsChildIsOwnerSQL( ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : 0, 'a.user_id', FALSE );
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
 			$query .= ',
@@ -1210,8 +1212,11 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 						';
 		}
 
+		$query .= Permission::getPermissionHierarchySQL( $company_id, ( isset($filter_data['permission_current_user_id']) ) ? $filter_data['permission_current_user_id'] : 0, 'a.user_id' );
+
 		$query .= '	WHERE ( a.company_id = '. (int)$company_id .' AND sf.replaced_id IS NULL )';
 
+		$query .= Permission::getPermissionIsChildIsOwnerFilterSQL( $filter_data, 'a.user_id' );
 		$query .= ( isset($filter_data['permission_children_ids']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['permission_children_ids'], 'numeric_list', $ph ) : NULL;
 		//Make sure we filter on user_date.user_id column, to handle OPEN shifts.
 		$query .= ( isset($filter_data['id']) ) ? $this->getWhereClauseSQL( 'a.user_id', $filter_data['id'], 'numeric_list', $ph ) : NULL;

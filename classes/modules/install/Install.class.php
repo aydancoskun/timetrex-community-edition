@@ -51,6 +51,7 @@ class Install {
 	protected $progress_bar_obj = NULL;
 	protected $AMF_message_id = NULL;
 
+	protected $critical_disabled_functions = array();
 
 	function __construct() {
 		global $config_vars;
@@ -1615,6 +1616,30 @@ class Install {
 		return 1;
 	}
 
+	function getCriticalFunctionList() {
+		$critical_functions = array( 'system', 'exec', 'passthru' , 'shell_exec', 'curl', 'curl_exec', 'curl_multi_exec', 'parse_ini_file', 'unlink', 'rename', 'eval' ); //'pcntl_alarm'
+		return $critical_functions;
+	}
+
+	function getCriticalDisabledFunctionList() {
+		return implode(',', $this->critical_disabled_functions );
+	}
+
+	//Check to see if they have disabled functions in there PHP.ini file.
+	// This can cause all sorts of strange failures, but most often they have system(), exec() and other OS/file system related functions disabled that completely breaks things.
+	function checkPHPDisabledFunctions() {
+		$critical_functions = $this->getCriticalFunctionList();
+		$disabled_functions = explode(',', ini_get('disable_functions') );
+
+		$this->critical_disabled_functions = array_intersect( $critical_functions, $disabled_functions );
+		if ( count($this->critical_disabled_functions) == 0 ) {
+			return 0;
+		}
+
+		Debug::Arr($this->critical_disabled_functions, 'Disabled functions that must be enabled: ', __FILE__, __LINE__, __METHOD__, 10);
+		return 1;
+	}
+
 	function checkPHPSafeMode() {
 		if ( ini_get('safe_mode') != '1' ) {
 			return 0;
@@ -1744,6 +1769,7 @@ class Install {
 		}
 
 		$retarr[$this->checkPHPSafeMode()]++;
+		$retarr[$this->checkPHPDisabledFunctions()]++;
 		$retarr[$this->checkPHPAllowURLFopen()]++;
 		$retarr[$this->checkPHPMemoryLimit()]++;
 		$retarr[$this->checkPHPMagicQuotesGPC()]++;
@@ -1906,6 +1932,9 @@ class Install {
 
 		if ( $fail_all == TRUE OR $this->checkPHPSafeMode() != 0 ) {
 			$retarr[] = 'PHPSafeMode';
+		}
+		if ( $fail_all == TRUE OR $this->checkPHPDisabledFunctions() != 0 ) {
+			$retarr[] = 'PHPDisabledFunctions';
 		}
 		if ( $fail_all == TRUE OR $this->checkPHPAllowURLFopen() != 0 ) {
 			$retarr[] = 'PHPAllowURLFopen';

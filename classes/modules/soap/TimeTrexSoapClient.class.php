@@ -47,8 +47,13 @@ class TTSoapClient extends SoapClient {
 				Debug::Text('WARNING: Due to failed connection attempts, falling back to non-SSL SOAP communication: '. $this->location, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
-			$result = parent::__call( $function_name, $arguments );
-			if ( is_soap_fault( $result ) AND $result->faultstring == 'Could not connect to host' ) {
+			if ( Debug::getEnable() == TRUE ) {
+				$result = parent::__call( $function_name, $arguments );
+			} else {
+				$result = @parent::__call( $function_name, $arguments );
+			}
+
+			if ( is_soap_fault( $result ) AND ( $result->faultstring == 'Could not connect to host' OR $result->faultstring == 'Error Fetching http headers' OR $result->faultstring == 'Failed Sending HTTP SOAP request' ) ) {
 				Debug::Text('SOAP connection failed, retrying...', __FILE__, __LINE__, __METHOD__, 10);
 				sleep( 2 );
 				$retry_count++;
@@ -93,7 +98,7 @@ class TimeTrexSoapClient {
 											'use' => SOAP_ENCODED,
 											'encoding' => 'UTF-8',
 											'connection_timeout' => 30,
-											'keep_alive' => FALSE, //This should prevent "Error fetching HTTP headers" or "errno=10054 An existing connection was forcibly closed by the remote host." SOAP errors.
+											'keep_alive' => FALSE, //This should help prevent "Error fetching HTTP headers" or "errno=10054 An existing connection was forcibly closed by the remote host." SOAP errors.
 											'trace' => 1,
 											'exceptions' => 0
 											)

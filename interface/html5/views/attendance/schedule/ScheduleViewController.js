@@ -6792,25 +6792,25 @@ ScheduleViewController = BaseViewController.extend( {
 		var day;
 		switch ( day ) {
 			case 0:
-				day = 'S';
+				day = $.i18n._('S');
 				break;
 			case 1:
-				day = 'M';
+				day = $.i18n._('M');
 				break;
 			case 2:
-				day = 'T';
+				day = $.i18n._('T');
 				break;
 			case 3:
-				day = 'W';
+				day = $.i18n._('W');
 				break;
 			case 4:
-				day = 'S';
+				day = $.i18n._('T');
 				break;
 			case 5:
-				day = 'F';
+				day = $.i18n._('F');
 				break;
 			case 6:
-				day = 'S';
+				day = $.i18n._('S');
 				break;
 		}
 

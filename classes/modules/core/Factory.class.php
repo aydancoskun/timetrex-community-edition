@@ -809,7 +809,7 @@ abstract class Factory {
 		}
 		return $retval;
 	}
-	
+
 	protected function getListSQL($array, &$ph = NULL, $cast = FALSE ) {
 		//Debug::Arr($array, 'List Values:', __FILE__, __LINE__, __METHOD__, 10);
 		if ( $ph === NULL ) {
@@ -1698,14 +1698,14 @@ abstract class Factory {
 			unset( $variable_to_function_map, $variable, $function );
 
 			//Don't set updated_date when deleting records, we use deleted_date/deleted_by for that.
-			if ( $this->getDeleted() == FALSE AND $this->setUpdatedDate() !== FALSE ) {
+			if ( $this->getDeleted() == FALSE AND $this->getUpdatedDate() !== FALSE ) {
 				$column_list[] = 'updated_date';
 			}
-			if ( $this->getDeleted() == FALSE AND $this->setUpdatedBy() !== FALSE ) {
+			if ( $this->getDeleted() == FALSE AND $this->getUpdatedBy() !== FALSE ) {
 				$column_list[] = 'updated_by';
 			}
 			//Make sure if the record is deleted we update the deleted columns.
-			if ( $this->getDeleted() == TRUE AND $this->setDeletedDate() !== FALSE AND $this->setDeletedBy() !== FALSE ) {
+			if ( $this->getDeleted() == TRUE AND $this->getDeletedDate() !== FALSE AND $this->getDeletedBy() !== FALSE ) {
 				$column_list[] = 'deleted_date';
 				$column_list[] = 'deleted_by';
 			}
@@ -2022,8 +2022,12 @@ abstract class Factory {
 
 			//Set updated date at the same time, so we can easily select last
 			//updated, or last created records.
-			$this->setUpdatedDate($time);
-			$this->setUpdatedBy();
+			if ( $this->getUpdatedDate() == '' ) {
+				$this->setUpdatedDate( $time );
+			}
+			if ( $this->getUpdatedBy() == '' ) {
+				$this->setUpdatedBy();
+			}
 
 			unset($time);
 
@@ -2048,6 +2052,14 @@ abstract class Factory {
 			$log_action = 10; //'Add';
 		} else {
 			Debug::text(' Updating...', __FILE__, __LINE__, __METHOD__, 10);
+			if ( $this->getDeleted() == TRUE ) {
+				$this->setDeletedDate();
+				$this->setDeletedBy();
+			} else {
+				//Don't set updated_date when deleting records, we use deleted_date for that instead.
+				$this->setUpdatedDate();
+				$this->setUpdatedBy();
+			}
 
 			//Update
 			$query = $this->getUpdateQuery(); //Don't pass data, too slow

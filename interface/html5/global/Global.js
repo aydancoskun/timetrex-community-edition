@@ -243,7 +243,7 @@ Global.initStaticStrings = function() {
 Global.getUpgradeMessage = function() {
 	var message = $.i18n._( 'This functionality is only available in' ) +
 		' ' + LocalCacheData.getLoginData().application_name + ' ' + $.i18n._( 'Professional, Corporate, or Enterprise Editions.' ) +
-		' ' + $.i18n._( 'For more information please visit' ) + ' <a href="https://www.timetrex.com/r.php?id=810" target="_blank">www.timetrex.com</a>';
+		' ' + $.i18n._( 'For more information please visit' ) + ' <a href="https://www.timetrex.com/r?id=810" target="_blank">www.timetrex.com</a>';
 
 	Global.trackView( 'CommunityUpgrade' );
 	return message;

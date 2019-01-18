@@ -1991,6 +1991,32 @@ class Misc {
 		return $result;
 	}
 
+	static function deleteEmptyDirectory( $path, $recurse_parent_levels = 0 ) {
+		if ( $path == '' ) {
+			Debug::Text('Path is empty: '. $path, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		if ( !is_dir( $path ) ) {
+			Debug::Text('Path is not a directory: '. $path, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
+		$fs_iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $path, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
+		if ( $fs_iterator->valid() == FALSE ) {
+			Debug::Text('Deleting Empty Directory: '. $path, __FILE__, __LINE__, __METHOD__, 10);
+			$parent_dir = realpath( $path . DIRECTORY_SEPARATOR . '..' ); //Need to get parent directory before its deleted, otherwise realpath() fails.
+			rmdir( $path );
+			if ( $recurse_parent_levels > 0 ) {
+				return self::deleteEmptyDirectory( $parent_dir, ( $recurse_parent_levels - 1 ) );
+			}
+		} else {
+			Debug::Text('Skipping Non-Empty Directory: '. $path, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return TRUE;
+	}
+
 	//If rename fails for some reason, attempt a copy instead as that might work, specifically on windows where if the file is in use.
 	//  Might fix possible "Access is denied. (code: 5)" errors on Windows when using PHP v5.2 (https://bugs.php.net/bug.php?id=43817)
 	static function rename( $oldname, $newname ) {
@@ -2137,9 +2163,23 @@ class Misc {
 				Debug::Text(' Memory Info: Free: '. $mem_free .'b Cached: '. $mem_cached .'b', __FILE__, __LINE__, __METHOD__, 10);
 				return ( $mem_free + ( $mem_cached * ( 3 / 4 ) ) ); //Only allow up to 3/4 of cached memory to be used.
 			}
+		} elseif ( OPERATING_SYSTEM == 'WIN' ) {
+			//Windows can use the following commands:
+			//wmic computersystem get TotalPhysicalMemory
+			//wmic OS get FreePhysicalMemory /Value
+
+			//This seems to take about 250ms on Windows 7.
+			$command = 'wmic OS get FreePhysicalMemory';
+			exec($command, $output, $retcode);
+
+			if ( isset($output[1]) AND is_numeric( trim( $output[1] ) ) ) {
+				$retval = ( $output[1] * 1024 ); //Convert from MB to bytes.
+				Debug::Text(' Memory Info: Total Physical: '. $retval .'b', __FILE__, __LINE__, __METHOD__, 10);
+				return $retval;
+			}
 		}
 
-		return 2147483647; //If not linux, return large number, this is in Bytes.
+		return PHP_INT_MAX; //If not linux, return large number, this is in Bytes.
 	}
 
 	static function getSystemLoad() {
@@ -2260,8 +2300,8 @@ class Misc {
 		try {
 			//If during an install/schema upgrade a SQL error has occurred, the transaction will be aborted and cause the below select to fail.
 			//To avoid an infinite loop, always check that the transaction hasn't already failed.
-			global $db;
-			if ( is_object($db) AND $db->hasFailedTrans() == FALSE ) {
+			global $db, $disable_database_connection;
+			if ( ( !isset($disable_database_connection) OR ( isset($disable_database_connection) AND $disable_database_connection != TRUE ) ) AND is_object($db) AND $db->hasFailedTrans() == FALSE ) {
 				$registration_key = SystemSettingFactory::getSystemSettingValueByKey( 'registration_key' );
 			}
 		} catch (Exception $e) {

@@ -209,7 +209,8 @@ class APISchedule extends APIFactory {
 		}
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
-		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'schedule', 'view' );
+		//Use the SQL based permission checks to avoid bugs with 'schedule' -> 'view' == TRUE and 'schedule' -> 'edit_child' == TRUE not allowing the user to edit any records.
+		$data['filter_data'] = array_merge( (array)$data['filter_data'], $this->getPermissionObject()->getPermissionFilterData( 'schedule', 'view' ) );
 
 		//Get Permission Hierarchy Children for wages first, as this can be used for viewing, or editing.
 		$data['filter_data']['wage_permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view' );
@@ -221,11 +222,11 @@ class APISchedule extends APIFactory {
 		}
 
 		//If we don't have permissions to view open shifts, exclude user_id = 0;
-		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
+		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == TRUE
+				AND ( $this->getPermissionObject()->Check('schedule', 'view_own') == TRUE OR $this->getPermissionObject()->Check('schedule', 'view_child') == TRUE ) ) {
+			$data['filter_data']['permission_is_id'] = 0; //Always allow this user_id to be returned.
+		} elseif ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
 			$data['filter_data']['exclude_id'] = array(0);
-		} elseif ( count($data['filter_data']['permission_children_ids']) > 0 ) {
-			//If schedule, view_open is allowed but they are also only allowed to see their subordinates (which they have some of), add "open" employee as if they are a subordinate.
-			$data['filter_data']['permission_children_ids'][] = 0;
 		}
 
 		//Pass items per page through to getScheduleArray()
@@ -242,7 +243,7 @@ class APISchedule extends APIFactory {
 
 		$sf->setAMFMessageID( $this->getAMFMessageID() );
 
-		$retarr = $sf->getScheduleArray( $data['filter_data'], $data['filter_data']['permission_children_ids'] );
+		$retarr = $sf->getScheduleArray( $data['filter_data'] );
 		//Hide wages if the user doesn't have permission to see them.
 		if ( is_array($retarr) ) {
 			foreach( $retarr as $date_stamp => $shifts ) {
@@ -254,7 +255,7 @@ class APISchedule extends APIFactory {
 						) ) {
 						$retarr[$date_stamp][$key]['hourly_rate'] = $retarr[$date_stamp][$key]['total_time_wage'] = 0;
 					}
-					$sf->getPermissionColumns( $retarr[$date_stamp][$key], $row['user_id'], $row['created_by_id'], $data['filter_data']['permission_children_ids'], $data['filter_columns'] );
+					//$sf->getPermissionColumns( $retarr[$date_stamp][$key], $row['user_id'], $row['created_by_id'], $data['filter_data']['permission_children_ids'], $data['filter_columns'] ); //This is handled in SQL from getScheduleArray() now, no need to pass in children IDs.
 				}
 			}
 		}

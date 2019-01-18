@@ -206,6 +206,9 @@ $_POST = array( 'data' => array('filter_data' => array('id' => array(101561) ) )
 //Debug::Arr(file_get_contents('php://input'), 'POST: ', __FILE__, __LINE__, __METHOD__, 10);
 //Debug::Arr($_POST, 'POST: ', __FILE__, __LINE__, __METHOD__, 10);
 
+//$argument_size = strlen( serialize($arguments) );
+$argument_size = strlen( $HTTP_RAW_POST_DATA ); //Just strlen this variable rather than serialize all the data as it should be much faster.
+
 $arguments = $_POST;
 if ( isset($_POST['json']) OR isset($_GET['json']) ) {
 	if ( isset($_GET['json']) AND $_GET['json'] != '' ) {
@@ -213,14 +216,15 @@ if ( isset($_POST['json']) OR isset($_GET['json']) ) {
 	} elseif ( isset($_POST['json']) AND $_POST['json'] != '' ) {
 		$arguments = json_decode( $_POST['json'], TRUE );
 	}
+
+	//Test to see if json_decode() failed for some reason, this should help determine if the argument data is somehow corrupt.
+	if ( $argument_size > 5 AND $arguments === NULL AND getJSONError() != '' ) {
+		Debug::Text('JSON Error: '. getJSONError(), __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Arr( $HTTP_RAW_POST_DATA, 'Raw POST Request: ', __FILE__, __LINE__, __METHOD__, 0 );
+		Debug::Arr( urldecode( $HTTP_RAW_POST_DATA ), 'URL Decoded Raw POST Request: ', __FILE__, __LINE__, __METHOD__, 0 );
+	}
 }
 
-//Make sure we sanitize all user inputs from XSS vulnerabilities. Where HTML should be allowed we can reverse this process on a case-by-case basis.
-//This causes data to be modified when stored in the database though, we have since enabled escaping on output in jqGrid instead.
-//FormVariables::RecurseFilterArray( $arguments );
-
-//$argument_size = strlen( serialize($arguments) );
-$argument_size = strlen( $HTTP_RAW_POST_DATA ); //Just strlen this variable rather than serialize all the data as it should be much faster.
 if ( PRODUCTION == TRUE AND $argument_size > (1024 * 12) ) {
 	Debug::Text('Arguments too large to display... Size: '. $argument_size, __FILE__, __LINE__, __METHOD__, 10);
 } else {

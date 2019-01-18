@@ -85,8 +85,16 @@ class APILog extends APIFactory {
 									OR $this->getPermissionObject()->Check( $permission_section, 'edit_child')
 								) ) ) {
 							//By default administrators have company,edit_own permissions, which means they can't see their own companies audit tab. This is just to be on the safe side.
-							Debug::Text('Skipping table name due to permissions: '. $filter_table_name .' Permission Section: '. $permission_section .' Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
-							unset($data['filter_data']['table_name'][$key], $data['filter_data']['table_name_object_id'][$filter_table_name]);
+
+							//If permission checks fail, force the filter to include the currently logged in user_id, assuming that they can always see audit records created by themselves.
+							//This is needed so they can see the audit tab for saved/scheduled reports and at least view when they were sent out.
+							if ( $this->getPermissionObject()->Check( $permission_section, 'view_own' ) OR $this->getPermissionObject()->Check( $permission_section, 'edit_own' ) ) {
+								Debug::Text( 'Forcing filter to currently logged in user due to audit log table permissions: ' . $filter_table_name . ' Permission Section: ' . $permission_section . ' Key: ' . $key, __FILE__, __LINE__, __METHOD__, 10 );
+								$data['filter_data']['user_id'] = $this->getCurrentUserObject()->getId();
+							} else {
+								Debug::Text('Skipping table name due to permissions: '. $filter_table_name .' Permission Section: '. $permission_section .' Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
+								unset($data['filter_data']['table_name'][$key], $data['filter_data']['table_name_object_id'][$filter_table_name]);
+							}
 						} else {
 							Debug::Text('Allowing table name due to permissions: '. $filter_table_name, __FILE__, __LINE__, __METHOD__, 10);
 						}
@@ -105,6 +113,7 @@ class APILog extends APIFactory {
 			return $this->returnHandler( TRUE ); //No records returned.
 		}
 
+		//Debug::Arr($data, 'Filter Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $blf->getRecordCount() > 0 ) {
@@ -112,7 +121,7 @@ class APILog extends APIFactory {
 
 			$this->setPagerObject( $blf );
 
-			$retarr = array();			
+			$retarr = array();
 			foreach( $blf as $b_obj ) {
 				$retarr[] = $b_obj->getObjectAsArray( $data['filter_columns'] );
 

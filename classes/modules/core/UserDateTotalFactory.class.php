@@ -1575,6 +1575,19 @@ class UserDateTotalFactory extends Factory {
 //										TTi18n::gettext('Pay Period is Currently Locked') );
 //		}
 
+
+		if ( $this->getDeleted() == FALSE ) {
+			//Make sure the total time matches the start/end time stamps when handling overridden records.
+			//This should avoid setting the total_time=0 when the start/end times show 2hrs or something.
+			if ( $this->getOverride() == TRUE AND $this->getStartTimeStamp() != '' AND $this->getEndTimeStamp() != '' ) {
+				if ( abs( $this->getEndTimeStamp() - $this->getStartTimeStamp() ) != abs( $this->getTotalTime() ) ) {
+					$this->Validator->isTRUE(	'total_time',
+												 FALSE,
+												 TTi18n::gettext('Time does not match Start Date/Time and End Date/Time') );
+				}
+			}
+		}
+
 		//Make sure that we aren't trying to overwrite an already overridden entry made by the user for some special purpose.
 		if ( $this->getDeleted() == FALSE
 				AND $this->isNew() == TRUE ) {

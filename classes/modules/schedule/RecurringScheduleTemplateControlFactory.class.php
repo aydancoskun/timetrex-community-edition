@@ -43,7 +43,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 	protected $pk_sequence_name = 'recurring_schedule_template_control_id_seq'; //PK Sequence name
 
 	protected $company_obj = NULL;
-	
+
 	function _getFactoryOptions( $name, $parent = NULL ) {
 		$retval = NULL;
 		switch( $name ) {
@@ -53,7 +53,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 										'-1040-description' => TTi18n::gettext('Description'),
 
 										'-1900-in_use' => TTi18n::gettext('In Use'),
-										
+
 										'-2000-created_by' => TTi18n::gettext('Created By'),
 										'-2010-created_date' => TTi18n::gettext('Created Date'),
 										'-2020-updated_by' => TTi18n::gettext('Updated By'),
@@ -92,7 +92,7 @@ class RecurringScheduleTemplateControlFactory extends Factory {
 										'description' => 'Description',
 										'in_use' => FALSE,
 										'deleted' => 'Deleted',
-										'created_by' => 'CreatedBy',
+										'created_by' => 'CreatedBy', //Needed to change the "owner" of the template for permission purposes.
 										);
 		return $variable_function_map;
 	}

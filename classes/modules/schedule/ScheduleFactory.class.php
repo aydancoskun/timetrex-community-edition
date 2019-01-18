@@ -730,6 +730,11 @@ class ScheduleFactory extends Factory {
 			Debug::Text('Using Default Branch: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
+		//If $id = -1 (default) makes it to this step (likely due to being an OPEN shift), force it to 0.
+		if ( $id == -1 ) {
+			$id = 0;
+		}
+
 		$blf = TTnew( 'BranchListFactory' );
 
 		if (  $id == 0
@@ -765,6 +770,11 @@ class ScheduleFactory extends Factory {
 			Debug::Text('Using Default Department: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 		}
 
+		//If $id = -1 (default) makes it to this step (likely due to being an OPEN shift), force it to 0.
+		if ( $id == -1 ) {
+			$id = 0;
+		}
+
 		$dlf = TTnew( 'DepartmentListFactory' );
 
 		if (  $id == 0
@@ -798,6 +808,11 @@ class ScheduleFactory extends Factory {
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
 			$id = $this->getUserObject()->getDefaultJob();
 			Debug::Text('Using Default Job: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		//If $id = -1 (default) makes it to this step (likely due to being an OPEN shift), force it to 0.
+		if ( $id == -1 ) {
+			$id = 0;
 		}
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -838,6 +853,11 @@ class ScheduleFactory extends Factory {
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $id == -1 ) { //Find default
 			$id = $this->getUserObject()->getDefaultJobItem();
 			Debug::Text('Using Default Job Item: '. $id, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		//If $id = -1 (default) makes it to this step (likely due to being an OPEN shift), force it to 0.
+		if ( $id == -1 ) {
+			$id = 0;
 		}
 
 		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
@@ -1160,7 +1180,7 @@ class ScheduleFactory extends Factory {
 		return $ret_arr;
 	}
 
-	function getScheduleArray( $filter_data, $permission_children_ids = NULL ) {
+	function getScheduleArray( $filter_data ) {
 		global $current_user;
 
 		//Get all schedule data by general filter criteria.
@@ -1308,10 +1328,13 @@ class ScheduleFactory extends Factory {
 													'created_by_id' => (int)$s_obj->getCreatedBy(),
 													'created_date' => $s_obj->getCreatedDate(),
 													'updated_date' => $s_obj->getUpdatedDate(),
+
+													'is_owner' => (bool)$s_obj->getColumn('is_owner'),
+													'is_child' => (bool)$s_obj->getColumn('is_child'),
 												);
 
-				//Make sure we add in permission columns.
-				$this->getPermissionColumns( $schedule_shifts[$iso_date_stamp][$i], (int)$s_obj->getUser(), $s_obj->getCreatedBy(), $permission_children_ids );
+				//Make sure we add in permission columns. They come from SQL now, so we don't need to use getPermissionColumns() at all anymore, let alone pass in $permission_children_ids
+				//$this->getPermissionColumns( $schedule_shifts[$iso_date_stamp][$i], (int)$s_obj->getUser(), $s_obj->getCreatedBy(), $permission_children_ids );
 
 				unset($absence_policy_name);
 
@@ -1396,7 +1419,7 @@ class ScheduleFactory extends Factory {
 														);
 
 						//Make sure we add in permission columns.
-						$this->getPermissionColumns( $schedule_shifts[TTDate::getISODateStamp( $filter_data['start_date'] )][$i], (int)$u_obj->getID(), $u_obj->getCreatedBy(), $permission_children_ids );
+						$this->getPermissionColumns( $schedule_shifts[TTDate::getISODateStamp( $filter_data['start_date'] )][$i], (int)$u_obj->getID(), $u_obj->getCreatedBy() );
 
 						$this->getProgressBarObject()->set( $this->getAMFMessageID(), $ulf->getCurrentRow() );
 

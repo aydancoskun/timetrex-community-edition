@@ -94,7 +94,7 @@
 
 			message_container.find('.sendButton' ).bind('click', $this.saveIconSelection);
 
-			message_container.find('.cancelButton' ).bind('click', $this.saveIconSelection);
+			message_container.find('.cancelButton' ).bind('click', $this.removeMessageContainer);
 
 			if ( $('body' ).children('.message-container' ).length == 0 ) {
 				$('body' ).append( message_container );

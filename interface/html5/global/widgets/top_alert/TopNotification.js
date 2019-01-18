@@ -81,7 +81,7 @@
 
 				if ( item.destination ) {
 
-					if ( (typeof item.destination["indexOf"]) !== 'undefined' && item.destination.indexOf( 'http://' ) > -1 ) {
+					if ( (typeof item.destination["indexOf"]) !== 'undefined' && ( item.destination.indexOf( 'http://' ) > -1 || item.destination.indexOf( 'https://' ) > -1 ) ) {
 						window.open( item.destination, '_blank' );
 
 					} else if ( item.destination.hasOwnProperty( 'menu_name' ) ) {

@@ -969,8 +969,8 @@ class ContributingShiftPolicyFactory extends Factory {
 			if ( is_array($holiday_policy_ids) AND count($holiday_policy_ids) > 0 ) {
 				foreach( $holiday_policy_ids as $holiday_policy_id ) {
 					if ( isset($calculate_policy_obj->holiday_policy[$holiday_policy_id]) ) {
-						$holiday_obj = $calculate_policy_obj->filterHoliday( $epoch, $calculate_policy_obj->holiday_policy[$holiday_policy_id], NULL );
-						if ( is_object($holiday_obj) ) {
+						$holiday_policies = $calculate_policy_obj->filterHoliday( $epoch, $calculate_policy_obj->holiday_policy[$holiday_policy_id], NULL );
+						if ( is_array( $holiday_policies ) AND count( $holiday_policies ) > 0 ) {
 							Debug::text(' Is Holiday: User ID: '. $calculate_policy_obj->getUserObject()->getID() .' Date: '. TTDate::getDate('DATE', $epoch), __FILE__, __LINE__, __METHOD__, 10);
 
 							//Check if its only eligible holidays or all holidays.
@@ -1014,7 +1014,7 @@ class ContributingShiftPolicyFactory extends Factory {
 		return FALSE;
 	}
 
-	function isActiveDayOfWeekOrHoliday( $date_epoch, $calculate_policy_obj = NULL ) {
+	function isActiveDayOfWeekOrHoliday( $date_epoch, $calculate_policy_obj ) {
 		Debug::text(' Date: '. TTDate::getDate('DATE+TIME', $date_epoch) .' Include Holiday Type: '. $this->getIncludeHolidayType(), __FILE__, __LINE__, __METHOD__, 10);
 		if ( $this->getIncludeHolidayType() > 10 AND is_object( $calculate_policy_obj ) ) {
 			$is_holiday = $this->isHoliday( TTDate::getMiddleDayEpoch( $date_epoch ), $calculate_policy_obj );
@@ -1151,7 +1151,7 @@ class ContributingShiftPolicyFactory extends Factory {
 						Debug::text(' Partial Punch Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
 					} elseif ( $this->getIncludeShiftType() == 200 AND $in_epoch >= $tmp_start_time_stamp AND $out_epoch <= $tmp_end_time_stamp
-							AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp ) AND $this->isActiveDayOfWeekOrHoliday( $tmp_end_time_stamp ) ) { //200=Full Shift (Must Start & End)
+							AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp, $calculate_policy_obj ) AND $this->isActiveDayOfWeekOrHoliday( $tmp_end_time_stamp, $calculate_policy_obj ) ) { //200=Full Shift (Must Start & End)
 						//Non partial punches, they must punch in AND out (entire shift) within the time window.
 						Debug::text(' Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
@@ -1168,7 +1168,7 @@ class ContributingShiftPolicyFactory extends Factory {
 									AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']] )
 									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() >= $tmp_start_time_stamp
 									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() <= $tmp_end_time_stamp
-									AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp ) ) {
+									AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp, $calculate_policy_obj ) ) {
 								Debug::text( ' Matched within Shift Start Time: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
 								return TRUE;
 							}
@@ -1180,7 +1180,7 @@ class ContributingShiftPolicyFactory extends Factory {
 									AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']] )
 									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']]->getEndTimeStamp() >= $tmp_start_time_stamp
 									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']]->getEndTimeStamp() <= $tmp_end_time_stamp
-									AND $this->isActiveDayOfWeekOrHoliday( $tmp_end_time_stamp ) ) {
+									AND $this->isActiveDayOfWeekOrHoliday( $tmp_end_time_stamp, $calculate_policy_obj ) ) {
 								Debug::text( ' Matched within Shift End Time: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
 								return TRUE;
 							}
@@ -1188,9 +1188,8 @@ class ContributingShiftPolicyFactory extends Factory {
 //								Debug::text( ' NOT Matched within Shift End Time: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
 //							}
 						} elseif( $this->getIncludeShiftType() == 230 ) { //230=Full Shift (Majority of Shift)
-							//$this->isActiveDayOfWeekOrHoliday( $i );
 							if ( isset( $tmp_shift_data['total_time_filter_overlap'] ) AND $tmp_shift_data['total_time_filter_overlap'] > ( $tmp_shift_data['total_time'] / 2 )
-									AND ( isset( $tmp_shift_data['day_with_most_time'] ) AND $this->isActiveDayOfWeekOrHoliday( $tmp_shift_data['day_with_most_time'] ) ) ) {
+									AND ( isset( $tmp_shift_data['day_with_most_time'] ) AND $this->isActiveDayOfWeekOrHoliday( $tmp_shift_data['day_with_most_time'], $calculate_policy_obj ) ) ) {
 								Debug::text( ' Matched within Majority Shift: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
 								return TRUE;
 							} elseif ( isset( $tmp_shift_data['total_time_filter_overlap'] ) AND $tmp_shift_data['total_time_filter_overlap'] == ( $tmp_shift_data['total_time'] / 2 ) ) {
@@ -1199,7 +1198,7 @@ class ContributingShiftPolicyFactory extends Factory {
 										AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']] )
 										AND $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() >= $tmp_start_time_stamp
 										AND $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() <= $tmp_end_time_stamp
-										AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp ) ) {
+										AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp, $calculate_policy_obj ) ) {
 									Debug::text( ' Matched within Majority Shift, 50/50 split: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
 									return TRUE;
 								} else {
@@ -1308,27 +1307,27 @@ class ContributingShiftPolicyFactory extends Factory {
 		$filter_end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), $udt_obj->getStartTimeStamp() ); //Base the end time on day of the in_epoch.
 		//Debug::text(' bChecking for Active Time with: In: '. TTDate::getDate('DATE+TIME', $filter_start_time_stamp ) .' Out: '. TTDate::getDate('DATE+TIME', $filter_end_time_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 
-			//Check if end timestamp is before start, if it is, move end timestamp to next day.
+		//Check if end timestamp is before start, if it is, move end timestamp to next day.
 		if ( $filter_end_time_stamp < $filter_start_time_stamp ) {
-				Debug::text(' Moving End TimeStamp to next day.', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text(' Moving End TimeStamp to next day.', __FILE__, __LINE__, __METHOD__, 10);
 			$filter_end_time_stamp = TTDate::getTimeLockedDate( $this->getFilterEndTime(), ( TTDate::getMiddleDayEpoch($filter_end_time_stamp) + 86400 ) ); //Due to DST, jump ahead 1.5 days, then jump back to the time locked date.
-			}
+		}
 
-			//Handle the last second of the day, so punches that span midnight like 11:00PM to 6:00AM get a full 1 hour for the time before midnight, rather than 59mins and 59secs.
+		//Handle the last second of the day, so punches that span midnight like 11:00PM to 6:00AM get a full 1 hour for the time before midnight, rather than 59mins and 59secs.
 		if ( TTDate::getHour( $filter_end_time_stamp ) == 23 AND TTDate::getMinute( $filter_end_time_stamp ) == 59 ) {
 			$filter_end_time_stamp = ( TTDate::getEndDayEpoch( $filter_end_time_stamp ) + 1 );
-				Debug::text(' End time stamp is within the last minute of day, make sure we include the last second of the day as well.', __FILE__, __LINE__, __METHOD__, 10);
-			}
+			Debug::text(' End time stamp is within the last minute of day, make sure we include the last second of the day as well.', __FILE__, __LINE__, __METHOD__, 10);
+		}
 
 		if ( $filter_start_time_stamp == $filter_end_time_stamp ) {
-				Debug::text(' Start/End time filters match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text(' Start/End time filters match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
 			return array( $udt_key => $udt_obj );
-			}
+		}
 
 		if ( $udt_obj->getStartTimeStamp() == $udt_obj->getEndTimeStamp() ) {
 			Debug::text(' Start/End time match, nothing to do...', __FILE__, __LINE__, __METHOD__, 10);
 			return array( $udt_key => $udt_obj );
-				}
+		}
 
 		$split_udt_time_stamps = TTDate::splitDateRangeAtMidnight( $udt_obj->getStartTimeStamp(), $udt_obj->getEndTimeStamp(), $filter_start_time_stamp, $filter_end_time_stamp );
 		if ( is_array($split_udt_time_stamps) AND count($split_udt_time_stamps) > 0 ) {
@@ -1364,7 +1363,12 @@ class ContributingShiftPolicyFactory extends Factory {
 				$i++;
 			}
 
-			return $retarr;
+			//If no split actually occurred (at least more than 1 record), return the original record untouched.
+			//Because splitting the record recalculates the TotalTime and sets isPartialShift(TRUE), we want to avoid modifying the data if at all possible.
+			//This manifested itself as a bug when manually overriding UDT records to 0hrs, but leaving the Start/End timestamps at thier original value.
+			if ( count($retarr) > 1 ) {
+				return $retarr;
+			}
 		}
 
 		Debug::text(' Nothing to split, returning original UDT record...', __FILE__, __LINE__, __METHOD__, 10);

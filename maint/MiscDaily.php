@@ -70,8 +70,14 @@ if ( !isset($config_vars['other']['disable_backup'])
 
 				$filepath = $backup_dir . DIRECTORY_SEPARATOR . $file;
 				if ( !is_dir( $filepath ) ) {
-					if ( preg_match( '/timetrex_database.*\.sql/i', $file) == 1 ) {
-						$backup_history_files[filemtime($filepath)] = $filepath;
+					//Be more strict with regex to avoid: PHP ERROR - WARNING(2): filemtime(): stat failed for C:\TimeTrex\timetrex\maint\..\..\timetrex_database_???.sql File: C:\TimeTrex\timetrex\maint\MiscDaily.php Line: 74
+					if ( preg_match( '/timetrex_database_[A-Za-z0-9\-]+\.sql/i', $file) == 1 ) {
+						$file_mtime = @filemtime($filepath);
+						if ( $file_mtime !== FALSE ) {
+							$backup_history_files[$file_mtime] = $filepath;
+						} else {
+							Debug::Text('ERROR: Unable to get filemtime on: '. $filepath, __FILE__, __LINE__, __METHOD__, 10);
+						}
 					}
 				}
 			}
@@ -82,7 +88,9 @@ if ( !isset($config_vars['other']['disable_backup'])
 			reset($backup_history_files);
 			$delete_backup_file = current($backup_history_files);
 			Debug::Text('Deleting oldest backup: '. $delete_backup_file .' Of Total: '. count($backup_history_files), __FILE__, __LINE__, __METHOD__, 10);
-			unlink( $delete_backup_file );
+			if ( @unlink( $delete_backup_file ) == FALSE ) { //PHP ERROR - WARNING(2): unlink(C:\TimeTrex\timetrex\maint\..\..\timetrex_database_20160322.sql): Permission denied File: C:\TimeTrex\timetrex\maint\MiscDaily.php Line: 85
+				Debug::Text('ERROR: Unable to delete backup file, possible permission denied error?', __FILE__, __LINE__, __METHOD__, 10);
+			}
 			unset($delete_backup_file);
 		}
 	}

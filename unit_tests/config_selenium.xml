@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit    backupGlobals="false"
+            backupStaticAttributes="true"
+            bootstrap="BootStrapSelenium.php"
+            cacheTokens="true"
+            colors="false"
+            convertErrorsToExceptions="true"
+            convertNoticesToExceptions="true"
+            convertWarningsToExceptions="true"
+            forceCoversAnnotation="false"
+            mapTestClassNameToCoveredClassName="false"
+            printerClass="PHPUnit_TextUI_ResultPrinter"
+            processIsolation="false"
+            stopOnError="true"
+            stopOnFailure="true"
+            stopOnIncomplete="false"
+            stopOnSkipped="false"
+            testSuiteLoaderClass="PHPUnit_Runner_StandardTestSuiteLoader"
+            strict="false"
+            verbose="false">
+
+    <testsuites>
+        <testsuite name="Selenium">
+            <directory suffix=".php">testcases/selenium/</directory>
+        </testsuite>
+    </testsuites>
+
+</phpunit>

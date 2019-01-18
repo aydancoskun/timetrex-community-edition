@@ -1474,7 +1474,6 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 
 
 	function testsplitDateRange() {
-
 		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-2016 8:00AM'), strtotime('02-Jan-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-2016 8:00AM') );
 		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('02-Jan-2016 12:00AM') );
@@ -1773,6 +1772,74 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $split_range_arr[6804]['start_time_stamp'], strtotime('2016-08-30 02:00:00am') );
 		$this->assertEquals( $split_range_arr[6804]['end_time_stamp'], strtotime('2016-08-30 05:00:00pm') );
 		$this->assertEquals( count($split_range_arr), 6805 );
+
+		//#2329 <24 hrs between with midnight filter provided.
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('04-Jul-17 9:55 PM'), strtotime('05-Jul-17 1:00 AM'), strtotime('04-Jul-17 12:00 AM'), strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('04-Jul-17 9:55 PM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('05-Jul-17 12:00 AM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('05-Jul-17 12:00 AM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('05-Jul-17 1:00 AM') );
+		$this->assertEquals( count($split_range_arr), 3 );
+
+		//same day
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('04-Jul-17 9:55 PM'), strtotime('04-Jul-17 11:00 PM'), strtotime('04-Jul-17 10:00 PM'), strtotime('04-Jul-17 10:50 PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('04-Jul-17 9:55 PM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('04-Jul-17 10:50 PM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('04-Jul-17 10:50 PM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('04-Jul-17 11:00 PM') );
+		$this->assertEquals( count($split_range_arr), 3 );
+
+		//next day < 24hrs between
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('04-Jul-17 9:55 PM'), strtotime('05-Jul-17 8:00 PM'), strtotime('04-Jul-17 10:00 PM'), strtotime('04-Jul-17 10:50 PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('04-Jul-17 9:55 PM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('04-Jul-17 10:50 PM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('04-Jul-17 10:50 PM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('05-Jul-17 12:00 AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('05-Jul-17 12:00 AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('05-Jul-17 8:00 PM') );
+		$this->assertEquals( count($split_range_arr), 4 );
+
+
+		//next day < 24hrs between reversed filters (greater, then less.)
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('04-Jul-17 9:55 PM'), strtotime('05-Jul-17 8:00 PM'), strtotime('04-Jul-17 10:50 PM'), strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('04-Jul-17 9:55 PM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('04-Jul-17 10:00 PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('04-Jul-17 10:50 PM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('04-Jul-17 10:50 PM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('05-Jul-17 12:00 AM') );
+		$this->assertEquals( $split_range_arr[3]['start_time_stamp'], strtotime('05-Jul-17 12:00 AM') );
+		$this->assertEquals( $split_range_arr[3]['end_time_stamp'], strtotime('05-Jul-17 8:00 PM') );
+		$this->assertEquals( count($split_range_arr), 4 );
+
+
+		//very small window
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('04-Jul-17 9:55 PM'), strtotime('04-Jul-17 09:58 PM'), strtotime('04-Jul-17 09:56 PM'), strtotime('04-Jul-17 09:57 PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('04-Jul-17 9:55 PM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('04-Jul-17 09:56 PM') );
+		$this->assertEquals( $split_range_arr[1]['start_time_stamp'], strtotime('04-Jul-17 09:56 PM') );
+		$this->assertEquals( $split_range_arr[1]['end_time_stamp'], strtotime('04-Jul-17 09:57 PM') );
+		$this->assertEquals( $split_range_arr[2]['start_time_stamp'], strtotime('04-Jul-17 09:57 PM') );
+		$this->assertEquals( $split_range_arr[2]['end_time_stamp'], strtotime('04-Jul-17 09:58 PM') );
+		$this->assertEquals( count($split_range_arr), 3 );
+
+		//with filter dates after the end time
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-17 08:00AM'), strtotime('01-Jan-17 05:00 PM'), strtotime('02-Jan-17 06:00 PM'), strtotime('02-Jan-17 07:00 PM') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-17 08:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-17 05:00 PM') );
+		$this->assertEquals( count($split_range_arr), 1 );
+
+		//with filter dates before the start time.
+		$split_range_arr = TTDate::splitDateRangeAtMidnight( strtotime('01-Jan-17 08:00AM'), strtotime('01-Jan-17 05:00 PM'), strtotime('02-Jan-17 03:00 AM'), strtotime('02-Jan-17 05:00 am') );
+		$this->assertEquals( $split_range_arr[0]['start_time_stamp'], strtotime('01-Jan-17 08:00AM') );
+		$this->assertEquals( $split_range_arr[0]['end_time_stamp'], strtotime('01-Jan-17 05:00 PM') );
+		$this->assertEquals( count($split_range_arr), 1 );
 
 	}
 

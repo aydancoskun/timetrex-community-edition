@@ -81,6 +81,10 @@ class HolidayPolicyFactory extends Factory {
 						40 => TTi18n::gettext('Must Not Work (Only if Scheduled Absent)'), //If scheduled absent, they must not work. Otherwise if not scheduled, or scheduled to work and they work that is fine too.
 						//50 => TTi18n::gettext('Must Work (if Scheduled), May Work if Not Scheduled)'), //If scheduled to work, they must work, otherwise if not scheduled (or scheduled absent) they don't work its fine too.
 						//60 => TTi18n::gettext('Must Not Work (if Scheduled Absent), May Work if Not Scheduled)'), //If scheduled absent, they must not work.
+
+						//70 => TTi18n::gettext('Must Not Work (Must be Scheduled)'), //Must not work, and must be scheduled to work.
+						72 => TTi18n::gettext('Must Not Work (Must be Scheduled Absent)'), //Must not work, and must be scheduled absent. This is useful for holidays that fall on a day that the employee *is* normally scheduled to work.
+						75 => TTi18n::gettext('Must Not Work (Must not be Scheduled)'), //Must not work, and must not be scheduled to work OR scheduled absent. This is useful for holidays that fall on a day that the employee *is not* normally scheduled to work.
 				);
 				break;
 			case 'columns':

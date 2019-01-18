@@ -306,59 +306,65 @@ switch ($object_type) {
 	case 'license':
 		$max_upload_file_size = 50000;
 
-		if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) AND getTTProductEdition() > 10
-			AND ( $permission->Check('company', 'add') OR $permission->Check('company', 'edit') OR $permission->Check('company', 'edit_own') OR $permission->Check('company', 'edit_child') ) ) {
-			$upload->set_max_filesize($max_upload_file_size); //20K or less
-			$upload->set_acceptable_types( array('text/plain','plain/text','application/octet-stream') ); // comma separated string, or array
-			$upload->set_overwrite_mode(1);
+		if ( getTTProductEdition() > 10 ) {
+			if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) ) {
+				if ( ( $permission->Check('company', 'add') OR $permission->Check('company', 'edit') OR $permission->Check('company', 'edit_own') OR $permission->Check('company', 'edit_child') ) ) {
+					$upload->set_max_filesize( $max_upload_file_size ); //20K or less
+					$upload->set_acceptable_types( array('text/plain', 'plain/text', 'application/octet-stream') ); // comma separated string, or array
+					$upload->set_overwrite_mode( 1 );
 
-			$dir = Environment::getStorageBasePath() . DIRECTORY_SEPARATOR .'license'. DIRECTORY_SEPARATOR . $current_company->getId();
-			if ( isset($dir) ) {
-				@mkdir($dir, 0700, TRUE);
+					$dir = Environment::getStorageBasePath() . DIRECTORY_SEPARATOR . 'license' . DIRECTORY_SEPARATOR . $current_company->getId();
+					if ( isset( $dir ) ) {
+						@mkdir( $dir, 0700, TRUE );
 
-				if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
-					$upload_result = $upload->upload("filedata", $dir);
-					//var_dump($upload ); //file data
-					if ($upload_result) {
-						$success = $upload_result .' '. TTi18n::gettext('Successfully Uploaded');
-					} else {
-						$error = $upload->get_error();
+						if ( @disk_free_space( $dir ) > ( $max_upload_file_size * 2 ) ) {
+							$upload_result = $upload->upload( "filedata", $dir );
+							//var_dump($upload ); //file data
+							if ( $upload_result ) {
+								$success = $upload_result . ' ' . TTi18n::gettext( 'Successfully Uploaded' );
+							} else {
+								$error = $upload->get_error();
+							}
+						}
 					}
-				}
-			}
-			Debug::Text('Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10);
-			if ( isset($success) AND $success != '' ) {
-				$clf = new CompanyListFactory();
-				$clf->getById( $config_vars['other']['primary_company_id'] );
-				if ( $clf->getRecordCount() == 1 ) {
+					Debug::Text( 'Post Upload Operation...', __FILE__, __LINE__, __METHOD__, 10 );
+					if ( isset( $success ) AND $success != '' ) {
+						$clf = new CompanyListFactory();
+						$clf->getById( $config_vars['other']['primary_company_id'] );
+						if ( $clf->getRecordCount() == 1 ) {
 
-					$ttsc = new TimeTrexSoapClient();
-					if ( $ttsc->Ping() == TRUE ) {
+							$ttsc = new TimeTrexSoapClient();
+							if ( $ttsc->Ping() == TRUE ) {
+								Debug::Text( 'Initial Communication to license server successful!', __FILE__, __LINE__, __METHOD__, 10 );
+								$file_data_arr = $upload->get_file();
+								$license_data = trim( file_get_contents( $dir . '/' . $upload_result ) );
 
-						Debug::Text( 'Rename', __FILE__, __LINE__, __METHOD__, 10 );
-
-
-						$file_data_arr = $upload->get_file();
-						$license_data = trim( file_get_contents( $dir . '/' . $upload_result ) );
-
-						$license = new TTLicense();
-						$retval = $license->getLicenseFile( TRUE, $license_data ); //Download updated license file if one exists.
-						if ( $retval === FALSE ) {
-							$error = TTi18n::gettext( 'Invalid license file or unable to activate license' );
+								$license = new TTLicense();
+								$retval = $license->getLicenseFile( TRUE, $license_data ); //Download updated license file if one exists.
+								if ( $retval === FALSE ) {
+									$error = TTi18n::gettext( 'Invalid license file or unable to activate license' );
+									unset( $success );
+								}
+							} else {
+								$error = TTi18n::gettext( 'ERROR: Unable to communicate with license server, please check your internet connection.' );
+								unset( $success );
+							}
+						} else {
+							$error = TTi18n::gettext( 'ERROR: Invalid PRIMARY_COMPANY_ID defined in timetrex.ini.php file.' );
 							unset( $success );
 						}
-					} else {
-						$error = TTi18n::gettext('ERROR: Unable to communicate with license server, please check your internet connection.');
-						unset($success);
 					}
 				} else {
-					$error = TTi18n::gettext('ERROR: Invalid PRIMARY_COMPANY_ID defined in timetrex.ini.php file.');
-					unset($success);
+					$error = TTi18n::gettext('ERROR: Permission Denied!');
 				}
+			} else {
+				Debug::Text( 'Current Company ID: '. $current_company->getId(), __FILE__, __LINE__, __METHOD__, 10);
+				$error = TTi18n::gettext('ERROR: Not logged into primary company.');
 			}
 		} else {
-			Debug::Text('Permission denied for upload!', __FILE__, __LINE__, __METHOD__, 10);
+			$error = TTi18n::gettext('ERROR: Product Edition is invalid, must not be Community Edition.');
 		}
+		Debug::Text( $error, __FILE__, __LINE__, __METHOD__, 10);
 		break;
 	case 'import':
 		$max_upload_file_size = 128000000;
@@ -462,10 +468,9 @@ if ( isset($success) ) {
 		//In some cases the real path of the file could be included in the error message, revealing too much information.
 		//Try to remove the directory from the error message if it exists.
 		if ( isset($dir) AND $dir != '' ) {
-			echo str_replace( $dir, '', $error );
-		} else {
-			echo TTi18n::gettext('ERROR: Unable to upload file.');
+			$error = str_replace( $dir, '', $error );
 		}
+		echo $error;
 		Debug::Text('Upload ERROR: '. $error, __FILE__, __LINE__, __METHOD__, 10);
 	} else {
 		if ( DEMO_MODE == TRUE ) {

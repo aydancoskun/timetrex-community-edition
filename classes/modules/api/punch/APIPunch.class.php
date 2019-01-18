@@ -47,6 +47,8 @@
 class APIPunch extends APIFactory {
 	protected $main_class = 'PunchFactory';
 
+	public $is_import = FALSE;
+
 	public function __construct() {
 		parent::__construct(); //Make sure parent constructor is always called.
 
@@ -599,6 +601,14 @@ class APIPunch extends APIFactory {
 					}
 
 					$lf->setObjectFromArray( $row );
+
+					//When importing punches, make sure they aren't tainted immediately. We assume if the punches are imported the employee did them originally from some other device.
+					//  The audit log will still show who imported the punch in the detailed log records.
+					if ( $this->is_import == TRUE ) {
+						Debug::Text('Imported punch, forcing created/updated by to the punch user...', __FILE__, __LINE__, __METHOD__, 10);
+						$lf->setCreatedBy( $lf->getUser() );
+						$lf->setUpdatedBy( $lf->getUser() );
+					}
 
 					$is_valid = $lf->isValid( $ignore_warning );
 					if ( $is_valid == TRUE ) {

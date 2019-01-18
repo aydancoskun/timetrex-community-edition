@@ -2966,11 +2966,12 @@ ReportBaseViewController = BaseViewController.extend( {
 			refresh_request += '	try {';
 			refresh_request += '		$.ajax({';
 			refresh_request += '			dataType: "JSON",';
-			refresh_request += "			data: {json:'" + Global.htmlEncode( JSON.stringify( post_data ) ) + "'},";
+			refresh_request += "			data: {json:'" + JSON.stringify( post_data ).replace(/'/g, "\\'") + "'},";
 			refresh_request += '			type: "POST",';
 			refresh_request += "            url: '" + url + "',";
 			refresh_request += '			success: function(result) {';
-			refresh_request += '			   Debug.Text("refresh","ReportBaseViewController.js", "", "onViewClick", 10 ); var newDoc = result.api_retval + $(\'body\').children(\':last\')[0].outerHTML; document.open("text/html"); document.write(newDoc); document.close(); ';
+			refresh_request += '			if(console){ console.log( "Auto refreshing report..." ) }';
+			refresh_request += '			var newDoc = result.api_retval + $(\'body\').children(\':last\')[0].outerHTML; document.open("text/html"); document.write(newDoc); document.close(); ';
 			refresh_request += '			}';
 			refresh_request += '		})';
 			refresh_request += '	}  catch(e) {}';

@@ -646,6 +646,8 @@ class Form941Report extends Report {
 								$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'] = 0;
 							}
 						}
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['additional_medicare_tax'] = bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'], $this->getF941Object()->medicare_additional_rate );
+
 						$this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] = bcadd( $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_wages'] );
 						//Debug::Text('User ID: '. $user_id .' DateStamp: '. TTDate::getDate('DATE', $date_stamp ) .' YTD Medicare Additional Wages: '. $this->tmp_data['ytd_pay_stub_entry'][$user_id]['medicare_wages'] .' This Pay Stub: '. $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_additional_wages'], __FILE__, __LINE__, __METHOD__, 10);
 
@@ -677,10 +679,11 @@ class Form941Report extends Report {
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l6'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l3'], bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5e'], $this->form_data['pay_period'][$quarter_month][$date_stamp]['l5f'] ) );
 
 						//Total up Social Security / Medicare Taxes withheld from the employee only, then double them for the employer portion, this helps calculate l7 further down.
+						// We can't just double the medicare_tax as it includes the additional tax which is not paid by the employer. So we have to back out the additional medicare tax for the employer portion after its doubled.
 						// The form setup for Medicare Taxes Witheld should only ever be setup for whatever the employee had withheld, now employee and employer.
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['income_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['income_tax'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['income_tax'] );
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['social_security_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['social_security_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['social_security_tax'], 2) );
-						$this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'], bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], 2 ) );
+						$this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'] = bcadd( $this->form_data['pay_period'][$quarter_month][$date_stamp]['medicare_tax'], bcsub( bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['medicare_tax'], 2 ), $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['additional_medicare_tax'] ) );
 
 						$this->form_data['pay_period'][$quarter_month][$date_stamp]['l10'] = $this->form_data['pay_period'][$quarter_month][$date_stamp]['l6']; //Add L6 -> L9 if they are implemented later.
 					}
@@ -843,15 +846,19 @@ class Form941Report extends Report {
 				$f941sb->name = $f941->name;
 				$f941sb->quarter = $f941->quarter;
 				$f941sb_data = array();
+
+				$f941->schedule_b_total = 0;
 				for( $i = 1; $i <= 3; $i++ ) {
 					if ( isset($this->form_data['pay_period'][$i]) ) {
 						foreach( $this->form_data['pay_period'][$i] as $pay_period_epoch => $data ) {
 							//Debug::Text('SB: Month: '. $i .' Pay Period Date: '. TTDate::getDate('DATE', $pay_period_epoch) .' DOM: '. TTDate::getDayOfMonth($pay_period_epoch) .' Amount: '. $data['l10'], __FILE__, __LINE__, __METHOD__, 10);
 							//$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = $data['l10']; //Don't round this as it can cause mismatches in the totals.
 							$f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] = bcadd($data['income_tax'], bcadd( $data['social_security_tax'], $data['medicare_tax'] ) ); //This should be values that appeared on the actual pay stubs, which are already rounded of course.
+							$f941->schedule_b_total = bcadd($f941->schedule_b_total, $f941sb_data[$i][TTDate::getDayOfMonth($pay_period_epoch)] );
 						}
 					}
 				}
+				//$f941->schedule_b_total += 1; Test mismatch of Schedule B totals.
 
 				if ( isset($f941sb_data[1]) ) {
 					$f941sb->month1 = $f941sb_data[1];
@@ -862,6 +869,7 @@ class Form941Report extends Report {
 				if ( isset($f941sb_data[3]) ) {
 					$f941sb->month3 = $f941sb_data[3];
 				}
+
 				unset($i, $f941sb_data);
 			}
 		} else {

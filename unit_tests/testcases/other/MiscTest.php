@@ -1097,5 +1097,10 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$child_dir =  '/etc/cron.daily';
 		$this->assertEquals( Misc::isSubDirectory( $child_dir, $parent_dir ), FALSE );
 	}
+
+	function testSOAPClient() {
+		$ttsc = TTnew('TimeTrexSoapClient');
+		$this->assertEquals( $ttsc->ping(), TRUE );
+	}
 }
 ?>

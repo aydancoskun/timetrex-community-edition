@@ -52,11 +52,5 @@
         <testsuite name="i18n">
             <directory suffix=".php">testcases/i18n/</directory>
         </testsuite>
-<!--
-        <testsuite name="Selenium">
-            <directory suffix=".php">testcases/selenium/</directory>
-        </testsuite>
--->
     </testsuites>
-
 </phpunit>

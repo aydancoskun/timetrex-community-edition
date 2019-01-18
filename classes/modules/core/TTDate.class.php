@@ -39,7 +39,7 @@
  * @package Core
  */
 class TTDate {
-	static protected $time_zone = 'GMT';
+	static protected $time_zone = NULL;
 	static protected $date_format = 'd-M-y';
 	static protected $time_format = 'g:i A T';
 	static protected $time_unit_format = 20; //Hours
@@ -131,7 +131,12 @@ class TTDate {
 	}
 
 	public static function getTimeZone() {
-		return self::$time_zone;
+		if ( self::$time_zone == '' ) {
+			Debug::text('ERROR: Timezone was not set prior to getting it!', __FILE__, __LINE__, __METHOD__, 10);
+			return 'GMT';
+		} else {
+			return self::$time_zone;
+		}
 	}
 	public static function setTimeZone($time_zone = NULL, $force = FALSE, $execute_sql_now = TRUE ) {
 		global $config_vars, $current_user_prefs;
@@ -2034,7 +2039,13 @@ class TTDate {
 		}
 
 		$c = 0;
-		$max_loops = ((($end_time_stamp - $start_time_stamp) / 86400) * 6);
+		$max_loops = ( ( ( $end_time_stamp - $start_time_stamp) / 86400 ) * 6 );
+		// #2329 - If the gap between start date and end date is less than a day, we end up with value < 1 so the while loop can't execute properly.
+		// In the corner case of start and end being less than a day apart with filters, we need to allow for a minimum of 4 segments, so set the sanity check to 4.
+		if ( $max_loops < 4 ) {
+			$max_loops = 4;
+		}
+
 		while ( $date_ceiling <= $end_time_stamp AND $c <= $max_loops ) {
 			$return_arr[] = array('start_time_stamp' => $date_floor, 'end_time_stamp' => $date_ceiling);
 			$date_floor = $date_ceiling;

@@ -41,7 +41,7 @@
 class Permission {
 	private $cached_permissions = array();
 	private $cached_permission_children_ids = array();
-	
+
 	function getPermissions( $user_id, $company_id ) {
 		//When Permission->Check() is used in a tight loop, even getCache() can be slow as it has to load a large array.
 		//So cache the permissions in even faster access memory when possible.
@@ -72,7 +72,7 @@ class Permission {
 				$plf->saveCache($perm_arr, $cache_id);
 			}
 		}
-		
+
 		$this->cached_permissions[$user_id][$company_id] = $perm_arr; //Populate local cache.
 		return $perm_arr;
 	}
@@ -232,11 +232,15 @@ class Permission {
 		return FALSE;
 	}
 
-	static function getPermissionIsChildIsOwnerSQL( $id, $inner_column ) {
+	static function getPermissionIsChildIsOwnerSQL( $id, $inner_column, $append_comma = TRUE ) {
 		$query = '
 				CASE WHEN phc.is_child is NOT NULL THEN 1 ELSE 0 END as is_child,
-				CASE WHEN '. $inner_column .' = '. (int)$id .' THEN 1 ELSE 0 END as is_owner,
-				';
+				CASE WHEN '. $inner_column .' = '. (int)$id .' THEN 1 ELSE 0 END as is_owner';
+
+		if ( $append_comma == TRUE ) {
+			$query .= ', ';
+		}
+
 		return $query;
 	}
 	static function getPermissionHierarchySQL( $company_id, $user_id, $outer_column ) {
@@ -260,7 +264,7 @@ class Permission {
 								AND ( phc_hlf.deleted = 0 AND phc_hcf.deleted = 0 )
 						) as phc ON '. $outer_column .' = phc.user_id
 					';
-					
+
 		return $query;
 	}
 	static function getPermissionIsChildIsOwnerFilterSQL( $filter_data, $outer_column_name ) {
@@ -275,6 +279,11 @@ class Permission {
 			}
 			if ( isset( $filter_data['permission_is_child'] ) AND $filter_data['permission_is_child'] == TRUE ) {
 				$query[] = 'phc.is_child = 1';
+			}
+
+			//Don't add this filter unless we have already added a is_own or is_child filter above because it will restrict to just the permission_is_id rather than it along with other children IDs.
+			if ( count($query) > 0 AND isset( $filter_data['permission_is_id'] ) AND $filter_data['permission_is_id'] !== '' ) {
+				$query[] = $outer_column_name . ' = ' . (int)$filter_data['permission_is_id'];
 			}
 
 			if ( empty( $query ) == FALSE ) {

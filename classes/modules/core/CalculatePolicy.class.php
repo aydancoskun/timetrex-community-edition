@@ -3379,23 +3379,35 @@ class CalculatePolicy {
 						unset($days_worked_arr, $weekly_days_worked, $minimum_days_worked);
 						break;
 					case 180: //Holiday
-						$holiday_obj = $this->filterHoliday( $date_stamp );
-						if ( is_object( $holiday_obj ) AND isset($this->holiday_policy[$holiday_obj->getHolidayPolicyID()]) ) {
-							Debug::text('   Found Holiday: '. $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
-							if ( $this->holiday_policy[$holiday_obj->getHolidayPolicyID()]->getForceOverTimePolicy() == TRUE
-									OR $this->isEligibleForHoliday( $date_stamp, $this->holiday_policy[$holiday_obj->getHolidayPolicyID()] ) ) {
-								$trigger_time = $otp_obj->getTriggerTime();
-								$trigger_time -= $this->getOverTimeTriggerTimeAdjustAmount( TTDate::getBeginDayEpoch( $date_stamp ), TTDate::getEndDayEpoch( $date_stamp ), $otp_obj );
-								Debug::text('   Is Eligible for Holiday: '. $holiday_obj->getName() .' Daily Trigger Time: '. $trigger_time, __FILE__, __LINE__, __METHOD__, 10);
-							} else {
-								Debug::text('   Not Eligible for Holiday: '. $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+						$holiday_policies = $this->filterHoliday( $date_stamp );
+						if ( is_array( $holiday_policies ) AND count( $holiday_policies ) > 0 ) {
+							$is_holiday_eligible = FALSE;
+							foreach ( $holiday_policies as $holiday_obj ) {
+								if ( is_object( $holiday_obj ) AND isset( $this->holiday_policy[ $holiday_obj->getHolidayPolicyID() ] ) ) {
+									Debug::text( '   Found Holiday: ' . $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+									if ( $this->holiday_policy[$holiday_obj->getHolidayPolicyID()]->getForceOverTimePolicy() == TRUE
+											OR $this->isEligibleForHoliday( $date_stamp, $this->holiday_policy[ $holiday_obj->getHolidayPolicyID() ] )
+									) {
+										$trigger_time = $otp_obj->getTriggerTime();
+										$trigger_time -= $this->getOverTimeTriggerTimeAdjustAmount( TTDate::getBeginDayEpoch( $date_stamp ), TTDate::getEndDayEpoch( $date_stamp ), $otp_obj );
+
+										$is_holiday_eligible = TRUE;
+										Debug::text( '   Is Eligible for Holiday: ' . $holiday_obj->getName() . ' Daily Trigger Time: ' . $trigger_time, __FILE__, __LINE__, __METHOD__, 10 );
+									} else {
+										Debug::text( '   Not Eligible for Holiday: ' . $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+									}
+								}
+							}
+
+							if ( $is_holiday_eligible == FALSE ) {
+								Debug::text( '   Not Eligible for any Holidays...', __FILE__, __LINE__, __METHOD__, 10 );
 								continue 2; //Skip to next policy
 							}
 						} else {
-							Debug::text('   Not Holiday...', __FILE__, __LINE__, __METHOD__, 10);
+							Debug::text( '   No Holidays...', __FILE__, __LINE__, __METHOD__, 10 );
 							continue 2; //Skip to next policy
 						}
-						unset($holiday_obj);
+						unset($holiday_policies, $holiday_obj, $is_holiday_eligible);
 						break;
 					case 200: //Over schedule (Daily) / No Schedule. Have trigger time extend the schedule time.
 						$schedule_daily_total_time = $this->getSumScheduleTime( $this->filterScheduleDataByStatus( $date_stamp, $date_stamp, array( 10 ) ) );
@@ -5973,7 +5985,7 @@ class CalculatePolicy {
 					switch( $pp_obj->getType() ) {
 						case 10: //Date/Time
 						case 100: //Advanced
-						case 90: //Holiday (coverts to Date/Time policy automatically)
+						case 90: //Holiday (converts to Date/Time policy automatically)
 							if ( is_object( $this->pay_period_schedule_obj ) ) {
 								$maximum_shift_time = $this->pay_period_schedule_obj->getMaximumShiftTime();
 							}
@@ -5983,35 +5995,43 @@ class CalculatePolicy {
 
 							if ( $pp_obj->getType() == 90 )	{
 								Debug::text(' Holiday Premium Policy...', __FILE__, __LINE__, __METHOD__, 10);
-								//Determine if the employee is eligible for holiday premium.
-								$holiday_obj = $this->filterHoliday( $date_stamp );
-								if ( !is_object($holiday_obj) ) {
-									$holiday_obj = $this->filterHoliday( ($date_stamp - $maximum_shift_time) );
-									if ( !is_object($holiday_obj) ) {
-										$holiday_obj = $this->filterHoliday( ($date_stamp + $maximum_shift_time) );
+								$holiday_policies = $this->filterHoliday( $date_stamp );
+								if ( !is_array( $holiday_policies ) OR ( is_array($holiday_policies) AND count( $holiday_policies ) == 0 ) ) {
+									$holiday_policies = $this->filterHoliday( ( $date_stamp - $maximum_shift_time ) );
+									if ( !is_array( $holiday_policies ) OR ( is_array( $holiday_policies ) AND count( $holiday_policies ) == 0 ) ) {
+										$holiday_policies = $this->filterHoliday( ( $date_stamp + $maximum_shift_time ) );
 									}
 								}
 
-								if ( is_object( $holiday_obj ) ) {
-									Debug::text(' Found Holiday: '. $holiday_obj->getName() .' Date: '. TTDate::getDate('DATE', $holiday_obj->getDateStamp() ) .' Current Date: '.	TTDate::getDate('DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
-									if ( $this->holiday_policy[$holiday_obj->getHolidayPolicyID()]->getForceOverTimePolicy() == TRUE
-											OR $this->isEligibleForHoliday( $date_stamp, $this->holiday_policy[$holiday_obj->getHolidayPolicyID()] ) ) {
-										Debug::text(' User is Eligible for Holiday: '. $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+								if ( is_array( $holiday_policies ) AND count( $holiday_policies ) > 0 ) {
+									foreach ( $holiday_policies as $holiday_obj ) {
+										Debug::text( ' Found Holiday: ' . $holiday_obj->getName() . ' Date: ' . TTDate::getDate( 'DATE', $holiday_obj->getDateStamp() ) . ' Current Date: ' . TTDate::getDate( 'DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
+										if ( $this->holiday_policy[$holiday_obj->getHolidayPolicyID()]->getForceOverTimePolicy() == TRUE
+												OR $this->isEligibleForHoliday( $date_stamp, $this->holiday_policy[$holiday_obj->getHolidayPolicyID()] )
+										) {
+											Debug::text( ' User is Eligible for Holiday: ' . $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 
-										//Modify the premium policy in memory to make it like a date/time policy
-										$pp_obj->setStartDate( $holiday_obj->getDateStamp() );
-										$pp_obj->setEndDate( $holiday_obj->getDateStamp() );
-										$pp_obj->setStartTime( TTDate::getBeginDayEpoch( $holiday_obj->getDateStamp() ) );
-										$pp_obj->setEndTime( TTDate::getEndDayEpoch( $holiday_obj->getDateStamp() ) );
-										$pp_obj->setSun( TRUE );
-										$pp_obj->setMon( TRUE );
-										$pp_obj->setTue( TRUE );
-										$pp_obj->setWed( TRUE );
-										$pp_obj->setThu( TRUE );
-										$pp_obj->setFri( TRUE );
-										$pp_obj->setSat( TRUE );
-										$pp_obj->setDailyTriggerTime( 0 );
-										$pp_obj->setWeeklyTriggerTime( 0 );
+											//Modify the premium policy in memory to make it like a date/time policy
+											$pp_obj->setStartDate( $holiday_obj->getDateStamp() );
+											$pp_obj->setEndDate( $holiday_obj->getDateStamp() );
+											$pp_obj->setStartTime( TTDate::getBeginDayEpoch( $holiday_obj->getDateStamp() ) );
+											$pp_obj->setEndTime( TTDate::getEndDayEpoch( $holiday_obj->getDateStamp() ) );
+											$pp_obj->setSun( TRUE );
+											$pp_obj->setMon( TRUE );
+											$pp_obj->setTue( TRUE );
+											$pp_obj->setWed( TRUE );
+											$pp_obj->setThu( TRUE );
+											$pp_obj->setFri( TRUE );
+											$pp_obj->setSat( TRUE );
+
+											//These don't apply to holiday type premium policies, but could be carried over from a Date/Time type accidently.
+											$pp_obj->setDailyTriggerTime( 0 );
+											$pp_obj->setMaximumDailyTriggerTime( 0 );
+											$pp_obj->setWeeklyTriggerTime( 0 );
+											$pp_obj->setMaximumWeeklyTriggerTime( 0 );
+
+											break; //If they are eligible for the holiday, stop processing more days.
+										}
 									}
 								} else {
 									//If a Date/Time premium was created first, with all days activated, then switched to a holiday type,
@@ -6023,8 +6043,14 @@ class CalculatePolicy {
 									$pp_obj->setThu( FALSE );
 									$pp_obj->setFri( FALSE );
 									$pp_obj->setSat( FALSE );
+
+									//These don't apply to holiday type premium policies, but could be carried over from a Date/Time type accidently.
+									$pp_obj->setDailyTriggerTime( 0 );
+									$pp_obj->setMaximumDailyTriggerTime( 0 );
+									$pp_obj->setWeeklyTriggerTime( 0 );
+									$pp_obj->setMaximumWeeklyTriggerTime( 0 );
 								}
-								unset($holiday_obj);
+								unset($holiday_policies, $holiday_obj);
 							}
 
 							//Make sure this is a valid day
@@ -7225,9 +7251,10 @@ class CalculatePolicy {
 					$shift_on_holiday = count( $this->getDayArrayUserDateTotalData( $this->filterUserDateTotalDataByContributingShiftPolicy( $date_stamp, $date_stamp, $this->contributing_shift_policy[$holiday_policy_obj->getEligibleContributingShiftPolicy()], array( 10, 20, 25, 30 ) ) ) );
 					$scheduled_working_on_holiday = 0;
 					$scheduled_absent_on_holiday = 0;
-					if ( $holiday_policy_obj->getShiftOnHolidayType() == 30 ) {
+					if ( in_array( $holiday_policy_obj->getShiftOnHolidayType(), array(30, 70, 72, 75 ) ) ) {
 						$scheduled_working_on_holiday = count( $this->getScheduleDates( $this->filterScheduleDataByStatus( $date_stamp, $date_stamp, array(10) ) ) );
-					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 40 ) {
+					}
+					if ( in_array( $holiday_policy_obj->getShiftOnHolidayType(), array(40, 70, 72, 75 ) ) ) {
 						$scheduled_absent_on_holiday = count( $this->getScheduleDates( $this->filterScheduleDataByStatus( $date_stamp, $date_stamp, array(20) ) ) );
 					}
 					Debug::text( 'ON HOLIDAY: Type: ' . $holiday_policy_obj->getShiftOnHolidayType() . ' Shift: ' . $shift_on_holiday . ' Schedule: Working: ' . $scheduled_working_on_holiday . ' Absent: ' . $scheduled_absent_on_holiday, __FILE__, __LINE__, __METHOD__, 10 );
@@ -7268,8 +7295,48 @@ class CalculatePolicy {
 							Debug::text( 'Employee has worked on the holiday or not scheduled absent!', __FILE__, __LINE__, __METHOD__, 10 );
 							return FALSE;
 						}
-
+//					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 70 ) { //Must not work, and must be scheduled to work.
+//						if ( $shift_on_holiday == 0 AND $scheduled_working_on_holiday > 0 ) {
+//							Debug::text( 'Employee has NOT worked on the holiday and are scheduled to work! Success.', __FILE__, __LINE__, __METHOD__, 10 );
+//						} else {
+//							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
+//							Debug::text( 'Employee has worked on the holiday when scheduled, or scheduled absent!', __FILE__, __LINE__, __METHOD__, 10 );
+//							return FALSE;
+//						}
+					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 72 ) { //Must not work, and must be scheduled absent. This is useful for holidays that fall on a day that the employee *is* normally scheduled to work.
+						if ( $shift_on_holiday == 0 AND $scheduled_absent_on_holiday > 0 ) {
+							Debug::text( 'Employee has NOT worked on the holiday and are scheduled absent! Success.', __FILE__, __LINE__, __METHOD__, 10 );
+						} elseif ( $shift_on_holiday == 0 AND $scheduled_working_on_holiday > 0 ) {
+							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
+							Debug::text( 'Employee has NOT worked and is scheduled to work on holiday!!', __FILE__, __LINE__, __METHOD__, 10 );
+							return FALSE;
+						} elseif ( $shift_on_holiday == 0 AND $scheduled_absent_on_holiday == 0 AND $scheduled_working_on_holiday == 0 ) {
+							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when scheduled absent');
+							Debug::text( 'Employee has NOT worked on the holiday and NOT scheduled!', __FILE__, __LINE__, __METHOD__, 10 );
+							return FALSE;
+						} elseif ( $shift_on_holiday > 0 ) {
+							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday');
+							Debug::text( 'Employee has worked on holiday!!', __FILE__, __LINE__, __METHOD__, 10 );
+							return FALSE;
+						}
+					} elseif ( $holiday_policy_obj->getShiftOnHolidayType() == 75 ) { //Must not work and must not be scheduled to work, or scheduled absent. This is useful for holidays that fall on a day that the employee is not normally scheduled to work.
+						if ( $shift_on_holiday == 0 AND $scheduled_working_on_holiday == 0 AND $scheduled_absent_on_holiday == 0 ) {
+							Debug::text( 'Employee has NOT worked on the holiday and are not scheduled to work, or absent! Success.', __FILE__, __LINE__, __METHOD__, 10 );
+						} elseif ( $shift_on_holiday > 0  ) {
+							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
+							Debug::text( 'Employee has worked on the holiday when not scheduled!', __FILE__, __LINE__, __METHOD__, 10 );
+							return FALSE;
+						} elseif ( $shift_on_holiday == 0 AND $scheduled_working_on_holiday > 0 ) {
+							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
+							Debug::text( 'Employee is scheduled to work on holiday!!', __FILE__, __LINE__, __METHOD__, 10 );
+							return FALSE;
+						} elseif ( $shift_on_holiday == 0 AND $scheduled_absent_on_holiday > 0 ) {
+							//$this->is_eligible_holiday_description = TTi18n::getText('Worked holiday when not scheduled');
+							Debug::text( 'Employee is scheduled absent on holiday!!', __FILE__, __LINE__, __METHOD__, 10 );
+							return FALSE;
+						}
 					}
+
 					unset($shift_on_holiday, $scheduled_working_on_holiday, $scheduled_absent_on_holiday);
 				}
 
@@ -7447,106 +7514,110 @@ class CalculatePolicy {
 	}
 
 	function calculateHolidayPolicy( $date_stamp ) {
-		$holiday_obj = $this->filterHoliday( $date_stamp, NULL, TRUE ); //Only consider holiday policies assigned to policy groups. There may be different holiday policies assigned to contributing shift policies
-		if ( is_object($holiday_obj) ) {
-			Debug::text(' Found Holiday: '. $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+		$holiday_policies = $this->filterHoliday( $date_stamp, NULL, TRUE ); //Only consider holiday policies assigned to policy groups. There may be different holiday policies assigned to contributing shift policies
+		if ( is_array( $holiday_policies ) AND count( $holiday_policies ) > 0 ) {
+			foreach ( $holiday_policies as $holiday_obj ) {
+				Debug::text( ' Found Holiday: ' . $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 
-			//Check for conflicting/overridden records, so we don't double up on the time.
-			//This policy could calculate 9.52hrs, but the user could override it to 9hrs, so if that happens simply skip calculating the holiday time again.
-			if ( is_object( $holiday_obj->getHolidayPolicyObject() )
-					AND $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() != FALSE
-					AND is_object( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject() )
-					AND $this->isConflictingUserDateTotal( $date_stamp, array(25, 50), (int)$holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayCode() ) == FALSE ) {
+				//Check for conflicting/overridden records, so we don't double up on the time.
+				//This policy could calculate 9.52hrs, but the user could override it to 9hrs, so if that happens simply skip calculating the holiday time again.
+				if ( is_object( $holiday_obj->getHolidayPolicyObject() )
+						AND $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() != FALSE
+						AND is_object( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject() )
+						AND $this->isConflictingUserDateTotal( $date_stamp, array(25, 50), (int)$holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayCode() ) == FALSE
+				) {
 
-				//Skip calculating holidays before the employees hire date, as in some cases if they were hired the day after the holiday it would try to put a 0hr absence on the holiday before their hire date.
-				//  We considered just not calculating any policies before the hire date, however that may cause problems with re-hires.
-				if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $date_stamp ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
-					Debug::Text('Skip calculation of holidays before the hire date: '. TTDate::getDate('DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
-					return TRUE;
-				}
+					//Skip calculating holidays before the employees hire date, as in some cases if they were hired the day after the holiday it would try to put a 0hr absence on the holiday before their hire date.
+					//  We considered just not calculating any policies before the hire date, however that may cause problems with re-hires.
+					if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $date_stamp ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
+						Debug::Text( 'Skip calculation of holidays before the hire date: ' . TTDate::getDate( 'DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
 
-				$holiday_time = 0;
-				if ( $this->isEligibleForHoliday( $date_stamp, $holiday_obj->getHolidayPolicyObject() ) ) {
-					Debug::text(' User is Eligible for Holiday: '. $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
+						return TRUE;
+					}
 
-					$holiday_time = $this->getHolidayTime( $date_stamp, $holiday_obj->getHolidayPolicyObject() );
-					Debug::text(' User average time for Holiday: '. TTDate::getHours($holiday_time), __FILE__, __LINE__, __METHOD__, 10);
-				} else {
-					Debug::text(' User is not eligible for holiday (adding record with 0 time)...', __FILE__, __LINE__, __METHOD__, 10);
-				}
+					$holiday_time = 0;
+					if ( $this->isEligibleForHoliday( $date_stamp, $holiday_obj->getHolidayPolicyObject() ) ) {
+						Debug::text( ' User is Eligible for Holiday: ' . $holiday_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
 
-				//Need to still record if holiday_time=0 as the user could be scheduled for 8hrs of Stat Holiday
-				//but they aren't eligible to receive any holiday time, if we don't create UDT record with total_time=0
-				//then the scheduled time of 8hrs will be used instead, which is incorrect.
-				//This won't actually get saved, its just used to cause calculateScheduleTime() to ignore this day instead.
-				if ( $holiday_time >= 0 ) {
-					//Try to get the start/end time of the scheduled shift for the holiday, so we can use that as the start/end time for the UDT record.
-					//This helps us match the schedule to the UDT records and apply any Schedule Policy's (which they themselves may contain premium policies).
-					$slf = $this->filterScheduleDataByStatus( $date_stamp, $date_stamp, 20 );
-					if ( is_array( $slf ) AND count( $slf ) > 0 ) {
-						foreach( $slf as $key => $s_obj ) {
-							if ( $s_obj->getAbsencePolicyID() == $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() ) {
-								Debug::text('   Found Scheduled Shift with the same Absence Policy to match to the UDT record... ID: '. $s_obj->getID() .' Start: '. TTDate::getDate('DATE+TIME', $s_obj->getStartTime() ) .' End: '. TTDate::getDate('DATE+TIME', $s_obj->getEndTime() ), __FILE__, __LINE__, __METHOD__, 10);
-								$scheduled_shifts[] = $s_obj;
-								break;
+						$holiday_time = $this->getHolidayTime( $date_stamp, $holiday_obj->getHolidayPolicyObject() );
+						Debug::text( ' User average time for Holiday: ' . TTDate::getHours( $holiday_time ), __FILE__, __LINE__, __METHOD__, 10 );
+					} else {
+						Debug::text( ' User is not eligible for holiday (adding record with 0 time)...', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+
+					//Need to still record if holiday_time=0 as the user could be scheduled for 8hrs of Stat Holiday
+					//but they aren't eligible to receive any holiday time, if we don't create UDT record with total_time=0
+					//then the scheduled time of 8hrs will be used instead, which is incorrect.
+					//This won't actually get saved, its just used to cause calculateScheduleTime() to ignore this day instead.
+					if ( $holiday_time >= 0 ) {
+						//Try to get the start/end time of the scheduled shift for the holiday, so we can use that as the start/end time for the UDT record.
+						//This helps us match the schedule to the UDT records and apply any Schedule Policy's (which they themselves may contain premium policies).
+						$slf = $this->filterScheduleDataByStatus( $date_stamp, $date_stamp, 20 );
+						if ( is_array( $slf ) AND count( $slf ) > 0 ) {
+							foreach ( $slf as $key => $s_obj ) {
+								if ( $s_obj->getAbsencePolicyID() == $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() ) {
+									Debug::text( '   Found Scheduled Shift with the same Absence Policy to match to the UDT record... ID: ' . $s_obj->getID() . ' Start: ' . TTDate::getDate( 'DATE+TIME', $s_obj->getStartTime() ) . ' End: ' . TTDate::getDate( 'DATE+TIME', $s_obj->getEndTime() ), __FILE__, __LINE__, __METHOD__, 10 );
+									$scheduled_shifts[] = $s_obj;
+									break;
+								}
 							}
 						}
-					}
-					unset($slf);
+						unset( $slf );
 
-					Debug::text(' Adding Holiday hours: '. TTDate::getHours($holiday_time) .'('.$holiday_time.')', __FILE__, __LINE__, __METHOD__, 10);
-					if ( !isset( $this->user_date_total[$this->user_date_total_insert_id] ) ) {
-						$udtf = TTnew( 'UserDateTotalFactory' );
-						$udtf->setUser( $this->getUserObject()->getId() );
-						$udtf->setDateStamp( $date_stamp );
-						$udtf->setObjectType( 50 ); //Absence
-						$udtf->setSourceObject( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() );
-						$udtf->setPayCode( (int)$holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayCode() );
+						Debug::text( ' Adding Holiday hours: ' . TTDate::getHours( $holiday_time ) . '(' . $holiday_time . ')', __FILE__, __LINE__, __METHOD__, 10 );
+						if ( !isset( $this->user_date_total[ $this->user_date_total_insert_id ] ) ) {
+							$udtf = TTnew( 'UserDateTotalFactory' );
+							$udtf->setUser( $this->getUserObject()->getId() );
+							$udtf->setDateStamp( $date_stamp );
+							$udtf->setObjectType( 50 ); //Absence
+							$udtf->setSourceObject( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyID() );
+							$udtf->setPayCode( (int)$holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayCode() );
 
-						$udtf->setBranch( (int)$this->getUserObject()->getDefaultBranch() );
-						$udtf->setDepartment( (int)$this->getUserObject()->getDefaultDepartment() );
-						if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
-							$udtf->setJob( (int)$this->getUserObject()->getDefaultJob() );
-							$udtf->setJobItem( (int)$this->getUserObject()->getDefaultJobItem() );
+							$udtf->setBranch( (int)$this->getUserObject()->getDefaultBranch() );
+							$udtf->setDepartment( (int)$this->getUserObject()->getDefaultDepartment() );
+							if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+								$udtf->setJob( (int)$this->getUserObject()->getDefaultJob() );
+								$udtf->setJobItem( (int)$this->getUserObject()->getDefaultJobItem() );
+							}
+
+							$udtf->setTotalTime( $holiday_time );
+
+							//See above comments when we get the scheduled shift objects.
+							if ( isset( $scheduled_shifts[0] ) ) {
+								$udtf->setStartType( 10 ); //Normal
+								$udtf->setStartTimeStamp( $scheduled_shifts[0]->getStartTime() );
+								$udtf->setEndType( 10 ); //Normal
+								$udtf->setEndTimeStamp( ( $scheduled_shifts[0]->getStartTime() + $holiday_time ) );
+							}
+
+							$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp ) );
+							$udtf->setHourlyRate( $this->getHourlyRate( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
+							$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
+
+							if ( $holiday_time == 0 AND $this->is_eligible_holiday_description != '' ) { //Include note explaining why they are not receiving holiday time.
+								$udtf->setNote( TTi18n::getText( 'Not Eligible for holiday' ) .' ['. $holiday_obj->getHolidayPolicyObject()->getName() .']' .' - '. $this->is_eligible_holiday_description . '.' );
+							}
+
+							$udtf->setEnableCalcSystemTotalTime( FALSE );
+							$udtf->setEnableCalculatePolicy( TRUE );
+							$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
+
+							if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
+								//Don't save the record, just add it to the existing array, so it can be included in other calculations.
+								//We will save these records at the end.
+								$this->user_date_total[ $this->user_date_total_insert_id ] = $udtf;
+								$this->user_date_total_insert_id--;
+							}
+						} else {
+							Debug::text( 'ERROR: Duplicate starting ID for some reason! ' . $this->user_date_total_insert_id, __FILE__, __LINE__, __METHOD__, 10 );
 						}
-
-						$udtf->setTotalTime( $holiday_time );
-
-						//See above comments when we get the scheduled shift objects.
-						if ( isset($scheduled_shifts[0]) ) {
-							$udtf->setStartType( 10 ); //Normal
-							$udtf->setStartTimeStamp( $scheduled_shifts[0]->getStartTime() );
-							$udtf->setEndType( 10 ); //Normal
-							$udtf->setEndTimeStamp( ( $scheduled_shifts[0]->getStartTime() + $holiday_time ) );
-						}
-
-						$udtf->setBaseHourlyRate( $this->getBaseHourlyRate( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp ) );
-						$udtf->setHourlyRate( $this->getHourlyRate( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getBaseHourlyRate() ) );
-						$udtf->setHourlyRateWithBurden( $this->getHourlyRateWithBurden( $holiday_obj->getHolidayPolicyObject()->getAbsencePolicyObject()->getPayFormulaPolicy(), $udtf->getPayCode(), $date_stamp, $udtf->getHourlyRate() ) );
-
-						if ( $holiday_time == 0 AND $this->is_eligible_holiday_description != '' ) { //Include note explaining why they are not receiving holiday time.
-							$udtf->setNote( TTi18n::getText('Not Eligible for holiday').' - '. $this->is_eligible_holiday_description .'.' );
-						}
-
-						$udtf->setEnableCalcSystemTotalTime(FALSE);
-						$udtf->setEnableCalculatePolicy(TRUE);
-						$udtf->preSave(); //Call this so TotalTimeAmount is calculated immediately, as we don't save these records until later.
-
-						if ( $this->isOverriddenUserDateTotalObject( $udtf ) == FALSE ) {
-							//Don't save the record, just add it to the existing array, so it can be included in other calculations.
-							//We will save these records at the end.
-							$this->user_date_total[$this->user_date_total_insert_id] = $udtf;
-							$this->user_date_total_insert_id--;
-						}
+						unset( $scheduled_shifts );
 					} else {
-						Debug::text('ERROR: Duplicate starting ID for some reason! '. $this->user_date_total_insert_id, __FILE__, __LINE__, __METHOD__, 10);
+						Debug::text( 'No holiday time to utilize...', __FILE__, __LINE__, __METHOD__, 10 );
 					}
-					unset($scheduled_shifts);
 				} else {
-					Debug::text('No holiday time to utilize...', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text( 'Overridden holiday time, skipping policy calculation...', __FILE__, __LINE__, __METHOD__, 10 );
 				}
-			} else {
-				Debug::text('Overridden holiday time, skipping policy calculation...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 
 			$this->user_date_total = $this->sortUserDateTotalData( $this->user_date_total ); //Sort UDT records once done modifying them. This should help avoid having to sort them everytime we get/filter them.
@@ -7563,6 +7634,7 @@ class CalculatePolicy {
 		if ( is_array( $hlf ) AND count( $hlf ) > 0 ) {
 			$date_stamp = TTDate::getMiddleDayEpoch($date_stamp); //Optimization - Move outside loop.
 
+			$retarr = array();
 			foreach( $hlf as $h_obj ) {
 				if ( TTDate::getMiddleDayEpoch( $h_obj->getDateStamp() ) == $date_stamp ) {
 					if (
@@ -7576,8 +7648,9 @@ class CalculatePolicy {
 								$holiday_policy_obj == NULL OR ( is_object( $holiday_policy_obj ) AND $h_obj->getHolidayPolicyID() == $holiday_policy_obj->getId() )
 							)
 						) {
-						$retarr = $h_obj; //Can only be one holiday per day. So once we find one break out of the loop.
-						break;
+						//Allow multiple holidays on the same day, as some users have complex situations where certain criteria once met change the holiday hours received.
+						// ie: If they worked 5 of 9 holiday weeks they get 8hrs, if 0 of 9 holiday week days they get 7 hrs.
+						$retarr[] = $h_obj;
 					}
 				}
 				//else {
@@ -7585,7 +7658,7 @@ class CalculatePolicy {
 				//}
 			}
 
-			if ( isset($retarr) ) {
+			if ( isset($retarr) AND count($retarr) > 0 ) {
 				Debug::text('Found holidays that apply on date: '. count($retarr), __FILE__, __LINE__, __METHOD__, 10);
 				return $retarr;
 			}

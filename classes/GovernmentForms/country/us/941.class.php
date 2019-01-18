@@ -55,6 +55,8 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 
 	public $line_16_cutoff_amount = 2500; //Line 16
 
+	public $schedule_b_total = 0; //Total from F941 Schedule B so we can show a warning if it doesn't match.
+
 	public function getFilterFunction( $name ) {
 		$variable_function_map = array(
 				'year'        => 'isNumeric',
@@ -712,7 +714,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 			'l10' => array(
 					'page'          => 1,
 					'template_page' => 1,
-					'function'      => array('calcL10', 'drawSplitDecimalFloat'),
+					'function'      => array('calcL10', 'drawSplitDecimalFloat', 'checkSBMatchTotals'),
 					'coordinates'   => array(
 							array(
 									'x'      => 446,
@@ -1307,9 +1309,23 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL10( $value, $schema ) {
-		$this->l10 = ( $this->l6 + $this->l7 + $this->l8 + $this->l9 );
+		//$this->l10 = ( $this->l6 + $this->l7 + $this->l8 + $this->l9 );
+		$this->l10 = bcadd( bcadd( bcadd( $this->l6, $this->l7), $this->l8 ), $this->l9 );
 
 		return $this->l10;
+	}
+
+	function checkSBMatchTotals( $value, $schema ) {
+		if ( isset($this->schedule_b_total) AND $this->schedule_b_total > 0 AND $this->l10 != $this->schedule_b_total ) {
+			$pdf = $this->getPDFObject();
+
+			$pdf->setTextColor( 255, 0, 0 );
+			$pdf->setXY( 300 + $this->getPageOffsets( 'x' ), 638 + $this->getPageOffsets( 'y' ) );
+
+			$pdf->Cell( 130, 10, 'WARNING: Does not match total from Schedule B', 1, 0, 'C', 1, FALSE, 1 );
+		}
+
+		return TRUE;
 	}
 
 	function calcL12( $value, $schema ) {

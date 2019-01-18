@@ -141,7 +141,7 @@ class APIUser extends APIFactory {
 	/**
 	 * Get user data for one or more users.
 	 * @param array $data filter data, see reference for details.
-	 * @see \Modules\Users\UserListFactory::getAPISearchByCompanyIdAndArrayCriteria()
+	 * @see UserListFactory::getAPISearchByCompanyIdAndArrayCriteria() To see a description of the ListFactory that is used.
 	 * @param boolean $disable_paging disables paging and returns all records.
 	 * @return array
 	 */
@@ -762,7 +762,7 @@ class APIUser extends APIFactory {
 	/**
 	 * Get user data for one or more users. This is an alias for getUser() that can be overridden by a plugin for getting data on remote servers.
 	 * @param array $data filter data, see reference for details.
-	 * @see \Modules\Users\UserListFactory::getAPISearchByCompanyIdAndArrayCriteria()
+	 * @see UserListFactory::getAPISearchByCompanyIdAndArrayCriteria() To see a description of the ListFactory that is used.
 	 * @param boolean $disable_paging disables paging and returns all records.
 	 * @return array
 	 */

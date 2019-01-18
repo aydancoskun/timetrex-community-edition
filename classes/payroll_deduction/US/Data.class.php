@@ -77,14 +77,14 @@ CHANGED:04-Jan-17				'ND' => 'North Dakota', - http://www.nd.gov/tax/user/busine
 CHANGED:04-Jan-17				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
 NOCHANGE:16-Dec-16				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
 NOCHANGE:04-Dec-17				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
-NOCHANGE:04-Jan-17				'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
+CHANGED:17-Jul-17				'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
 NOCHANGE:04-Jan-17				'MI' => 'Michigan',		- http://www.michigan.gov/taxes/0,4676,7-238-43519_43531---,00.html *Michigan Income Tax Withholding Guide 446-I
 NOCHANGE:04-Jan-17				'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
 
 
 CHECKAGAIN:04-Jan-17			'AL' => 'Alabama' 		- http://www.ador.state.al.us/Withholding/index.html *Withholding Tax Tables and Instructions
 CHECKAGAIN:04-Jan-17			'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
-CHECKAGAIN:04-Jan-17*NYC NOCHG 'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
+CHECKAGAIN:04-Jan-17*NYC:17-Jul-17 'NY' => 'New York',		- http://www.tax.ny.gov/forms/withholding_cur_forms.htm *WATCH NYS=New York State, NYC=New York City. NYS-50-T.1 or .2
 CHECKAGAIN:04-Jan-17			'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M
 
 //Change less often

@@ -127,6 +127,7 @@ class APIInstall extends APIFactory {
 				$retval['mail'] = $install_obj->checkMAIL();
 				$retval['pear'] = $install_obj->checkPEAR();
 				$retval['safe_mode'] = $install_obj->checkPHPSafeMode();
+				$retval['disabled_functions'] = array( 'check_disabled_functions' => $install_obj->checkPHPDisabledFunctions(), 'disabled_function_list' => $install_obj->getCriticalDisabledFunctionList() );
 				$retval['allow_fopen_url'] = $install_obj->checkPHPAllowURLFopen();
 				$retval['magic_quotes'] = $install_obj->checkPHPMagicQuotesGPC();
 				$retval['disk_space'] = $install_obj->checkDiskSpace();
@@ -156,7 +157,6 @@ class APIInstall extends APIFactory {
 
 				$retval['cache_dir'] = array(
 					'check_writable_cache_directory' => $install_obj->checkWritableCacheDirectory(),
-					'check_safe_cache_directory' => $install_obj->checkSafeCacheDirectory(),
 					'cache_dir' => $install_obj->config_vars['cache']['dir']
 				);
 				$retval['safe_cache_dir'] = array(
@@ -176,7 +176,7 @@ class APIInstall extends APIFactory {
 				);
 
 				$retval['log_dir'] = array(
-					'check_safe_log_directory' => $install_obj->checkSafeLogDirectory(),
+					'check_writable_log_directory' => $install_obj->checkWritableLogDirectory(),
 					'log_path' => $install_obj->config_vars['path']['log'],
 				);
 				$retval['safe_log_dir'] = array(
@@ -199,6 +199,7 @@ class APIInstall extends APIFactory {
 					$retval['extended_error_messages'] = array();
 				}
 
+				Debug::Arr( $retval, 'Retval: ', __FILE__, __LINE__, __METHOD__, 10);
 				return $this->returnHandler( $retval );
 			}
 		}

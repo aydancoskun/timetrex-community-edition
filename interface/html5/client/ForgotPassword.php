@@ -87,7 +87,7 @@ switch ($action) {
 							$rl->delete(); //Clear password reset rate limit upon successful reset.
 
 							//Redirect::Page( URLBuilder::getURL( array('password_reset' => 1 ), 'Login.php' ) );
-							Redirect::Page( 'https://www.timetrex.com/store.php?step=login' );
+							Redirect::Page( 'https://www.timetrex.com/store?step=login' );
 						}
 
 					} else {

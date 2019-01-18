@@ -1789,9 +1789,10 @@ class PunchFactory extends Factory {
 	}
 	function cleanStoragePath( $company_id = NULL, $user_id = NULL, $punch_id = NULL ) {
 		$file_name = $this->getImageFileName( $company_id, $user_id, $punch_id );
-		if ( $file_name != '' ) {
+		if ( $file_name != '' AND $this->isImageExists() ) {
 			Debug::Text('Deleting Image... File Name: '. $file_name, __FILE__, __LINE__, __METHOD__, 10);
 			@unlink($file_name);
+			Misc::deleteEmptyDirectory( dirname( $file_name ), 4 ); //Recurse to $user_id parent level and remove empty directories.
 		}
 
 		return TRUE;

@@ -42,7 +42,12 @@ var $database = '';
 			$s = "$dbms error: [$errno: $errmsg] in $fn($p1, '$user', '****', $p2)";
 			break;
 		default:
-			$s = "$dbms error: [$errno: $errmsg] in $fn($p1, $p2)";
+			//Prevent: PHP NOTICE(8): Array to string conversion File: \adodb\adodb-exceptions.inc.php Line: 45
+			if ( is_array( $p1 ) OR is_array( $p2 ) ) {
+				$s = @"$dbms error: [$errno: $errmsg] in $fn";
+			} else {
+				$s = "$dbms error: [$errno: $errmsg] in $fn($p1, $p2)";
+			}
 			break;
 		}
 

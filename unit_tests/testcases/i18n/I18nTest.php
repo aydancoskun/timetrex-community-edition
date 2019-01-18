@@ -295,7 +295,8 @@ class i18nTest extends PHPUnit_Framework_TestCase {
 		TTi18n::setLocale( 'yi_US' );
 		$this->assertEquals( TTi18n::getText( 'Employee' ), 'Z' );
 		TTi18n::setLocale( 'fr_CA' );
-		$this->assertEquals( TTi18n::getText( 'Saved Reports' ), 'Rapports sauvs' );
+		//$this->assertEquals( TTi18n::getText( 'Saved Reports' ), 'Rapports sauvs' );
+		$this->assertEquals( TTi18n::getText( 'Saved Reports' ), 'Rapports enregistrés' );
 		TTi18n::setLocale( 'fr_FR' );
 		$this->assertEquals( TTi18n::getText( 'Saved Reports' ), 'Enregistrer le rapport' );
 

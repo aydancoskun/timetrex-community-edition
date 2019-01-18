@@ -326,6 +326,37 @@ class Debug {
 		return TRUE;
 	}
 
+	//Replacement for apache_request_headers() as it wasn't reliably available and would sometimes cause PHP fatal errors due to it being undefined.
+	static function RequestHeaders() {
+		$arh = array();
+		$rx_http = '/\AHTTP_/';
+		foreach ( $_SERVER as $key => $val ) {
+			if ( preg_match( $rx_http, $key ) ) {
+				$arh_key = preg_replace( $rx_http, '', $key );
+				$rx_matches = array();
+				// do some nasty string manipulations to restore the original letter case
+				// this should work in most cases
+				$rx_matches = explode( '_', strtolower( $arh_key ) );
+				if ( count( $rx_matches ) > 0 and strlen( $arh_key ) > 2 ) {
+					foreach ( $rx_matches as $ak_key => $ak_val ) {
+						$rx_matches[ $ak_key ] = ucfirst( $ak_val );
+					}
+					$arh_key = implode( '-', $rx_matches );
+				}
+				$arh[ $arh_key ] = $val;
+			}
+		}
+
+		if ( isset( $_SERVER['CONTENT_TYPE'] ) ) {
+			$arh['Content-Type'] = $_SERVER['CONTENT_TYPE'];
+		}
+		if ( isset( $_SERVER['CONTENT_LENGTH'] ) ) {
+			$arh['Content-Length'] = $_SERVER['CONTENT_LENGTH'];
+		}
+
+		return $arh;
+	}
+
 	static function ErrorHandler( $error_number, $error_str, $error_file, $error_line ) {
 		//Only handle errors included in the error_reporting()
 		if ( ( error_reporting() & $error_number ) ) { //Bitwise operator.
@@ -365,13 +396,13 @@ class Debug {
 			self::$php_errors++;
 
 			if ( self::$php_errors == 1 ) { //Only trigger this on the first error, so its not repeated over and over again.
-				if ( PHP_SAPI != 'cli' AND function_exists( 'apache_request_headers' ) ) {
-					self::Arr( apache_request_headers(), 'Raw Request Headers: ', $error_file, $error_line, __METHOD__, 0 );
+				if ( PHP_SAPI != 'cli' ) { //Used to use apache_request_headers() here, but it would often fail as undefined, even though we would check function_exists() on it.
+					self::Arr( self::RequestHeaders(), 'Raw Request Headers: ', $error_file, $error_line, __METHOD__, 0 );
 				}
 
 				global $HTTP_RAW_POST_DATA;
 				if ( $HTTP_RAW_POST_DATA != '' ) {
-					self::Arr( $HTTP_RAW_POST_DATA, 'Raw POST Request: ', $error_file, $error_line, __METHOD__, 0 );
+					self::Arr( urldecode( $HTTP_RAW_POST_DATA ), 'Raw POST Request: ', $error_file, $error_line, __METHOD__, 0 );
 				}
 			}
 

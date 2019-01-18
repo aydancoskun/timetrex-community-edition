@@ -51,6 +51,26 @@ class PayrollDeduction_US_NY_NYC extends PayrollDeduction_US_NY {
 	*/
 
 	var $district_income_tax_rate_options = array(
+			20170701 => array(
+					10 => array(
+							array('income' => 8000, 'rate' => 2.25, 'constant' => 0),
+							array('income' => 8700, 'rate' => 3.00, 'constant' => 180),
+							array('income' => 15000, 'rate' => 3.45, 'constant' => 201),
+							array('income' => 25000, 'rate' => 4.15, 'constant' => 418),
+							array('income' => 60000, 'rate' => 4.35, 'constant' => 833),
+							array('income' => 500000, 'rate' => 4.45, 'constant' => 2356),
+							array('income' => 500000, 'rate' => 4.25, 'constant' => 20828), //Just the constant changed by the looks of it.
+					),
+					20 => array(
+							array('income' => 8000, 'rate' => 2.25, 'constant' => 0),
+							array('income' => 8700, 'rate' => 3.00, 'constant' => 180),
+							array('income' => 15000, 'rate' => 3.45, 'constant' => 201),
+							array('income' => 25000, 'rate' => 4.15, 'constant' => 418),
+							array('income' => 60000, 'rate' => 4.35, 'constant' => 833),
+							array('income' => 500000, 'rate' => 4.45, 'constant' => 2356),
+							array('income' => 500000, 'rate' => 4.25, 'constant' => 20828), //Just the constant changed by the looks of it.
+					),
+			),
 			20160101 => array(
 					10 => array(
 							array('income' => 8000, 'rate' => 1.9, 'constant' => 0),

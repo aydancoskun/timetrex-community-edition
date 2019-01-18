@@ -112,8 +112,7 @@ unset($authentication);
 		<head>
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-			<meta name="Keywords" content="workforce management, time and attendance, payroll software, online timesheet software, open source payroll, online employee scheduling software, employee time clock software, online job costing software, workforce management, flexible scheduling solutions, easy scheduling solutions, track employee attendance, monitor employee attendance, employee time clock, employee scheduling, true real-time time sheets, accruals and time banks, payroll system, time management system" />
-			<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily." />
+			<meta name="Description" content="Employee Login | TimeTrex Workforce Management Software"/>
 			<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
 			<title><?php echo APPLICATION_NAME .' Workforce Management';?></title>
 			<link rel="shortcut icon" type="image/ico" href="<?php echo Environment::getBaseURL();?>../favicon.ico">
@@ -198,9 +197,7 @@ unset($authentication);
 	*/
 	?>
 	<body class="login-bg" oncontextmenu="return true;">
-
-
-	<div class="need-hidden-element" ><a href="https://www.timetrex.com">Workforce Management Software</a><a href="https://www.timetrex.com/time_and_attendance.php">Time and Attendance</a></div>
+	<div class="need-hidden-element"><h1><a href="https://www.timetrex.com/time-and-attendance">TimeTrex Time and Attendance</a> Software</h1> - Web-based Time And Attendance suite which offers Employee Time and Attendance (timeclock, timecard, timesheet) and Payroll all in single tightly integrated package. With the ability to interface with biometric facial recognition tablets and cell phones employees are able to efficiently track their time at the office or on the road. Automatically calculate complex over time and premium time business policies and immediately be able to identify labor costs attributed to branches, and departments. Finally TimeTrex can process your payroll by calculating withholding taxes, generate detailed electronic pay stubs and even print paychecks or direct deposit funds.</div>
 	<div id="topContainer" class="top-container"></div>
 	<div id="contentContainer" class="content-container">
 		<div class="loading-view">
@@ -214,7 +211,6 @@ unset($authentication);
 			<!--<![endif]-->
 		</div>
 	</div>
-	<div class="need-hidden-element"><a href="https://www.timetrex.com/download.php">Download Time and Attendance Software</a></div>
 	<div id="bottomContainer" class="bottom-container" ondragstart="return false;">
 		<ul class="signal-strength">
 			<li class="signal-strength-very-weak"><div></div></li>
@@ -225,7 +221,7 @@ unset($authentication);
 		<div class="copyright-container">
 			<a id="copy_right_logo_link" class="copy-right-logo-link" target="_blank"><img id="copy_right_logo" class="copy-right-logo"></a>
 			<a id="copy_right_info" class="copy-right-info" target="_blank" style="display: none"></a>
-			<span id="copy_right_info_1" class="copy-right-info" style="display: none">&nbsp;&nbsp;<?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?></span>
+			<span id="copy_right_info_1" class="copy-right-info" style="display: none"><?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?></span>
 		</div>
 		<div id="feedbackContainer" class="feedback-container">
 			<span>Overall, how are you feeling about <?php echo APPLICATION_NAME; ?>?</span>
@@ -234,9 +230,7 @@ unset($authentication);
 			<img class="filter grr-filter" title="Grr!" data-feedback = -1 alt="sad" >
 		</div>
 	</div>
-
 	<div id="overlay" class=""></div>
-
 	</body>
 
 	<iframe style="display: none" id="hideReportIFrame" name="hideReportIFrame"></iframe>

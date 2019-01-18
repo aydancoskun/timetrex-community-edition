@@ -20,8 +20,27 @@ Debug::setEnable(FALSE); //Set to TRUE to see debug output. Leave buffer output 
 Debug::setEnableDisplay(TRUE);
 Debug::setVerbosity(10);
 
-define('ENABLE_SELENIUM_TESTS', FALSE );
-define('ENABLE_SELENIUM_REMOTE_TESTS', FALSE );
+//Use this command to launch the Selenium server: java -Dwebdriver.gecko.driver=/opt/selenium-server/geckodriver -jar /opt/selenium-server/selenium-server-standalone-3.0.1.jar
+//
+// In GRID mode use:
+// java -jar /opt/selenium-server/selenium-server-standalone-3.0.1.jar -role hub
+// java -Dwebdriver.gecko.driver=/opt/selenium-server/geckodriver -jar /opt/selenium-server/selenium-server-standalone-3.0.1.jar -role node -browser browserName=firefox,version=49,platform=LINUX
+//
+
+// Command: ./run_selenium.sh --filter testUIScreenShot
+//   and below DEFINES are set to TRUE.
+define('ENABLE_SELENIUM_TESTS', TRUE );
+define('ENABLE_SELENIUM_REMOTE_TESTS', TRUE );
+$selenium_config = array(
+							//'host' => '10.7.5.72', //josh
+							'host' => '10.7.5.31', //dev1
+							//'host' => '10.7.5.9',
+							'browser' => 'chrome',
+							'default_url' => 'http://mikeb.dev1.office.timetrex.com/timetrex/trunk/interface/html5/',
+							//'default_url' => 'http://joshr.dev1.office.timetrex.com/timetrex/trunk/interface/html5/',
+							//'default_url' => 'http://joshr.dev1.office.timetrex.com/timetrex/branch1/interface/html5/',
+							'default_timeout' => 30,
+						);
 
 //This prevent PHPUnit from creating a mock ADODB-lib class and causing a fatal error on redeclaration of its functions.
 //See for a possible fix? http://sebastian-bergmann.de/archives/797-Global-Variables-and-PHPUnit.html#content
@@ -36,7 +55,7 @@ if ( PRODUCTION != FALSE ) {
 	exit;
 }
 
-//require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'vendor/'. DIRECTORY_SEPARATOR .'autoload.php');
+require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'vendor/'. DIRECTORY_SEPARATOR .'autoload.php'); //This must be uncommented for Selenium to work.
 //set_include_path( get_include_path() . PATH_SEPARATOR . '/usr/share/php'  );
 
 echo "Include Path: ". get_include_path() ."\n";
