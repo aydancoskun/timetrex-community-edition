@@ -56,7 +56,7 @@ class TTSoapClient extends SoapClient {
 				Debug::Text('WARNING: Due to failed connection attempts, falling back to non-SSL SOAP communication: '. $this->location, __FILE__, __LINE__, __METHOD__, 10);
 			}
 
-			if ( Debug::getEnable() == TRUE ) {
+			if ( Debug::getEnable() == TRUE AND Debug::getVerbosity() >= 11 ) {
 				$result = parent::__call( $function_name, $arguments );
 			} else {
 				$result = @parent::__call( $function_name, $arguments );

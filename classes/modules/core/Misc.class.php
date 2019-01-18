@@ -3827,9 +3827,9 @@ class Misc {
 		return $retval;
 	}
 
-	//This is can be used to handle YTD amounts.
 
 	/**
+	 * This is can be used to handle YTD amounts.
 	 * @param $amount
 	 * @param $limit
 	 * @return string

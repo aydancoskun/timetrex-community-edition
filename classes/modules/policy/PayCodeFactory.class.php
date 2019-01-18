@@ -463,7 +463,7 @@ class PayCodeFactory extends Factory {
 					AND $this->getPayFormulaPolicy() == TTUUID::getZeroID() ) { //Defined by Policy
 				//Check to make sure all policies associated with this pay code have a pay formula defined
 				$rtplf = TTNew('RegularTimePolicyListFactory');
-				$rtplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
+				$rtplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $rtplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
 												FALSE,
@@ -471,7 +471,7 @@ class PayCodeFactory extends Factory {
 				}
 
 				$otplf = TTNew('OverTimePolicyListFactory');
-				$otplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
+				$otplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $otplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
 												FALSE,
@@ -479,7 +479,7 @@ class PayCodeFactory extends Factory {
 				}
 
 				$pplf = TTNew('PremiumPolicyListFactory');
-				$pplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
+				$pplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $pplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
 												FALSE,
@@ -487,7 +487,7 @@ class PayCodeFactory extends Factory {
 				}
 
 				$aplf = TTNew('AbsencePolicyListFactory');
-				$aplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
+				$aplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $aplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
 												FALSE,
@@ -495,7 +495,7 @@ class PayCodeFactory extends Factory {
 				}
 
 				$mplf = TTNew('MealPolicyListFactory');
-				$mplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
+				$mplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $mplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
 												FALSE,
@@ -503,7 +503,7 @@ class PayCodeFactory extends Factory {
 				}
 
 				$bplf = TTNew('BreakPolicyListFactory');
-				$bplf->getByCompanyIdAndPayCodeId( $this->getCompany(), $this->getId() );
+				$bplf->getByCompanyIdAndPayCodeIdAndPayFormulaPolicyId( $this->getCompany(), $this->getId(), TTUUID::getZeroID() );
 				if ( $bplf->getRecordCount() > 0 ) {
 					$this->Validator->isTRUE(	'pay_formula_policy_id',
 												FALSE,

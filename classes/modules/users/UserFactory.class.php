@@ -1920,7 +1920,7 @@ class UserFactory extends Factory {
 			//Check to see if any wage entries exist for this employee
 			$uwlf->getLastWageByUserId( $this->getID() );
 			if ( $uwlf->getRecordCount() >= 1 ) {
-				Debug::Text('No wage entries exist...', __FILE__, __LINE__, __METHOD__, 10);
+				Debug::Text('Wage entries exist...', __FILE__, __LINE__, __METHOD__, 10);
 
 				//Work around the fact that hire_date is a epoch and user_wage.effective_date is a 'date' datatype.
 				// So if a user was just hired and has hire_date of 02-Oct-2017 (MST) and they are trying to reset their password with the system timezone to PST
@@ -1930,13 +1930,20 @@ class UserFactory extends Factory {
 					$this->getUserPreferenceObject()->setTimeZonePreferences();
 				}
 
+				$epoch = TTDate::getEndDayEpoch( $epoch ); //*must be done after timezone is changed* Use the middle day epoch only when checking valid wages, to better avoid off-by-one-hour issues.
+
 				$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getID(), TTUUID::getZeroID(), $epoch, 1 );
 
-				TTDate::getTimeZone( $original_time_zone );
+				if ( isset($original_time_zone) ) {
+					TTDate::setTimeZone( $original_time_zone );
+				}
+
 				if ( $uwlf->getRecordCount() == 0 ) {
 					Debug::Text('No wage entry on or before: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					return FALSE;
 				}
+			} else {
+				Debug::Text('No wage entries exist...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 

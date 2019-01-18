@@ -1066,19 +1066,13 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 	},
 
 	updateEmployeeData: function(){
-		var request_data = { filter_data:{} };
+		var request_data = { filter_data: {} };
 		if( this.edit_view_ui_dic && this.edit_view_ui_dic.legal_entity_id && this.edit_view_ui_dic.legal_entity_id.getValue() ) {
 			request_data.filter_data.legal_entity_id = this.edit_view_ui_dic.legal_entity_id.getValue();
-			var $this = this;
-			this.user_api.getUser(request_data, {
-				onResult: function (result) {
-
-					//PREVENTS EXECPTION - "TypeError: $this.edit_view_ui_dic.user is undefined"
-					if ( $this.edit_view_ui_dic && $this.edit_view_ui_dic.user ) {
-						$this.edit_view_ui_dic.user.setSourceData(result.getResult());
-					}
-				}
-			});
+			if ( this.edit_view_ui_dic.user ) {
+				this.edit_view_ui_dic.user.setDefaultArgs( request_data );
+				this.edit_view_ui_dic.user.setSourceData( null );
+			}
 		}
 	},
 
@@ -1101,8 +1095,14 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.api.getCompanyDeduction( { filter_data: { legal_entity_id: this.parent_edit_record.legal_entity_id } }, true, {
-			onResult: function( result ) {
+		var request_data = {
+			filter_data: {
+				legal_entity_id: this.parent_edit_record.legal_entity_id,
+				exclude_user_id: this.parent_edit_record.id //Don't show records the employee is already assinged to. Helps prevent duplicate mappings.
+			}
+		};
+
+		this.api.getCompanyDeduction( request_data , true, { onResult: function( result ) {
 				var result_data = result.getResult();
 				$this.edit_view_ui_dic.company_tax_deduction_ids.setUnselectedGridData( result_data );
 			}
@@ -3270,7 +3270,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				//
 				//Canada
 				//
-                case '100-CA': //Federal Income Tax Formula -- CA
+				case '100-CA': //Federal Income Tax Formula -- CA
 				case '200-CA': //Province/State Income TaxFormula -- CA-AB
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Claim Amount' ) + ": " );

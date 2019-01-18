@@ -821,7 +821,7 @@ class UserWageFactory extends Factory {
 											TTi18n::gettext('Incorrect Labor Burden Percent')
 										);
 		// Effective Date
-		if ( $this->getEffectiveDate() !== FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE OR $this->getEffectiveDate() !== FALSE ) { //Ensure an effective date is always specified, but handle mass editing properly too.
 			$this->Validator->isDate(		'effective_date',
 													$this->getEffectiveDate(),
 													TTi18n::gettext('Incorrect Effective Date')
@@ -833,6 +833,7 @@ class UserWageFactory extends Factory {
 													);
 			}
 		}
+
 		// Note
 		if ( $this->getNote() != '' ) {
 			$this->Validator->isLength(		'note',

@@ -421,6 +421,31 @@ class RequestFactory extends Factory {
 											);
 			}
 		}
+
+		if ( $this->Validator->isError('date_stamp') == FALSE AND $this->getDateStamp() < ( time() - (86400 * 365 * 1 ) ) ) { //No more than 1 year in the past
+			$this->Validator->isTRUE(		'date_stamp',
+											 FALSE,
+											 TTi18n::gettext('Date cannot be more than 1 year in the past')
+			);
+		}
+
+		if ( $this->Validator->isError('date_stamp') == FALSE AND $this->getDateStamp() > ( time() + (86400 * 365 * 5 ) ) ) { //No more than 5 years in the future.
+			$this->Validator->isTRUE(		'date_stamp',
+											 FALSE,
+											 TTi18n::gettext('Date cannot be more than 5 years in the future')
+			);
+		}
+
+		//Make sure the user isn't entering requests before the employees hire or after termination date
+		if ( $this->Validator->isError('date_stamp') == FALSE AND $this->getDeleted() == FALSE AND $this->getDateStamp() != FALSE AND is_object( $this->getUserObject() ) ) {
+			if ( $this->getUserObject()->getHireDate() != '' AND TTDate::getBeginDayEpoch( $this->getDateStamp() ) < TTDate::getBeginDayEpoch( $this->getUserObject()->getHireDate() ) ) {
+				$this->Validator->isTRUE(	'date_stamp',
+											 FALSE,
+											 TTi18n::gettext('Date cannot be before your hire date') );
+			}
+			//Don't bother checking termination date, as it leak sensitive information.
+		}
+
 		// Type
 		$this->Validator->inArrayKey(	'type',
 												$this->getType(),

@@ -129,6 +129,10 @@ Global.sendErrorReport = function() {
 			error = 'Client Version: ' + APIGlobal.pre_login_data.application_build + '\n\n Uncaught Error From: ' + script_name + '\n\n' + 'Error: ' + error_string + ' in ' + from_file + ' line ' + line + ' ' + '\n\nUser: ' + '\n\nURL: ' + window.location.href + ' ' + '\n\nUser-Agent: ' + navigator.userAgent + ' ' + '\n\nIE:' + ie;
 		}
 
+        //When not in production mode, popup alert box anytime an exception appears so it can't be missed.
+        if ( APIGlobal.pre_login_data.production !== true ) {
+            alert('JAVASCRIPT EXCEPTION:\n---------------------------------------------\n'+ error +'\n---------------------------------------------' );
+        }
 
 		if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
 			ga( 'send', 'exception', { 'exDescription': error_string + ' in ' + from_file + ' line ' + line, 'exFatal': false } ); // Send an exception hit to Google Analytics. Must be 8192 bytes or smaller.
@@ -255,7 +259,7 @@ Global.doPingIfNecessary = function() {
 			return;
 		}
 
-    Debug.Text( 'User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', 'Global.js', '', 'doPingIfNecessary', 1 );
+	Debug.Text( 'User is active again after idle for: ' + Global.idle_time + '... Resetting idle to 0', 'Global.js', '', 'doPingIfNecessary', 1 );
 	Global.idle_time = 0;
 
 		if ( LocalCacheData.current_open_primary_controller.viewId === 'LoginView' ) {
@@ -295,7 +299,7 @@ Global.setupPing = function() {
 	function timerIncrement() {
 		Global.idle_time = Global.idle_time + 1;
 		if ( Global.idle_time >= 15 ) {
-            Debug.Text( 'User is idle: ' + Global.idle_time, 'Global.js', '', 'setupPing', 1 );
+			Debug.Text( 'User is idle: ' + Global.idle_time, 'Global.js', '', 'setupPing', 1 );
 		}
 	}
 };
@@ -1264,7 +1268,7 @@ Global.setSignalStrength = function() {
 				total_time = checking_array[i] + total_time;
 			}
 			average_time = total_time / checking_array.length;
-            Debug.Text(  'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + (new Date).toISOString().replace( /z|t/gi, ' ' ), 'Global.js', '', 'doPing', 1 );
+			Debug.Text(  'Current Ping: ' + time + 'ms Average: ' + average_time + 'ms Date: ' + (new Date).toISOString().replace( /z|t/gi, ' ' ), 'Global.js', '', 'doPing', 1 );
 			Global.current_ping = average_time;
 			status = 'Good';
 			//do not allow signal strength variation in unit test mode
@@ -1942,7 +1946,7 @@ Global.removeCss = function( path ) {
 Global.getViewPathByViewId = function( viewId ) {
 	var path;
 	switch ( viewId ) {
-	    //Recruitment Portal
+		//Recruitment Portal
 		case 'MyProfile':
 			path = 'views/portal/hr/my_profile/';
 			break;
@@ -2489,20 +2493,20 @@ Global.getViewPathByViewId = function( viewId ) {
 
 //returns exact filepaths for class dependencies
 Global.getViewPreloadPathByViewId = function (viewId){
-    var preloads = [];
-    switch ( viewId ) {
-        case 'Request':
-        case 'RequestAuthorization':
-            preloads = ['views/common/AuthorizationHistoryCommon.js', 'views/common/RequestViewCommonController.js', 'views/common/EmbeddedMessageCommon.js'];
-            break;
+	var preloads = [];
+	switch ( viewId ) {
+		case 'Request':
+		case 'RequestAuthorization':
+			preloads = ['views/common/AuthorizationHistoryCommon.js', 'views/common/RequestViewCommonController.js', 'views/common/EmbeddedMessageCommon.js'];
+			break;
 		case 'ExpenseAuthorization':
 		case 'UserExpense':
 		case 'LoginUserExpense':
 		case 'TimeSheetAuthorization':
 			preloads = ['views/common/AuthorizationHistoryCommon.js'];
 			break;
-    }
-    return preloads;
+	}
+	return preloads;
 };
 
 Global.removeViewCss = function( viewId, fileName ) {
@@ -2511,12 +2515,12 @@ Global.removeViewCss = function( viewId, fileName ) {
 
 Global.loadViewSource = function( viewId, fileName, onResult, sync ) {
 	if ( fileName.indexOf( '.js' ) > 0 ) {
-        var preloads = Global.getViewPreloadPathByViewId(viewId)
-        if ( preloads.length > 0 ) {
-            for ( var p in preloads ) {
-                Global.loadScript( preloads[p] );
-            }
-        }
+		var preloads = Global.getViewPreloadPathByViewId(viewId)
+		if ( preloads.length > 0 ) {
+			for ( var p in preloads ) {
+				Global.loadScript( preloads[p] );
+			}
+		}
 
 		if ( sync ) {
 			return Global.loadScript( Global.getViewPathByViewId( viewId ) + fileName );
@@ -3531,41 +3535,41 @@ Global.setLanguageCookie = function (lang) {
  * @param name
  */
 Global.eraseCookieFromAllPaths = function (name) {
-    var value = $.cookie(name);
+	var value = $.cookie(name);
 
-    // This function will attempt to remove a cookie from all paths
-    var path_bits = location.pathname.split('/');
-    var path_current = ' path=';
+	// This function will attempt to remove a cookie from all paths
+	var path_bits = location.pathname.split('/');
+	var path_current = ' path=';
 
-    // Do a simple pathless delete first
-    document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT;';
-    for (var i = 0; i < path_bits.length; i++) {
-        path_current += ((path_current.substr(-1) != '/') ? '/' : '') + path_bits[i];
-        Debug.Text('---'+ i +'. Deleting cookie: '+ name +' with value: '+ value +' and path: '+ path_current, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
-        document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' + path_current + '/;';
-        document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' + path_current + ';';
-    }
+	// Do a simple pathless delete first
+	document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT;';
+	for (var i = 0; i < path_bits.length; i++) {
+		path_current += ((path_current.substr(-1) != '/') ? '/' : '') + path_bits[i];
+		Debug.Text('---'+ i +'. Deleting cookie: '+ name +' with value: '+ value +' and path: '+ path_current, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
+		document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' + path_current + '/;';
+		document.cookie = name + '=; expires=Thu, 01-Jan-1970 00:00:01 GMT; ' + path_current + ';';
+	}
 
-    Debug.Text('Deleting cookie: '+name+' with value:'+value+' and path:'+path_current, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
-    return value;
+	Debug.Text('Deleting cookie: '+name+' with value:'+value+' and path:'+path_current, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
+	return value;
 };
 
 /**
  * Moves specific app cookies from all over to the root cookie path so that they will be accessible from everywhere
  */
 Global.moveCookiesToNewPath = function() {
-    Debug.Arr(document.cookie,'COOKIE BEFORE CONTENT: ', 'Global.js', 'Global', 'moveCookiesToNewPath', 10);
-    var cookies =['language', 'StationID', 'SessionID'];
-    var year = new Date().getFullYear();
-    for (var i =0; i < cookies.length; i++ ) {
-        var val = Global.eraseCookieFromAllPaths(cookies[i]);
-        if (val && val.length > 0) {
-           Debug.Text('Setting cookie:'+cookies[i]+' with value:'+val+' and path:'+APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
-            document.cookie = cookies[i] + '='+ val +'; expires=Thu, 01-Jan-'+ (year + 10) +' 00:00:01 GMT; path=' + APIGlobal.pre_login_data.cookie_base_url + ';';
-        } else{
-           Debug.Text('NOT Setting cookie:'+cookies[i]+' with value:'+val+' and path:'+APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
-        }
-    }
+	Debug.Arr(document.cookie,'COOKIE BEFORE CONTENT: ', 'Global.js', 'Global', 'moveCookiesToNewPath', 10);
+	var cookies =['language', 'StationID', 'SessionID'];
+	var year = new Date().getFullYear();
+	for (var i =0; i < cookies.length; i++ ) {
+		var val = Global.eraseCookieFromAllPaths(cookies[i]);
+		if (val && val.length > 0) {
+		   Debug.Text('Setting cookie:'+cookies[i]+' with value:'+val+' and path:'+APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
+			document.cookie = cookies[i] + '='+ val +'; expires=Thu, 01-Jan-'+ (year + 10) +' 00:00:01 GMT; path=' + APIGlobal.pre_login_data.cookie_base_url + ';';
+		} else{
+		   Debug.Text('NOT Setting cookie:'+cookies[i]+' with value:'+val+' and path:'+APIGlobal.pre_login_data.cookie_base_url, 'Global.js', 'Global', 'eraseCookieFromAllPaths', 10);
+		}
+	}
 	Debug.Arr(document.cookie,'COOKIE AFTER CONTENT: ', 'Global.js', 'Global', 'moveCookiesToNewPath', 10);
 };
 
@@ -3574,16 +3578,16 @@ Global.clearSessionCookie = function() {
 	$.cookie( Global.getSessionIDKey(), null, {expires: 30, path: LocalCacheData.cookie_path} );
 };
 Global.array_unique = function(arr) {
-    if ( Global.isArray(arr) == false) {
-        return arr;
-    }
-    var clean_arr = [];
-    for ( var n in arr) {
-        if ( clean_arr.indexOf(arr[n]) == -1 ) {
-            clean_arr.push(arr[n]);
-        }
-    }
-    return clean_arr;
+	if ( Global.isArray(arr) == false) {
+		return arr;
+	}
+	var clean_arr = [];
+	for ( var n in arr) {
+		if ( clean_arr.indexOf(arr[n]) == -1 ) {
+			clean_arr.push(arr[n]);
+		}
+	}
+	return clean_arr;
 };
 
 //Special rounding function that handles values like 1.005 or 1.0049999999999999 properly, see: http://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places
@@ -3729,7 +3733,7 @@ Global.getStationID = function () {
 //#2342 - Close all open edit views from one place.
 Global.closeEditViews = function() {
 	TTPromise.add( 'base', 'onCancelClick' );
-    if ( typeof $('#cancelIcon')[0] != 'undefined' && $('#cancelIcon').parent().hasClass('disable-image') == false ) {   //Make sure the cancel exists first.
+	if ( typeof $('#cancelIcon')[0] != 'undefined' && $('#cancelIcon').parent().hasClass('disable-image') == false ) {   //Make sure the cancel exists first.
 		$('#cancelIcon').trigger('click');
 
 		TTPromise.wait( 'base', 'onCancelClick', function() {

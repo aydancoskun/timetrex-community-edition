@@ -2289,7 +2289,7 @@ ScheduleViewController = BaseViewController.extend( {
 			record = this.getRecordsFromUserIDs( record );
 		}
 
-		this.api['set' + this.api.key_name]( record, false, false, ignoreWarning, {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				$this.onSaveAndNewResult( result );
 			}
@@ -2363,7 +2363,7 @@ ScheduleViewController = BaseViewController.extend( {
 			record = this.getRecordsFromUserIDs( [record] );
 		}
 
-		this.api['set' + this.api.key_name]( record, false, false, ignoreWarning, {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				this.previous_absence_policy_id = false;
 				$this.onSaveAndContinueResult( result );
@@ -2457,7 +2457,7 @@ ScheduleViewController = BaseViewController.extend( {
 
 		}
 
-		this.api['set' + this.api.key_name]( record, false, false, ignoreWarning, {
+		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
 			onResult: function( result ) {
 				if ( result.isValid() ) {
 					var result_data = result.getResult();

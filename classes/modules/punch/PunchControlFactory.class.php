@@ -439,7 +439,7 @@ class PunchControlFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $value UUID
 	 * @return bool
 	 */
 	function setBranch( $value) {
@@ -463,7 +463,7 @@ class PunchControlFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $value UUID
 	 * @return bool
 	 */
 	function setDepartment( $value) {
@@ -487,7 +487,7 @@ class PunchControlFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $value UUID
 	 * @return bool
 	 */
 	function setJob( $value) {
@@ -513,7 +513,7 @@ class PunchControlFactory extends Factory {
 	}
 
 	/**
-	 * @param string $id UUID
+	 * @param string $value UUID
 	 * @return bool
 	 */
 	function setJobItem( $value) {

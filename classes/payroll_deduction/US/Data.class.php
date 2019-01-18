@@ -68,6 +68,8 @@ CHANGED:16-Dec-16				Federal          		- Google: Notice 1036 http://www.irs.gov
 *CHECKAGAIN-*:22-Dec-17			'ND' => 'North Dakota', - http://www.nd.gov/tax/user/businesses/formspublications/income-tax-withholding/income-tax-withholding-instructions--tables *Income Tax Withholding Rates & Instructions Booklet
 *CHECKAGAIN-*:22-Dec-17			'AL' => 'Alabama' 		- https://revenue.alabama.gov/individual-corporate/taxes-administered-by-individual-corporate-income-tax/withholding-tax/ *Withholding Tax Tables and Instructions
 *CHECKAGAIN-*:22-Dec-17			'OH' => 'Ohio',			- http://www.tax.ohio.gov/employer_withholding.aspx *Withholding Tables/Income Tax Withholding Instructions
+*CHECKAGAIN-*:27-Dec-17			'KS' => 'Kansas',		- http://www.ksrevenue.org/forms-btwh.html *Form: KW-100
+*CHECKAGAIN-*:27-Dec-17			'IL' => 'Illinois',		- http://www.revenue.state.il.us/Businesses/TaxInformation/Payroll/index.htm *Booklet IL-700-T
 NOCHANGE:22-Dec-17				'OK' => 'Oklahoma',		- http://ok.gov/tax/Forms_&_Publications/Publications/Withholding/ *OW-2, Oklahoma Income Tax Withholding Tables
 NOCHANGE:19-Dec-17				'NC' => 'North Carolina'- http://www.dornc.com/taxes/wh_tax/index.html *Income Tax Withholding Tables & Instructions for Employers, NC30
 CHANGED:16-Dec-17				'KY' => 'Kentucky', 	- http://revenue.ky.gov/Business/Pages/Employer-Payroll-Withholding.aspx *Standard Deduction adjusted each year in Computer Formula (Optional Withholding Method)
@@ -81,7 +83,6 @@ NOCHANGE:16-Dec-17				'CO' => 'Colorado',		- https://www.colorado.gov/pacific/ta
 NOCHANGE:16-Dec-17				'NM' => 'New Mexico', 	- http://www.tax.newmexico.gov/Businesses/Wage-Withholding-Tax/Pages/Home.aspx *FYI-104 ***Often changes in Jan.
 NOCHANGE:09-Dec-17				'CT' => 'Connecticut'	- http://www.ct.gov/drs/cwp/view.asp?a=1509&q=444766 *May have to search for the latest year... Form TPG-211 Withholding Calculation Rules Effective
 NOCHANGE:04-Dec-17				'ID' => 'Idaho',		- http://tax.idaho.gov/s-results-pub.cfm?doc=EPB00006&pkey=bus
-
 
 //Change less often
 *CHECKAGAIN-*:22-Dec-17			'MA' => 'Massachusetts' - http://www.mass.gov/dor/individuals/taxpayer-help-and-resources/tax-guides/withholding-tax-guide.html#calculate *Circular M

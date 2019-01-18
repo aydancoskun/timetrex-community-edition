@@ -1266,6 +1266,10 @@ class Import {
 			return TTUUID::getZeroID(); //No branch
 		}
 
+		if ( trim($input) == '-1' ) {
+			return TTUUID::getNotExistID(); //User default branch
+		}
+
 		if ( !is_array( $this->branch_options ) ) {
 			$this->getBranchOptions();
 		}
@@ -1312,6 +1316,10 @@ class Import {
 	function parse_department( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return TTUUID::getZeroID(); //No department
+		}
+
+		if ( trim($input) == '-1' ) {
+			return TTUUID::getNotExistID(); //User default department
 		}
 
 		if ( !is_array( $this->department_options ) ) {
@@ -1363,6 +1371,10 @@ class Import {
 			return TTUUID::getZeroID(); //No job
 		}
 
+		if ( trim($input) == '-1' ) {
+			return TTUUID::getNotExistID(); //User default job
+		}
+
 		if ( !is_array( $this->job_options ) ) {
 			$this->getJobOptions();
 		}
@@ -1409,6 +1421,10 @@ class Import {
 	function parse_job_item( $input, $default_value = NULL, $parse_hint = NULL ) {
 		if ( trim($input) == '' ) {
 			return TTUUID::getZeroID(); //No job_item
+		}
+
+		if ( trim($input) == '-1' ) {
+			return TTUUID::getNotExistID(); //User default job_item
 		}
 
 		if ( !is_array( $this->job_item_options ) ) {

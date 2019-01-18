@@ -652,6 +652,11 @@ class UserDateTotalFactory extends Factory {
 		if ( $value == '' ) {
 			$value = TTUUID::getZeroID();
 		}
+
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
+			$value = $this->getUserObject()->getDefaultBranch();
+			Debug::Text( 'Using Default Branch: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+		}
 		return $this->setGenericDataValue( 'branch_id', $value );
 	}
 
@@ -670,6 +675,11 @@ class UserDateTotalFactory extends Factory {
 		$value = TTUUID::castUUID($value);
 		if ( $value == '' ) {
 			$value = TTUUID::getZeroID();
+		}
+
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
+			$value = $this->getUserObject()->getDefaultDepartment();
+			Debug::Text( 'Using Default Department: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 		return $this->setGenericDataValue( 'department_id', $value );
 	}
@@ -693,6 +703,10 @@ class UserDateTotalFactory extends Factory {
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
+			$value = $this->getUserObject()->getDefaultJob();
+			Debug::Text( 'Using Default Job: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+		}
 		return $this->setGenericDataValue( 'job_id', $value );
 	}
 
@@ -714,6 +728,10 @@ class UserDateTotalFactory extends Factory {
 		}
 		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
+		}
+		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
+			$value = $this->getUserObject()->getDefaultJobItem();
+			Debug::Text( 'Using Default Job Item: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 		return $this->setGenericDataValue( 'job_item_id', $value );
 	}

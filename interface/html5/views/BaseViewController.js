@@ -3192,6 +3192,7 @@ BaseViewController = Backbone.View.extend( {
 
 				//#2349 - update source data every time so that it doesn't go unrefreshed in the case of saving a new record or deleting exiting
 				this.navigation.setSourceData( grid_current_page_items );
+				this.navigation.setPagerData( this.pager_data );
 				//init navigation only when open edit view
 				if ( !this.navigation.getSourceData() ) {
 					if ( LocalCacheData.getLoginUserPreference() ) {
@@ -6843,18 +6844,22 @@ BaseViewController = Backbone.View.extend( {
 			$this.sub_log_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_log_view_controller.table_name_key = $this.table_name_key;
 			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.initData();
-		}
 
-		Global.loadScript( 'views/core/log/LogViewController.js', function() {
-			if ( !$this.edit_view_tab ) {
-				return;
-			}
-			var tab = $this.edit_view_tab.find( '#' + tab_id );
-			var firstColumn = tab.find( '.first-column-sub-view' );
-			Global.trackView( 'Sub' + 'Log' + 'View', LocalCacheData.current_doing_context_action );
-			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-		} );
+			var tab = $this.edit_view_tab.find('#' + tab_id);
+			var firstColumn = tab.find('.first-column-sub-view');
+			LogViewController.loadSubView(firstColumn, beforeLoadView, afterLoadView);
+		} else {
+
+			Global.loadScript('views/core/log/LogViewController.js', function () {
+				if (!$this.edit_view_tab) {
+					return;
+				}
+				var tab = $this.edit_view_tab.find('#' + tab_id);
+				var firstColumn = tab.find('.first-column-sub-view');
+				Global.trackView('Sub' + 'Log' + 'View', LocalCacheData.current_doing_context_action);
+				LogViewController.loadSubView(firstColumn, beforeLoadView, afterLoadView);
+			});
+		}
 
 		function beforeLoadView() {
 

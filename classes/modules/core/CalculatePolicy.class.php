@@ -481,6 +481,13 @@ class CalculatePolicy {
 				if ( ( is_numeric( $key ) AND $key < 0 AND $udt_obj->getObjectType() != 10 AND ( $udt_obj->getTotalTime() != 0 OR $udt_obj->getTotalTimeAmount() != 0 OR $udt_obj->getNote() != '' ) )
 						OR ( TTUUID::isUUID( $key ) == TRUE AND $udt_obj->getObjectType() != 50 AND $udt_obj->getOverride() == TRUE AND isset($this->dates['calculated'][TTDate::getBeginDayEpoch($udt_obj->getDateStamp())]) ) ) {
 					//Debug::text('    Currency ID: '. $this->getUserObject()->getCurrency() .' Rate: '. $this->filterCurrencyRate( $udt_obj->getDateStamp() )->getReverseConversionRate(), __FILE__, __LINE__, __METHOD__, 10);
+
+					//  This is required when the last day of a closed pay period is a holiday with manual timesheet time exists, and trying to add time on first day of the next pay period,
+					// 		due to the maximum shift time, it will try to recalculate the last day of the previous pay period and cause a validation failure, preventing any punches from being saved.
+					//		It will cause UDT object to skip certain validations, such as locked pay periods of course.
+					//		FIXME: We could potentially change this to just skipping trying to save the record in a locked pay period completely. By just checking if its locked outside the isValid() function.
+					$udt_obj->setEnableCalculatePolicy( TRUE );
+
 					//Handle currency rates here, just before the record is saved.
 					$udt_obj->setCurrency( $this->getUserObject()->getCurrency(), TRUE ); //Disable automatic rate lookup.
 					$udt_obj->setCurrencyRate( $this->filterCurrencyRate( $udt_obj->getDateStamp() )->getReverseConversionRate() );
@@ -733,6 +740,7 @@ class CalculatePolicy {
 		Debug::text('Pivot Date: '. TTDate::getDate('DATE', $pivot_date ) .' Direction: '.  $direction .' Limit: '. $limit, __FILE__, __LINE__, __METHOD__, 10);
 		if ( is_array($slf) AND count($slf) > 0 ) {
 			$direction = strtolower($direction);
+			$status_ids = (array)$status_ids;
 
 			if ( $direction == 'desc' ) {
 				uasort( $slf, array( $this, 'sortScheduleByDateDESC' ) );
@@ -744,8 +752,8 @@ class CalculatePolicy {
 			$i = 1;
 			foreach( $slf as $s_obj ) {
 				$s_obj_date_stamp = TTDate::getMiddleDayEpoch( $s_obj->getDateStamp() );
-				if ( ( $direction == 'desc' AND $s_obj_date_stamp < $pivot_date )
-						OR ( $direction == 'asc' AND $s_obj_date_stamp > $pivot_date ) ) {
+				if ( in_array( $s_obj->getStatus(), $status_ids )
+						AND ( ( $direction == 'desc' AND $s_obj_date_stamp < $pivot_date ) OR ( $direction == 'asc' AND $s_obj_date_stamp > $pivot_date ) ) ) {
 					$retarr[$s_obj->getId()] = $s_obj;
 
 					//Stop the loop once the limit is reached on the returned values.
@@ -7540,7 +7548,7 @@ class CalculatePolicy {
 												}
 
 												//Debug::Text('	UDT Key: '. $udt_key .' Object Type ID: '. $udt_obj->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
-												Debug::Text('	Min/Max Adjusted Accrual Amount: '. $accrual_amount .' Limits: Max Balance: '. $milestone_obj->getMaximumTime() .' Annual Max: '. $milestone_obj->getAnnualMaximumTime(), __FILE__, __LINE__, __METHOD__, 10);
+												Debug::Text('	Min/Max Adjusted Accrual Amount: '. $accrual_amount .' Limits: Max Balance: '. $milestone_obj->getMaximumTime() .' Annual Max: '. $milestone_obj->getAnnualMaximumTime() .' Date: '. TTDate::getDate('DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 
 												//It would be nice to find a way to compact these accrual records,
 												//as right now there could be many (hundreds) per day and it makes viewing the accrual balance difficult.
@@ -7581,18 +7589,23 @@ class CalculatePolicy {
 				foreach( $accrual_compact_arr as $accrual_policy_account_id => $data1 ) {
 					foreach( $data1 as $accrual_policy_id => $data2 ) {
 						foreach( $data2 as $date_stamp => $total_time ) {
-							$af = TTnew( 'AccrualFactory' );
-							$af->setUser( $this->getUserObject()->getId() );
-							$af->setType( 76 ); //Hour-Based Accrual Policy
-							$af->setAccrualPolicyAccount( $accrual_policy_account_id );
-							$af->setAccrualPolicy( $accrual_policy_id );
-							$af->setUserDateTotalID( $this->new_system_user_date_total_id[TTDate::getMiddleDayEpoch($date_stamp)] ); //Link hour based accruals to just the system total time for each day.
-							$af->setAmount( $total_time );
-							$af->setTimeStamp( $date_stamp );
-							$af->setEnableCalcBalance( TRUE );
-							if ( $af->isValid() ) {
-								$insert_id = $af->Save();
-								Debug::Text('	Adding Accrual Record, ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
+							//$date_stamp is already ran through getMiddleDayEpoch above.
+							if ( isset($this->new_system_user_date_total_id[$date_stamp]) ) {
+								$af = TTnew( 'AccrualFactory' );
+								$af->setUser( $this->getUserObject()->getId() );
+								$af->setType( 76 ); //Hour-Based Accrual Policy
+								$af->setAccrualPolicyAccount( $accrual_policy_account_id );
+								$af->setAccrualPolicy( $accrual_policy_id );
+								$af->setUserDateTotalID( $this->new_system_user_date_total_id[$date_stamp] ); //Link hour based accruals to just the system total time for each day.
+								$af->setAmount( $total_time );
+								$af->setTimeStamp( $date_stamp );
+								$af->setEnableCalcBalance( TRUE );
+								if ( $af->isValid() ) {
+									$insert_id = $af->Save();
+									Debug::Text( '	Adding Accrual Record, ID: ' . $insert_id . ' Total Time: ' . $total_time . ' Date: ' . TTDate::getDate( 'DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10 );
+								}
+							} else {
+								Debug::text('  ERROR: Unable to save accrual record due to invalid link to UserDateTotal ID. Date: '. TTDate::getDate( 'DATE', $date_stamp ), __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 					}
@@ -7837,8 +7850,8 @@ class CalculatePolicy {
 					if ( $holiday_policy_obj->getWorkedScheduledDays() == 1 ) { //Scheduled Days
 						Debug::text('BEFORE: Using scheduled days!', __FILE__, __LINE__, __METHOD__, 10);
 
-						//Use 365days as the upper limit.
-						$this->getScheduleData( ( $date_stamp - ( 86400 * 365 ) ), ( $date_stamp - 86400 ), 10, $holiday_policy_obj->getMinimumWorkedPeriodDays(), array( 'a.date_stamp' => 'desc' ) );
+						//Use 30days as the upper limit. We are passing getScheduleData() a limit option, so performance should be decent.
+						$this->getScheduleData( ( $date_stamp - ( 86400 * 30 ) ), ( $date_stamp - 86400 ), 10, $holiday_policy_obj->getMinimumWorkedPeriodDays(), array( 'a.date_stamp' => 'desc' ) );
 
 						$scheduled_date_stamps_before = $this->getScheduleDates( $this->filterScheduleDataByDateAndDirection( $date_stamp, 10, 'desc', $holiday_policy_obj->getMinimumWorkedPeriodDays() ) );
 						//Debug::Arr( (array)$scheduled_date_stamps_before, 'Scheduled DateStamps Before: ', __FILE__, __LINE__, __METHOD__, 10);
@@ -7864,8 +7877,8 @@ class CalculatePolicy {
 					if ( $holiday_policy_obj->getWorkedAfterScheduledDays() == 1 ) { //Scheduled Days
 						Debug::text('AFTER: Using scheduled days!', __FILE__, __LINE__, __METHOD__, 10);
 
-						//Use 365days as the upper limit.
-						$this->getScheduleData( ( $date_stamp + 86400 ), time(), 10, $holiday_policy_obj->getMinimumWorkedAfterPeriodDays(), array( 'a.date_stamp' => 'asc' ) );
+						//Use 30days as the upper limit. We are passing getScheduleData() a limit option, so performance should be decent.
+						$this->getScheduleData( ( $date_stamp + 86400 ), ( $date_stamp + ( 86400 * 30 ) ), 10, $holiday_policy_obj->getMinimumWorkedAfterPeriodDays(), array( 'a.date_stamp' => 'asc' ) );
 
 						$scheduled_date_stamps_after = $this->getScheduleDates( $this->filterScheduleDataByDateAndDirection( $date_stamp, 10, 'asc', $holiday_policy_obj->getMinimumWorkedAfterPeriodDays() ) );
 						//Debug::Arr( (array)$scheduled_date_stamps_after, 'Scheduled DateStamps After: ', __FILE__, __LINE__, __METHOD__, 10);

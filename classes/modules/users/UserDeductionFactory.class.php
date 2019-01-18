@@ -820,6 +820,7 @@ class UserDeductionFactory extends Factory {
 				$target_ytd_amount = $this->Validator->stripNonFloat( $target_ytd_amount );
 
 				Debug::Text('Percent: '. $percent .' Target Amount: '. $target_amount .' YTD Amount: '. $target_ytd_amount, __FILE__, __LINE__, __METHOD__, 10);
+				$retval = 0;
 				if ( $percent != 0 ) {
 					$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
 
@@ -842,11 +843,7 @@ class UserDeductionFactory extends Factory {
 						} else {
 							$retval = $filtered_amount;
 						}
-					} else {
-						$retval = 0;
 					}
-				} else {
-					$retval = 0;
 				}
 
 				if ( $percent >= 0 AND $retval < 0 ) {
@@ -1141,24 +1138,15 @@ class UserDeductionFactory extends Factory {
 
 				$retval = 0;
 				if ( $fixed_amount != 0 ) {
-					$amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
-					Debug::Text('Amount: '. $amount, __FILE__, __LINE__, __METHOD__, 10);
-					if ( $amount !== $target_amount ) {
-						if ( abs($fixed_amount) < abs(bcsub($amount, $target_amount)) ) {
-							//Use full fixed amount
-							Debug::Text('Not within reach of target, use full fixed amount...', __FILE__, __LINE__, __METHOD__, 10);
-							$retval = $fixed_amount;
-						} else {
-							Debug::Text('Within reach of target, use partial fixed amount...', __FILE__, __LINE__, __METHOD__, 10);
-							//Use partial fixed_amount
-							$retval = bcadd( abs($amount), $target_amount);
-						}
-					}
+					$ytd_amount = $cd_obj->getCalculationPayStubAmount( $pay_stub_obj );
+
+					$ytd_amount_remaining = Misc::getAmountDifferenceUpToLimit( $ytd_amount, $target_amount );
+					Debug::Text('  YTD Amount: '. $ytd_amount .' YTD Remaining Amount: '. $ytd_amount_remaining, __FILE__, __LINE__, __METHOD__, 10);
+
+					$retval = Misc::getAmountUpToLimit( $ytd_amount_remaining, $fixed_amount );
 				}
 
-				$retval = abs($retval);
-
-				unset($fixed_amount, $amount);
+				unset($fixed_amount, $target_amount, $ytd_amount, $ytd_amount_remaining);
 
 				break;
 			case 69: // Custom Formulas
@@ -2273,9 +2261,9 @@ class UserDeductionFactory extends Factory {
 											TTi18n::gettext('Employee not specified'));
 		}
 
-		if ( TTUUID::isUUID( $this->getId() ) AND $this->getId() != TTUUID::getZeroID() AND $this->getId() != TTUUID::getNotExistID()
+		if ( TTUUID::isUUID( $this->getUser() )
 				AND $this->getDeleted() == FALSE
-				AND TTUUID::isUUID( $this->getCompanyDeduction() ) AND $this->getCompanyDeduction() != TTUUID::getZeroID() AND $this->getCompanyDeduction() != TTUUID::getNotExistID()
+				AND TTUUID::isUUID( $this->getCompanyDeduction() )
 				AND is_object( $this->getCompanyDeductionObject() ) ) {
 			$this->Validator->isTrue(				'company_deduction',
 													$this->isUniqueCompanyDeduction( $this->getCompanyDeduction() ),

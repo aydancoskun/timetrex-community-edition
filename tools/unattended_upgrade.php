@@ -636,7 +636,7 @@ if ( isset($argv[1]) AND in_array($argv[1], array('--help', '-help', '-h', '-?')
 									system( $command, $exit_code );
 									Debug::Text('Running pre-requirements update... Command: '. $command .' Exit Code: '. $exit_code, __FILE__, __LINE__, __METHOD__, 10);
 									if ( $exit_code == 0 ) {
-										Debug::Text('New version system requirements met...', __FILE__, __LINE__, __METHOD__, 10);
+										Debug::Text('New version pre-requirements met...', __FILE__, __LINE__, __METHOD__, 10);
 										$handle = @fopen('http://www.timetrex.com/'. URLBuilder::getURL( array('v' => $install_obj->getFullApplicationVersion(), 'page' => 'unattended_upgrade_pre_requirements' ), 'pre_install.php'), 'r');
 										@fclose($handle);
 
