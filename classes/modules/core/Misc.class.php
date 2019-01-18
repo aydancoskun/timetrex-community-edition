@@ -3401,6 +3401,34 @@ class Misc {
 
 	/**
 	 * @param null $useragent
+	 * @return bool
+	 */
+	static function isSearchEngineBrowser( $useragent = NULL ) {
+		if ( $useragent == '' ) {
+			if ( isset($_SERVER['HTTP_USER_AGENT']) ) {
+				$useragent = $_SERVER['HTTP_USER_AGENT'];
+			} else {
+				return FALSE;
+			}
+		}
+
+		$retval = FALSE;
+
+		if ( !class_exists('Browser', FALSE ) ) {
+			require_once( Environment::getBasePath().'/classes/other/Browser.php');
+		}
+
+		$browser = new Browser( $useragent );
+
+		if ( $browser->getBrowser() == Browser::BROWSER_GOOGLEBOT OR $browser->getBrowser() == Browser::BROWSER_BINGBOT OR $browser->getBrowser() == Browser::BROWSER_SLURP ) {
+			$retval = TRUE;
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * @param null $useragent
 	 * @return bool|string
 	 */
 	static function detectMobileBrowser( $useragent = NULL ) {
@@ -3831,15 +3859,25 @@ class Misc {
 			$result = $zip->open( $tmp_file, ZIPARCHIVE::CREATE );
 			Debug::Text( 'Creating new zip file for download: ' . $zip_file_name . ' File Open Result: ' . $result, __FILE__, __LINE__, __METHOD__, 10 );
 
+			$total_zipped_files = 0;
 			foreach ( $file_array as $file ) {
-				$zip->addFromString( $file['file_name'], $file['data'] );
+				if ( isset($file['file_name']) AND isset($file['data']) ) {
+					$zip->addFromString( $file['file_name'], $file['data'] );
+					$total_zipped_files++;
+				}
 			}
 
 			$zip->close();
-			$ret_arr = array('file_name' => $zip_file_name, 'mime_type' => 'application/zip', 'data' => file_get_contents( $tmp_file ));
+			$zip_file_contents = file_get_contents( $tmp_file );
 			unlink( $tmp_file );
 
-			return $ret_arr;
+			if ( $total_zipped_files > 0 ) {
+				$ret_arr = array('file_name' => $zip_file_name, 'mime_type' => 'application/zip', 'data' => $zip_file_contents);
+
+				return $ret_arr;
+			} else {
+				return FALSE; //No ZIP files to return...
+			}
 		}
 	}
 

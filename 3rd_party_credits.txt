@@ -52,3 +52,4 @@ As Of Date      Name	                        Path	                              
 11-Apr-2018     jquery.json	                    interface/html5/framework/jquery.json.js	                                2.6.0	    2.6.0	        MIT	    https://github.com/Krinkle/jquery-json
 13-Apr-2018     jquery.tablednd	                interface/html5/framework/jquery.tablednd.js	                            1.0.3       1.0.3	        MIT	    https://github.com/isocra/TableDnD
 22-Aug-2018     analytics.js                    interface/html5/framework/google/analytics/analytics.js                     16-Aug-18   ??              ??      https://www.google-analytics.com/analytics.js -- We load this locally instead of remotely to catch script errors.
+17-Dec-2018     decimal                         interface/html5/framework/decimal.min.js                                    10.0.2      10.0.2          MIT     https://github.com/MikeMcl/decimal.js/

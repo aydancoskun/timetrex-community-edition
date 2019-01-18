@@ -155,14 +155,14 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		var send = new RibbonSubMenu( {
-			label: $.i18n._( 'Send' ),
-			id: ContextMenuIconName.send,
-			group: editor_group,
-			icon: Icons.send,
-			permission_result: true,
-			permission: null
-		} );
+		// var send = new RibbonSubMenu( {
+		// 	label: $.i18n._( 'Send' ),
+		// 	id: ContextMenuIconName.send,
+		// 	group: editor_group,
+		// 	icon: Icons.send,
+		// 	permission_result: true,
+		// 	permission: null
+		// } );
 
 		var cancel = new RibbonSubMenu( {
 			label: $.i18n._( 'Cancel' ),
@@ -205,7 +205,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			id: ContextMenuIconName.authorization_request,
 			group: objects_group,
 			icon: Icons.authorization_request,
-			permission_result: true,
+			permission_result: PermissionManager.checkTopLevelPermission( 'RequestAuthorization' ),
 			permission: null
 		} );
 
@@ -215,7 +215,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			group: objects_group,
 			icon: Icons.authorization_timesheet,
 			selected: true,
-			permission_result: true,
+			permission_result: PermissionManager.checkTopLevelPermission( 'TimeSheetAuthorization' ),
 			permission: null
 		} );
 
@@ -225,7 +225,7 @@ TimeSheetAuthorizationViewController = BaseViewController.extend( {
 			group: objects_group,
 			icon: Icons.authorization_expense,
 			selected: false,
-			permission_result: true,
+			permission_result: PermissionManager.checkTopLevelPermission( 'ExpenseAuthorization' ),
 			permission: null
 		} );
 

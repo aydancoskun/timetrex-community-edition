@@ -120,7 +120,9 @@ class APISchedule extends APIFactory {
 
 		if ( is_array( $schedule_arr ) AND count( $schedule_arr ) > 0 ) {
 			$schedule_arr = call_user_func_array( 'array_merge', (array)$schedule_arr ); //Flattens the array by one level, to remove the ISO date keys.
-			$retarr = Misc::arrayCommonValuesForEachKey( $schedule_arr, array( 'start_time', 'end_time', 'schedule_policy_id' ) );
+
+			//Merge the few fields from $schedule_arr data into the existing $retarr otherwise we overwrite all the default branch/department/job/task data obtained above.
+			$retarr = array_merge( $retarr, Misc::arrayCommonValuesForEachKey( $schedule_arr, array( 'start_time', 'end_time', 'schedule_policy_id' ) ) );
 		}
 
 		Debug::Arr($retarr, 'Default data...', __FILE__, __LINE__, __METHOD__, 10);

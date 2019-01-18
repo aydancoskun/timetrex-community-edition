@@ -41,6 +41,19 @@
 class PayrollDeduction_US_IA extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20190101 => array(
+					0 => array(
+							array('income' => 1333, 'rate' => 0.33, 'constant' => 0),
+							array('income' => 2666, 'rate' => 0.67, 'constant' => 4.40),
+							array('income' => 5331, 'rate' => 2.25, 'constant' => 13.33),
+							array('income' => 11995, 'rate' => 4.14, 'constant' => 73.29),
+							array('income' => 19992, 'rate' => 5.63, 'constant' => 349.18),
+							array('income' => 26656, 'rate' => 5.96, 'constant' => 799.41),
+							array('income' => 39984, 'rate' => 6.25, 'constant' => 1196.58),
+							array('income' => 59976, 'rate' => 7.44, 'constant' => 2029.58),
+							array('income' => 59976, 'rate' => 8.53, 'constant' => 3516.98),
+					),
+			),
 			20060401 => array(
 					0 => array(
 							array('income' => 1300, 'rate' => 0.36, 'constant' => 0),
@@ -57,6 +70,10 @@ class PayrollDeduction_US_IA extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20190101 => array( //01-Jan-2019
+							   'standard_deduction' => array(1690.00, 4160.00),
+							   'allowance'          => 40,
+			),
 			20060401 => array( //01-Apr-06
 							   'standard_deduction' => array(1650.00, 4060.00),
 							   'allowance'          => 40,

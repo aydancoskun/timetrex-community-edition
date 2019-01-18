@@ -136,7 +136,7 @@ class APIAuthentication extends APIFactory {
 			$validator_obj = new Validator();
 			$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
 
-			$error_column = 'user_name';
+			$error_column = 'quick_punch_id'; // match the correct input field in the html
 			$error_message = TTi18n::gettext('Quick Punch ID or Password is incorrect');
 			//Get company status from user_name, so we can display messages for ONHOLD/Cancelled accounts.
 			if ( is_object( $c_obj ) ) {

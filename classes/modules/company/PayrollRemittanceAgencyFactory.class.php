@@ -44,6 +44,7 @@ class PayrollRemittanceAgencyFactory extends Factory {
 
 	protected $legal_entity_obj = NULL;
 	protected $contact_user_obj = NULL;
+	protected $remittance_source_account_obj = NULL;
 
 	/**
 	 * @param bool $name
@@ -1009,6 +1010,13 @@ class PayrollRemittanceAgencyFactory extends Factory {
 	 */
 	function getLegalEntityObject() {
 		return $this->getGenericObject( 'LegalEntityListFactory', $this->getLegalEntity(), 'legal_entity_obj' );
+	}
+
+	/**
+	 * @return object|bool
+	 */
+	function getRemittanceSourceAccountObject() {
+		return $this->getGenericObject( 'RemittanceSourceAccountListFactory', $this->getRemittanceSourceAccount(), 'remittance_source_account_obj' );
 	}
 
 	/**

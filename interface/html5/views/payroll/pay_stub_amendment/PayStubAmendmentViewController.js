@@ -673,7 +673,8 @@ PayStubAmendmentViewController = BaseViewController.extend( {
 
 		if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
 			//widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) ); //This fails on 17.07 * 9.50 as it rounds to 162.16 rather than 162.17
-			calc_amount = ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) );
+			//calc_amount = ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ); //This fails on 16.5 * 130.23
+			calc_amount = new Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed(4);
 			Debug.Text( 'Calculate Amount before rounding: ' + calc_amount, 'PayStubAmendmentViewController.js', 'PayStubAmendmentViewController', 'onFormItemKeyUp', 10 );
 			widget_amount.setValue( Global.MoneyRound( calc_amount ) );
 		} else {

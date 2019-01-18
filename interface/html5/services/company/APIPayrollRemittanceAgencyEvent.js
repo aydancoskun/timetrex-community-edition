@@ -42,7 +42,11 @@ var APIPayrollRemittanceAgencyEvent = ServiceCaller.extend( {
 	getReportData: function() {
 		return this.argumentsHandler( this.className, 'getReportData', arguments );
 	},
-	getURL: function() {
-		return this.argumentsHandler( this.className, 'getURL', arguments );
+	getMakePaymentData: function() {
+		return this.argumentsHandler( this.className, 'getMakePaymentData', arguments );
 	},
+	getFileAndPayWithPaymentServicesData: function() {
+		return this.argumentsHandler( this.className, 'getFileAndPayWithPaymentServicesData', arguments );
+	},
+
 } );

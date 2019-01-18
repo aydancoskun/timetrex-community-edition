@@ -41,6 +41,22 @@
 class PayrollDeduction_US_NM extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20190101 => array(
+					10 => array(
+							array('income' => 3700, 'rate' => 0, 'constant' => 0),
+							array('income' => 9200, 'rate' => 1.7, 'constant' => 0),
+							array('income' => 14700, 'rate' => 3.2, 'constant' => 93.50),
+							array('income' => 19700, 'rate' => 4.7, 'constant' => 269.50),
+							array('income' => 19700, 'rate' => 4.9, 'constant' => 504.50),
+					),
+					20 => array(
+							array('income' => 11550, 'rate' => 0, 'constant' => 0),
+							array('income' => 19550, 'rate' => 1.7, 'constant' => 0),
+							array('income' => 27550, 'rate' => 3.2, 'constant' => 136),
+							array('income' => 35550, 'rate' => 4.7, 'constant' => 392),
+							array('income' => 35550, 'rate' => 4.9, 'constant' => 768),
+					),
+			),
 			20180101 => array(
 					10 => array(
 							array('income' => 3700, 'rate' => 0, 'constant' => 0),
@@ -220,6 +236,7 @@ class PayrollDeduction_US_NM extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			//01-Jan-2019 - No Change
 			20180101 => array( //01-Jan-2018
 							   'allowance' => 4150,
 			),
@@ -273,7 +290,14 @@ class PayrollDeduction_US_NM extends PayrollDeduction_US {
 
 		$allowance_arr = $retarr['allowance'];
 
-		$retval = bcmul( $this->getStateAllowance(), $allowance_arr );
+		$allowances = $this->getStateAllowance();
+
+		//As of 01-Jan-2019, the allowances is capped at 3, however they should still be reported properly.
+		if ( $this->getDate() >= 20190101 AND $allowances > 3 ) {
+			$allowances = 3;
+		}
+
+		$retval = bcmul( $allowances, $allowance_arr );
 
 		Debug::text( 'State Allowance Amount: ' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
 

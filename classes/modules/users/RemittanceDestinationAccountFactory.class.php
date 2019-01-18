@@ -1251,8 +1251,11 @@ class RemittanceDestinationAccountFactory extends Factory {
 							break;
 						case 'type':
 							$rsaf = TTnew( 'RemittanceSourceAccountFactory' );
-							$type_options = $rsaf->getOptions('type');
-							$data[$variable] = $type_options[$this->getType()];
+
+							$function = 'get'.$variable;
+							if ( method_exists( $this, $function ) ) {
+								$data[$variable] = Option::getByKey( $this->$function(), $rsaf->getOptions( $variable ) );
+							}
 							break;
 						case 'status':
 							$function = 'get'.$variable;

@@ -2024,12 +2024,12 @@ class DateTimeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'FL', '8135555555' ), 'EST5EDT' ); //Same state with different timezones based on phone number.
 		$this->assertEquals( $upf->getLocationTimeZone( 'US', 'FL', '8505555555' ), 'CST6CDT' ); //Same state with different timezones based on phone number.
 
-		$this->assertEquals( $upf->getLocationTimeZone( 'AG', '' ), 'AST4ADT' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'AG', '00' ), 'AST4ADT' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'AG', '' ), 'America/Antigua' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'AG', '00' ), 'America/Antigua' );
 
-		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '' ), 'EST5EDT' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '', '2525555555' ), 'EST5EDT' );
-		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '00', '2525555555' ), 'EST5EDT' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '' ), 'America/Nassau' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '', '2525555555' ), 'America/Nassau' );
+		$this->assertEquals( $upf->getLocationTimeZone( 'BS', '00', '2525555555' ), 'America/Nassau' );
 	}
 }
 ?>

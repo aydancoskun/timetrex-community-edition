@@ -42,19 +42,20 @@ class PayrollDeduction {
 	var $obj = NULL;
 	var $data = NULL;
 
-	protected $version = '1.0.44';
-	protected $data_version = '20180701';
+	protected $version = '1.0.45';
+	protected $data_version = '20190101';
 
 	function __construct( $country, $province, $district = NULL ) {
 		$this->setCountry( $country );
 		$this->setProvince( $province );
 		$this->setDistrict( $district );
 
-		$base_file_name = Environment::getBasePath() . '/classes/payroll_deduction/PayrollDeduction_Base.class.php';
-		$province_file_name = Environment::getBasePath() . '/classes/payroll_deduction/' . $this->getCountry() . '/' . $this->getProvince() . '.class.php';
-		$district_file_name = Environment::getBasePath() . '/classes/payroll_deduction/' . $this->getCountry() . '/' . $this->getProvince() . '_' . $this->getDistrict() . '.class.php';
-		$country_file_name = Environment::getBasePath() . '/classes/payroll_deduction/' . $this->getCountry() . '.class.php';
-		$data_file_name = Environment::getBasePath() . '/classes/payroll_deduction/' . $this->getCountry() . '/Data.class.php';
+		$base_path = Environment::getBasePath();
+		$base_file_name = $base_path . '/classes/payroll_deduction/PayrollDeduction_Base.class.php';
+		$province_file_name = $base_path . '/classes/payroll_deduction/' . $this->getCountry() . '/' . $this->getProvince() . '.class.php';
+		$district_file_name = $base_path . '/classes/payroll_deduction/' . $this->getCountry() . '/' . $this->getProvince() . '_' . $this->getDistrict() . '.class.php';
+		$country_file_name = $base_path . '/classes/payroll_deduction/' . $this->getCountry() . '.class.php';
+		$data_file_name = $base_path . '/classes/payroll_deduction/' . $this->getCountry() . '/Data.class.php';
 
 		if ( $this->getDistrict() != '' AND $this->getDistrict() != '00' ) {
 			$class_name = 'PayrollDeduction_' . $this->getCountry() . '_' . $this->getProvince() . '_' . $this->getDistrict();

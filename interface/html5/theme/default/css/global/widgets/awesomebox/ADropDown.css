@@ -5,9 +5,8 @@
 }
 
 .a-dropdown .unselect-grid-div {
-
     background-color: #34628D;
-    border-radius: 6px;
+    border-radius: 4px;
     height: auto;
     /*padding-bottom: 10px;*/
     width: 450px;
@@ -99,7 +98,7 @@
 
 .a-dropdown .select-grid-div {
     background-color: #34628D;
-    border-radius: 6px;
+    border-radius: 4px;
     height: auto;
     padding-bottom: 10px;
     width: 450px;
@@ -173,7 +172,7 @@
     top: -2px;
     background-color: #1B3E60;
     border: 1px solid #6687A6;
-    border-radius: 4px 4px 4px 4px;
+    border-radius: 4px;
     color: #FFFFFF;
     font-size: 10px;
     padding-bottom: 2px;

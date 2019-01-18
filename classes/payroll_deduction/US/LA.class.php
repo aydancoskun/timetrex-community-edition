@@ -52,8 +52,19 @@
 class PayrollDeduction_US_LA extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
-		//LA publication R-1306 doesn't give actual tax brackets, instead we had to calculate them based on the formula they provide. 0.21, +0.160 (3.7%) +0.135 (5.05%)
-		20090701 => array(
+		20180216 => array( //16-Feb-2018
+				10 => array( //LA publication R-1306 doesn't give actual tax brackets, instead we had to calculate them based on the formula they provide. 0.021, +0.180 (3.9%) +0.165 (5.55%)
+						array('income' => 12500, 'rate' => 2.1, 'constant' => 0),
+						array('income' => 50000, 'rate' => 3.9, 'constant' => 262.50),
+						array('income' => 50000, 'rate' => 5.55, 'constant' => 1725.00),
+				),
+				20 => array(
+						array('income' => 25000, 'rate' => 2.2, 'constant' => 0),
+						array('income' => 100000, 'rate' => 3.95, 'constant' => 550.00),
+						array('income' => 100000, 'rate' => 5.64, 'constant' => 3512.50),
+				),
+		),
+		20090701 => array( //LA publication R-1306 doesn't give actual tax brackets, instead we had to calculate them based on the formula they provide. 0.21, +0.160 (3.7%) +0.135 (5.05%)
 				10 => array(
 						array('income' => 12500, 'rate' => 2.1, 'constant' => 0),
 						array('income' => 50000, 'rate' => 3.7, 'constant' => 262.50),
@@ -69,6 +80,20 @@ class PayrollDeduction_US_LA extends PayrollDeduction_US {
 
 
 	var $state_options = array(
+			20180216 => array(
+					'allowance'           => 4500,
+					'dependant_allowance' => 1000,
+					'allowance_rates'     => array( //Personal exceptions
+													10 => array(
+															0 => array(12500, 2.1, 0),
+															1 => array(12500, 1.8, 262.50),
+													),
+													20 => array(
+															0 => array(25000, 2.1, 0),
+															1 => array(25000, 1.75, 525),
+													),
+					),
+			),
 			20060101 => array(
 					'allowance'           => 4500,
 					'dependant_allowance' => 1000,

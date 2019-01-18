@@ -41,6 +41,18 @@
 class PayrollDeduction_US_ME extends PayrollDeduction_US {
 
 	var $state_income_tax_rate_options = array(
+			20190101 => array(
+					10 => array(
+							array('income' => 21850, 'rate' => 5.8, 'constant' => 0),
+							array('income' => 51700, 'rate' => 6.75, 'constant' => 1267),
+							array('income' => 51700, 'rate' => 7.15, 'constant' => 3282),
+					),
+					20 => array(
+							array('income' => 43700, 'rate' => 5.8, 'constant' => 0),
+							array('income' => 103400, 'rate' => 6.75, 'constant' => 2535),
+							array('income' => 103400, 'rate' => 7.15, 'constant' => 6565),
+					),
+			),
 			20180101 => array(
 					10 => array(
 							array('income' => 21450, 'rate' => 5.8, 'constant' => 0),
@@ -219,6 +231,17 @@ class PayrollDeduction_US_ME extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20190101 => array( //01-Jan-19
+							   'allowance'                    => 4200,
+							   'standard_deduction'           => array(
+									   '10' => 9350,
+									   '20' => 21550,
+							   ),
+							   'standard_deduction_threshold' => array(
+									   '10' => array(81450, 156450, 75000), //Min/Max/Divisor
+									   '20' => array(162950, 312950, 150000), //Min/Max/Divsor
+							   ),
+			),
 			20180101 => array( //01-Jan-18
 							   'allowance'                    => 4150,
 							   'standard_deduction'           => array(

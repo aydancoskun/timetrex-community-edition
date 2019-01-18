@@ -176,7 +176,6 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
 		this.onStatusChange();
-
 	},
 
 	openEditView: function() {
@@ -218,24 +217,10 @@ LoginUserPreferenceViewController = BaseViewController.extend( {
 		this.setMassEditingFieldsWhenFormChange( target );
 
 		var key = target.getField();
-		//this.current_edit_record[key] = target.getValue();
 		var c_value = target.getValue();
-
-//		switch ( key ) {
-//			case 'schedule_icalendar_alarm1_working':
-//			case 'schedule_icalendar_alarm2_working':
-//			case 'schedule_icalendar_alarm1_absence':
-//			case 'schedule_icalendar_alarm2_absence':
-//			case 'schedule_icalendar_alarm1_modified':
-//			case 'schedule_icalendar_alarm2_modified':
-//				c_value = this.date_api.parseTimeUnit( target.getValue(), {async: false} ).getResult();
-//				break;
-//		}
-
 		this.current_edit_record[key] = c_value;
 
 		if ( key === 'schedule_icalendar_type_id' ) {
-
 			this.onStatusChange();
 		}
 

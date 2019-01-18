@@ -608,6 +608,8 @@ class APIDashboard extends APIFactory {
 								display:table;
 								width:100%;
 								border-spacing:0 5px;
+								font-family: Arial, Helvetica, sans-serif;
+								font-size: 15px;
 							}
 
 							.item{
@@ -623,8 +625,7 @@ class APIDashboard extends APIFactory {
 							}
 
 							.item > div {
-							  border-radius: 10px 10px 10px 10px;
-							  -moz-border-radius: 10px 10px 10px 10px;
+							  border-radius: 4px 4px 4px 4px;
 							}
 
 							.newsItem g{

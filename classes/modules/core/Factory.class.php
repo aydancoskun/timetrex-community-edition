@@ -2443,6 +2443,15 @@ abstract class Factory {
 	 */
 	function isValid( $ignore_warning = TRUE ) {
 		if ( $this->is_valid == FALSE ) {
+			//Most preSave()'s should actually be preValidates, so they are always run prior to validation.
+			//  This will only get called if the data is not valid.
+			if ( method_exists($this, 'preValidate') ) {
+				Debug::text( 'Calling preValidate()', __FILE__, __LINE__, __METHOD__, 10 );
+				if ( $this->preValidate() === FALSE ) {
+					throw new GeneralError('preValidate() failed.');
+				}
+			}
+
 			if ( method_exists($this, 'Validate') ) {
 				Debug::text( 'Calling Validate()', __FILE__, __LINE__, __METHOD__, 10 );
 				if ( $this->Validate( $ignore_warning ) == TRUE ) {

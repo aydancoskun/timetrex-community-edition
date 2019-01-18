@@ -3305,6 +3305,49 @@ class UserFactory extends Factory {
 			}
 		}
 
+		if ( $this->getDeleted() == TRUE AND is_object( $this->getCompanyObject() ) AND $this->getCompanyObject()->getStatus() == 10 AND $this->getCompanyObject()->getDeleted() == FALSE ) { //Only perform these checks if the company is active. Otherwise we can't delete records for cancelled companies.
+			//Too many users are accidently deleting employee records still, even though we default to turning off Employee -> Delete permissions.
+			// Therefore prevent them doing so if there are punches, timesheet data or pay stubs.
+
+			if ( $this->getStatus() == 10 ) {
+				$this->Validator->isTRUE( 'status',
+										  FALSE,
+										  TTi18n::gettext( 'Unable to delete employees who are active' ) );
+			}
+
+			$end_date = time();
+
+			if ( $this->Validator->isError() == FALSE ) { //This can be pretty resource intensive, so if there are any other errors don't bother checking it.
+				//Check to make sure there aren't any punches/timesheet data in the last 2 years.
+				$start_date = TTDate::incrementDate( time(), -2, 'year');
+
+				$udtlf = TTnew( 'UserDateTotalListFactory' );
+				$udtlf->getByCompanyIDAndUserIdAndObjectTypeAndStartDateAndEndDate( $this->getCompany(), $this->getId(), 10, $start_date, $end_date, 1 ); //10=System Limit 1
+				if ( $udtlf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'Unable to delete employees who have recorded worked time in the last 2 years' ) );
+				}
+			}
+
+			if ( $this->Validator->isError() == FALSE ) { //This can be pretty resource intensive, so if there are any other errors don't bother checking it.
+				//Check to make sure there aren't any PAID pay stubs in the last 7 years.
+				$start_date = TTDate::incrementDate( time(), -7, 'year');
+
+				$pslf = TTnew( 'PayStubListFactory' );
+				$pslf->getByUserId( $this->getId(), 1 ); //limit 1
+				$pslf->getByUserIdAndStartDateAndEndDate( $this->getId(), $start_date, $end_date, 1 ); //Limit 1
+				if ( $pslf->getRecordCount() > 0 ) {
+					$this->Validator->isTRUE( 'in_use',
+											  FALSE,
+											  TTi18n::gettext( 'Unable to delete employees with pay stubs in the last 7 years' ) );
+				}
+			}
+
+			unset( $start_date, $end_date, $pslf, $udtlf );
+		}
+
+
 		if ( $ignore_warning == FALSE ) {
 			if ( $this->isNew( TRUE ) == FALSE AND $this->getLegalEntity() != $this->getGenericOldDataValue('legal_entity_id') ) {
 				$pslf = TTnew( 'PayStubListFactory');

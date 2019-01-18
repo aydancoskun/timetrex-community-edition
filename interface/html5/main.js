@@ -82,7 +82,6 @@ require.config( {
 		'BaseWizardController': 'views/wizard/BaseWizardController',
 		'UserGenericStatusWindowController': 'views/wizard/user_generic_data_status/UserGenericStatusWindowController',
 		'ReportBaseViewController': 'views/reports/ReportBaseViewController',
-		'sonic': 'framework/sonic',
 		'qtip': 'framework/widgets/jquery.qtip/jquery.qtip.min',
 		'rightclickmenu': 'framework/rightclickmenu/rightclickmenu',
 
@@ -98,6 +97,7 @@ require.config( {
 		'Global': 'global/Global',
 		'LocalCacheData': 'global/LocalCacheData',
 		'nanobar': 'framework/nanobar.min',
+		'decimal': 'framework/decimal.min',
 
 		'leaflet': 'framework/leaflet/leaflet',
 		'leaflet-timetrex': 'framework/leaflet/leaflet-timetrex',
@@ -540,7 +540,6 @@ require( [
 	'TComboBox',
 	'ProgressBarManager',
 	'TAlertManager',
-	'sonic',
 	'TTPromise',
 	'TTUUID',
 	'APIAuthentication',
@@ -549,8 +548,6 @@ require( [
 ], function( r, lcd, bb, G, html2canvas, moment ) {
 	window.moment = moment;
 	window.html2canvas = html2canvas;
-	//Hide elements that show hidden link for search friendly
-	hideElements();
 
 	//Don't not show loading bar if refresh
 	if ( Global.isSet( LocalCacheData.getLoginUser() ) ) {
@@ -581,14 +578,6 @@ require( [
 				$( '.progress-bar-div' ).hide();
 				clearInterval( loading_bar_time );
 			}, 50 );
-		}
-	}
-
-	function hideElements() {
-		var elements = document.getElementsByClassName( 'need-hidden-element' );
-
-		for ( var i = 0; i < elements.length; i++ ) {
-			elements[i].style.display = 'none';
 		}
 	}
 
@@ -829,10 +818,6 @@ require( [
 		}
 
 		function initApps() {
-			if ( ie <= 10 ) {
-				TAlertManager.showBrowserTopBanner();
-			}
-
 			loadViewRequiredJS();
 
 			//Optimization: Only change locale if its *not* en_US or enable_default_language_translation = TRUE
@@ -955,6 +940,7 @@ require( [
 			'backbone',
 			'Global',
 			'nanobar', //only in timesheet
+			'decimal', //only in Pay Stub and Pay Stub Amendments currently.
 			'jquery_json',
 			'rightclickmenu',
 			'jquery_tablednd',
@@ -1025,14 +1011,16 @@ require( [
 		//do not load interact on mobile.
 		if ( Global.detectMobileBrowser() == true ) {
 			require_array.splice( require_array.indexOf( 'interact' ), 1 );
-			require( require_array, function( Backbone, Global, Nanobar ) {
+			require( require_array, function( Backbone, Global, Nanobar, Decimal) {
 				window.Nanobar = Nanobar;
+				window.Decimal = Decimal;
 				LocalCacheData.loadViewRequiredJSReady = true;
 			} );
 		} else {
-			require( require_array, function( Backbone, Global, Nanobar, interact ) {
+			require( require_array, function( Backbone, Global, Nanobar, Decimal, interact ) {
 				window.interact = interact;
 				window.Nanobar = Nanobar;
+				window.Decimal = Decimal;
 				LocalCacheData.loadViewRequiredJSReady = true;
 			} );
 		}

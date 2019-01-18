@@ -82,6 +82,8 @@ class APILegalEntity extends APIFactory {
 						'province' => $company_obj->getProvince(),
 						'work_phone' => $company_obj->getWorkPhone(),
 						'fax_phone' => $company_obj->getFaxPhone(),
+
+						'payment_services_status_id' => 20, //Disabled
 					);
 
 		return $this->returnHandler( $data );

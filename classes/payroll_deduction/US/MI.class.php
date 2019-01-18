@@ -41,6 +41,10 @@
 class PayrollDeduction_US_MI extends PayrollDeduction_US {
 
 	var $state_options = array(
+			20190101 => array( //01-Jan-10
+							   'rate'      => 4.25,
+							   'allowance' => 4400,
+			),
 			20180101 => array( //01-Jan-18
 							   'rate'      => 4.25,
 							   'allowance' => 4050,

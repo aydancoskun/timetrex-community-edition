@@ -216,6 +216,16 @@ class TTUUID {
 	}
 
 	/**
+	 * @param $str string
+	 * @return string
+	 */
+	static function convertStringToUUID( $str ) {
+		$retval = substr($str, 0, 8 ) .'-'. substr($str, 8, 4) .'-'. substr($str, 12, 4) .'-'. substr($str, 16, 4) .'-'. substr($str, 20);
+
+		return $retval;
+	}
+
+	/**
 	 * @param bool $fail_to_random
 	 * @return bool|string
 	 */

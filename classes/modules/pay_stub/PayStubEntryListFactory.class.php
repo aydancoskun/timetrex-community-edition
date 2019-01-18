@@ -1513,6 +1513,7 @@ class PayStubEntryListFactory extends PayStubEntryFactory implements IteratorAgg
 							$query .= ( isset($filter_data['pay_stub_status_id']) ) ? $this->getWhereClauseSQL( 'bb.status_id', $filter_data['pay_stub_status_id'], 'numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['pay_stub_type_id']) ) ? $this->getWhereClauseSQL( 'bb.type_id', $filter_data['pay_stub_type_id'], 'numeric_list', $ph ) : NULL;
 							$query .= ( isset($filter_data['pay_stub_run_id']) ) ? $this->getWhereClauseSQL( 'bb.run_id', $filter_data['pay_stub_run_id'], 'numeric_list', $ph ) : NULL;
+							$query .= ( isset($filter_data['pay_stub_id']) ) ? $this->getWhereClauseSQL( 'aa.pay_stub_id', $filter_data['pay_stub_id'], 'uuid_list', $ph ) : NULL; //Critical for exporting payroll withholding to TT Payment Services
 
 							if ( isset($filter_data['exclude_ytd_adjustment']) AND (bool)$filter_data['exclude_ytd_adjustment'] == TRUE ) {
 								$query .= ' AND ( hh.ytd_adjustment is NULL OR hh.ytd_adjustment = 0 )';

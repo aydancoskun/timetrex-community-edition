@@ -11,7 +11,7 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 	init: function() {
 		filter_data = {
 			filter_data: {
-				'status_id': 10, //Enabled
+				'status_id': [ 10, 15 ], //10=Enabled (Self Service) 15=Enabled (Full Service)
 				'payroll_remittance_agency_status_id': 10, //Enabled
 				'start_date': ( ( new Date() / 1000 ) + ( 86400 * 14 ) ) //Move start date into the future by 14 days so per Pay Period frequencies will still appear well in advance.
 			},
@@ -28,6 +28,7 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 				'in_time_period': true
 			},
 			'filter_sort': {
+				'status_id': 'desc',
 				'due_date': 'asc',
 				'legal_entity_id': 'asc',
 				'payroll_remittance_agency_id': 'asc',

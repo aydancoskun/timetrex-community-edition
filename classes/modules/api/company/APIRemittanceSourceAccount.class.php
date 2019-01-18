@@ -93,6 +93,13 @@ class APIRemittanceSourceAccount extends APIFactory {
 			$data['country'] = $udf_obj->getCountry();
 		}
 
+		//Handle default data formats based on the country.
+		if ( strtoupper( $data['country'] ) == 'CA' ) {
+			$data['data_format_id'] = 20; //EFT 1464
+		} else {
+			$data['data_format_id'] = 10; //ACH
+		}
+
 		return $this->returnHandler( $data );
 	}
 

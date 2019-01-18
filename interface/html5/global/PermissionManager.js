@@ -219,7 +219,23 @@ var PermissionManager = (function() {
 			case 'RequestAuthorization':
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
-				} else if ( PermissionManager.validate( permission_section, 'view' ) ) {
+				} else if ( PermissionManager.validate( 'request', 'authorize' ) && ( PermissionManager.validate( permission_section, 'view' ) || PermissionManager.validate( permission_section, 'view_child' ) ) ) {
+					result = true;
+				}
+				break;
+			case 'TimeSheetAuthorization':
+				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
+					result = false;
+				} else if ( PermissionManager.validate( 'punch', 'authorize' ) && ( PermissionManager.validate( permission_section, 'view' ) || PermissionManager.validate( permission_section, 'view_child' ) ) ) {
+					result = true;
+				}
+				break;
+			case 'ExpenseAuthorization':
+				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) ) {
+					result = false;
+				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
+					result = false;
+				} else if ( PermissionManager.validate( 'user_expense', 'authorize' ) && ( PermissionManager.validate( permission_section, 'view' ) || PermissionManager.validate( permission_section, 'view_child' ) ) ) {
 					result = true;
 				}
 				break;
@@ -316,16 +332,6 @@ var PermissionManager = (function() {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'edit' ) ||
 						PermissionManager.validate( permission_section, 'edit_child' ) ) {
-					result = true;
-				}
-				break;
-			case 'ExpenseAuthorization':
-				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 25 ) ) {
-					result = false;
-				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
-					result = false;
-				} else if ( PermissionManager.validate( permission_section, 'view' ) &&
-						PermissionManager.validate( 'user_expense', 'authorize' ) ) {
 					result = true;
 				}
 				break;

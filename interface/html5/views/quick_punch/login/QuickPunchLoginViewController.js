@@ -18,6 +18,8 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 		this.setElement( this.template( {} ) );
 		Global.contentContainer().html( this.$el );
 
+		this.checkForWebkitTextSecuritySupport();
+
 		var $this = this;
 		require( this.filterRequiredFiles(), function() {
 			$this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
@@ -38,7 +40,7 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 		this.login_btn.on( 'click', function( e ) {
 			$this.onLogin( e );
 		} );
-		this.$( 'input[name="user_name"]' ).focus();
+		this.$( 'input[name="quick_punch_id"]' ).focus();
 		this.setLanguageSourceData( 'language' );
 		$( document ).off( 'keydown' ).on( 'keydown', function( event ) {
 			var attrs = event.target.attributes;
@@ -71,11 +73,11 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 
 	onLogin: function( e ) {
 		var $this = this;
-		var user_name = this.$( '#user_name' ).val();
-		var password = this.$( '#password' ).val();
+		var quick_punch_id = this.$( '#quick_punch_id' ).val();
+		var quick_punch_password = this.$( '#quick_punch_password' ).val();
 		this.login_btn.attr( 'disabled', 'disabled' );
 		this.clearErrorTips( true, true );
-		this.authentication_api.PunchLogin( user_name, password, {
+		this.authentication_api.PunchLogin( quick_punch_id, quick_punch_password, {
 			onResult: function( raw_result ) {
 				if ( raw_result.isValid() ) {
 
@@ -130,6 +132,21 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 		} );
 	},
 
+	/* Checks if browser supports the use of -webkit-text-security, so we can obscure the password.
+	 * We want type number so that mobile devices will trigger the numeric keypad rather than the alphabet keyboard.
+	 * If not supported by browser (E.g. IE), replace element type number with type password.
+	 * Note: type="number" is default in html, otherwise chrome on android does not change the keyboard to numeric keypad if other way around and converting to number from password. Seems to miss/ignore the type change.
+	 */
+	checkForWebkitTextSecuritySupport: function() {
+		if(typeof CSS !== 'function' || !CSS.supports('-webkit-text-security', 'disc')) {
+			var old_elem = $('input#quick_punch_password');
+			var new_elem = old_elem.clone(true); // clone all, including bound events
+			new_elem.attr('type', 'password');
+			// Replace the element rather than simply changing the original, as IE does not support input type change well.
+			old_elem.replaceWith(new_elem);
+		}
+	},
+
 	getLocale: function() {
 		var result = this.authentication_api.getLocale( $( 'select[name="language"]' ).val(), {
 			onResult: function( result ) {
@@ -182,7 +199,6 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 	},
 
 	goToView: function() {
-		// TAlertManager.closeBrowserBanner();
 		this.doing_login = false;
 		// TopMenuManager.ribbon_view_controller = null;
 		// TopMenuManager.ribbon_menus = null;

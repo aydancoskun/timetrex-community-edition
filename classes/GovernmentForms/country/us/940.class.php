@@ -50,7 +50,8 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 
 	public $futa_tax_rate = 0.054; //Line9
 
-	public $credit_reduction_states = array('CA', 'VI'); //Last Updated: Tax Year 2017
+	public $credit_reduction_states = array( 'VI' ); //Last Updated: Tax Year 2018
+	//public $credit_reduction_states = array('CA', 'VI'); //Last Updated: Tax Year 2017
 
 	public $line_16_cutoff_amount = 500; //Line16
 

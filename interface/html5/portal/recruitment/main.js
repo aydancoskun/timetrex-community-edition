@@ -79,7 +79,6 @@ require.config( {
 		'BaseWizardController': '../../views/wizard/BaseWizardController',
 		'UserGenericStatusWindowController': '../../views/wizard/user_generic_data_status/UserGenericStatusWindowController',
 		'ReportBaseViewController': '../../views/reports/ReportBaseViewController',
-		'sonic': '../../framework/sonic',
 		'qtip': '../../framework/widgets/jquery.qtip/jquery.qtip.min',
 		'rightclickmenu': '../../framework/rightclickmenu/rightclickmenu',
 		//'jquery.ui.position': '../../framework/rightclickmenu/jquery.ui.position',
@@ -560,7 +559,6 @@ require( [
 	'TComboBox',
 	'ProgressBarManager',
 	'TAlertManager',
-	'sonic',
 	'ServiceCaller',
 	'ttpromise',
 
@@ -572,8 +570,9 @@ require( [
 	Global.addCss("views/wizard/Wizard.css");
 	Global.addCss( "image_area_select/imgareaselect-default.css" );
 
-	//Hide elements that show hidden link for search friendly
-	hideElements();
+	Global.topContainer().css( 'display', 'none' );
+	Global.bottomContainer().css( 'display', 'none' );
+	
 	//Don't not show loading bar if refresh
 	if (Global.isSet(LocalCacheData.getPortalLoginUser())) {
 		$(".loading-view").hide();
@@ -603,14 +602,6 @@ require( [
 				$(".progress-bar-div").hide();
 				clearInterval(loading_bar_time);
 			}, 50);
-		}
-	}
-
-	function hideElements() {
-		var elements = document.getElementsByClassName('need-hidden-element');
-
-		for (var i = 0; i < elements.length; i++) {
-			elements[i].style.display = 'none';
 		}
 	}
 
@@ -747,11 +738,8 @@ require( [
 		}
 
 		function initApps() {
-			if ( ie <= 8 ) {
-				TAlertManager.showBrowserTopBanner();
-				return;
-			}
 			loadViewRequiredJS();
+
 			//Optimization: Only change locale if its *not* en_US or enable_default_language_translation = TRUE
 			if ( loginData.locale !== 'en_US' || loginData.enable_default_language_translation == true ) {
 				Global.loadLanguage( loginData.locale );

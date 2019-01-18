@@ -414,7 +414,7 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 		$prev_bracket = 0;
 		$i = 0;
 		foreach ( $input_arr as $bracket => $value ) {
-			Debug::text( 'Bracket: ' . $bracket . ' Value: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::text( 'Bracket: ' . $bracket . ' Value: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );
 
 			if ( $income >= $prev_bracket AND $income < $bracket ) {
 				Debug::text( 'Found Bracket: ' . $bracket . ' Returning: ' . $value, __FILE__, __LINE__, __METHOD__, 10 );

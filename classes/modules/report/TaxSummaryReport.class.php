@@ -239,8 +239,9 @@ class TaxSummaryReport extends Report {
 										'-2220-pay_period_tax_withheld_weeks' => TTi18n::gettext('Tax Withheld Weeks'),
 										'-2230-pay_period_weeks' => TTi18n::gettext('Pay Period Weeks'),
 
-										'-3010-company_deduction_rate' => TTi18n::gettext('Tax/Deduction Rate'),
+										'-2300-total_user' => TTi18n::gettext('Total Employees'), //Group counter...
 
+										'-3010-company_deduction_rate' => TTi18n::gettext('Tax/Deduction Rate'),
 							);
 
 				$retval = array_merge( $retval, $this->getOptions('pay_stub_account_amount_columns') );
@@ -298,7 +299,7 @@ class TaxSummaryReport extends Report {
 				$columns = Misc::trimSortPrefix( array_merge($this->getOptions('dynamic_columns'), (array)$this->getOptions('report_custom_column')) );
 				if ( is_array($columns) ) {
 					foreach($columns as $column => $name ) {
-						if ( $column == 'subject_units' OR strpos($column, '_weeks') !== FALSE OR substr( $column, 0, 2 ) == 'PU' ) {
+						if ( $column == 'subject_units' OR strpos($column, '_weeks') !== FALSE OR substr( $column, 0, 2 ) == 'PU' OR strpos($column, 'total_user') !== FALSE ) {
 							$retval[$column] = 'numeric';
 						} elseif ( strpos($column, '_wage') !== FALSE OR strpos($column, '_hourly_rate') !== FALSE
 							OR substr( $column, 0, 2 ) == 'PA' OR substr( $column, 0, 2 ) == 'PY' OR substr( $column, 0, 2 ) == 'PR'
@@ -308,7 +309,7 @@ class TaxSummaryReport extends Report {
 						} elseif ( strpos($column, '_time') OR strpos($column, '_policy') ) {
 							$retval[$column] = 'time_unit';
 						} elseif ( $column == 'company_deduction_rate' ) {
-							$retval[$column] = 'percent';
+							$retval[ $column ] = 'percent';
 						}
 					}
 				}
@@ -596,11 +597,9 @@ class TaxSummaryReport extends Report {
 
 			$i = 0;
 			foreach( $cdlf as $cd_obj ) {
-				Debug::Text('  Company Deduction: '. $cd_obj->getName(), __FILE__, __LINE__, __METHOD__, 10);
-
 				//Check to see if its a Tax/Deduction that can be combined.
 				//Just State, District/Local taxes can't be combined, due to employees working in multiple jurisdictions and may or may not be taxable. So they could be assigned to multiple Tax/Deductions of the same State.
-				if ( in_array( $cd_obj->getCalculation(), array(200, 300) ) ) {
+				if ( strtoupper( $cd_obj->getCountry() ) == 'US' AND in_array( $cd_obj->getCalculation(), array(200, 300) ) ) {
 					$can_be_combined = FALSE;
 				} else {
 					$can_be_combined = TRUE;
@@ -611,6 +610,8 @@ class TaxSummaryReport extends Report {
 				} else {
 					$tmp_payroll_remittance_agency_id = $cd_obj->getPayrollRemittanceAgency();
 				}
+
+				Debug::Text('  Company Deduction: '. $cd_obj->getName() .' Can Be Combined: '. (int)$can_be_combined .' Split: Agency: '. (int)$enable_split_by_payroll_remittance_agency .' Deduction: '. (int)$enable_split_by_company_deduction, __FILE__, __LINE__, __METHOD__, 10);
 
 				if ( $can_be_combined == TRUE AND $enable_split_by_company_deduction == FALSE ) {
 					$tmp_company_deduction_id = TTUUID::getZeroID();
@@ -814,6 +815,10 @@ class TaxSummaryReport extends Report {
 			$company_deduction_filter_data['payroll_remittance_agency_id'] = $filter_data['payroll_remittance_agency_id'];
 		}
 
+		if ( isset( $filter_data['legal_entity_id'] ) ) {
+			$company_deduction_filter_data['legal_entity_id'] = $filter_data['legal_entity_id'];
+		}
+
 		$filter_data['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view', $this->getUserObject()->getID(), $this->getUserObject()->getCompany() );
 
 		$ulf = TTnew( 'UserListFactory' );
@@ -903,6 +908,7 @@ class TaxSummaryReport extends Report {
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
 			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'province' => TRUE, 'hire_date' => TRUE, 'termination_date' => TRUE , 'title_id' => TRUE ) ) );
+			$this->tmp_data['user'][$u_obj->getId()]['total_user'] = 1;
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
@@ -996,6 +1002,42 @@ class TaxSummaryReport extends Report {
 		//Debug::Arr($this->data, 'preProcess Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		return TRUE;
+	}
+
+	/**
+	 * Formats report data for exporting to TimeTrex payment service.
+	 * @return array
+	 */
+	function getPaymentServicesData() {
+		//Make sure we have the columns we need.
+		$report_data['config'] = $this->getConfig();
+		$report_data['config']['columns'] = array( 'payroll_remittance_agency_name', 'transaction-date_stamp', 'subject_wages', 'taxable_wages', 'tax_withheld', 'total_user' );
+		$report_data['config']['group'] = array( 'payroll_remittance_agency_name', 'transaction-date_stamp' );
+		$this->setConfig( (array)$report_data['config'] );
+
+		$output_data = $this->getOutput( 'raw' );
+		Debug::Arr( $output_data, 'Raw Report data!', __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $this->hasData() ) {
+			//Get last Grand Total row.
+			$last_row = end( $output_data );
+
+			if ( isset( $last_row['_total'] ) ) {
+				$retarr = array(
+						'object'          => 'TaxSummaryReport',
+						'total_employees' => ( isset( $last_row['total_user'] ) ) ? (int)$last_row['total_user'] : NULL,
+						'subject_wages'   => ( isset( $last_row['subject_wages'] ) ) ? $last_row['subject_wages'] : NULL,
+						'taxable_wages'   => ( isset( $last_row['taxable_wages'] ) ) ? $last_row['taxable_wages'] : NULL,
+						'amount_withheld' => ( isset( $last_row['tax_withheld'] ) ) ? $last_row['tax_withheld'] : NULL,
+						'amount_due'      => ( isset( $last_row['tax_withheld'] ) ) ? $last_row['tax_withheld'] : NULL,
+				);
+
+				return $retarr;
+			}
+		}
+
+		Debug::Text('No report data!', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
 	}
 }
 ?>

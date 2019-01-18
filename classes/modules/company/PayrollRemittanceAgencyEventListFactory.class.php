@@ -130,7 +130,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 					select	a.*
 					from	'. $this->getTable() .' as a
 						LEFT JOIN	'. $praf->getTable() .' as b ON ( a.payroll_remittance_agency_id = b.id )
-						LEFT JOIN	'. $lef->getTable() .' as c ON ( b.legal_entity_id = b.id )
+						LEFT JOIN	'. $lef->getTable() .' as c ON ( b.legal_entity_id = c.id )
 					where	b.legal_entity_id = ?
 						AND c.company_id = ?
 						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
@@ -139,6 +139,55 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 
 
 		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param int $status_id
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|PayrollRemittanceAgencyEventListFactory
+	 */
+	function getByCompanyIdAndStatus( $company_id, $status_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '') {
+			return FALSE;
+		}
+
+		if ( $status_id == '') {
+			return FALSE;
+		}
+
+		if ( $order == NULL ) {
+			$order = array( 'b.legal_entity_id' => 'asc', 'a.id' => 'asc');
+			$strict = FALSE;
+		} else {
+			$strict = TRUE;
+		}
+
+		$lef = new LegalEntityFactory();
+		$praf = new PayrollRemittanceAgencyFactory();
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID($company_id),
+				'status_id' => (int)$status_id,
+		);
+
+		$query = '
+					select	a.*
+					from	'. $this->getTable() .' as a
+						LEFT JOIN	'. $praf->getTable() .' as b ON ( a.payroll_remittance_agency_id = b.id )
+						LEFT JOIN	'. $lef->getTable() .' as c ON ( b.legal_entity_id = c.id )
+					where
+						c.company_id = ?
+						AND a.status_id = ?
+						AND ( a.deleted = 0 AND b.deleted = 0 AND c.deleted = 0 )';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order, $strict );
+
+		$this->ExecuteSQL( $query, $ph );
+		Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -167,6 +216,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$praf = new PayrollRemittanceAgencyFactory();
 		$lef = new LegalEntityFactory();
 
+		//Only consider active/enabled legal entities, remittance agencies, and events.
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
@@ -174,7 +224,9 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 						LEFT JOIN '. $lef->getTable() .' as lef ON ( praf.legal_entity_id = lef.id AND lef.deleted = 0 )
 					where	
 						lef.company_id = ?
-						AND a.status_id = 10
+						AND lef.status_id = 10
+						AND praf.status_id = 10
+						AND a.status_id in ( 10, 15 )
 						AND ( a.next_reminder_date IS NOT NULL AND a.next_reminder_date <= ? )
 						AND ( a.last_reminder_date IS NULL OR a.last_reminder_date < a.next_reminder_date )
 						AND ( a.deleted = 0 AND praf.deleted = 0 AND lef.deleted = 0 )';
@@ -183,7 +235,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 
 
 		$this->ExecuteSQL( $query, $ph );
-		//Debug::Arr($ph, 'SQL: '.$query, __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
 		return $this;
 	}
@@ -208,6 +260,7 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 		$praf = new PayrollRemittanceAgencyFactory();
 		$lef = new LegalEntityFactory();
 
+		//Only consider active/enabled legal entities, remittance agencies, and events.
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
@@ -215,7 +268,9 @@ class PayrollRemittanceAgencyEventListFactory extends PayrollRemittanceAgencyEve
 						LEFT JOIN '. $lef->getTable() .' as lef ON ( praf.legal_entity_id = lef.id AND lef.deleted = 0 )
 					where	
 						lef.company_id = ?
-						AND a.status_id = 10
+						AND lef.status_id = 10
+						AND praf.status_id = 10
+						AND a.status_id in ( 10, 15 )
 						AND a.frequency_id in ('. $this->getListSQL( $frequency_id, $ph, 'int' ) .')
 						AND a.due_date IS NULL
 						AND ( a.deleted = 0 )';

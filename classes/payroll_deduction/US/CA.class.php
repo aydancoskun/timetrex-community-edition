@@ -47,6 +47,56 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 	*/
 
 	var $state_income_tax_rate_options = array(
+			20190101 => array(
+					10 => array(
+							array('income' => 8544, 'rate' => 1.1, 'constant' => 0),
+							array('income' => 20255, 'rate' => 2.2, 'constant' => 93.98),
+							array('income' => 31969, 'rate' => 4.4, 'constant' => 351.62),
+							array('income' => 44377, 'rate' => 6.6, 'constant' => 867.04),
+							array('income' => 56085, 'rate' => 8.8, 'constant' => 1685.97),
+							array('income' => 286492, 'rate' => 10.23, 'constant' => 2716.27),
+							array('income' => 343788, 'rate' => 11.33, 'constant' => 26286.91),
+							array('income' => 572980, 'rate' => 12.43, 'constant' => 32778.55),
+							array('income' => 1000000, 'rate' => 13.53, 'constant' => 61267.12),
+							array('income' => 1000000, 'rate' => 14.63, 'constant' => 119042.93),
+					),
+					20 => array(
+							array('income' => 8544, 'rate' => 1.1, 'constant' => 0),
+							array('income' => 20255, 'rate' => 2.2, 'constant' => 93.98),
+							array('income' => 31969, 'rate' => 4.4, 'constant' => 351.62),
+							array('income' => 44377, 'rate' => 6.6, 'constant' => 867.04),
+							array('income' => 56085, 'rate' => 8.8, 'constant' => 1685.97),
+							array('income' => 286492, 'rate' => 10.23, 'constant' => 2716.27),
+							array('income' => 343788, 'rate' => 11.33, 'constant' => 26286.91),
+							array('income' => 572980, 'rate' => 12.43, 'constant' => 32778.55),
+							array('income' => 1000000, 'rate' => 13.53, 'constant' => 61267.12),
+							array('income' => 1000000, 'rate' => 14.63, 'constant' => 119042.93),
+					),
+					30 => array(
+							array('income' => 17088, 'rate' => 1.1, 'constant' => 0),
+							array('income' => 40510, 'rate' => 2.2, 'constant' => 187.97),
+							array('income' => 63938, 'rate' => 4.4, 'constant' => 703.25),
+							array('income' => 88754, 'rate' => 6.6, 'constant' => 1734.08),
+							array('income' => 112170, 'rate' => 8.8, 'constant' => 3371.94),
+							array('income' => 572984, 'rate' => 10.23, 'constant' => 5432.55),
+							array('income' => 687576, 'rate' => 11.33, 'constant' => 52573.82),
+							array('income' => 1000000, 'rate' => 12.43, 'constant' => 65557.09),
+							array('income' => 1145961, 'rate' => 13.53, 'constant' => 104391.39),
+							array('income' => 1145961, 'rate' => 14.63, 'constant' => 124139.90),
+					),
+					40 => array( //These are different than 30 above.
+								 array('income' => 17099, 'rate' => 1.1, 'constant' => 0),
+								 array('income' => 40512, 'rate' => 2.2, 'constant' => 188.09),
+								 array('income' => 52224, 'rate' => 4.4, 'constant' => 703.18),
+								 array('income' => 64632, 'rate' => 6.6, 'constant' => 1218.51),
+								 array('income' => 76343, 'rate' => 8.8, 'constant' => 2037.44),
+								 array('income' => 389627, 'rate' => 10.23, 'constant' => 3068.01),
+								 array('income' => 467553, 'rate' => 11.33, 'constant' => 35116.96),
+								 array('income' => 779253, 'rate' => 12.43, 'constant' => 43945.98),
+								 array('income' => 1000000, 'rate' => 13.53, 'constant' => 82690.29),
+								 array('income' => 1000000, 'rate' => 14.63, 'constant' => 112557.36),
+					),
+			),
 			20180101 => array(
 					10 => array(
 							array('income' => 8223, 'rate' => 1.1, 'constant' => 0),
@@ -691,14 +741,39 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			20190101 => array( //01-Jan-19
+							   //Standard Deduction Table
+							   'standard_deduction' => array(
+								   //First entry is 0,1 allowance, second is for 2 or more.
+								   '10' => array(4401, 4401),
+								   '20' => array(4401, 4401),
+								   '30' => array(4401, 8802),
+								   '40' => array(8802, 8802),
+							   ),
+							   //Exemption Allowance Table
+							   'allowance'          => array(
+									   '10' => 129.80,
+									   '20' => 129.80,
+									   '30' => 129.80,
+									   '40' => 129.80,
+							   ),
+							   //Low Income Exemption Table
+							   'minimum_income'     => array(
+								   //First entry is 0,1 allowance, 2nd is 2 or more.
+								   '10' => array(14573, 14573),
+								   '20' => array(14573, 14573),
+								   '30' => array(14573, 29146),
+								   '40' => array(29146, 29146),
+							   ),
+			),
 			20180101 => array( //01-Jan-18
 							   //Standard Deduction Table
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(4236.00, 4236.00),
-								   '20' => array(4236.00, 4236.00),
-								   '30' => array(4236.00, 8472.00),
-								   '40' => array(8472.00, 8472.00),
+								   '10' => array(4236, 4236),
+								   '20' => array(4236, 4236),
+								   '30' => array(4236, 8472),
+								   '40' => array(8472, 8472),
 							   ),
 							   //Exemption Allowance Table
 							   'allowance'          => array(
@@ -710,20 +785,20 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 							   //Low Income Exemption Table
 							   'minimum_income'     => array(
 								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(14048.00, 14048.00),
-								   '20' => array(14048.00, 14048.00),
-								   '30' => array(14048.00, 28095.00),
-								   '40' => array(28095.00, 28095.00),
+								   '10' => array(14048, 14048),
+								   '20' => array(14048, 14048),
+								   '30' => array(14048, 28095),
+								   '40' => array(28095, 28095),
 							   ),
 			),
 			20170101 => array( //01-Jan-17
 							   //Standard Deduction Table
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(4129.00, 4129.00),
-								   '20' => array(4129.00, 4129.00),
-								   '30' => array(4129.00, 8258.00),
-								   '40' => array(8258.00, 8258.00),
+								   '10' => array(4129, 4129),
+								   '20' => array(4129, 4129),
+								   '30' => array(4129, 8258),
+								   '40' => array(8258, 8258),
 							   ),
 							   //Exemption Allowance Table
 							   'allowance'          => array(
@@ -735,20 +810,20 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 							   //Low Income Exemption Table
 							   'minimum_income'     => array(
 								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(13687.00, 13687.00),
-								   '20' => array(13687.00, 13687.00),
-								   '30' => array(13687.00, 27373.00),
-								   '40' => array(27373.00, 27373.00),
+								   '10' => array(13687, 13687),
+								   '20' => array(13687, 13687),
+								   '30' => array(13687, 27373),
+								   '40' => array(27373, 27373),
 							   ),
 			),
 			20160101 => array( //01-Jan-16
 							   //Standard Deduction Table
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(4044.00, 4044.00),
-								   '20' => array(4044.00, 4044.00),
-								   '30' => array(4044.00, 8088.00),
-								   '40' => array(8088.00, 8088.00),
+								   '10' => array(4044, 4044),
+								   '20' => array(4044, 4044),
+								   '30' => array(4044, 8088),
+								   '40' => array(8088, 8088),
 							   ),
 							   //Exemption Allowance Table
 							   'allowance'          => array(
@@ -760,20 +835,20 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 							   //Low Income Exemption Table
 							   'minimum_income'     => array(
 								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(13419.00, 13419.00),
-								   '20' => array(13419.00, 13419.00),
-								   '30' => array(13419.00, 26838.00),
-								   '40' => array(26838.00, 26838.00),
+								   '10' => array(13419, 13419),
+								   '20' => array(13419, 13419),
+								   '30' => array(13419, 26838),
+								   '40' => array(26838, 26838),
 							   ),
 			),
 			20150101 => array( //01-Jan-15
 							   //Standard Deduction Table
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3992.00, 3992.00),
-								   '20' => array(3992.00, 3992.00),
-								   '30' => array(3992.00, 7984.00),
-								   '40' => array(7984.00, 7984.00),
+								   '10' => array(3992, 3992),
+								   '20' => array(3992, 3992),
+								   '30' => array(3992, 7984),
+								   '40' => array(7984, 7984),
 							   ),
 							   //Exemption Allowance Table
 							   'allowance'          => array(
@@ -785,20 +860,20 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 							   //Low Income Exemption Table
 							   'minimum_income'     => array(
 								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(13267.00, 13267.00),
-								   '20' => array(13267.00, 13267.00),
-								   '30' => array(13267.00, 26533.00),
-								   '40' => array(26533.00, 26533.00),
+								   '10' => array(13267, 13267),
+								   '20' => array(13267, 13267),
+								   '30' => array(13267, 26533),
+								   '40' => array(26533, 26533),
 							   ),
 			),
 			20140101 => array( //01-Jan-14
 							   //Standard Deduction Table
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3906.00, 3906.00),
-								   '20' => array(3906.00, 3906.00),
-								   '30' => array(3906.00, 7812.00),
-								   '40' => array(7812.00, 7812.00),
+								   '10' => array(3906, 3906),
+								   '20' => array(3906, 3906),
+								   '30' => array(3906, 7812),
+								   '40' => array(7812, 7812),
 							   ),
 							   //Exemption Allowance Table
 							   'allowance'          => array(
@@ -810,19 +885,19 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 							   //Low Income Exemption Table
 							   'minimum_income'     => array(
 								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(12997.00, 12997.00),
-								   '20' => array(12997.00, 12997.00),
-								   '30' => array(12997.00, 25994.00),
-								   '40' => array(25994.00, 25994.00),
+								   '10' => array(12997, 12997),
+								   '20' => array(12997, 12997),
+								   '30' => array(12997, 25994),
+								   '40' => array(25994, 25994),
 							   ),
 			),
 			20130101 => array( //01-Jan-13
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3841.00, 3841.00),
-								   '20' => array(3841.00, 3841.00),
-								   '30' => array(3841.00, 7682.00),
-								   '40' => array(7682.00, 7682.00),
+								   '10' => array(3841, 3841),
+								   '20' => array(3841, 3841),
+								   '30' => array(3841, 7682),
+								   '40' => array(7682, 7682),
 							   ),
 							   'allowance'          => array(
 									   '10' => 114.40,
@@ -832,19 +907,19 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 							   ),
 							   'minimum_income'     => array(
 								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(12769.00, 12769.00),
-								   '20' => array(12769.00, 12769.00),
-								   '30' => array(12769.00, 25537.00),
-								   '40' => array(25537.00, 25537.00),
+								   '10' => array(12769, 12769),
+								   '20' => array(12769, 12769),
+								   '30' => array(12769, 25537),
+								   '40' => array(25537, 25537),
 							   ),
 			),
 			20120101 => array( //01-Jan-12
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3769.00, 3769.00),
-								   '20' => array(3769.00, 3769.00),
-								   '30' => array(3769.00, 7538.00),
-								   '40' => array(7538.00, 7538.00),
+								   '10' => array(3769, 3769),
+								   '20' => array(3769, 3769),
+								   '30' => array(3769, 7538),
+								   '40' => array(7538, 7538),
 							   ),
 							   'allowance'          => array(
 									   '10' => 112.20,
@@ -854,19 +929,19 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 							   ),
 							   'minimum_income'     => array(
 								   //First entry is 0,1 allowance, 2nd is 2 or more.
-								   '10' => array(12527.00, 12527.00),
-								   '20' => array(12527.00, 12527.00),
-								   '30' => array(12527.00, 25054.00),
-								   '40' => array(25054.00, 25054.00),
+								   '10' => array(12527, 12527),
+								   '20' => array(12527, 12527),
+								   '30' => array(12527, 25054),
+								   '40' => array(25054, 25054),
 							   ),
 			),
 			20110101 => array( //01-Jan-11
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3670.00, 3670.00),
-								   '20' => array(3670.00, 3670.00),
-								   '30' => array(3670.00, 7340.00),
-								   '40' => array(7340.00, 7340.00),
+								   '10' => array(3670, 3670),
+								   '20' => array(3670, 3670),
+								   '30' => array(3670, 7340),
+								   '40' => array(7340, 7340),
 							   ),
 							   'allowance'          => array(
 									   '10' => 108.90,
@@ -878,10 +953,10 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 			20100101 => array( //01-Jan-10
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3637.00, 3637.00),
-								   '20' => array(3637.00, 3637.00),
-								   '30' => array(3637.00, 7274.00),
-								   '40' => array(7274.00, 7274.00),
+								   '10' => array(3637, 3637),
+								   '20' => array(3637, 3637),
+								   '30' => array(3637, 7274),
+								   '40' => array(7274, 7274),
 							   ),
 							   'allowance'          => array(
 									   '10' => 107.80,
@@ -893,10 +968,10 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 			20091101 => array( //01-Nov-09
 							   'standard_deduction' => array(
 								   //First entry is 0,1 allowance, second is for 2 or more.
-								   '10' => array(3692.00, 3692.00),
-								   '20' => array(3692.00, 3692.00),
-								   '30' => array(3692.00, 7384.00),
-								   '40' => array(7384.00, 7384.00),
+								   '10' => array(3692, 3692),
+								   '20' => array(3692, 3692),
+								   '30' => array(3692, 7384),
+								   '40' => array(7384, 7384),
 							   ),
 							   'allowance'          => array(
 									   '10' => 108.90,
@@ -908,61 +983,61 @@ class PayrollDeduction_US_CA extends PayrollDeduction_US {
 			20090101 => array(
 					'standard_deduction' => array(
 						//First entry is 0,1 allowance, second is for 2 or more.
-						'10' => array(3692.00, 3692.00),
-						'20' => array(3692.00, 3692.00),
-						'30' => array(3692.00, 7384.00),
-						'40' => array(7384.00, 7384.00),
+						'10' => array(3692, 3692),
+						'20' => array(3692, 3692),
+						'30' => array(3692, 7384),
+						'40' => array(7384, 7384),
 					),
 					'allowance'          => array(
-							'10' => 99.00,
-							'20' => 99.00,
-							'30' => 99.00,
-							'40' => 99.00,
+							'10' => 99,
+							'20' => 99,
+							'30' => 99,
+							'40' => 99,
 					),
 			),
 			20080101 => array(
 					'standard_deduction' => array(
 						//First entry is 0,1 allowance, second is for 2 or more.
-						'10' => array(3516.00, 3516.00),
-						'20' => array(3516.00, 3516.00),
-						'30' => array(3516.00, 7032.00),
-						'40' => array(7032.00, 7032.00),
+						'10' => array(3516, 3516),
+						'20' => array(3516, 3516),
+						'30' => array(3516, 7032),
+						'40' => array(7032, 7032),
 					),
 					'allowance'          => array(
-							'10' => 94.00,
-							'20' => 94.00,
-							'30' => 94.00,
-							'40' => 94.00,
+							'10' => 94,
+							'20' => 94,
+							'30' => 94,
+							'40' => 94,
 					),
 			),
 			20070101 => array(
 					'standard_deduction' => array(
 						//First entry is 0,1 allowance, second is for 2 or more.
-						'10' => array(3410.00, 3410.00),
-						'20' => array(3410.00, 3410.00),
-						'30' => array(3410.00, 6820.00),
-						'40' => array(6820.00, 6820.00),
+						'10' => array(3410, 3410),
+						'20' => array(3410, 3410),
+						'30' => array(3410, 6820),
+						'40' => array(6820, 6820),
 					),
 					'allowance'          => array(
-							'10' => 91.00,
-							'20' => 91.00,
-							'30' => 91.00,
-							'40' => 91.00,
+							'10' => 91,
+							'20' => 91,
+							'30' => 91,
+							'40' => 91,
 					),
 			),
 			20060101 => array(
 					'standard_deduction' => array(
 						//First entry is 0,1 allowance, second is for 2 or more.
-						'10' => array(3254.00, 3254.00),
-						'20' => array(3254.00, 3254.00),
-						'30' => array(3254.00, 6508.00),
-						'40' => array(6508.00, 6508.00),
+						'10' => array(3254, 3254),
+						'20' => array(3254, 3254),
+						'30' => array(3254, 6508),
+						'40' => array(6508, 6508),
 					),
 					'allowance'          => array(
-							'10' => 87.00,
-							'20' => 87.00,
-							'30' => 87.00,
-							'40' => 87.00,
+							'10' => 87,
+							'20' => 87,
+							'30' => 87,
+							'40' => 87,
 					),
 			),
 	);

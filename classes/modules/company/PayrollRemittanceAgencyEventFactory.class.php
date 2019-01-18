@@ -57,7 +57,8 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		switch ( $name ) {
 			case 'status':
 				$retval = array(
-						10 => TTi18n::gettext('Enabled'),
+						10 => TTi18n::gettext('Enabled - Self Service'),
+						15 => TTi18n::gettext('Enabled - Full Service'),
 						20 => TTi18n::gettext('Disabled'),
 				);
 				break;
@@ -326,7 +327,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 * @return bool|mixed
 	 */
 	function getFrequencyName() {
-		$value = $this->getGenericDataValue( 'frequency_id' );
+		$value = $this->getFrequency();
 		if ( $value !== FALSE ) {
 			$frequencies = $this->_getFactoryOptions( 'frequency' );
 			foreach ( $frequencies as $n => $f ) {
@@ -859,12 +860,6 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				}
 			}
 
-
-
-			//todo: chgeck that these frequencies make sense and are complete.
-
-
-
 			if ( in_array( $this->getFrequency(), array(2000, 3000, 4100) ) ) { //20=Annual, 30=Quarterly, 40=Monthly
 				// Day of month
 				if ( $this->getPrimaryDayOfMonth() !== FALSE ) {
@@ -938,7 +933,44 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 			}
 		}
 
+		if ( $this->getDeleted() != TRUE ) {
+			if ( $this->getStatus() == 15 ) { //15=Enabled - Full Service
+				//Make sure autopay OR autofile is enabled first.
+				$event_data = $this->getEventData();
+				if ( is_array($event_data) AND isset($event_data['flags']) AND ( $event_data['flags']['auto_file'] == FALSE AND $event_data['flags']['auto_pay'] == FALSE ) ) {
+					$this->Validator->isTrue(		'status_id',
+													 FALSE,
+													 TTi18n::gettext('Agency or Event Type is not eligible for Full Service yet, try again later'));
+				}
 
+				//Make sure the RemittanceAgency is linked to a source account, which is required to at least get a PaymentServices API username/password
+				if ( is_object( $this->getPayrollRemittanceAgencyObject() )
+						AND !is_object( $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject() ) ) {
+					$this->Validator->isTrue(		'status_id',
+													 FALSE,
+													 TTi18n::gettext('Remittance Agency must have Source Account specified'));
+				}
+
+				//Make sure the source account is of TimeTrex Payment Services format.
+				if ( is_object( $this->getPayrollRemittanceAgencyObject() )
+						AND is_object( $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject() )
+						AND $this->getPayrollRemittanceAgencyObject()->getRemittanceSourceAccountObject()->getDataFormat() != 5 ) { //5=TimeTrex Payment Services
+					$this->Validator->isTrue(		'status_id',
+													 FALSE,
+													 TTi18n::gettext('Remittance Agency Source Account Format is incorrect'));
+				}
+
+
+				if ( $this->getDeleted() == FALSE AND is_object( $this->getPayrollRemittanceAgencyObject() ) AND is_object( $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject() )  ) {
+					$this->Validator->isTrue( 'status_id',
+											  $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject()->checkPaymentServicesCredentials(),
+											  TTi18n::gettext( 'Payment Services User Name or API Key is incorrect, or service not activated' ) );
+				}
+
+				//Confirm the Agency/Event is valid, then setup authorization record if its not already.
+
+			}
+		}
 
 		return TRUE;
 	}
@@ -973,6 +1005,28 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
+
+		if ( $this->getStatus() == 15 ) { //15=Full Service
+			//Send data to TimeTrex Payment Services.
+			$le_obj = $this->getPayrollRemittanceAgencyObject()->getLegalEntityObject();
+			if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+				require_once( '../../classes/modules/other/TimeTrexPaymentServices.class.php' );
+				try {
+					$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+					$retval = $tt_ps_api->setAgencyAuthorization( $tt_ps_api->convertRemittanceAgencyEventObjectToAgencyAuthorizationArray( $this ) );
+					if ( $retval === FALSE ) {
+						Debug::Text( 'ERROR! Unable to upload remittance agency event data... (a)', __FILE__, __LINE__, __METHOD__, 10 );
+
+						return FALSE;
+					}
+				} catch ( Exception $e ) {
+					Debug::Text( 'ERROR! Unable to upload remittance agency event data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			} else {
+				Debug::Text( 'ERROR! Payment Services not enabled in legal entity!', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		}
+
 
 		return TRUE;
 	}
@@ -1991,7 +2045,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		return $url;
 	}
 
-	function getReport( $report_id, $data = NULL, $user_obj, $permission_obj, $api_obj ) {
+	function getReport( $report_id, $data = NULL, $user_obj, $permission_obj ) {
 		$report_obj_name = NULL;
 		$report_data = array();
 		$report_data_override = array(); //Overrides report data.
@@ -2043,8 +2097,9 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 									$template_name = 'by_pay_period_by_employee';
 									$report_obj_name = 'RemittanceSummaryReport';
 									break;
-								default:
-									// $this->>report_obj is null
+								case 'raw':
+									$template_name = 'by_pay_period';
+									$report_obj_name = 'RemittanceSummaryReport';
 									break;
 							}
 							break;
@@ -2218,7 +2273,7 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 		}
 
 		if ( isset( $report_obj_name ) AND $report_obj_name != ''
-				AND is_object( $user_obj ) AND is_object( $permission_obj ) AND is_object( $api_obj ) ) {
+				AND is_object( $user_obj ) AND is_object( $permission_obj ) ) {
 			$report_obj = TTNew( $report_obj_name );
 			$report_obj->setUserObject( $user_obj );
 			$report_obj->setPermissionObject( $permission_obj );
@@ -2269,42 +2324,12 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 		$validation_obj = $report_obj->validateConfig( $report_id );
 		if ( $validation_obj->isValid() == TRUE ) {
-			//return Misc::APIFileDownload( 'report.pdf', 'application/pdf', $this->getReportObject()->getOutput( $format ) );
-			$output_arr = $report_obj->getOutput( $report_id );
-
-			if ( isset( $output_arr['file_name'] ) AND isset( $output_arr['mime_type'] ) AND isset( $output_arr['data'] ) ) {
-				//If using the SOAP API, return data base64 encoded so it can be decoded on the client side.
-				if ( defined( 'TIMETREX_SOAP_API' ) AND TIMETREX_SOAP_API == TRUE ) {
-					$output_arr['data'] = base64_encode( $output_arr['data'] );
-
-					return $api_obj->returnHandler( $output_arr );
-				} else {
-					if ( $output_arr['mime_type'] === 'text/html' ) {
-						return $api_obj->returnHandler( $output_arr['data'] );
-					} else {
-						Misc::APIFileDownload( $output_arr['file_name'], $output_arr['mime_type'], $output_arr['data'] );
-
-						return NULL; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
-					}
-				}
-			} elseif ( isset( $output_arr['api_retval'] ) ) { //Pass through validation errors.
-				Debug::Text( 'Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__, 10 );
-
-				return $api_obj->returnHandler( $output_arr['api_retval'], $output_arr['api_details']['code'], $output_arr['api_details']['description'] );
-				//return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Please try again later...') );
-			} elseif ( $output_arr !== FALSE ) {
-				//Likely RAW data, return untouched.
-				return $api_obj->returnHandler( $output_arr );
-			} else {
-				//getOutput() returned FALSE, some error occurred. Likely load too high though.
-				//return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('Error generating report...') );
-				return $api_obj->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'ERROR: Please try again later or narrow your search criteria to decrease the size of your report' ) . '...' );
-			}
+			return $report_obj;
 		} else {
-			return $api_obj->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'INVALID DATA' ), array(0 => $validation_obj->getErrorsArray()), array('total_records' => 1, 'valid_records' => 0) );
+			Debug::Text( '  Report config validation failed!', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
-		return $api_obj->returnHandler( FALSE );
+		return FALSE;
 	}
 }
 ?>

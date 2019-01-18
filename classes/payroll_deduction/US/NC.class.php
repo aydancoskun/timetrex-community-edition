@@ -56,6 +56,19 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 
 	*/
 	var $state_options = array(
+			20190101 => array(
+					'standard_deduction' => array(
+							'10' => 10000.00,
+							'20' => 10000.00,
+							'30' => 10000.00,
+							'40' => 15000.00,
+					),
+					'allowance'          => array(
+							1 => 2500,
+					),
+					'rate'               => 5.35, //Flat 5.35%
+			),
+			// 2018 - No Change
 			20170101 => array(
 					'standard_deduction' => array(
 							'10' => 8750.00,
@@ -140,6 +153,7 @@ class PayrollDeduction_US_NC extends PayrollDeduction_US {
 	);
 
 	var $state_income_tax_rate_options = array(
+			//Switched to flat rate percent using the above $state_options array 01-Jan-2014
 			20090101 => array(
 					10 => array(
 							array('income' => 12750, 'rate' => 6, 'constant' => 0),

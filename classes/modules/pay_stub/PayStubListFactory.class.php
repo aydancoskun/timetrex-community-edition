@@ -555,7 +555,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubListFactory
 	 */
-	function getByUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date, $where = NULL, $order = NULL) {
+	function getByUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date, $limit = NULL, $page = NULL, $where = NULL, $order = NULL ) {
 		if ( $user_id == '' ) {
 			return FALSE;
 		}
@@ -589,7 +589,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict_order );
 
-		$this->ExecuteSQL( $query, $ph );
+		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
 	}

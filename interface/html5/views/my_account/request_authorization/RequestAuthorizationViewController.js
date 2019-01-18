@@ -247,7 +247,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			group: objects_group,
 			icon: Icons.authorization_request,
 			selected: true,
-			permission_result: true,
+			permission_result: PermissionManager.checkTopLevelPermission( 'RequestAuthorization' ),
 			permission: null
 		} );
 
@@ -256,7 +256,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			id: ContextMenuIconName.authorization_timesheet,
 			group: objects_group,
 			icon: Icons.authorization_timesheet,
-			permission_result: true,
+			permission_result: PermissionManager.checkTopLevelPermission( 'TimeSheetAuthorization' ),
 			permission: null
 		} );
 
@@ -266,7 +266,7 @@ RequestAuthorizationViewController = RequestViewCommonController.extend( {
 			group: objects_group,
 			icon: Icons.authorization_expense,
 			selected: false,
-			permission_result: true,
+			permission_result: PermissionManager.checkTopLevelPermission( 'ExpenseAuthorization' ),
 			permission: null
 		} );
 

@@ -44,6 +44,7 @@ class LegalEntityFactory extends Factory {
 
 	protected $address_validator_regex = '/^[a-zA-Z0-9-,_\/\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
 	protected $city_validator_regex = '/^[a-zA-Z0-9-,_\.\'#\ |\x{0080}-\x{FFFF}]{1,250}$/iu';
+	protected $short_name_validator_regex = '/^[a-zA-Z0-9-]{1,15}$/iu'; //Short name must only allow characters available for EFT/ACH banking systems.
 
 	protected $company_obj = NULL;
 
@@ -62,6 +63,13 @@ class LegalEntityFactory extends Factory {
 					20 => TTi18n::gettext('CLOSED')
 				);
 				break;
+			case 'payment_services_status':
+				$retval = array(
+						10 => TTi18n::gettext('Enabled'),
+						20 => TTi18n::gettext('Disabled')
+				);
+				break;
+
 			case 'type':
 				$retval = array(
 					0  => TTi18n::getText('- Please Choose -'),
@@ -102,6 +110,7 @@ class LegalEntityFactory extends Factory {
 				$retval = array(
 					'-1010-legal_name' => TTi18n::gettext('Legal Name'),
 					'-1020-trade_name' => TTi18n::gettext('Trade Name'),
+					'-1021-short_name' => TTi18n::gettext('Short Name'),
 					'-1022-type' => TTi18n::gettext('Type'),
 					'-1025-classification_code_name' => TTi18n::gettext('Classification Code'),
 					'-1030-status' => TTi18n::gettext('Status'),
@@ -170,6 +179,7 @@ class LegalEntityFactory extends Factory {
 			'classification_code_name' => FALSE,
 			'legal_name' => 'LegalName',
 			'trade_name' => 'TradeName',
+			'short_name' => 'ShortName',
 			'address1' => 'Address1',
 			'address2' => 'Address2',
 			'city' => 'City',
@@ -180,8 +190,12 @@ class LegalEntityFactory extends Factory {
 			'fax_phone' => 'FaxPhone',
 			'start_date' => 'StartDate',
 			'end_date' => 'EndDate',
+
+			'payment_services_status_id' => 'PaymentServicesStatus',
+			'payment_services_user_name' => 'PaymentServicesUserName',
+			'payment_services_api_key' => 'PaymentServicesAPIKey',
+
 			'in_use' => FALSE,
-//			'tag' => 'Tag',
 			'deleted' => 'Deleted',
 		);
 		return $variable_function_map;
@@ -330,6 +344,21 @@ class LegalEntityFactory extends Factory {
 		return $this->setGenericDataValue( 'trade_name', $value );
 	}
 
+	/**
+	 * @return bool|mixed
+	 */
+	function getShortName() {
+		return $this->getGenericDataValue( 'short_name' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setShortName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'short_name', $value );
+	}
 
 	/**
 	 * @return bool|mixed
@@ -492,6 +521,92 @@ class LegalEntityFactory extends Factory {
 		$value = trim($value);
 		return $this->setGenericDataValue( 'end_date', $value );
 	}
+
+	/**
+	 * @return int
+	 */
+	function getPaymentServicesStatus() {
+		return $this->getGenericDataValue( 'payment_services_status_id' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPaymentServicesStatus( $value) {
+		$value = (int)trim($value);
+		return $this->setGenericDataValue( 'payment_services_status_id', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getPaymentServicesUserName() {
+		return $this->getGenericDataValue( 'payment_services_user_name' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPaymentServicesUserName( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'payment_services_user_name', $value );
+	}
+
+	/**
+	 * Get a secure version of the PaymentServicesAPIKey
+	 * @return bool|string
+	 */
+	function getSecurePaymentServicesAPIKey( $value = NULL ) {
+		if ( $value == NULL ) {
+			$value = $this->getPaymentServicesAPIKey();
+		}
+
+		return Misc::censorString( $value, 'X', 1, 6, 1, 6 );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getPaymentServicesAPIKey() {
+		$value = $this->getGenericDataValue( 'payment_services_api_key' );
+
+		if ( $value !== FALSE ) {
+			$retval = Misc::decrypt( $value );
+			if ( is_string( $retval ) ) {
+				return $retval;
+			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setPaymentServicesAPIKey( $value) {
+		//If X's are in the key, skip setting it
+		// Also if a colon is in the key, its likely an encrypted string, also skip.
+		//This allows them to change other data without seeing the account number.
+		if ( stripos( $value, 'X') !== FALSE OR stripos( $value, ':') !== FALSE ) {
+			return FALSE;
+		}
+
+		$value = trim($value);
+		if ( $value != '' ) { //Make sure we can clear out the value if needed. Misc::encypt() will return FALSE on a blank value.
+			$encrypted_value = Misc::encrypt( $value );
+			if ( $encrypted_value === FALSE ) {
+				return FALSE;
+			}
+		} else {
+			$encrypted_value = $value;
+		}
+
+		return $this->setGenericDataValue( 'payment_services_api_key', $encrypted_value );
+	}
+
 	/**
 	 * @return bool
 	 */
@@ -578,6 +693,7 @@ class LegalEntityFactory extends Factory {
 												  $clf->getByID($this->getCompany()),
 												  TTi18n::gettext('Company is invalid')
 		);
+
 		// Status
 		if ( $this->getStatus() !== FALSE ) {
 			$this->Validator->inArrayKey( 'status_id',
@@ -586,6 +702,7 @@ class LegalEntityFactory extends Factory {
 										  $this->getOptions( 'status' )
 			);
 		}
+
 		// Type
 		if ( $this->getType() !== FALSE ) {
 			$this->Validator->inArrayKey( 'type_id',
@@ -601,6 +718,7 @@ class LegalEntityFactory extends Factory {
 										 TTi18n::gettext('Incorrect Classification Code'),
 										 Misc::trimSortPrefix( $this->getOptions('classification_code') )
 		);
+
 		// Legal name
 		if ( $this->getLegalName() !== FALSE ) {
 			$this->Validator->isLength(		'legal_name',
@@ -616,6 +734,7 @@ class LegalEntityFactory extends Factory {
 				);
 			}
 		}
+
 		// Trade name
 		if ( $this->getTradeName() !== FALSE ) {
 			$this->Validator->isLength(		'trade_name',
@@ -625,6 +744,25 @@ class LegalEntityFactory extends Factory {
 											   100
 			);
 		}
+
+		// Short name
+		if ( $this->getShortName() != '' ) {
+			//Short name must only allow characters available in domain names.
+			$this->Validator->isLength(		'short_name',
+											   $this->getShortName(),
+											   TTi18n::gettext('Short name is too short or too long'),
+											   2,
+											   15
+			);
+			if ( $this->Validator->isError('short_name') == FALSE ) {
+				$this->Validator->isRegEx(		'short_name',
+												  $this->getShortName(),
+												  TTi18n::gettext('Short name must not contain any special characters'),
+												  $this->short_name_validator_regex
+				);
+			}
+		}
+
 		// Address1
 		if ( $this->getAddress1() !== FALSE AND $this->getAddress1() != '' ) {
 			$this->Validator->isLength(		'address1',
@@ -780,6 +918,21 @@ class LegalEntityFactory extends Factory {
 			}
 		}
 
+		// Payment Services Status
+		if ( $this->getPaymentServicesStatus() !== FALSE ) {
+			$this->Validator->inArrayKey( 'payment_services_status_id',
+										  $this->getPaymentServicesStatus(),
+										  TTi18n::gettext( 'Incorrect Payment Services Status' ),
+										  $this->getOptions( 'payment_services_status' )
+			);
+		}
+
+		if ( $this->getPaymentServicesStatus() == 10 AND $this->getPaymentServicesUserName() != '' AND $this->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+			$this->Validator->isTrue( 'payment_services_user_name',
+									  $this->checkPaymentServicesCredentials(),
+									  TTi18n::gettext( 'Payment Services User Name or API Key is incorrect, or service not activated' ) );
+		}
+
 		if ( $this->getDeleted() == TRUE ) {
 			$ulf = TTnew( 'UserListFactory' );
 			$ulf->getByLegalEntityIdAndCompanyId( $this->getId(), $this->getCompany() );
@@ -817,6 +970,35 @@ class LegalEntityFactory extends Factory {
 
 		return TRUE;
 	}
+
+	function getPaymentServicesAPIObject() {
+		require_once('../../classes/modules/other/TimeTrexPaymentServices.class.php');
+		$tt_ps_api = new TimeTrexPaymentServices( $this->getPaymentServicesUserName(), $this->getPaymentServicesAPIKey() ); //Username and API Key
+
+		return $tt_ps_api;
+	}
+
+	function checkPaymentServicesCredentials() {
+		if ( PRODUCTION == FALSE ) {
+			return TRUE;
+		}
+
+		if ( $this->getPaymentServicesStatus() == 10 AND $this->getPaymentServicesUserName() != '' AND $this->getPaymentServicesAPIKey() != '' ) {
+			require_once( '../../classes/modules/other/TimeTrexPaymentServices.class.php' );
+			try {
+				$tt_ps_api = $this->getPaymentServicesAPIObject();
+				return $tt_ps_api->ping();
+			} catch ( Exception $e ) {
+				Debug::Text( 'ERROR! Unable to login to payment services... Username: '. $this->getPaymentServicesUserName() .' Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+
+				return FALSE;
+			}
+		}
+
+		Debug::Text( 'ERROR! Unable to login to payment services, either disabled, or username/API key not defined...', __FILE__, __LINE__, __METHOD__, 10 );
+		return FALSE;
+	}
+
 
 	/**
 	 * @return bool
@@ -920,6 +1102,91 @@ class LegalEntityFactory extends Factory {
 			}
 		}
 
+
+		if ( PRODUCTION == TRUE AND $this->getPaymentServicesStatus() == 10 ) { //10=Enabled
+			//Send data to TimeTrex Payment Services.
+			require_once( '../../classes/modules/other/TimeTrexPaymentServices.class.php' );
+
+			if ( $this->getPaymentServicesUserName() == '' OR $this->getPaymentServicesAPIKey() == '' ) {
+				global $current_user;
+				if ( isset( $current_user ) AND is_object( $current_user ) ) {
+					try {
+						//Setting up a new remittance source account, so we need to create the necessary data remotely.
+						$tt_ps_api = new TimeTrexPaymentServices(); //No API key yet, as we need to create one still.
+						$organization_retval = $tt_ps_api->createNewOrganization( $tt_ps_api->convertLegalEntityObjectToOrganizationArray( $this ) );
+						Debug::Arr( $organization_retval, 'createNewOrganization(): ', __FILE__, __LINE__, __METHOD__, 10 );
+						if ( TTUUID::isUUID( $organization_retval ) ) {
+							$user_retval = $tt_ps_api->createNewUser( $tt_ps_api->convertUserObjectToUserArray( $current_user, $organization_retval ) );
+							Debug::Arr( $user_retval, 'createNewUser(): ', __FILE__, __LINE__, __METHOD__, 10 );
+							if ( is_array( $user_retval ) AND isset( $user_retval['user_name'] ) AND isset( $user_retval['api_key'] ) ) {
+								Debug::Text( 'Creating new user success! Username: ' . $user_retval['user_name'] . ' API Key: ' . $user_retval['api_key'], __FILE__, __LINE__, __METHOD__, 10 );
+
+								//Update UserName/API Key
+								$lelf = TTNew( 'LegalEntityListFactory' );
+								$lelf->getByIdAndCompanyId( $this->getId(), $this->getCompany() );
+								if ( $lelf->getRecordCount() == 1 ) {
+									$lef = $lelf->getCurrent();
+									$lef->setPaymentServicesUserName( $user_retval['user_name'] );
+									$lef->setPaymentServicesAPIKey( $user_retval['api_key'] );
+									if ( $lef->isValid() ) {
+										$lef->Save( FALSE );
+									} else {
+										Debug::Text( 'ERROR! Saving user_name/API Key failed!', __FILE__, __LINE__, __METHOD__, 10 );
+
+										return FALSE;
+									}
+								}
+							} else {
+								Debug::Text( 'ERROR! Creating new user failed!', __FILE__, __LINE__, __METHOD__, 10 );
+
+								return FALSE;
+							}
+						} else {
+							Debug::Text( 'ERROR! Creating new organization failed!', __FILE__, __LINE__, __METHOD__, 10 );
+
+							return FALSE;
+						}
+					} catch ( Exception $e ) {
+						Debug::Text( 'ERROR! Unable to create new organization/user... Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+
+						return FALSE;
+					}
+				} else {
+					Debug::Text( 'No user currently logged in, skipping creating remote Remittance records...', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			} else {
+				//Update any legal entity information.
+				try {
+					$tt_ps_api = $this->getPaymentServicesAPIObject();
+					$retval = $tt_ps_api->setOrganization( $tt_ps_api->convertLegalEntityObjectToOrganizationArray( $this ) );
+					if ( $retval === FALSE ) {
+						Debug::Text( 'ERROR! Unable to upload organization data... (a)', __FILE__, __LINE__, __METHOD__, 10 );
+
+						return FALSE;
+					}
+				} catch (Exception $e) {
+					Debug::Text( 'ERROR! Unable to upload organization data... (b) Exception: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+				}
+
+				//Update any contact information for the user.
+				global $current_user;
+				if ( PRODUCTION == TRUE AND isset( $current_user ) AND is_object( $current_user ) ) {
+					try {
+						$tt_ps_api = $this->getPaymentServicesAPIObject();
+						$retval = $tt_ps_api->setUser( $tt_ps_api->convertUserObjectToUserArray( $current_user, $this->getId() ) );
+						if ( $retval === FALSE ) {
+							Debug::Text( 'ERROR! Unable to upload user data... (a)', __FILE__, __LINE__, __METHOD__, 10 );
+
+							return FALSE;
+						}
+					} catch ( Exception $e ) {
+						Debug::Text( 'ERROR! Unable to upload user data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+					}
+				}
+
+			}
+		}
+
 		return TRUE;
 	}
 
@@ -989,6 +1256,9 @@ class LegalEntityFactory extends Factory {
 							break;
 						case 'end_date':
 							$data['end_date'] = TTDate::getAPIDate( 'DATE', $this->getEndDate() );
+							break;
+						case 'payment_services_api_key':
+							$data[$variable] = $this->getSecurePaymentServicesAPIKey();
 							break;
 						default:
 							if ( method_exists( $this, $function ) ) {

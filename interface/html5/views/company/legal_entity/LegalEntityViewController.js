@@ -5,13 +5,12 @@ LegalEntityViewController = BaseViewController.extend( {
 
 	status_array: null,
 	type_array: null,
-
 	classification_code_array: null,
-
 	country_array: null,
 	province_array: null,
-
 	e_province_array: null,
+
+	payment_services_status_array: null,
 
 	company_api: null,
 
@@ -43,6 +42,7 @@ LegalEntityViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'classification_code' );
 		this.initDropDownOption( 'country', 'country', this.company_api );
 
+		this.initDropDownOption( 'payment_services_status' );
 	},
 
 	onSetSearchFilterFinished: function() {
@@ -70,6 +70,7 @@ LegalEntityViewController = BaseViewController.extend( {
 	},
 
 	setEditViewDataDone: function() {
+		this.onPaymentServicesStatusChange();
 		this._super( 'setEditViewDataDone' );
 		this.file_browser.setImage( this.getLogoUrl() );
 	},
@@ -256,7 +257,6 @@ LegalEntityViewController = BaseViewController.extend( {
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
-
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -268,6 +268,10 @@ LegalEntityViewController = BaseViewController.extend( {
 					break;
 				}
 				this.eSetProvince( c_value );
+				break;
+			case 'payment_services_status_id':
+				this.current_edit_record[key] = c_value;
+				this.onPaymentServicesStatusChange();
 				break;
 		}
 
@@ -303,13 +307,25 @@ LegalEntityViewController = BaseViewController.extend( {
 		}
 	},
 
-	buildEditViewUI: function() {
+	onPaymentServicesStatusChange: function() {
+		if ( this.current_edit_record && this.current_edit_record['payment_services_status_id'] == 10 ) {
+			this.attachElement( 'payment_services_user_name' );
+			this.attachElement( 'payment_services_api_key' );
+		} else {
+			this.detachElement( 'payment_services_user_name' );
+			this.detachElement( 'payment_services_api_key' );
+		}
 
+		this.editFieldResize();
+	},
+
+	buildEditViewUI: function() {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
 		var tab_model = {
 			'tab_legal_entity': { 'label': $.i18n._( 'Legal Entity' ) },
+			'tab_payment_services': { 'label': $.i18n._( 'Payment Services' ), 'display_on_mass_edit': false },
 			'tab_audit': true,
 		};
 		this.setTabModel( tab_model );
@@ -330,17 +346,18 @@ LegalEntityViewController = BaseViewController.extend( {
 		}
 
 		//Tab 0 start
-
 		var tab_legal_entity = this.edit_view_tab.find( '#tab_legal_entity' );
-
 		var tab_legal_entity_column1 = tab_legal_entity.find( '.first-column' );
-
 		this.edit_view_tabs[0] = [];
-
 		this.edit_view_tabs[0].push( tab_legal_entity_column1 );
 
-		//Status
+		//Payment Services Tab
+		var tab_payment_services = this.edit_view_tab.find( '#tab_payment_services' );
+		var tab_payment_services_column1 = tab_payment_services.find( '.first-column' );
+		this.edit_view_tabs[1] = [];
+		this.edit_view_tabs[1].push( tab_payment_services_column1 );
 
+		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
@@ -359,91 +376,73 @@ LegalEntityViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Classification Code' ), form_item_input, tab_legal_entity_column1, '' );
 
 		// Legal Name
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'legal_name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Legal Name' ), form_item_input, tab_legal_entity_column1 );
-
 		form_item_input.parent().width( '45%' );
 
 		// Trade Name
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'trade_name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Trade Name' ), form_item_input, tab_legal_entity_column1 );
 		form_item_input.parent().width( '45%' );
 
-		// Address1
-
+		// Short Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'short_name', width: '150' } );
+		this.addEditFieldToColumn( $.i18n._( 'Short Name/Abbreviation' ), form_item_input, tab_legal_entity_column1 );
 
+		// Address1
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 		form_item_input.TTextInput( { field: 'address1', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 1)' ), form_item_input, tab_legal_entity_column1 );
-
 		form_item_input.parent().width( '45%' );
 
 		// Address2
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'address2', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab_legal_entity_column1 );
-
 		form_item_input.parent().width( '45%' );
 
 		// city
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'city', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_legal_entity_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'country', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_legal_entity_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-
 		form_item_input.TComboBox( { field: 'province' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_legal_entity_column1 );
 
 		//Postcode
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'postal_code', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_legal_entity_column1 );
 
 		// Phone
-
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'work_phone', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab_legal_entity_column1 );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
 		form_item_input.TTextInput( { field: 'fax_phone', width: 149 } );
-
 		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_legal_entity_column1 );
 
 		//Start Date
-
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( { field: 'start_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_legal_entity_column1 );
 
 		//End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-
 		form_item_input.TDatePicker( { field: 'end_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_legal_entity_column1 );
 
@@ -498,6 +497,24 @@ LegalEntityViewController = BaseViewController.extend( {
 		}
 
 		this.addEditFieldToColumn( $.i18n._( 'Logo' ), this.file_browser, tab_legal_entity_column1, '', null, false, true );
+
+
+		//Status
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( { field: 'payment_services_status_id' } );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.payment_services_status_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_payment_services_column1, '', null, true );
+
+
+		//User Name
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'payment_services_user_name', width: 250 } );
+		this.addEditFieldToColumn( $.i18n._( 'User Name' ), form_item_input, tab_payment_services_column1, '', null, true );
+
+		//API Key
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'payment_services_api_key', width: 510 } );
+		this.addEditFieldToColumn( $.i18n._( 'API Key' ), form_item_input, tab_payment_services_column1, '', null, true );
 
 	},
 

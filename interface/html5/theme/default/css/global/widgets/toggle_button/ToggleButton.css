@@ -2,9 +2,7 @@
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ffffff), color-stop(1, #dfdfdf));
     background: -moz-linear-gradient(center top, #ffffff 5%, #dfdfdf 100%);
     background-color: #ffffff;
-    -moz-border-radius: 6px;
-    -webkit-border-radius: 6px;
-    border-radius: 6px;
+    border-radius: 4px;
     border: 1px solid #aeaeae;
     display: inline-block;
     color: #49535c;

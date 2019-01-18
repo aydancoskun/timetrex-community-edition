@@ -1,162 +1,102 @@
-#floatingCirclesG {
+/* start .lds-spinner loading spinner code */
+.lds-spinner {
+    display: inline-block;
+    position: relative;
+    width: 4em;
+    height: 150px; /* 150px is used instead of 4em, so that the time&percentage based counters are positioned correctly. TODO-future: improve positioning of those elements and set this back to 4em. */
+    top: 40px;
+    font-size: 16px; /* Edit only this to change spinner size - Everything has been updated to work off em's so that all you need to change is the font size here to adjust spinner size */
+}
+
+.lds-spinner div {
+    transform-origin: 2em 2em;
+    animation: lds-spinner 1.2s linear infinite;
+}
+
+.lds-spinner div:after {
+    content: ' ';
+    display: block;
     position: absolute;
-    width: 70px;
-    height: 70px;
-    -webkit-transform: scale(0.6);
-    -moz-transform: scale(0.6);
-    -o-transform: scale(0.6);
-    -ms-transform: scale(0.6);
-
-    top: 50%;
-    left: 50%;
-
-    margin: -35px 0 0 -35px;
+    top: 0.2em;
+    left: 1.8em;
+    width: 0.3em;
+    height: 0.9em;
+    border-radius: 20%;
+    background: #fff;
 }
 
-.f_circleG {
-    position: absolute;
-    background-color: #000000;
-    height: 13px;
-    width: 13px;
-    -moz-border-radius: 6px;
-    -webkit-border-radius: 6px;
-    border-radius: 6px;
-    -webkit-animation-name: f_fadeG;
-    -webkit-animation-duration: 0.56s;
-    -webkit-animation-iteration-count: infinite;
-    -webkit-animation-direction: linear;
-    -moz-animation-name: f_fadeG;
-    -moz-animation-duration: 0.56s;
-    -moz-animation-iteration-count: infinite;
-    -moz-animation-direction: linear;
-    -o-animation-name: f_fadeG;
-    -o-animation-duration: 0.56s;
-    -o-animation-iteration-count: infinite;
-    -o-animation-direction: linear;
-    -ms-animation-name: f_fadeG;
-    -ms-animation-duration: 0.56s;
-    -ms-animation-iteration-count: infinite;
-    -ms-animation-direction: linear;
+.lds-spinner div:nth-child(1) {
+    transform: rotate(0deg);
+    animation-delay: -1.1s;
 }
 
-#frotateG_01 {
-    left: 0;
-    top: 29px;
-    -webkit-animation-delay: 0.21s;
-    -moz-animation-delay: 0.21s;
-    -o-animation-delay: 0.21s;
-    -ms-animation-delay: 0.21s
+.lds-spinner div:nth-child(2) {
+    transform: rotate(30deg);
+    animation-delay: -1s;
 }
 
-#frotateG_02 {
-    left: 8px;
-    top: 8px;
-    -webkit-animation-delay: 0.28s;
-    -moz-animation-delay: 0.28s;
-    -o-animation-delay: 0.28s;
-    -ms-animation-delay: 0.28s
+.lds-spinner div:nth-child(3) {
+    transform: rotate(60deg);
+    animation-delay: -0.9s;
 }
 
-#frotateG_03 {
-    left: 29px;
-    top: 0;
-    -webkit-animation-delay: 0.35s;
-    -moz-animation-delay: 0.35s;
-    -o-animation-delay: 0.35s;
-    -ms-animation-delay: 0.35s;
+.lds-spinner div:nth-child(4) {
+    transform: rotate(90deg);
+    animation-delay: -0.8s;
 }
 
-#frotateG_04 {
-    right: 8px;
-    top: 8px;
-    -webkit-animation-delay: 0.42s;
-    -moz-animation-delay: 0.42s;
-    -o-animation-delay: 0.42s;
-    -ms-animation-delay: 0.42s;
+.lds-spinner div:nth-child(5) {
+    transform: rotate(120deg);
+    animation-delay: -0.7s;
 }
 
-#frotateG_05 {
-    right: 0;
-    top: 29px;
-    -webkit-animation-delay: 0.49s;
-    -moz-animation-delay: 0.49s;
-    -o-animation-delay: 0.49s;
-    -ms-animation-delay: 0.49s;
+.lds-spinner div:nth-child(6) {
+    transform: rotate(150deg);
+    animation-delay: -0.6s;
 }
 
-#frotateG_06 {
-    right: 8px;
-    bottom: 8px;
-    -webkit-animation-delay: 0.56s;
-    -moz-animation-delay: 0.56s;
-    -o-animation-delay: 0.56s;
-    -ms-animation-delay: 0.56s;
+.lds-spinner div:nth-child(7) {
+    transform: rotate(180deg);
+    animation-delay: -0.5s;
 }
 
-#frotateG_07 {
-    left: 29px;
-    bottom: 0;
-    -webkit-animation-delay: 0.63s;
-    -moz-animation-delay: 0.63s;
-    -o-animation-delay: 0.63s;
-    -ms-animation-delay: 0.63s;
+.lds-spinner div:nth-child(8) {
+    transform: rotate(210deg);
+    animation-delay: -0.4s;
 }
 
-#frotateG_08 {
-    left: 8px;
-    bottom: 8px;
-    -webkit-animation-delay: 0.7s;
-    -moz-animation-delay: 0.7s;
-    -o-animation-delay: 0.7s;
-    -ms-animation-delay: 0.7s;
+.lds-spinner div:nth-child(9) {
+    transform: rotate(240deg);
+    animation-delay: -0.3s;
 }
 
-@-webkit-keyframes f_fadeG {
+.lds-spinner div:nth-child(10) {
+    transform: rotate(270deg);
+    animation-delay: -0.2s;
+}
+
+.lds-spinner div:nth-child(11) {
+    transform: rotate(300deg);
+    animation-delay: -0.1s;
+}
+
+.lds-spinner div:nth-child(12) {
+    transform: rotate(330deg);
+    animation-delay: 0s;
+}
+
+@keyframes lds-spinner {
     0% {
-        background-color: #F2F7FA
+        opacity: 1;
     }
-
     100% {
-        background-color: #000000
+        opacity: 0;
     }
-
 }
-
-@-moz-keyframes f_fadeG {
-    0% {
-        background-color: #F2F7FA
-    }
-
-    100% {
-        background-color: #000000
-    }
-
-}
-
-@-o-keyframes f_fadeG {
-    0% {
-        background-color: #F2F7FA
-    }
-
-    100% {
-        background-color: #000000
-    }
-
-}
-
-@-ms-keyframes f_fadeG {
-    0% {
-        background-color: #F2F7FA
-    }
-
-    100% {
-        background-color: #000000
-    }
-
-}
+/* end .lds-spinner loading spinner code */
 
 .popup-loading {
-    background-color: #000000;
+    background: rgba(0,0,0,0.8);
     /*position: absolute;*/
     position: fixed;
     top: 50%;
@@ -169,10 +109,7 @@
     font-size: 16px;
     text-align: center;
     z-index: 101;
-    -moz-border-radius: 15px;
-    border-radius: 15px;
-    opacity: 0.8;
-
+    border-radius: 4px;
 }
 
 .popup-loading .processing {

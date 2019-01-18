@@ -33,14 +33,40 @@
     -webkit-user-drag: none;
 }
 
+/* This section contains the logic for the double curved left edge of the white logo box.
+ * It is made up of 3 sections:
+ * - The main white rectangle which has the bottom left white corner
+ * - The blue square with the top right blue corner
+ * - The white square which sits behind the small blue square as the background on the curve.
+*/
+
+/* This is the majority of the white rectangle that sits on the navbar under part of the company logo */
 .top-container .right-tab-bg {
     position: absolute;
     top: 27px;
-    height: 30px;
-    width: 195px;
+    height: 24px; /* This can adjusted freely, other aspects should update. If smaller than before+after, then update those manually */
+    width: 186px;
     border: 0px solid;
     right: 0;
-    background: url("images/top_right_bg.png") no-repeat scroll #ffffff;
+    background: #fff;
+    border-bottom-left-radius: 8px; /* Set to preferred bottom left curve size */
+}
+
+/* This is the white square that will sit behind the blue corner */
+.top-container .right-tab-bg:before, .top-container .right-tab-bg:after {
+    content: '';
+    position: absolute;
+    top:0;
+    left:-10px;
+    width: 10px;
+    height: 15px;
+    background:inherit;
+}
+
+/* This is the blue square with top right corner curved */
+.top-container .right-tab-bg:after {
+    background: #32689b; /* Set this to the parent background color */
+    border-top-right-radius: 8px; /* Set to preferred top right curve size */
 }
 
 .top-container .ribbon-tab-out-side {
@@ -49,15 +75,15 @@
 
 .top-container .ribbon-tab {
     border: none;
-    background: url(images/bg_right.png) right no-repeat, url(images/bg_left.png) left repeat-x;
-
+    background: #e6e6e6;
+    border-bottom: 1px solid #c7c7c7;
     height: 100%;
 }
 
 .top-container .context-ribbon-tab {
     border: none;
-    background: url(images/context-bg_right.png) right no-repeat, url(images/context_bg_left.png) left repeat-x;
-
+    background: #d8e7f4;
+    border-bottom: 1px solid #c7c7c7;
     height: 100%;
 }
 
@@ -66,9 +92,8 @@
     overflow: auto;
     white-space: nowrap;
     display: block;
-    height: 110px;
+    height: 107px;
     overflow-y: hidden;
-
 }
 
 .menu {
@@ -78,14 +103,15 @@
 .top-container .top-ribbon-menu {
     border: 1px solid #c2c2c2;
     padding: 5px;
-    border-radius: 10px;
+    border-radius: 4px;
     margin-right: 10px;
     padding-bottom: 10px;
     display: inline-block;
     height: 97px;
-    background: #e6e6e6;
+    background: #f9f9f9;
     margin-top: 5px;
     margin-left: 5px;
+    margin-bottom: 5px;
     position: relative;
     vertical-align: top;
 }
@@ -97,16 +123,10 @@
     border-right: 0;
     position: absolute;
     height: 16px;
-    border-radius: 10px;
+    border-radius: 4px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    background-image: -moz-linear-gradient(top, #6a90b3, #34628d);
-    /* Safari & Chrome */
-    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #34628d), color-stop(1, #6a90b3));
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#6a90b3', endColorstr='#34628d', grandientType=1);
-    -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#6a90b3', endColorstr='#34628d', grandientType=1);
-    background-image: -ms-linear-gradient(#6a90b3, #34628d, #34628d);
-    background: -ms-linear-gradient(top, #6a90b3 0%, #34628d 100%);
+    background: #32689b;
     text-align: center;
     color: #ffffff;
     bottom: 0;
@@ -114,7 +134,6 @@
     clear: both;
     font-size: 10px;
     width: 100%;
-
 }
 
 .menu .menu-bottom span {
@@ -155,10 +174,8 @@
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d9eafa', endColorstr='#c8dcf0', grandientType=1);
     -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d9eafa', endColorstr='#c8dcf0', grandientType=1);
     background-image: -ms-linear-gradient(#d9eafa, #c8dcf0, #c8dcf0);
-
     background: -ms-linear-gradient(top, #d9eafa 0%, #c8dcf0 100%);
-
-    border-radius: 6px;
+    border-radius: 4px;
 }
 
 .menu ul li .selected-menu {
@@ -169,14 +186,12 @@
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#c4e1fc', endColorstr='#b4d2ee', grandientType=1);
     -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#c4e1fc', endColorstr='#b4d2ee', grandientType=1);
     background: -ms-linear-gradient(top, #c4e1fc 0%, #b4d2ee 100%);
-
-    border: 1px solid #cecece;
-    border-radius: 6px;
+    border: 1px solid #32689b;
+    border-radius: 4px;
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 4px;
     padding-right: 4px;
-
 }
 
 .menu ul li .ribbon-sub-menu-icon {
@@ -238,16 +253,15 @@
 .top-container .ui-widget-content {
     background: #ffffff;
     border: 0px solid #DDDDDD;
-    color: #362B36;
-    height: 110px;
+    color: #000;
+    height: 107px;
 }
 
 .top-container .ui-widget-header {
-    background: url("images/top_bg.png") repeat-x scroll #ffffff;
+    background: #32689b;
     border: 0px solid #AED0EA;
     color: #222222;
     font-weight: bold;
-
 }
 
 .top-container .ui-tabs .ui-tabs-nav li.context-menu-active {
@@ -313,11 +327,11 @@
 }
 
 .top-container .ui-corner-all, .top-container .ui-corner-top, .top-container .ui-corner-right, .top-container .ui-corner-tr {
-    border-top-right-radius: 10px;
+    border-top-right-radius: 4px;
 }
 
 .top-container .ui-corner-all, .top-container .ui-corner-top, .top-container .ui-corner-left, .top-container .ui-corner-tl {
-    border-top-left-radius: 10px;
+    border-top-left-radius: 4px;
 }
 
 .top-container .context-menu a, .top-container .context-menu a:link, .top-container .context-menu a:visited {

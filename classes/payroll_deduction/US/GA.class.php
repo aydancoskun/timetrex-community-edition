@@ -51,6 +51,48 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 	*/
 
 	var $state_income_tax_rate_options = array(
+			20190101 => array(
+					10 => array(
+							array('income' => 750, 'rate' => 1.0, 'constant' => 0),
+							array('income' => 2250, 'rate' => 2.0, 'constant' => 7.50),
+							array('income' => 3750, 'rate' => 3.0, 'constant' => 37.50),
+							array('income' => 5250, 'rate' => 4.0, 'constant' => 82.50),
+							array('income' => 7000, 'rate' => 5.0, 'constant' => 142.50),
+							array('income' => 7000, 'rate' => 5.75, 'constant' => 230),
+					),
+					20 => array(
+							array('income' => 500, 'rate' => 1.0, 'constant' => 0),
+							array('income' => 1500, 'rate' => 2.0, 'constant' => 5),
+							array('income' => 2500, 'rate' => 3.0, 'constant' => 25),
+							array('income' => 3500, 'rate' => 4.0, 'constant' => 55),
+							array('income' => 5000, 'rate' => 5.0, 'constant' => 95),
+							array('income' => 5000, 'rate' => 5.75, 'constant' => 170),
+					),
+					30 => array(
+							array('income' => 1000, 'rate' => 1.0, 'constant' => 0),
+							array('income' => 3000, 'rate' => 2.0, 'constant' => 10),
+							array('income' => 5000, 'rate' => 3.0, 'constant' => 50),
+							array('income' => 7000, 'rate' => 4.0, 'constant' => 110),
+							array('income' => 10000, 'rate' => 5.0, 'constant' => 190),
+							array('income' => 10000, 'rate' => 5.75, 'constant' => 340),
+					),
+					40 => array(
+							array('income' => 500, 'rate' => 1.0, 'constant' => 0),
+							array('income' => 1500, 'rate' => 2.0, 'constant' => 5),
+							array('income' => 2500, 'rate' => 3.0, 'constant' => 25),
+							array('income' => 3500, 'rate' => 4.0, 'constant' => 55),
+							array('income' => 5000, 'rate' => 5.0, 'constant' => 95),
+							array('income' => 5000, 'rate' => 5.75, 'constant' => 170),
+					),
+					50 => array(
+							array('income' => 1000, 'rate' => 1.0, 'constant' => 0),
+							array('income' => 3000, 'rate' => 2.0, 'constant' => 10),
+							array('income' => 5000, 'rate' => 3.0, 'constant' => 50),
+							array('income' => 7000, 'rate' => 4.0, 'constant' => 110),
+							array('income' => 10000, 'rate' => 5.0, 'constant' => 190),
+							array('income' => 10000, 'rate' => 5.75, 'constant' => 340),
+					),
+			),
 			20060101 => array(
 					10 => array(
 							array('income' => 750, 'rate' => 1.0, 'constant' => 0),
@@ -96,12 +138,29 @@ class PayrollDeduction_US_GA extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
-			10 => 'Single',
-			20 => 'Married - Filing Separately',
-			30 => 'Married - Joint One Income',
-			40 => 'Married - Joint Two Incomes',
-			50 => 'Head of Household',
+//			10 => 'Single',
+//			20 => 'Married - Filing Separately',
+//			30 => 'Married - Joint One Income',
+//			40 => 'Married - Joint Two Incomes',
+//			50 => 'Head of Household',
 
+			20190101 => array(
+					'standard_deduction'  => array(
+							'10' => 4600.00,
+							'20' => 3000.00,
+							'30' => 6000.00,
+							'40' => 3000.00,
+							'50' => 4600.00,
+					),
+					'employee_allowance'  => array( //Personal Allowance
+													'10' => 2700.00,
+													'20' => 3700.00,
+													'30' => 7400.00,
+													'40' => 3700.00,
+													'50' => 2700.00,
+					),
+					'dependant_allowance' => 3000,
+			),
 
 			20060101 => array(
 					'standard_deduction'  => array(

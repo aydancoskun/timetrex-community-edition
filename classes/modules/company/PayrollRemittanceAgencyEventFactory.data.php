@@ -62,8 +62,8 @@ return array(
 							'include_w2'          => FALSE,
 							'file_zero_wage'      => FALSE, //File if zero wages were paid.
 							'file_zero_liability' => FALSE, //File is zero libability is owed.
-							'auto_file'           => FALSE, //TT can automatically files.
-							'auto_pay'            => FALSE, //TT can automatically pays.
+							'auto_file'           => TRUE, //TT can automatically files.
+							'auto_pay'            => TRUE, //TT can automatically pays.
 					),
 					'frequency'        => array( //Weekly,Monthly,Quarterly
 

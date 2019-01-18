@@ -298,13 +298,16 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 			case 'type_id':
 				this.onTypeChange();
 				break;
-			case 'value24':
-				if ( c_value != false ) {
-					this.attachElement( 'value25' ).text( $.i18n._( 'Offset Description' ) + ':' );
-					this.attachElement( 'value27' ).text( $.i18n._( 'Offset Routing' ) + ':' );
-					this.attachElement( 'value28' ).text( $.i18n._( 'Offset Account' ) + ':' );
-					if ( this.edit_view_ui_dic.value25.getValue().length == 0 ) {
-						this.edit_view_ui_dic.value25.setValue( 'OFFSET' );
+            case 'data_format_id':
+                this.onDataFormatChange();
+                break;
+            case 'value24':
+				if (c_value != false) {
+					this.attachElement('value25').text($.i18n._('Offset Description') + ':');
+					this.attachElement('value27').text($.i18n._('Offset Routing') + ':');
+					this.attachElement('value28').text($.i18n._('Offset Account') + ':');
+					if (this.edit_view_ui_dic.value25.getValue().length == 0) {
+						this.edit_view_ui_dic.value25.setValue('OFFSET');
 					}
 				} else {
 					this.detachElement( 'value25' );
@@ -360,6 +363,10 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 						widget.setValue( this.current_edit_record[key] );
 						this.onTypeChange();
 						break;
+                    case 'data_format_id': //popular case
+                        widget.setValue(this.current_edit_record[key]);
+                        this.onDataFormatChange();
+                        break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
 						break;
@@ -373,115 +380,144 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 
 	},
 
+	onDataFormatChange: function () {
+		var $this = this;
+		var type_id = this.edit_view_ui_dic.type_id.getValue();
+		var data_format_id = this.edit_view_ui_dic.data_format_id.getValue();
 
-	onTypeChange: function() {
+		//alert(' DataFormatChange: Type: '+ type_id + ' Data Format: '+ data_format_id );
+
+		if ( type_id == false || data_format_id == false ) {
+			return;
+		}
+
+		$( this.edit_view_tab.find( 'ul li' )[1] ).hide(); //Hide Advanced tab
+
+		this.detachElement('value4');
+		this.detachElement('value5');
+		this.detachElement('value6');
+		this.detachElement('value7');
+		this.detachElement('value8');
+		this.detachElement('value9');
+		this.detachElement('value10');
+		this.detachElement('value11');
+		this.detachElement('value12');
+		this.detachElement('value13');
+		this.detachElement('value14');
+		this.detachElement('value15');
+		this.detachElement('value16');
+		this.detachElement('value17');
+		this.detachElement('value18');
+		this.detachElement('value19');
+		this.detachElement('value20');
+		this.detachElement('value21');
+		this.detachElement('value22');
+		this.detachElement('value23');
+		this.detachElement('value24');
+		this.detachElement('value25');
+		this.detachElement('value26');
+		this.detachElement('value27');
+		this.detachElement('value28');
+		this.detachElement('value29');
+		this.detachElement('value30');
+
+		this.detachElement('signature');
+		this.edit_view_ui_dic.value5.parent().find('.mm_field_unit_text').remove();
+		this.edit_view_ui_dic.value6.parent().find('.mm_field_unit_text').remove();
+		if ( type_id != 2000 ) {
+			TTPromise.wait(null, null, function () {
+				$this.edit_view_ui_dic.value5.setWidth(200);
+				$this.edit_view_ui_dic.value6.setWidth(200);
+			});
+		}
+
+		if ( type_id == 2000 ) {
+			$( this.edit_view_tab.find( 'ul li' )[1] ).show(); //Show Advanced Tab
+
+			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) { //All cheque formats.
+				this.attachElement('value5').text($.i18n._('Vertical Alignment') + ':');
+				this.attachElement('value6').text($.i18n._('Horizontal Alignment') + ':');
+				this.attachElement('signature');
+
+				this.edit_view_ui_dic.value5.parent().append('<span class="mm_field_unit_text">&nbsp;mm</span>');
+				this.edit_view_ui_dic.value6.parent().append('<span class="mm_field_unit_text">&nbsp;mm</span>');
+
+				TTPromise.wait(null, null, function () {
+					$this.edit_view_ui_dic.value5.setWidth(42);
+					$this.edit_view_ui_dic.value6.setWidth(42)
+				});
+			}
+		} else if ( type_id == 3000 ) {
+			if ( data_format_id == 5 ) { //TimeTrex Remittances
+				// this.attachElement('value5').text($.i18n._('User Name') + ':');
+				// this.attachElement('value6').text($.i18n._('API Key') + ':');
+			} else if ( data_format_id == 10 ) { //US - ACH
+				$( this.edit_view_tab.find( 'ul li' )[1] ).show(); //Show Advanced Tab
+
+				this.attachElement('value4').text($.i18n._('Business Number') + ':');
+				this.attachElement('value5').text($.i18n._('Immediate Origin') + ':');
+				this.attachElement('value6').text($.i18n._('Immediate Origin Name') + ':');
+				this.attachElement('value7').text($.i18n._('Immediate Dest.') + ':');
+				this.attachElement('value8').text($.i18n._('Immediate Dest. Name') + ':');
+				this.attachElement('value9').text($.i18n._('Trace Number') + ':');
+
+				this.attachElement('value24').text($.i18n._('Offset Transaction') + ':');
+				if (this.current_edit_record.value24 == 1) {
+					this.current_edit_record.value24 = true;
+					this.attachElement('value25').text($.i18n._('Offset Description') + ':');
+					this.attachElement('value27').text($.i18n._('Offset Routing') + ':');
+					this.attachElement('value28').text($.i18n._('Offset Account') + ':');
+				}
+				this.attachElement('value29').text($.i18n._('File Header Line') + ':');
+				this.attachElement('value30').text($.i18n._('File Trailer Line') + ':');
+			} else if ( data_format_id == 20 || data_format_id == 30 || data_format_id == 50 ) { //CA - EFT
+				$( this.edit_view_tab.find( 'ul li' )[1] ).show(); //Show Advanced Tab
+
+				this.attachElement('value5').text($.i18n._('Originator ID') + ':');
+				this.attachElement('value6').text($.i18n._('Originator Short Name') + ':');
+				this.attachElement('value7').text($.i18n._('Data Center ID') + ':');
+				//this.attachElement( 'value7' ).text( $.i18n._('Data Center Name') + ':' );
+
+				this.attachElement('value26').text($.i18n._('Return Institution') + ':');
+				this.attachElement('value27').text($.i18n._('Return Transit') + ':');
+				this.attachElement('value28').text($.i18n._('Return Account') + ':');
+				this.attachElement('value29').text($.i18n._('File Header Line') + ':');
+				this.attachElement('value30').text($.i18n._('File Trailer Line') + ':');
+			}
+		}
+
+	},
+
+	onTypeChange: function () {
 		var $this = this;
 		var type_id = this.edit_view_ui_dic.type_id.getValue();
 		var country = (this.edit_view_ui_dic.country.getValue() && this.edit_view_ui_dic.country.getValue() != TTUUID.zero_id) ? this.edit_view_ui_dic.country.getValue() : this.current_edit_record.country; //sometimes it's false for no reason.
 
 		this.setAdvancedTabVisible();
 
-		this.detachElement( 'last_transaction_number' );
-		this.detachElement( 'data_format_id' );
-		this.detachElement( 'signature' );
-		this.detachElement( 'value1' );
-		this.detachElement( 'value2' );
-		this.detachElement( 'value3' );
-		this.detachElement( 'value4' );
-		this.detachElement( 'value5' );
-		this.detachElement( 'value6' );
-		this.detachElement( 'value7' );
-		this.detachElement( 'value8' );
-		this.detachElement( 'value9' );
-		this.detachElement( 'value10' );
-		this.detachElement( 'value11' );
-		this.detachElement( 'value12' );
-		this.detachElement( 'value13' );
-		this.detachElement( 'value14' );
-		this.detachElement( 'value15' );
-		this.detachElement( 'value16' );
-		this.detachElement( 'value17' );
-		this.detachElement( 'value18' );
-		this.detachElement( 'value19' );
-		this.detachElement( 'value20' );
-		this.detachElement( 'value21' );
-		this.detachElement( 'value22' );
-		this.detachElement( 'value23' );
-		this.detachElement( 'value24' );
-		this.detachElement( 'value25' );
-		this.detachElement( 'value26' );
-		this.detachElement( 'value27' );
-		this.detachElement( 'value28' );
-		this.detachElement( 'value29' );
-		this.detachElement( 'value30' );
+        this.detachElement('data_format_id');
+		this.detachElement('last_transaction_number');
+        this.detachElement('value1');
+        this.detachElement('value2');
+        this.detachElement('value3');
 
-		if ( country == false || type_id == false ) {
+		if (country == false || type_id == false) {
 			return;
 		}
 
-		this.edit_view_ui_dic.value5.parent().find( '.mm_field_unit_text' ).remove();
-		this.edit_view_ui_dic.value6.parent().find( '.mm_field_unit_text' ).remove();
-		if ( type_id == 2000 && LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) { //All cheque formats.
-			this.attachElement( 'last_transaction_number' ).text( $.i18n._( 'Last Check Number' ) + ':' );
+		if ( type_id == 2000 ) {
+            this.attachElement('last_transaction_number').text($.i18n._('Last Check Number') + ':');
+		} else if ( type_id == 3000 ) {
+            this.attachElement('last_transaction_number').text($.i18n._('Last Batch Number') + ':');
 
-			this.attachElement( 'value5' ).text( $.i18n._( 'Vertical Alignment' ) + ':' );
-			this.attachElement( 'value6' ).text( $.i18n._( 'Horizontal Alignment' ) + ':' );
-			this.attachElement( 'signature' );
-
-			this.edit_view_ui_dic.value5.parent().append( '<span class="mm_field_unit_text">&nbsp;mm</span>' );
-			this.edit_view_ui_dic.value6.parent().append( '<span class="mm_field_unit_text">&nbsp;mm</span>' );
-
-			TTPromise.wait( null, null, function() {
-				$this.edit_view_ui_dic.value5.setWidth( 42 );
-				$this.edit_view_ui_dic.value6.setWidth( 42 );
-			} );
-
-		} else {
-			TTPromise.wait( null, null, function() {
-				$this.edit_view_ui_dic.value5.setWidth( 200 );
-				$this.edit_view_ui_dic.value6.setWidth( 200 );
-			} );
-
-		}
-
-		if ( type_id == 2000 && country == 'US' ) { //cheque US
-		} else if ( type_id == 2000 && country == 'CA' ) { //cheque CA
-		} else if ( type_id == 3000 && country == 'US' ) { //ACH (american eft)
-			this.attachElement( 'last_transaction_number' ).text( $.i18n._( 'Last Batch Number' ) + ':' );
-			this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
-			this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
-			this.attachElement( 'value4' ).text( $.i18n._( 'Business Number' ) + ':' );
-			this.attachElement( 'value5' ).text( $.i18n._( 'Immediate Origin' ) + ':' );
-			this.attachElement( 'value6' ).text( $.i18n._( 'Immediate Origin Name' ) + ':' );
-			this.attachElement( 'value7' ).text( $.i18n._( 'Immediate Dest.' ) + ':' );
-			this.attachElement( 'value8' ).text( $.i18n._( 'Immediate Dest. Name' ) + ':' );
-			this.attachElement( 'value9' ).text( $.i18n._( 'Trace Number' ) + ':' );
-
-			this.attachElement( 'value24' ).text( $.i18n._( 'Offset Transaction' ) + ':' );
-			if ( this.current_edit_record.value24 == 1 ) {
-				this.current_edit_record.value24 = true;
-				this.attachElement( 'value25' ).text( $.i18n._( 'Offset Description' ) + ':' );
-				this.attachElement( 'value27' ).text( $.i18n._( 'Offset Routing' ) + ':' );
-				this.attachElement( 'value28' ).text( $.i18n._( 'Offset Account' ) + ':' );
-			}
-			this.attachElement( 'value29' ).text( $.i18n._( 'File Header Line' ) + ':' );
-			this.attachElement( 'value30' ).text( $.i18n._( 'File Trailer Line' ) + ':' );
-		} else if ( type_id == 3000 && country == 'CA' ) { //canadian eft
-			this.attachElement( 'last_transaction_number' ).text( $.i18n._( 'Last Batch Number' ) + ':' );
-			this.attachElement( 'value1' ).text( $.i18n._( 'Institution' ) + ':' );
-			this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
-			this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
-
-			this.attachElement( 'value5' ).text( $.i18n._( 'Originator ID' ) + ':' );
-			this.attachElement( 'value6' ).text( $.i18n._( 'Originator Short Name' ) + ':' );
-			this.attachElement( 'value7' ).text( $.i18n._( 'Data Center ID' ) + ':' );
-			//this.attachElement( 'value7' ).text( $.i18n._('Data Center Name') + ':' );
-
-			this.attachElement( 'value26' ).text( $.i18n._( 'Return Institution' ) + ':' );
-			this.attachElement( 'value27' ).text( $.i18n._( 'Return Transit' ) + ':' );
-			this.attachElement( 'value28' ).text( $.i18n._( 'Return Account' ) + ':' );
-			this.attachElement( 'value29' ).text( $.i18n._( 'File Header Line' ) + ':' );
-			this.attachElement( 'value30' ).text( $.i18n._( 'File Trailer Line' ) + ':' );
+			if ( country == 'US' ) { //ACH (american eft)
+                this.attachElement('value2').text($.i18n._('Routing') + ':');
+                this.attachElement('value3').text($.i18n._('Account') + ':');
+            } else if ( country == 'CA' ) { //canadian eft
+                this.attachElement('value1').text($.i18n._('Institution') + ':');
+                this.attachElement('value2').text($.i18n._('Bank Transit') + ':');
+                this.attachElement('value3').text($.i18n._('Account') + ':');
+            }
 		}
 
 		$( '#tab_advanced_content_div .edit-view-form-item-div .edit-view-form-item-label-div' ).css( 'border-top-left-radius', '0px' );
@@ -510,12 +546,10 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 				} else {
 					$this.current_edit_record['data_format_id'] = $this.edit_view_ui_dic['data_format_id'].getValue();
 				}
-			}
-		} );
 
-		if ( !this.is_edit ) {
-			this.detachElement( 'signature' );
-		}
+                $this.onDataFormatChange();
+            }
+		});
 
 		this.editFieldResize();
 	},
@@ -550,7 +584,7 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 		this.edit_view_tabs[0] = [];
 		this.edit_view_tabs[0].push( tab_remittance_source_account_column1 );
 
-		//advanced tab
+		//Advanced tab
 		var tab_advanced = this.edit_view_tab.find( '#tab_advanced' );
 		var tab_advanced_column1 = tab_advanced.find( '.first-column' );
 		this.edit_view_tabs[1] = [];
@@ -691,16 +725,14 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 						}
 					} );
 
-				}
-			} );
-		}
+				}} );}
 
 		if ( this.is_edit ) {
-			this.attachElement( 'signature' );
-			this.file_browser.setEnableDelete( true );
-			this.file_browser.bind( 'deleteClick', function( e, target ) {
-				$this.api.deleteImage( $this.current_edit_record.id, {
-					onResult: function( result ) {
+			this.attachElement('signature');
+			this.file_browser.setEnableDelete(true);
+			this.file_browser.bind('deleteClick', function (e, target) {
+				$this.api.deleteImage($this.current_edit_record.id, {
+					onResult: function (result) {
 						$this.onDeleteImage();
 					}
 				} );

@@ -4,10 +4,6 @@
 # Requires composer modules, install with: "composer install" in this directory
 #
 
-
-#Unit testw with HHVM
-#hhvm /usr/bin/phpunit -d max_execution_time=86400 --configuration config.xml
-
 #Use: export XDEBUG_REMOTE_HOST=10.7.5.9
 # or: unset XDEBUG_REMOTE_HOST
 if [[ -z "${XDEBUG_REMOTE_HOST}" ]]; then

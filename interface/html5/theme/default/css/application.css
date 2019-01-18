@@ -3,11 +3,7 @@ html, body {
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
-    font-size: 12px;
-    font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
-    overflow-y: hidden;
     height: 100%;
-    min-width: 990px;
     -webkit-backface-visibility: hidden;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -15,12 +11,24 @@ html, body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-
     line-height:1.1 !important;
     /** #1187 fix bold-looking text caused by mac text smoothing **/
     -webkit-font-smoothing: antialiased; /* This needs to be set or some normal faced fonts look bold on Mac in Chrome/Webkit based browsers. */
     -moz-osx-font-smoothing: grayscale; /* Fixes font bold issue in Firefox version 25+ on Mac */
 }
+
+body {
+    font-size: 12px;
+    font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
+    overflow-y: hidden;
+    min-width: 990px;
+}
+
+/* Also overriding various styles with .mobile-device-mode in LoginView.css */
+body.mobile-device-mode {
+    min-width: 0; /* Disabling the min-width prevents the page from being forced too big to show properly on mobile (too zoomed out). */
+}
+
 input,select,textarea {
     font-family: Lucida Grande, Lucida Sans, Arial, sans-serif;
 }
@@ -54,6 +62,10 @@ span {
     font-size: 12px;
     font-weight: normal;
 }
+span.title {
+    font-size: 12px;
+    font-weight: bold;
+}
 
 select {
     font-size: 12px;
@@ -84,6 +96,25 @@ input:disabled {
     /*border: 1px solid #DDD;*/
     /*background-color: #F5F5F5;*/
     color: #362B36;
+}
+
+/* Hide the site description on main application pages. Only show on login page. */
+/* Only meant for search engines, so the php code should hide for normal users */
+.application-bg .site-description {
+    display: none;
+}
+
+/* Opacity filter is only used for the animal background and to give a different shade on mobile & app loading. Make bg transparent afterwards. */
+.application-bg #login-bg_opacity_filter {
+    background: none;
+}
+
+.site-description {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+    padding: 10px;
+    margin: 10px;
 }
 
 .loading-view {
@@ -141,6 +172,16 @@ progress::-moz-progress-bar {
     top: 320px;
 }
 
+.quick-punch-login .loading-view .progress-label {
+    background: #fff;
+    color: #000;
+}
+
+.recruitment-portal .loading-view .progress-label {
+    background: #fff;
+    color: #000;
+}
+
 .link {
     cursor: pointer;
     text-decoration: underline;
@@ -162,7 +203,7 @@ progress::-moz-progress-bar {
     padding: 3px;
     position: relative;
     z-index: 1;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .inside-grid {
@@ -235,7 +276,7 @@ progress::-moz-progress-bar {
     background: -ms-linear-gradient(top, #d9eafa 0%, #c8dcf0 100%);
 
     border: 1px solid #cecece;
-    border-radius: 6px;
+    border-radius: 4px;
     padding-top: 5px;
     padding-bottom: 5px;
     padding-left: 9px;
@@ -274,17 +315,12 @@ progress::-moz-progress-bar {
     padding: 5px;
 }
 
-.login-view-bg {
-    background: url("../images/login_view_bg.jpg");
-}
-
 .login-bg {
-
-    background: #727272;
+    background: #fff;
 }
 
 .atferLogin-bg {
-    background: #ffffff;
+    background: #fff;
 }
 
 .arrow {
@@ -316,7 +352,7 @@ progress::-moz-progress-bar {
 }
 
 .content-container-after-login {
-    bottom: 5px;
+    padding: 5px;
     position: relative;
     top: 0;
     width: 100%;
@@ -337,9 +373,9 @@ progress::-moz-progress-bar {
     margin-top: 0;
     margin-right: 0;
     margin-left: 0;
-    height: 170px;
+    height: 164px; /* Set to 164px to be the exact required height of the ribbon menu and no space below. The space will be made in contentContainer child elements */
     position: relative;
-
+    overflow: hidden; /* Bug fix: sometimes (always during page refresh) during ribbon menu generation, a blue background (from context menu) shines through between top and content container. Moved the space from top container to content, then added overflow hidden to hide this blue flash */
 }
 
 .top-container-after-login {
@@ -431,23 +467,16 @@ progress::-moz-progress-bar {
 }
 
 .message-container {
-    /*text-align: center;*/
     display: block;
-    /*top: 40%;*/
-    /*left: 43%;*/
     position: absolute;
-    /*z-index: 5001;*/
     background-color: #f8f8f8;
     border: 10px solid #a1a3a6;
-    /*padding: 5px;*/
-    /*border-radius: 10px;*/
     text-align: center;
-
     background-color: #f8f8f8;
-    border-bottom: 35px solid #355f87;
-    border-top: 40px solid #355f87;;
-    border-left: 20px solid #355f87;;
-    border-right: 20px solid #355f87;;
+    border-bottom: 2px solid #355f87;
+    border-top: 30px solid #355f87;
+    border-left: 2px solid #355f87;
+    border-right: 2px solid #355f87;
     position: absolute;
     top: 40%;
     left: 40%;
@@ -458,22 +487,19 @@ progress::-moz-progress-bar {
     font-size: 12px;
     text-align: center;
     z-index: 6001;
-    border-radius: 15px;
+    border-radius: 4px;
     padding: 6px;
-
-    -moz-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
-    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+    padding-bottom: 35px;
+    box-shadow: 5px 5px 8px 0px rgba(0, 0, 0, 0.3), 0 0 20px 0px rgba(0, 0, 0, 0.38);
     /* For IE 8 */
     -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
     /* For IE 5.5 - 7 */
     filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
-
 }
 
 .message-container .top-bar-title {
     position:absolute;
-    top:-2.0em;
+    top: -1.7em;
     color:#fff;
     font-weight:bold;
 }
@@ -481,14 +507,18 @@ progress::-moz-progress-bar {
 .message-container .user-contact-details {
     width:100%;
     text-align:left;
-    padding-left:2.0em
+    padding: 0 18px 15px;
 }
 
 .message-container .row {
-    line-height:2.0em;
+    padding-top: 4px;
+    line-height: 24px;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .message-container .contact-notice-text {
+    padding: 5px 0 10px;
     font-weight: bold;
 }
 
@@ -501,7 +531,7 @@ progress::-moz-progress-bar {
     height: auto;
     font-size: 14px;*/
     font-weight: bold;
-    padding: 0 2em;
+    padding: 0 18px;
 }
 
 .message-container .feedback-messagebox {
@@ -518,7 +548,7 @@ progress::-moz-progress-bar {
     position: absolute;
     height: 30px;
     border: none;
-    bottom: -35px;
+    bottom: 4px;
     width: 100%;
 }
 
@@ -536,17 +566,11 @@ progress::-moz-progress-bar {
 /*}*/
 
 .t-select {
-    background: -webkit-gradient(linear, 0 0, 0 100%, from(#e8edf2), to(#a5bcd3));
-    background: -moz-linear-gradient(top, #e8edf2, #a5bcd3);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e8edf2', endColorstr='#a5bcd3', grandientType=1);
-    -ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e8edf2', endColorstr='#a5bcd3', grandientType=1); /** IE8 **/
-    background-image: -ms-linear-gradient(#e8edf2, #a5bcd3, #a5bcd3);
-    background: -ms-linear-gradient(top, #e8edf2 0%, #a5bcd3 100%);
-    color: #000000;
-    font-weight: normal;
+    background: #fff;
+    border: 1px solid #bdbdbd;
+    color: #000;
     min-width: 100px;
     max-width: 200px;
-    border: 1px solid #999999;
     height: 24px;
     vertical-align: top;
 }
@@ -786,34 +810,25 @@ progress::-moz-progress-bar {
 }
 
 .t-button {
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ffffff), color-stop(1, #dfdfdf));
-    background: -moz-linear-gradient(center top, #ffffff 5%, #dfdfdf 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dfdfdf');
-    background-color: #ffffff;
-    -moz-border-radius: 6px;
-    -webkit-border-radius: 6px;
-    border-radius: 6px;
-    border: 1px solid #aeaeae;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #bdbdbd;
     display: inline-block;
-    color: #49535c;
+    color: #000;
     font-size: 12px;
     font-weight: normal;
-    padding: 3px 5px;
+    padding: 5px 20px;
     text-decoration: none;
     cursor: pointer;
-
 }
 
 .bottom-bar-yes-btn {
     margin-right: 5px;
 }
 
-.t-button:hover {
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ffffff));
-    background: -moz-linear-gradient(center top, #dfdfdf 5%, #ffffff 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ffffff');
-    background-color: #dfdfdf;
-}
+/*.t-button:hover, .t-button:focus {*/
+    /*background: #e2e2e2;*/
+/*}*/
 
 .t-button:active {
     position: relative;
@@ -821,11 +836,10 @@ progress::-moz-progress-bar {
 }
 
 .view {
-
-    border-radius: 10px;
+    border-radius: 4px;
     background: #e1e1e1;
     border: 1px solid #c7c7c7;
-    margin: 0px 5px 0px 5px;
+    margin: 0;
     height: 100%;
     position: relative;
 }
@@ -852,8 +866,6 @@ progress::-moz-progress-bar {
 
 .view .grid-top-border, .edit-view .grid-top-border {
     background: none repeat scroll 0 0 #A40000;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
     height: 5px;
     width: 100%;
     display: none;
@@ -862,10 +874,7 @@ progress::-moz-progress-bar {
 
 .view .grid-bottom-border, .edit-view .grid-bottom-border {
     background: none repeat scroll 0 0 #A40000;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
     height: 5px;
-
     display: block;
     position: fixed;
     bottom: 39px;
@@ -898,13 +907,12 @@ progress::-moz-progress-bar {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);
     /* For IE 8*/
     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";
-
     height: 100%;
     position: absolute;
     top: 0;
+    left: 0; /* To counteract the 5px padding on parent. Without it, in sandbox mode the red border shows through and not covered by overlay. Same for top:0, but that was already there */
     width: 100%;
     z-index: 90;
-
 }
 
 .edit-view .tab-label-wrap {
@@ -990,12 +998,12 @@ progress::-moz-progress-bar {
 }
 
 .edit-view .edit-view-form-item-div:first-child .edit-view-form-item-label-div {
-    border-top-left-radius: 5px;
+    border-top-left-radius: 4px;
 
 }
 
 .edit-view .edit-view-form-item-div:last-of-type .edit-view-form-item-label-div {
-    border-bottom-left-radius: 5px;
+    border-bottom-left-radius: 4px;
 
 }
 
@@ -1036,7 +1044,7 @@ progress::-moz-progress-bar {
     width: 98%;
     min-width: 900px;
     max-width: 1300px;
-    border-radius: 5px;
+    border-radius: 4px;
     height: 96%;
 }
 
@@ -1044,7 +1052,7 @@ progress::-moz-progress-bar {
 .edit-view .edit-view-tab-bar .edit-view-tab-outside {
     background: none repeat scroll 0 0 #EAEAEA;
     border: 1px solid #AAAAAA;
-    border-radius: 10px;
+    border-radius: 4px;
     border-top-left-radius: 0;
     min-height: 200px;
     overflow: auto;
@@ -1055,7 +1063,7 @@ progress::-moz-progress-bar {
 .edit-view .edit-view-tab-bar .edit-view-tab-outside-sub-view {
     background: none repeat scroll 0 0 #EAEAEA;
     border: 1px solid #AAAAAA;
-    border-radius: 10px;
+    border-radius: 4px;
     border-top-left-radius: 0;
     min-height: 400px;
     overflow-y: hidden; /** #2353 - Prevent this extra scrollbar. Only show data table scrollbars. **/
@@ -1091,7 +1099,7 @@ progress::-moz-progress-bar {
 
 .edit-view .edit-view-tab-bar .edit-view-tab-outside .edit-view-tab .first-column {
     border: 1px solid #C7C7C7;
-    border-radius: 5px 5px 5px 5px;
+    border-radius: 4px;
     float: left;
     width: 48%;
     margin-bottom: 5px;
@@ -1099,7 +1107,7 @@ progress::-moz-progress-bar {
 
 .edit-view .edit-view-tab-bar .edit-view-tab-outside .edit-view-tab .first-row {
     border: 1px solid #C7C7C7;
-    border-radius: 5px 5px 5px 5px;
+    border-radius: 4px;
     float: left;
     min-width: 400px;
     margin-bottom: 5px;
@@ -1107,7 +1115,7 @@ progress::-moz-progress-bar {
 
 .edit-view .edit-view-tab-bar .edit-view-tab-outside .edit-view-tab .second-column {
     border: 1px solid #C7C7C7;
-    border-radius: 5px 5px 5px 5px;
+    border-radius: 4px;
     float: right;
     width: 50%;
     margin-left: 10px;
@@ -1116,13 +1124,13 @@ progress::-moz-progress-bar {
 
 .edit-view .edit-view-tab-bar .edit-view-tab-outside .edit-view-tab .border-column {
     border: 1px solid #C7C7C7;
-    border-radius: 5px 5px 5px 5px;
+    border-radius: 4px;
     float: left;
 }
 
 .edit-view .edit-view-tab-bar .edit-view-tab-outside .edit-view-tab .second-row {
     border: 1px solid #C7C7C7;
-    border-radius: 5px 5px 5px 5px;
+    border-radius: 4px;
     float: left;
     margin-bottom: 5px;
 }
@@ -1898,7 +1906,7 @@ progress::-moz-progress-bar {
     width: 250px;
     height: auto;
     border: 1px solid #C7C7C7;
-    border-radius: 5px;
+    border-radius: 4px;
 }
 
 .total-data-row {
@@ -1931,12 +1939,12 @@ progress::-moz-progress-bar {
 
 .inside-custom-style {
     border: 1px solid #C7C7C7;
-    border-radius: 5px;
+    border-radius: 4px;
     text-align: center;
 }
 
 .qtip-contentWrapper {
-    border-radius: 3px;
+    border-radius: 4px;
     font-size: 11px;
 }
 
@@ -2056,33 +2064,6 @@ progress::-moz-progress-bar {
     left: 50%;
 }
 
-.browser-banner {
-    background: none repeat scroll 0 0 #cccccc;
-    border: 1px solid #999999;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    left: 0;
-    height: 25px;
-    line-height: 25px;
-    margin-left: auto;
-    margin-right: auto;
-    position: absolute;
-    right: 0;
-    top: 0;
-    text-align: center;
-    width: 100%;
-    background: yellow;
-    vertical-align: middle
-}
-
-.browser-banner .label {
-    color: #ae0000;
-}
-
-.browser-banner a {
-
-}
-
 .t-image {
     max-width: 200px;
     max-height: 200px;
@@ -2199,6 +2180,26 @@ progress::-moz-progress-bar {
 
 }
 
+.ui-resizable-n {
+    top: 0px; /* To cancel out the 5px padding applied to .dashlet-container */
+}
+
+.ui-resizable-e {
+    right: 0; /* To cancel out the 5px padding applied to .dashlet-container */
+}
+
+.ui-resizable-s {
+    bottom: 0; /* To cancel out the 5px padding applied to .dashlet-container */
+}
+
+.ui-resizable-w {
+    left: 0; /* To cancel out the 5px padding applied to .dashlet-container */
+}
+
+.ui-resizable-se.ui-icon-gripsmall-diagonal-se {
+    background-position: -65px -225px;
+}
+
 .ui-sortable-helper {
     opacity: 0.5;
     z-index:50;
@@ -2206,19 +2207,17 @@ progress::-moz-progress-bar {
 
 
 .dashlet {
-
     box-sizing: border-box;
     background-color: #f8f8f8;
-    border-bottom: 2px solid #355f87;
-    border-top: 30px solid #355f87;;
-    border-left: 2px solid #355f87;;
-    border-right: 2px solid #355f87;;
+    border-bottom: 2px solid #32689b;
+    border-top: 30px solid #32689b;
+    border-left: 2px solid #32689b;
+    border-right: 2px solid #32689b;
     font-size: 12px;
     text-align: center;
-    border-radius: 10px;
+    border-radius: 4px;
     position: relative;
     height: 100%;
-
 }
 
 .dashlet .title {
@@ -2249,7 +2248,7 @@ progress::-moz-progress-bar {
 .dashlet .button-bar .button {
     background-color: #1B3E60;
     border: 1px solid #6687A6;
-    border-radius: 4px 4px 4px 4px;
+    border-radius: 4px;
     color: #FFFFFF;
     font-size: 10px;
     padding-bottom: 2px;
@@ -2280,11 +2279,6 @@ progress::-moz-progress-bar {
     left: 5px;
     top: -24px;
     position: absolute;
-}
-
-.dashlet .no-result-div {
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
 }
 
 .dashlet .dashlet-left-cover {
@@ -2451,33 +2445,25 @@ progress::-moz-progress-bar {
     width: calc( 100% - 1px );
 }
 
-.t-alert {
+.t-alert, .confirm-alert {
     background-color: #f8f8f8;
-    border-bottom: 35px solid #355f87;
-    border-top: 40px solid #355f87;;
-    border-left: 20px solid #355f87;;
-    border-right: 20px solid #355f87;;
+    border-bottom: 2px solid #32689b;
+    border-top: 30px solid #32689b;
+    border-left: 2px solid #32689b;
+    border-right: 2px solid #32689b;
     position: absolute;
     top: 40%;
     left: 50%;
     margin: -130px 0 0 -130px;
     height: auto;
-
     width: 260px;
     font-size: 12px;
     text-align: center;
     z-index: 6001;
-    border-radius: 15px;
-    padding: 6px;
-
-    -moz-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
-    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
-    /* For IE 8 */
-    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
-    /* For IE 5.5 - 7 */
-    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
-
+    border-radius: 4px;
+    padding: 10px;
+    padding-bottom: 30px;
+    box-shadow: 5px 5px 8px 0px rgba(0, 0, 0, 0.3), 0 0 60px 5px rgba(0, 0, 0, 0.38);
 }
 
 .t-alert .content-div,
@@ -2487,24 +2473,26 @@ progress::-moz-progress-bar {
     overflow: auto;
 }
 
-.t-alert .title {
+.t-alert .title,
+.confirm-alert .title {
     color: #ffffff;
     position: absolute;
-    top: -30px;
-    left: 0;
-    font-size: 14px;
-}
-
-.t-alert .content {
-
+    top: -21px;
+    left: 5px;
     font-size: 12px;
 }
 
-.t-alert .bottom-bar {
+.t-alert .content,
+.confirm-alert .content {
+    font-size: 12px;
+}
+
+.t-alert .bottom-bar,
+.confirm-alert .bottom-bar {
     position: absolute;
     height: 30px;
     border: none;
-    bottom: -35px;
+    bottom: 0;
     width: 100%;
 }
 
@@ -2515,7 +2503,7 @@ progress::-moz-progress-bar {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#c6c4c4');
     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#ffffff, endColorstr='#c6c4c4)";
 
-    border-radius: 6px;
+    border-radius: 4px;
     border: none;
     color: #333333;
     font-family: arial;
@@ -2532,63 +2520,11 @@ progress::-moz-progress-bar {
     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#c6c4c4, endColorstr='#f6f6f6)";
 }
 
-.confirm-alert {
-    background-color: #f8f8f8;
-    border-bottom: 35px solid #355f87;
-    border-top: 40px solid #355f87;;
-    border-left: 20px solid #355f87;;
-    border-right: 20px solid #355f87;;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin: -130px 0 0 -130px;
-    height: auto;
-    min-height: 100px;
-    width: 260px;
-    font-size: 12px;
-    text-align: center;
-    z-index: 6001;
-    border-radius: 15px;
-    padding: 6px;
-
-    -moz-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
-    box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
-    /* For IE 8 */
-    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
-    /* For IE 5.5 - 7 */
-    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
-
-}
-
-.confirm-alert .title {
-    color: #ffffff;
-    position: absolute;
-    top: -30px;
-    left: 0;
-    font-size: 14px;
-}
-
-.confirm-alert .content {
-
-    font-size: 12px;
-}
-
 .confirm-alert ol {
-
     text-align: left;
 }
 
-.confirm-alert .bottom-bar {
-    position: absolute;
-    height: 30px;
-    border: none;
-    bottom: -35px;
-    width: 100%;
-}
-
 .confirm-alert .button {
-
     margin-right: 10px;
 }
 
@@ -2640,12 +2576,12 @@ progress::-moz-progress-bar {
     margin-right: 10px;
     display: none;
     cursor: pointer;
-    border: 1px solid #355f87;
+    border: 1px solid #32689b;
     padding-top: 2px;
     padding-bottom: 2px;
     padding-left: 3px;
     padding-right: 2px;
-    border-radius: 3px;
+    border-radius: 4px;
     position: relative;
 }
 
@@ -2677,7 +2613,7 @@ progress::-moz-progress-bar {
 
 .signal-strength li div {
     height: 100%;
-    background: #355f87;
+    background: #32689b;
 }
 
 .signal-strength-empty div {
@@ -2691,8 +2627,8 @@ progress::-moz-progress-bar {
 }
 
 .tt-liveChat {
-    border: 1px solid #355f87;
-    border-radius: 3px;
+    border: 1px solid #32689b;
+    border-radius: 4px;
     position: relative;
     color: #4a4a4a;
     padding-left: 15px;
@@ -3004,6 +2940,10 @@ th.ui-th-column div {
     background: red;
 }
 
+.top-container .ui-state-active, .top-container .ui-widget-content .ui-state-active {
+    border-bottom: none;
+}
+
 .top-container .ui-state-active, .top-container .ui-widget-content .ui-state-active.context-menu {
     border: 1px solid #ccc;
     background: #d8e7f4 !important;
@@ -3185,8 +3125,8 @@ th.ui-th-column div {
 .edit-view .edit-view-tab-bar-label .ui-state-default {
     border: 1px solid #AAAAAA;
     background: none;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     font-size: 12px;
     border-bottom: none;
 }
@@ -3284,14 +3224,6 @@ th.ui-state-hover {
 
 .ui-datepicker select.ui-datepicker-month, .ui-datepicker select.ui-datepicker-year {
     width: 46%;
-}
-
-.ui-resizable-n {
-    cursor: n-resize;
-    height: 7px;
-    width: 100%;
-    top: -0px;
-    left: 0;
 }
 
 .employee-edit-view #tab_qualifications.edit-view-tab-outside-sub-view,

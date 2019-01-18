@@ -107,6 +107,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( ( isset( $data['filter_columns'] ) ) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions( 'list_columns' ) ) );
 		}
 
+		/** @var $blf PayrollRemittanceAgencyEventListFactory */
 		$blf = TTnew( 'PayrollRemittanceAgencyEventListFactory' );
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text( 'Record Count: ' . $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -394,8 +395,7 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 	 * @param null $data
 	 * @return array|bool
 	 */
-	function getReportData ( $prae_id, $report_id, $data = NULL ) {
-
+	function getReportData( $prae_id, $report_id, $data = NULL ) {
 		if ( !$this->getPermissionObject()->Check( 'payroll_remittance_agency', 'enabled' )
 				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit_own' ) )
 		) {
@@ -408,21 +408,51 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 		if ( $praelf->getRecordCount() > 0 ) {
 			$user_obj = $this->getCurrentUserObject();
 			$permission_obj = $this->getPermissionObject();
-			return $this->returnHandler($praelf->getCurrent()->getReport( $report_id, $data, $user_obj, $permission_obj, $this) );
+
+			$report_obj = $praelf->getCurrent()->getReport( $report_id, $data, $user_obj, $permission_obj );
+
+			$output_arr = $report_obj->getOutput( $report_id );
+			if ( isset( $output_arr['file_name'] ) AND isset( $output_arr['mime_type'] ) AND isset( $output_arr['data'] ) ) {
+				//If using the SOAP API, return data base64 encoded so it can be decoded on the client side.
+				if ( defined( 'TIMETREX_SOAP_API' ) AND TIMETREX_SOAP_API == TRUE ) {
+					$output_arr['data'] = base64_encode( $output_arr['data'] );
+
+					$retval = $this->returnHandler( $output_arr );
+				} else {
+					if ( $output_arr['mime_type'] === 'text/html' ) {
+						$retval = $this->returnHandler( $output_arr['data'] );
+					} else {
+						Misc::APIFileDownload( $output_arr['file_name'], $output_arr['mime_type'], $output_arr['data'] );
+
+						return NULL; //Don't send any additional data, so JSON encoding doesn't corrupt the download.
+					}
+				}
+			} elseif ( isset( $output_arr['api_retval'] ) ) { //Pass through validation errors.
+				Debug::Text( 'Report returned VALIDATION error, passing through...', __FILE__, __LINE__, __METHOD__, 10 );
+
+				$retval = $this->returnHandler( $output_arr['api_retval'], $output_arr['api_details']['code'], $output_arr['api_details']['description'] );
+			} elseif ( $output_arr !== FALSE ) {
+				//Likely RAW data, return untouched.
+				$retval = $this->returnHandler( $output_arr );
+			} else {
+				//getOutput() returned FALSE, some error occurred. Likely load too high though.
+				$retval = $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText( 'ERROR: Please try again later or narrow your search criteria to decrease the size of your report' ) . '...' );
+			}
+
+			return $this->returnHandler( $retval ); //This is double wrapped in returnHandler() for some reason
 		}
 
 		return $this->returnHandler( FALSE );
 	}
 
 	/**
-	 * Returns report data intended for the tax wizard
+	 * Returns make payment data intended for the tax wizard
 	 * @param $prae_id
 	 * @param $report_id
 	 * @param null $data
 	 * @return array|bool
 	 */
-	function getURL( $prae_id, $action_id, $data = NULL ) {
-
+	function getMakePaymentData( $prae_id, $action_id, $data = NULL ) {
 		if ( !$this->getPermissionObject()->Check( 'payroll_remittance_agency', 'enabled' )
 				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit_own' ) )
 		) {
@@ -432,8 +462,137 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 		/** @var PayrollRemittanceAgencyEventListFactory $praelf */
 		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
 		$praelf->getByIdAndCompanyId( $prae_id, $this->getCurrentCompanyObject()->getId() );
-		if ( $praelf->getRecordCount() > 0 ) {
-			return $this->returnHandler( $praelf->getCurrent()->getURL( $action_id ) );
+		if ( $praelf->getRecordCount() == 1 ) {
+			$prae_obj = $praelf->getCurrent();
+
+			$retval = $prae_obj->getURL( $action_id );
+
+			return $this->returnHandler( $retval );
+		}
+
+		return $this->returnHandler( FALSE );
+	}
+
+	/**
+	 * Submits data to Payment Services for filing and payment.
+	 * @param $prae_id
+	 * @param $report_id
+	 * @param null $data
+	 * @return array|bool
+	 */
+	function getFileAndPayWithPaymentServicesData( $prae_id, $action_id, $data = NULL ) {
+		if ( !$this->getPermissionObject()->Check( 'payroll_remittance_agency', 'enabled' )
+				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'edit_own' ) )
+		) {
+			return $this->getPermissionObject()->PermissionDenied();
+		}
+
+		/** @var PayrollRemittanceAgencyEventListFactory $praelf */
+		$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+		$praelf->getByIdAndCompanyId( $prae_id, $this->getCurrentCompanyObject()->getId() );
+		if ( $praelf->getRecordCount() == 1 ) {
+			$prae_obj = $praelf->getCurrent();
+
+			if ( $prae_obj->getStatus() == 15 ) { //15=Full Service
+				$retval = array(
+						'result' => FALSE,
+						'user_message' => TTi18n::gettext('ERROR: General error occurred, please contact customer service immediately.'),
+				);
+
+				if ( is_object( $prae_obj->getPayrollRemittanceAgencyObject() ) ) {
+					/** @var $pra_obj PayrollRemittanceAgencyFactory */
+					$pra_obj = $prae_obj->getPayrollRemittanceAgencyObject();
+
+					/** @var $rs_obj PayrollRemittanceSourceFactory */
+					$rs_obj = $pra_obj->getRemittanceSourceAccountObject();
+
+					/** @var LegalEntityFactory $le_obj */
+					$le_obj = $rs_obj->getLegalEntityObject();
+
+					if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH, 5=TimeTrex EFT
+
+						if ( is_object( $pra_obj->getContactUserObject() ) ) {
+							Debug::Text( '  Agency Event: Agency: ' . $prae_obj->getPayrollRemittanceAgencyObject()->getName() . ' Legal Entity: ' . $prae_obj->getPayrollRemittanceAgencyObject()->getLegalEntity() . ' Type: ' . $prae_obj->getType() . ' Due Date: ' . TTDate::getDate( 'DATE', $prae_obj->getDueDate() ) . ' ID: ' . $prae_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+							Debug::Text( '  Remittance Source: Name: ' . $rs_obj->getName() . ' API Username: ' . $rs_obj->getValue5(), __FILE__, __LINE__, __METHOD__, 10 );
+
+							$pra_user_obj = $pra_obj->getContactUserObject();
+
+							/** @var $report_obj Report */
+							$report_obj = $prae_obj->getReport( 'raw', NULL, $pra_user_obj, new Permission() );
+							//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
+
+							$output_data = $report_obj->getPaymentServicesData();
+							Debug::Arr( $output_data, 'Report Payment Services Data: ', __FILE__, __LINE__, __METHOD__, 10 );
+							if ( is_array( $output_data ) ) {
+								if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+									try {
+										$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+
+										$batch_id = $tt_ps_api->generateBatchID( $prae_obj->getEndDate() );
+
+										//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
+										//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
+										$remote_id = TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id ) );
+
+										$agency_report_arr = $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj, NULL, NULL, NULL, NULL, $batch_id, $remote_id, 'P' );
+										$retval = $tt_ps_api->setAgencyReport( $agency_report_arr ); //P=Payment
+										Debug::Arr( $retval, 'TimeTrexPaymentServices Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+										if ( $retval->isValid() == TRUE ) {
+											$retval = array(
+													'result'       => TRUE,
+													'user_message' => TTi18n::gettext( 'Payment submitted successfully for $%1', array(Misc::MoneyFormat( $agency_report_arr['amount_due'] )) ),
+											);
+										} else {
+											$retval = array(
+													'result' => FALSE,
+													'user_message' => TTi18n::gettext('Payment Services Validation ERROR: %1', array( $retval->getDescription() ) ),
+											);
+										}
+										unset( $agency_report_arr );
+									} catch ( Exception $e ) {
+										Debug::Text( 'ERROR! Unable to upload agency report data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+										$retval = array(
+												'result' => FALSE,
+												'user_message' => TTi18n::gettext('Payment Services ERROR: %1', array( $e->getMessage() ) ),
+										);
+									}
+									unset( $tt_ps_api, $agency_report_arr, $batch_id, $remote_id );
+								} else {
+									Debug::Text( 'WARNING: Production is off, not calling payment services API...', __FILE__, __LINE__, __METHOD__, 10 );
+									$retval = array(
+											'result' => FALSE,
+											'user_message' => TTi18n::gettext('WARNING: Not in PRODUCTION mode, unable to send data to Payment Services.'),
+									);
+
+									//$retval = TRUE;
+								}
+							} else {
+								Debug::Arr( $output_data, 'Report returned unexpected number of rows, not transmitting...', __FILE__, __LINE__, __METHOD__, 10 );
+								$retval = array(
+										'result' => FALSE,
+										'user_message' => TTi18n::gettext('ERROR: Unable to generate report to for transmission to Payment Services.'),
+								);
+
+							}
+						} else {
+							Debug::Text( '  ERROR! Contact user assign to agency is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
+						}
+					} else {
+						Debug::Text( '  ERROR! Remittance Source Account is not EFT or TimeTrex Payment Services!', __FILE__, __LINE__, __METHOD__, 10 );
+					}
+				} else {
+					Debug::Text( '  ERROR! Remittance Agency Object is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+
+
+			} else {
+				$retval = array(
+						'result' => FALSE,
+						'user_message' => TTi18n::gettext('ERROR: Agency event is not configured for full service processing.'),
+				);
+			}
+
+			return $this->returnHandler( $retval );
 		}
 
 		return $this->returnHandler( FALSE );

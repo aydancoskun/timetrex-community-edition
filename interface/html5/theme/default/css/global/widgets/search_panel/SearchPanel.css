@@ -75,19 +75,19 @@
     cursor: pointer;
     margin-bottom: 0;
     padding-bottom: 1px;
-    background: #ffffff !important;
+    background: #f9f9f9 !important;
+    border-bottom-color: transparent;
 }
 
 /*Current table div style*/
 .search-panel .search-panel-tab-outside {
-    background: none repeat scroll 0 0 #EAEAEA;
+    background: none repeat scroll 0 0 #f9f9f9;
     border: 1px solid #BDBDBD;
-    border-radius: 10px;
+    border-radius: 4px;
     float: left;
     margin-bottom: 2px;
     width: 100%;
     border-bottom-left-radius: 0;
-
 }
 
 .search-panel .search-panel-tab-outside-collapse {
@@ -183,13 +183,13 @@
     float: left;
     border: 1px solid #BDBDBD;
     border-top: none;
-    border-radius: 6px;
+    border-radius: 4px;
     border-top-right-radius: 0;
     border-top-left-radius: 0;
     padding: 3px;
     margin-bottom: 5px;
     margin-top: -3px;
-    background: #EAEAEA;
+    background: #f5f5f5;
 }
 
 .search-panel .search-panel-tab-bar .search-panel-tab-bar-label .ui-state-hover {
@@ -208,8 +208,8 @@
 .search-panel .search-panel-tab-bar-label .ui-state-default {
     border: 1px solid #BDBDBD;
     background: none;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     font-size: 12px;
     margin-bottom: 0;
     padding-bottom: 1px;

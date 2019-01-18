@@ -67,8 +67,8 @@ class RemittanceSourceAccountFactory extends Factory {
 				break;
 			case 'type':
 				$retval = array(
-					//1000 => TTi18n::gettext('TimeTrex EFT'),
-					//1010 => TTi18n::gettext('TimeTrex Check'),
+					//1000 => TTi18n::gettext('TimeTrex EFT'), //See Formats instead
+					//1010 => TTi18n::gettext('TimeTrex Check'), //See Formats instead
 					2000 => TTi18n::gettext('Check'),
 					3000 => TTi18n::gettext('EFT/ACH'),
 					//9000 => TTi18n::gettext('Bitcoin'),
@@ -104,6 +104,7 @@ class RemittanceSourceAccountFactory extends Factory {
 					switch( $params['type_id'] ) {
 						case 2000: //Check
 							$tmp_retval = array(
+								//5  => TTi18n::gettext('TimeTrex Checks'),
 								10 => TTi18n::gettext('Top Check (Sage) [9085]'), //cheque_9085 // SS9085 (still current for Sage 50 & Accpac)  https://www.nebs.ca/canEcat/products/product_detail.jsp?pc=SS9085
 								20 => TTi18n::gettext('Top Check (QuickBooks) [9209P]'), //cheque_9209p // SS9209 (still current for Quickbooks)  https://www.nebs.ca/canEcat/products/product_detail.jsp?pc=SS9209
 								30 => TTi18n::gettext('Top Check Lined (QuickBooks) [DLT103]'), //cheque_dlt103 // DLT103 (fill-in lines on cheques)  https://www.deluxe.com/shopdeluxe/pd/laser-top-checks-lined/_/A-DLT103
@@ -113,6 +114,7 @@ class RemittanceSourceAccountFactory extends Factory {
 							break;
 						case 3000: //EFT
 							$tmp_retval = array(
+								5 => TTi18n::gettext( 'TimeTrex Payment Services' ),
 								10 => TTi18n::gettext( 'United States - ACH (94-Byte)' ),
 								20 => TTi18n::gettext( 'Canada - EFT (1464-Byte)' ),
 								30 => TTi18n::gettext( 'Canada - EFT CIBC (1464-Byte)'),
@@ -123,9 +125,9 @@ class RemittanceSourceAccountFactory extends Factory {
 							);
 
 							if ( $params['country'] == 'US' ) {
-								$valid_keys = array(10);
+								$valid_keys = array(5, 10);
 							}elseif ( $params['country'] == 'CA' ) {
-								$valid_keys = array(20, 30, 50, 70);
+								$valid_keys = array(5, 20, 30, 50, 70);
 							}
 							break;
 					}
@@ -1142,6 +1144,16 @@ class RemittanceSourceAccountFactory extends Factory {
 												   TTi18n::gettext( 'Legal entity is invalid' )
 			);
 		}
+
+		//When using TimeTrex EFT service, all source accounts must be directly assigned to a legal entity.
+		if ( $this->getType() == 3000 AND $this->getDataFormat() == 5 AND $this->getLegalEntity() == TTUUID::getNotExistID() ) {
+			$this->Validator->isTrue(		'legal_entity_id',
+											 FALSE,
+											 TTi18n::gettext('Legal Entity must be specified')
+			);
+		}
+
+
 		// Currency
 		if ( $this->getCurrency() !== FALSE ) {
 			$culf = TTnew( 'CurrencyListFactory' );
@@ -1679,6 +1691,18 @@ class RemittanceSourceAccountFactory extends Factory {
 			}
 		}
 
+		if ( $this->getDeleted() == FALSE AND $this->getType() == 3000 AND $this->getDataFormat() == 5 AND is_object( $this->getLegalEntityObject() ) ) { //3000=EFT/ACH, 5=TimeTrex EFT
+			if ( $this->getLegalEntityObject()->getPaymentServicesStatus() == 10 ) {
+				$this->Validator->isTrue( 'data_format_id',
+										  $this->getLegalEntityObject()->checkPaymentServicesCredentials(),
+										  TTi18n::gettext( 'Payment Services User Name or API Key is incorrect, or service not activated' ) );
+			} else {
+				$this->Validator->isTrue( 'data_format_id',
+										  FALSE,
+										  TTi18n::gettext( 'Payment Services are not enabled for this Legal Entity' ) );
+			}
+		}
+
 		return TRUE;
 	}
 
@@ -1694,6 +1718,26 @@ class RemittanceSourceAccountFactory extends Factory {
 	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
+
+		if ( $this->getType() == 3000 AND $this->getDataFormat() == 5 ) { //3000=EFT/ACH, 5=TimeTrex EFT
+			//Send data to TimeTrex Payment Services.
+			$le_obj = $this->getLegalEntityObject();
+			if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+				try {
+					$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+					$retval = $tt_ps_api->setRemittanceSourceAccount( $tt_ps_api->convertRemittanceSourceAccountObjectToBankAccountArray( $this ) );
+					if ( $retval === FALSE ) {
+						Debug::Text( 'ERROR! Unable to upload remittance source account data... (a)', __FILE__, __LINE__, __METHOD__, 10 );
+
+						return FALSE;
+					}
+				} catch ( Exception $e ) {
+					Debug::Text( 'ERROR! Unable to upload remittance source account data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			} else {
+				Debug::Text( 'ERROR! Payment Services not enable in legal entity!', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		}
 
 		return TRUE;
 	}

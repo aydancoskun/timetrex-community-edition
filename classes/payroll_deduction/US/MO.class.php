@@ -212,7 +212,7 @@ class PayrollDeduction_US_MO extends PayrollDeduction_US {
 							'30' => 24000.00,
 							'40' => 18000.00,
 					),
-					'allowance'           => array(
+					'allowance'           => array( //Removed in 2018.
 							'10' => array(2100.00, 1200.00, 1200.00),
 							'20' => array(2100.00, 1200.00, 1200.00),
 							'30' => array(2100.00, 2100.00, 1200.00),

@@ -188,49 +188,6 @@ class Wage {
 	}
 
 	/**
-	 * @param int $transaction_epoch EPOCH
-	 * @param $avg_monthly_remittance
-	 * @return bool|false|int
-	 */
-	static function getRemittanceDueDate( $transaction_epoch, $avg_monthly_remittance) {
-		Debug::text('Transaction Date: '. TTDate::getDate('DATE+TIME', $transaction_epoch), __FILE__, __LINE__, __METHOD__, 10);
-		if ( $transaction_epoch > 0 ) {
-			if ( $avg_monthly_remittance < 15000 ) {
-				Debug::text('Regular Monthly', __FILE__, __LINE__, __METHOD__, 10);
-				//15th of the month FOLLOWING transaction_epoch.
-				$due_date = mktime(0, 0, 0, ( date('n', $transaction_epoch) + 1), 15, date('y', $transaction_epoch) );
-			} elseif ( $avg_monthly_remittance >= 15000 AND $avg_monthly_remittance < 49999.99 ) {
-				Debug::text('Accelerated Threshold 1', __FILE__, __LINE__, __METHOD__, 10);
-				/*
-				Amounts you deduct or withhold from remuneration paid in the first 15 days of the month
-				are due by the 25th of the same month. Amounts you withhold from the 16th to the end of
-				the month are due by the 10th day of the following month.
-				*/
-				if ( date('j', $transaction_epoch) <= 15 ) {
-					$due_date = mktime(0, 0, 0, date('n', $transaction_epoch), 25, date('y', $transaction_epoch) );
-				} else {
-					$due_date = mktime(0, 0, 0, ( date('n', $transaction_epoch) + 1), 10, date('y', $transaction_epoch) );
-				}
-			} elseif ( $avg_monthly_remittance > 50000) {
-				Debug::text('Accelerated Threshold 2', __FILE__, __LINE__, __METHOD__, 10);
-				/*
-				Amounts you deduct or withhold from remuneration you pay any time during the month are due by the third working day (not counting Saturdays, Sundays, or holidays) after the end of the following periods:
-
-				* from the 1st through the 7th day of the month;
-				* from the 8th through the 14th day of the month;
-				* from the 15th through the 21st day of the month; and
-				* from the 22nd through the last day of the month.
-				*/
-				return FALSE;
-			}
-		} else {
-			$due_date = FALSE;
-		}
-
-		return $due_date;
-	}
-
-	/**
 	 * @param $seconds
 	 * @param $rate
 	 * @return int|string

@@ -3547,7 +3547,7 @@ class SetupPresets extends Factory {
 											'calculation_order'              => 186,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - Disability Insurance' ),
 											'user_value1'                    => 1.0, //Percent
-											'user_value2'                    => 114967, //WageBase
+											'user_value2'                    => 118371, //WageBase - Rate for: 20190101
 											'user_value3'                    => 0,
 											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
 											'exclude_pay_stub_entry_account' => array(
@@ -3586,7 +3586,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'co': //colorado
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 12600; //Rate for: 20180101
+							$state_unemployment_wage_base = 13100; //Rate for: 20190101
 
 							break;
 						case 'ct': //connecticut
@@ -3817,7 +3817,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ia': //iowa
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 29900; //Rate for: 20180101
+							$state_unemployment_wage_base = 30600; //Rate for: 20190101
 
 							//Reserve Fund
 							$this->createCompanyDeduction(
@@ -3875,7 +3875,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ky': //kentucky
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 10200;
+							$state_unemployment_wage_base = 10500; //Rate for: 20190101
 							break;
 						case 'la': //louisiana
 							//Unemployment Insurance - Employee
@@ -3974,7 +3974,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'mn': //minnesota
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 32000;
+							$state_unemployment_wage_base = 34000; //Rate for: 20190101
 
 							//Workforce Enhancement Fee
 							$this->createCompanyDeduction(
@@ -4032,11 +4032,11 @@ class SetupPresets extends Factory {
 							break;
 						case 'mo': //missouri
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 12500; //Rate for: 20180101
+							$state_unemployment_wage_base = 12000; //Rate for: 20190101
 							break;
 						case 'mt': //montana
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 32000; //Rate for: 20180101
+							$state_unemployment_wage_base = 33000; //Rate for: 20190101
 
 							//Administrative Fund
 							$this->createCompanyDeduction(
@@ -4094,7 +4094,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'nv': //nevada
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 30500; //Rate for: 20180101
+							$state_unemployment_wage_base = 31200; //Rate for: 20190101
 
 							//Career Enhancement
 							$this->createCompanyDeduction(
@@ -4333,7 +4333,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'nm': //new mexico
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 24200; //Rate for: 20180101
+							$state_unemployment_wage_base = 24800; //Rate for: 20190101
 
 							//State Trust Fund
 							$this->createCompanyDeduction(
@@ -4362,7 +4362,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ny': //new york
 							//Unemployment Insurance - Employee
-							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 11100; //Rate for: 20180101
+							$company_state_unemployment_wage_base = $state_unemployment_wage_base = 11400; //Rate for: 20190101
 
 							//Reemployment Service Fund
 							$this->createCompanyDeduction(
@@ -4548,7 +4548,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'nc': //north carolina
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 23500; //Rate for: 20180101
+							$state_unemployment_wage_base = 24300; //Rate for: 20190101
 							break;
 						case 'nd': //north dakota
 							//Unemployment Insurance - Employee
@@ -4560,7 +4560,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'ok': //oklahoma
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 17600; //Rate for: 20180101
+							$state_unemployment_wage_base = 18100; //Rate for: 20190101
 							break;
 						case 'or': //oregon
 							//Unemployment Insurance - Employee
@@ -4885,7 +4885,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'tn': //tennessee
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 8000;
+							$state_unemployment_wage_base = 7000; //Rate for: 20190101
 
 							//Job Skills Fee
 							$this->createCompanyDeduction(
@@ -4972,7 +4972,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'vt': //vermont
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 17600; //Rate for: 20180101
+							$state_unemployment_wage_base = 15600; //Rate for: 20190101
 							break;
 						case 'va': //virginia
 							//Unemployment Insurance - Employee
@@ -4980,7 +4980,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'wa': //washington
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 47300; //Rate for: 20180101
+							$state_unemployment_wage_base = 49800; //Rate for: 20190101
 
 							//Industrial Insurance - Employee
 							$this->createCompanyDeduction(
@@ -5067,7 +5067,7 @@ class SetupPresets extends Factory {
 							break;
 						case 'wy': //wyoming
 							//Unemployment Insurance - Employee
-							$state_unemployment_wage_base = 24700; //Rate for: 20180101
+							$state_unemployment_wage_base = 24400; //Rate for: 20190101
 
 							//Employment Support Fund
 							$this->createCompanyDeduction(

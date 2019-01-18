@@ -67,7 +67,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 							$this->data['federal_total_claim_amount'] == $this->getBasicFederalClaimCodeAmount( $next_year )
 					)
 			) {
-				Debug::text( 'Using Basic Federal Claim Code Amount: ' . $this->getBasicFederalClaimCodeAmount() . ' (Previous Amount: ' . $this->data['federal_total_claim_amount'] . ') Date: ' . TTDate::getDate( 'DATE', $this->getDateEpoch() ), __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::text( 'Using Basic Federal Claim Code Amount: ' . $this->getBasicFederalClaimCodeAmount() . ' (Previous Amount: ' . $this->data['federal_total_claim_amount'] . ') Date: ' . $this->getDate(), __FILE__, __LINE__, __METHOD__, 10 );
 
 				return $this->getBasicFederalClaimCodeAmount();
 			}
@@ -104,7 +104,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 							$this->data['provincial_total_claim_amount'] == $this->getBasicProvinceClaimCodeAmount( $next_year )
 					)
 			) {
-				Debug::text( 'Using Basic Provincial Claim Code Amount: ' . $this->getBasicProvinceClaimCodeAmount() . ' (Previous Amount: ' . $this->data['provincial_total_claim_amount'] . ') Date: ' . TTDate::getDate( 'DATE', $this->getDateEpoch() ), __FILE__, __LINE__, __METHOD__, 10 );
+				Debug::text( 'Using Basic Provincial Claim Code Amount: ' . $this->getBasicProvinceClaimCodeAmount() . ' (Previous Amount: ' . $this->data['provincial_total_claim_amount'] . ') Date: ' . $this->getDate(), __FILE__, __LINE__, __METHOD__, 10 );
 
 				return $this->getBasicProvinceClaimCodeAmount();
 			}
@@ -208,19 +208,6 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		}
 
 		return 0;
-	}
-
-	function setWCBRate( $value ) {
-		$this->data['wcb_rate'] = $value;
-
-		return TRUE;
-	}
-
-	function getWCBRate() {
-		//Divide rate by 100 so its not a percent anymore.
-		return bcdiv( $this->data['wcb_rate'], 100 );
-
-		return TRUE;
 	}
 
 	function setFederalTaxExempt( $value ) {
@@ -336,7 +323,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 				//Must include bonus amount for pay period, as well as YTD bonus amount.
 			*/
 
-			$A = 0;
+//			$A = 0;
 			$P = $this->getAnnualPayPeriods();
 			$I = $this->getGrossPayPeriodIncome();
 			$F = 0;
@@ -344,13 +331,14 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			$U1 = $this->getUnionDuesAmount();
 			$HD = 0;
 			$F1 = 0;
-			Debug::text( 'P: ' . $P, __FILE__, __LINE__, __METHOD__, 10 );
-			Debug::text( 'I: ' . $I, __FILE__, __LINE__, __METHOD__, 10 );
-			Debug::text( 'U1: ' . $U1, __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::text( 'P: ' . $P, __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::text( 'I: ' . $I, __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::text( 'U1: ' . $U1, __FILE__, __LINE__, __METHOD__, 10 );
 
 			//$A = ($P * ($I - $F - $F2 - $U1) ) - $HD - $F1;
 			$A = bcsub( bcsub( bcmul( $P, bcsub( bcsub( bcsub( $I, $F ), $F2 ), $U1 ) ), $HD ), $F1 );
-			Debug::text( 'A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::text( 'A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'P: '. $P .' I: '. $I .' U1: '. $U1 .' A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return $A;
@@ -364,7 +352,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
         R = Federal tax rate applicable to annual taxable income
 		*/
 
-		$T3 = 0;
+//		$T3 = 0;
 		$A = $this->getAnnualTaxableIncome();
 		$R = $this->getData()->getFederalRate( $A );
 		$K = $this->getData()->getFederalConstant( $A );
@@ -384,14 +372,15 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			$K4 = 0;
 		}
 
-		Debug::text( 'A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'R: ' . $R, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K: ' . $K, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'TC: ' . $TC, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K1: ' . $K1, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K2: ' . $K2, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K3: ' . $K3, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K4: ' . $K4, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'R: ' . $R, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K: ' . $K, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'TC: ' . $TC, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K1: ' . $K1, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K2: ' . $K2, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K3: ' . $K3, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K4: ' . $K4, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'A: ' . $A .' R: '. $R .' K: '. $K .' TC: '. $TC .' K1: '. $K1 .' K2: '. $K2 .' K3: '. $K3 .' K4: '. $K4, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$T3 = ($R * $A) - $K - $K1 - $K2 - $K3 - $K4;
 		$T3 = bcsub( bcsub( bcsub( bcsub( bcsub( bcmul( $R, $A ), $K ), $K1 ), $K2 ), $K3 ), $K4 );
@@ -590,11 +579,12 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			$T2 = 0;
 		}
 
-		Debug::text( 'T2: ' . $T2, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'T4: ' . $T4, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'V1: ' . $V1, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'V2: ' . $V2, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'S: ' . $S, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'T2: ' . $T2, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'T4: ' . $T4, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'V1: ' . $V1, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'V2: ' . $V2, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'S: ' . $S, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'T2: ' . $T2 .' T4: '. $T4 .' V1: '. $V1 .' V2: '. $V2 .' S: '. $S, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $T2;
 	}
@@ -617,14 +607,15 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		$K3P = 0;
 		$K4P = $this->getProvincialEmploymentCredit();
 
-		Debug::text( 'A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'V: ' . $V, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'KP: ' . $KP, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'TCP: ' . $TCP, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K1P: ' . $K1P, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K2P: ' . $K2P, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K3P: ' . $K3P, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'K4P: ' . $K4P, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'A: ' . $A, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'V: ' . $V, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'KP: ' . $KP, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'TCP: ' . $TCP, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K1P: ' . $K1P, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K2P: ' . $K2P, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K3P: ' . $K3P, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'K4P: ' . $K4P, __FILE__, __LINE__, __METHOD__, 10 );
+		Debug::text( 'A: ' . $A .' V: '. $V .' KP: '. $KP .' TCP: '. $TCP .' K1P: '. $K1P .' K2P: '. $K2P .' K3P: '. $K3P .' K4P: '. $K3P, __FILE__, __LINE__, __METHOD__, 10 );
 
 		//$T4 = ($V * $A) - $KP - $K1P - $K2P - $K3P;
 		$T4 = bcsub( bcsub( bcsub( bcsub( bcsub( bcmul( $V, $A ), $KP ), $K1P ), $K2P ), $K3P ), $K4P );
@@ -638,66 +629,19 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return $T4;
 	}
 
+	//Should be overridden by provincial specific function.
 	function getProvincialTaxReduction() {
-
-		$A = $this->getAnnualTaxableIncome();
-		$T4 = $this->getProvincialBasicTax();
-		$V1 = $this->getProvincialSurtax();
-		$Y = 0;
-		$S = 0;
-
-		Debug::text( 'No Specific Province: ' . $this->getProvince(), __FILE__, __LINE__, __METHOD__, 10 );
-
-		Debug::text( 'aS: ' . $S, __FILE__, __LINE__, __METHOD__, 10 );
-
-		if ( $S < 0 ) {
-			$S = 0;
-		}
-
-		Debug::text( 'bS: ' . $S, __FILE__, __LINE__, __METHOD__, 10 );
-
-		return $S;
+		return 0; //$S
 	}
 
+	//Should be overridden by provincial specific function.
 	function getProvincialSurtax() {
-		/*
-			V1 =
-			For Ontario
-				Where T4 <= 4016
-				V1 = 0
-
-				Where T4 > 4016 <= 5065
-				V1 = 0.20 * ( T4 - 4016 )
-
-				Where T4 > 5065
-				V1 = 0.20 * (T4 - 4016) + 0.36 * (T4 - 5065)
-
-		*/
-
-		$T4 = $this->getProvincialBasicTax();
-		$V1 = 0;
-
-		Debug::text( 'V1: ' . $V1, __FILE__, __LINE__, __METHOD__, 10 );
-
-		return $V1;
+		return 0; // $V1
 	}
 
+	//Should be overridden by provincial specific function.
 	function getAdditionalProvincialSurtax() {
-		/*
-			V2 =
-
-			Where A < 20,000
-			V2 = 0
-
-			Where A >
-		*/
-
-		$A = $this->getAnnualTaxableIncome();
-		$V2 = 0;
-
-		Debug::text( 'V2: ' . $V2, __FILE__, __LINE__, __METHOD__, 10 );
-
-		return $V2;
+		return 0; // $V2
 	}
 
 	function getProvincialCPPAndEITaxCredit() {
@@ -742,8 +686,7 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 				$exemption = 0;
 			}
 
-			Debug::text( 'P: ' . $P, __FILE__, __LINE__, __METHOD__, 10 );
-			Debug::text( 'I: ' . $I, __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::text( 'P: ' . $P .' I: '. $I, __FILE__, __LINE__, __METHOD__, 10 );
 
 			$tmp2_C = bcmul( $this->getCPPEmployeeRate(), bcsub( $I, $exemption ) );
 		}
@@ -771,13 +714,13 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		}
 
 		$D = $this->getYearToDateCPPContribution();
-		Debug::text( 'D: ' . $D, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'D: ' . $D, __FILE__, __LINE__, __METHOD__, 10 );
 
 		$tmp1_C = bcsub( $this->getCPPEmployeeMaximumContribution(), $D );
 		$tmp2_C = $this->getEmployeeCPPForPayPeriod();
 
-		Debug::text( 'Tmp1_C: ' . $tmp1_C, __FILE__, __LINE__, __METHOD__, 10 );
-		Debug::text( 'Tmp2_C: ' . $tmp2_C, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'Tmp1_C: ' . $tmp1_C, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'Tmp2_C: ' . $tmp2_C, __FILE__, __LINE__, __METHOD__, 10 );
 
 		if ( $tmp1_C < $tmp2_C ) {
 			$C = $tmp1_C;
@@ -789,7 +732,9 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 			$C = 0;
 		}
 
-		Debug::text( 'C: ' . $C, __FILE__, __LINE__, __METHOD__, 10 );
+//		Debug::text( 'C: ' . $C, __FILE__, __LINE__, __METHOD__, 10 );
+
+		Debug::text( 'D: '. $D .' Tmp1_C: '. $tmp1_C .' Tmp2_C: '. $tmp2_C .' C: ' . $C, __FILE__, __LINE__, __METHOD__, 10 );
 
 		return $C;
 	}
@@ -882,24 +827,10 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return bcsub( $this->getGrossPayPeriodIncome(), $this->getPayPeriodEmployeeTotalDeductions() );
 	}
 
-	function getEmployerWCB() {
-		if ( $this->getWCBRate() != FALSE AND $this->getWCBRate() > 0 ) {
-			//$WCB = $this->getGrossPayPeriodIncome() * $this->getWCBRate();
-			$WCB = bcmul( $this->getGrossPayPeriodIncome(), $this->getWCBRate() );
-
-			Debug::text( 'Employer WCB: ' . $WCB . ' Rate: ' . $this->getWCBRate(), __FILE__, __LINE__, __METHOD__, 10 );
-
-			return $WCB;
-		}
-
-		return FALSE;
-	}
-
 	/*
 		Use this to get all useful values.
 	*/
 	function getArray() {
-
 		$array = array(
 				'gross_pay'                    => $this->getGrossPayPeriodIncome(),
 				'federal_tax'                  => $this->getFederalPayPeriodDeductions(),
@@ -909,7 +840,6 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 				'employer_cpp'                 => $this->getEmployerCPP(),
 				'employee_ei'                  => $this->getEmployeeEI(),
 				'employer_ei'                  => $this->getEmployerEI(),
-				'employer_wcb'                 => $this->getEmployerWCB(),
 				'federal_additional_deduction' => $this->getFederalAdditionalDeduction(),
 				//'net_pay' => $this->getPayPeriodNetPay()
 		);
@@ -919,5 +849,4 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		return $array;
 	}
 }
-
 ?>

@@ -40,6 +40,12 @@
  */
 class PayrollDeduction_CA_NU extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
+			20190101 => array(
+					array('income' => 45414, 'rate' => 4.0, 'constant' => 0),
+					array('income' => 90829, 'rate' => 7.0, 'constant' => 1362),
+					array('income' => 147667, 'rate' => 9.0, 'constant' => 3179),
+					array('income' => 147667, 'rate' => 11.5, 'constant' => 6871),
+			),
 			20180101 => array(
 					array('income' => 44437, 'rate' => 4.0, 'constant' => 0),
 					array('income' => 88874, 'rate' => 7.0, 'constant' => 1333),

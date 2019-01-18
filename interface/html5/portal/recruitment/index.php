@@ -82,6 +82,8 @@ if ( isset($_GET['company_id']) AND $_GET['company_id'] != '' ) {
 	exit;
 }
 
+Misc::redirectUnSupportedBrowser(); //Redirect unsupported web browsers automatically.
+
 //Handle HTTPAuthentication after all redirects may have finished.
 $authentication = new Authentication();
 if ( $authentication->getHTTPAuthenticationUsername() == FALSE ) {
@@ -142,8 +144,8 @@ Bottom minimize tab: 39
 Login view:10
 
  -->
-<body class="login-bg">
-<div id="topContainer" class="top-container need-hidden-element"></div>
+<body class="login-bg recruitment-portal">
+<div id="topContainer" class="top-container"></div>
 
 <div id="contentContainer" class="content-container">
 	<div class="loading-view">
@@ -157,7 +159,7 @@ Login view:10
 		<!--<![endif]-->
 	</div>
 </div>
-<div id="bottomContainer" class="bottom-container need-hidden-element">
+<div id="bottomContainer" class="bottom-container">
     <div class="footer">
         <div class="container">
             <div class="row">

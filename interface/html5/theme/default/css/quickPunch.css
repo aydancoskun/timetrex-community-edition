@@ -35,6 +35,9 @@ body {
 .navbar-punch-login .company-logo img {
     max-height: 51px;
 }
+.navbar-header img {
+    padding: 5px;
+}
 .form-signin {
     max-width: 330px;
     padding: 15px;
@@ -148,6 +151,9 @@ body {
 .row{
     margin-top:10px;
 }
+.footer .row {
+    margin-top: 0; /* Negate the row margin for footer, as it stops vertical centering */
+}
 .navbar-default {
     background-color: #f8f8f8;
     border-color: #e7e7e7;
@@ -165,4 +171,39 @@ body {
 
 select.form-control:not([size]):not([multiple]) {
     height: auto;
+}
+
+.btn-primary {
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    background: #426d9d;
+    color: #fff;
+}
+
+.btn-danger {
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    background: #cd403c;
+}
+
+/* To hide the spinner up/down arrows on quickpunch login */
+/* For Firefox */
+.quick_punch_login_container input[type='number'] {
+    -moz-appearance:textfield;
+}
+/* Webkit browsers like Safari and Chrome */
+.quick_punch_login_container input[type=number]::-webkit-inner-spin-button,
+.quick_punch_login_container input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Sets the input field of type number for quick punch password to disc characters to obscure the password.
+ * We want type number so that mobile devices will trigger the numeric keypad rather than the alphabet keyboard.
+ * Works together with QuickPunchLoginViewController.checkForWebkitTextSecuritySupport() to be replaced with a type="password" element if not supported by browser.
+ */
+.quick_punch_login_container input[type=number]#quick_punch_password {
+    -webkit-text-security: disc;
 }

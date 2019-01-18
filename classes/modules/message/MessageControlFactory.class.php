@@ -577,7 +577,7 @@ class MessageControlFactory extends Factory {
 	 * @return bool
 	 */
 	static function markRecipientMessageAsRead( $company_id, $user_id, $ids ) {
-		if ( $company_id == '' OR $user_id == '' OR $ids == '' OR count($ids) == 0 ) {
+		if ( $company_id == '' OR $user_id == '' OR $ids == '' OR ( is_array( $ids ) AND count( $ids ) == 0 ) ) {
 			return FALSE;
 		}
 

@@ -43,7 +43,8 @@ include_once( 'US.class.php' );
 class GovernmentForms_US_940SA extends GovernmentForms_US {
 	public $pdf_template = '940sa.pdf';
 
-	public $credit_reduction_rates = array( 'CA' => 0.021, 'VI' => 0.021 ); //Tax Year: 2017
+	public $credit_reduction_rates = array( 'VI' => 0.024 ); //Tax Year: 2018
+	//public $credit_reduction_rates = array( 'CA' => 0.021, 'VI' => 0.021 ); //Tax Year: 2017
 
 	public function getFilterFunction( $name ) {
 		$variable_function_map = array(
@@ -219,6 +220,24 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 										'halign' => 'C',
 								),
 						),
+					),
+			),
+
+			'state_credit_reduction_rate' => array(
+					'function'    => array('calcStateCreditReductionRate', 'drawNormalGrid'),
+					'coordinates' => array(
+						//Column 1
+//						'CA'  => array(
+//						),
+						//Column 2
+						'VI'  => array(
+										'x'      => 420,
+										'y'      => 679,
+										'h'      => 14,
+										'w'      => 66,
+										'halign' => 'R',
+								),
+
 					),
 			),
 
@@ -691,6 +710,22 @@ class GovernmentForms_US_940SA extends GovernmentForms_US {
 		}
 
 		return $this->state_amounts; //Must return $state_amounts, *not* the state_checkboxes, otherwise FUTA taxable wages won't be printed.
+	}
+
+	function calcStateCreditReductionRate() {
+		$state_credit_reduction_rate = array();
+
+		if ( isset($this->state_amounts) AND is_array($this->state_amounts) ) {
+			foreach ( $this->state_amounts as $state => $amount ) {
+				if ( isset( $this->credit_reduction_rates[ $state ] ) ) {
+					$state_credit_reduction_rate[ $state ] = $this->credit_reduction_rates[ $state ];
+				}
+			}
+
+			$this->state_credit_reduction_rate = $state_credit_reduction_rate;
+		}
+
+		return $this->state_credit_reduction_rate;
 	}
 
 	function calcStateCreditReduction() {

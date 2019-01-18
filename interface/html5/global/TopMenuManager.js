@@ -1398,7 +1398,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		id: 'TimeSheetAuthorization',
 		group: authorization,
 		icon: 'authorize_timesheet-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'RequestAuthorization' ),
+		permission_result: PermissionManager.checkTopLevelPermission( 'TimeSheetAuthorization' ),
 		permission: permission.punch
 	} );
 

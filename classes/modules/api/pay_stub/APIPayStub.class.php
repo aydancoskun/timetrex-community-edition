@@ -141,6 +141,11 @@ class APIPayStub extends APIFactory {
 		}
 
 		if ( ( $format == 'export_transactions' ) AND $this->getPermissionObject()->Check( 'pay_stub', 'view' ) == TRUE ) {
+			//Always enable debug logging during transaction export.
+			Debug::setEnable(TRUE);
+			Debug::setBufferOutput(TRUE);
+			Debug::setEnableLog(TRUE);
+			Debug::setVerbosity(10);
 
 			if ( isset($data['filter_data']['time_period']) AND is_array($data['filter_data']['time_period']) ) {
 				$report_obj = TTnew('Report');
@@ -200,12 +205,18 @@ class APIPayStub extends APIFactory {
 				$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 
 				if ( is_array($output) AND count($output) > 0 ) {
-					$filename = FALSE;
-					if ( $format == 'export_transactions' ) {
-						$filename = 'pay_stub_transactions_'.TTDate::getDate( 'DATE', time() ).'.zip';
-					}
+					//Transmit agency reports to TimeTrex Payment Services
+					$pslf->exportPayStubRemittanceAgencyReports( $pslf );
+
+					$filename = 'pay_stub_transactions_'.TTDate::getDate( 'DATE', time() ).'.zip';
 					$zip_file = Misc::zip($output, $filename, TRUE);
-					return Misc::APIFileDownload($zip_file['file_name'], $zip_file['mime_type'], $zip_file['data'] );
+					if ( is_array( $zip_file ) AND isset( $zip_file['file_name'] ) AND isset( $zip_file['mime_type'] ) AND isset( $zip_file['data'] ) ) { //Was just: $zip_file !== FALSE
+						return Misc::APIFileDownload( $zip_file['file_name'], $zip_file['mime_type'], $zip_file['data'] );
+					} else {
+						//FIXME: Return UserGenericStatus ID instead? Or at least some message showing success.
+						Debug::Arr( $output, 'No Zip file to download, perhaps transactions were processed with PaymentServices API?', __FILE__, __LINE__, __METHOD__, 10 );
+						return TRUE;
+					}
 				} else {
 					return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: No data to export...') );
 				}

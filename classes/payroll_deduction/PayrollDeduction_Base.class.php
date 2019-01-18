@@ -348,6 +348,7 @@ class PayrollDeduction_Base {
 		$income = $this->convertToCountryCurrency( $income );
 		//Debug::text('Setting converted gross pay period income: '. $income, __FILE__, __LINE__, __METHOD__, 10);
 
+		Debug::text( 'Gross Pay Period Income: I: ' . $income, __FILE__, __LINE__, __METHOD__, 10 );
 		$this->data['gross_pay_period_income'] = $income;
 
 		return TRUE;
@@ -355,7 +356,7 @@ class PayrollDeduction_Base {
 
 	function getGrossPayPeriodIncome() {
 		if ( isset( $this->data['gross_pay_period_income'] ) ) {
-			Debug::text( 'Gross Pay Period Income: I: ' . $this->data['gross_pay_period_income'], __FILE__, __LINE__, __METHOD__, 10 );
+//			Debug::text( 'Gross Pay Period Income: I: ' . $this->data['gross_pay_period_income'], __FILE__, __LINE__, __METHOD__, 10 );
 
 			return $this->data['gross_pay_period_income'];
 		}

@@ -289,7 +289,7 @@ InOutViewController = BaseViewController.extend( {
 
 					if ( !result.isValid() ) {
 						TAlertManager.showErrorAlert( result );
-						$this.onCancelClick();
+						$this.onCancelClick( true );
 						return;
 					}
 
@@ -308,9 +308,9 @@ InOutViewController = BaseViewController.extend( {
 
 	},
 
-	onCancelClick: function() {
+	onCancelClick: function( force_no_confirm ) {
 		this.is_changed = true;
-		this._super( 'onCancelClick' );
+		this._super( 'onCancelClick', force_no_confirm );
 	},
 
 	openEditView: function() {

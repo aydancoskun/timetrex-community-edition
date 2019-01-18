@@ -56,6 +56,10 @@ class PayrollDeduction_US_KY extends PayrollDeduction_US {
 
 
 	var $state_options = array(
+			20190101 => array( //01-Jan-2019
+							   'standard_deduction' => 2590,
+							   'allowance'          => 0, //Removed as of 2018
+			),
 			20180101 => array( //01-Jan-2018
 							   'standard_deduction' => 2530,
 							   'allowance'          => 0, //Removed as of 2018

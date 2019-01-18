@@ -269,10 +269,26 @@ WizardStep = Backbone.View.extend( {
 	},
 
 	urlClick: function( action_id ) {
-		this.api.getURL( this.getWizardObject().selected_remittance_agency_event_id, action_id, {
+		this.api.getMakePaymentData( this.getWizardObject().selected_remittance_agency_event_id, action_id, {
 			onResult: function( result ) {
 				var url = result.getResult();
 				window.open( url );
+			}
+		} );
+	},
+
+	paymentServicesClick: function( action_id ) {
+		this.api.getFileAndPayWithPaymentServicesData( this.getWizardObject().selected_remittance_agency_event_id, action_id, {
+			onResult: function( result ) {
+				var retval = result.getResult();
+
+				if ( retval['user_message'] && retval['user_message'] != '' ) {
+					TAlertManager.showAlert( retval['user_message'] );
+				} else {
+					if ( retval == false ) {
+						TAlertManager.showAlert( $.i18n._( 'ERROR! Something went wrong, please contact customer service immediately!' ) );
+					}
+				}
 			}
 		} );
 	}

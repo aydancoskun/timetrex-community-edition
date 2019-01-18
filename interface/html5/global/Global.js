@@ -149,10 +149,11 @@ Global.sendErrorReport = function() {
 		//Don't send error report if exception not happens in our codes.
 		//from_file should always contains the root url
 		//If URL is not sent by IE, assume its our own code and report the error still.
-		if ( from_file && from_file.indexOf( ServiceCaller.rootURL ) < 0 ) {
-			Debug.Text( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.rootURL + '" Script: ' + from_file, 'Global.js', '', 'sendErrorReport', 1 );
-			return;
-		}
+		// Modern browsers won't send error reports from other domains due to security issues now, so I think this can be removed.
+		// if ( from_file && from_file.indexOf( ServiceCaller.rootURL ) < 0 ) {
+		// 	Debug.Text( 'Exception caught from unauthorized source, not sending report. Source: "' + ServiceCaller.rootURL + '" Script: ' + from_file, 'Global.js', '', 'sendErrorReport', 1 );
+		// 	return;
+		// }
 
 		if ( current_company_obj ) { //getCurrentCompany() which in turn calls getRequiredLocalCache(), which can call sendErroReport causing a loop. So try to prevent that by checking LocalCacheData['current_company'] first.
 			error = error + '\n\n' + 'Product Edition: ' + current_company_obj.product_edition_id;
@@ -3974,3 +3975,41 @@ Global.groupArrayDataByKey = function( data, makeUnique ) {
 		return accumulator;
 	}, {} );
 };
+
+/**
+ * Used to modify the viewport meta tag in the index.php head section. This controls the 'virtual' device viewport on mobile devices.
+ * More info: https://developers.google.com/web/updates/2015/01/What-the-Viewport
+ * @param {string} setting - name of pre-defined viewport setting
+ * @returns {string} returns the new content value for the viewport meta tag
+ * @example A use case is Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
+ */
+Global.setVirtualDeviceViewport = function ( setting ) {
+	var width;
+	var scale;
+	var meta_tag_viewport = $( 'meta[name=viewport]' );
+
+	if ( !setting || !meta_tag_viewport || meta_tag_viewport.length !== 1 ) {
+		Debug.Text( 'Error: Missing params in function call', 'Global.js', 'Global', 'setVirtualDeviceViewport', 1 );
+		return undefined;
+	}
+	if ( setting === 'mobile' ) {
+		width = 'device-width';
+		scale = 1;
+	}
+	else if ( setting === 'desktop' ) {
+		width = 990; // Minium application width which was previously used elsewhere.
+		scale = 0.5;
+	}
+	else {
+		Debug.Text( 'Error: Invalid setting passed to function', 'Global.js', 'Global', 'setVirtualDeviceViewport', 1 );
+		return undefined;
+	}
+	if ( width && scale ) {
+		meta_tag_viewport.attr( 'content', 'width=' + width + ', initial-scale=' + scale );
+		return meta_tag_viewport.attr( 'content' );
+	} else {
+		Debug.Text( 'Error: Invalid device settings. Either width or scale is invalid', 'Global.js', 'Global', 'setVirtualDeviceViewport', 1 );
+		return undefined;
+	}
+};
+

@@ -1007,6 +1007,9 @@ class Form940Report extends Report {
 					unset( $state, $tmp_state_data );
 
 //					//Test Amounts for each state.
+//					$f940sa = $this->getFormObject()->getFormObject( '940sa', 'US' );
+//					$f940sa->setDebug(FALSE);
+//					$f940sa->setShowBackground( $show_background );
 //					$states = $this->getUserObject()->getCompanyObject()->getOptions('province', 'US' );
 //					foreach( $states as $state_code => $name ) {
 //						if ( !isset($state_amounts[$state_code]) ) {

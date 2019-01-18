@@ -545,7 +545,7 @@ HomeViewController = Backbone.View.extend( {
 					if ( dashlet_data.data.dashlet_type === 'custom_report' ) {
 						dashlet_data.data.width = 99;
 					} else {
-						dashlet_data.data.width = 33;
+						dashlet_data.data.width = 33.3;
 					}
 				}
 				dash_let.css( 'height', dashlet_data.data.height + 'px' );

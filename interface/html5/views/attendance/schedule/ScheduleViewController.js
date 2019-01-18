@@ -221,7 +221,23 @@ ScheduleViewController = BaseViewController.extend( {
 		Global.removeViewTab( this.viewId );
 		ProgressBar.showOverlay();
 		this.initOptions();
-		this.default_display_columns = ['branch', 'department'];
+
+		//For regular employees who currently can't see the "Saved Search and Layout" tab, try to be smarter about what columns they do see by default.
+		this.default_display_columns = [];
+		if ( PermissionManager.validate( this.permission_id, 'edit_branch' ) ) {
+			this.default_display_columns.push('branch');
+		}
+		if ( PermissionManager.validate( this.permission_id, 'edit_department' ) ) {
+			this.default_display_columns.push('department');
+		}
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
+			if ( PermissionManager.validate( this.permission_id, 'edit_job' ) ) {
+				this.default_display_columns.push('job');
+			}
+			if ( PermissionManager.validate( this.permission_id, 'edit_job_item' ) ) {
+				this.default_display_columns.push('job_item');
+			}
+		}
 
 		var date = new Date();
 

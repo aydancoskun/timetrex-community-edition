@@ -71,7 +71,6 @@ module.exports = function(grunt) {
                 '../../interface/html5/views/wizard/BaseWizardController.js',
                 '../../interface/html5/views/wizard/user_generic_data_status/UserGenericStatusWindowController.js',
                 '../../interface/html5/views/reports/ReportBaseViewController.js',
-                '../../interface/html5/framework/sonic.js',
                 '../../interface/html5/framework/jquery.qtip.min.js',
 
                 '../../interface/html5/framework/require.js',

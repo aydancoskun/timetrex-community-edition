@@ -259,6 +259,7 @@ unset($authentication);
 		<head>
 			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1">
 			<meta name="Description" content="Employee Login | TimeTrex Workforce Management Software"/>
 			<meta name="google" content="notranslate">
 			<title><?php echo APPLICATION_NAME .' Workforce Management';?></title>
@@ -339,41 +340,66 @@ unset($authentication);
 	Login view:10
 	-->
 	*/
-	?>
-	<body class="login-bg" oncontextmenu="return true;">
-	<div class="need-hidden-element"><h1><a href="https://www.timetrex.com/time-and-attendance">TimeTrex Time and Attendance</a> Software</h1> - Web-based Time And Attendance suite which offers Employee Time and Attendance (timeclock, timecard, timesheet) and Payroll all in single tightly integrated package. With the ability to interface with biometric facial recognition tablets and cell phones employees are able to efficiently track their time at the office or on the road. Automatically calculate complex over time and premium time business policies and immediately be able to identify labor costs attributed to branches, and departments. Finally TimeTrex can process your payroll by calculating withholding taxes, generate detailed electronic pay stubs and even print paychecks or direct deposit funds.</div>
-	<div id="topContainer" class="top-container"></div>
-	<div id="contentContainer" class="content-container">
-		<div class="loading-view">
-			<!--[if (gt IE 8)|!(IE)]><!-->
-			<div class="progress-bar-div">
-				<progress class="progress-bar" max="100" value="10">
-					<strong>Progress: 100% Complete.</strong>
-				</progress>
-				<span class="progress-label">Initializing...</span>
-			</div>
-			<!--<![endif]-->
-		</div>
-	</div>
-	<div id="bottomContainer" class="bottom-container">
-		<ul class="signal-strength">
-			<li class="signal-strength-very-weak"><div></div></li>
-			<li class="signal-strength-weak"><div></div></li>
-			<li class="signal-strength-strong"><div></div></li>
-			<li class="signal-strength-pretty-strong"><div></div></li>
-		</ul>
-		<div class="copyright-container">
-			<a id="copy_right_logo_link" class="copy-right-logo-link" target="_blank"><img id="copy_right_logo" class="copy-right-logo"></a>
-			<a id="copy_right_info" class="copy-right-info" target="_blank" style="display: none"></a>
-			<span id="copy_right_info_1" class="copy-right-info" style="display: none"><?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?></span>
-		</div>
-		<div id="feedbackContainer" class="feedback-container">
-			<span>Overall, how are you feeling about <?php echo APPLICATION_NAME; ?>?</span>
-			<img class="filter yay-filter" title="Yay!" data-feedback = 1 alt="happy"  >
-			<img class="filter meh-filter" title="Meh." data-feedback = 0 alt="neutral" >
-			<img class="filter grr-filter" title="Grr!" data-feedback = -1 alt="sad" >
-		</div>
-	</div>
+
+    // Detect if mobile, and add class on body for CSS to use.
+    // Reason for doing this instead of using css media queries is so we dont have to guess suitable mobile device breakpoints. May change to breakpoints if this does not work out though.
+    if( Misc::detectMobileBrowser() ) { ?>
+    <body class="login-bg mobile-device-mode" oncontextmenu="return true;">
+    <?php } else { ?>
+
+    <style>
+        /* This code is related to the office-animal background image on login. */
+        /* Note: This CSS is here to ensure the background image on login loads immediately vs putting it in the LoginView.css view. Even cached it was delayed while in css file. */
+        .login-bg {
+            background: url('theme/default/images/login_background_base.png');
+            position: fixed;
+            background-size: cover;
+            background-position: center;
+            width: 100vw; /** hack to allow not half a screen width in safari... **/
+        }
+    </style>
+    <body class="login-bg" oncontextmenu="return true;">
+    <?php } ?>
+    <div id="login-bg_animal">
+        <div id="login-bg_opacity_filter">
+			<?php
+			if ( Misc::isSearchEngineBrowser() == TRUE ) { ?>
+                <div class="site-description"><h1><a href="https://www.timetrex.com/time-and-attendance">TimeTrex Time and Attendance</a> Software</h1> - Web-based Time And Attendance suite which offers Employee Time and Attendance (timeclock, timecard, timesheet) and Payroll all in single tightly integrated package. With the ability to interface with biometric facial recognition tablets and cell phones employees are able to efficiently track their time at the office or on the road. Automatically calculate complex over time and premium time business policies and immediately be able to identify labor costs attributed to branches, and departments. Finally TimeTrex can process your payroll by calculating withholding taxes, generate detailed electronic pay stubs and even print paychecks or direct deposit funds.</div>
+			<?php } ?>
+            <div id="topContainer" class="top-container"></div>
+            <div id="contentContainer" class="content-container">
+                <div class="loading-view">
+                    <!--[if (gt IE 8)|!(IE)]><!-->
+                    <div class="progress-bar-div">
+                        <progress class="progress-bar" max="100" value="10">
+                            <strong>Progress: 100% Complete.</strong>
+                        </progress>
+                        <span class="progress-label">Initializing...</span>
+                    </div>
+                    <!--<![endif]-->
+                </div>
+            </div>
+            <div id="bottomContainer" class="bottom-container">
+                <ul class="signal-strength">
+                    <li class="signal-strength-very-weak"><div></div></li>
+                    <li class="signal-strength-weak"><div></div></li>
+                    <li class="signal-strength-strong"><div></div></li>
+                    <li class="signal-strength-pretty-strong"><div></div></li>
+                </ul>
+                <div class="copyright-container">
+                    <a id="copy_right_logo_link" class="copy-right-logo-link" target="_blank"><img id="copy_right_logo" class="copy-right-logo"></a>
+                    <a id="copy_right_info" class="copy-right-info" target="_blank" style="display: none"></a>
+                    <span id="copy_right_info_1" class="copy-right-info" style="display: none"><?php /*REMOVING OR CHANGING THIS COPYRIGHT NOTICE IS IN STRICT VIOLATION OF THE LICENSE AND COPYRIGHT AGREEMENT*/ echo COPYRIGHT_NOTICE;?></span>
+                </div>
+                <div id="feedbackContainer" class="feedback-container">
+                    <span>Overall, how are you feeling about <?php echo APPLICATION_NAME; ?>?</span>
+                    <img class="filter yay-filter" title="Yay!" data-feedback = 1 alt="happy"  >
+                    <img class="filter meh-filter" title="Meh." data-feedback = 0 alt="neutral" >
+                    <img class="filter grr-filter" title="Grr!" data-feedback = -1 alt="sad" >
+                </div>
+            </div>
+        </div>
+    </div>
 	<div id="overlay" class=""></div>
 
 	<iframe style="display: none" id="hideReportIFrame" name="hideReportIFrame"></iframe>

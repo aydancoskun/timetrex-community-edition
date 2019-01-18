@@ -128,6 +128,9 @@ class Report {
 	protected $progress_bar_obj = NULL;
 	protected $AMF_message_id = NULL;
 
+	protected $enable_system_columns = FALSE;
+
+
 	/**
 	 * @param $name
 	 * @param null $params
@@ -325,6 +328,25 @@ class Report {
 		//Only set them when actually executing the report data in Output();
 
 		return TRUE;
+	}
+
+	/**
+	 * When this is enabled, it ignores checking that the columns returned are actually in the list of available columns.
+	 * Useful for when we need reports to return IDs and such, like when sending AgencyReprots to TimeTrex PaymentServices.
+	 * @param $bool
+	 * @return bool
+	 */
+	function setEnableSystemColumns( $bool ) {
+		$this->enable_system_columns = $bool;
+
+		return TRUE;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function getEnableSystemColumns() {
+		return $this->enable_system_columns;
 	}
 
 	//Defines the max execution timelimit for PHP
@@ -2423,6 +2445,8 @@ class Report {
 		foreach( $column_config as $column => $tmp ) {
 			if ( isset($column_options[$column]) ) {
 				$columns[$column] = $column_options[$column];
+			} elseif ( $this->getEnableSystemColumns() == TRUE ) {
+				$columns[$column] = $column;
 			}
 		}
 		unset($tmp);//code standards

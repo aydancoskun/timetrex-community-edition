@@ -49,333 +49,354 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Claim Code Basic Amounts
 	*/
 	var $basic_claim_code_options = array(
-		//Make sure updateCompanyDeductionForTaxYear() is run in the installer so it updates the Tax/Deduction records properly.
-		20180701 => array( //01-Jul-2018:
-						   'CA' => 11809, //Federal
-						   'BC' => 10412,
-						   'AB' => 18915,
-						   'SK' => 16065,
-						   'MB' => 9382,
-						   'QC' => 0,
-						   'ON' => 10354,
-						   'NL' => 9247,
-						   'NB' => 10043,
-						   'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
-						   'PE' => 9160,
-						   'NT' => 14492,
-						   'YT' => 11809,
-						   'NU' => 13325,
-		),
-		20180101 => array( //01-Jan-2018:
-						   'CA' => 11809, //Federal
-						   'BC' => 10412,
-						   'AB' => 18915,
-						   'SK' => 16065,
-						   'MB' => 9382,
-						   'QC' => 0,
-						   'ON' => 10354,
-						   'NL' => 9247,
-						   'NB' => 10043,
-						   'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
-						   'PE' => 8160,
-						   'NT' => 14492,
-						   'YT' => 11809,
-						   'NU' => 13325,
-		),
-		20170701 => array( //01-Jul-2017:
-						   'CA' => 11635, //Federal
-						   'BC' => 10208,
-						   'AB' => 18690,
-						   'SK' => 16065,
-						   'MB' => 9271,
-						   'QC' => 0,
-						   'ON' => 10171,
-						   'NL' => 8978,
-						   'NB' => 9895,
-						   'NS' => 8481,
-						   'PE' => 8320,
-						   'NT' => 14278,
-						   'YT' => 11635,
-						   'NU' => 13128,
-		),
-		20170101 => array( //01-Jan-2017:
-						   'CA' => 11635, //Federal
-						   'BC' => 10208,
-						   'AB' => 18690,
-						   'SK' => 16065,
-						   'MB' => 9271,
-						   'QC' => 0,
-						   'ON' => 10171,
-						   'NL' => 8978,
-						   'NB' => 9895,
-						   'NS' => 8481,
-						   'PE' => 8000,
-						   'NT' => 14278,
-						   'YT' => 11635,
-						   'NU' => 13128,
-		),
-		20160701 => array( //01-Jul-2016:
-						   'CA' => 11474, //Federal
-						   'BC' => 10027,
-						   'AB' => 18451,
-						   'SK' => 15843,
-						   'MB' => 9134,
-						   'QC' => 0,
-						   'ON' => 10011,
-						   'NL' => 8802,
-						   'NB' => 9758,
-						   'NS' => 8481,
-						   'PE' => 8292,
-						   'NT' => 14081,
-						   'YT' => 11474,
-						   'NU' => 12947,
-		),
-		20160101 => array( //01-Jan-2016:
-						   'CA' => 11474, //Federal
-						   'BC' => 10027,
-						   'AB' => 18451,
-						   'SK' => 15843,
-						   'MB' => 9134,
-						   'QC' => 0,
-						   'ON' => 10011,
-						   'NL' => 8802,
-						   'NB' => 9758,
-						   'NS' => 8481,
-						   'PE' => 7708,
-						   'NT' => 14081,
-						   'YT' => 11474,
-						   'NU' => 12947,
-		),
-		20150101 => array( //01-Jan-2015:
-						   'CA' => 11327, //Federal
-						   'BC' => 9938,
-						   'AB' => 18214,
-						   'SK' => 15639,
-						   'MB' => 9134,
-						   'QC' => 0,
-						   'ON' => 9863,
-						   'NL' => 8767,
-						   'NB' => 9633,
-						   'NS' => 8481,
-						   'PE' => 7708,
-						   'NT' => 13900,
-						   'YT' => 11327,
-						   'NU' => 12781,
-		),
-		20140101 => array( //01-Jan-2014:
-						   'CA' => 11138, //Federal
-						   'BC' => 9869,
-						   'AB' => 17787,
-						   'SK' => 15378,
-						   'MB' => 9134,
-						   'QC' => 0,
-						   'ON' => 9670,
-						   'NL' => 8578,
-						   'NB' => 9472,
-						   'NS' => 8481,
-						   'PE' => 7708,
-						   'NT' => 13668,
-						   'YT' => 11138,
-						   'NU' => 12567,
-		),
-		20130101 => array( //01-Jan-2013:
-						   'CA' => 11038, //Federal
-						   'BC' => 10276,
-						   'AB' => 17593,
-						   'SK' => 15241,
-						   'MB' => 8884,
-						   'QC' => 0,
-						   'ON' => 9574,
-						   'NL' => 8451,
-						   'NB' => 9388,
-						   'NS' => 8481,
-						   'PE' => 7708,
-						   'NT' => 13546,
-						   'YT' => 11038,
-						   'NU' => 12455,
-		),
-		20120101 => array( //01-Jan-2012:
-						   'CA' => 10822, //Federal
-						   'BC' => 11354,
-						   'AB' => 17282,
-						   'SK' => 14942,
-						   'MB' => 8634,
-						   'QC' => 0,
-						   'ON' => 9405,
-						   'NL' => 8237,
-						   'NB' => 9203,
-						   'NS' => 8481,
-						   'PE' => 7708,
-						   'NT' => 13280,
-						   'YT' => 10822,
-						   'NU' => 12211,
-		),
-		20110701 => array( //01-Jul-2011: Some of these are only changed for the last 6mths in the year.
-						   'CA' => 10527, //Federal
-						   'BC' => 11088,
-						   'AB' => 16977,
-						   'SK' => 14535,
-						   'MB' => 8634,
-						   'QC' => 0,
-						   'ON' => 9104,
-						   'NL' => 7989,
-						   'NB' => 8953,
-						   'NS' => 8731,
-						   'PE' => 7708,
-						   'NT' => 12919,
-						   'YT' => 10527,
-						   'NU' => 11878,
-		),
-		20110101 => array( //01-Jan-2011
-						   'CA' => 10527, //Federal
-						   'BC' => 11088,
-						   'AB' => 16977,
-						   'SK' => 13535,
-						   'MB' => 8134,
-						   'QC' => 0,
-						   'ON' => 9104,
-						   'NL' => 7989,
-						   'NB' => 8953,
-						   'NS' => 8231,
-						   'PE' => 7708,
-						   'NT' => 12919,
-						   'YT' => 10527,
-						   'NU' => 11878,
-		),
-		20100101 => array( //01-Jan-2010
-						   'CA' => 10382, //Federal
-						   'BC' => 11000,
-						   'AB' => 16825,
-						   'SK' => 13348,
-						   'MB' => 8134,
-						   'QC' => 0,
-						   'ON' => 8943,
-						   'NL' => 7833,
-						   'NB' => 8777,
-						   'NS' => 8231,
-						   'PE' => 7708,
-						   'NT' => 12740,
-						   'YT' => 10382,
-						   'NU' => 11714,
-		),
-		20090401 => array( //01-Apr-09
-						   'CA' => 10375, //Federal
-						   'BC' => 9373,
-						   'AB' => 16775,
-						   'SK' => 13269,
-						   'MB' => 8134,
-						   'QC' => 0,
-						   'ON' => 8881,
-						   'NL' => 7778,
-						   'NB' => 8134,
-						   'NS' => 7981,
-						   'PE' => 7708,
-						   'NT' => 12664,
-						   'YT' => 10375,
-						   'NU' => 11644,
-		),
-		20090101 => array( //01-Jan-09
-						   'CA' => 10100, //Federal
-						   'BC' => 9373,
-						   'AB' => 16775,
-						   'SK' => 13269,
-						   'MB' => 8134,
-						   'QC' => 0,
-						   'ON' => 8881,
-						   'NL' => 7778,
-						   'NB' => 8134,
-						   'NS' => 7981,
-						   'PE' => 7708,
-						   'NT' => 12664,
-						   'YT' => 10100,
-						   'NU' => 11644,
-		),
-		20080101 => array( //01-Jan-08
-						   'CA' => 9600, //Federal
-						   'BC' => 9189,
-						   'AB' => 16161,
-						   'SK' => 8945,
-						   'MB' => 8034,
-						   'QC' => 0,
-						   'ON' => 8681,
-						   'NL' => 7566,
-						   'NB' => 8395,
-						   'NS' => 7731,
-						   'PE' => 7708,
-						   'NT' => 12355,
-						   'YT' => 9600,
-						   'NU' => 11360,
-		),
-		20070701 => array( //01-Jul-07
-						   'CA' => 8929, //Federal
-						   'BC' => 9027,
-						   'AB' => 15435,
-						   'SK' => 8778,
-						   'MB' => 7834,
-						   'QC' => 0,
-						   'ON' => 8553,
-						   'NL' => 7558,
-						   'NB' => 8239,
-						   'NS' => 7481,
-						   'PE' => 7708,
-						   'NT' => 12125,
-						   'YT' => 8929,
-						   'NU' => 11149,
-		),
-		20070101 => array( //01-Jan-07
-						   'CA' => 8929, //Federal
-						   'BC' => 9027,
-						   'AB' => 15435,
-						   'SK' => 8778,
-						   'MB' => 7834,
-						   'QC' => 0,
-						   'ON' => 8553,
-						   'NL' => 7410,
-						   'NB' => 8239,
-						   'NS' => 7481,
-						   'PE' => 7412,
-						   'NT' => 12125,
-						   'YT' => 8929,
-						   'NU' => 11149,
-		),
-		20060701 => array( //01-Jul-06
-						   'CA' => 8639, //Federal
-						   'BC' => 8858,
-						   'AB' => 14999,
-						   'SK' => 8589,
-						   'MB' => 7734,
-						   'QC' => 0,
-						   'ON' => 8377,
-						   'NL' => 7410,
-						   'NB' => 8061,
-						   'NS' => 7231,
-						   'PE' => 7412,
-						   'NT' => 11864,
-						   'YT' => 8328,
-						   'NU' => 10909,
-		),
-		20060101 => array( //01-Jan-06
-						   'CA' => 9039, //Federal
-						   'BC' => 8858,
-						   'AB' => 14799,
-						   'SK' => 8589,
-						   'MB' => 7734,
-						   'QC' => 0,
-						   'ON' => 8377,
-						   'NL' => 7410,
-						   'NB' => 8061,
-						   'NS' => 7231,
-						   'PE' => 7412,
-						   'NT' => 11864,
-						   'YT' => 8328,
-						   'NU' => 10909,
-		),
+			20190101 => array( //01-Jan-2019:
+							   'CA' => 12069, //Federal
+							   'BC' => 10682,
+							   'AB' => 19369,
+							   'SK' => 16065,
+							   'MB' => 9626,
+							   'QC' => 0,
+							   'ON' => 10582,
+							   'NL' => 9414,
+							   'NB' => 10264,
+							   'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
+							   'PE' => 9160,
+							   'NT' => 14811,
+							   'YT' => 12069,
+							   'NU' => 13618,
+			),
+			20180701 => array( //01-Jul-2018:
+							   'CA' => 11809, //Federal
+							   'BC' => 10412,
+							   'AB' => 18915,
+							   'SK' => 16065,
+							   'MB' => 9382,
+							   'QC' => 0,
+							   'ON' => 10354,
+							   'NL' => 9247,
+							   'NB' => 10043,
+							   'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
+							   'PE' => 9160,
+							   'NT' => 14492,
+							   'YT' => 11809,
+							   'NU' => 13325,
+			),
+			20180101 => array( //01-Jan-2018:
+							   'CA' => 11809, //Federal
+							   'BC' => 10412,
+							   'AB' => 18915,
+							   'SK' => 16065,
+							   'MB' => 9382,
+							   'QC' => 0,
+							   'ON' => 10354,
+							   'NL' => 9247,
+							   'NB' => 10043,
+							   'NS' => 11481, //See NS.class.php, as there are a low and high basic claim amounts now.
+							   'PE' => 8160,
+							   'NT' => 14492,
+							   'YT' => 11809,
+							   'NU' => 13325,
+			),
+			20170701 => array( //01-Jul-2017:
+							   'CA' => 11635, //Federal
+							   'BC' => 10208,
+							   'AB' => 18690,
+							   'SK' => 16065,
+							   'MB' => 9271,
+							   'QC' => 0,
+							   'ON' => 10171,
+							   'NL' => 8978,
+							   'NB' => 9895,
+							   'NS' => 8481,
+							   'PE' => 8320,
+							   'NT' => 14278,
+							   'YT' => 11635,
+							   'NU' => 13128,
+			),
+			20170101 => array( //01-Jan-2017:
+							   'CA' => 11635, //Federal
+							   'BC' => 10208,
+							   'AB' => 18690,
+							   'SK' => 16065,
+							   'MB' => 9271,
+							   'QC' => 0,
+							   'ON' => 10171,
+							   'NL' => 8978,
+							   'NB' => 9895,
+							   'NS' => 8481,
+							   'PE' => 8000,
+							   'NT' => 14278,
+							   'YT' => 11635,
+							   'NU' => 13128,
+			),
+			20160701 => array( //01-Jul-2016:
+							   'CA' => 11474, //Federal
+							   'BC' => 10027,
+							   'AB' => 18451,
+							   'SK' => 15843,
+							   'MB' => 9134,
+							   'QC' => 0,
+							   'ON' => 10011,
+							   'NL' => 8802,
+							   'NB' => 9758,
+							   'NS' => 8481,
+							   'PE' => 8292,
+							   'NT' => 14081,
+							   'YT' => 11474,
+							   'NU' => 12947,
+			),
+			20160101 => array( //01-Jan-2016:
+							   'CA' => 11474, //Federal
+							   'BC' => 10027,
+							   'AB' => 18451,
+							   'SK' => 15843,
+							   'MB' => 9134,
+							   'QC' => 0,
+							   'ON' => 10011,
+							   'NL' => 8802,
+							   'NB' => 9758,
+							   'NS' => 8481,
+							   'PE' => 7708,
+							   'NT' => 14081,
+							   'YT' => 11474,
+							   'NU' => 12947,
+			),
+			20150101 => array( //01-Jan-2015:
+							   'CA' => 11327, //Federal
+							   'BC' => 9938,
+							   'AB' => 18214,
+							   'SK' => 15639,
+							   'MB' => 9134,
+							   'QC' => 0,
+							   'ON' => 9863,
+							   'NL' => 8767,
+							   'NB' => 9633,
+							   'NS' => 8481,
+							   'PE' => 7708,
+							   'NT' => 13900,
+							   'YT' => 11327,
+							   'NU' => 12781,
+			),
+			20140101 => array( //01-Jan-2014:
+							   'CA' => 11138, //Federal
+							   'BC' => 9869,
+							   'AB' => 17787,
+							   'SK' => 15378,
+							   'MB' => 9134,
+							   'QC' => 0,
+							   'ON' => 9670,
+							   'NL' => 8578,
+							   'NB' => 9472,
+							   'NS' => 8481,
+							   'PE' => 7708,
+							   'NT' => 13668,
+							   'YT' => 11138,
+							   'NU' => 12567,
+			),
+			20130101 => array( //01-Jan-2013:
+							   'CA' => 11038, //Federal
+							   'BC' => 10276,
+							   'AB' => 17593,
+							   'SK' => 15241,
+							   'MB' => 8884,
+							   'QC' => 0,
+							   'ON' => 9574,
+							   'NL' => 8451,
+							   'NB' => 9388,
+							   'NS' => 8481,
+							   'PE' => 7708,
+							   'NT' => 13546,
+							   'YT' => 11038,
+							   'NU' => 12455,
+			),
+			20120101 => array( //01-Jan-2012:
+							   'CA' => 10822, //Federal
+							   'BC' => 11354,
+							   'AB' => 17282,
+							   'SK' => 14942,
+							   'MB' => 8634,
+							   'QC' => 0,
+							   'ON' => 9405,
+							   'NL' => 8237,
+							   'NB' => 9203,
+							   'NS' => 8481,
+							   'PE' => 7708,
+							   'NT' => 13280,
+							   'YT' => 10822,
+							   'NU' => 12211,
+			),
+			20110701 => array( //01-Jul-2011: Some of these are only changed for the last 6mths in the year.
+							   'CA' => 10527, //Federal
+							   'BC' => 11088,
+							   'AB' => 16977,
+							   'SK' => 14535,
+							   'MB' => 8634,
+							   'QC' => 0,
+							   'ON' => 9104,
+							   'NL' => 7989,
+							   'NB' => 8953,
+							   'NS' => 8731,
+							   'PE' => 7708,
+							   'NT' => 12919,
+							   'YT' => 10527,
+							   'NU' => 11878,
+			),
+			20110101 => array( //01-Jan-2011
+							   'CA' => 10527, //Federal
+							   'BC' => 11088,
+							   'AB' => 16977,
+							   'SK' => 13535,
+							   'MB' => 8134,
+							   'QC' => 0,
+							   'ON' => 9104,
+							   'NL' => 7989,
+							   'NB' => 8953,
+							   'NS' => 8231,
+							   'PE' => 7708,
+							   'NT' => 12919,
+							   'YT' => 10527,
+							   'NU' => 11878,
+			),
+			20100101 => array( //01-Jan-2010
+							   'CA' => 10382, //Federal
+							   'BC' => 11000,
+							   'AB' => 16825,
+							   'SK' => 13348,
+							   'MB' => 8134,
+							   'QC' => 0,
+							   'ON' => 8943,
+							   'NL' => 7833,
+							   'NB' => 8777,
+							   'NS' => 8231,
+							   'PE' => 7708,
+							   'NT' => 12740,
+							   'YT' => 10382,
+							   'NU' => 11714,
+			),
+			20090401 => array( //01-Apr-09
+							   'CA' => 10375, //Federal
+							   'BC' => 9373,
+							   'AB' => 16775,
+							   'SK' => 13269,
+							   'MB' => 8134,
+							   'QC' => 0,
+							   'ON' => 8881,
+							   'NL' => 7778,
+							   'NB' => 8134,
+							   'NS' => 7981,
+							   'PE' => 7708,
+							   'NT' => 12664,
+							   'YT' => 10375,
+							   'NU' => 11644,
+			),
+			20090101 => array( //01-Jan-09
+							   'CA' => 10100, //Federal
+							   'BC' => 9373,
+							   'AB' => 16775,
+							   'SK' => 13269,
+							   'MB' => 8134,
+							   'QC' => 0,
+							   'ON' => 8881,
+							   'NL' => 7778,
+							   'NB' => 8134,
+							   'NS' => 7981,
+							   'PE' => 7708,
+							   'NT' => 12664,
+							   'YT' => 10100,
+							   'NU' => 11644,
+			),
+			20080101 => array( //01-Jan-08
+							   'CA' => 9600, //Federal
+							   'BC' => 9189,
+							   'AB' => 16161,
+							   'SK' => 8945,
+							   'MB' => 8034,
+							   'QC' => 0,
+							   'ON' => 8681,
+							   'NL' => 7566,
+							   'NB' => 8395,
+							   'NS' => 7731,
+							   'PE' => 7708,
+							   'NT' => 12355,
+							   'YT' => 9600,
+							   'NU' => 11360,
+			),
+			20070701 => array( //01-Jul-07
+							   'CA' => 8929, //Federal
+							   'BC' => 9027,
+							   'AB' => 15435,
+							   'SK' => 8778,
+							   'MB' => 7834,
+							   'QC' => 0,
+							   'ON' => 8553,
+							   'NL' => 7558,
+							   'NB' => 8239,
+							   'NS' => 7481,
+							   'PE' => 7708,
+							   'NT' => 12125,
+							   'YT' => 8929,
+							   'NU' => 11149,
+			),
+			20070101 => array( //01-Jan-07
+							   'CA' => 8929, //Federal
+							   'BC' => 9027,
+							   'AB' => 15435,
+							   'SK' => 8778,
+							   'MB' => 7834,
+							   'QC' => 0,
+							   'ON' => 8553,
+							   'NL' => 7410,
+							   'NB' => 8239,
+							   'NS' => 7481,
+							   'PE' => 7412,
+							   'NT' => 12125,
+							   'YT' => 8929,
+							   'NU' => 11149,
+			),
+			20060701 => array( //01-Jul-06
+							   'CA' => 8639, //Federal
+							   'BC' => 8858,
+							   'AB' => 14999,
+							   'SK' => 8589,
+							   'MB' => 7734,
+							   'QC' => 0,
+							   'ON' => 8377,
+							   'NL' => 7410,
+							   'NB' => 8061,
+							   'NS' => 7231,
+							   'PE' => 7412,
+							   'NT' => 11864,
+							   'YT' => 8328,
+							   'NU' => 10909,
+			),
+			20060101 => array( //01-Jan-06
+							   'CA' => 9039, //Federal
+							   'BC' => 8858,
+							   'AB' => 14799,
+							   'SK' => 8589,
+							   'MB' => 7734,
+							   'QC' => 0,
+							   'ON' => 8377,
+							   'NL' => 7410,
+							   'NB' => 8061,
+							   'NS' => 7231,
+							   'PE' => 7412,
+							   'NT' => 11864,
+							   'YT' => 8328,
+							   'NU' => 10909,
+			),
 	);
 
 	/*
 		CPP settings
 	*/
 	var $cpp_options = array(
+			20190101 => array( //2019
+							   'maximum_pensionable_earnings'  => 57400,
+							   'basic_exemption'               => 3500,
+							   'employee_rate'                 => 0.0510,
+							   'employee_maximum_contribution' => 2748.90,
+			),
 			20180101 => array( //2018
 							   'maximum_pensionable_earnings'  => 55900,
 							   'basic_exemption'               => 3500,
@@ -472,6 +493,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		EI settings
 	*/
 	var $ei_options = array(
+			20190101 => array( //2019
+							   'maximum_insurable_earnings'    => 53100,
+							   'employee_rate'                 => 0.0162,
+							   'employee_maximum_contribution' => 860.22,
+							   'employer_rate'                 => 1.4,
+			),
 			20180101 => array( //2018
 							   'maximum_insurable_earnings'    => 51700,
 							   'employee_rate'                 => 0.0166,
@@ -568,6 +595,7 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal employment credit
 	*/
 	var $federal_employment_credit_options = array(
+			20190101 => array('credit' => 1222),
 			20180101 => array('credit' => 1195),
 			20170101 => array('credit' => 1178),
 			20160101 => array('credit' => 1161),
@@ -587,6 +615,13 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		Federal Income Tax Rates
 	*/
 	var $federal_income_tax_rate_options = array(
+			20190101 => array(
+					array('income' => 47630, 'rate' => 15, 'constant' => 0),
+					array('income' => 95259, 'rate' => 20.5, 'constant' => 2620),
+					array('income' => 147667, 'rate' => 26, 'constant' => 7859),
+					array('income' => 210371, 'rate' => 29, 'constant' => 12289),
+					array('income' => 210371, 'rate' => 33, 'constant' => 20704),
+			),
 			20180101 => array(
 					array('income' => 46605, 'rate' => 15, 'constant' => 0),
 					array('income' => 93208, 'rate' => 20.5, 'constant' => 2563),
@@ -886,17 +921,16 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 	}
 
 	function getData() {
-		global $cache;
-
-		$country = $this->getCountry();
-		$province = $this->getProvince();
+//		global $cache;
+//		$country = $this->getCountry();
+//		$province = $this->getProvince();
 		$epoch = $this->getDate();
 
 		if ( $epoch == NULL OR $epoch == '' ) {
 			$epoch = $this->getISODate( TTDate::getTime() );
 		}
 
-		Debug::text( 'bUsing (' . $province . ') values from: ' . TTDate::getDate( 'DATE+TIME', $this->getDateEpoch( $epoch ) ), __FILE__, __LINE__, __METHOD__, 10 );
+		//Debug::text( 'bUsing (' . $province . ') values from: ' . TTDate::getDate( 'DATE+TIME', $this->getDateEpoch( $epoch ) ), __FILE__, __LINE__, __METHOD__, 10 );
 
 		$this->income_tax_rates = FALSE;
 		if ( isset( $this->federal_income_tax_rate_options ) AND count( $this->federal_income_tax_rate_options ) > 0 ) {
@@ -936,15 +970,12 @@ class PayrollDeduction_CA_Data extends PayrollDeduction_Base {
 		$i = 0;
 		foreach ( $rates as $key => $values ) {
 			$value = $values['income'];
-			$rate = $values['rate'];
-			$constant = $values['constant'];
 
-			Debug::text( 'Value: ' . $value . ' Rate: ' . $rate . ' Constant: ' . $constant . ' Previous Value: ' . $prev_value, __FILE__, __LINE__, __METHOD__, 10 );
 			if ( $income > $prev_value AND $income <= $value ) {
-				//Debug::text('Found Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::text( 'Value: ' . $value . ' Rate: ' . $values['rate'] . ' Constant: ' . $values['constant'] . ' Previous Value: ' . $prev_value, __FILE__, __LINE__, __METHOD__, 10 );
 				return $this->income_tax_rates[ $type ][ $key ];
 			} elseif ( $i == $total_rates ) {
-				//Debug::text('Found Last Key: '. $key, __FILE__, __LINE__, __METHOD__, 10);
+				//Debug::text( 'Last Value: ' . $value . ' Rate: ' . $values['rate'] . ' Constant: ' . $values['constant'] . ' Previous Value: ' . $prev_value, __FILE__, __LINE__, __METHOD__, 10 );
 				return $this->income_tax_rates[ $type ][ $key ];
 			}
 

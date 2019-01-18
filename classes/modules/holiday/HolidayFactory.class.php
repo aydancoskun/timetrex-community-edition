@@ -175,6 +175,14 @@ class HolidayFactory extends Factory {
 	 */
 	function setDateStamp( $value) {
 		$value = ( !is_int($value) ) ? trim($value) : $value; //Dont trim integer values, as it changes them to strings.
+
+		if ( $value > 0 ) {
+			if ( $this->getDateStamp() !== $value AND $this->getOldDateStamp() != $this->getDateStamp() ) {
+				Debug::Text(' Setting Old DateStamp... Current Old DateStamp: '. (int)$this->getOldDateStamp() .' Current DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
+				$this->setOldDateStamp( $this->getDateStamp() );
+			}
+		}
+
 		return $this->setGenericDataValue( 'date_stamp', $value );
 	}
 
@@ -354,19 +362,7 @@ class HolidayFactory extends Factory {
 													TTi18n::gettext('Date is already in use by another Holiday')
 												);
 		}
-		if ( $this->Validator->isError('date_stamp') == FALSE ) {
-			$value = $this->getDateStamp();
-			if	( $value > 0 ) {
-				if ( $this->getDateStamp() !== $value AND $this->getOldDateStamp() != $this->getDateStamp() ) {
-					Debug::Text(' Setting Old DateStamp... Current Old DateStamp: '. (int)$this->getOldDateStamp() .' Current DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
-					$this->setOldDateStamp( $this->getDateStamp() );
-				}
-			} else {
-				$this->Validator->isTRUE(		'date_stamp',
-												FALSE,
-												TTi18n::gettext('Incorrect date'));
-			}
-		}
+
 		// Name
 		$this->Validator->isLength(	'name',
 											$this->getName(),
@@ -409,18 +405,20 @@ class HolidayFactory extends Factory {
 	 */
 	function postSave() {
 		//ReCalculate Recurring Schedule records based on this holiday, assuming its in the future.
-		if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) >= TTDate::getMiddleDayEpoch( time() ) ) {
-			Debug::text('Holiday is today or in the future, try to recalculate recurring schedules on this date: '. TTDate::getDate('DATE', $this->getDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
+		if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) >= TTDate::getMiddleDayEpoch( time() ) OR TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) >= TTDate::getMiddleDayEpoch( time() ) ) {
+			Debug::text('Holiday is today or in the future, try to recalculate recurring schedules on this date: '. TTDate::getDate('DATE', $this->getDateStamp() ) .' Old Date: '. TTDate::getDate('DATE', $this->getOldDateStamp() ), __FILE__, __LINE__, __METHOD__, 10);
 
 			$date_ranges = array();
 			if ( TTDate::getMiddleDayEpoch( $this->getDateStamp() ) != TTDate::getMiddleDayEpoch( $this->getOldDateStamp() ) ) {
 				$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getOldDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getOldDateStamp() ) );
 			}
+
 			$date_ranges[] = array( 'start_date' => TTDate::getBeginDayEpoch( $this->getDateStamp() ), 'end_date' => TTDate::getEndDayEpoch( $this->getDateStamp() ) );
 
 			foreach( $date_ranges as $date_range ) {
 				$start_date = $date_range['start_date'];
 				$end_date = $date_range['end_date'];
+				Debug::text('Recalculating Recurring Schedules... Start Date: '. TTDate::getDate('DATE', $start_date ) .' End Date: '. TTDate::getDate('DATE', $end_date ), __FILE__, __LINE__, __METHOD__, 10);
 
 				//Get existing recurring_schedule rows on the holiday day, so we can figure out which recurring_schedule_control records to recalculate.
 				$recurring_schedule_control_ids = array();

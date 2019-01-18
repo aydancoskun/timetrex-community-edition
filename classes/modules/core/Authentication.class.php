@@ -844,7 +844,14 @@ class Authentication {
 					}
 					break;
 				case 'job_applicant':
-					$password_result = $this->checkApplicantPassword($user_name, $password);
+					$company_obj = $this->getCompanyObject( $user_name, 'JOB_APPLICANT' );
+					if ( is_object( $company_obj ) AND $company_obj->getProductEdition() == 25 AND $company_obj->getStatus() == 10 ) { //Active
+						$password_result = $this->checkApplicantPassword( $user_name, $password );
+					} else {
+						Debug::text('ERROR: Company is not active or incorrect product edition...', __FILE__, __LINE__, __METHOD__, 10);
+						$password_result = FALSE; //No company by that user name.
+					}
+					unset( $company_obj );
 					break;
 				default:
 					return FALSE;
@@ -1038,25 +1045,40 @@ class Authentication {
 	//
 	//Functions to help check crendentials.
 	//
+
+	function getCompanyObject( $user_name, $type = 'USER' ) {
+		$type = strtoupper($type);
+		if ( $type == 'USER' ) {
+			$ulf = TTnew( 'UserListFactory' );
+			$ulf->getByUserName( strtolower( $user_name ) );
+		} elseif ( $type == 'JOB_APPLICANT' )  {
+			$ulf = TTnew( 'JobApplicantListFactory' );
+			$ulf->getByUserName( $user_name );
+		}
+
+		if ( $ulf->getRecordCount() == 1 ) {
+			$u_obj = $ulf->getCurrent();
+			if ( is_object( $u_obj ) ) {
+				$clf = TTnew( 'CompanyListFactory' );
+				$clf->getById( $u_obj->getCompany() );
+				if ( $clf->getRecordCount() == 1 ) {
+					return $clf->getCurrent();
+				}
+			}
+		}
+
+		return FALSE;
+	}
 	/**
 	 * @param $user_name
 	 * @return bool
 	 */
 	function checkCompanyStatus( $user_name ) {
-		$ulf = TTnew( 'UserListFactory' );
-		$ulf->getByUserName( strtolower($user_name) );
-		if ( $ulf->getRecordCount() == 1 ) {
-			$u_obj = $ulf->getCurrent();
-			if ( is_object($u_obj) ) {
-				$clf = TTnew( 'CompanyListFactory' );
-				$clf->getById( $u_obj->getCompany() );
-				if ( $clf->getRecordCount() == 1 ) {
-					//Return the actual status so we can do multiple checks.
-					Debug::text('Company Status: '. $clf->getCurrent()->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
-					return $clf->getCurrent()->getStatus();
-				}
-
-			}
+		$company_obj = $this->getCompanyObject( $user_name, 'USER' );
+		if ( is_object( $company_obj ) ) {
+			//Return the actual status so we can do multiple checks.
+			Debug::text('Company Status: '. $company_obj->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
+			return $company_obj->getStatus();
 		}
 
 		return FALSE;

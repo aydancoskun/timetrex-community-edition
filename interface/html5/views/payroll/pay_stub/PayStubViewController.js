@@ -2404,7 +2404,8 @@ PayStubViewController = BaseViewController.extend( {
 
 			if ( widget_rate.getValue().length > 0 && widget_units.getValue().length > 0 ) {
 				//widget_amount.setValue( ( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) ).toFixed( 2 ) );
-				var amount_value = Global.MoneyRound( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) );
+				//var amount_value = Global.MoneyRound( parseFloat( widget_rate.getValue() ) * parseFloat( widget_units.getValue() ) );
+				amount_value = Global.MoneyRound( Decimal( parseFloat( widget_rate.getValue() ) ).mul( parseFloat( widget_units.getValue() ) ).toFixed(4) );
 				if ( amount_value == 'NaN' || amount_value == 0 || amount_value == '' ) {
 					amount_value = '0.00';
 				}
@@ -2439,7 +2440,8 @@ PayStubViewController = BaseViewController.extend( {
 				var original_ytd_amount = parseFloat( this.rows_widgets_array[index]['ytd_amount'].attr( 'original_ytd_amount' ) );
 				var original_amount = parseFloat( this.rows_widgets_array[index]['ytd_amount'].attr( 'original_amount' ) );
 //				var new_ytd_amount = (original_ytd_amount - original_amount + c_value).toFixed( 4 );
-				var new_ytd_amount = Global.removeTrailingZeros( (original_ytd_amount - original_amount + c_value) );
+// 				var new_ytd_amount = Global.removeTrailingZeros( (original_ytd_amount - original_amount + c_value) );
+				var new_ytd_amount = Global.removeTrailingZeros( Decimal( original_ytd_amount ).sub( original_amount ).add( c_value ).toFixed(4) );
 				this.rows_widgets_array[index]['ytd_amount'].setValue( new_ytd_amount != 0 ? new_ytd_amount : '-' );
 				this.rows_widgets_array[index]['ytd_amount'].attr( 'original_ytd_amount', new_ytd_amount );
 				this.rows_widgets_array[index]['ytd_amount'].attr( 'original_amount', c_value );
@@ -2491,8 +2493,11 @@ PayStubViewController = BaseViewController.extend( {
 						net_pay_amount = total_amount;
 						net_pay_ytd_amount = total_ytd_amount;
 					} else if ( row.type_id == 20 ) { // Subtract deductions (only)
-						net_pay_amount = net_pay_amount - total_amount;
-						net_pay_ytd_amount = net_pay_ytd_amount - total_ytd_amount;
+						//net_pay_amount = net_pay_amount - total_amount;
+						net_pay_amount = Decimal( net_pay_amount ).sub( total_amount ).toFixed(4);
+
+						//net_pay_ytd_amount = net_pay_ytd_amount - total_ytd_amount;
+						net_pay_ytd_amount = Decimal( net_pay_ytd_amount ).sub( total_ytd_amount ).toFixed(4);
 					}
 
 					this.parent_controller.net_pay_amount = net_pay_amount;
@@ -2523,17 +2528,20 @@ PayStubViewController = BaseViewController.extend( {
 				}
 
 				if ( total_units_blank == false ) {
-					total_units = parseFloat( total_units ) + parseFloat( current_units );
+					// total_units = parseFloat( total_units ) + parseFloat( current_units );
+					total_units = Decimal( parseFloat( total_units ) ).add( parseFloat( current_units ) ).toFixed(4);
 				} else {
 					total_units = '';
 				}
 
 				if ( Global.isNumeric( current_total_amount ) ) {
-					total_amount = total_amount + current_total_amount;
+					// total_amount = total_amount + current_total_amount;
+					total_amount = Decimal( total_amount ).add( current_total_amount ).toFixed(4);
 				}
 
 				if ( Global.isNumeric( current_ytd_total ) ) {
-					total_ytd_amount = total_ytd_amount + current_ytd_total;
+					// total_ytd_amount = total_ytd_amount + current_ytd_total;
+					total_ytd_amount = Decimal( total_ytd_amount ).add( current_ytd_total ).toFixed(4);
 				}
 
 			}
@@ -2714,7 +2722,9 @@ PayStubViewController = BaseViewController.extend( {
 
 
 			if ( total_amount > 0 ) {
-				var difference = Global.removeTrailingZeros( parseFloat( total_amount ) - parseFloat( this.parent_controller.net_pay_amount ) );
+				// var difference = Global.removeTrailingZeros( parseFloat( total_amount ) - parseFloat( this.parent_controller.net_pay_amount ) );
+				var difference = Global.removeTrailingZeros( Decimal( parseFloat( total_amount ) ).sub( parseFloat( this.parent_controller.net_pay_amount ) ).toFixed(4) );
+
 				if ( isNaN( difference ) ) {
 					difference = 0;
 				}

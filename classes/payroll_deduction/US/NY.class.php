@@ -38,7 +38,7 @@
 /**
  * @package PayrollDeduction\US
  */
-class PayrollDeduction_US_NY extends PayrollDeduction_US {
+class PayrollDeduction_US_NY extends PayrollDeduction_US { //Use New York State (NYS) withholding guide.
 	/*
 															10 => 'Single',
 															20 => 'Married',
@@ -57,32 +57,32 @@ class PayrollDeduction_US_NY extends PayrollDeduction_US {
 							array('income' => 11700, 'rate' => 4.5, 'constant' => 340),
 							array('income' => 13900, 'rate' => 5.25, 'constant' => 484),
 							array('income' => 21400, 'rate' => 5.90, 'constant' => 600),
-							array('income' => 80650, 'rate' => 6.33, 'constant' => 1042),
-							array('income' => 96800, 'rate' => 6.57, 'constant' => 4793),
-							array('income' => 107650, 'rate' => 7.58, 'constant' => 5854),
-							array('income' => 157650, 'rate' => 8.08, 'constant' => 6676),
-							array('income' => 215400, 'rate' => 7.07, 'constant' => 10716),
-							array('income' => 265400, 'rate' => 8.56, 'constant' => 14799),
-							array('income' => 1077550, 'rate' => 7.35, 'constant' => 19079),
-							array('income' => 1127550, 'rate' => 52.08, 'constant' => 78772),
-							array('income' => 1127550, 'rate' => 9.62, 'constant' => 104812),
+							array('income' => 80650, 'rate' => 6.21, 'constant' => 1042),
+							array('income' => 96800, 'rate' => 6.49, 'constant' => 4721),
+							array('income' => 107650, 'rate' => 7.52, 'constant' => 5770),
+							array('income' => 157650, 'rate' => 8.02, 'constant' => 6585),
+							array('income' => 215400, 'rate' => 6.99, 'constant' => 10595),
+							array('income' => 265400, 'rate' => 8.90, 'constant' => 14632),
+							array('income' => 1077550, 'rate' => 7.35, 'constant' => 19082),
+							array('income' => 1127550, 'rate' => 52.08, 'constant' => 78775),
+							array('income' => 1127550, 'rate' => 9.62, 'constant' => 104815),
 					),
 					20 => array(
 							array('income' => 8500, 'rate' => 4.0, 'constant' => 0),
 							array('income' => 11700, 'rate' => 4.5, 'constant' => 340),
 							array('income' => 13900, 'rate' => 5.25, 'constant' => 484),
 							array('income' => 21400, 'rate' => 5.90, 'constant' => 600),
-							array('income' => 80650, 'rate' => 6.33, 'constant' => 1042),
-							array('income' => 96800, 'rate' => 6.57, 'constant' => 4793),
-							array('income' => 107650, 'rate' => 7.83, 'constant' => 5854),
-							array('income' => 157650, 'rate' => 8.33, 'constant' => 6703),
-							array('income' => 211550, 'rate' => 7.85, 'constant' => 10868),
-							array('income' => 323200, 'rate' => 7.07, 'constant' => 15099),
-							array('income' => 373200, 'rate' => 9.16, 'constant' => 22993),
-							array('income' => 1077550, 'rate' => 7.35, 'constant' => 27573),
-							array('income' => 2155350, 'rate' => 7.65, 'constant' => 79343),
-							array('income' => 2205350, 'rate' => 94.54, 'constant' => 161794),
-							array('income' => 2205350, 'rate' => 9.62, 'constant' => 209064),
+							array('income' => 80650, 'rate' => 6.21, 'constant' => 1042),
+							array('income' => 96800, 'rate' => 6.49, 'constant' => 4721),
+							array('income' => 107650, 'rate' => 7.64, 'constant' => 5770),
+							array('income' => 157650, 'rate' => 8.14, 'constant' => 6599),
+							array('income' => 211550, 'rate' => 7.90, 'constant' => 10669),
+							array('income' => 323200, 'rate' => 6.99, 'constant' => 14927),
+							array('income' => 373200, 'rate' => 9.68, 'constant' => 22731),
+							array('income' => 1077550, 'rate' => 7.35, 'constant' => 27571),
+							array('income' => 2155350, 'rate' => 7.65, 'constant' => 79341),
+							array('income' => 2205350, 'rate' => 94.54, 'constant' => 161792),
+							array('income' => 2205350, 'rate' => 9.62, 'constant' => 209062),
 					),
 			),
 			20170101 => array(
@@ -342,6 +342,7 @@ class PayrollDeduction_US_NY extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+		//2019 - No Change
 		//2018 - No Change
 		20170101 => array( // 01-Jan-2017
 						   'standard_deduction' => array(

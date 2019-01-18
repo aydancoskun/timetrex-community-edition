@@ -40,6 +40,14 @@
  */
 class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
+			20190101 => array(
+					array('income' => 40707, 'rate' => 5.06, 'constant' => 0),
+					array('income' => 81416, 'rate' => 7.7, 'constant' => 1075),
+					array('income' => 93476, 'rate' => 10.5, 'constant' => 3354),
+					array('income' => 113506, 'rate' => 12.29, 'constant' => 5028),
+					array('income' => 153900, 'rate' => 14.7, 'constant' => 7763),
+					array('income' => 153900, 'rate' => 16.8, 'constant' => 10995),
+			),
 			20180101 => array(
 					array('income' => 39676, 'rate' => 5.06, 'constant' => 0),
 					array('income' => 79353, 'rate' => 7.7, 'constant' => 1047),
@@ -196,6 +204,12 @@ class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 		Provincial tax reduction
 	*/
 	var $provincial_tax_reduction_options = array(
+			20190101 => array( //2019
+							   'income1' => 20668,
+							   'income2' => 33702,
+							   'amount'  => 464,
+							   'rate'    => 0.0356,
+			),
 			20180101 => array( //2018
 							   'income1' => 20144,
 							   'income2' => 32868.72,
@@ -303,8 +317,8 @@ class PayrollDeduction_CA_BC extends PayrollDeduction_CA {
 	function getProvincialTaxReduction() {
 		$A = $this->getAnnualTaxableIncome();
 		$T4 = $this->getProvincialBasicTax();
-		$V1 = $this->getProvincialSurtax();
-		$Y = 0;
+//		$V1 = $this->getProvincialSurtax();
+//		$Y = 0;
 		$S = 0;
 
 		Debug::text( 'BC Specific - Province: ' . $this->getProvince(), __FILE__, __LINE__, __METHOD__, 10 );

@@ -2,12 +2,12 @@
     <form class="form-signin" role="form" autocomplete="off">
         <h4 class="form-signin-heading"><img src="../../images/lock.gif">  <%= $.i18n._('Quick Punch Login') %></h4>
         <div class="form-group">
-            <label for="user_name"><%= $.i18n._('Quick Punch ID') %></label>
-            <input tabindex="1" tab-start type="number" data-toggle="tooltip" class="form-control" name="user_name" id="user_name" autocomplete="off" autofocus>
+            <label for="quick_punch_id"><%= $.i18n._('Quick Punch ID') %></label>
+            <input type="number" id="quick_punch_id" name="quick_punch_id" min="0" data-toggle="tooltip" class="form-control" tabindex="1" tab-start autocomplete="off" autofocus>
         </div>
         <div class="form-group">
-            <label for="password"><%= $.i18n._('Password') %></label>
-            <input tabindex="2" type="password" data-toggle="tooltip" class="form-control" id="password" name="password" autocomplete="off">
+            <label for="quick_punch_password"><%= $.i18n._('Password') %></label>
+            <input type="number" id="quick_punch_password" name="quick_punch_password" tabindex="2" data-toggle="tooltip" class="form-control" autocomplete="off">
         </div>
         <div class="form-group">
             <label for="language"><%= $.i18n._('Language') %></label>

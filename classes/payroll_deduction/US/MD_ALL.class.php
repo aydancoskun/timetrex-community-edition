@@ -41,6 +41,13 @@
 class PayrollDeduction_US_MD_ALL extends PayrollDeduction_US_MD {
 
 	var $district_options = array(
+		20180601 => array( //01-Jun-2018
+				'standard_deduction_rate'    => 15,
+				'standard_deduction_minimum' => 1500,
+				'standard_deduction_maximum' => 2250,
+				'allowance'                  => 3200,
+		),
+
 		//01-Jan-12: No change.
 		//01-Jan-11: No change.
 		//01-Jan-10: No change.

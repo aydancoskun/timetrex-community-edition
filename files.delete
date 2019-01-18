@@ -1293,3 +1293,20 @@
 /interface/html5/employees/bank_account/
 /interface/html5/company/bank_accounts/
 /interface/html5/framework/fastclick.js
+
+/interface/html5/theme/default/images/combobox_up_left_down.png
+/interface/html5/theme/default/images/combobox_up_middle_down.png
+/interface/html5/theme/default/images/combobox_up_right_down.png
+/interface/html5/theme/default/images/combobox_up_left.png
+/interface/html5/theme/default/images/combobox_up_middle.png
+/interface/html5/theme/default/images/combobox_up_right.png
+/interface/html5/theme/default/css/global/widgets/ribbon/images/top_right_bg.png
+/interface/html5/theme/default/css/global/widgets/ribbon/images/bg_right.png
+/interface/html5/theme/default/css/global/widgets/ribbon/images/context_bg_left.png
+/interface/html5/theme/default/css/global/widgets/ribbon/images/top_bg.png
+/interface/html5/theme/default/images/combobox_up_left_error.png
+/interface/html5/theme/default/images/combobox_up_middle_error.png
+/interface/html5/theme/default/images/combobox_up_right_error.png
+
+/interface/html5/framework/sonic.js b/interface/html5/framework/sonic.js
+/interface/html5/framework/currency.min.js

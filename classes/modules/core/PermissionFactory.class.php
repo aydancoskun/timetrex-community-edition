@@ -1701,6 +1701,8 @@ class PermissionFactory extends Factory {
 															'schedule' =>	array(
 																				'enabled' => TRUE,
 																				'view_own' => TRUE,
+																				'edit_branch' => TRUE, //Allows the user to see the branch column by default.
+																				'edit_department' => TRUE, //Allows the user to see the department column by default.
 																			),
 															'accrual' =>	array(
 																				'enabled' => TRUE,
@@ -1764,6 +1766,10 @@ class PermissionFactory extends Factory {
 														),
 													40 => //Module: Job Costing
 														array(
+															'schedule' => array(
+																				'edit_job' => TRUE,
+																				'edit_job_item' => TRUE,
+																			),
 															'punch' =>	array(
 																				'edit_job' => TRUE,
 																				'edit_job_item' => TRUE,

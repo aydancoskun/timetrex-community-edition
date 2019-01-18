@@ -40,6 +40,13 @@
  */
 class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 	var $provincial_income_tax_rate_options = array(
+			20190101 => array(
+					array('income' => 43906, 'rate' => 5.05, 'constant' => 0),
+					array('income' => 87813, 'rate' => 9.15, 'constant' => 1800),
+					array('income' => 150000, 'rate' => 11.16, 'constant' => 3565),
+					array('income' => 220000, 'rate' => 12.16, 'constant' => 5065),
+					array('income' => 220000, 'rate' => 13.16, 'constant' => 7265),
+			),
 			20180101 => array(
 					array('income' => 42960, 'rate' => 5.05, 'constant' => 0),
 					array('income' => 85923, 'rate' => 9.15, 'constant' => 1761),
@@ -129,6 +136,12 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 		Provincial surtax
 	*/
 	var $provincial_surtax_options = array(
+			20190101 => array( //2019
+							   'income1' => 4740,
+							   'income2' => 6067,
+							   'rate1'   => 0.20,
+							   'rate2'   => 0.36,
+			),
 			20180101 => array( //2018
 							   'income1' => 4638,
 							   'income2' => 5936,
@@ -213,6 +226,9 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 		Provincial tax reduction
 	*/
 	var $provincial_tax_reduction_options = array(
+			20190101 => array( //2019
+							   'amount' => 244,
+			),
 			20180101 => array( //2018
 							   'amount' => 239,
 			),
@@ -255,7 +271,7 @@ class PayrollDeduction_CA_ON extends PayrollDeduction_CA {
 	);
 
 	function getProvincialTaxReduction() {
-		$A = $this->getAnnualTaxableIncome();
+//		$A = $this->getAnnualTaxableIncome();
 		$T4 = $this->getProvincialBasicTax();
 		$V1 = $this->getProvincialSurtax();
 		$Y = 0;

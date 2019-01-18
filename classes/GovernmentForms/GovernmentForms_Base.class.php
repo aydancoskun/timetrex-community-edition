@@ -452,7 +452,39 @@ class GovernmentForms_Base {
 		return TRUE;
 	}
 
-	//Draw an X in each of the specified locations
+	//Draw an normal values in a grid.
+	function drawNormalGrid( $value, $schema ) {
+		if ( !is_array( $value ) ) {
+			$value = (array)$value;
+		}
+
+		foreach( $value as $key => $tmp_value ) {
+
+			if ( $tmp_value !== FALSE ) {
+				//var_dump($tmp_value, $schema['coordinates'][$key] );
+
+				//$this->Draw( $this->getBeforeDecimal( $value ),  array('coordinates' => $schema['coordinates'][$key][0] ) );
+				//var_dump( $this->getSchemaSpecificCoordinates( $schema, $key, 0 ) );
+				//$this->Draw( $this->getBeforeDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, $key, 0 ) );
+
+				if ( is_array($tmp_value) ) {
+
+					foreach( $tmp_value as $value ) {
+						$this->drawNormal( $value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
+					}
+				} else {
+					$this->drawNormal( $tmp_value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
+				}
+
+
+				//$this->Draw( $tmp_value, $this->getSchemaSpecificCoordinates( $schema, $key ) );
+			}
+		}
+
+		return TRUE;
+	}
+
+	//Draw an split decimal values in a grid.
 	function drawSplitDecimalFloatGrid( $value, $schema ) {
 		if ( !is_array( $value ) ) {
 			$value = (array)$value;

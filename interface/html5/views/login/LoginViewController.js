@@ -19,6 +19,7 @@ LoginViewController = BaseViewController.extend( {
 	init: function( options ) {
 		//this._super('initialize', options );
 		var $this = this;
+		Global.setVirtualDeviceViewport('mobile'); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
 		this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 		this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
 		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
@@ -77,7 +78,6 @@ LoginViewController = BaseViewController.extend( {
 
 	events: {
 		'click #quick_punch': 'onQuickPunchClick',
-		'click #login_btn': 'onLoginBtnClick',
 		'click #forgot_password': 'forgotPasswordClick',
 		'click #appTypeLogo': 'onAppTypeClick',
 		'click #companyLogo': 'onAppTypeClick',
@@ -349,7 +349,6 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	goToView: function() {
-		TAlertManager.closeBrowserBanner();
 		this.doing_login = false;
 		TopMenuManager.ribbon_view_controller = null;
 		TopMenuManager.ribbon_menus = null;
@@ -433,6 +432,13 @@ LoginViewController = BaseViewController.extend( {
 		var $this = this;
 		var message_id = UUID.guid();
 		LocalCacheData.setSessionID( '' );
+
+		if(!$('body').hasClass('mobile-device-mode')) {
+			// If not on a mobile view (Where desktop UI is forced, render the random animal on background. If mobile, no animals.
+			this.renderAnimalsForBackground();
+		}
+
+
 		$( '#login_copy_right_info' ).hide();
 		$( '#powered_by' ).hide();
 
@@ -450,12 +456,16 @@ LoginViewController = BaseViewController.extend( {
 
 		username_input.focus();
 
-		passwordInput.unbind( 'keydown' ).bind( 'keydown', function( e ) {
+		// Listen to the login form submit event, but replace default behaviour with our own.
+		// We need to trigger login via the standard form submission for browsers to properly detect a login form for autocomplete and credential storage, especially picky browsers like IE11. See git log or issue #2680 for further context.
+		// This event listener will also be triggered by keyboard ENTER, thus we do not need a separate listener for that key anymore.
+		$('#login-form').on('submit', function(e) {
+			// Prevent the default once submit event triggered.
+			e.preventDefault();
 
-			if ( e.keyCode === 13 ) {
-				$this.onLoginBtnClick( e );
-			}
-		} );
+			// Instead of submitting the form to itself, trigger the login check.
+			$this.onLoginBtnClick(e);
+		});
 
 		$( '#versionNumber' ).html( 'v' + APIGlobal.pre_login_data.application_build );
 
@@ -471,15 +481,15 @@ LoginViewController = BaseViewController.extend( {
 		}
 
 		if ( LocalCacheData.productEditionId > 10 && LocalCacheData.appType === true ) {
-			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/od.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/od.png' + '?v=' + APIGlobal.pre_login_data.application_build );
 		} else if ( LocalCacheData.productEditionId === 15 ) {
-			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/beo.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/beo.png' + '?v=' + APIGlobal.pre_login_data.application_build );
 		} else if ( LocalCacheData.productEditionId === 20 ) {
-			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/peo.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/peo.png' + '?v=' + APIGlobal.pre_login_data.application_build );
 		} else if ( LocalCacheData.productEditionId === 25 ) {
-			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/eeo.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/eeo.png' + '?v=' + APIGlobal.pre_login_data.application_build );
 		} else {
-			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/seo.png' );
+			$( '#appTypeLogo' ).attr( 'src', url + '/css/views/login/images/seo.png' + '?v=' + APIGlobal.pre_login_data.application_build );
 			is_seo = true;
 		}
 
@@ -522,19 +532,19 @@ LoginViewController = BaseViewController.extend( {
 			}, 100 );
 		} );
 
-		$( '#powered_by' ).show();
-		$( '#powered_by' ).attr( 'src', ServiceCaller.login_page_powered_by_logo );
-		$( '#powered_by' ).attr( 'alt', LocalCacheData.loginData.application_name + ' Workforce Management Software' );
+		var powered_by_img = $( '#powered_by' );
+		powered_by_img.show();
+		powered_by_img.attr( 'src', ServiceCaller.login_page_powered_by_logo );
+		powered_by_img.attr( 'alt', LocalCacheData.loginData.application_name + ' Workforce Management Software' );
 		var powered_by_link = $( '<a target="_blank" href="https://' + LocalCacheData.getLoginData().organization_url + '"></a>' );
-		powered_by_link.append( $( '#powered_by' ) );
 		powered_by_link.addClass( 'powered-by-img-seo' );
+		powered_by_img.wrap(powered_by_link);
+
+		// get copyright info from main page copyright tag
 		$( '#login_copy_right_info' ).html( $( '#copy_right_info_1' ).html() );
 		$( '#login_copy_right_info' ).show();
-		powered_by_link.insertAfter( $( $this.el ) );
-		$( '#login_copy_right_info' ).insertAfter( $( $this.el ) );
 
 		if ( LocalCacheData.productEditionId === 10 ) {
-			$( '#social_div' ).insertAfter( $( $this.el ) );
 			$( '#social_div' ).show();
 			$( '#social_div' ).find( '.facebook-img' ).attr( 'src', 'theme/default/images/facebook_button.jpg' );
 			$( '#social_div' ).find( '.twitter-img' ).attr( 'src', 'theme/default/images/twitter_button.jpg' );
@@ -597,7 +607,21 @@ LoginViewController = BaseViewController.extend( {
 
 	cleanWhenUnloadView: function( callBack ) {
 		$( '#loginViewContainer' ).remove();
+		Global.setVirtualDeviceViewport('desktop'); // Setting mobile view on login, then back to desktop (990px virtual) after login, to allow pan & zoom, as not whole app is mobile optimized.
 		this._super( 'cleanWhenUnloadView', callBack );
+	},
+
+	renderAnimalsForBackground: function() {
+		var station_id = Global.getStationID();
+		//week of year and numeric digits of station_id.
+		if ( station_id.length > 0 ) {
+			station_id = station_id.substr( 0, 5 ).match( /\d+/g ).map( function ( n ) {
+				return parseInt( n );
+			} );
+		}
+		var seed = parseInt( moment().week() + '' + station_id );
+		var random_image_number = Math.floor( ( Math.abs( Math.sin( seed ) ) * seed ) % 2 ) + 1; // seeded random
+		$( '#login-bg_animal' ).css( 'background-image', 'url(\'theme/default/images/login_animals_' + random_image_number + '.png\')' );
 	}
 
 } );

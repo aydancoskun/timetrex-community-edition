@@ -134,41 +134,15 @@ var ProgressBar = (function() {
 				cancelProgressBar();
 
 			} );
-
-			if ( ie >= 9 ) {
-				circle = new Sonic( {
-
-					width: 50,
-					height: 50,
-					padding: 50,
-
-					strokeColor: '#ffffff',
-
-					pointDistance: 0.01,
-					stepsPerFrame: 3,
-					trailLength: 0.7,
-
-					step: 'fader',
-
-					setup: function() {
-						this._.lineWidth = 5;
-					},
-
-					path: [
-						['arc', 25, 25, 25, 0, 360]
-					]
-
-				} );
-
-				circle.play();
-			}
+			// css only spinner - and yes, it does unfortunately need all those divs. They are for each of the spokes of the circle.
+			circle = $('<div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>');
 
 			$( 'body' ).append( loadngBox );
 			loading_box = $( '#progressBar' );
 			message_label = loading_box.find( '.processing' );
 
 			if ( circle ) {
-				message_label.after( circle.canvas );
+				message_label.after( circle );
 			}
 
 			loading_box.css( 'display', 'none' );
@@ -177,9 +151,7 @@ var ProgressBar = (function() {
 			message_label = loading_box.find( '.processing' );
 
 			if ( circle ) {
-				circle.stop();
-				circle.play();
-				message_label.after( circle.canvas );
+				message_label.after( circle );
 			}
 
 		}
@@ -421,9 +393,6 @@ var ProgressBar = (function() {
 							start_progress_timer = false;
 						}
 
-						if ( circle ) {
-							circle.stop();
-						}
 					}
 
 					TTPromise.resolve( 'ProgressBar', 'MASTER' );

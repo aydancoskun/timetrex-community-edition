@@ -133,6 +133,7 @@ PayrollRemittanceAgencyEventWizard = Wizard.extend( {
 					'payroll_remittance_agency_name': true,
 					'user_report_data_id': true,
 					'status': true,
+					'status_id': true,
 					'type': true,
 					'type_id': true,
 					'frequency': true,

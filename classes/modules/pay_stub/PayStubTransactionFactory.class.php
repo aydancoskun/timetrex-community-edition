@@ -652,7 +652,7 @@ class PayStubTransactionFactory extends Factory {
 			);
 		}
 
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getStatus() != 100 ) { //Ignore this check when setting to stop payment.
 			//Make sure Source Account and Destination Account types match.
 			if ( $this->getRemittanceSourceAccount() !== FALSE AND $this->getRemittanceDestinationAccount() !== FALSE ) {
 				if ( is_object( $this->getRemittanceSourceAccountObject() ) AND is_object( $this->getRemittanceDestinationAccountObject() ) ) {
@@ -752,6 +752,31 @@ class PayStubTransactionFactory extends Factory {
 	 */
 	function postSave() {
 		$this->removeCache( $this->getId() );
+
+		$rs_obj = $this->getRemittanceSourceAccountObject();
+		$le_obj = $rs_obj->getLegalEntityObject();
+		if ( $this->getDeleted() == FALSE AND is_object($rs_obj) AND $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 AND in_array( $this->getStatus(), array(100, 200) ) ) { //3000=EFT/ACH, 5=TimeTrex EFT, 100=Stop Payment, 200=Stop Payment (ReIssue)
+			Debug::Text( '  Issuing Stop Payment for TimeTrex PaymentServices... ', __FILE__, __LINE__, __METHOD__, 10 );
+
+			//Send data to TimeTrex Remittances service.
+			$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+
+			if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+				try {
+					$retval = $tt_ps_api->setPayStubTransaction( array('_kind' => 'Transaction', 'remote_id' => $this->getId(), 'status_id' => 'S') ); //S=Stop Payment by Client
+				} catch ( Exception $e ) {
+					Debug::Text( 'ERROR! Unable to upload pay stub transaction data... (c) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+				}
+			} else {
+				Debug::Text( 'WARNING: Production is off, not calling payment services API...', __FILE__, __LINE__, __METHOD__, 10 );
+				$retval = TRUE;
+			}
+
+			if ( $retval === FALSE ) {
+				return FALSE;
+			}
+		}
+
 		return TRUE;
 	}
 
@@ -1035,7 +1060,6 @@ class PayStubTransactionFactory extends Factory {
 	 * @throws GeneralError
 	 */
 	function exportPayStubTransaction( $pstlf = NULL, $export_type = NULL, $company_obj = NULL, $last_transaction_numbers = NULL ) {
-
 		require_once( Environment::getBasePath() . '/classes/ChequeForms/ChequeForms.class.php' );
 		$output = array();
 
@@ -1054,7 +1078,7 @@ class PayStubTransactionFactory extends Factory {
 			return FALSE;
 		}
 
-		$pstlf->StartTransaction();
+		$pstlf->StartTransaction(); //Ensure that all transaction are processed in the entire batch, or NONE are processed to avoid cases where only one file, or one set of transactions is paid and the user misses the failures.
 		if ( $pstlf->getRecordCount() > 0 ) {
 			//start with getting paystub transactions sorted by legal entity id, source acocunt
 			Debug::Text( 'Getting paystub transactions. Count: ' . $pstlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
@@ -1128,6 +1152,9 @@ class PayStubTransactionFactory extends Factory {
 							/** @var RemittanceSourceAccountFactory $rs_obj */
 							$rs_obj = $pst_obj->getRemittanceSourceAccountObject();
 
+							/** @var LegalEntityFactory $le_obj */
+							$le_obj = $rs_obj->getLegalEntityObject();
+
 							if ( isset( $last_transaction_numbers ) AND isset( $last_transaction_numbers[$rs_obj->getId()] ) AND count( $last_transaction_numbers ) > 0 ) {
 								Debug::Text( 'Overriding last transaction number for ' . $rs_obj->getName() . ' to: ' . $last_transaction_numbers[$rs_obj->getId()], __FILE__, __LINE__, __METHOD__, 10 );
 								$rs_obj->setLastTransactionNumber( $last_transaction_numbers[$rs_obj->getId()] );
@@ -1138,8 +1165,58 @@ class PayStubTransactionFactory extends Factory {
 						}
 						Debug::Text( 'RSA: name: [' . $rs_obj->getName() . '] Type: '. $rs_obj->getType() .' ID: ' . $rs_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 
+						//TimeTrex PaymentServices API loop
+						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH 5=TimeTrex Payment Services
+							//START BATCH
+							if ( $n == 0 ) {
+								//Send data to TimeTrex Remittances service.
+								$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+
+								$next_transaction_number = $rs_obj->getNextTransactionNumber();
+								Debug::Text( 'PaymentServices API RemittanceSourceAccount: name: [' . $rs_obj->getName() . '] ID: ' . $rs_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+							}
+
+							if ( $pst_obj->getAmount() > 0 ) {
+								$confirmation_number = strtoupper( substr( sha1( TTUUID::generateUUID() ), -6 ) ); //Generate random string from UUIDs... Keep it around 6 chars so there is more room on EFT descriptions.
+
+								//Batch payment services API requests so they can all be sent in a single transaction.
+								$tt_ps_api_request_arr[] = $tt_ps_api->convertPayStubTransactionObjectToTransactionArray( $pst_obj, $ps_obj, $rs_obj, $uf_obj, $confirmation_number, $next_transaction_number );
+							}
+
+							//END BATCH
+							if ( $n == $n_max ) {
+								Debug::Text( 'Ending PaymentServices API  Batch! Source name: [' . $rs_obj->getName() . '] ID: ' . $rs_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+
+								if ( isset($tt_ps_api_request_arr) AND count( $tt_ps_api_request_arr ) > 0 ) {
+
+									if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+										try {
+											$tt_ps_api_retval = $tt_ps_api->setPayStubTransaction( $tt_ps_api_request_arr );
+											if ( $tt_ps_api_retval->isValid() == TRUE ) {
+												$output[ $rs_obj->getId() ] = TRUE;
+											} else {
+												Debug::Arr( $tt_ps_api_retval, 'ERROR! Unable to upload pay stub transaction data... (a)', __FILE__, __LINE__, __METHOD__, 10 );
+												$pstlf->FailTransaction();
+												unset( $confirmation_number ); //This prevents the transaction from being marked as PAID upon error, and also ensures the entire transaction fails.
+											}
+										} catch ( Exception $e ) {
+											Debug::Text( 'ERROR! Unable to upload pay stub transaction data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+											$pstlf->FailTransaction();
+											unset( $confirmation_number ); //This prevents the transaction from being marked as PAID upon error, and also ensures the entire transaction fails.
+										}
+									} else {
+										Debug::Text( 'WARNING: Production is off, not calling payment services API...', __FILE__, __LINE__, __METHOD__, 10 );
+										$output[ $rs_obj->getId() ] = TRUE;
+									}
+								} else {
+									Debug::Text( 'WARNING: No Payment Service API requests to send...', __FILE__, __LINE__, __METHOD__, 10 );
+								}
+								unset($tt_ps_api_request_arr);
+							}
+						} //end TimeTrex Remittances API loop
+
 						//EFT loop
-						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 3000 ) {
+						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() != 5 ) {
 							//START BATCH
 							if ( $n == 0 ) {
 								$next_transaction_number = $rs_obj->getNextTransactionNumber();
@@ -1163,7 +1240,7 @@ class PayStubTransactionFactory extends Factory {
 						} //end EFT loop
 
 						//CHECK loop
-						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 2000 ) {
+						if ( ( $export_type == 'export_transactions' ) AND $rs_obj->getType() == 2000 AND $rs_obj->getDataFormat() != 5 ) {
 							//START BATCH
 							if ( $n == 0 ) {
 								$data_format_type_id = $rs_obj->getDataFormat();
@@ -1202,6 +1279,7 @@ class PayStubTransactionFactory extends Factory {
 								$output = array();
 							}
 						} else {
+							//Ensure that all transaction are processed in the entire batch, or NONE are processed to avoid cases where only one file, or one set of transactions is paid and the user misses the failures.
 							$pstlf->FailTransaction();
 							Debug::Text( '  Payment failed, not sending any output...', __FILE__, __LINE__, __METHOD__, 10 );
 							$output = array();
@@ -1213,12 +1291,11 @@ class PayStubTransactionFactory extends Factory {
 					$this->getProgressBarObject()->set( NULL, $i );
 					$i++;
 					$n++;
-				}//foreach
+				}
 			}
+		}
 
-		}//if recordcount
-
-		//$pstlf->FailTransaction(); //Uncomment for easier testing.
+		//$pstlf->FailTransaction(); //ZZZ REMOVE ME! Uncomment for easier testing.
 		$pstlf->CommitTransaction();
 
 		if ( isset( $output ) ) {
@@ -1226,6 +1303,167 @@ class PayStubTransactionFactory extends Factory {
 		}
 
 		return FALSE;
+	}
+
+
+	/**
+	 * @param null $pstlf
+	 * @param null $company_obj
+	 * @return bool
+	 */
+	function exportPayStubRemittanceAgencyReports( $pstlf = NULL, $company_obj = NULL ) {
+		// Need to handle cases where transactions are of different types (ie: check, EFT, payment services API)
+		// If the remittance agency is setup to be paid through payment services, we need to obtain the proper amount regardless of what payment method was used for individual pay stubs.
+		// The proper amount would be for just the pay period/run they are processing for, and only OPEN pay stubs to avoid uploading duplicate records to the payment services API.
+		//   Since this should be called as soon as the transactions themselves are processed, the pay stubs should always be OPEN.
+		//   If this is run multiple times due to the user only processing one type or source account worth of transactions at a time, it shouldn't be a problem as the information will just be updated on remote payment services API end.
+		// If an out-of-cycle payroll run is processed, then we need to submit a completely separate agency report to the payment services API.
+		// NOTE: This can't be triggered on pay period close, as that won't work for out-of-cycle pay stubs, because we don't know which pay stubs were included in previous reports or not.
+
+		if ( !is_object( $company_obj ) ) {
+			global $current_company;
+			$company_obj = $current_company;
+		}
+
+		/** @var PayStubTransactionListFactory $pstlf */
+		if ( get_class( $pstlf ) !== 'PayStubTransactionListFactory' ) {
+			return FALSE;
+		}
+
+		$pstlf->StartTransaction();
+		Debug::Text( 'Total Transactions: '. $pstlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $pstlf->getRecordCount() > 0 ) {
+			$pay_period_run_ids = array();
+			foreach( $pstlf as $pst_obj ) {
+				$ps_obj = $pst_obj->getPayStubObject();
+
+				if ( is_object( $ps_obj ) ) {
+					//Need to break the pay stubs out by pay period/run so we can batch the agency reports by those.
+					//$pay_period_run_ids[$ps_obj->getPayPeriod()][$ps_obj->getRun()][] = $pst_obj->getPayStub();
+					$pay_period_run_ids[$ps_obj->getPayPeriod()][$ps_obj->getRun()] = TRUE;
+				}
+			}
+			unset($ps_obj);
+
+			Debug::Arr( $pay_period_run_ids, '  Total Pay Stub Pay Periods: '. count($pay_period_run_ids), __FILE__, __LINE__, __METHOD__, 10 );
+			if ( count($pay_period_run_ids) > 0 ) {
+				require_once( Environment::getBasePath() . DIRECTORY_SEPARATOR .'classes'. DIRECTORY_SEPARATOR .'modules'. DIRECTORY_SEPARATOR . 'other' . DIRECTORY_SEPARATOR . 'TimeTrexPaymentServices.class.php' );
+
+				//Find all full service agency events that need to be processed.
+				$praelf = TTnew('PayrollRemittanceAgencyEventListFactory');
+				$praelf->getByCompanyIdAndStatus( $company_obj->getId(), 15 ); //15=Full Service
+				if ( $praelf->getRecordCount() > 0 ) {
+					foreach ( $praelf as $prae_obj ) {
+						/** @var $prae_obj PayrollRemittanceAgencyEventFactory */
+
+						if ( is_object( $prae_obj->getPayrollRemittanceAgencyObject() ) ) {
+							/** @var $pra_obj PayrollRemittanceAgencyFactory */
+							$pra_obj = $prae_obj->getPayrollRemittanceAgencyObject();
+
+							/** @var $rs_obj PayrollRemittanceSourceFactory */
+							$rs_obj = $pra_obj->getRemittanceSourceAccountObject();
+
+							/** @var LegalEntityFactory $le_obj */
+							$le_obj = $rs_obj->getLegalEntityObject();
+
+							if ( $rs_obj->getType() == 3000 AND $rs_obj->getDataFormat() == 5 ) { //3000=EFT/ACH, 5=TimeTrex EFT  -- This is the remittance source account assigned the remittance agency, not the individual transactions.
+
+								if ( is_object( $pra_obj->getContactUserObject() ) ) {
+									Debug::Text( '  Agency Event: Agency: ' . $prae_obj->getPayrollRemittanceAgencyObject()->getName() . ' Legal Entity: ' . $prae_obj->getPayrollRemittanceAgencyObject()->getLegalEntity() . ' Type: ' . $prae_obj->getType() . ' Due Date: ' . TTDate::getDate( 'DATE', $prae_obj->getDueDate() ) . ' ID: ' . $prae_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+									Debug::Text( '  Remittance Source: Name: ' . $rs_obj->getName() . ' API Username: ' . $rs_obj->getValue5(), __FILE__, __LINE__, __METHOD__, 10 );
+
+									$pra_user_obj = $pra_obj->getContactUserObject();
+
+									foreach ( $pay_period_run_ids as $pay_period_id => $run_ids ) {
+										Debug::Text( '    Pay Period ID: ' . $pay_period_id . ' Total Runs: ' . count( $run_ids ), __FILE__, __LINE__, __METHOD__, 10 );
+
+										$pplf = TTnew( 'PayPeriodListFactory' );
+										$pplf->getByIdAndCompanyId( $pay_period_id, $company_obj->getId() );
+										if ( $pplf->getRecordCount() > 0 ) {
+											$pp_obj = $pplf->getCurrent();
+
+											foreach ( $run_ids as $run_id => $run_id_bool ) {
+												Debug::Text( '      Run ID: ' . $run_id, __FILE__, __LINE__, __METHOD__, 10 );
+
+												/** @var $report_obj Report */
+												$report_obj = $prae_obj->getReport( 'raw', NULL, $pra_user_obj, new Permission() );
+												//$report_obj = $prae_obj->getReport( '123456', NULL, $pra_user_obj, new Permission() ); //Test with generic TaxSummaryReport
+
+												$report_data['config'] = $report_obj->getConfig();
+
+												unset( $report_data['config']['filter']['time_period'], $report_data['config']['filter']['start_date'], $report_data['config']['filter']['end_date'] ); //Remove custom date filters and only use pay_period_run_ids.
+												//$report_data['config']['filter']['pay_stub_id'] = $run_pay_stub_ids; //Legal entity is already set in $prae_obj->getReport()
+
+												//Get report for the entire pay period/run and only include OPEN pay stubs.
+												$report_data['config']['filter']['pay_period_id'] = $pay_period_id; //Legal entity is already set in $prae_obj->getReport()
+												$report_data['config']['filter']['pay_stub_run_id'] = $run_id;
+												$report_data['config']['filter']['pay_stub_status_id'] = 25; //25=OPEN
+
+												$report_obj->setConfig( (array)$report_data['config'] );
+
+												$output_data = $report_obj->getPaymentServicesData();
+												Debug::Arr( $output_data, 'Report Payment Services Data: ', __FILE__, __LINE__, __METHOD__, 10 );
+												if ( is_array( $output_data ) ) {
+													if ( PRODUCTION == TRUE AND is_object( $le_obj ) AND $le_obj->getPaymentServicesStatus() == 10 AND $le_obj->getPaymentServicesUserName() != '' AND $le_obj->getPaymentServicesAPIKey() != '' ) { //10=Enabled
+														try {
+															$tt_ps_api = $le_obj->getPaymentServicesAPIObject();
+
+															$batch_id = $tt_ps_api->generateBatchID( $pp_obj->getEndDate(), $run_id );
+
+															//Generate a consistent remote_id based on the exact pay stubs that are selected, the remittance agency event, and batch ID.
+															//This helps to prevent duplicate records from be created, as well as work across separate or split up batches that may be processed.
+															$remote_id = TTUUID::convertStringToUUID( md5( $prae_obj->getId() . $batch_id . $pay_period_id . $run_id ) );
+
+															$retval = $tt_ps_api->setAgencyReport( $tt_ps_api->convertReportPaymentServicesDataToAgencyReportArray( $output_data, $prae_obj, $pra_obj, $rs_obj, $pra_user_obj, $pp_obj->getStartDate(), $pp_obj->getEndDate(), $pp_obj->getTransactionDate(), $run_id, $batch_id, $remote_id, 'D' ) ); //D=Deposit/Estimate
+															Debug::Arr( $retval, 'TimeTrexPaymentServices Retval: ', __FILE__, __LINE__, __METHOD__, 10 );
+															if ( $retval->isValid() == TRUE ) {
+																Debug::Text( 'Upload successful!', __FILE__, __LINE__, __METHOD__, 10 );
+															} else {
+																Debug::Arr( $retval, 'ERROR! Unable to upload agency report data... ', __FILE__, __LINE__, __METHOD__, 10 );
+
+																//No point in failing the transaction, as there isn't any easy way to re-trigger this right now. Its also after the transactions have all been uploaded too.
+																//$pstlf->FailTransaction();
+																//return FALSE;
+															}
+															unset( $batch_id, $remote_id );
+														} catch ( Exception $e ) {
+															Debug::Text( 'ERROR! Unable to upload agency report data... (b) Exception: ' . $e->getMessage(), __FILE__, __LINE__, __METHOD__, 10 );
+														}
+													} else {
+														Debug::Text( 'WARNING: Production is off, not calling payment services API...', __FILE__, __LINE__, __METHOD__, 10 );
+														$retval = TRUE;
+													}
+												} else {
+													Debug::Arr( $output_data, 'Report returned unexpected number of rows, not transmitting...', __FILE__, __LINE__, __METHOD__, 10 );
+												}
+											}
+										} else {
+											Debug::Text( '  ERROR! Pay Period does not exist!', __FILE__, __LINE__, __METHOD__, 10 );
+										}
+									}
+								} else {
+									Debug::Text( '  ERROR! Contact user assign to agency is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
+								}
+							} else {
+								Debug::Text( '  ERROR! Remittance Source Account is not EFT or TimeTrex Payment Services!', __FILE__, __LINE__, __METHOD__, 10 );
+							}
+						} else {
+							Debug::Text( '  ERROR! Remittance Agency Object is invalid!', __FILE__, __LINE__, __METHOD__, 10 );
+						}
+					}
+				} else {
+					Debug::Text( '  No full service remittance agency events!', __FILE__, __LINE__, __METHOD__, 10 );
+				}
+
+			} else {
+				Debug::Text( '  No pay stubs to process!', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		}
+
+		$pstlf->CommitTransaction();
+
+		Debug::Text( 'Done.', __FILE__, __LINE__, __METHOD__, 10 );
+		return TRUE;
 	}
 
 	/**

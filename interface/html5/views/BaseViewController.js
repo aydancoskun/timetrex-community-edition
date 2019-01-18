@@ -1104,8 +1104,6 @@ BaseViewController = Backbone.View.extend( {
 			this.removeContentMenuByName( needRemovedContextMenuName );
 		}
 
-		$( '#ribbon_view_container' ).tabs( 'refresh' ); //Required to prevent a tiny blue line (context menu background) from "flashing" immediately below the ribbon menu when changing views.
-
 		if ( setFocus ) {
 			this.need_switch_to_context_menu = true;
 
@@ -3278,8 +3276,8 @@ BaseViewController = Backbone.View.extend( {
 	},
 
 	setFocusToFirstInput: function() {
-		//Do not set focus to first input in unit test mode as it causes a blink that is inconsistent in screenshots.
-		if ( Global.UNIT_TEST_MODE ) {
+		//Do not set focus to first input in unit test mode as it causes a blink that is inconsistent in screenshots. Also disable on mobile mode so its not a jarring experience with the zoom changes on each page
+		if ( Global.UNIT_TEST_MODE || $('body').hasClass('mobile-device-mode') ) {
 			return;
 		}
 

@@ -1434,7 +1434,7 @@ class EFT_File_Format_1464 Extends EFT {
 			$line[] = $this->padRecord( NULL, 11, 'N'); //254-264 - Invalid Data Element, must be 0's for HSBC to accept it -- Blank
 
 			$sanity_check_3 = strlen( implode('', $line) );
-			Debug::Text('Digits to END of invalid data element: '. $sanity_check_3 .' - Should be: 264', __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('Digits to END of data element: '. $sanity_check_3 .' - Should be: 264', __FILE__, __LINE__, __METHOD__, 10);
 			if ( $sanity_check_3 !== 264 ) {
 				Debug::Text('Failed Sanity Check 3', __FILE__, __LINE__, __METHOD__, 10);
 				return FALSE;

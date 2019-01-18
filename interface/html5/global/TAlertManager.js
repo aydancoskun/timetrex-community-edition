@@ -83,17 +83,6 @@ var TAlertManager = (function() {
 		}
 	};
 
-	var closeBrowserBanner = function() {
-		$( '.browser-banner' ).remove();
-	};
-
-	var showBrowserTopBanner = function() {
-		var div = $( '<div class="browser-banner"><a href="https://www.timetrex.com/supported-web-browsers" target="_blank"><span class="label"></span></a></div>' );
-		div.find( 'span' ).text( $.i18n._( LocalCacheData.getLoginData().application_name + ' requires a modern HTML5 standards compatible web browser, click here for more information.' ) );
-
-		$( 'body' ).append( div );
-	};
-
 	var showErrorAlert = function( result ) {
 		var details = result.getDetails();
 
@@ -269,8 +258,6 @@ var TAlertManager = (function() {
 		showAlert: showAlert,
 		showErrorAlert: showErrorAlert,
 		showPreSessionAlert: showPreSessionAlert,
-		showBrowserTopBanner: showBrowserTopBanner,
-		closeBrowserBanner: closeBrowserBanner,
 		showWarningAlert: showWarningAlert,
 		showNetworkErrorAlert: showNetworkErrorAlert
 	};

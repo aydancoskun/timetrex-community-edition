@@ -508,10 +508,10 @@ var ApplicationRouter = Backbone.Router.extend( {
 	},
 
 	setContentDivHeight: function() {
-		Global.contentContainer().css( 'height', (Global.bodyHeight() - Global.topContainer().height() - 5) );
+		Global.contentContainer().css( 'height', (Global.bodyHeight() - Global.topContainer().height()) );
 
 		$( window ).resize( function() {
-			Global.contentContainer().css( 'height', (Global.bodyHeight() - Global.topContainer().height() - 5) );
+			Global.contentContainer().css( 'height', (Global.bodyHeight() - Global.topContainer().height()) );
 		} );
 
 		Global.contentContainer().removeClass( 'content-container' );
