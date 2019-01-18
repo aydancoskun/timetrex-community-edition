@@ -164,7 +164,8 @@
 			//if value is number convert to number type
 			var value = $( this ).children( 'option:selected' ).attr( 'value' );
 
-			if ( $.isNumeric(value) ) {
+			//#2624 - Avoid parsing float value if we have a value larger than zero with a leading zero so that numeric string (eg province) ISO codes are not converted from '01' to 1
+			if ( $.isNumeric(value) && ( value === '0' || value.toString()[0] !== '0' ) ) {
 				value = parseFloat( value );
 			}
 

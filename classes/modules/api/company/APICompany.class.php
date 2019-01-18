@@ -63,7 +63,13 @@ class APICompany extends APIFactory {
 			$name = 'list_columns';
 		}
 
-		return parent::getOptions( $name, $parent );
+		$retval = parent::getOptions( $name, $parent );
+		if ( $name == 'province' ) {
+			//Provinces need to have sort prefixes added, as some countries (like Dominica Republic) use numeric keys (00, 01) and the name of the provinces are not in order when sorting by that.
+			//They needed to be added here though, because if they are added in CompanyFactory->getOptions() it breaks the $parent argument lookup.
+			$retval = Misc::addSortPrefix( $retval );
+		}
+		return $retval;
 	}
 
 	/**

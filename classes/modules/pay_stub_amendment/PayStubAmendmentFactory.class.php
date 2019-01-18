@@ -1081,7 +1081,7 @@ class PayStubAmendmentFactory extends Factory {
 		}
 
 		// Effective date
-		if ( $this->getEffectiveDate() !== FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE OR $this->getEffectiveDate() !== FALSE ) {
 			$this->Validator->isDate(		'effective_date',
 											 $this->getEffectiveDate(),
 											 TTi18n::gettext('Incorrect effective date')

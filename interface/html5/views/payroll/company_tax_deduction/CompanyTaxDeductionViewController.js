@@ -3260,7 +3260,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 					break;
 				case '100-US':
-				case "100-CR" :
+				case '100-CR':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.federal_filing_status_array );
@@ -3285,11 +3285,17 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 				//
 				//US - States
 				//
-				case '200-US-AZ': //Province/State Income TaxFormula -- US-AZ
-					$this.attachElement( 'df_0' );
-					$this.edit_view_form_item_dic.df_0.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Percent' ) + ": " );
-					$this.edit_view_ui_dic.df_0.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_0.setValue( $this.current_edit_record.user_value1 );
+				case '200-US': //Province/State Income TaxFormula
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
 				case '200-US-AL':
 					$this.attachElement( 'df_14' );
@@ -3303,14 +3309,20 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case '200-US-CT': //Province/State Income TaxFormula
+				case '200-US-AZ':
+					$this.attachElement( 'df_0' );
+					$this.edit_view_form_item_dic.df_0.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Percent' ) + ": " );
+					$this.edit_view_ui_dic.df_0.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_0.setValue( $this.current_edit_record.user_value1 );
+					break;
+				case '200-US-CT':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ct_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 					break;
-				case '200-US-DC': //Province/State Income TaxFormula -- CA-AB
+				case '200-US-DC':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_dc_filing_status_array );
@@ -3322,7 +3334,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case '200-US-DE': //Province/State Income TaxFormula -- CA-AB
+				case '200-US-DE':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_de_filing_status_array );
@@ -3334,55 +3346,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case "200-US-NJ" : //Province/State Income TaxFormula -- CA-AB
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_nj_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-					break;
-				case "200-US-NC" : //Province/State Income TaxFormula -- CA-AB
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_nc_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-					break;
-				case "200-US-MA" :
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ma_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-					break;
-				case "200-US-OK" :
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ok_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-					break;
-				case "200-US-GA" :
+				case '200-US-GA':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ga_filing_status_array );
@@ -3399,7 +3363,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_2.setField( 'user_value3' );
 					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value3 );
 					break;
-				case "200-US-IL" :
+				case '200-US-IL':
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'IL-W-4 Line 1' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
@@ -3410,25 +3374,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_2.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case "200-US-OH" :
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-					break;
-				case "200-US-VA" :
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_2' );
-					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Age 65/Blind' ) + ": " );
-					$this.edit_view_ui_dic.df_2.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value2 );
-
-					break;
-				case "200-US-IN" :
+				case '200-US-IN':
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
@@ -3439,7 +3385,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_2.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case "200-US-LA" :
+				case '200-US-LA':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_la_filing_status_array );
@@ -3455,12 +3401,11 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Dependents' ) + ": " );
 					$this.edit_view_ui_dic.df_2.setField( 'user_value3' );
 					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value3 );
-
 					break;
-				case "200-US-ME" :
+				case '200-US-MA':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_me_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ma_filing_status_array );
 					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
 					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
 
@@ -3468,48 +3413,8 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-
 					break;
-				case "200-US-WI" :
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.federal_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-
-					break;
-				case "200-US-WV" :
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_wv_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-
-					break;
-				case "200-US" :
-					$this.attachElement( 'df_14' );
-					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
-					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_filing_status_array );
-					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
-					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
-
-					$this.attachElement( 'df_1' );
-					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
-					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
-					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
-
-					break;
-				case "200-US-MD" :
+				case '200-US-MD':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_dc_filing_status_array );
@@ -3525,9 +3430,97 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'County Rate' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'user_value3' );
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value3 );
-
 					break;
-				case "300-US" :
+				case '200-US-ME':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_me_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-NC':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_nc_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-NJ':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_nj_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-OK':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_ok_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-OH':
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-VA':
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_2' );
+					$this.edit_view_form_item_dic.df_2.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Age 65/Blind' ) + ": " );
+					$this.edit_view_ui_dic.df_2.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_2.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-WI':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.federal_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '200-US-WV':
+					$this.attachElement( 'df_14' );
+					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
+					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_wv_filing_status_array );
+					$this.edit_view_ui_dic.df_14.setField( 'user_value1' );
+					$this.edit_view_ui_dic.df_14.setValue( $this.current_edit_record.user_value1 );
+
+					$this.attachElement( 'df_1' );
+					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Allowances' ) + ": " );
+					$this.edit_view_ui_dic.df_1.setField( 'user_value2' );
+					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
+					break;
+				case '300-US':
 					$this.attachElement( 'df_14' );
 					$this.edit_view_form_item_dic.df_14.find( '.edit-view-form-item-label' ).text( $.i18n._( 'Filing Status' ) + ": " );
 					$this.edit_view_ui_dic.df_14.setSourceData( $this.state_filing_status_array );
@@ -3540,7 +3533,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_1.setValue( $this.current_edit_record.user_value2 );
 
 					break;
-				case "300-US-IN" :
+				case '300-US-IN':
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'District / County Name' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'company_value1' );
@@ -3561,7 +3554,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_4.setField( 'user_value3' );
 					$this.edit_view_ui_dic.df_4.setValue( $this.current_edit_record.user_value3 );
 					break;
-				case "300-US-MD" :
+				case '300-US-MD':
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'District / County Name' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'company_value1' );
@@ -3577,7 +3570,7 @@ CompanyTaxDeductionViewController = BaseViewController.extend( {
 					$this.edit_view_ui_dic.df_3.setField( 'user_value2' );
 					$this.edit_view_ui_dic.df_3.setValue( $this.current_edit_record.user_value2 );
 					break;
-				case "300-US-PERCENT" :
+				case '300-US-PERCENT':
 					$this.attachElement( 'df_1' );
 					$this.edit_view_form_item_dic.df_1.find( '.edit-view-form-item-label' ).text( $.i18n._( 'District / County Name' ) + ": " );
 					$this.edit_view_ui_dic.df_1.setField( 'company_value1' );

@@ -476,6 +476,29 @@ class SetupPresets extends Factory {
 							'credit_account' => 'Workers Comp.'. $gl_account_payable_suffix, //2230
 					)
 			);
+
+			$this->createPayStubAccount(
+					array(
+							'company_id'     => $this->getCompany(),
+							'status_id'      => 10,
+							'type_id'        => 10,
+							'name'           => 'Termination Pay', //Different from severance pay. Usually used in lieu of notice of termination.
+							'ps_order'       => 160,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
+							'credit_account' => '',
+					)
+			);
+			$this->createPayStubAccount(
+					array(
+							'company_id'     => $this->getCompany(),
+							'status_id'      => 10,
+							'type_id'        => 10,
+							'name'           => 'Severance Pay (Retiring Allowance)', //Was: Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
+							'ps_order'       => 161,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
+							'credit_account' => '',
+					)
+			);
 		}
 
 		//United States
@@ -573,6 +596,20 @@ class SetupPresets extends Factory {
 							'ps_order'       => 305,
 							'debit_account'  => 'Workers Comp.'. $gl_account_expense_suffix, //5440
 							'credit_account' => 'Workers Comp.'. $gl_account_payable_suffix, //2230
+					)
+			);
+
+
+			//Split into Termination Pay and Retiring Allowance in Canada.
+			$this->createPayStubAccount(
+					array(
+							'company_id'     => $this->getCompany(),
+							'status_id'      => 10,
+							'type_id'        => 10,
+							'name'           => 'Severence Pay',
+							'ps_order'       => 161,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
+							'credit_account' => '',
 					)
 			);
 
@@ -1550,17 +1587,7 @@ class SetupPresets extends Factory {
 							'credit_account' => '',
 					)
 			);
-			$this->createPayStubAccount(
-					array(
-							'company_id'     => $this->getCompany(),
-							'status_id'      => 10,
-							'type_id'        => 10,
-							'name'           => 'Severance',
-							'ps_order'       => 160,
-							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
-							'credit_account' => '',
-					)
-			);
+
 			$this->createPayStubAccount(
 					array(
 							'company_id'     => $this->getCompany(),
@@ -1908,11 +1935,16 @@ class SetupPresets extends Factory {
 													 'include_pay_stub_entry_account' => array(
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 40, 'Total Gross' ),
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ),
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Life Insurance' ), //Employer contributions are taxable.
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Accidental Death & Dismemberment' ), //Employer contributions are taxable.
 													 ),
 													 'exclude_pay_stub_entry_account' => array(
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay. Included in box 67 instead.
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Health Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Dental Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
 													 ),
 							),
 							'tax'          => array( //Income Tax Withheld (Box 22)
@@ -1937,11 +1969,15 @@ class SetupPresets extends Factory {
 							'cpp_earnings' => array( //CPP Earnings (Box 26)
 													 'include_pay_stub_entry_account' => array(
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 40, 'Total Gross' ),
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Life Insurance' ), //Employer contributions are taxable.
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Accidental Death & Dismemberment' ), //Employer contributions are taxable.
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ), //Employer paid RRSP contributions are pensionable and insurable.
 													 ),
 													 'exclude_pay_stub_entry_account' => array(
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
 													 ),
 							),
 							'employee_ei'  => array( //Employee EI (Box 18)
@@ -1959,11 +1995,13 @@ class SetupPresets extends Factory {
 							'ei_earnings'  => array( //EI Earnings (Box 24)
 													 'include_pay_stub_entry_account' => array(
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 40, 'Total Gross' ),
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ), //Employer paid RRSP contributions are pensionable and insurable.
 													 ),
 													 'exclude_pay_stub_entry_account' => array(
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+															 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
 													 ),
 							),
 							'union_dues'   => array( //Union Dues (Box 44)
@@ -1976,10 +2014,30 @@ class SetupPresets extends Factory {
 													 array(
 															 'box'                            => 40, //(Code 40) - RRSP
 															 'include_pay_stub_entry_account' => array(
+																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Health Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
+																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Dental Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
 																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ),
+																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Life Insurance' ), //Employer contributions are taxable.
+																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Accidental Death & Dismemberment' ), //Employer contributions are taxable.
 															 ),
 															 'exclude_pay_stub_entry_account' => array(),
 													 ),
+													 array(
+															 'box'                            => 67, //(Code 67) - Non-eligible retiring allowances
+															 'include_pay_stub_entry_account' => array(
+																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
+															 ),
+															 'exclude_pay_stub_entry_account' => array(),
+													 ),
+													 array(
+															 'box'                            => 85, //(Code 85) - Employee-paid premiums for private health services plans (Optional), but may avoid requiring employee requiring supporting documents.
+															 'include_pay_stub_entry_account' => array(
+																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Health Benefits Plan' ),
+																	 $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Dental Benefits Plan' ),
+															 ),
+															 'exclude_pay_stub_entry_account' => array(),
+													 ),
+
 							),
 					);
 
@@ -2009,15 +2067,20 @@ class SetupPresets extends Factory {
 					//Remittance Summary
 					//
 					$form_remittance_summary_config = array(
-							'gross_payroll' => array( //Employment Income (Box 14)
+							'gross_payroll' => array( //Gross Payroll, should match Employment Income (Box 14) on T4
 													  'include_pay_stub_entry_account' => array(
 															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 40, 'Total Gross' ),
 															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ),
+															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Life Insurance' ), //Employer contributions are taxable.
+															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Accidental Death & Dismemberment' ), //Employer contributions are taxable.
 													  ),
 													  'exclude_pay_stub_entry_account' => array(
 															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay. Included in box 67 instead.
+															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Health Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
+															  $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Dental Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
 													  ),
 							),
 							'cpp'           => array( //CPP
@@ -2063,6 +2126,12 @@ class SetupPresets extends Factory {
 																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Bonus' ),
 																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Tips' ),
 																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
+																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
+																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Retro Pay' ),
+																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Termination Pay' ),
+																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Bereavement' ),
+																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Jury Duty' ),
+																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ), //Employer paid RRSP contributions are pensionable and insurable.
 							),
 							'vacation_psea_ids'           => array( //Vacation Pay
 																	$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
@@ -2345,6 +2414,21 @@ class SetupPresets extends Factory {
 			if ( $cdf->isValid() ) {
 				return $cdf->Save( TRUE, TRUE );
 			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * @param int $type_id
+	 * @param $name
+	 * @return bool
+	 */
+	function getPayStubEntryAccountByCompanyIDAndType( $type_id ) {
+		$psealf = TTnew( 'PayStubEntryAccountListFactory' );
+		$psealf->getByCompanyIdAndType( $this->getCompany(), $type_id );
+		if ( $psealf->getRecordCount() > 0 ) {
+			return $psealf->getCurrent()->getId();
 		}
 
 		return FALSE;
@@ -2733,13 +2817,19 @@ class SetupPresets extends Factory {
 											'country'                        => strtoupper( $country ),
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'CA - Federal Income Tax' ),
 											'user_value1'                    => $pd_obj->getBasicFederalClaimCodeAmount(),
-											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+											'include_pay_stub_entry_account' => array(
+													$psea_obj->getTotalGross(),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Life Insurance' ), //Employer contributions are taxable.
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Accidental Death & Dismemberment' ), //Employer contributions are taxable.
+											),
 											'exclude_pay_stub_entry_account' => array(
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ), //Advances shouldn't be taxed, as they are similar to a loan.
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'RRSP' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Union Dues' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Health Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Dental Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
 											),
 									)
 							);
@@ -2772,12 +2862,17 @@ class SetupPresets extends Factory {
 											'minimum_user_age'               => 18,
 											'maximum_user_age'               => 70,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'CPP' ),
-											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+											'include_pay_stub_entry_account' => array(
+													$psea_obj->getTotalGross(),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Life Insurance' ), //Employer contributions are taxable.
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Accidental Death & Dismemberment' ), //Employer contributions are taxable.
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ), //Employer paid RRSP contributions are pensionable and insurable.
+											),
 											'exclude_pay_stub_entry_account' => array(
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
 											),
 									)
 							);
@@ -2809,12 +2904,15 @@ class SetupPresets extends Factory {
 											'calculation_id'                 => 91, //EI Formula
 											'calculation_order'              => 90,
 											'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'EI' ),
-											'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+											'include_pay_stub_entry_account' => array(
+													$psea_obj->getTotalGross(),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'RRSP - Employer' ), //Employer paid RRSP contributions are pensionable and insurable.
+											),
 											'exclude_pay_stub_entry_account' => array(
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
-													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
 											),
 									)
 							);
@@ -3108,7 +3206,7 @@ class SetupPresets extends Factory {
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Statutory Holiday' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
-								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
@@ -3120,7 +3218,7 @@ class SetupPresets extends Factory {
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Over Time 2' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
-								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
@@ -3130,7 +3228,7 @@ class SetupPresets extends Factory {
 						$vacation_accrual_exclude_pay_stub_accounts = array(
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - Accrual Release' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Vacation - No Accrual' ),
-								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
+								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance Pay (Retiring Allowance)' ), //Severance (aka Retiring Allowance) is an earned benefit. Different from termination pay.
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 								$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
@@ -3237,13 +3335,19 @@ class SetupPresets extends Factory {
 									'province'                       => strtoupper( $province ),
 									'pay_stub_entry_account_id'      => $this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, strtoupper( $province ) . ' - Provincial Income Tax' ),
 									'user_value1'                    => $pd_obj->getBasicProvinceClaimCodeAmount(),
-									'include_pay_stub_entry_account' => array($psea_obj->getTotalGross()),
+									'include_pay_stub_entry_account' => array(
+											$psea_obj->getTotalGross(),
+											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Life Insurance' ), //Employer contributions are taxable.
+											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 30, 'Accidental Death & Dismemberment' ), //Employer contributions are taxable.
+									),
 									'exclude_pay_stub_entry_account' => array(
 											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
 											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'RRSP' ),
 											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Union Dues' ),
+											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Health Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
+											$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 20, 'Dental Benefits Plan' ), //Employee contributions eligible for tax deductions. Employer Contributions are not.
 									),
 							)
 					);
@@ -9903,10 +10007,10 @@ class SetupPresets extends Factory {
 								'worked_after_scheduled_days'      => 1,
 
 								//Averaging
-								'average_time_days'                => 1, //1 Pay Period to average time over
-								'average_time_frequency_type_id'   => 20, //Pay Periods
-								'average_time_worked_days'         => TRUE, //Only days worked
-								'average_days'                     => 0, //Divsor for average formula.
+								'average_time_days'                => 4, //Weeks to average time over
+								'average_time_frequency_type_id'   => 15, //Weeks
+								'average_time_worked_days'         => FALSE, //Only days worked
+								'average_days'                     => 20, //Divisor for average formula.
 
 								'minimum_time' => 0,
 								'maximum_time' => 0,

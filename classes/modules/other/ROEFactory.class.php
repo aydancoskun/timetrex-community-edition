@@ -613,8 +613,10 @@ class ROEFactory extends Factory {
 		if ( $rlf->getRecordCount() > 0 ) {
 			$roe_obj = $rlf->getCurrent();
 
-			$first_date = $roe_obj->getLastDate();
-			Debug::Text('Previous ROE Last Date: '. TTDate::getDate('DATE+TIME', $first_date ), __FILE__, __LINE__, __METHOD__, 10);
+			//getNextByUserIdAndObjectTypeAndEpoch() below uses >=, so make sure the first date is one day past the last date.
+			//  Otherwise if the employee worked on the last day worked of the previous ROE, that will be the same day used for the First Date, which is not correct as its being included twice.
+			$first_date = ( $roe_obj->getLastDate() + 86400 );
+			Debug::Text('Previous ROE Last Date: '. TTDate::getDate('DATE+TIME', $roe_obj->getLastDate() ), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
 		if ( !isset($first_date) OR $first_date == '' ) {

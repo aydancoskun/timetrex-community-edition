@@ -1096,6 +1096,11 @@ class Install {
 			return 0; //Skip permission checks.
 		}
 
+		//Some systems, especially Windows with really poor virus scanners, will spend 12-24hrs checking permissions, exceeding the maximum execution and likely not triggering visible errors to the user.
+		// Try to exit out much earlier if we detect poor performance.
+		//$maximum_run_time = 10800; //3 hours - About 1.0s per file. This needs to be fairly high as there could be many cache files that its checking during weekly maintenance. Install/Upgrades clear the cache, so it shouldn't be a problem in that case.
+		$start_time = time();
+
 		$is_root_user = Misc::isCurrentOSUserRoot();
 		if ( $is_root_user == TRUE ) {
 			$web_server_user = Misc::findWebServerOSUser();
@@ -1128,12 +1133,19 @@ class Install {
 				try {
 					$rdi = new RecursiveDirectoryIterator( $dir, RecursiveIteratorIterator::SELF_FIRST );
 					foreach ( new RecursiveIteratorIterator( $rdi ) as $file_name => $cur ) {
+						//Check if its "." or current directory, and format it as a directory, so file_exists() doesn't fail below.
+						// If /var/cache/timetrex/ is chmod 660, file_exists() returns FALSE on '/var/cache/timetrex/.' but TRUE on '/var/cache/timetrex/'
+						if ( strcmp( basename($file_name), '.') == 0 ) {
+							$file_name = dirname( $file_name ) . DIRECTORY_SEPARATOR;
+						}
+
 						if (
 								//strcmp( basename($file_name), '.') == 0 OR //Make sure we do check "." (the current directory). As permissions could be denied on it, but allowed on all sub-dirs/files.
 								file_exists( $file_name ) == FALSE //Its possible if it takes a long time to iterate the files, they could be gone by the time we get to them, so just check them again.
 								OR strcmp( basename($file_name), '..' ) == 0
 								OR strpos( $file_name, '.git' ) !== FALSE
 								OR strcmp( basename($file_name), '.htaccess' ) == 0 ) { //.htaccess files often aren't writable by the webserver.
+							Debug::Text('  Skipping: '. $file_name .' due to being ignored or not existing... File Exists: '. (int)file_exists( $file_name ), __FILE__, __LINE__, __METHOD__, 10);
 							continue;
 						}
 
@@ -1155,6 +1167,13 @@ class Install {
 							$this->setExtendedErrorMessage( 'checkFilePermissions', 'Not writable: '. $file_name );
 							return 1; //Invalid
 						}
+
+						//Ignore for now as it could slow due to the infinite loop caused by: C:\TimeTrex\cache\upgrade_staging\latest_version\interface\html5\views\payroll\pay_stub_transaction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+						//if ( ( $i % 10 ) == 0 AND ( time() - $start_time ) > $maximum_run_time ) {
+						//	Debug::Text('Exceeded maximum run time of: '. $maximum_run_time .' Files Checked: '. $i .' in: '. round( time() - $start_time ) .'s', __FILE__, __LINE__, __METHOD__, 10);
+						//	$this->setExtendedErrorMessage( 'checkFilePermissions', 'Poor system performance, unable to check all files... Files Checked: '. $i .' in: '. round( time() - $start_time ) .'s' );
+						//	return 1; //Invalid
+						//}
 
 						//Do this last, as it can take a long time on some systems using a slow file system.
 						if ( PHP_SAPI != 'cli' AND ( $i % 100 ) == 0 )  {
@@ -1181,7 +1200,7 @@ class Install {
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );
 		}
 
-		Debug::Text('All Files/Directories ('. $i .') are readable/writable!', __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('All Files/Directories ('. $i .') are readable/writable! Files Checked: '. $i .' in: '. ( time() - $start_time ) .'s', __FILE__, __LINE__, __METHOD__, 10);
 		return 0;
 	}
 
@@ -1854,7 +1873,7 @@ class Install {
 	 * @return int
 	 */
 	function checkWritableConfigFile() {
-		if ( is_writable( CONFIG_FILE ) ) {
+		if ( Misc::isWritable( CONFIG_FILE ) ) {
 			return 0;
 		}
 
@@ -1865,7 +1884,7 @@ class Install {
 	 * @return int
 	 */
 	function checkWritableCacheDirectory() {
-		if ( isset($this->config_vars['cache']['dir']) AND is_dir($this->config_vars['cache']['dir']) AND is_writable($this->config_vars['cache']['dir']) ) {
+		if ( isset($this->config_vars['cache']['dir']) AND is_dir($this->config_vars['cache']['dir']) AND Misc::isWritable($this->config_vars['cache']['dir']) ) {
 			return 0;
 		}
 
@@ -1939,6 +1958,7 @@ class Install {
 				if ( is_array($raw_cache_files) AND count($raw_cache_files) > 0 ) {
 					foreach( $raw_cache_files as $cache_file ) {
 						if ( $cache_file != '.' AND $cache_file != '..' AND stristr( $cache_file, '.state') === FALSE AND stristr( $cache_file, '.lock') === FALSE AND stristr( $cache_file, '.ZIP') === FALSE AND stristr( $cache_file, 'upgrade_staging') === FALSE) { //Ignore UPGRADE.ZIP files.
+							Debug::Text('Cache file remaining: '. $cache_file, __FILE__, __LINE__, __METHOD__, 9);
 							return 1;
 						}
 					}
@@ -1953,7 +1973,7 @@ class Install {
 	 * @return int
 	 */
 	function checkWritableStorageDirectory() {
-		if ( isset($this->config_vars['path']['storage']) AND is_dir($this->config_vars['path']['storage']) AND is_writable($this->config_vars['path']['storage']) ) {
+		if ( isset($this->config_vars['path']['storage']) AND is_dir($this->config_vars['path']['storage']) AND Misc::isWritable($this->config_vars['path']['storage']) ) {
 			return 0;
 		}
 
@@ -1976,7 +1996,7 @@ class Install {
 	 * @return int
 	 */
 	function checkWritableLogDirectory() {
-		if ( isset($this->config_vars['path']['log']) AND is_dir($this->config_vars['path']['log']) AND is_writable($this->config_vars['path']['log']) ) {
+		if ( isset($this->config_vars['path']['log']) AND is_dir($this->config_vars['path']['log']) AND Misc::isWritable($this->config_vars['path']['log']) ) {
 			return 0;
 		}
 

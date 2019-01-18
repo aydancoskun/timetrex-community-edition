@@ -257,7 +257,7 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 	function setSource( $value) {
 		$value = trim($value);
 
-		$this->journal_entry_data['source'] = substr( $value, 0, 13);
+		$this->journal_entry_data['source'] = $value; //Was max 13 chars, moved length restrictions into format specific classes instead.
 
 		return TRUE;
 	}
@@ -280,11 +280,7 @@ class GeneralLedgerExport_JournalEntry extends GeneralLedgerExport {
 	function setComment( $value) {
 		$value = trim($value);
 
-		if ( strlen( $value ) <= 39 ) {
-			$this->journal_entry_data['comment'] = $value;
-
-			return TRUE;
-		}
+		$this->journal_entry_data['comment'] = $value; //Was max 39 chars, moved length restrictions into format specific classes instead.
 
 		return FALSE;
 	}
@@ -487,13 +483,9 @@ class GeneralLedgerExport_Record extends GeneralLedgerExport_JournalEntry {
 	function setAccount( $value) {
 		$value = trim($value);
 
-		if ( strlen( $value ) <= 100 ) { //Allow long account values for more job tracking.
-			$this->record_data['account'] = $value;
+		$this->record_data['account'] = $value; //Was max 100 chars - Allow long account values for more job tracking.
 
-			return TRUE;
-		}
-
-		return FALSE;
+		return TRUE;
 	}
 
 	/**
@@ -557,8 +549,8 @@ class GeneralLedgerExport_File_Format_Simply Extends GeneralLedgerExport {
 			//Debug::Arr($record, 'Record Object:', __FILE__, __LINE__, __METHOD__, 10);
 
 			$line1[] = $this->toDate( $journal_entry->getDate() );
-			$line1[] = '"'.$journal_entry->getSource().'"';
-			$line1[] = '"'.$journal_entry->getComment().'"';
+			$line1[] = '"'. substr( $journal_entry->getSource(), 0, 20 ) .'"';
+			$line1[] = '"'. substr( $journal_entry->getComment(), 0, 75 ) .'"';
 
 			$line1 = implode(',', $line1);
 			Debug::Text('Line 1: '. $line1, __FILE__, __LINE__, __METHOD__, 10);

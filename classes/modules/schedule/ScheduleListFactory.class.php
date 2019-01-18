@@ -435,6 +435,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 	}
 
 	/**
+	 * @param string $company_id UUID
 	 * @param string $user_id UUID
 	 * @param int $start_date EPOCH
 	 * @param int $end_date EPOCH
@@ -443,8 +444,12 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|ScheduleListFactory
 	 */
-	function getConflictingByUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
+	function getConflictingByCompanyIdAndUserIdAndStartDateAndEndDate( $company_id, $user_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
 		Debug::Text('User ID: '. $user_id .' Start Date: '. $start_date .' End Date: '. $end_date, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
 
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -470,6 +475,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$end_timestamp = $this->db->BindTimeStamp( (int)$end_date );
 
 		$ph = array(
+					'company_id' => TTUUID::castUUID($company_id),
 					'user_id' => TTUUID::castUUID($user_id),
 					'start_date_a' => $start_datestamp,
 					'end_date_b' => $end_datestamp,
@@ -487,13 +493,17 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 					);
 
 		//Add filter on date_stamp for optimization
+		// Make sure we ignore any records that have been replaced by other records already.
 		$query = '
 					SELECT	a.*
 					FROM	'. $this->getTable() .' as a
-					WHERE a.user_id = ?
+					LEFT JOIN '. $this->getTable() .' as b ON ( a.id = b.replaced_id AND b.deleted = 0 )
+					WHERE a.company_id = ?
+						AND a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
 						AND a.id != ?
+						AND b.id IS NULL
 						AND
 						(
 							( a.start_time >= ? AND a.end_time <= ? )
@@ -507,7 +517,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							( a.start_time = ? AND a.end_time = ? )
 						)
 						AND ( a.deleted = 0 )
-					ORDER BY start_time';
+					ORDER BY start_time, user_id, created_date';
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order );
 
@@ -1279,11 +1289,11 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 																( sf_b.user_id != \''. TTUUID::getZeroID() .'\' AND sf_b.user_id = rsf.user_id ) ';
 
 					if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-						$ph[] = $this->db->BindTimeStamp( ( (int)$filter_data['start_date'] - 86400 ) );
+						$ph[] = $this->db->BindDate( ( (int)$filter_data['start_date'] - 86400 ) );
 						$query	.=	' AND sf_b.date_stamp >= ?';
 					}
 					if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-						$ph[] = $this->db->BindTimeStamp( ( (int)$filter_data['end_date'] + 86400 ) );
+						$ph[] = $this->db->BindDate( ( (int)$filter_data['end_date'] + 86400 ) );
 						$query	.=	' AND sf_b.date_stamp <= ?';
 					}
 
@@ -1384,14 +1394,12 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 			$query .= ( isset($filter_data['job_item_id']) ) ? $this->getWhereClauseSQL( 'a.job_item_id', $filter_data['job_item_id'], 'uuid_list', $ph ) : NULL;
 		}
 
-		if ( isset($filter_data['start_date']) AND !is_array($filter_data['start_date']) AND trim($filter_data['start_date']) != '' ) {
-			$ph[] = $this->db->BindTimeStamp( (int)$filter_data['start_date'] );
-			$query	.=	' AND a.start_time >= ?';
-		}
-		if ( isset($filter_data['end_date']) AND !is_array($filter_data['end_date']) AND trim($filter_data['end_date']) != '' ) {
-			$ph[] = $this->db->BindTimeStamp( (int)$filter_data['end_date'] );
-			$query	.=	' AND a.start_time <= ?';
-		}
+		$query .= ( isset($filter_data['date_stamp']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['date_stamp'], 'date_range_datestamp', $ph ) : NULL;
+		$query .= ( isset($filter_data['start_date']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['start_date'], 'start_datestamp', $ph ) : NULL;
+		$query .= ( isset($filter_data['end_date']) ) ? $this->getWhereClauseSQL( 'a.date_stamp', $filter_data['end_date'], 'end_datestamp', $ph ) : NULL;
+
+		$query .= ( isset($filter_data['start_time']) ) ? $this->getWhereClauseSQL( 'a.start_time', $filter_data['start_time'], 'start_timestamp', $ph ) : NULL;
+		$query .= ( isset($filter_data['end_time']) ) ? $this->getWhereClauseSQL( 'a.end_time', $filter_data['end_time'], 'end_timestamp', $ph ) : NULL;
 
 		$query .=	'
 						AND ( a.deleted = 0 AND ( uf.deleted IS NULL OR uf.deleted = 0 ) )

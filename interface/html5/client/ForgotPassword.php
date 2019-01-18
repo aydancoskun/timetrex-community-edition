@@ -57,6 +57,10 @@ $rl->setTimeFrame( 900 ); //15 minutes
 
 $validator = new Validator();
 
+//All HTML special chars are encoded prior to getting here, which makes things like "&" be saved as "&amp;", corrupting passwords.
+$password = FormVariables::reverseSanitize( $password );
+$password2 = FormVariables::reverseSanitize( $password2 );
+
 $action = Misc::findSubmitButton();
 Debug::Text('Action: '. $action, __FILE__, __LINE__, __METHOD__,10);
 switch ($action) {

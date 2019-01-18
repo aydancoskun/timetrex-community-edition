@@ -989,9 +989,9 @@ class PunchFactory extends Factory {
 
 			//When rounding is disabled, that just disables rounding policies.
 			//  Still always round *down* to the nearest minute, no matter what. Even on a transfer punch.
-		//  We used to round to the nearest minute (average), however in v10.5.0 this was changed.
-		//  Instead this mimics what a wall clock would show, for example 8:00:59 shows as 8:00, so if we do average rounding it would record as 8:01 which they may not expect.
-		//  So if we always round down its still fair and consistent, for both IN and OUT punches, but it more closely matches a clock that they may be looking at, assuming its close to the server time at least.
+			//  We used to round to the nearest minute (average), however in v10.5.0 this was changed.
+			//  Instead this mimics what a wall clock would show, for example 8:00:59 shows as 8:00, so if we do average rounding it would record as 8:01 which they may not expect.
+			//  So if we always round down its still fair and consistent, for both IN and OUT punches, but it more closely matches a clock that they may be looking at, assuming its close to the server time at least.
 			//
 			//  **To disable rounding completely and record punches to the exact second, they must create a rounding policy with a interval of 0 and no grace time.
 			//

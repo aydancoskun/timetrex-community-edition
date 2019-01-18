@@ -106,9 +106,31 @@ CompanyViewController = BaseViewController.extend( {
 			if ( !this.edit_view ) {
 				this.initEditViewUI( 'Company', 'CompanyEditView.html' );
 			}
-
-
 		}
+
+		var new_url = window.location.href;
+		if ( new_url.indexOf('company_id') == -1 ) {
+			new_url = new_url + '&company_id=' + LocalCacheData.getLoginUser().company_id;
+			Global.setURLToBrowser( new_url );
+		}
+
+	},
+
+	removeCompanyIdFromUrl: function(){
+		var new_url = window.location.href;
+		if ( new_url.indexOf('company_id') != -1 ) {
+			var parts = new_url.split('&');
+			new_url = parts[0];
+			for ( var i = 1; i < ( parts.length - 1 ) ; i++ ) {
+			new_url += ('&' + parts[i]);
+		}
+			Global.setURLToBrowser( new_url );
+		}
+	},
+
+	removeEditView: function(){
+		this.removeCompanyIdFromUrl();
+		this._super('removeEditView');
 
 	},
 

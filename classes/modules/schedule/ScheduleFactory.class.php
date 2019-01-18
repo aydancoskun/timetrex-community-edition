@@ -1370,7 +1370,7 @@ class ScheduleFactory extends Factory {
 		Debug::Text('User ID: '. $this->getUser() .' DateStamp: '. $this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
 		//Make sure we're not conflicting with any other schedule shifts.
 		$slf = TTnew( 'ScheduleListFactory' );
-		$slf->getConflictingByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getStartTime(), $this->getEndTime(), TTUUID::castUUID($this->getID()) );
+		$slf->getConflictingByCompanyIdAndUserIdAndStartDateAndEndDate( $this->getCompany(), $this->getUser(), $this->getStartTime(), $this->getEndTime(), TTUUID::castUUID($this->getID()) );
 		if ( $slf->getRecordCount() > 0 ) {
 			foreach( $slf as $conflicting_schedule_shift_obj ) {
 				if ( $conflicting_schedule_shift_obj->isNew() === FALSE
@@ -1526,13 +1526,16 @@ class ScheduleFactory extends Factory {
 													   TTi18n::gettext( 'Invalid Pay Period' )
 				);
 			}
-			// Scheduled Shift to replace
+			// Scheduled Shift to replace.
+			// Note: There was a bug where replaced shifts would be deleted due to the conflict check below. Causing the shift that replaced it to throw this validation error if it was later modified.
+			//       To replicate it, create a committed OPEN shift, then using Find Available fill it. Then copy an identical shift from the previous day to day the shift was just filled on, and it would delete the replaced shift in the background.
+			//       That should be resolved now that we do better checks around the replaced shifts.
 			if ( $this->getReplacedId() !== FALSE AND $this->getID() != $this->getReplacedId() AND $this->getReplacedId() != TTUUID::getZeroID() ) {
 				//Make sure we don't replace ourselves.
 				$slf = TTnew( 'ScheduleListFactory' );
 				$this->Validator->isResultSetWithRows( 'date_stamp',
 													   $slf->getByID( $this->getReplacedId() ),
-													   TTi18n::gettext( 'Scheduled Shift to replace does not exist.' )
+													   TTi18n::gettext( 'Scheduled Shift to replace does not exist' )
 				);
 			}
 			// Date
@@ -1838,11 +1841,21 @@ class ScheduleFactory extends Factory {
 			$this->setStatus( 10 ); //Default to working.
 		}
 
-		if ( $this->getEnableOverwrite() == TRUE ) {
-			//Delete any conflicting schedule shift before saving.
+
+		if ( $this->getEnableOverwrite() == TRUE  ) {
+
 			$slf = TTnew( 'ScheduleListFactory' );
 
-			$slf->getConflictingByUserIdAndStartDateAndEndDate( $this->getUser(), $this->getStartTime(), $this->getEndTime(), $this->getId() ); //Don't consider the current record to be conflicting with itself (by passing id argument)
+			//When overwriting OPEN shifts, always check based on branch/department/job/task, as there could be multople OPEN shifts that are duplicate it from one another.
+			//  I don't see the point in overwriting OPEN shifts to begin with, but its possible the user may do it without fulling understanding.
+			if ( $this->getUser() == TTUUID::getZeroID() ) {
+				Debug::Text( 'Looking for Conflicting OPEN Shifts...', __FILE__, __LINE__, __METHOD__, 10 );
+				$slf->getConflictingOpenShiftSchedule( $this->getCompany(), $this->getStartTime(), $this->getEndTime(), $this->getBranch(), $this->getDepartment(), $this->getJob(), $this->getJobItem(), $this->getReplacedId(), 1 ); //Limit 1;
+			} else {
+				//Delete any conflicting schedule shift before saving.
+				$slf->getConflictingByCompanyIdAndUserIdAndStartDateAndEndDate( $this->getCompany(), $this->getUser(), $this->getStartTime(), $this->getEndTime(), $this->getId() ); //Don't consider the current record to be conflicting with itself (by passing id argument)
+			}
+
 			if ( $slf->getRecordCount() > 0 ) {
 				Debug::Text( 'Found Conflicting Shift!!', __FILE__, __LINE__, __METHOD__, 10 );
 				//Delete shifts.
@@ -1852,10 +1865,15 @@ class ScheduleFactory extends Factory {
 					if ( $s_obj->isValid() ) {
 						$s_obj->Save();
 					}
+
+					//Only delete the first one. Especially important if we are overwriting OPEN shifts where there could be multiple conflicting ones, and the reality is we don't know specifically which one to delete.
+					//  Other than OPEN shifts, there should never be more than one record anyways, since records should never overlap or conflict with one another.
+					break;
 				}
 			} else {
 				Debug::Text( 'NO Conflicting Shift found...', __FILE__, __LINE__, __METHOD__, 10 );
 			}
+
 		}
 
 		//Since Add Request icon was added to Attendance -> Schedule, a user could request to fill a *committed* open shift, and once the request is authorized, that open shift will still be there.
@@ -1898,6 +1916,7 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function postSave() {
+
 		if ( $this->getEnableTimeSheetVerificationCheck() ) {
 			//Check to see if schedule is verified, if so unverify it on modified punch.
 			//Make sure exceptions are calculated *after* this so TimeSheet Not Verified exceptions can be triggered again.

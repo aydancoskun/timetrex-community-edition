@@ -138,7 +138,22 @@ class APIImport extends APIFactory {
 		$validator_obj->isTrue( 'file', FALSE, TTi18n::getText('Please upload file again') );
 
 		$validator = array();
-		$validator[0] = $validator_obj->getErrorsArray();
+		$validator[0]['error'] = $validator_obj->getErrorsArray();
+		return $this->returnHandler( FALSE, 'IMPORT_FILE', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
+	}
+
+	/**
+	 * @return array|bool
+	 */
+	function returnMaximumLineValidationError( $maximum_lines = NULL ) {
+		//Make sure we return a complete validation error to be displayed to the user.
+		$validator_obj = new Validator();
+		$validator_stats = array('total_records' => 1, 'valid_records' => 0 );
+
+		$validator_obj->isTrue( 'records', FALSE, TTi18n::getText('File exceeds maximum number of records (%1) that can be imported at one time', $maximum_lines ) );
+
+		$validator = array();
+		$validator[0]['error'] = $validator_obj->getErrorsArray();
 		return $this->returnHandler( FALSE, 'IMPORT_FILE', TTi18n::getText('INVALID DATA'), $validator, $validator_stats );
 	}
 
@@ -199,8 +214,42 @@ class APIImport extends APIFactory {
 	 * @return array|bool
 	 */
 	function Import( $column_map, $import_options = array(), $validate_only = FALSE ) {
-		if ( $this->getImportObject()->getRawDataFromFile() == FALSE ) {
-			return $this->returnFileValidationError();
+		if ( Misc::isSystemLoadValid() == FALSE ) { //Check system load as the user could ask to calculate decades worth at a time.
+			Debug::Text('ERROR: System load exceeded, preventing new imports from starting...', __FILE__, __LINE__, __METHOD__, 10);
+			return $this->returnHandler( FALSE );
+		}
+
+		global $config_vars;
+		if ( isset($config_vars['other']['import_maximum_execution_limit']) AND $config_vars['other']['import_maximum_execution_limit'] != '' ) {
+			$maximum_execution_time = $config_vars['other']['import_maximum_execution_limit'];
+		} else {
+			if ( DEPLOYMENT_ON_DEMAND == TRUE ) {
+				$maximum_execution_time = 3600;
+			} else {
+				$maximum_execution_time = 0;
+			}
+		}
+
+		if ( $validate_only == TRUE ) { //When validating, reduce the maximum execution time substantially to limit resource/time waste.
+			$maximum_execution_time = ceil( $maximum_execution_time / 2 );
+		}
+
+		ini_set( 'max_execution_time', $maximum_execution_time );
+		Debug::Text('Maximum Execution Time for Import: '. $maximum_execution_time .' Validate Only: '. (int)$validate_only, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( isset($config_vars['other']['import_maximum_records_limit']) AND $config_vars['other']['import_maximum_records_limit'] != '' ) {
+			$maximum_record_limit = $config_vars['other']['import_maximum_records_limit'];
+		} else {
+			if ( DEPLOYMENT_ON_DEMAND == TRUE ) {
+				$maximum_record_limit = 1000;
+			} else {
+				$maximum_record_limit = 0;
+			}
+		}
+		Debug::Text('Maximum Records allowed for Import: '. $maximum_record_limit .' Validate Only: '. (int)$validate_only, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( function_exists('proc_nice') ) {
+			proc_nice(19); //Low priority.
 		}
 
 		if ( $this->getImportObject()->setColumnMap( $column_map ) == FALSE ) {
@@ -211,17 +260,18 @@ class APIImport extends APIFactory {
 			return $this->returnHandler( FALSE );
 		}
 
-		if ( Misc::isSystemLoadValid() == FALSE ) { //Check system load as the user could ask to calculate decades worth at a time.
-			Debug::Text('ERROR: System load exceeded, preventing new imports from starting...', __FILE__, __LINE__, __METHOD__, 10);
-			return $this->returnHandler( FALSE );
+		if ( $this->getImportObject()->getRawDataFromFile() == FALSE ) {
+			return $this->returnFileValidationError();
+		}
+
+		if ( $maximum_record_limit > 0 AND $this->getImportObject()->getRawDataLines() > $maximum_record_limit ) {
+			return $this->returnMaximumLineValidationError( $maximum_record_limit );
 		}
 
 		//Force this while testing.
-		//Force this while testing.
-		//Force this while testing.
 		//$validate_only = TRUE;
-
 		$this->getImportObject()->setAMFMessageId( $this->getAMFMessageID() ); //This must be set *after* the all constructor functions are called.
+
 		return $this->getImportObject()->Process( $validate_only ); //Don't need return handler here as a API function is called anyways.
 	}
 

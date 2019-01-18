@@ -719,8 +719,8 @@ class TTDate {
 			//$epoch = self::strtotime( $formatted_date );
 			$epoch = strtotime( $formatted_date ); //Don't use self::strtotime() as it treats all numeric values as epochs, which breaks handling for Ymd. Its faster too.
 
-			//Parse failed.
-			if ( $epoch === FALSE OR $epoch === -1 ) {
+			//Parse failed, or result is outside 32-bit signed integer range, which will cause a SQL error when the data type is an integer.
+			if ( $epoch === FALSE OR $epoch === -1 OR $epoch > 2147483647 OR $epoch < -2147483648 ) {
 				Debug::text('  Parsing Date Failed! Returning FALSE: '. $formatted_date .' Format: '. self::$date_format, __FILE__, __LINE__, __METHOD__, 10);
 				$epoch = FALSE;
 			}
@@ -1285,12 +1285,12 @@ class TTDate {
 		if ( isset($array[$prefix.'Year']) ) {
 			$year = $array[$prefix.'Year'];
 		} else {
-			$year = strftime("%Y");
+			$year = strftime('%Y');
 		}
 		if ( isset($array[$prefix.'Month']) ) {
 			$month = $array[$prefix.'Month'];
 		} else {
-			//$month = strftime("%m");
+			//$month = strftime('%m');
 			$month = 1;
 		}
 		if ( isset($array[$prefix.'Day']) ) {
@@ -1298,7 +1298,7 @@ class TTDate {
 		} else {
 			//If day isn't specified it uses the current day, but then if its the 30th, and they
 			//select February, it goes to March!
-			//$day = strftime("%d");
+			//$day = strftime('%d');
 			$day = 1;
 		}
 		if ( isset($array[$prefix.'Hour']) ) {
@@ -1333,15 +1333,15 @@ class TTDate {
 	 */
 	public static function getTimeStamp($year="", $month="", $day="", $hour = 0, $min = 0, $sec = 0) {
 		if ( empty($year) ) {
-			$year = strftime("%Y");
+			$year = strftime('%Y');
 		}
 
 		if ( empty($month) ) {
-			$month = strftime("%m");
+			$month = strftime('%m');
 		}
 
 		if ( empty($day) ) {
-			$day = strftime("%d");
+			$day = strftime('%d');
 		}
 
 		if ( empty($hour) ) {
@@ -1522,9 +1522,9 @@ class TTDate {
 		}
 
 		$date = getdate( $epoch );
-		return mktime( 12, 0, 0, $date['mon'], $date['mday'], $date['year'] ); //4.2secs x 500000x
+		return mktime( 12, 0, 0, $date['mon'], $date['mday'], $date['year'] ); //4.2secs x 500,000x
 		//return strtotime( 'noon', $epoch ); //7.6secs = 500,000x
-		//$retval = mktime(12, 0, 0, date('m', $epoch), date('d', $epoch), date('Y', $epoch)); //4secs = 50,000x
+		//$retval = mktime(12, 0, 0, date('m', $epoch), date('d', $epoch), date('Y', $epoch)); //4secs = 500,000x
 
 		//Debug::text('Middle (noon) Day Epoch: '. $retval .' - '. TTDate::getDate('DATE+TIME', $retval), __FILE__, __LINE__, __METHOD__, 10);
 		//return $retval;
@@ -2003,7 +2003,7 @@ class TTDate {
 			$offset = ( $day_of_week - $start_day_of_week );
 		}
 
-		$retval = mktime(0, 0, 0, date("m", $epoch), ( date("j", $epoch) - $offset), date("Y", $epoch) );
+		$retval = mktime(0, 0, 0, date('m', $epoch), ( date('j', $epoch) - $offset), date('Y', $epoch) );
 
 		//Debug::text(' Epoch: '. TTDate::getDate('DATE+TIME', $epoch) .' Retval: '. TTDate::getDate('DATE+TIME', $retval) .' Start Day of Week: '. $start_day_of_week .' Offset: '. $offset, __FILE__, __LINE__, __METHOD__, 10);
 		return $retval;
@@ -2626,7 +2626,7 @@ class TTDate {
 			$c++;
 		}
 
-		Debug::Text("ERROR: infinite loop detected. This should never happen", __FILE__, __LINE__, __METHOD__, 10);
+		Debug::Text('ERROR: infinite loop detected. This should never happen', __FILE__, __LINE__, __METHOD__, 10);
 		return $return_arr;
 	}
 
@@ -2751,9 +2751,8 @@ class TTDate {
 		return round( TTDate::getDays( mktime( 0, 0, 0, $month, $day, $year ) - mktime( 0, 0, 0, 3, 21, $year ) ) );
 	}
 
-	// Function to return "13 mins ago" text from a given time.
-
 	/**
+	 * Function to return "13 mins ago" text from a given time.
 	 * @param int $epoch EPOCH
 	 * @return string
 	 */
@@ -2808,7 +2807,7 @@ class TTDate {
 		}
 
 		//Debug::text(' Num: '. $num .' Suffix: '. $suffix, __FILE__, __LINE__, __METHOD__, 10);
-		return sprintf("%0.01f", $num)." ".$suffix;
+		return sprintf('%0.01f', $num).' '.$suffix;
 	}
 
 	//Runs strtotime over a string, but if it happens to be an epoch, strtotime

@@ -8011,13 +8011,17 @@ class CalculatePolicy {
 
 			if ( $holiday_policy_obj->getAverageTimeFrequencyType() == 20 ) { //Pay Periods
 				$past_pay_period_dates = $this->pay_period_schedule_obj->getStartAndEndDateRangeFromPastPayPeriods( $date_stamp, $holiday_policy_obj->getAverageTimeDays() );
-				if ( is_array($past_pay_period_dates) ) {
+				if ( is_array( $past_pay_period_dates ) ) {
 					$filter_start_date = $past_pay_period_dates['start_date'];
 					$filter_end_date = $past_pay_period_dates['end_date'];
 				} else {
-					Debug::text('ERROR: No pay period found, unable to calculate holiday time!', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::text( 'ERROR: No pay period found, unable to calculate holiday time!', __FILE__, __LINE__, __METHOD__, 10 );
+
 					return 0;
 				}
+			} elseif ( $holiday_policy_obj->getAverageTimeFrequencyType() == 15 ) { //Weeks
+				$filter_end_date = ( TTDate::getBeginWeekEpoch( $date_stamp, $this->start_week_day_id ) - 1 ); //End on 11:59:59 the day before the week of the holiday starts.
+				$filter_start_date = ( ( $filter_end_date + 1 ) - ( ( $holiday_policy_obj->getAverageTimeDays() * 7 ) * 86400 ) ); //Goes after $filter_end_date above.
 			} else { //Days
 				if ( $holiday_policy_obj->getAverageTimeDays() >= 0 ) {
 					$filter_start_date = ( $date_stamp - ( $holiday_policy_obj->getAverageTimeDays() * 86400 ) );
@@ -8367,13 +8371,15 @@ class CalculatePolicy {
 
 				if ( $hp_obj->getAverageTimeFrequencyType() == 20 ) { //Pay Periods
 					$past_pay_period_dates = $this->pay_period_schedule_obj->getStartAndEndDateRangeFromPastPayPeriods( $date_stamp, $hp_obj->getAverageTimeDays() );
-					if ( is_array($past_pay_period_dates) ) {
+					if ( is_array( $past_pay_period_dates ) ) {
 						$min_start_date = $past_pay_period_dates['start_date'];
 
-						if ( TTDate::getDayDifference( $min_start_date, $date_stamp) > $this->holiday_before_days  ) {
-							$this->holiday_before_days = TTDate::getDayDifference( $min_start_date, $date_stamp);
+						if ( TTDate::getDayDifference( $min_start_date, $date_stamp ) > $this->holiday_before_days ) {
+							$this->holiday_before_days = TTDate::getDayDifference( $min_start_date, $date_stamp );
 						}
 					}
+				} elseif ( $hp_obj->getAverageTimeFrequencyType() == 15 ) { //Week
+					$this->holiday_before_days = ( $hp_obj->getAverageTimeDays() * 7 ) + TTDate::getDays( $date_stamp - TTDate::getBeginWeekEpoch( $date_stamp, $this->start_week_day_id ) );
 				} else {
 					if ( $hp_obj->getAverageTimeDays() > $this->holiday_before_days ) {
 						$this->holiday_before_days = $hp_obj->getAverageTimeDays();

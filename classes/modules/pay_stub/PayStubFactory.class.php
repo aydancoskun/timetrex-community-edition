@@ -1785,13 +1785,22 @@ class PayStubFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getSumByEntriesArrayAndTypeIDAndPayStubAccountID( $ps_entries, $type_ids = NULL, $ps_account_ids = NULL) {
+		$ps_entries = strtolower($ps_entries);
 		//Debug::text('PS Entries: '. $ps_entries .' Type ID: '. count($type_ids) .' PS Account ID: '. count($ps_account_ids), __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( strtolower($ps_entries) == 'current' ) {
+		if ( !isset($this->tmp_data['current_pay_stub']) ) {
+			$this->tmp_data['current_pay_stub'] = NULL;
+		}
+
+		if ( !isset($this->tmp_data['previous_pay_stub']) ) {
+			$this->tmp_data['previous_pay_stub'] = NULL;
+		}
+
+		if ( $ps_entries == 'current' ) {
 			$entries = $this->tmp_data['current_pay_stub']['entries'];
-		} elseif ( strtolower($ps_entries) == 'previous' ) {
+		} elseif ( $ps_entries == 'previous' ) {
 			$entries = $this->tmp_data['previous_pay_stub']['entries'];
-		} elseif ( strtolower($ps_entries) == 'previous+ytd_adjustment' ) {
+		} elseif ( $ps_entries == 'previous+ytd_adjustment' ) {
 			$entries = $this->tmp_data['previous_pay_stub']['entries'];
 			//Include any YTD adjustment PS amendments in the current entries as if they occurred in the previous pay stub.
 			//This so we can account for the first pay stub having a YTD adjustment that exceeds a wage base amount, so no amount is calculated.

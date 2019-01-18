@@ -840,6 +840,12 @@ class UserFactory extends Factory {
 		$password = trim($password);
 		$password_confirm = ( $password_confirm !== NULL ) ? trim($password_confirm) : $password_confirm;
 
+		//Check to see if the password is hashed and being passed back into itself from the LogDetailFactory or something.
+		if ( strlen( $password ) > 100 AND strpos( $password, ':') !== FALSE ) {
+			Debug::Text('Password is hashed, ignoring: '. $password, __FILE__, __LINE__, __METHOD__, 10);
+			return FALSE;
+		}
+
 		//Make sure we accept just $password being set otherwise setObjectFromArray() won't work correctly.
 		if ( ( $password != '' AND $password_confirm != '' AND $password === $password_confirm ) OR ( $password != '' AND $password_confirm === NULL ) ) {
 			$passwords_match = TRUE;
@@ -3203,9 +3209,6 @@ class UserFactory extends Factory {
 		//However when mass editing, no IDs are set so this always fails during the only validation phase.
 		if ( $this->Validator->getValidateOnly() == FALSE AND $this->isNew( TRUE ) == TRUE AND ( $this->getPassword() == FALSE OR $this->getPassword() == '' ) ) {
 			$this->setPassword( TTPassword::generateRandomPassword() ); //Default to just some random password instead of making the user decide.
-			//$this->Validator->isTrue(		'password',
-			//								FALSE,
-			//								TTi18n::gettext('Please specify a password'));
 		}
 
 		if ( $this->Validator->getValidateOnly() == FALSE AND $this->getEmployeeNumber() == FALSE AND $this->getStatus() == 10 ) {

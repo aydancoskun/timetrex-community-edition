@@ -160,6 +160,18 @@ class Import {
 	}
 
 	/**
+	 * @return int|bool
+	 */
+	function getRawDataLines() {
+		if ( isset($this->data['raw_data']) ) {
+			Debug::Text('Raw Data Lines: '. count($this->data['raw_data']), __FILE__, __LINE__, __METHOD__, 10);
+			return count($this->data['raw_data']);
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * @param int $limit Limit the number of records returned
 	 * @return array|bool|mixed
 	 */

@@ -1676,41 +1676,44 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				$i = 0;
 				$hour_code_map = array();
-				foreach($rows as $row) {
-					//Combine all hours from the same code together.
-					foreach( $setup_data['va_munis']['columns'] as $column_id => $column_data ) {
-						if ( $column_data['hour_column'] != 0 ) {
-							$hour_code = $row[Misc::trimSortPrefix($column_data['hour_column'])];
-						} else {
-							$hour_code = trim($column_data['hour_code']);
-						}
 
-						$hour_code_map[$hour_code][$column_id] = NULL;
-						if ( isset( $row[$column_id.'_time'] ) AND $hour_code != '' ) {
-							if ( !isset($tmp_hour_codes[$hour_code]) ) {
-								$tmp_hour_codes[$hour_code] = 0;
+				if ( is_array($rows) ) {
+					foreach ( $rows as $row ) {
+						//Combine all hours from the same code together.
+						foreach ( $setup_data['va_munis']['columns'] as $column_id => $column_data ) {
+							if ( $column_data['hour_column'] != 0 ) {
+								$hour_code = $row[ Misc::trimSortPrefix( $column_data['hour_column'] ) ];
+							} else {
+								$hour_code = trim( $column_data['hour_code'] );
 							}
-							$tmp_hour_codes[$hour_code] = bcadd( $tmp_hour_codes[$hour_code], $row[$column_id.'_time'] ); //Use seconds for math here.
-						}
-					}
 
-					if ( isset($tmp_hour_codes) ) {
-						foreach($tmp_hour_codes as $hour_code => $hours ) {
-							foreach( $export_column_map as $export_column ) {
-								if ( $export_column != '' ) {
-									//Due to a bug in PHP v5.3, isset($row[$export_column]['display']) always returns TRUE, so we need to add array_key_exists() check as well.
-									$tmp_rows[$i][$export_column] = ( isset($row[$export_column]) ) ? ( is_array($row[$export_column]) AND array_key_exists('display', $row[$export_column]) ) ? $row[$export_column]['display'] : $row[$export_column] : NULL;
+							$hour_code_map[ $hour_code ][ $column_id ] = NULL;
+							if ( isset( $row[ $column_id . '_time' ] ) AND $hour_code != '' ) {
+								if ( !isset( $tmp_hour_codes[ $hour_code ] ) ) {
+									$tmp_hour_codes[ $hour_code ] = 0;
 								}
-								$tmp_rows[$i]['hour_code'] = $hour_code;
-								$tmp_rows[$i]['hours'] = TTDate::getTimeUnit( $hours, 20 );
+								$tmp_hour_codes[ $hour_code ] = bcadd( $tmp_hour_codes[ $hour_code ], $row[ $column_id . '_time' ] ); //Use seconds for math here.
 							}
-							$i++;
 						}
-						unset($tmp_hour_codes, $hour_code, $hours);
+
+						if ( isset( $tmp_hour_codes ) ) {
+							foreach ( $tmp_hour_codes as $hour_code => $hours ) {
+								foreach ( $export_column_map as $export_column ) {
+									if ( $export_column != '' ) {
+										//Due to a bug in PHP v5.3, isset($row[$export_column]['display']) always returns TRUE, so we need to add array_key_exists() check as well.
+										$tmp_rows[ $i ][ $export_column ] = ( isset( $row[ $export_column ] ) ) ? ( is_array( $row[ $export_column ] ) AND array_key_exists( 'display', $row[ $export_column ] ) ) ? $row[ $export_column ]['display'] : $row[ $export_column ] : NULL;
+									}
+									$tmp_rows[ $i ]['hour_code'] = $hour_code;
+									$tmp_rows[ $i ]['hours'] = TTDate::getTimeUnit( $hours, 20 );
+								}
+								$i++;
+							}
+							unset( $tmp_hour_codes, $hour_code, $hours );
+						}
 					}
 				}
-				//Debug::Arr($tmp_rows, 'Tmp Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 
+				//Debug::Arr($tmp_rows, 'Tmp Rows: ', __FILE__, __LINE__, __METHOD__, 10);
 				if ( isset( $tmp_rows) ) {
 
 					$data = '';
@@ -1918,7 +1921,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 							//Debug::Arr($column_data, 'Output2', __FILE__, __LINE__, __METHOD__, 10);
 
 							$tmp_rows[$row['employee_number']][] = array(
-												'pay_period_end_date' => date('m/d/Y', $row['pay_period_end_date']),
+												'pay_period_end_date' => date('m-d-Y', $row['pay_period_end_date']),
 												'employee_number' => $row['employee_number'],
 												'last_name' => $row['last_name'],
 												'first_name' => $row['first_name'],
@@ -1932,14 +1935,22 @@ class PayrollExportReport extends TimesheetSummaryReport {
 
 				$data = '';
 				if ( isset( $tmp_rows ) ) {
+					$data .= '<Version>'."\r\n";
+					$data .= '"12001","'. ( ( $this->getUserObject()->getCompanyObject()->getCountry() == 'US' ) ? 2 : 1 ) .'"'."\r\n"; //1=Canada, 2=US, 3=UK
+					$data .= '</Version>'."\r\n";
 					foreach( $tmp_rows as $detail_records ) {
 						$data .= '<Timeslip>'."\r\n";
 						$total_detail_records = count($detail_records);
 						if ( $total_detail_records > 0 ) {
-							$data .= '"'. substr( $row['last_name'].', '. $row['first_name'], 0, 52) .'"'."\r\n";
-							$data .= '"'. $total_detail_records .'","","'. date('m-d-Y', $row['pay_period_end_date']).'"'."\r\n";
+							$i = 0;
 							foreach( $detail_records as $detail_record ) {
-								$data .= '"'. $detail_record['customer_name'] .'","'. trim($column_data['hour_code']) .'","'. TTDate::getTimeUnit( $detail_record['value'], 12 ) .'"'."\r\n";
+								if ( $i == 0 ) {
+									$data .= '"' . substr( $detail_record['last_name'] . ', ' . $detail_record['first_name'], 0, 52 ) . '"' . "\r\n";
+									$data .= '"'. $total_detail_records .'","","'. $detail_record['pay_period_end_date'] .'"'."\r\n";
+								}
+								$data .= '"'. $detail_record['customer_name'] .'","'. $detail_record['hour_code'] .'","'. TTDate::getTimeUnit( $detail_record['value'], 12 ) .'"'."\r\n";
+
+								$i++;
 							}
 						}
 						$data .= '</Timeslip>'."\r\n";

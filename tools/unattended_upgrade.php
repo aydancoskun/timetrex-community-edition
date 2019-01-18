@@ -52,6 +52,8 @@ Debug::setBufferOutput(TRUE);
 Debug::setEnableLog(TRUE);
 Debug::setVerbosity(10);
 ignore_user_abort(TRUE);
+ini_set( 'default_socket_timeout', 5 );
+ini_set( 'allow_url_fopen', 1 );
 ini_set( 'max_execution_time', 0 );
 ini_set( 'memory_limit', '2048M' ); //Just in case.
 

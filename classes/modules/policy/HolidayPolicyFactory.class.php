@@ -71,8 +71,8 @@ class HolidayPolicyFactory extends Factory {
 			case 'average_time_frequency_type':
 				$retval = array(
 						10 => TTi18n::gettext('Day(s)'), //Default
-						20 => TTi18n::gettext('Pay Period(s)'), //Used by Ontario.
-						//20 => TTi18n::gettext('Week'),
+						15 => TTi18n::gettext('Week(s)'),
+						20 => TTi18n::gettext('Pay Period(s)'), //Was used by Ontario from Jan 1st 2018 to Jul 1st 2018.
 						//30 => TTi18n::gettext('Month'),
 				);
 				break;

@@ -753,7 +753,7 @@ class UserWageFactory extends Factory {
 													);
 		}
 		// Type
-		if ( $this->getType() !== FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE OR $this->getType() !== FALSE ) {
 			$this->Validator->inArrayKey(	'type_id',
 													$this->getType(),
 													TTi18n::gettext('Incorrect Type'),

@@ -486,8 +486,12 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|RecurringScheduleListFactory
 	 */
-	function getConflictingByUserIdAndStartDateAndEndDate( $user_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
+	function getConflictingByCompanyIdAndUserIdAndStartDateAndEndDate( $company_id, $user_id, $start_date, $end_date, $id = NULL, $where = NULL, $order = NULL) {
 		Debug::Text('User ID: '. $user_id .' Start Date: '. $start_date .' End Date: '. $end_date, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
 
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -513,6 +517,7 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$end_timestamp = $this->db->BindTimeStamp( $end_date );
 
 		$ph = array(
+					'company_id' => TTUUID::castUUID($company_id),
 					'user_id' => TTUUID::castUUID($user_id),
 					'start_date_a' => $start_datestamp,
 					'end_date_b' => $end_datestamp,
@@ -533,7 +538,8 @@ class RecurringScheduleListFactory extends RecurringScheduleFactory implements I
 		$query = '
 					select	a.*
 					from	'. $this->getTable() .' as a
-					where a.user_id = ?
+					where a.company_id = ?
+						AND a.user_id = ?
 						AND a.date_stamp >= ?
 						AND a.date_stamp <= ?
 						AND a.id != ?

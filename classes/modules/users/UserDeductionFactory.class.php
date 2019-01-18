@@ -542,7 +542,7 @@ class UserDeductionFactory extends Factory {
 			$transaction_date = time();
 		}
 
-		if ( strtolower( $cd_obj->getCountry() ) == 'ca' ) {
+		if ( $cd_obj->getCountry() == 'CA' ) {
 			require_once( Environment::getBasePath(). DIRECTORY_SEPARATOR . 'classes'. DIRECTORY_SEPARATOR .'payroll_deduction'. DIRECTORY_SEPARATOR .'PayrollDeduction.class.php');
 			$pd_obj = new PayrollDeduction( $cd_obj->getCountry(), $cd_obj->getProvince() );
 			$pd_obj->setDate( $transaction_date );
@@ -553,76 +553,75 @@ class UserDeductionFactory extends Factory {
 			case 100: //Federal
 				$country_label = strtoupper( $cd_obj->getCountry() );
 
-				if ( strtolower( $cd_obj->getCountry() ) == 'ca' ) {
+				if ( $cd_obj->getCountry() == 'CA' ) {
 					//Filter Claim Amount through PayrollDeduction class so it can be automatically adjusted if necessary.
 					$pd_obj->setFederalTotalClaimAmount( $user_value1 );
 					$retval = $country_label .' - '. TTI18n::getText('Claim Amount').': $'. Misc::MoneyFormat( $pd_obj->getFederalTotalClaimAmount() );
-				} elseif ( strtolower( $cd_obj->getCountry() ) == 'us' ) {
+				} elseif ( $cd_obj->getCountry() == 'US' ) {
 					$retval = $country_label .' - '. TTI18n::getText('Filing Status').': '. Option::getByKey( $user_value1, $cd_obj->getOptions('federal_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. $user_value2;
 				}
 				break;
 			case 200:
 				$province_label = strtoupper( $cd_obj->getProvince() );
 
-				if ( strtolower( $cd_obj->getCountry() ) == 'ca' ) {
+				if ( $cd_obj->getCountry() == 'CA' ) {
 					//Filter Claim Amount through PayrollDeduction class so it can be automatically adjusted if necessary.
 					$pd_obj->setProvincialTotalClaimAmount( $user_value1 );
 					$retval = $province_label.' - '. TTI18n::getText('Claim Amount').': $'. Misc::MoneyFormat( $pd_obj->getProvincialTotalClaimAmount() );
 				} elseif ( $cd_obj->getCountry() == 'US' ) {
 					switch( strtolower( $cd_obj->getProvince() ) ) {
+						case 'al':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_al_filing_status') ) .' '. TTI18n::getText('Dependents') .': '. (int)$user_value2;
+							break;
 						case 'az': //Percent
 							$retval = $province_label.' - '. TTI18n::getText('Percent', $province_label ).': '. (float)$user_value1 .'%';
 							break;
-						case 'md': //County Rate
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_filing_status') ) .' '. TTI18n::getText('County Rate') .': '. (float)$user_value2 .'%';
+						case 'ct':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_ct_filing_status') );
+							break;
+						case 'dc':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_dc_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+							break;
+						case 'de':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_de_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+							break;
+						case 'ga':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_ga_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2 .' '. TTI18n::getText('Dependent Allowances') .': '. (int)$user_value3;
 							break;
 						case 'il':
 							$retval = $province_label.' - '.  TTI18n::getText('IL-W-4 Line 1') .': '. (int)$user_value1 .' '. TTI18n::getText('IL-W-4 Line 2') .': '. (int)$user_value2;
 							break;
-						case 'oh':
-						case 'va':
+						case 'in':
+							$retval = $province_label.' - '. TTI18n::getText('Allowances', $province_label ).': '. (int)$user_value1 .' '. TTI18n::getText('Dependents') .': '. (int)$user_value2;
+							break;
+						case 'la':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value3, $cd_obj->getOptions('state_la_filing_status') ) .' '. TTI18n::getText('Dependents') .': '. (int)$user_value2 .' '. TTI18n::getText('Exemptions') .': '. (int)$user_value1;
+							break;
+						case 'ma':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_ma_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+							break;
+						case 'md': //County Rate
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_filing_status') ) .' '. TTI18n::getText('County Rate') .': '. (float)$user_value2 .'%';
+							break;
+						case 'me':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_me_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+							break;
+						case 'nc':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_nc_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+							break;
+						case 'nj':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_nj_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+							break;
+						case 'ok':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_ok_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
+							break;
 						case 'ar':
 						case 'ia':
 						case 'ky':
 						case 'mi':
 						case 'mt':
+						case 'oh':
 							$retval = $province_label.' - '. TTI18n::getText('Allowances', $province_label ).': '. (int)$user_value2;
-							break;
-						case 'in':
-							$retval = $province_label.' - '. TTI18n::getText('Allowances', $province_label ).': '. (int)$user_value1 .' '. TTI18n::getText('Dependents') .': '. (int)$user_value2;
-							break;
-						case 'ga':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_ga_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2 .' '. TTI18n::getText('Dependent Allowances') .': '. (int)$user_value3;
-							break;
-						case 'nj':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_nj_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
-							break;
-						case 'nc':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_nc_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
-							break;
-						case 'ma':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_ma_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
-							break;
-						case 'al':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_al_filing_status') ) .' '. TTI18n::getText('Dependents') .': '. (int)$user_value2;
-							break;
-						case 'ct':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_ct_filing_status') );
-							break;
-						case 'wv':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_wv_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
-							break;
-						case 'me':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_me_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
-							break;
-						case 'de':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_de_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
-							break;
-						case 'dc':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_dc_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
-							break;
-						case 'la':
-							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value3, $cd_obj->getOptions('state_la_filing_status') ) .' '. TTI18n::getText('Dependents') .': '. (int)$user_value2 .' '. TTI18n::getText('Exemptions') .': '. (int)$user_value1;
 							break;
 						case 'or':
 							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
@@ -630,6 +629,12 @@ class UserDeductionFactory extends Factory {
 							if ( is_object( $cd_obj->getPayrollRemittanceAgencyObject() ) AND $cd_obj->getPayrollRemittanceAgencyObject()->getPrimaryIdentification() != '' ) {
 								$retval .= ' [#'. $cd_obj->getPayrollRemittanceAgencyObject()->getPrimaryIdentification() .']';
 							}
+							break;
+						case 'va':
+							$retval = $province_label.' - '.  TTI18n::getText('Allowances') .': '. (int)$user_value1 .' '. TTI18n::getText('Age 65/Blind') .': '. (int)$user_value2;
+							break;
+						case 'wv':
+							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_wv_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;
 							break;
 						default:
 							$retval = $province_label.' - '. TTI18n::getText('Filing Status', $province_label ).': '. Option::getByKey( $user_value1, $cd_obj->getOptions('state_filing_status') ) .' '. TTI18n::getText('Allowances') .': '. (int)$user_value2;

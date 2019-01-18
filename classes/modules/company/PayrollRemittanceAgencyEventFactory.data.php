@@ -121,14 +121,14 @@ return array(
 														 'frequency_id'         => 2100, //Annual (YTD)
 														 'primary_month'        => 7, //Jul
 														 'primary_day_of_month' => 1,
-														 'reminder_days'        => 7,
+														 'reminder_days'        => 0,
 												 ),
 												 array(
 														 'status_id'            => 10, //Enabled
 														 'frequency_id'         => 2100, //Annual (YTD)
 														 'primary_month'        => 12, //Dec
 														 'primary_day_of_month' => 1,
-														 'reminder_days'        => 7,
+														 'reminder_days'        => 0,
 												 ),
 					),
 			),

@@ -1096,18 +1096,21 @@ class Misc {
 		return ($asString ? "{$rgb[0]} {$rgb[1]} {$rgb[2]}" : $rgb);
 	}
 
-	//Mititage CSV Injection attacks: See below links for more information:
-	//[1] https://www.owasp.org/index.php/CSV_Excel_Macro_Injection
-	//[2] https://hackerone.com/reports/72785
-	//[3] https://hackerone.com/reports/90131
 	/**
+	 * Mititage CSV Injection attacks: See below links for more information:
+	 * [1] https://www.owasp.org/index.php/CSV_Excel_Macro_Injection
+	 * [2] https://hackerone.com/reports/72785
+	 * [3] https://hackerone.com/reports/90131
 	 * @param $input
 	 * @return mixed
 	 */
 	static function escapeCSVTriggerChars( $input ) {
-		$first_char = substr( trim($input), 0, 1 );
+		$input = trim($input);
+		$first_char = substr( $input, 0, 1 );
 		$trigger_chars = array( '=', '-','+', '|');
-		if ( in_array( $first_char, $trigger_chars ) ) {
+
+		//Be sure to ignore negative numbers/dollar amounts here, as its not expected when using the API to retrieve such data and there shouldn't be risk of injections attacks that are all numeric.
+		if ( !is_numeric( $input ) AND in_array( $first_char, $trigger_chars ) ) {
 			$retval = '\''. $input; //Prepend with single quote "'" to force it to text.
 		} else {
 			$retval = $input;
@@ -2626,9 +2629,10 @@ class Misc {
 		$files = array();
 		if ( is_dir($start_dir) AND is_readable( $start_dir ) ) {
 			$fh = opendir($start_dir);
-			while ( ($file = readdir($fh)) !== FALSE ) {
-				# loop through the files, skipping . and .., and recursing if necessary
-				if ( strcmp($file, '.') == 0 OR strcmp($file, '..' ) == 0 ) {
+			while ( ( $file = readdir($fh) ) !== FALSE ) {
+				// loop through the files, skipping . and .., and recursing if necessary
+				// If for some reason $file is blank, it could cause an infinite loop like: "C:\TimeTrex\cache\upgrade_staging\latest_version\interface\html5\views\payroll\pay_stub_transaction\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
+				if ( $file == '' OR strcmp($file, '.') == 0 OR strcmp($file, '..' ) == 0 ) {
 					continue;
 				}
 
@@ -2655,7 +2659,7 @@ class Misc {
 			closedir($fh);
 			sort($files);
 		} else {
-			# false if the function was called with an invalid non-directory argument
+			// false if the function was called with an invalid non-directory argument
 			$files = FALSE;
 		}
 
@@ -3511,26 +3515,34 @@ class Misc {
 	 * @return bool
 	 */
 	static function isWritable( $path ) {
-		if ( substr($path, -1) == DIRECTORY_SEPARATOR OR substr($path, -1) == '.' ) {
-			return self::isWritable( dirname( $path ) . DIRECTORY_SEPARATOR . uniqid( mt_rand() ).'.tmp' );
-		}
+		//Debug::text( 'File: ' . $path, __FILE__, __LINE__, __METHOD__, 10 );
+		if ( file_exists( $path ) ) {
+			if ( substr( $path, -1 ) == DIRECTORY_SEPARATOR OR substr( $path, -1 ) == '.' OR is_dir( $path ) ) {
+				//Debug::text( 'File is directory: ' . $path, __FILE__, __LINE__, __METHOD__, 10 );
 
-		if ( file_exists($path) ) {
-			if ( !( $f = @fopen($path, 'r+') ) ) {
+				return self::isWritable( $path . DIRECTORY_SEPARATOR . uniqid( mt_rand() ) . '.tmp' );
+			}
+
+			$f = @fopen( $path, 'r+' );
+			if ( $f == FALSE ) {
+				//Debug::text( 'File is NOT writable: ' . $path, __FILE__, __LINE__, __METHOD__, 10 );
 				return FALSE;
 			}
-			fclose($f);
+			fclose( $f );
+
+			return TRUE;
+		} else {
+			//Debug::text( 'File does not exists...', __FILE__, __LINE__, __METHOD__, 10 );
+			$f = @fopen( $path, 'w' );
+			if ( $f == FALSE ) {
+				Debug::text( 'File is NOT writable: ' . $path, __FILE__, __LINE__, __METHOD__, 10 );
+				return FALSE;
+			}
+			fclose( $f );
+			unlink( $path );
+
 			return TRUE;
 		}
-
-		if ( !( $f = @fopen($path, 'w') ) ) {
-			return FALSE;
-		}
-
-		fclose($f);
-		unlink($path);
-
-		return TRUE;
 	}
 
 	/**
