@@ -28,12 +28,12 @@
 		this.showErrorTip = function( sec ) {
 
 			if ( !Global.isSet( sec ) ) {
-				sec = 2
+				sec = 2;
 			}
 
 			if ( !error_tip_box ) {
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
-				error_tip_box = error_tip_box.ErrorTipBox()
+				error_tip_box = error_tip_box.ErrorTipBox();
 			}
 			if ( $( this ).hasClass( 'warning-tip' ) ) {
 				error_tip_box.show( this, error_string, sec, true );
@@ -90,7 +90,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper tag-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -167,15 +167,15 @@
 					delete_mode = true;
 				}
 
-				var tagSpanDiv = $( "<div class='tag-span-div'></div>" );
-				var close_btn = $( "<span  class='close-btn'>X</span>" );
-				var tagSpan = $( "<span class='tag-span'></span>" );
+				var tagSpanDiv = $( '<div class=\'tag-span-div\'></div>' );
+				var close_btn = $( '<span  class=\'close-btn\'>X</span>' );
+				var tagSpan = $( '<span class=\'tag-span\'></span>' );
 
 				if ( delete_mode ) {
 					tagSpanDiv.addClass( 'removed' );
 				}
 
-				close_btn.attr( 'value', content );
+				close_btn.attr( 'data-value', content );
 				tagSpan.text( content );
 
 				var doing_dblclick = false;
@@ -185,10 +185,10 @@
 						return;
 					}
 
-					var value = $( this ).attr( 'value' );
+					var value = $( this ).attr( 'data-value' );
 
 					if ( Global.isSet( tag_span_dic[value] ) ) {
-						tag_span_dic[value].remove()
+						tag_span_dic[value].remove();
 
 					}
 
@@ -221,7 +221,7 @@
 							return;
 						}
 
-						var value = $( $$this ).attr( 'value' );
+						var value = $( $$this ).attr( 'data-value' );
 						var current_div = tag_span_dic[value];
 						var new_value = '';
 
@@ -241,7 +241,7 @@
 						tag_span_dic[value].find( '.tag-span' ).text( new_value );
 
 						delete tag_span_dic[value];
-						$( $$this ).attr( 'value', new_value );
+						$( $$this ).attr( 'data-value', new_value );
 
 						tag_span_dic[new_value] = current_div;
 
@@ -258,18 +258,18 @@
 				tagSpanDiv.append( close_btn );
 				$( $this ).prepend( tagSpanDiv );
 
-				tag_span_dic[close_btn.attr( 'value' )] = tagSpanDiv;
+				tag_span_dic[content] = tagSpanDiv;
 
 			} );
-		}
+		};
 
 		this.createTag = function( val ) {
 
-			var tagSpanDiv = $( "<div class='tag-span-div new'></div>" );
-			var close_btn = $( "<span class='close-btn'>X</span>" );
-			var tagSpan = $( "<span class='tag-span'></span>" );
+			var tagSpanDiv = $( '<div class=\'tag-span-div new\'></div>' );
+			var close_btn = $( '<span class=\'close-btn\'>X</span>' );
+			var tagSpan = $( '<span class=\'tag-span\'></span>' );
 
-			close_btn.attr( 'value', val );
+			close_btn.attr( 'data-value', val );
 			tagSpan.text( val );
 
 			var doing_dblclick = false;
@@ -280,10 +280,10 @@
 					return;
 				}
 
-				var value = $( this ).attr( 'value' );
+				var value = $( this ).attr( 'data-value' );
 
 				if ( Global.isSet( tag_span_dic[value] ) ) {
-					tag_span_dic[value].remove()
+					tag_span_dic[value].remove();
 
 				}
 
@@ -316,7 +316,7 @@
 						return;
 					}
 
-					var value = $( $$this ).attr( 'value' );
+					var value = $( $$this ).attr( 'data-value' );
 					var current_div = tag_span_dic[value];
 					var new_value = '';
 
@@ -331,7 +331,7 @@
 					tag_span_dic[value].find( '.tag-span' ).text( new_value );
 
 					delete tag_span_dic[value];
-					$( $$this ).attr( 'value', new_value );
+					$( $$this ).attr( 'data-value', new_value );
 
 					tag_span_dic[new_value] = current_div;
 
@@ -340,16 +340,15 @@
 
 			} );
 
-			if ( Global.isSet( tag_span_dic[close_btn.attr( 'value' )] ) ) {
+			if ( Global.isSet( tag_span_dic[close_btn.attr( 'data-value' )] ) ) {
 				return;
 			}
 
 			tagSpanDiv.append( tagSpan );
 			tagSpanDiv.append( close_btn );
 			tagSpanDiv.insertBefore( add_tag_input );
-
-			tag_span_dic[close_btn.attr( 'value' )] = tagSpanDiv;
-		}
+			tag_span_dic[val] = tagSpanDiv;
+		};
 
 		this.each( function() {
 
@@ -361,7 +360,7 @@
 				object_type_id = o.object_type_id;
 			}
 
-			add_tag_input = $( "<input class='add-tag-input' />" );
+			add_tag_input = $( '<input class=\'add-tag-input\' autocomplete=\'On\' />' );
 
 			api_tag = new (APIFactory.getAPIClass( 'APICompanyGenericTag' ))();
 
@@ -372,7 +371,7 @@
 					if ( check_box ) {
 						$this.setCheckBox( true );
 					}
-					add_tag_input.autocomplete( "option", "source", [] );
+					add_tag_input.autocomplete( 'option', { source: [] } );
 					$this.trigger( 'formItemChange', [$this] );
 					$this.isSelectedItem = true;
 				},
@@ -390,13 +389,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-							LocalCacheData.current_open_sub_controller.edit_view &&
-							LocalCacheData.current_open_sub_controller.is_viewing ) {
+								LocalCacheData.current_open_sub_controller.edit_view &&
+								LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-							LocalCacheData.current_open_primary_controller.edit_view &&
-							LocalCacheData.current_open_primary_controller.is_viewing ) {
+								LocalCacheData.current_open_primary_controller.edit_view &&
+								LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -437,7 +436,6 @@
 			} );
 
 			add_tag_input.bind( 'keyup', function( e ) {
-
 				if ( e.which === 40 || e.which === 38 ) {
 					e.preventDefault();
 					return false;
@@ -455,11 +453,15 @@
 						var final_result = [];
 
 						for ( var i = 0; i < result_data.length; i++ ) {
+							//https://stackoverflow.com/questions/13144025/jquery-autocomplete-update-source-with-object-formatting-the-array
+							//final_result.push({title: result_data[i].name, label: result_data[i].name,});
+							//http://api.jqueryui.com/autocomplete/#option-source
 							final_result.push( result_data[i].name );
 						}
 
-						add_tag_input.autocomplete( "option", "source", final_result );
-						add_tag_input.autocomplete( 'search', args.filter_data.name );
+						//add_tag_input.autocomplete( "option", "source", final_result )
+
+						add_tag_input.autocomplete( 'option', { source: final_result } );
 
 					}
 				} );
@@ -476,7 +478,7 @@
 				}
 
 				if ( (e.which === 13 || e.which === 44 || e.which === 32 || e.which === 9 || e.which === 188) &&
-					add_tag_input.val().length > 0 ) {
+						add_tag_input.val().length > 0 ) {
 
 					e.preventDefault();
 
@@ -490,12 +492,12 @@
 					if ( check_box ) {
 						$this.setCheckBox( true );
 					}
-					add_tag_input.autocomplete( "option", "source", [] );
+					//add_tag_input.autocomplete( "option", { source: [] } );
 					$this.trigger( 'formItemChange', [$this] );
 
 					return false;
 				} else {
-					add_tag_input.autocomplete( "option", "source", [] );
+					//add_tag_input.autocomplete( "option", { source: [] } );
 				}
 
 			} );

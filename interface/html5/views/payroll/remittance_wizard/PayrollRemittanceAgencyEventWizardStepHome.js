@@ -1,19 +1,19 @@
-PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
+PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend( {
 
 	name: 'home',
 
 	prae_grid_source_data: null,
 	grid: null,
 
-	el: $('.wizard.process_transactions_wizard'),
+	el: $( '.wizard.process_transactions_wizard' ),
 
 
-	init: function(){
+	init: function() {
 		filter_data = {
 			filter_data: {
 				'status_id': 10, //Enabled
 				'payroll_remittance_agency_status_id': 10, //Enabled
-				'start_date': ( ( new Date() / 1000 ) + ( 86400 * 2 ) ), //Move start date into the future by 2 days so per Pay Period frequencies will still appear a few days in advance.
+				'start_date': ( ( new Date() / 1000 ) + ( 86400 * 14 ) ) //Move start date into the future by 14 days so per Pay Period frequencies will still appear well in advance.
 			},
 			filter_columns: {
 				'id': true,
@@ -25,13 +25,13 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 				'start_date': true,
 				'end_date': true,
 				'due_date': true,
-				'in_time_period': true,
+				'in_time_period': true
 			},
 			'filter_sort': {
 				'due_date': 'asc',
 				'legal_entity_id': 'asc',
 				'payroll_remittance_agency_id': 'asc',
-				'type_id': 'asc',
+				'type_id': 'asc'
 			}
 		};
 
@@ -47,9 +47,9 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 		} );
 	},
 
-	getNextStepName: function (){
+	getNextStepName: function() {
 		//Must have a selected row in home step grid to enable the next button.
-		if( TTUUID.isUUID(this.getWizardObject().selected_remittance_agency_event_id) ) {
+		if ( TTUUID.isUUID( this.getWizardObject().selected_remittance_agency_event_id ) ) {
 			return 'review';
 		} else {
 			return false;
@@ -58,53 +58,50 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 
 	_render: function() {
 		this.setTitle( this.getWizardObject().wizard_name );
-
 		if ( this.prae_grid_source_data.length > 0 ) {
 			var $this = this;
-			this.setInstructions( $.i18n._( 'Select one of the event(s) below to process' ) +': ', function(){
+			this.setInstructions( $.i18n._( 'Select one of the event(s) below to process' ) + ': ', function() {
 				var grid_id = 'payroll_remittance_agency_events';
-				var grid_div = $("<div class='grid-div wizard-grid-div'></div>");
-				var grid_table = $("<table id='" + grid_id + "'></table>");
-				grid_div.append(grid_table);
+				var grid_div = $( '<div class=\'grid-div wizard-grid-div\'></div>' );
+				var grid_table = $( '<table id=\'' + grid_id + '\'></table>' );
+				grid_div.append( grid_table );
 
-				$this.grid = $this.setGrid( grid_id, grid_div );
-
-				$this.grid.clearGridData();
-				$this.grid.setGridParam({data: $this.prae_grid_source_data});
-				$this.grid.trigger('reloadGrid');
-
+				if ( !$this.grid ) {
+					$this.grid = $this.setGrid( grid_id, grid_div );
+					$this.grid.setData( $this.prae_grid_source_data );
+				}
 				$this.colorGrid();
 
-				$this.setGridAutoHeight($this.grid, $this.prae_grid_source_data.length);
+				$this.setGridAutoHeight( $this.grid, $this.prae_grid_source_data.length );
 
-				if (TTUUID.isUUID($this.getWizardObject().selected_remittance_agency_event_id)) {
-					$this.grid.setSelection($this.getWizardObject().selected_remittance_agency_event_id);
+				if ( TTUUID.isUUID( $this.getWizardObject().selected_remittance_agency_event_id ) ) {
+					$this.grid.grid.setSelection( $this.getWizardObject().selected_remittance_agency_event_id );
 				} else {
 					//select the first row on load.
-					$this.grid.setSelection($this.grid.find('tbody:first-child tr:nth-child(2)').attr('id'));
-					$this.getWizardObject().selected_remittance_agency_event_id = $this.grid.find('tbody:first-child tr:nth-child(2)').attr('id');
+					$this.grid.grid.setSelection( $this.grid.grid.find( 'tbody:first-child tr:nth-child(2)' ).attr( 'id' ) );
+					$this.getWizardObject().selected_remittance_agency_event_id = $this.grid.grid.find( 'tbody:first-child tr:nth-child(2)' ).attr( 'id' );
 				}
 
 				$this.addButton( 'PayrollRemittanceAgency',
-					Icons.view_detail,
-					$.i18n._('Edit Remittance Agency'),
-					$.i18n._('In the event of incorrect dates, edit the selected remittance agency and its events to make corrections.')
+						Icons.view_detail,
+						$.i18n._( 'Edit Remittance Agency' ),
+						$.i18n._( 'In the event of incorrect dates, edit the selected remittance agency and its events to make corrections.' )
 				);
 			} );
 
 		} else {
-			var message = $('<div/>');
-			message.html( $.i18n._('There are no outstanding tax events at this time.') );
-			this.append(message)
+			var message = $( '<div/>' );
+			message.html( $.i18n._( 'There are no outstanding tax events at this time.' ) );
+			this.append( message );
 		}
 
 		//If the wizard is closed, it reopens to the home step and must be told what the current step is.
-		this.getWizardObject().setCurrentStepName('home');
+		this.getWizardObject().setCurrentStepName( 'home' );
 
 	},
 
 	colorGrid: function() {
-		var data = this.grid.getGridParam( 'data' );
+		var data = this.grid.getData();
 		//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 		if ( !data ) {
 			return;
@@ -116,22 +113,22 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 			var item = data[i];
 
 			if ( item.in_time_period == true ) {
-				$(this.grid).find( "tr[id='" + item.id + "']" ).css('color','#ccc');
+				$( this.grid ).find( 'tr[id=\'' + item.id + '\']' ).css( 'color', '#ccc' );
 			}
 
 		}
 	},
 
 	_onNavigationClick: function( icon ) {
-		switch(icon) {
+		switch ( icon ) {
 			case 'PayrollRemittanceAgency':
 				this.getWizardObject().minimize();
 
-				var grid_data = this.grid.jqGrid('getGridParam', 'data');
-				var grid_indecies = this.grid.jqGrid('getGridParam', '_index')
-				var remittance_agency_event = grid_data[ grid_indecies [ this.getWizardObject().selected_remittance_agency_event_id ] ];
+				var grid_data = this.grid.getData();
+				var grid_indecies = this.grid.grid.jqGrid( 'getGridParam', '_index' );
+				var remittance_agency_event = grid_data[grid_indecies [this.getWizardObject().selected_remittance_agency_event_id]];
 
-				IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, 'PayrollRemittanceAgency', remittance_agency_event.payroll_remittance_agency_id);
+				IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, 'PayrollRemittanceAgency', remittance_agency_event.payroll_remittance_agency_id );
 
 				break;
 		}
@@ -186,7 +183,7 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 				width: 60,
 				sortable: true,
 				title: false
-			},
+			}
 			// {
 			// 	name: 'in_time_period',
 			// 	index: 'in_time_period',
@@ -195,12 +192,12 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 			// 	sortable: false,
 			// 	title: false
 			// },
-		]
+		];
 
 		return column_info_array;
 	},
 
-	onGridSelectRow: function( selected_id ){
+	onGridSelectRow: function( selected_id ) {
 		if ( this.getWizardObject().selected_remittance_agency_event_id != selected_id ) {
 			this.getWizardObject().selected_remittance_agency_event_id = selected_id;
 
@@ -209,5 +206,5 @@ PayrollRemittanceAgencyEventWizardStepHome = WizardStep.extend({
 
 		}
 		this.getWizardObject().enableButtons();
-	},
-});
+	}
+} );

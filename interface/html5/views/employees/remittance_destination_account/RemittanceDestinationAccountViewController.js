@@ -1,7 +1,7 @@
 RemittanceDestinationAccountViewController = BaseViewController.extend( {
 	el: '#remittance_destination_account_view_container',
 
-	_required_files: ['APIRemittanceDestinationAccount' , 'APICompany', 'APIUser', 'APIUserDefault' ,'APIRemittanceSourceAccount', 'APILegalEntity', 'APICurrency', ],
+	_required_files: ['APIRemittanceDestinationAccount', 'APICompany', 'APIUser', 'APIUserDefault', 'APIRemittanceSourceAccount', 'APILegalEntity', 'APICurrency'],
 
 	status_array: null,
 	type_array: null,
@@ -22,8 +22,8 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 	init: function( options ) {
 		this.type_array = [],
-		//this._super('initialize', options );
-		this.edit_view_tpl = 'RemittanceDestinationAccountEditView.html';
+				//this._super('initialize', options );
+				this.edit_view_tpl = 'RemittanceDestinationAccountEditView.html';
 		this.permission_id = 'remittance_destination_account';
 		this.viewId = 'RemittanceDestinationAccount';
 		this.script_name = 'RemittanceDestinationAccountView';
@@ -48,23 +48,19 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		if ( !this.sub_view_mode ) {
 			this.initData();
 		}
-//		this.buildContextMenu();
-//
-//		this.initData();
-		this.setSelectRibbonMenuIfNecessary();
 
+		this.setSelectRibbonMenuIfNecessary();
 	},
 
 	initOptions: function() {
 		var $this = this;
 		this.initDropDownOption( 'status' );
-//		this.initDropDownOption( 'type' );
 		this.initDropDownOption( 'amount_type' );
 		this.api.getOptions( 'priority', {
 			onResult: function( res ) {
 				$this.priority_array = res.getResult();
 			}
-		});
+		} );
 		this.api.getOptions( 'ach_transaction_type', {
 			onResult: function( res ) {
 				var result = res.getResult();
@@ -73,18 +69,18 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 			}
 		} );
 
-		this.remittance_source_account_api.getOptions('type', {
-			onResult:function(result){
+		this.remittance_source_account_api.getOptions( 'type', {
+			onResult: function( result ) {
 				result = result.getResult();
 				//Prevent exception when in subgrid mode: "TypeError: $this.basic_search_field_ui_dic.type_id is undefined"
 				if ( $this.basic_search_field_ui_dic && $this.basic_search_field_ui_dic['type_id'] ) {
-					$this.basic_search_field_ui_dic['type_id'].setSourceData(Global.buildRecordArray(result));
+					$this.basic_search_field_ui_dic['type_id'].setSourceData( Global.buildRecordArray( result ) );
 				}
 				if ( $this.adv_search_field_ui_dic && $this.adv_search_field_ui_dic['type_id'] ) {
-					$this.adv_search_field_ui_dic['type_id'].setSourceData(Global.buildRecordArray(result));
+					$this.adv_search_field_ui_dic['type_id'].setSourceData( Global.buildRecordArray( result ) );
 				}
 			}
-		});
+		} );
 
 	},
 
@@ -101,7 +97,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 					if ( $this.is_subview == true && (columns_result_data[n] == 'user_first_name' || columns_result_data[n] == 'user_last_name' ) ) {
 						continue;
 					} else {
-						$this.default_display_columns.push(columns_result_data[n]);
+						$this.default_display_columns.push( columns_result_data[n] );
 					}
 				}
 
@@ -124,7 +120,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		this.edit_view_form_item_dic[key].insertBefore( place_holder );
 		place_holder.remove();
 
-		return $(this.edit_view_form_item_dic[key].find('.edit-view-form-item-label') );
+		return $( this.edit_view_form_item_dic[key].find( '.edit-view-form-item-label' ) );
 	},
 
 	setCurrentEditRecordData: function() {
@@ -174,11 +170,16 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 			}
 		}
+
+		//Only allow changing employee if they have permissions to do so.
+		if ( !( PermissionManager.validate( this.permission_id, 'edit' ) || PermissionManager.validate( this.permission_id, 'edit_child' ) ) ) {
+			$this.current_edit_record['user_id'] = LocalCacheData.getLoginUser().id;
+			$this.edit_view_ui_dic.user_id.setValue( LocalCacheData.getLoginUser().id );
+			this.edit_view_ui_dic.user_id.setEnabled( false );
+		}
+
 		this.getLegalEntity();
-
-//		this.collectUIDataToCurrentEditRecord();
 		this.setEditViewDataDone();
-
 	},
 
 	setEditViewDataDone: function() {
@@ -195,7 +196,8 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		var params = {
 			legal_entity_id: this.current_edit_record['legal_entity_id']
 		};
-		this.api.getOptions( 'type', params, { async:false,
+		this.api.getOptions( 'type', params, {
+			async: false,
 			onResult: function( res ) {
 
 				var result = res.getResult();
@@ -205,7 +207,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				$this.type_array = Global.buildRecordArray( result );
 
 				$this.edit_view_ui_dic['type_id'].setSourceData( $this.type_array );
-				if ( $this.current_edit_record['type_id'] && result[$this.current_edit_record['type_id'] ]  ) {
+				if ( $this.current_edit_record['type_id'] && result[$this.current_edit_record['type_id']] ) {
 					$this.edit_view_ui_dic['type_id'].setValue( $this.current_edit_record['type_id'] );
 				} else {
 					$this.current_edit_record['type_id'] = $this.edit_view_ui_dic['type_id'].getValue();
@@ -221,9 +223,10 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 		if ( this.edit_view_ui_dic && this.edit_view_ui_dic['user_id'] && this.edit_view_ui_dic['user_id'].getValue() != TTUUID.zero_id ) {
 			var user_id = this.edit_view_ui_dic['user_id'].getValue();
-			if (!Global.isSet(user_id) || Global.isFalseOrNull(user_id)) {
+			if ( !Global.isSet( user_id ) || Global.isFalseOrNull( user_id ) ) {
 				user_id = this.current_edit_record['user_id'];
 			}
+
 			var user_args = {};
 			user_args.filter_data = {};
 			user_args.filter_columns = {
@@ -232,31 +235,31 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 				currency_id: true
 			};
 			user_args.filter_data.id = user_id;
-			this.user_api.getUser(user_args, {
-				async: false, onResult: function (res) {
-					if (res.isValid()) {
+			this.user_api.getUser( user_args, {
+				async: false, onResult: function( res ) {
+					if ( res.isValid() ) {
 						var result = res.getResult()[0];
-						if (Global.isSet(result.legal_entity_id) && result.legal_entity_id !== 0) {
+						if ( Global.isSet( result.legal_entity_id ) && result.legal_entity_id !== 0 ) {
 							$this.current_edit_record['legal_entity_id'] = result.legal_entity_id;
 							$this.edit_view_ui_dic.legal_entity_id.setValue( result.legal_entity_id );
 						}
-						if (Global.isSet(result.currency_id) && !Global.isSet($this.current_edit_record['currency_id'])) {
+						if ( Global.isSet( result.currency_id ) && !Global.isSet( $this.current_edit_record['currency_id'] ) ) {
 							$this.current_edit_record['currency_id'] = result.currency_id;
 							$this.edit_view_ui_dic.currency_id.setValue( result.currency_id );
 						}
 
 					}
 				}
-			});
+			} );
 
-			if (!Global.isSet(this.current_edit_record['legal_entity_id']) || Global.isFalseOrNull(this.current_edit_record['legal_entity_id'])) {
-				this.user_default_api['get' + this.user_default_api.key_name]({
-					async: false, onResult: function (res) {
+			if ( !Global.isSet( this.current_edit_record['legal_entity_id'] ) || Global.isFalseOrNull( this.current_edit_record['legal_entity_id'] ) ) {
+				this.user_default_api['get' + this.user_default_api.key_name]( {
+					async: false, onResult: function( res ) {
 						var result = res.getResult();
 						$this.current_edit_record['legal_entity_id'] = result[0]['legal_entity_id'];
 						$this.edit_view_ui_dic.legal_entity_id.setValue( result[0]['legal_entity_id'] );
 					}
-				})
+				} );
 			}
 		} else {
 			$this.current_edit_record['legal_entity_id'] = TTUUID.zero_id;
@@ -286,47 +289,46 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( null );
 		$this.edit_view_ui_dic['remittance_source_account_id'].setDefaultArgs( source_account_args );
 
-		this.remittance_source_account_api.getRemittanceSourceAccount( source_account_args, {async:false, onResult: function(res) {
-			var result = res.getResult();
-			if ( !result ) {
-				result = [];
-			}
-			$this.remittance_source_account_array = result ;
-			$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( $this.remittance_source_account_array );
-
-			var key = false;
-			for ( var index in result ) {
-				if ( !result.hasOwnProperty( index ) ) {
-					continue;
+		this.remittance_source_account_api.getRemittanceSourceAccount( source_account_args, {
+			async: false, onResult: function( res ) {
+				var result = res.getResult();
+				if ( !result ) {
+					result = [];
 				}
-				if ( result[index].id != TTUUID.zero_id && result[index].id != TTUUID.not_exist_id && !key ) {
-					key = index;
+				$this.remittance_source_account_array = result;
+				$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( $this.remittance_source_account_array );
+
+				var key = false;
+				for ( var index in result ) {
+					if ( !result.hasOwnProperty( index ) ) {
+						continue;
+					}
+					if ( result[index].id != TTUUID.zero_id && result[index].id != TTUUID.not_exist_id && !key ) {
+						key = index;
+					}
+
+					if ( $this.current_edit_record['remittance_source_account_id'] ) {
+						if ( $this.current_edit_record['remittance_source_account_id'] == result[index].id ) {
+							$this.edit_view_ui_dic['remittance_source_account_id'].setValue( $this.current_edit_record['remittance_source_account_id'] );
+						}
+					}
+
 				}
 
-				if ( $this.current_edit_record['remittance_source_account_id'] ) {
-					if ( $this.current_edit_record['remittance_source_account_id'] == result[index].id ) {
-						$this.edit_view_ui_dic['remittance_source_account_id'].setValue( $this.current_edit_record['remittance_source_account_id'] );
+				if ( typeof result == 'object' && !$this.current_edit_record.id ) {
+					if ( $this.is_first_load || $this.current_edit_record.type_id == 0 ) {
+						$this.is_first_load = false;
+						if ( $this.edit_view_ui_dic['remittance_source_account_id'].getValue() !== 0 && Global.isFalseOrNull( $this.edit_view_ui_dic['remittance_source_account_id'].getValue() ) ) {
+							$this.edit_view_ui_dic['remittance_source_account_id'].setValue( result[key].id );
+						}
+					} else {
+						if ( Global.isFalseOrNull( $this.edit_view_ui_dic['remittance_source_account_id'].getValue() ) ) {
+							$this.edit_view_ui_dic['remittance_source_account_id'].setValue( result[key].id );
+						}
 					}
 				}
 
-			}
-
-			if ( typeof result == 'object' && !$this.current_edit_record.id ) {
-				if ($this.is_first_load || $this.current_edit_record.type_id == 0) {
-					$this.is_first_load = false;
-					if ($this.edit_view_ui_dic['remittance_source_account_id'].getValue() !== 0 && Global.isFalseOrNull($this.edit_view_ui_dic['remittance_source_account_id'].getValue())) {
-						$this.edit_view_ui_dic['remittance_source_account_id'].setValue(result[key].id);
-					}
-				} else {
-					if (Global.isFalseOrNull($this.edit_view_ui_dic['remittance_source_account_id'].getValue())) {
-						$this.edit_view_ui_dic['remittance_source_account_id'].setValue(result[key].id);
-					}
-				}
-			}
-
-			$this.onTypeChange();
-
-		}} );
+		$this.onTypeChange();}} );
 
 		$this.current_edit_record['remittance_source_account_id'] = $this.edit_view_ui_dic['remittance_source_account_id'].getValue();
 
@@ -339,15 +341,15 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 			for ( var i = 1; i <= 10; i++ ) {
 				if ( i == 1 ) {
 					if ( this.edit_view_ui_dic['value1_1'].is(':visible') ) {
-						record['value1'] = record['value1_1'] ? record['value1_1'] : this.edit_view_ui_dic['value1_1'].getValue();
+						record['value1'] =record['value1_1'] ?record['value1_1'] : this.edit_view_ui_dic['value1_1'].getValue();
 					} else if ( this.edit_view_ui_dic['value1_2'].is(':visible') ) {
-						record['value1'] = record['value1_2'] ? record['value1_2'] : this.edit_view_ui_dic['value1_2'].getValue();
+						record['value1'] =record['value1_2'] ? record['value1_2'] : this.edit_view_ui_dic['value1_2'].getValue();
 					} else {
 						record['value1'] = false;
 					}
 
-				}else {
-					if (record['value' + i] && ( typeof this.edit_view_ui_dic['value' + i] == 'undefined' || ( this.edit_view_ui_dic['value' + i] && this.edit_view_ui_dic['value' + i].is(':visible') == false ) )) {
+				} else {
+					if ( record['value' + i] && ( typeof this.edit_view_ui_dic['value' + i] == 'undefined' || ( this.edit_view_ui_dic['value' + i] && this.edit_view_ui_dic['value' + i].is( ':visible' ) == false ) ) ) {
 						record['value' + i] = false;
 					}
 				}
@@ -425,22 +427,22 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		var country = null;
 		if ( this.edit_view_ui_dic.type_id.getValue() == 3000 && this.edit_view_ui_dic.remittance_source_account_id.getValue() != TTUUID.zero_id ) {
 			if ( this.edit_view_ui_dic.remittance_source_account_id.getValue() ) {
-				var rsa = this.remittance_source_account_api.getRemittanceSourceAccount({filter_data: {id: this.edit_view_ui_dic.remittance_source_account_id.getValue()}}, {async: false}).getResult()
+				var rsa = this.remittance_source_account_api.getRemittanceSourceAccount( { filter_data: { id: this.edit_view_ui_dic.remittance_source_account_id.getValue() } }, { async: false } ).getResult();
 				country = rsa[0].country;
 			}
 			if ( country != null ) {
 				if ( country == 'US' ) {
-					this.attachElement('value1_2').text($.i18n._('Account Type') + ':');
-					this.attachElement('value2').text($.i18n._('Routing') + ':');
-					this.attachElement('value3').text($.i18n._('Account') + ':');
-					if (Global.isFalseOrNull(this.current_edit_record['value1'])) {
+					this.attachElement( 'value1_2' ).text( $.i18n._( 'Account Type' ) + ':' );
+					this.attachElement( 'value2' ).text( $.i18n._( 'Routing' ) + ':' );
+					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
+					if ( Global.isFalseOrNull( this.current_edit_record['value1'] ) ) {
 						this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_2'].getValue();
 						this.current_edit_record['value1_2'] = this.edit_view_ui_dic['value1_2'].getValue();
 					}
 				} else if ( country == 'CA' ) {
-					this.attachElement('value1_1').text($.i18n._('Institution') + ':');
-					this.attachElement('value2').text($.i18n._('Bank Transit') + ':');
-					this.attachElement('value3').text($.i18n._('Account') + ':');
+					this.attachElement( 'value1_1' ).text( $.i18n._( 'Institution' ) + ':' );
+					this.attachElement( 'value2' ).text( $.i18n._( 'Bank Transit' ) + ':' );
+					this.attachElement( 'value3' ).text( $.i18n._( 'Account' ) + ':' );
 					this.current_edit_record['value1'] = this.edit_view_ui_dic['value1_1'].getValue();
 					this.current_edit_record['value1_1'] = this.edit_view_ui_dic['value1_1'].getValue();
 				}
@@ -478,16 +480,12 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_remittance_destination_account': $.i18n._( 'Payment Methods' ),
-			'tab_attachment': $.i18n._( 'Attachments' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
-		// var tab_0_label = this.edit_view.find( 'a[ref=tab_remittance_destination_account]' );
-		// var tab_1_label = this.edit_view.find( 'a[ref=tab_audit]' );
-		// tab_0_label.text( $.i18n._( 'Payment Methods' ) );
-		// tab_1_label.text( $.i18n._( 'Audit' ) );
+		var tab_model = {
+			'tab_remittance_destination_account': { 'label': $.i18n._( 'Payment Methods' ) },
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRemittanceDestinationAccount' )),
@@ -515,7 +513,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.LEGAL_ENTITY,
 			field: 'legal_entity_id',
 			set_empty: true,
-			show_search_inputs: true,
+			show_search_inputs: true
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Legal Entity' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
@@ -526,20 +524,25 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.USER,
 			field: 'user_id',
-			set_empty: true,
+			set_empty: true, //Must be true for when administrators add payment methods under Employee -> Payment Methods.
 			show_search_inputs: true
 		} );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_remittance_destination_account_column1, '' );
+
+		var default_args = {};
+		default_args.permission_section = 'remittance_destination_account';
+		form_item_input.setDefaultArgs( default_args );
+
+		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
 		// Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_remittance_destination_account_column1 );
 		form_item_input.parent().width( '45%' );
 
@@ -551,7 +554,7 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 		//TYPE
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
@@ -583,166 +586,83 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 
 		// Priority
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'priority'} );
+		form_item_input.TComboBox( { field: 'priority' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.priority_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Priority' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
 		// Amount TYPE
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'amount_type_id'} );
+		form_item_input.TComboBox( { field: 'amount_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.amount_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Amount Type' ), form_item_input, tab_remittance_destination_account_column1, '' );
 
 		//Amount
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'amount', width: 50} );
+		form_item_input.TTextInput( { field: 'amount', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		//Percent
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'percent_amount', width: 79} );
+		form_item_input.TTextInput( { field: 'percent_amount', width: 79 } );
 		this.addEditFieldToColumn( $.i18n._( 'Percent' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value1_1', validation_field: 'value1', width: 149} );
+		form_item_input.TTextInput( { field: 'value1_1', validation_field: 'value1', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value1' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'value1_2', validation_field: 'value1'} );
+		form_item_input.TComboBox( { field: 'value1_2', validation_field: 'value1' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.ach_transaction_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Account Type' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value2
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value2', width: 149} );
+		form_item_input.TTextInput( { field: 'value2', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value2' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value3
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value3', width: 149} );
+		form_item_input.TTextInput( { field: 'value3', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value3' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value4
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value4', width: 149} );
+		form_item_input.TTextInput( { field: 'value4', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value4' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value5
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value5', width: 149} );
+		form_item_input.TTextInput( { field: 'value5', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value5' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// the below are all non-display
 
 		// Value6
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value6', width: 149} );
+		form_item_input.TTextInput( { field: 'value6', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value6' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value7
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value7', width: 149} );
+		form_item_input.TTextInput( { field: 'value7', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value7' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value8
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value8', width: 149} );
+		form_item_input.TTextInput( { field: 'value8', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value8' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value9
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value9', width: 149} );
+		form_item_input.TTextInput( { field: 'value9', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value9' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
 		// Value10
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'value10', width: 149} );
+		form_item_input.TTextInput( { field: 'value10', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Value10' ), form_item_input, tab_remittance_destination_account_column1, '', null, true );
 
-	},
-
-	setTabStatus: function() {
-
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-
-	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
 	},
 
 	buildSearchFields: function() {
@@ -842,13 +762,10 @@ RemittanceDestinationAccountViewController = BaseViewController.extend( {
 		];
 	},
 
-	removeEditView: function() {
-
-		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
-
+	searchDone: function(){
+		this.__super('searchDone');
+		TTPromise.resolve( 'PaymentMethodsView', 'init' );
 	}
-
 } );
 
 RemittanceDestinationAccountViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {

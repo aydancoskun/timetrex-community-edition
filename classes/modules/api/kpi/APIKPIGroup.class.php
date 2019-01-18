@@ -92,11 +92,12 @@ class APIKPIGroup extends APIFactory {
 	 * @return array|bool
 	 */
 	function getKPIGroup( $data = NULL, $disable_paging = FALSE, $mode = 'flat' ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('kpi', 'enabled')
 				OR !( $this->getPermissionObject()->Check('kpi', 'view') OR $this->getPermissionObject()->Check('kpi', 'view_own') OR $this->getPermissionObject()->Check('kpi', 'view_child') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'kpi', 'view' );
 

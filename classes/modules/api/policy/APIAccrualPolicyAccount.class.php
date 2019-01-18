@@ -90,12 +90,13 @@ class APIAccrualPolicyAccount extends APIFactory {
 	 * @return array
 	 */
 	function getAccrualPolicyAccount( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('accrual_policy', 'enabled')
 				OR !( $this->getPermissionObject()->Check('accrual_policy', 'view') OR $this->getPermissionObject()->Check('accrual_policy', 'view_own') OR $this->getPermissionObject()->Check('accrual_policy', 'view_child')	 ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'accrual_policy', 'view' );
 

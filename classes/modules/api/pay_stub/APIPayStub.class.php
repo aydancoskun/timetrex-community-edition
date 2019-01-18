@@ -119,12 +119,13 @@ class APIPayStub extends APIFactory {
 	 * @return array|bool
 	 */
 	function getPayStub( $data = NULL, $disable_paging = FALSE, $format = FALSE, $hide_employer_rows = TRUE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check( 'pay_stub', 'enabled' )
 				OR !( $this->getPermissionObject()->Check( 'pay_stub', 'view' ) OR $this->getPermissionObject()->Check( 'pay_stub', 'view_own' ) OR $this->getPermissionObject()->Check( 'pay_stub', 'view_child' ) )
 		) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$format = Misc::trimSortPrefix( $format );
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub', 'view' );
@@ -792,11 +793,13 @@ class APIPayStub extends APIFactory {
 					$ppsulf = TTnew( 'PayPeriodScheduleUserListFactory' );
 					if ( is_array($user_ids) AND count($user_ids) > 0 AND !in_array( TTUUID::getNotExistID(), $user_ids ) ) {
 						Debug::text('Generating pay stubs for specific users...', __FILE__, __LINE__, __METHOD__, 10);
-						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Company Pay Stubs for Pay Period').': '. $pay_period_id, $this->getCurrentUserObject()->getId(), 'pay_stub' ); //Notice
+
+
+						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Company Pay Stubs for Pay Period').': '. TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ), $this->getCurrentUserObject()->getId(), 'pay_stub' ); //Notice
 						$ppsulf->getByCompanyIDAndPayPeriodScheduleIdAndUserID( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule(), $user_ids );
 					} else {
 						Debug::text('Generating pay stubs for all users...', __FILE__, __LINE__, __METHOD__, 10);
-						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Employee Pay Stub for Pay Period').': '. $pay_period_id, $this->getCurrentUserObject()->getId(), 'pay_stub' );
+						TTLog::addEntry( $this->getCurrentCompanyObject()->getId(), 500, TTi18n::gettext('Calculating Employee Pay Stub for Pay Period').': '. TTDate::getDate('DATE', $pay_period_obj->getStartDate() ).' -> '. TTDate::getDate('DATE', $pay_period_obj->getEndDate() ), $this->getCurrentUserObject()->getId(), 'pay_stub' );
 						$ppsulf->getByCompanyIDAndPayPeriodScheduleId( $this->getCurrentCompanyObject()->getId(), $pay_period_obj->getPayPeriodSchedule() );
 					}
 					$total_pay_stubs = $ppsulf->getRecordCount();

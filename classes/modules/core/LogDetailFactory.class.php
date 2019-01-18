@@ -372,8 +372,8 @@ class LogDetailFactory extends Factory {
 				case 'RemittanceDestinationAccountListFactory':
 					//Only log secure values.
 					if ( isset($diff_arr['value3']) ) {
-						$old_data['value3'] = ( isset($old_data['value3']) ) ? $object->getSecureValue3( Misc::decrypt( $old_data['value3'] ) ) : '';
-						$new_data['value3'] = ( isset($new_data['value3']) ) ? $object->getSecureValue3( Misc::decrypt( $new_data['value3'] ) ) : '';
+						$old_data['value3'] = ( isset($old_data['value3']) ) ? $object->getSecureValue3( $object->getValue3( $old_data['value3'] ) ) : '';
+						$new_data['value3'] = ( isset($new_data['value3']) ) ? $object->getSecureValue3( $object->getValue3( $new_data['value3'] ) ) : '';
 					}
 					break;
 				case 'JobApplicantFactory':

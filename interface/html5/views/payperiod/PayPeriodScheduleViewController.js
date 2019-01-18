@@ -39,7 +39,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 	openEditView: function( id ) {
 		Global.setUINotready();
-		TTPromise.add('init','init');
+		TTPromise.add( 'init', 'init' );
 		TTPromise.wait();
 
 		var $this = this;
@@ -96,24 +96,24 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		var $this = this;
 
 		var options = [
-			{option_name: 'type'},
-			{option_name: 'transaction_date'},
-			{option_name: 'transaction_date_business_day'},
-			{option_name: 'shift_assigned_day'},
-			{option_name: 'time_zone', field_name: '', api: this.user_preference_api},
-			{option_name: 'timesheet_verify_type'},
-			{option_name: 'start_week_day'}
+			{ option_name: 'type' },
+			{ option_name: 'transaction_date' },
+			{ option_name: 'transaction_date_business_day' },
+			{ option_name: 'shift_assigned_day' },
+			{ option_name: 'time_zone', field_name: '', api: this.user_preference_api },
+			{ option_name: 'timesheet_verify_type' },
+			{ option_name: 'start_week_day' }
 
 		];
 
 		this.initDropDownOptions( options, function( result ) {
 
 			$this.transaction_date_array.push( {
-					fullValue: -1,
-					value: -1,
-					label: $.i18n._( '- Last Day Of Month -' ),
-					id: 2000
-				}
+						fullValue: -1,
+						value: -1,
+						label: $.i18n._( '- Last Day Of Month -' ),
+						id: 2000
+					}
 			);
 
 			$this.user_preference_api.getOptions( 'start_week_day', {
@@ -131,83 +131,12 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 	},
 
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_pay_period' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubPayPeriodsView();
-			} else {
-				this.edit_view_tab.find( '#tab_pay_period' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 3 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	setTabStatus: function() {
-
-		$( this.edit_view_tab.find( 'ul li a[ref="tab_pay_period_schedule"]' ) ).parent().show();
-		if ( this.is_mass_editing ) {
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_pay_period"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-		} else {
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_pay_period"]' ) ).parent().show();
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-
-	},
-
-	initTabData: function() {
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_pay_period' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubPayPeriodsView();
-			} else {
-				this.edit_view_tab.find( '#tab_pay_period' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
 	initSubPayPeriodsView: function() {
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
 
 		if ( this.sub_pay_periods_view_controller ) {
 			this.sub_pay_periods_view_controller.buildContextMenu( true );
@@ -255,7 +184,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		if ( key == 'type_id' ) {
 			this.onTypeChange();
-		}else if ( key == 'start_day_of_week' && ( !this.current_edit_record || !this.current_edit_record.id) ) {
+		} else if ( key == 'start_day_of_week' && ( !this.current_edit_record || !this.current_edit_record.id) ) {
 			this.edit_view_ui_dic.start_week_day_id.setValue( this.edit_view_ui_dic.start_day_of_week.getValue() );
 			this.current_edit_record.start_week_day_id = this.edit_view_ui_dic.start_day_of_week.getValue();
 		} else if ( key == 'timesheet_verify_type_id' ) {
@@ -423,12 +352,17 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_pay_period_schedule': $.i18n._( 'Pay Period Schedule' ),
-			'tab_advanced': $.i18n._( 'Advanced' ),
-			'tab_pay_period': $.i18n._( 'Pay Periods' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_pay_period_schedule': { 'label': $.i18n._( 'Pay Period Schedule' ) },
+			'tab_advanced': { 'label': $.i18n._( 'Advanced' ) },
+			'tab_pay_period': {
+				'label': $.i18n._( 'Pay Periods' ),
+				'init_callback': 'initSubPayPeriodsView',
+				'display_on_mass_edit': false
+			},
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
@@ -454,42 +388,42 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_pay_period_schedule_column1, '' );
 
 		form_item_input.parent().width( '45%' );
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		form_item_input.TTextInput( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_pay_period_schedule_column1 );
 
 		form_item_input.parent().width( '45%' );
 
 		// Pay Period Dates
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Pay Period Dates' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Pay Period Dates' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_pay_period_schedule_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_period_schedule_column1 );
 
 		// Primary
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Primary' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Primary' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_pay_period_schedule_column1, '', null, true, false, 'primary' );
 
 		// Pay Period Start Day of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'primary_day_of_month'} );
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( 'at 00:00' ) + "</span>" );
+		form_item_input.TComboBox( { field: 'primary_day_of_month' } );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'at 00:00' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -499,21 +433,21 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		// Transaction Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'primary_transaction_day_of_month'} );
+		form_item_input.TComboBox( { field: 'primary_transaction_day_of_month' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Day Of Month' ), form_item_input, tab_pay_period_schedule_column1, '', null, true );
 
 		// Secondary
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Secondary' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Secondary' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_pay_period_schedule_column1, '', null, true, false, 'secondary' );
 
 		// Pay Period Start Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'secondary_day_of_month'} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'at 00:00' ) + "</span>" );
+		form_item_input.TComboBox( { field: 'secondary_day_of_month' } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'at 00:00' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -523,22 +457,22 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		// Transaction Day Of Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'secondary_transaction_day_of_month'} );
+		form_item_input.TComboBox( { field: 'secondary_transaction_day_of_month' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Day Of Month' ), form_item_input, tab_pay_period_schedule_column1, '', null, true );
 
 		// Annual Pay Periods
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'annual_pay_periods'} );
+		form_item_input.TTextInput( { field: 'annual_pay_periods' } );
 		this.addEditFieldToColumn( $.i18n._( 'Annual Pay Periods' ), form_item_input, tab_pay_period_schedule_column1, '', null, true );
 
 		// Pay Period Starts On
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'start_day_of_week'} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'at 00:00' ) + "</span>" );
+		form_item_input.TComboBox( { field: 'start_day_of_week' } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'at 00:00' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -548,9 +482,9 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		// Transaction Date
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'transaction_date'} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> (" + $.i18n._( 'days after end of pay period' ) + ")</span>" );
+		form_item_input.TComboBox( { field: 'transaction_date' } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> (' + $.i18n._( 'days after end of pay period' ) + ')</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -560,7 +494,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		// Transaction Always on Business Day
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'transaction_date_bd'} );
+		form_item_input.TComboBox( { field: 'transaction_date_bd' } );
 
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.transaction_date_business_day_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Transaction Always on Business Day' ), form_item_input, tab_pay_period_schedule_column1, '', null, true );
@@ -568,7 +502,7 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		//Create Initial Pay Periods From
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'anchor_date'} );
+		form_item_input.TDatePicker( { field: 'anchor_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Create Initial Pay Periods From' ), form_item_input, tab_pay_period_schedule_column1, '', null, true );
 
 		// employees
@@ -595,68 +529,68 @@ PayPeriodScheduleViewController = BaseViewController.extend( {
 		// Overtime Week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'start_week_day_id'} );
+		form_item_input.TComboBox( { field: 'start_week_day_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.start_week_day_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Overtime Week' ), form_item_input, tab_advanced_column1, '' );
 
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'time_zone', set_empty: true} );
+		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Time Zone' ), form_item_input, tab_advanced_column1 );
 
 		// Minimum Time-Off Between Shifts
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'new_day_trigger_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'new_day_trigger_time', mode: 'time_unit', need_parser_sec: true } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>(" + $.i18n._( 'Only for shifts that span midnight' ) + ")</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>(' + $.i18n._( 'Only for shifts that span midnight' ) + ')</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Time-Off Between Shifts' ), form_item_input, tab_advanced_column1, '', widgetContainer );
 
 		// Maximum Shift Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_shift_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'maximum_shift_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Maximum Shift Time' ), form_item_input, tab_advanced_column1, '', null );
 
 		// Assign Shifts To
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'shift_assigned_day_id'} );
+		form_item_input.TComboBox( { field: 'shift_assigned_day_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.shift_assigned_day_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Assign Shifts To' ), form_item_input, tab_advanced_column1 );
 
 		// TimeSheet Verification
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'TimeSheet Verification' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'TimeSheet Verification' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_advanced_column1 );
 
 		// Timesheet Verification
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'timesheet_verify_type_id'} );
+		form_item_input.TComboBox( { field: 'timesheet_verify_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.timesheet_verify_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'TimeSheet Verification' ), form_item_input, tab_advanced_column1 );
 
 		// Verification Window Starts
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'timesheet_verify_before_end_date', width: 30} );
+		form_item_input.TTextInput( { field: 'timesheet_verify_before_end_date', width: 30 } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>" + $.i18n._( 'Day(s)' ) + ' (' + $.i18n._( 'Before Pay Period End Date' ) + ' )' + "</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Day(s)' ) + ' (' + $.i18n._( 'Before Pay Period End Date' ) + ' )' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Verification Window Starts' ), form_item_input, tab_advanced_column1, '', widgetContainer, true );
 
 		// Verification Windows Ends
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'timesheet_verify_before_transaction_date', width: 30} );
+		form_item_input.TTextInput( { field: 'timesheet_verify_before_transaction_date', width: 30 } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>" + $.i18n._( 'Day(s)' ) + ' (' + $.i18n._( 'Before Pay Period Transaction Date' ) + ' )' + "</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Day(s)' ) + ' (' + $.i18n._( 'Before Pay Period Transaction Date' ) + ' )' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Verification Window Ends' ), form_item_input, tab_advanced_column1, '', widgetContainer, true );

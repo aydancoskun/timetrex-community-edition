@@ -92,12 +92,13 @@ class APIUserGroup extends APIFactory {
 	 * @return array
 	 */
 	function getUserGroup( $data = NULL, $disable_paging = FALSE, $mode = 'flat' ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user', 'view') OR $this->getPermissionObject()->Check('user', 'view_own') OR $this->getPermissionObject()->Check('user', 'view_child') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Allow supervisor (subordinates only) to see all groups.
 		//$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view' );

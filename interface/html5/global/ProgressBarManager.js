@@ -47,18 +47,18 @@ var ProgressBar = (function() {
 	var showOverlay = function() {
 		Global.overlay().addClass( 'overlay' );
 		Global.setUINotready();
-		TTPromise.add('ProgressBar','overlay_visible');
+		TTPromise.add( 'ProgressBar', 'overlay_visible' );
 	};
 
 	var closeOverlay = function() {
 		//this variable is set in BaseViewController::onContextMenuClick
-		if(window.clickProcessing == true) {
+		if ( window.clickProcessing == true ) {
 			window.clickProcessing = false;
 			window.clearTimeout( window.clickProcessingHandle );
 		}
 		Global.overlay().removeClass( 'overlay' );
 		Global.setUIReady();
-		TTPromise.resolve('ProgressBar','overlay_visible');
+		TTPromise.resolve( 'ProgressBar', 'overlay_visible' );
 	};
 
 	cancelProgressBar = function() {
@@ -73,22 +73,28 @@ var ProgressBar = (function() {
 		first_start_get_progress_timer = false;
 	};
 
-	var showProgressBar = function( message_id, auto_clear ) {
+	var showProgressBar = function( message_id, auto_clear, instant ) {
 
-		TTPromise.add('ProgressBar', 'MASTER');
+		TTPromise.add( 'ProgressBar', 'MASTER' );
 		if ( no_progress_for_next_call ) {
 			no_progress_for_next_call = false;
 			return;
 		}
-		if ( !timer ) {
+		if ( instant ) {
+			if ( process_number > 0 && loading_box ) {
+				loading_box.css( 'display', 'block' );
+			}
+		} else {
+			if ( !timer ) {
 //			clearTimeout( timer );
-			//Display progress bar after 1 sec
-			timer = setTimeout( function() {
-				if ( process_number > 0 && loading_box ) {
-					loading_box.css( 'display', 'block' );
-				}
+				//Display progress bar after 1 sec
+				timer = setTimeout( function() {
+					if ( process_number > 0 && loading_box ) {
+						loading_box.css( 'display', 'block' );
+					}
 
-			}, 1000 );
+				}, 1000 );
+			}
 		}
 
 		if ( message_id ) {
@@ -102,8 +108,8 @@ var ProgressBar = (function() {
 
 		if ( message_id && start_progress_timer === false ) {
 			start_progress_timer = setInterval( function() {
-					getProgressBarProcess();
-				}, 3000 );
+				getProgressBarProcess();
+			}, 3000 );
 			first_start_get_progress_timer = true;
 		}
 
@@ -201,7 +207,7 @@ var ProgressBar = (function() {
 		time_remaining.css( 'display', 'none' );
 
 		complete_info.text( 0 + ' / ' + 0 + ' ' + 0 + '%' );
-		progress_bar.attr( 'value', 0 );
+		progress_bar.val( 0 );
 
 		last_iteration = null;
 
@@ -234,7 +240,7 @@ var ProgressBar = (function() {
 		time_remaining.css( 'display', 'block' );
 
 		complete_info.text( data.current_iteration + ' / ' + data.total_iterations + ' ' + (percentage * 100).toFixed( 0 ) + '%' );
-		progress_bar.attr( 'value', (percentage * 100) );
+		progress_bar.prop( 'value', (percentage * 100) );
 
 		if ( !last_iteration ) {
 			time_remaining.text( 'Calculating remaining time...' );
@@ -316,8 +322,8 @@ var ProgressBar = (function() {
 						TAlertManager.showAlert( res_data.message );
 					} else {
 						if ( res_data === true ||
-							($.type( res_data ) === 'array' && res_data.length === 0) || !res_data.total_iterations ||
-							$.type( res_data.total_iterations ) !== 'number' ) {
+								($.type( res_data ) === 'array' && res_data.length === 0) || !res_data.total_iterations ||
+								$.type( res_data.total_iterations ) !== 'number' ) {
 							stopProgress();
 							return;
 						} else {
@@ -328,12 +334,12 @@ var ProgressBar = (function() {
 								//prevent over-writing active handle. see bug #2196
 								if ( start_progress_timer != false && get_progress_timer == false ) {
 									//start interval needs to be reset to FALSE to trigger start code in showProgressBar
-									clearInterval(start_progress_timer);
+									clearInterval( start_progress_timer );
 									start_progress_timer = false;
 
-									get_progress_timer = setInterval(function () {
+									get_progress_timer = setInterval( function() {
 										getProgressBarProcess();
-									}, 2000);
+									}, 2000 );
 								}
 
 							}
@@ -347,11 +353,11 @@ var ProgressBar = (function() {
 
 		function stopProgress() {
 			if ( start_progress_timer ) {
-				clearInterval(start_progress_timer);
+				clearInterval( start_progress_timer );
 				start_progress_timer = false;
 			}
-			if (get_progress_timer) {
-				clearInterval(get_progress_timer);
+			if ( get_progress_timer ) {
+				clearInterval( get_progress_timer );
 				get_progress_timer = false;
 			}
 
@@ -406,12 +412,12 @@ var ProgressBar = (function() {
 						loading_box.css( 'display', 'none' );
 
 						if ( get_progress_timer ) {
-							clearInterval(get_progress_timer);
+							clearInterval( get_progress_timer );
 							get_progress_timer = false;
 						}
 
 						if ( start_progress_timer ) {
-							clearInterval(start_progress_timer);
+							clearInterval( start_progress_timer );
 							start_progress_timer = false;
 						}
 
@@ -420,7 +426,7 @@ var ProgressBar = (function() {
 						}
 					}
 
-					TTPromise.resolve('ProgressBar', 'MASTER');
+					TTPromise.resolve( 'ProgressBar', 'MASTER' );
 				}, close_time_timeout );
 			}
 		}
@@ -433,7 +439,7 @@ var ProgressBar = (function() {
 				bg: 'red',
 				id: 'nano-bar'
 			};
-			nanoBar = new Nanobar(options);
+			nanoBar = new Nanobar( options );
 		}
 		var percentage = 0;
 		loading_bar_time && clearInterval( loading_bar_time );
@@ -441,7 +447,7 @@ var ProgressBar = (function() {
 			if ( percentage < 80 ) {
 				percentage = percentage + 20;
 				nanoBar.go( percentage );
-			}else if ( percentage === 80 ) {
+			} else if ( percentage === 80 ) {
 				percentage = percentage + 10;
 				nanoBar.go( percentage );
 			}

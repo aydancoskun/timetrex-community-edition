@@ -2,7 +2,7 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 
 	_required_files: ['APIAccrualBalanceSummaryReport', 'APIAccrualPolicyAccount', 'APIAccrual', 'APIAccrualPolicy'],
 
-	initReport: function ( options ) {
+	initReport: function( options ) {
 		this.script_name = 'AccrualBalanceSummaryReport';
 		this.viewId = 'AccrualBalanceSummaryReport';
 		this.context_menu_name = $.i18n._( 'Accrual Balance Summary' );
@@ -106,7 +106,7 @@ AccrualBalanceSummaryReportViewController = ReportBaseViewController.extend( {
 		other.show_duplicate_values = this.current_edit_record.show_duplicate_values;
 		other.accrual_policy_account_id = this.current_edit_record.accrual_policy_account_id;
 
-		if ( this.current_saved_report && Global.isSet(this.current_saved_report.name) ) {
+		if ( this.current_saved_report && Global.isSet( this.current_saved_report.name ) ) {
 			other.report_name = _.escape( this.current_saved_report.name );
 			other.report_description = this.current_saved_report.description;
 		}

@@ -680,7 +680,7 @@ class APIInstall extends APIFactory {
 
 			//Write auto_update feature to system settings.
 			if ( ( isset($data['update_notify']) AND $data['update_notify'] == 1 )
-					OR getTTProductEdition() > 10
+					OR getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL
 					OR $external_installer == 1 ) {
 				SystemSettingFactory::setSystemSetting( 'update_notify', 1 );
 			} else {

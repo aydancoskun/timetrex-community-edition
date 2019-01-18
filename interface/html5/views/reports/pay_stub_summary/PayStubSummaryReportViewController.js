@@ -6,7 +6,7 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'PayStubSummaryReport';
 		this.viewId = 'PayStubSummaryReport';
 		this.context_menu_name = $.i18n._( 'Pay Stub Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'PayStubSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIPayStubSummaryReport' ))();
 	},
@@ -171,7 +171,7 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 						}
 					}
 					LocalCacheData.default_edit_id_for_next_open_edit_view = null;
-				}else{
+				} else {
 					edit_item = $this.getDefaultReport( result );
 				}
 
@@ -196,65 +196,28 @@ PayStubSummaryReportViewController = ReportBaseViewController.extend( {
 
 	onFormItemChangeProcessFilterField: function( target, key ) {
 		var filter = target.getValue();
-		this.visible_report_values[key] = {status_id: filter};
+		this.visible_report_values[key] = { status_id: filter };
 	},
 
 	setFilterValue: function( widget, value ) {
 		widget.setValue( value.status_id );
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		if ( Global.isSet( menu_name ) ) {
-			var id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.view_html:
-				ProgressBar.showOverlay();
-				this.onViewClick('html');
-				break;
-			case ContextMenuIconName.view_html_new_window:
-				ProgressBar.showOverlay();
-				this.onViewClick('html', true);
-				break;
-			case ContextMenuIconName.export_excel:
-				this.onViewExcelClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
-			case ContextMenuIconName.save_existed_report: //All report view
-				this.onSaveExistedReportClick();
-				break;
-			case ContextMenuIconName.save_new_report: //All report view
-				this.onSaveNewReportClick();
-				break;
 			case ContextMenuIconName.employee_pay_stubs: //All report view
-				this.onViewClick( 'pdf_employee_pay_stub' )
+				this.onViewClick( 'pdf_employee_pay_stub' );
 				break;
 			case ContextMenuIconName.employer_pay_stubs: //All report view
-				this.onViewClick( 'pdf_employer_pay_stub' )
+				this.onViewClick( 'pdf_employer_pay_stub' );
 				break;
 			case ContextMenuIconName.direct_deposit:
 				if ( !this.validate( true ) ) {
 					return;
 				}
 
-				IndexViewController.openWizardController('ProcessTransactionsWizardController', {filter_data: this.visible_report_values} );
+				IndexViewController.openWizardController( 'ProcessTransactionsWizardController', { filter_data: this.visible_report_values } );
 				break;
 		}
 	}
-
 } );

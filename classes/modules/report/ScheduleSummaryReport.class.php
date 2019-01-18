@@ -79,10 +79,15 @@ class ScheduleSummaryReport extends Report {
 				//Regular employee printing timesheet for themselves. Force specific config options.
 				//Get current pay period from config, then overwrite it with
 				$filter_config = $this->getFilterConfig();
+				if ( !isset( $filter_config['time_period'] ) ) {
+					$filter_config['time_period'] = 'custom_date';
+				}
+
 				if ( !isset($filter_config['start_date']) OR !isset($filter_config['end_date']) ) {
 					$filter_config['start_date'] = TTDate::getBeginWeekEpoch( time() );
 					$filter_config['end_date'] = TTDate::getEndWeekEpoch( time() );
 				}
+
 				$this->setFilterConfig( array( 'include_user_id' => array($user_id), 'time_period' => $filter_config['time_period'], 'start_date' => $filter_config['start_date'], 'end_date' => $filter_config['end_date'] ) );
 			} else {
 				Debug::Text('Supervisor employee not restricting schedule...', __FILE__, __LINE__, __METHOD__, 10);
@@ -1102,7 +1107,7 @@ class ScheduleSummaryReport extends Report {
 		}
 
 		$company_obj = $this->getUserObject()->getCompanyObject();
-		if ( is_object( $company_obj ) AND $company_obj->getProductEdition() > 10 ) {
+		if ( is_object( $company_obj ) AND $company_obj->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			$url = Misc::getURLProtocol() .'://'.Misc::getHostName().Environment::getBaseURL() .'ical/ical.php';
 
 			$this->pdf->Cell( ($this->pdf->getPageWidth() - $margins['right'] - $margins['left']), 5, TTi18n::getText('Synchronize this schedule to your desktop/mobile phone calendar application').': '. $url, 1, 0, 'C', 0, NULL, 1 );

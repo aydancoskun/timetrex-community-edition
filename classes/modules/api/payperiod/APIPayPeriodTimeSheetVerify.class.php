@@ -83,11 +83,12 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 	 * @return array|bool
 	 */
 	function getPayPeriodTimeSheetVerify( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
 				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//If type_id and hierarchy_level is passed, assume we are in the authorization view.
 		if ( isset($data['filter_data']['hierarchy_level'])

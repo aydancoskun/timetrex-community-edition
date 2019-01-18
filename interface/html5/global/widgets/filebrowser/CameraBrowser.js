@@ -19,7 +19,7 @@
 			if ( local_stream ) {
 				local_stream.stop();
 			}
-		}
+		};
 
 		this.showCamera = function() {
 
@@ -27,19 +27,19 @@
 			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
 			if ( navigator.getUserMedia ) {
 				// get webcam feed if available
-				navigator.getUserMedia( {video: true}, function( stream ) {
+				navigator.getUserMedia( { video: true }, function( stream ) {
 					video.src = window.URL.createObjectURL( stream );
 					video.play();
 					local_stream = stream;
 				}, errorBack );
 			} else if ( navigator.webkitGetUserMedia ) { // WebKit-prefixed
-				navigator.webkitGetUserMedia( {video: true}, function( stream ) {
+				navigator.webkitGetUserMedia( { video: true }, function( stream ) {
 					video.src = window.webkitURL.createObjectURL( stream );
 					video.play();
 					local_stream = stream;
 				}, errorBack );
 			} else if ( navigator.mozGetUserMedia ) { // Firefox-prefixed
-				navigator.mozGetUserMedia( {video: true}, function( stream ) {
+				navigator.mozGetUserMedia( { video: true }, function( stream ) {
 					video.src = window.URL.createObjectURL( stream );
 					video.play();
 					local_stream = stream;
@@ -51,7 +51,7 @@
 			function errorBack() {
 				TAlertManager.showAlert( $.i18n._( 'No camera' ) );
 			}
-		}
+		};
 
 		this.setEnable = function( val ) {
 			enabled = val;
@@ -60,13 +60,13 @@
 
 			if ( !val ) {
 				btn.attr( 'disabled', true );
-				btn.removeClass( 'disable-element' ).addClass( 'disable-element' )
+				btn.removeClass( 'disable-element' ).addClass( 'disable-element' );
 			} else {
 				btn.removeAttr( 'disabled' );
 				btn.removeClass( 'disable-element' );
 			}
 
-		}
+		};
 
 		this.clearErrorStyle = function() {
 
@@ -81,8 +81,8 @@
 		};
 
 		this.getFileName = function() {
-			return 'camera_stream.png'
-		}
+			return 'camera_stream.png';
+		};
 
 		this.getImageSrc = function() {
 			return canvas[0].toDataURL();
@@ -170,8 +170,6 @@
 
 	};
 
-	$.fn.CameraBrowser.defaults = {
-
-	};
+	$.fn.CameraBrowser.defaults = {};
 
 })( jQuery );

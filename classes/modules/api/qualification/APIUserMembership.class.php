@@ -83,11 +83,12 @@ class APIUserMembership extends APIFactory {
 	 * @return array|bool
 	 */
 	function getUserMembership( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('user_membership', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_membership', 'view') OR $this->getPermissionObject()->Check('user_membership', 'view_own') OR $this->getPermissionObject()->Check('user_membership', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_membership', 'view' );
 

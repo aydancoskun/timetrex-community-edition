@@ -1,6 +1,9 @@
 <?php
 define('UNIT_TEST_MODE', TRUE ); //Add a define so other functions know when we are running unit tests and can change their behavior to not exit/redirect etc...
 
+//SELENIUM EXPECTS THE DATABASE TO BE LOADED TO 15-Feb-2018
+//run this to refresh the db: php create_demo_data.php -f -s 2 -date 15-Feb-2018
+
 require_once( dirname(__FILE__) . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR .'includes'. DIRECTORY_SEPARATOR .'global.inc.php');
 //PHPUnit 3.1.9 works with unit tests, but v3.6 fails on ADODB for some reason.
 //Need to run phpunit like this: phpunit --bootstrap BootStrap.php --no-globals-backup DateTimeTest
@@ -32,7 +35,7 @@ Debug::setVerbosity(10);
 define('ENABLE_SELENIUM_TESTS', TRUE );
 define('ENABLE_SELENIUM_REMOTE_TESTS', TRUE );
 $selenium_config = array(
-							//'host' => '10.7.5.72', //josh
+							//'host' => '10.7.5.139', //josh
 							'host' => '10.7.5.31', //dev1
 							//'host' => '10.7.5.9',
 							'browser' => 'chrome',

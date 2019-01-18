@@ -84,11 +84,12 @@ class APIUserDefault extends APIFactory {
 	 * @return array|bool
 	 */
 	function getUserDefault( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user', 'edit') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$uplf = TTnew( 'UserDefaultListFactory' );
 		$uplf->getByCompanyId( $this->getCurrentCompanyObject()->getId() );

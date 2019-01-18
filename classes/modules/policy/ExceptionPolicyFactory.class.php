@@ -769,7 +769,7 @@ class ExceptionPolicyFactory extends Factory {
 	function getTypeOptions( $product_edition = 10 ) {
 		$options = $this->getOptions('type');
 
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE OR $product_edition < 20 ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL OR $product_edition <= TT_PRODUCT_PROFESSIONAL ) {
 			$corporate_exceptions = array('J1', 'J2', 'J3', 'J4', 'SC', 'C1', 'G1');
 			foreach( $corporate_exceptions as $corporate_exception ) {
 				unset($options[$corporate_exception]);

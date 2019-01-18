@@ -104,11 +104,12 @@ class APIMessageControl extends APIFactory {
 	 * @return array|bool
 	 */
 	function getMessageControl( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('message', 'enabled')
 				OR !( $this->getPermissionObject()->Check('message', 'view') OR $this->getPermissionObject()->Check('message', 'view_own') OR $this->getPermissionObject()->Check('message', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//No need to check for permission_children, as the logged in user can only view their own messages anyways.
 		$data['filter_data']['current_user_id'] = $this->getCurrentUserObject()->getId();
@@ -154,11 +155,12 @@ class APIMessageControl extends APIFactory {
 	 * @return array|bool
 	 */
 	function getMessage( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('message', 'enabled')
 				OR !( $this->getPermissionObject()->Check('message', 'view') OR $this->getPermissionObject()->Check('message', 'view_own') OR $this->getPermissionObject()->Check('message', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( !isset($data['filter_data']['id']) ) {
 			return $this->returnHandler( TRUE ); //No records returned.
@@ -196,11 +198,12 @@ class APIMessageControl extends APIFactory {
 	 * @return array|bool
 	 */
 	function getEmbeddedMessage( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('message', 'enabled')
 				OR !( $this->getPermissionObject()->Check('message', 'view') OR $this->getPermissionObject()->Check('message', 'view_own') OR $this->getPermissionObject()->Check('message', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( isset($data['filter_data']['object_type_id']) AND $data['filter_data']['object_type_id'] == 5 ) {
 			Debug::Text('ERROR: Emails cant be embedded!', __FILE__, __LINE__, __METHOD__, 10);

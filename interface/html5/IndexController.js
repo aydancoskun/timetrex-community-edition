@@ -23,8 +23,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 		//error: Uncaught ReferenceError: XXXXViewController is not defined ininterface/html5/#!m=TimeSheet line 3
 		// Happens when quickly click on context menu and network is slow.
 		if ( window[view_id + 'ViewController'] &&
-			LocalCacheData.current_open_primary_controller &&
-			LocalCacheData.current_open_primary_controller.viewId === view_id ) {
+				LocalCacheData.current_open_primary_controller &&
+				LocalCacheData.current_open_primary_controller.viewId === view_id ) {
 			LocalCacheData.current_open_primary_controller.setSelectLayout();
 			LocalCacheData.current_open_primary_controller.search();
 		}
@@ -63,6 +63,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 		LocalCacheData.fullUrlParameterStr = viewName;
 		LocalCacheData.all_url_args = args;
+
 		if ( view_id == 'Install' ) {
 			if ( LocalCacheData.loadViewRequiredJSReady ) {
 				IndexViewController.openWizard( 'InstallWizard', null, function() {
@@ -86,13 +87,13 @@ var ApplicationRouter = Backbone.Router.extend( {
 		}
 
 		if ( LocalCacheData.all_url_args.sm === 'ResetPassword' && LocalCacheData.all_url_args.key ) {
-			IndexViewController.openWizard('ResetForgotPasswordWizard', null, function () {
+			IndexViewController.openWizard( 'ResetForgotPasswordWizard', null, function() {
 				delete LocalCacheData.all_url_args.sm, LocalCacheData.all_url_args.key;
 				TAlertManager.showAlert( $.i18n._( 'Password has been changed successfully, you may now login.' ) );
 				var new_url = Global.getBaseURL().split( '#' )[0];
 				Global.setURLToBrowser( new_url + '#!m=Login' );
 				return;
-			});
+			} );
 			return;
 		}
 
@@ -116,8 +117,8 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 							//Error: Unable to get property 'id' of undefined or null reference in /interface/html5/IndexController.js?v=8.0.0-20141230-125406 line 87
 							if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-								(LocalCacheData.current_open_primary_controller.current_edit_record &&
-								LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
+									(LocalCacheData.current_open_primary_controller.current_edit_record &&
+											LocalCacheData.current_open_primary_controller.current_edit_record.id != edit_id) ) {
 
 								//Makes ure when doing copy_as_new, don't open this
 								if ( LocalCacheData.current_doing_context_action === 'edit' ) {
@@ -138,12 +139,12 @@ var ApplicationRouter = Backbone.Router.extend( {
 								case 'MessageControl':
 									if ( args.t === 'message' ) {
 										if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-											(!checkIds()) ) {
+												(!checkIds()) ) {
 											openEditView( edit_id, true );
 										}
 									} else if ( args.t === 'request' ) {
 										if ( !LocalCacheData.current_open_primary_controller.edit_view ||
-											(LocalCacheData.current_open_primary_controller.current_select_message_control_data.id != edit_id) ) {
+												(LocalCacheData.current_open_primary_controller.current_select_message_control_data.id != edit_id) ) {
 											openEditView( edit_id, true );
 										}
 									}
@@ -163,12 +164,10 @@ var ApplicationRouter = Backbone.Router.extend( {
 					return;
 				} else {
 					if ( LocalCacheData.current_open_primary_controller.edit_view &&
-						LocalCacheData.current_open_primary_controller.current_edit_record ) {
+							LocalCacheData.current_open_primary_controller.current_edit_record ) {
 
-						if ( LocalCacheData.current_open_primary_controller.viewId === 'TimeSheet' ) {
-							if ( LocalCacheData.current_open_primary_controller.is_mass_editing ) {
-								return;
-							}
+						if ( LocalCacheData.current_open_primary_controller.is_mass_editing ) {
+							return;
 						}
 
 						LocalCacheData.current_open_primary_controller.buildContextMenu( true );
@@ -242,7 +241,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			}
 			switch ( view_id ) {
 				case 'JobApplication':
-					require(['autolinker/Autolinker.min', 'pdfjs/compatibility', 'pdfjs/pdf.min', 'pdfjs/ui_utils', 'pdfjs/text_layer_builder'], function (autolinker) {
+					require(['autolinker/Autolinker.min', 'pdfjs-dist/build/pdf', 'pdfjs/compatibility', 'pdfjs/ui_utils', 'pdfjs/text_layer_builder'], function (autolinker) {
 						window.Autolinker = autolinker;
 						Global.loadViewSource(view_id, view_id + 'ViewController.js', function () {
 							var permission_id = view_id;
@@ -342,7 +341,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 							if ( !$( this ).hasClass( 'current' ) ) {
 								$( this ).attr( 'src', path + $( this ).attr( 'alt' ) + '.png' );
 							}
-						} )
+						} );
 					}
 				} );
 			}
@@ -360,13 +359,13 @@ var ApplicationRouter = Backbone.Router.extend( {
 				for ( var i = 0; i < LocalCacheData.current_open_primary_controller.current_edit_record.length; i++ ) {
 					var item = LocalCacheData.current_open_primary_controller.current_edit_record[i];
 
-					if ( item.id === edit_id ) {
+					if ( item.id && item.id === edit_id ) {
 						return true;
 					}
 				}
 			} else {
 				item = LocalCacheData.current_open_primary_controller.current_edit_record;
-				if ( item.id === edit_id ) {
+				if ( item.id && item.id === edit_id ) {
 					return true;
 				}
 			}
@@ -474,12 +473,12 @@ var ApplicationRouter = Backbone.Router.extend( {
 		var current_company = LocalCacheData.getCurrentCompany();
 		var current_user = LocalCacheData.getLoginUser();
 		var label = current_company.name + ' - ' + current_user.first_name + ' ' + current_user.last_name;
-		var label_container = $( "<div class='login-information-div'><span class='login-information'></span></div>" );
+		var label_container = $( '<div class=\'login-information-div\'><span class=\'login-information\'></span></div>' );
 		label_container.children().eq( 0 ).text( label );
 		Global.topContainer().append( label_container );
 		this.testInternetConnection();
-		//if ( ( APIGlobal.pre_login_data.demo_mode === false && APIGlobal.pre_login_data.deployment_on_demand === true && LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
-		if ( ( APIGlobal.pre_login_data.demo_mode === false && LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
+		//if ( ( APIGlobal.pre_login_data.demo_mode === false && APIGlobal.pre_login_data.deployment_on_demand === true && LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+		if ( ( APIGlobal.pre_login_data.demo_mode === false && LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
 			var permission_api = new (APIFactory.getAPIClass( 'APIPermissionControl' ))();
 			var filter = {};
 			filter.filter_data = {};
@@ -495,9 +494,9 @@ var ApplicationRouter = Backbone.Router.extend( {
 							if ( !is_testing_internet_connection ) {
 								clearInterval( check_connection_timer );
 								if ( internet_connection_available && current_user ) {
-									require(['live-chat'], function(){
+									require( ['live-chat'], function() {
 										Global.topContainer().append( chat );
-									});
+									} );
 								}
 							}
 						}, 500 );
@@ -523,12 +522,12 @@ var ApplicationRouter = Backbone.Router.extend( {
 
 	addTopMenu: function() {
 		var $this = this;
-		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js', function(){
+		Global.loadScript( 'global/widgets/ribbon/RibbonViewController.js', function() {
 			// Error: 'RibbonViewController' is undefined
 			if ( RibbonViewController ) {
-			// #2235 - ReferenceError: RibbonViewController is not defined
-			//Error: ReferenceError: Can't find variable: RibbonViewController
-			RibbonViewController.loadView();
+				// #2235 - ReferenceError: RibbonViewController is not defined
+				//Error: ReferenceError: Can't find variable: RibbonViewController
+				RibbonViewController.loadView();
 			}
 			$( 'body' ).removeClass( 'login-bg' );
 			$( 'body' ).addClass( 'application-bg' );
@@ -601,14 +600,14 @@ IndexViewController = Backbone.View.extend( {
 IndexViewController.goToView = function( view_name, filter ) {
 	Global.closeEditViews( function() {
 		if ( TopMenuManager.selected_sub_menu_id ) {
-			$('#' + TopMenuManager.selected_sub_menu_id).removeClass('selected-menu');
+			$( '#' + TopMenuManager.selected_sub_menu_id ).removeClass( 'selected-menu' );
 		}
 
-		$('#' + view_name).addClass('selected-menu');
+		$( '#' + view_name ).addClass( 'selected-menu' );
 		LocalCacheData.default_filter_for_next_open_view = filter;
 
-		TopMenuManager.goToView(view_name, true);
-	});
+		TopMenuManager.goToView( view_name, true );
+	} );
 
 };
 
@@ -631,7 +630,7 @@ IndexViewController.goToViewByViewLabel = function( view_label ) {
 		default:
 			var reg = /\s/g;
 			view_name = view_label.replace( reg, '' );
-			break
+			break;
 	}
 
 	if ( TopMenuManager.selected_sub_menu_id ) {
@@ -675,15 +674,15 @@ IndexViewController.openWizardController = function( wizardName, filter_data, so
 		default:
 			// track edit view only view
 			Global.trackView( wizardName );
-			Global.loadViewSource( wizardName, wizardName+'.js', function() {
+			Global.loadViewSource( wizardName, wizardName + '.js', function() {
 
 				if ( LocalCacheData.current_open_wizard_controller ) {
-					switch (wizardName) {
+					switch ( wizardName ) {
 						case 'ReportViewWizard':
 							break;
 						case 'PayrollRemittanceAgencyEventWizardController':
 							//if the current wizard is a PayrollRemittanceAgencyEventWizard, we need to remember the cards that were clicked because it's just minimized.
-							if(LocalCacheData.current_open_wizard_controller.wizard_id == 'PayrollRemittanceAgencyEventWizard') {
+							if ( LocalCacheData.current_open_wizard_controller.wizard_id == 'PayrollRemittanceAgencyEventWizard' ) {
 								var wizard = LocalCacheData.current_open_wizard_controller;
 								wizard.getStepObject().initialize( wizard );
 							} else {
@@ -696,7 +695,7 @@ IndexViewController.openWizardController = function( wizardName, filter_data, so
 					}
 				}
 
-				Global.loadViewSource( wizardName, wizardName+'.html', function( result ) {
+				Global.loadViewSource( wizardName, wizardName + '.html', function( result ) {
 					var args = {};
 					var template = _.template( result );
 					$( 'body' ).append( template( args ) );
@@ -705,7 +704,7 @@ IndexViewController.openWizardController = function( wizardName, filter_data, so
 					// This must be here because we don't instantiate the WizardController ( the host view ) in the html file like we do with other views so that we can pass it constructor arguments
 					switch ( wizardName ) {
 						case 'ProcessTransactionsWizardController':
-							new ProcessTransactionsWizardController(filter_data);
+							new ProcessTransactionsWizardController( filter_data );
 							break;
 					}
 
@@ -773,25 +772,26 @@ IndexViewController.openReport = function (parent_view_controller, view_name, id
 				} else {
 					console.debug('Report View does not exist! View Name: ' + view_name);
 					if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
-						window.location.href = ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url;
+						Global.setURLToBrowser( ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url );
 					}
 				}
 		}
-	});
+	} );
 
 };
 
 //Open edit view
-IndexViewController.openEditView = function ( parent_view_controller, view_name, id, action_function ) {
-	if  ( LocalCacheData.current_open_report_controller ) { //don't allow editviews over report views.
+IndexViewController.openEditView = function( parent_view_controller, view_name, id, action_function ) {
+	if ( LocalCacheData.current_open_report_controller ) { //don't allow editviews over report views.
 		LocalCacheData.current_open_report_controller.onCancelClick( null, null, function() {
-			Global.closeEditViews(function(){
+			Global.closeEditViews( function() {
 				IndexViewController.openEditView( parent_view_controller, view_name, id, action_function );
-			});
-		});
+			} );
+		} );
 		return;
 	} else if ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.viewId && LocalCacheData.current_open_edit_only_controller.viewId == view_name ) { //Stop edit only views from overlaying themselves with the same view and disconnecting others from the menu
 		LocalCacheData.current_open_edit_only_controller.setEditMenu(); //display the right edit menu
+		$( '#ribbon_view_container .context-menu:visible a' ).click();
 	} else {
 		doNext();
 	}
@@ -804,18 +804,18 @@ IndexViewController.openEditView = function ( parent_view_controller, view_name,
 				if (LocalCacheData.getLoginUserPreference().default_login_screen) {
 					TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
 				} else {
-					TopMenuManager.goToView('Home');
+					TopMenuManager.goToView( 'Home' );
 				}
 			} else {
-				TAlertManager.showAlert('Permission denied', 'ERROR', function () {
-					if (LocalCacheData.getLoginUserPreference().default_login_screen) {
-						TopMenuManager.goToView(LocalCacheData.getLoginUserPreference().default_login_screen);
+				TAlertManager.showAlert( 'Permission denied', 'ERROR', function() {
+					if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+						TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
 					} else {
-						TopMenuManager.goToView('Home');
+						TopMenuManager.goToView( 'Home' );
 					}
-				});
+				} );
 			}
-			Debug.Text('Navigation permission denied. View: ' + view_name, 'IndexController.js', 'IndexController', 'openEditView', 10);
+			Debug.Text( 'Navigation permission denied. View: ' + view_name, 'IndexController.js', 'IndexController', 'openEditView', 10 );
 			return;
 		}
 
@@ -840,30 +840,30 @@ IndexViewController.openEditView = function ( parent_view_controller, view_name,
 
 		Global.loadViewSource( view_name, view_name + 'ViewController.js', function () {
 			/* jshint ignore:start */
-			view_controller = eval('new ' + view_name + 'ViewController( {edit_only_mode: true} ); ');
+			view_controller = eval( 'new ' + view_name + 'ViewController( {edit_only_mode: true} ); ' );
 			/* jshint ignore:end */
 
-			TTPromise.wait('BaseViewController', 'initialize', function () {
+			TTPromise.wait( 'BaseViewController', 'initialize', function() {
 				view_controller.parent_view_controller = parent_view_controller;
 
-				view_controller[action_function](id);
-				if (TTUUID.isUUID(id)) {
+				view_controller[action_function]( id );
+				if ( TTUUID.isUUID( id ) ) {
 					var current_url = window.location.href;
-					if (current_url.indexOf('&sm') > 0) {
-						current_url = current_url.substring(0, current_url.indexOf('&sm'));
+					if ( current_url.indexOf( '&sm' ) > 0 ) {
+						current_url = current_url.substring( 0, current_url.indexOf( '&sm' ) );
 					}
-					if (id && _.isString(id)) {
+					if ( id && _.isString( id ) ) {
 						current_url = current_url + '&sm=' + view_name + '&sid=' + id;
 					} else {
 						current_url = current_url + '&sm=' + view_name;
 					}
 
-					Global.setURLToBrowser(current_url);
+					Global.setURLToBrowser( current_url );
 				}
 
 				LocalCacheData.current_open_edit_only_controller = view_controller;
-			});
-		});
+			} );
+		} );
 	}
 };
 

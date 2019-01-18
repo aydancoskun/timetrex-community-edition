@@ -40,18 +40,24 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'pivot_day_direction' );
 		this.initDropDownOption( 'always_week_day', 'always_week_day' );
 
-		this.date_api.getDayOfMonthArray( {onResult: function( res ) {
-			res = res.getResult();
-			$this.day_of_month_array = res;
-		}} );
-		this.date_api.getMonthOfYearArray( {onResult: function( res ) {
-			res = res.getResult();
-			$this.month_of_year_array = res;
-		}} );
-		this.date_api.getDayOfWeekArray( {onResult: function( res ) {
-			res = res.getResult();
-			$this.day_of_week_array = res;
-		}} );
+		this.date_api.getDayOfMonthArray( {
+			onResult: function( res ) {
+				res = res.getResult();
+				$this.day_of_month_array = res;
+			}
+		} );
+		this.date_api.getMonthOfYearArray( {
+			onResult: function( res ) {
+				res = res.getResult();
+				$this.month_of_year_array = res;
+			}
+		} );
+		this.date_api.getDayOfWeekArray( {
+			onResult: function( res ) {
+				res = res.getResult();
+				$this.day_of_week_array = res;
+			}
+		} );
 	},
 
 	buildEditViewUI: function() {
@@ -60,11 +66,11 @@ RecurringHolidayViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_recurring_holiday': $.i18n._( 'Recurring Holiday' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_recurring_holiday': { 'label': $.i18n._( 'Recurring Holiday' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRecurringHoliday' )),
@@ -91,7 +97,7 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_recurring_holiday_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -99,56 +105,56 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		// Special Day
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'special_day'} );
+		form_item_input.TComboBox( { field: 'special_day' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.special_day_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Special Day' ), form_item_input, tab_recurring_holiday_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Week Interval
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'week_interval'} );
+		form_item_input.TComboBox( { field: 'week_interval' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.week_interval_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Week Interval' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Day of the week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'day_of_week'} );
+		form_item_input.TComboBox( { field: 'day_of_week' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $.extend( {}, $this.day_of_week_array ) ) );
 		this.addEditFieldToColumn( $.i18n._( 'Day of the week' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Pivot Day Direction
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'pivot_day_direction_id'} );
+		form_item_input.TComboBox( { field: 'pivot_day_direction_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.pivot_day_direction_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Pivot Day Direction' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Day of the Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'day_of_month'} );
+		form_item_input.TComboBox( { field: 'day_of_month' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.day_of_month_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Day of the Month' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'month_int'} );
+		form_item_input.TComboBox( { field: 'month_int' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_year_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Month' ), form_item_input, tab_recurring_holiday_column1, '', null, true );
 
 		// Always On Week Day
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'always_week_day_id'} );
+		form_item_input.TComboBox( { field: 'always_week_day_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.always_week_day_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Always On Week Day' ), form_item_input, tab_recurring_holiday_column1, '' );
 
@@ -245,14 +251,17 @@ RecurringHolidayViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -260,9 +269,11 @@ RecurringHolidayViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -270,7 +281,8 @@ RecurringHolidayViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	}
 

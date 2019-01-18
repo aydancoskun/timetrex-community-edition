@@ -27,8 +27,8 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 
 		switch ( this.current_step ) {
 			case 1:
-				var label = this.getLabel()
-				label.text( $.i18n._( "Generate pay stubs for individual employees when manual modifications or a termination occurs. Use Payroll -> Process Payroll if you wish to generate pay stubs for all employees instead." ) )
+				var label = this.getLabel();
+				label.text( $.i18n._( 'Generate pay stubs for individual employees when manual modifications or a termination occurs. Use Payroll -> Process Payroll if you wish to generate pay stubs for all employees instead.' ) );
 
 				this.content_div.append( label );
 				break;
@@ -116,7 +116,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 				label.text( $.i18n._( 'Select one or more employees' ) );
 
 				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIUser' )), true, ALayoutIDs.USER, 'user_id', true );
-				var div = $( "<div class='wizard-acombobox-div'></div>" );
+				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -147,8 +147,8 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		switch ( this.current_step ) {
 			case 2:
 				if ( current_step_data.pay_period_id ) {
-					var pay_period_ids = current_step_data.pay_period_id
-					pay_period_ids = Global.array_unique(pay_period_ids);
+					var pay_period_ids = current_step_data.pay_period_id;
+					pay_period_ids = Global.array_unique( pay_period_ids );
 
 					if ( current_step_data ) {
 						current_step_ui.pay_period_id.setValue( pay_period_ids );
@@ -160,7 +160,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 			case 3:
 				if ( current_step_data.user_id ) {
 					var user_ids = current_step_data.user_id;
-					user_ids = Global.array_unique(user_ids);
+					user_ids = Global.array_unique( user_ids );
 					current_step_ui.user_id.setValue( user_ids );
 				}
 				break;
@@ -192,16 +192,17 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 			transaction_date = this.stepsDataDic[2].transaction_date;
 		}
 
-		api.generatePayStubs( pay_period_ids, user_ids, cal_pay_stub_amendment, run_id, type_id, transaction_date, {onResult: onDoneResult} );
+		api.generatePayStubs( pay_period_ids, user_ids, cal_pay_stub_amendment, run_id, type_id, transaction_date, { onResult: onDoneResult } );
+
 		function onDoneResult( result ) {
 			if ( result.isValid() ) {
 				var user_generic_status_batch_id = result.getAttributeInAPIDetails( 'user_generic_status_batch_id' );
 
-				if ( user_generic_status_batch_id && TTUUID.isUUID( user_generic_status_batch_id ) && user_generic_status_batch_id != TTUUID.zero_id&& user_generic_status_batch_id != TTUUID.not_exist_id ) {
+				if ( user_generic_status_batch_id && TTUUID.isUUID( user_generic_status_batch_id ) && user_generic_status_batch_id != TTUUID.zero_id && user_generic_status_batch_id != TTUUID.not_exist_id ) {
 					UserGenericStatusWindowController.open( user_generic_status_batch_id, user_ids, function() {
 						if ( cal_pay_stub_amendment ) {
-							var filter = {filter_data: {}};
-							var users = {value: user_ids};
+							var filter = { filter_data: {} };
+							var users = { value: user_ids };
 							filter.filter_data.user_id = users;
 							filter.filter_data.status_id = 50; //active
 							IndexViewController.goToView( 'PayStubAmendment', filter );
@@ -226,9 +227,9 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 		var current_step_data = this.stepsDataDic[this.current_step];
 		//Error: Uncaught TypeError: Cannot read property 'hide' of undefined in /interface/html5/index.php#!m=PayStub line 221
 		if ( !current_step_ui ||
-			!current_step_ui['run_id_row'] ||
-			!current_step_ui['carry_forward_to_date_row'] ||
-			!current_step_ui['transaction_date_row']) {
+				!current_step_ui['run_id_row'] ||
+				!current_step_ui['carry_forward_to_date_row'] ||
+				!current_step_ui['transaction_date_row'] ) {
 			return;
 		}
 		current_step_ui['run_id_row'].hide();
@@ -312,7 +313,7 @@ GeneratePayStubWizardController = BaseWizardController.extend( {
 						}
 						$this.onPayrollTypeChange( refresh );
 					}
-				} )
+				} );
 			}
 		} );
 

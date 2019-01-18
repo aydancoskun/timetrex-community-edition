@@ -827,7 +827,7 @@ class ROEFactory extends Factory {
 			$prev_pay_period_id = FALSE;
 
 			foreach( $tmp_data as $pay_period_id => $pp_data ) {
-				if ( $pp_data['after_last_date'] == TRUE ) {
+				if ( $pp_data['after_last_date'] == TRUE AND isset( $retarr[$prev_pay_period_id] ) ) {
 					$retarr[$prev_pay_period_id]['amount'] += $pp_data['amount'];
 					$retarr[$prev_pay_period_id]['units'] += $pp_data['units'];
 					$retarr[$prev_pay_period_id]['pay_period_ids'][] = $pay_period_id;
@@ -1164,6 +1164,21 @@ class ROEFactory extends Factory {
 													$this->getRecallDate(),
 													TTi18n::gettext('Invalid recall date')
 												);
+		}
+
+		if ( $this->getFirstDate() !== FALSE AND $this->getLastDate() !== FALSE AND TTDate::getMiddleDayEpoch( $this->getFirstDate() ) > TTDate::getMiddleDayEpoch( $this->getLastDate() ) ) {
+			$this->Validator->isTrue( 'last_date',
+									  FALSE,
+									  TTi18n::gettext( 'Last Day Paid must be after First Day Worked' )
+			);
+		}
+
+		if ( $this->getLastDate() !== FALSE AND $this->getPayPeriodEndDate() !== FALSE AND TTDate::getMiddleDayEpoch( $this->getLastDate() ) > TTDate::getMiddleDayEpoch( $this->getPayPeriodEndDate() ) ) {
+			$this->Validator->isTrue( 'pay_period_end_date',
+									  FALSE,
+									  TTi18n::gettext( 'Final Pay Period Ending Date must be on or after Last Day Paid' )
+			);
+
 		}
 
 		if ( $this->getEnableReleaseAccruals() == TRUE OR $this->getEnableGeneratePayStub() == TRUE ) {

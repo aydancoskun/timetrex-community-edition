@@ -1,6 +1,6 @@
 AccrualBalanceViewController = BaseViewController.extend( {
 	el: '#accrual_balance_view_container',
-	_required_files: ['APIAccrualBalance', 'APIAccrual', 'APIUserGroup', 'APIUser', 'APIAccrualPolicyAccount', 'APIBranch', 'APIDepartment','views/attendance/accrual/AccrualViewController'],
+	_required_files: ['APIAccrualBalance', 'APIAccrual', 'APIUserGroup', 'APIUser', 'APIAccrualPolicyAccount', 'APIBranch', 'APIDepartment', 'views/attendance/accrual/AccrualViewController'],
 	user_group_api: null,
 	user_group_array: null,
 
@@ -81,10 +81,15 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_accrual': $.i18n._( 'Accrual' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_accrual': {
+				'label': $.i18n._( 'Accrual' ),
+				'init_callback': 'initSubAccrualView',
+				'display_on_mass_edit': false
+			},
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIAccrualBalance' )),
@@ -188,7 +193,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		var column_filter = {};
 		column_filter.user_id = true;
 		column_filter.accrual_policy_account_id = true;
-		return this._getFilterColumnsFromDisplayColumns(column_filter,  true);
+		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
 	__createRowId: function( data ) {
@@ -392,78 +397,16 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		this.setCurrentEditRecordData();
 		//Init *Please save this record before modifying any related data* box
-		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( {related_view_controller: this} );
+		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( { related_view_controller: this } );
 		this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'none' );
-	},
-
-	initTabData: function() {
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 0 ) {
-			if ( this.current_edit_record ) {
-				this.edit_view_tab.find( '#tab_accrual' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubAccrualView();
-			} else {
-				this.edit_view_tab.find( '#tab_accrual' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-
-			if ( this.current_edit_record ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 0 ) {
-			if ( this.current_edit_record ) {
-				this.edit_view_tab.find( '#tab_accrual' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubAccrualView();
-			} else {
-				this.edit_view_tab.find( '#tab_accrual' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 1 ) {
-			if ( this.current_edit_record ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	showNoResultCover: function( show_new_btn ) {
-		this.removeNoResultCover();
-		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
-		this.no_result_box.NoResultBox( {related_view_controller: this, is_new: false} );
-		this.no_result_box.attr( 'id', this.ui_id + '_no_result_box' );
-
-		var grid_div = $( this.el ).find( '.grid-div' );
-
-		grid_div.append( this.no_result_box );
-
-		this.initRightClickMenu( RightClickMenuType.NORESULTBOX );
 	},
 
 	initSubAccrualView: function() {
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
 
 		if ( this.sub_accrual_view_controller ) {
 			this.sub_accrual_view_controller.buildContextMenu( true );
@@ -474,10 +417,19 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		}
 
 		Global.loadScript( 'views/attendance/accrual/AccrualViewController.js', function() {
-			var tab_accrual = $this.edit_view_tab.find('#tab_accrual');
-			var firstColumn = tab_accrual.find('.first-column-sub-view');
-			Global.trackView('Sub' + 'Accrual' + 'View');
-			AccrualViewController.loadSubView(firstColumn, beforeLoadView, afterLoadView);
+			var tab_accrual = $this.edit_view_tab.find( '#tab_accrual' );
+
+			var firstColumn = tab_accrual.find( '.first-column-sub-view' );
+
+			TTPromise.add( 'initSubAccrualView', 'init' );
+			TTPromise.wait( 'initSubAccrualView', 'init', function() {
+				firstColumn.css('opacity', '1');
+			} );
+
+			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
+
+			Global.trackView( 'Sub' + 'Accrual' + 'View' );
+			AccrualViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 		} );
 
 		function beforeLoadView() {
@@ -497,6 +449,11 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 	initSubLogView: function( tab_id ) {
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
 		if ( this.sub_log_view_controller ) {
 			this.sub_log_view_controller.buildContextMenu( true );
 			this.sub_log_view_controller.setDefaultMenu();
@@ -511,10 +468,19 @@ AccrualBalanceViewController = BaseViewController.extend( {
 		}
 
 		Global.loadScript( 'views/core/log/LogViewController.js', function() {
-			var tab = $this.edit_view_tab.find('#' + tab_id);
-			var firstColumn = tab.find('.first-column-sub-view');
-			Global.trackView('Sub' + 'Log' + 'View');
-			LogViewController.loadSubView(firstColumn, beforeLoadView, afterLoadView);
+			var tab = $this.edit_view_tab.find( '#' + tab_id );
+
+			var firstColumn = tab.find( '.first-column-sub-view' );
+
+			TTPromise.add( 'initSubAudit', 'init' );
+			TTPromise.wait( 'initSubAudit', 'init', function() {
+				firstColumn.css('opacity', '1');
+			} );
+
+			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
+
+			Global.trackView( 'Sub' + 'Log' + 'View' );
+			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 		} );
 
 		function beforeLoadView() {
@@ -525,7 +491,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 			// Can't directly open Audit in this case, because Audit need data from Sub Accrual View and it not
 			// be loaded if directly open audit from url
 			if ( !$this.log_object_ids ) {
-				$this.edit_view_tab.tabs( 'select', 0 );
+				$this.edit_view_tab.tabs( 'option', 'active', 0 );
 				return;
 			}
 			$this.sub_log_view_controller = subViewController;
@@ -551,7 +517,7 @@ AccrualBalanceViewController = BaseViewController.extend( {
 
 		var $this = this;
 		this.navigation.setPossibleDisplayColumns( this.buildDisplayColumnsByColumnModel( this.grid.getGridParam( 'colModel' ) ),
-			this.buildDisplayColumns( this.default_display_columns ) );
+				this.buildDisplayColumns( this.default_display_columns ) );
 
 		this.navigation.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 

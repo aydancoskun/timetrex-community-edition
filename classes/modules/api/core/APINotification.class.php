@@ -72,7 +72,7 @@ class APINotification extends APIFactory {
 				unset($sslf);
 
 				//Check license validity
-				if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $this->getCurrentCompanyObject()->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) AND getTTProductEdition() > 10 ) {
+				if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $this->getCurrentCompanyObject()->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $this->getCurrentCompanyObject()->getId() == $config_vars['other']['primary_company_id'] ) ) AND getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 					if ( !isset($system_settings['license']) ) {
 						$system_settings['license'] = NULL;
 					}

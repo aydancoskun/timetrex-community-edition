@@ -49,6 +49,8 @@
 
 	- Federal/State tax information: http://www.payroll-taxes.com/state-tax.htm
 
+	- QuickBooks payroll updates: https://community.intuit.com/articles/1434289-intuit-quickbooks-desktop-payroll-news-updates
+
 //
 //***Update PayrollDeduction.class.php with updated date/version
 //

@@ -115,7 +115,11 @@ class TaxSummaryReport extends Report {
 				$retval = TTDate::getTimePeriodOptions();
 				break;
 			case 'date_columns':
-				$retval = TTDate::getReportDateOptions( 'transaction', TTi18n::getText('Transaction Date'), 13, TRUE );
+				$retval = array_merge(
+						TTDate::getReportDateOptions( 'hire', TTi18n::getText('Hire Date'), 13, FALSE ),
+						TTDate::getReportDateOptions( 'termination', TTi18n::getText('Termination Date'), 14, FALSE ),
+						TTDate::getReportDateOptions( 'transaction', TTi18n::getText('Transaction Date'), 16, TRUE )
+				);
 				break;
 			case 'custom_columns':
 				//Get custom fields for report data.
@@ -203,12 +207,12 @@ class TaxSummaryReport extends Report {
 										'-1290-note' => TTi18n::gettext('Note'),
 										'-1295-tag' => TTi18n::gettext('Tags'),
 
-										'-1298-hire_date_age' => TTi18n::gettext('Length of Service'),
-										'-1299-birth_date_age' => TTi18n::gettext('Age'),
+										'-1598-hire_date_age' => TTi18n::gettext('Length of Service'),
+										'-1599-birth_date_age' => TTi18n::gettext('Age'),
 
-										'-1400-payroll_remittance_agency_name' => TTi18n::gettext('Remittance Agency'),
+										'-1700-payroll_remittance_agency_name' => TTi18n::gettext('Remittance Agency'),
 
-										'-1510-company_deduction_name' => TTi18n::gettext('Tax/Deduction Name'),
+										'-1810-company_deduction_name' => TTi18n::gettext('Tax/Deduction Name'),
 
 								);
 
@@ -313,7 +317,7 @@ class TaxSummaryReport extends Report {
 			case 'grand_total_metadata':
 				//Make sure all jobs are sum'd
 				$retval['aggregate'] = array();
-				$dynamic_columns = array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
 				if ( is_array($dynamic_columns ) ) {
 					foreach( $dynamic_columns as $column ) {
 						switch ( $column ) {
@@ -332,7 +336,7 @@ class TaxSummaryReport extends Report {
 			case 'sub_total_by_metadata':
 				//Make sure task estimates are sum'd.
 				$retval['aggregate'] = array();
-				$dynamic_columns = array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
 				if ( is_array($dynamic_columns ) ) {
 					foreach( $dynamic_columns as $column ) {
 						switch ( $column ) {
@@ -350,7 +354,7 @@ class TaxSummaryReport extends Report {
 				break;
 			case 'group_by_metadata':
 				$retval['aggregate'] = array();
-				$dynamic_columns = array_keys( Misc::trimSortPrefix( $this->getOptions('dynamic_columns') ) );
+				$dynamic_columns = array_keys( Misc::trimSortPrefix( array_merge( $this->getOptions('dynamic_columns'), (array)$this->getOptions('report_dynamic_custom_column') ) ) );
 				if ( is_array($dynamic_columns ) ) {
 					foreach( $dynamic_columns as $column ) {
 						switch ( $column ) {
@@ -898,7 +902,7 @@ class TaxSummaryReport extends Report {
 		Debug::Text(' User Total Rows: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ulf->getRecordCount(), NULL, TTi18n::getText('Retrieving Data...') );
 		foreach ( $ulf as $key => $u_obj ) {
-			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( $this->getColumnDataConfig() );
+			$this->tmp_data['user'][$u_obj->getId()] = (array)$u_obj->getObjectAsArray( array_merge( (array)$this->getColumnDataConfig(), array( 'province' => TRUE, 'hire_date' => TRUE, 'termination_date' => TRUE , 'title_id' => TRUE ) ) );
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 		}
 
@@ -929,9 +933,8 @@ class TaxSummaryReport extends Report {
 		return TRUE;
 	}
 
-	//PreProcess data such as calculating additional columns from raw data etc...
-
 	/**
+	 * PreProcess data such as calculating additional columns from raw data etc...
 	 * @return bool
 	 */
 	function _preProcess() {
@@ -947,6 +950,19 @@ class TaxSummaryReport extends Report {
 						foreach ( $level_2 as $user_id => $row ) {
 							if ( isset( $this->tmp_data['user'][ $user_id ] ) ) {
 								$date_columns = TTDate::getReportDates( 'transaction', $date_stamp, FALSE, $this->getUserObject(), array('pay_period_start_date' => $row['pay_period_start_date'], 'pay_period_end_date' => $row['pay_period_end_date'], 'pay_period_transaction_date' => $row['pay_period_transaction_date']) );
+
+								if ( isset($this->tmp_data['user'][$user_id]['hire_date']) ) {
+									$hire_date_columns = TTDate::getReportDates( 'hire', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['hire_date'] ), FALSE, $this->getUserObject() );
+								} else {
+									$hire_date_columns = array();
+								}
+
+								if ( isset($this->tmp_data['user'][$user_id]['termination_date']) ) {
+									$termination_date_columns = TTDate::getReportDates( 'termination', TTDate::parseDateTime( $this->tmp_data['user'][$user_id]['termination_date'] ), FALSE, $this->getUserObject() );
+								} else {
+									$termination_date_columns = array();
+								}
+
 								$processed_data = array(
 									//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
 									//'pay_stub' => array('sort' => $row['pay_stub_transaction_date'], 'display' => TTDate::getDate('DATE', $row['pay_stub_transaction_date'] ) ),
@@ -965,7 +981,7 @@ class TaxSummaryReport extends Report {
 									$tmp_payroll_remittance_agency = array();
 								}
 
-								$this->data[] = array_merge( $this->tmp_data['user'][ $user_id ], $tmp_company_deduction, $tmp_payroll_remittance_agency, $row, $date_columns, $processed_data );
+								$this->data[] = array_merge( $this->tmp_data['user'][ $user_id ], $tmp_company_deduction, $tmp_payroll_remittance_agency, $row, $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
 
 								$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 								$key++;

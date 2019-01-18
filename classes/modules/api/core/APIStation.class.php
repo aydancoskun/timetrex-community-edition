@@ -128,6 +128,8 @@ class APIStation extends APIFactory {
 	 * @return array
 	 */
 	function getStation( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('station', 'enabled')
 				OR !( $this->getPermissionObject()->Check('station', 'view') OR $this->getPermissionObject()->Check('station', 'view_own') OR $this->getPermissionObject()->Check('station', 'view_child') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
@@ -135,7 +137,6 @@ class APIStation extends APIFactory {
 			//Rather then permission denied, restrict to just 'list_view' columns.
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//View/Edit Punch looks for stations by ID, but they can't be returned if its a supervisor who has subordinates only permissions and it didn't happen to match.
 		if ( !isset($data['filter_data']['id']) ) {

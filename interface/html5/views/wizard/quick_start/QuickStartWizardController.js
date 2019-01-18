@@ -118,7 +118,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				form_item_input_div.append( frequency );
 
 				frequency.bind( 'formItemChange', function( e, target ) {
-					$this.onFrequencyChange( target )
+					$this.onFrequencyChange( target );
 				} );
 
 				this.content_div.append( form_item );
@@ -127,7 +127,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				//Example Dates
 				var grid_id = 'example_dates';
-				var grid_div = $( "<div style='float: left; width: 100%'  class='grid-div wizard-grid-div'> <table id='" + grid_id + "'></table></div>" );
+				var grid_div = $( '<div style=\'float: left; width: 100%\'  class=\'grid-div wizard-grid-div\'> <table id=\'' + grid_id + '\'></table></div>' );
 				this.setDateGrid( grid_id, grid_div, 300 );
 
 				break;
@@ -143,14 +143,14 @@ QuickStartWizardController = BaseWizardController.extend( {
 				this.content_div.append( legal_entity_label );
 
 				var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-				form_item_input.TText( {field: 'legal_entity_id'} );
+				form_item_input.TText( { field: 'legal_entity_id' } );
 				form_item_input.AComboBox( {
 					api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
 					allow_multiple_selection: true,
 					layout_name: ALayoutIDs.LEGAL_ENTITY,
 					show_search_inputs: false,
 					set_empty: true,
-					custom_first_label: Global.all_item,
+					custom_first_label: Global.all_item
 				} );
 
 				this.content_div.append( form_item_input );
@@ -261,12 +261,12 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		// Country
 
-		var widgetContainer = $( "<ul style='list-style: none; padding: 0; margin: 0;'></ul>" );
+		var widgetContainer = $( '<ul style=\'list-style: none; padding: 0; margin: 0;\'></ul>' );
 
-		var widgetContainer1 = $( "<li class='widget-h-box' style='float: left; margin-right: 10px'></li>" );
+		var widgetContainer1 = $( '<li class=\'widget-h-box\' style=\'float: left; margin-right: 10px\'></li>' );
 
 		var country = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		country.TComboBox( {field: 'country', set_empty: true, set_select_item_when_set_source_data: true} );
+		country.TComboBox( { field: 'country', set_empty: true, set_select_item_when_set_source_data: true } );
 
 		var country_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 
@@ -275,7 +275,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				var result_data = result.getResult();
 				country.setSourceData( Global.buildRecordArray( result_data ) );
 
-				if( $this.parent_controller.selected_country_index != -1 ) {
+				if ( $this.parent_controller.selected_country_index != -1 ) {
 					country.setSelectedIndex( $this.parent_controller.selected_country_index );
 				} else {
 					country.setValue( data.country );
@@ -290,11 +290,11 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				country.bind( 'formItemChange', function( e, target ) {
 					$this.parent_controller.selected_country_index = country.getSelectedIndex();
-					TTPromise.add('QuickStartWizard','setProvince');
-					$this.parent_controller.setProvince( {country: target.getValue(), province: ''}, province );
-					TTPromise.wait('QuickStartWizard','setProvince', function () {
+					TTPromise.add( 'QuickStartWizard', 'setProvince' );
+					$this.parent_controller.setProvince( { country: target.getValue(), province: '' }, province );
+					TTPromise.wait( 'QuickStartWizard', 'setProvince', function() {
 						$this.parent_controller.selected_province_index = province.getSelectedIndex();
-					});
+					} );
 				} );
 
 				widgetContainer1.append( country );
@@ -305,22 +305,22 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				// Province
 
-				widgetContainer = $( "<ul style='list-style: none; padding: 0; margin: 0;'></ul>" );
+				widgetContainer = $( '<ul style=\'list-style: none; padding: 0; margin: 0;\'></ul>' );
 
-				widgetContainer1 = $( "<li class='widget-h-box' style='float: left; margin-right: 10px'></li>" );
+				widgetContainer1 = $( '<li class=\'widget-h-box\' style=\'float: left; margin-right: 10px\'></li>' );
 
 				var province = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-				province.TComboBox( {field: 'province', set_empty: false} );
+				province.TComboBox( { field: 'province', set_empty: false } );
 
-				TTPromise.add('QuickStartWizard','setProvince');
-				$this.parent_controller.setProvince(data, province);
-				TTPromise.wait('QuickStartWizard','setProvince', function () {
+				TTPromise.add( 'QuickStartWizard', 'setProvince' );
+				$this.parent_controller.setProvince( data, province );
+				TTPromise.wait( 'QuickStartWizard', 'setProvince', function() {
 					updateProvince( province );
-				});
+				} );
 
 				province.bind( 'formItemChange', function() {
 					$this.parent_controller.selected_province_index = province.getSelectedIndex();
-				});
+				} );
 
 				widgets[province.getField()] = province;
 
@@ -348,12 +348,12 @@ QuickStartWizardController = BaseWizardController.extend( {
 			}
 		} );
 
-		function updateProvince(province){
-			if( typeof index == 'undefined' ){
+		function updateProvince( province ) {
+			if ( typeof index == 'undefined' ) {
 				$this.parent_controller.selected_province_index = province.getSelectedIndex();
 			} else {
 				$this.parent_controller.selected_province_index++;
-				province.setSelectedIndex( $this.parent_controller.selected_province_index )
+				province.setSelectedIndex( $this.parent_controller.selected_province_index );
 			}
 		}
 	},
@@ -364,7 +364,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 		if ( !val.country ) {
 			province.setSourceData( [] );
 			province.setValue( 0 );
-			TTPromise.reject('QuickStart','setProvince');
+			TTPromise.reject( 'QuickStart', 'setProvince' );
 			return;
 
 		}
@@ -377,7 +377,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				province.setSourceData( Global.buildRecordArray( res ) );
 				province.setValue( val.province );
-				TTPromise.resolve('QuickStartWizard','setProvince');
+				TTPromise.resolve( 'QuickStartWizard', 'setProvince' );
 			}
 		} );
 	},
@@ -386,11 +386,11 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 		var grid = current_step_ui['example_dates'];
-		var data = grid.getGridParam( 'data' );
+		var data = grid.getData();
 
 		var first_cell_val;
 
-		//rror: Uncaught TypeError: Cannot read property 'start_date' of undefined in /interface/html5/#!m=Schedule&date=20141201&mode=week line 332 
+		//rror: Uncaught TypeError: Cannot read property 'start_date' of undefined in /interface/html5/#!m=Schedule&date=20141201&mode=week line 332
 		if ( data && data[0] ) {
 			first_cell_val = data[0].start_date;
 		}
@@ -406,25 +406,17 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		this.content_div.append( grid_div );
 
-		var grid = grid_div.find( '#' + gridId );
-
 		if ( !height ) {
 			height = 370;
 		}
 
-		this.getGridColumns( gridId, function( result ) {
+		this.getGridColumns( gridId, function( column_model ) {
 
-			grid = grid.jqGrid( {
-				altRows: true,
-				data: [],
-				datatype: 'local',
+			$this.stepsWidgetDic[$this.current_step][gridId] = new TTGrid( gridId, {
 				sortable: false,
 				height: height,
-				rowNum: 10000,
-				colNames: [],
-				colModel: result,
-				viewrecords: true,
-				editurl: 'clientArray',
+				editurl: 'QuickStart',
+				multiselect: false,
 
 				onSelectRow: function( id ) {
 					if ( id ) {
@@ -432,11 +424,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 					}
 				}
 
-			} );
+			}, column_model );
 
-			$this.stepsWidgetDic[$this.current_step][gridId] = grid;
-
-			$this.setGridSize( grid );
+			$this.setGridSize( $this.stepsWidgetDic[$this.current_step][gridId] );
 
 			$this.setGridGroupColumns( gridId );
 
@@ -474,7 +464,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 				$( $this.el ).remove();
 				LocalCacheData.current_open_wizard_controller = null;
-			} )
+			} );
 		} else {
 			$( $this.el ).remove();
 			LocalCacheData.current_open_wizard_controller = null;
@@ -490,7 +480,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 		var target_id = target.attr( 'id' );
 		var row_id = target_id.split( '_' )[0];
 		var field = target_id.substring( target_id.indexOf( '_' ) + 1, target_id.length );
-		var data = grid.getGridParam( 'data' );
+		var data = grid.getData();
 		var target_val = target.getValue();
 
 		var first_cell_val = data[0].start_date;
@@ -499,22 +489,20 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		for ( var i = 0; i < len; i++ ) {
 			var row_data = data[i];
-			if ( (i + 1) === parseInt( row_id ) ) {
+
+			if ( row_data.id == row_id ) {
 				row_data[field] = target_val;
 
 				if ( i === 0 && field === 'start_date' ) {
-
 					if ( first_cell_val && first_cell_val !== target_val ) {
 						$this.setDefaultDates( true );
 					} else if ( !first_cell_val ) {
 						$this.setDefaultDates();
 					}
-
 				}
 
 				break;
 			}
-
 		}
 
 	},
@@ -526,7 +514,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				if ( flag ) {
 					doNext();
 				}
-			} )
+			} );
 		} else {
 			doNext();
 		}
@@ -535,7 +523,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 			var type_id = $this.stepsWidgetDic[3].type_id.getValue();
 			var grid = $this.stepsWidgetDic[3].example_dates;
-			var data = grid.getGridParam( 'data' );
+			var data = grid.getData();
 			var first_date = data[0].start_date;
 
 			var api = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
@@ -543,9 +531,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 			api.detectPayPeriodScheduleDates( type_id, first_date, {
 				onResult: function( result ) {
 					var res_data = result.getResult();
-					grid.clearGridData();
-					grid.setGridParam( {data: res_data} );
-					grid.trigger( 'reloadGrid' );
+					grid.setData( res_data );
 
 					$this.setStep3CellDatePickers( grid );
 
@@ -632,7 +618,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 						if ( current_step_data ) {
 							for ( var key in current_step_data ) {
-								if ( !current_step_data.hasOwnProperty( key ) ) continue;
+								if ( !current_step_data.hasOwnProperty( key ) ) {
+									continue;
+								}
 
 								current_step_ui[key].setValue( current_step_data[key] );
 							}
@@ -651,7 +639,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 						if ( current_step_data ) {
 							for ( var key in current_step_data ) {
-								if ( !current_step_data.hasOwnProperty( key ) ) continue;
+								if ( !current_step_data.hasOwnProperty( key ) ) {
+									continue;
+								}
 
 								current_step_ui[key].setValue( current_step_data[key] );
 							}
@@ -670,7 +660,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 						if ( current_step_data ) {
 							for ( var key in current_step_data ) {
-								if ( !current_step_data.hasOwnProperty( key ) ) continue;
+								if ( !current_step_data.hasOwnProperty( key ) ) {
+									continue;
+								}
 
 								current_step_ui[key].setValue( current_step_data[key] );
 							}
@@ -703,9 +695,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 							var array = current_step_data['example_dates'];
 
 							var grid = current_step_ui['example_dates'];
-							grid.clearGridData();
-							grid.setGridParam( {data: array} );
-							grid.trigger( 'reloadGrid' );
+							grid.setData( array );
 							$this.setStep3CellDatePickers( grid );
 							current_step_ui['type_id'].setValue( current_step_data['type_id'] );
 
@@ -737,7 +727,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 			var tf = current_step_ui['time_format'];
 			var s = current_step_ui['start_week_day'];
 
-			if ( user_preference.language === "en" ) {
+			if ( user_preference.language === 'en' ) {
 				api_user_preference.getOptions( 'date_format', {
 					onResult: function( result ) {
 
@@ -745,7 +735,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 						if ( current_step_data ) {
 							for ( var key in current_step_data ) {
-								if ( !current_step_data.hasOwnProperty( key ) ) continue;
+								if ( !current_step_data.hasOwnProperty( key ) ) {
+									continue;
+								}
 
 								current_step_ui[key].setValue( current_step_data[key] );
 							}
@@ -766,7 +758,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 						if ( current_step_data ) {
 							for ( var key in current_step_data ) {
-								if ( !current_step_data.hasOwnProperty( key ) ) continue;
+								if ( !current_step_data.hasOwnProperty( key ) ) {
+									continue;
+								}
 
 								current_step_ui[key].setValue( current_step_data[key] );
 							}
@@ -787,16 +781,14 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 		function buildStep3EmptySource() {
 			var array = [
-				{start_date: '', end_date: '', transaction_date: ''},
-				{start_date: '', end_date: '', transaction_date: ''},
-				{start_date: '', end_date: '', transaction_date: ''},
-				{start_date: '', end_date: '', transaction_date: ''}
+				{ start_date: '', end_date: '', transaction_date: '' },
+				{ start_date: '', end_date: '', transaction_date: '' },
+				{ start_date: '', end_date: '', transaction_date: '' },
+				{ start_date: '', end_date: '', transaction_date: '' }
 			];
 
 			var grid = current_step_ui['example_dates'];
-			grid.clearGridData();
-			grid.setGridParam( {data: array} );
-			grid.trigger( 'reloadGrid' );
+			grid.setData( array );
 
 			$this.setStep3CellDatePickers( grid );
 
@@ -804,10 +796,10 @@ QuickStartWizardController = BaseWizardController.extend( {
 	},
 
 	setStep3CellDatePickers: function( grid ) {
-		var inputs = grid.find( 'div[custom_cell="true"]' );
+		var inputs = grid.grid.find( 'div[custom_cell="true"]' );
 		var $this = this;
 		for ( var i = 0; i < inputs.length; i++ ) {
-			var input = $( inputs[i] ).TDatePicker( {width: 290} );
+			var input = $( inputs[i] ).TDatePicker( { width: 290 } );
 
 			input.bind( 'formItemChange', function( e, target ) {
 				$this.onStep3DatePickerChange( target );
@@ -890,7 +882,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				current_step_data.date_format = current_step_ui.date_format.getValue();
 				current_step_data.start_week_day = current_step_ui.start_week_day.getValue();
 
-				if(direction === 'forward'){
+				if ( direction === 'forward' ) {
 					var api_current_user = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
 					var api_user_preference = new (APIFactory.getAPIClass( 'APIUserPreference' ))();
 					api_current_user.getCurrentUserPreference( {
@@ -913,7 +905,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 						}
 					} );
-				}else{
+				} else {
 					callBack( true );
 				}
 				break;
@@ -924,7 +916,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 				current_step_data.type_id = current_step_ui.type_id.getValue();
 				current_step_data.example_dates = current_step_ui.example_dates.getGridParam( 'data' );
 
-				if(direction === 'forward'){
+				if ( direction === 'forward' ) {
 					var api_pp_schedule = new (APIFactory.getAPIClass( 'APIPayPeriodSchedule' ))();
 
 					api_pp_schedule.detectPayPeriodScheduleSettings( current_step_data.type_id, current_step_data.example_dates, {
@@ -952,10 +944,9 @@ QuickStartWizardController = BaseWizardController.extend( {
 
 						}
 					} );
-				}else{
+				} else {
 					callBack( true );
 				}
-
 
 
 				break;
@@ -969,8 +960,8 @@ QuickStartWizardController = BaseWizardController.extend( {
 				var selected_legal_entities = current_step_ui.legal_entity_id.getValue( true );
 				if ( selected_legal_entities && selected_legal_entities.length > 0 ) {
 					current_step_data.legal_entity_id = [];
-					for (var n in selected_legal_entities) {
-						current_step_data.legal_entity_id.push(selected_legal_entities[n].id);
+					for ( var n in selected_legal_entities ) {
+						current_step_data.legal_entity_id.push( selected_legal_entities[n].id );
 					}
 				}
 
@@ -987,7 +978,7 @@ QuickStartWizardController = BaseWizardController.extend( {
 							}
 						}
 					} );
-				}else{
+				} else {
 					callBack( true );
 				}
 				break;

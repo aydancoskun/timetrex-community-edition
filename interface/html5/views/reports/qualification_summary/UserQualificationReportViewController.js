@@ -6,7 +6,7 @@ UserQualificationReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'UserQualificationReport';
 		this.viewId = 'UserQualificationReport';
 		this.context_menu_name = $.i18n._( 'Qualification Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'UserQualificationReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIUserQualificationReport' ))();
 	},

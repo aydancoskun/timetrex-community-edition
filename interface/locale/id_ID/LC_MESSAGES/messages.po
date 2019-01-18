@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-03 15:44-0700\n"
+"POT-Creation-Date: 2018-10-19 08:10-0700\n"
 "PO-Revision-Date: 2013-10-21 04:07+0000\n"
 "Last-Translator: Noke Nahuway <it-tech_yajasi@yajasi.org>\n"
 "Language-Team: Indonesian <id@li.org>\n"
@@ -682,6 +682,9 @@ msgstr "HAK OTORISASI TERBUKA"
 msgid "AUTHORIZED"
 msgstr "DISAHKAN"
 
+msgid "AWESOMEBOX TESTING VIEW"
+msgstr ""
+
 msgid "Aberdeen"
 msgstr "Aberdeen"
 
@@ -821,6 +824,9 @@ msgid "Account Number"
 msgstr ""
 
 msgid "Account Type"
+msgstr ""
+
+msgid "Account Type must be specified"
 msgstr ""
 
 msgid "Account number must not be a part of the Description"
@@ -2170,9 +2176,6 @@ msgstr ""
 msgid "Attachment  Name"
 msgstr ""
 
-msgid "Attachments"
-msgstr "Lampiran"
-
 msgid "Attendance"
 msgstr "Kehadiran"
 
@@ -2353,9 +2356,6 @@ msgstr ""
 msgid "Available Hours Per Week(Minimum)"
 msgstr ""
 
-msgid "Available Immediate Drug Test"
-msgstr ""
-
 msgid "Available Start Date"
 msgstr ""
 
@@ -2425,8 +2425,17 @@ msgstr "AVG"
 msgid "Awarded"
 msgstr "diberikan"
 
+msgid "AwesomBox Test"
+msgstr ""
+
+msgid "AwesomeBox Test"
+msgstr ""
+
 msgid "Azerbaijan"
 msgstr "Azerbaijan"
+
+msgid "Azua"
+msgstr ""
 
 msgid "BASIC SEARCH"
 msgstr ""
@@ -2478,6 +2487,9 @@ msgstr "Bahama"
 
 msgid "Bahia"
 msgstr "Bahia"
+
+msgid "Bahoruco"
+msgstr ""
 
 msgid "Bahrain"
 msgstr "Bahrain"
@@ -2571,6 +2583,9 @@ msgstr "Bar - Horizontal"
 
 msgid "Bar - Vertical"
 msgstr "Bar - Vertical"
+
+msgid "Barahona"
+msgstr ""
 
 msgid "Barbados"
 msgstr "Barbados"
@@ -3562,9 +3577,6 @@ msgstr ""
 msgid "Classification Code"
 msgstr ""
 
-msgid "Clear"
-msgstr "Hapus"
-
 msgid "Clear Last Punch Time"
 msgstr "Jelas Waktu Pukulan terakhir"
 
@@ -3869,6 +3881,9 @@ msgid "Configure Available Fields"
 msgstr ""
 
 msgid "Confirm #"
+msgstr ""
+
+msgid "Confirm Email"
 msgstr ""
 
 msgid "Confirm Password"
@@ -4487,6 +4502,9 @@ msgid "Daily Time"
 msgstr "Waktu setiap hari"
 
 msgid "Daily Totals"
+msgstr ""
+
+msgid "Dajabón"
 msgstr ""
 
 msgid "Daman and Diu"
@@ -5164,6 +5182,9 @@ msgstr "Distrito Kapital"
 msgid "Distrito Federal"
 msgstr "Distrito Federal"
 
+msgid "Distrito Nacional"
+msgstr ""
+
 msgid "Djibouti"
 msgstr "Jibouti"
 
@@ -5282,6 +5303,9 @@ msgid "Drivers License"
 msgstr ""
 
 msgid "Drug Test"
+msgstr ""
+
+msgid "Duarte"
 msgstr ""
 
 msgid "Dudley"
@@ -5710,8 +5734,14 @@ msgstr "El Progreso"
 msgid "El Salvador"
 msgstr "El Salvador"
 
+msgid "El Seibo"
+msgstr ""
+
 msgid "Electronically signed by"
 msgstr "Elektronik ditandatangani oleh"
+
+msgid "Elias Piña"
+msgstr ""
 
 msgid "Eligibility"
 msgstr ""
@@ -6028,6 +6058,9 @@ msgstr "Bayar Gaji Karyawan"
 msgid "Employee Pay<br>Stubs"
 msgstr ""
 
+msgid "Employee Payment Method"
+msgstr ""
+
 msgid "Employee Payment Methods"
 msgstr ""
 
@@ -6086,6 +6119,9 @@ msgid "Employee Tax / Deductions"
 msgstr "Pajak / Pengurangan Karyawan"
 
 msgid "Employee Termination Date"
+msgstr ""
+
+msgid "Employee TimeClock"
 msgstr ""
 
 msgid "Employee TimeSheet"
@@ -6174,6 +6210,9 @@ msgstr "Jumlah Karyawan harus ditentukan bagi karyawan ACTIVE"
 
 msgid "Employee number must only be digits"
 msgstr "Nomor karyawan hanya harus digit"
+
+msgid "Employee payment method is invalid"
+msgstr ""
 
 msgid "Employee's Hire Date"
 msgstr ""
@@ -6588,6 +6627,9 @@ msgstr "Eritrea"
 
 msgid "Escuintla"
 msgstr "Escuintla"
+
+msgid "Espaillat"
+msgstr ""
 
 msgid "Espirito Santo"
 msgstr ""
@@ -7153,6 +7195,9 @@ msgstr ""
 msgid "File checksums do not match, some"
 msgstr ""
 
+msgid "File exceeds maximum number of records (%1) that can be imported at one time"
+msgstr ""
+
 msgid "File is invalid, unable to save"
 msgstr ""
 
@@ -7188,6 +7233,9 @@ msgstr ""
 
 msgid "Final Pay Period Ending Date"
 msgstr "Periode pembayaran akhir Akhir Tanggal"
+
+msgid "Final Pay Period Ending Date must be on or after Last Day Paid"
+msgstr ""
 
 msgid "Final Pay Stub End Date"
 msgstr ""
@@ -7330,10 +7378,10 @@ msgstr ""
 msgid "For help, please visit"
 msgstr "Untuk bantuan, silahkan kunjungi"
 
-msgid "For installation support, please contact "
+msgid "For installation assistance, please contact "
 msgstr ""
 
-msgid "For installation support, please join our community "
+msgid "For installation assistance, please join our community "
 msgstr ""
 
 msgid "For more information please click here."
@@ -7528,7 +7576,10 @@ msgstr "Frosinone"
 msgid "Full Name"
 msgstr "Nama lengkap"
 
-msgid "Full Shift (Majority of Shift)"
+msgid "Full Shift (Majority of Shift Observed)"
+msgstr ""
+
+msgid "Full Shift (Majority of Shift Worked)"
 msgstr ""
 
 msgid "Full Shift (Must End)"
@@ -7840,6 +7891,9 @@ msgstr "Greenland (tanah hijau)"
 msgid "Grenada"
 msgstr "Grenada"
 
+msgid "Grid Test"
+msgstr ""
+
 msgid "Gross Amount"
 msgstr ""
 
@@ -7863,6 +7917,9 @@ msgstr "Grosseto"
 
 msgid "Group"
 msgstr "Kelompok"
+
+msgid "Group (Multi)"
+msgstr ""
 
 msgid "Group - Combined"
 msgstr ""
@@ -8032,6 +8089,9 @@ msgstr "Hartlepool"
 msgid "Haryana"
 msgstr "Haryana"
 
+msgid "Hato Mayor"
+msgstr ""
+
 msgid "Have no effect"
 msgstr "tidak memiliki efek"
 
@@ -8073,6 +8133,9 @@ msgstr "Heredia"
 
 msgid "Herefordshire"
 msgstr "Herefordshire"
+
+msgid "Hermanas Mirabal"
+msgstr ""
 
 msgid "Herrera"
 msgstr "Herrera"
@@ -8233,6 +8296,9 @@ msgstr ""
 msgid "Hour Based"
 msgstr "jam Berdasarkan"
 
+msgid "Hour Of Day"
+msgstr ""
+
 msgid "Hour Type"
 msgstr ""
 
@@ -8274,6 +8340,12 @@ msgstr "Kode Jam"
 
 msgid "Hours/Pay Criteria"
 msgstr "Jam/ Kriteria Pembayaran"
+
+msgid "Hours/Week (Max)"
+msgstr ""
+
+msgid "Hours/Week (Min)"
+msgstr ""
 
 msgid "Hrs/Units"
 msgstr "Jam/Unit"
@@ -8432,6 +8504,9 @@ msgid "Immediate Dest."
 msgstr ""
 
 msgid "Immediate Dest. Name"
+msgstr ""
+
+msgid "Immediate Drug Test"
 msgstr ""
 
 msgid "Immediate Origin"
@@ -9496,9 +9571,6 @@ msgstr "Minimum Jumlah Pembelian yang Salah"
 msgid "Incorrect month"
 msgstr ""
 
-msgid "Incorrect name length"
-msgstr ""
-
 msgid "Incorrect option to enable calendar synchronization"
 msgstr "Hak memilih  mengkoordinasikan kemampuan Kalender yang Salah"
 
@@ -9633,6 +9705,9 @@ msgstr ""
 
 msgid "Independence Day"
 msgstr "Hari Kemerdekaan"
+
+msgid "Independencia"
+msgstr ""
 
 msgid "India"
 msgstr "India"
@@ -10540,6 +10615,9 @@ msgstr ""
 msgid "Job Details By Supervisor"
 msgstr ""
 
+msgid "Job End Date"
+msgstr ""
+
 msgid "Job Estimate Bad Quantity"
 msgstr "Job Perkiraan Bad Kuantitas"
 
@@ -10600,7 +10678,13 @@ msgstr "Menganalisi Daftar Gaji Pekerjaan"
 msgid "Job Reports"
 msgstr "Laporan Pekerjaan"
 
+msgid "Job Search"
+msgstr ""
+
 msgid "Job Selection Type"
+msgstr ""
+
+msgid "Job Start Date"
 msgstr ""
 
 msgid "Job Status"
@@ -10909,6 +10993,9 @@ msgstr "RENDAH"
 msgid "L`Aquila"
 msgstr ""
 
+msgid "La Altagracia"
+msgstr ""
+
 msgid "La Guajira"
 msgstr "La Guajira"
 
@@ -10918,11 +11005,17 @@ msgstr "La Libertad"
 msgid "La Paz"
 msgstr "La Paz"
 
+msgid "La Romana"
+msgstr ""
+
 msgid "La Spezia"
 msgstr "La Spezia"
 
 msgid "La Union"
 msgstr "La Union"
+
+msgid "La Vega"
+msgstr ""
 
 msgid "Label"
 msgstr "Label"
@@ -11052,6 +11145,9 @@ msgstr ""
 
 msgid "Last Day For Which Paid"
 msgstr "Hari terakhir yang dibayar"
+
+msgid "Last Day Paid must be after First Day Worked"
+msgstr ""
 
 msgid "Last Download"
 msgstr "Unduh terakhir"
@@ -11617,9 +11713,6 @@ msgstr ""
 msgid "MBSTRING Enabled"
 msgstr ""
 
-msgid "MCRYPT Enabled"
-msgstr ""
-
 msgid "ME-UC-1"
 msgstr ""
 
@@ -11892,6 +11985,9 @@ msgstr "Martinique"
 
 msgid "Maryland"
 msgstr "Maryland"
+
+msgid "María Trinidad Sánchez"
+msgstr ""
 
 msgid "Masaya"
 msgstr "Masaya"
@@ -12442,6 +12538,9 @@ msgstr "Nomor ponsel tidak sah"
 msgid "Modena"
 msgstr "Modena"
 
+msgid "Modified Business Tax Return"
+msgstr ""
+
 msgid "Modified Shifts"
 msgstr ""
 
@@ -12472,8 +12571,17 @@ msgstr "Mongolia"
 msgid "Monmouthshire"
 msgstr "Monmouthshire"
 
+msgid "Monseñor Nouel"
+msgstr ""
+
 msgid "Montana"
 msgstr "Montana"
+
+msgid "Monte Cristi"
+msgstr ""
+
+msgid "Monte Plata"
+msgstr ""
 
 msgid "Montenegro"
 msgstr ""
@@ -12545,6 +12653,9 @@ msgid "Mountain"
 msgstr "Pegunungan"
 
 msgid "Move"
+msgstr ""
+
+msgid "Move All"
 msgstr ""
 
 msgid "Moyle"
@@ -12769,11 +12880,11 @@ msgstr ""
 msgid "Net Pay"
 msgstr "Penghasilan  Bersih"
 
+msgid "Net Pay (%1) is a negative amount, deductions (%2) exceed earnings (%3)"
+msgstr ""
+
 msgid "Net Pay doesn't match earnings or deductions"
 msgstr "Bayar Bersih tidak sesuai laba atau pengurangan"
-
-msgid "Net Pay is a negative amount, deductions exceed earnings"
-msgstr ""
 
 msgid "Net pay doesn't match total of all pending or paid transactions"
 msgstr ""
@@ -14203,8 +14314,8 @@ msgstr "Kata Sandi"
 msgid "Password (confirm)"
 msgstr ""
 
-msgid "Password - Phone"
-msgstr "Kata sandi-Telepon"
+msgid "Password - Quick Punch"
+msgstr ""
 
 msgid "Password - Web"
 msgstr "Kata sandi-Internet"
@@ -14752,6 +14863,9 @@ msgstr ""
 msgid "Payroll<br>Reports"
 msgstr ""
 
+msgid "Pedernales"
+msgstr ""
+
 msgid "Pembrokeshire"
 msgstr "Pembrokeshire"
 
@@ -14820,6 +14934,9 @@ msgstr ""
 
 msgid "Per Weight"
 msgstr "Per Berat"
+
+msgid "Peravia"
+msgstr ""
 
 msgid "Percent"
 msgstr "Persen"
@@ -15604,6 +15721,9 @@ msgstr "Penerbitan Industries (kecuali internet)"
 msgid "Puebla"
 msgstr "Puebla"
 
+msgid "Puerto Plata"
+msgstr ""
+
 msgid "Puerto Rico"
 msgstr "Puerto Rico"
 
@@ -15641,6 +15761,9 @@ msgid "Punch Mode: QRCode"
 msgstr ""
 
 msgid "Punch Mode: Quick Punch"
+msgstr ""
+
+msgid "Punch Note"
 msgstr ""
 
 msgid "Punch Notes"
@@ -15948,9 +16071,6 @@ msgstr "Coblos Cepat ID harus angka saja"
 
 msgid "Quick Punch ID or Password is incorrect"
 msgstr ""
-
-msgid "Quick Punch Login"
-msgstr "Login Cepat Coblos"
 
 msgid "Quick Punch Password"
 msgstr "Kata sandi Coblos Cepat"
@@ -16402,9 +16522,6 @@ msgstr ""
 msgid "Remittance Agency Event"
 msgstr ""
 
-msgid "Remittance Destination Account"
-msgstr ""
-
 msgid "Remittance Source Account"
 msgstr ""
 
@@ -16418,12 +16535,6 @@ msgid "Remittance Summary Report"
 msgstr "Laporan Ringkasan Pengiriman uang"
 
 msgid "Remittance agency is invalid"
-msgstr ""
-
-msgid "Remittance destination account"
-msgstr ""
-
-msgid "Remittance destination account is invalid"
 msgstr ""
 
 msgid "Remittance source account"
@@ -16510,6 +16621,9 @@ msgstr ""
 msgid "Request - Employee"
 msgstr ""
 
+msgid "Request - Schedule"
+msgstr ""
+
 msgid "Request Authorization"
 msgstr ""
 
@@ -16574,6 +16688,9 @@ msgid "Result"
 msgstr "Hasil"
 
 msgid "Resume"
+msgstr ""
+
+msgid "Resume Keywords"
 msgstr ""
 
 msgid "Retail Trade"
@@ -16867,6 +16984,9 @@ msgstr ""
 msgid "Run"
 msgstr ""
 
+msgid "Run tests?"
+msgstr ""
+
 msgid "Running Scheduled Report"
 msgstr ""
 
@@ -16999,6 +17119,9 @@ msgstr ""
 msgid "Salford"
 msgstr "Salford"
 
+msgid "Samaná"
+msgstr ""
+
 msgid "Samar"
 msgstr "Samar"
 
@@ -17017,8 +17140,17 @@ msgstr "San Andres y Providencia"
 msgid "San Blas"
 msgstr "San Blas"
 
+msgid "San Cristóbal"
+msgstr ""
+
 msgid "San Jose"
 msgstr "San Jose"
+
+msgid "San José de Ocoa"
+msgstr ""
+
+msgid "San Juan"
+msgstr ""
 
 msgid "San Luis Potosi"
 msgstr "San Luis Potosi"
@@ -17031,6 +17163,9 @@ msgstr "San Marino"
 
 msgid "San Miguel"
 msgstr "San Miguel"
+
+msgid "San Pedro de Macorís"
+msgstr ""
 
 msgid "San Salvador"
 msgstr "San Salvador"
@@ -17055,6 +17190,15 @@ msgstr "Santa Rosa"
 
 msgid "Santander"
 msgstr "Santander"
+
+msgid "Santiago"
+msgstr ""
+
+msgid "Santiago Rodríguez"
+msgstr ""
+
+msgid "Santo Domingo"
+msgstr ""
 
 msgid "Sao Paulo"
 msgstr ""
@@ -17139,6 +17283,9 @@ msgstr ""
 
 msgid "Savings"
 msgstr "tabungan"
+
+msgid "Savings Account"
+msgstr ""
 
 msgid "Savona"
 msgstr "Savona"
@@ -17233,10 +17380,13 @@ msgstr "Jadwal Absen"
 msgid "Scheduled Days"
 msgstr "Jadwal Hari - hari"
 
+msgid "Scheduled Employees/Hour"
+msgstr ""
+
 msgid "Scheduled Report"
 msgstr "Jadwal Laporan"
 
-msgid "Scheduled Shift to replace does not exist."
+msgid "Scheduled Shift to replace does not exist"
 msgstr ""
 
 msgid "Scheduled Shifts"
@@ -17608,6 +17758,9 @@ msgstr "Terkirim"
 msgid "Sep"
 msgstr "Sep"
 
+msgid "Separated_box: if you see this, the test is passing."
+msgstr ""
+
 msgid "September"
 msgstr "September"
 
@@ -17627,6 +17780,9 @@ msgid "Serial number should be between 9 and 15 digits"
 msgstr "Serial number harus antara 9 dan 15 digit"
 
 msgid "Server"
+msgstr ""
+
+msgid "Server Time Zone"
 msgstr ""
 
 msgid "Service"
@@ -18613,6 +18769,9 @@ msgstr ""
 msgid "System log is invalid"
 msgstr "Log sistem tidak sah"
 
+msgid "Sánchez Ramírez"
+msgstr ""
+
 msgid "T"
 msgstr "T"
 
@@ -18658,10 +18817,43 @@ msgstr ""
 msgid "TC-941R Filing"
 msgstr ""
 
+msgid "TCheckbox"
+msgstr ""
+
+msgid "TColorPicker"
+msgstr ""
+
+msgid "TDatePicker"
+msgstr ""
+
+msgid "TDateRange"
+msgstr ""
+
+msgid "TImageAdvBrowser"
+msgstr ""
+
+msgid "TPasswordInput"
+msgstr ""
+
 msgid "TQ01C Filing"
 msgstr ""
 
+msgid "TTagInput"
+msgstr ""
+
+msgid "TText"
+msgstr ""
+
+msgid "TTextArea"
+msgstr ""
+
+msgid "TTimePicker"
+msgstr ""
+
 msgid "TX-17 Filing"
+msgstr ""
+
+msgid "TXR-020.04 Filing"
 msgstr ""
 
 msgid "Tabasco"
@@ -19240,6 +19432,9 @@ msgstr ""
 msgid "This remittance source account is currently in use by employee payment methods assigned to a different legal entity. (%1)"
 msgstr ""
 
+msgid "This remittance source account is currently in use by employee payment methods in a different country"
+msgstr ""
+
 msgid "This station is currently pending activation by a supervisor..."
 msgstr ""
 
@@ -19280,6 +19475,9 @@ msgid "Time"
 msgstr "Waktu"
 
 msgid "Time & Attendance"
+msgstr ""
+
+msgid "Time (Actual)"
 msgstr ""
 
 msgid "Time Accrued"
@@ -19590,6 +19788,12 @@ msgstr "Jumlah Karyawan"
 
 msgid "Total Employees Hired By Month"
 msgstr "Jumlah Karyawan Dipekerjakan Dengan Bulan"
+
+msgid "Total Employees Scheduled By Date/Hour of Day"
+msgstr ""
+
+msgid "Total Employees Scheduled By Day of Week/Hour of Day"
+msgstr ""
 
 msgid "Total Employees Terminated By Month"
 msgstr "Jumlah Karyawan Dihentikan Dengan Bulan"
@@ -20485,6 +20689,12 @@ msgstr "Terpakai"
 msgid "Used to search for the user, for anonymous binding enter: anonymous"
 msgstr ""
 
+msgid "User"
+msgstr ""
+
+msgid "User ( Big multi select)"
+msgstr ""
+
 msgid "User Date Total ID is invalid"
 msgstr "Pengguna Tanggal Jumlah ID tidak sah"
 
@@ -20821,6 +21031,9 @@ msgstr ""
 msgid "Value9"
 msgstr ""
 
+msgid "Valverde"
+msgstr ""
+
 msgid "Vanuatu"
 msgstr "Vanuatu"
 
@@ -20864,9 +21077,6 @@ msgid "Verification Window Starts is too large"
 msgstr ""
 
 msgid "Verification Window Starts is too small"
-msgstr ""
-
-msgid "Verification Windows Ends"
 msgstr ""
 
 msgid "Verification failed due to the following reasons"
@@ -21424,6 +21634,9 @@ msgstr "Whos Dalam Ringkasan"
 msgid "Whos In/Out"
 msgstr ""
 
+msgid "Widget Test"
+msgstr ""
+
 msgid "Width"
 msgstr ""
 
@@ -21662,9 +21875,6 @@ msgid "Workers Safety and Compensation Commission"
 msgstr ""
 
 msgid "Workers' Compensation Fee Form"
-msgstr ""
-
-msgid "Workforce Management Software"
 msgstr ""
 
 msgid "Working"
@@ -22072,9 +22282,6 @@ msgstr ""
 msgid "by remittance agencies"
 msgstr ""
 
-msgid "by remittance destination accounts"
-msgstr ""
-
 msgid "by remittance sources"
 msgstr ""
 
@@ -22271,6 +22478,9 @@ msgid "is unable to connect to its database, please make sure that the database 
 msgstr ""
 
 msgid "is_empty(expression) - Example: if( is_empty(#PA3206#) = 0, #PA3206#, 0)"
+msgstr ""
+
+msgid "item(s) selected"
 msgstr ""
 
 msgid "items selected"
@@ -22993,6 +23203,9 @@ msgstr "yrs"
 #~ msgid "Attach Existing Document"
 #~ msgstr "Lampirkan Dokumen yang ada"
 
+#~ msgid "Attachments"
+#~ msgstr "Lampiran"
+
 #~ msgid "Attendance History"
 #~ msgstr "kehadiran Sejarah"
 
@@ -23286,6 +23499,9 @@ msgstr "yrs"
 
 #~ msgid "City:"
 #~ msgstr "Kota:"
+
+#~ msgid "Clear"
+#~ msgstr "Hapus"
 
 #~ msgid "Click here</a> to assign"
 #~ msgstr "Klik di sini </ a> untuk menetapkan"
@@ -25447,6 +25663,9 @@ msgstr "yrs"
 #~ msgid "Password (confirm):"
 #~ msgstr "Kata sandi ( yang dipastikan_"
 
+#~ msgid "Password - Phone"
+#~ msgstr "Kata sandi-Telepon"
+
 #~ msgid "Password Reset requested at "
 #~ msgstr "Pengulangan Kata sandi diminta pada "
 
@@ -25903,6 +26122,9 @@ msgstr "yrs"
 
 #~ msgid "Quick Punch ID:"
 #~ msgstr "ID Cepat Coblos"
+
+#~ msgid "Quick Punch Login"
+#~ msgstr "Login Cepat Coblos"
 
 #~ msgid "Quick Punch Password:"
 #~ msgstr "Kata sandi Coblos Cepat:"

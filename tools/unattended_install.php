@@ -52,7 +52,7 @@ if ( $argc < 1 OR ( isset($argv[1]) AND in_array($argv[1], array('--help', '-hel
 	if ( in_array('-u', $argv) ) {
 		$user_name = trim($argv[(array_search('-u', $argv) + 1)]);
 	} else {
-		$user_name = 'demoadmin1';
+		$user_name = 'demoadmin';
 	}
 
 	if ( in_array('-f', $argv) ) {

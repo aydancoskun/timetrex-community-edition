@@ -141,7 +141,7 @@ class APIAbout extends APIFactory {
 		$license = new TTLicense();
 		$data['hardware_id'] = $license->getHardwareID();
 
-		if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) AND getTTProductEdition() > 10 ) {
+		if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) AND getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 
 			if ( !isset($system_settings['license']) ) {
 				$system_settings['license'] = NULL;

@@ -100,8 +100,9 @@ class InstallSchema_1058A extends InstallSchema_Base {
 					unset($pclf, $pf, $preset_options, $preset_level_options, $old_permission_arr, $level, $pc_obj );
 
 					//Re-enable audit logging after permissions were updated.
-					$config_vars['other']['disable_audit_log_detail'] = FALSE;
-					$config_vars['other']['disable_audit_log'] = FALSE;
+					// Can't do this anymore as of v11.0 where we switch to UUIDs, as all audit logging must be disabled prior to schema version 1100
+//					$config_vars['other']['disable_audit_log_detail'] = FALSE;
+//					$config_vars['other']['disable_audit_log'] = FALSE;
 
 					//Delete duplicate OPEN shifts before todays date.
 					$sf = new ScheduleFactory();

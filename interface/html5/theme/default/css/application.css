@@ -16,6 +16,7 @@ html, body {
     -ms-user-select: none;
     user-select: none;
 
+    line-height:1.1 !important;
     /** #1187 fix bold-looking text caused by mac text smoothing **/
     -webkit-font-smoothing: antialiased; /* This needs to be set or some normal faced fonts look bold on Mac in Chrome/Webkit based browsers. */
     -moz-osx-font-smoothing: grayscale; /* Fixes font bold issue in Firefox version 25+ on Mac */
@@ -146,8 +147,12 @@ progress::-moz-progress-bar {
 }
 
 .grid-div {
+    max-height: calc(100% - 70px);
     position: relative;
+}
 
+.edit-view .grid-div {
+    max-height: 100%;
 }
 
 .grid-outline {
@@ -222,7 +227,6 @@ progress::-moz-progress-bar {
 }
 
 .ribbon-button:hover {
-
     background: -webkit-gradient(linear, 0 0, 0 100%, from(#d9eafa), to(#c8dcf0));
     background: -moz-linear-gradient(top, #d9eafa, #c8dcf0);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d9eafa', endColorstr='#c8dcf0', grandientType=1);
@@ -250,15 +254,18 @@ progress::-moz-progress-bar {
     margin-bottom: 3px;
 }
 
+.context-menu-icon {
+    background-size: 15px;
+    background-repeat: no-repeat;
+}
+
 /*Override styles from Jquery style*/
 .ui-button-text-only .ui-button-text {
     padding: .2em .5em;
 }
-
 /*Override styles from Jquery style end*/
 
 .drag-holder-table {
-
     cursor: default;
     z-index: -1000;
     position: absolute;
@@ -342,7 +349,7 @@ progress::-moz-progress-bar {
 .top-container .login-information-div {
     padding-left: 70px;
     position: relative;
-    top: -102px;
+    top: -101px;
     width: 77%;
 }
 
@@ -352,11 +359,16 @@ progress::-moz-progress-bar {
 }
 
 .bottom-container {
-    bottom: 31px;
+    bottom: 0px;
     display: block;
     margin-right: 20px;
     margin-left: 20px;
-    position: relative;
+    position: fixed;
+    height: 38px;
+    z-index: 1;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .portal .bottom-container {
@@ -364,7 +376,7 @@ progress::-moz-progress-bar {
 }
 
 .bottom-container .copyright-container {
-    width: 40%;
+     width: 600px;
     float: left;
 }
 
@@ -515,6 +527,7 @@ progress::-moz-progress-bar {
     background: #375979;
     color: #ffffff;
     border-right: 1px solid #dddddd;
+    font-weight:bold;
 }
 
 /*.ui-jqgrid-btable .ui-state-hover{*/
@@ -612,7 +625,8 @@ progress::-moz-progress-bar {
 }
 
 .t-text-area {
-    width: 200px;
+    min-width: 350px;
+    width: 100%;
 
 }
 
@@ -629,11 +643,11 @@ progress::-moz-progress-bar {
 .t-text-input,
 .t-color-picker, .cp-HEX{
     width: 156px;
-    line-height: 20px;
+    line-height: 25px;
     outline: none;
     vertical-align: middle;
     border: 1px solid rgb(211, 204, 204);
-    height: 20px;
+    height: 24px;
 }
 
 .t-text-input-readonly {
@@ -731,7 +745,7 @@ progress::-moz-progress-bar {
 
 .mass-edit-checkbox {
     opacity: 0;
-    position: absolute;
+    position: absolute !important;
     top: 0;
     left: 0;
     z-index: 1;
@@ -838,30 +852,41 @@ progress::-moz-progress-bar {
 
 .view .grid-top-border, .edit-view .grid-top-border {
     background: none repeat scroll 0 0 #A40000;
-    border-top-left-radius: 3px;
+    border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     height: 5px;
     width: 100%;
     display: none;
+    padding: 0px 7px;
 }
 
 .view .grid-bottom-border, .edit-view .grid-bottom-border {
     background: none repeat scroll 0 0 #A40000;
-    border-bottom-left-radius: 3px;
+    border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
     height: 5px;
-    width: 100%;
-    display: none;
 
+    display: block;
+    position: fixed;
+    bottom: 39px;
+    width: calc(100% - 12px);
+}
+.edit-view .grid-bottom-border {
+    position:relative;
+    bottom:0px;
+    width: 100%;
+    padding: 0px 5px;
 }
 
 .view .bottom-div {
     height: 55px;
     margin-top: 5px;
+    max-width:100vw;
 }
 
 .sub-view .bottom-div {
     height: auto;
+    margin: 0px;
 }
 
 .edit-view {
@@ -878,14 +903,14 @@ progress::-moz-progress-bar {
     position: absolute;
     top: 0;
     width: 100%;
-    z-index: 40;
+    z-index: 90;
 
 }
 
 .edit-view .tab-label-wrap {
     overflow: hidden;
     margin-bottom: -4px;
-
+    height: 32px;
 }
 
 .edit-view .label-wrap {
@@ -896,6 +921,8 @@ progress::-moz-progress-bar {
 .edit-view .btn-wrap {
     display: inline-block;
     margin-left: 15px;
+    top: 13px;
+    position: absolute;
 }
 
 .edit-view .tab-arrow {
@@ -945,6 +972,7 @@ progress::-moz-progress-bar {
     height: 32px;
     margin-right: 10px;
     min-height: 32px;
+    min-width: 145px;
 }
 
 .edit-view .edit-view-form-item-div .edit-view-form-item-sub-label-div {
@@ -978,8 +1006,8 @@ progress::-moz-progress-bar {
     margin-left: 5px;
     margin-top: 9px;
     min-width: 135px;
-    text-align: right
-
+    text-align: right;
+    min-width: 145px;
 }
 
 .edit-view .edit-view-form-item-div .edit-view-form-item-input-div {
@@ -1020,7 +1048,7 @@ progress::-moz-progress-bar {
     border-top-left-radius: 0;
     min-height: 200px;
     overflow: auto;
-    height: calc(100% - 58px);
+    height: calc(100% - 30px);
 }
 
 /*Current table div style*/
@@ -1029,8 +1057,9 @@ progress::-moz-progress-bar {
     border: 1px solid #AAAAAA;
     border-radius: 10px;
     border-top-left-radius: 0;
-    min-height: 200px;
-    overflow: auto;
+    min-height: 400px;
+    overflow-y: hidden; /** #2353 - Prevent this extra scrollbar. Only show data table scrollbars. **/
+    overflow-x: auto;
     padding-top: 0;
     padding-left: 5px;
     padding-right: 5px;
@@ -1039,9 +1068,8 @@ progress::-moz-progress-bar {
 }
 
 .edit-view .edit-view-tab-bar .edit-view-tab-outside .edit-view-tab {
-    margin: -7px -10px;
-    height: 90%;
-
+    margin: 7px 10px;
+    height: calc(100% - 32px - 14px);
 }
 
 /*.first-sub-view .sub-grid-view-div, .second-sub-view .sub-grid-view-div, .third-sub-view .sub-grid-view-div, .forth-sub-view .sub-grid-view-div, .fifth-sub-view .sub-grid-view-div {*/
@@ -1110,7 +1138,6 @@ progress::-moz-progress-bar {
     padding-top: 0;
     background: none;
     border: medium none;
-
 }
 
 /*table Default style*/
@@ -1159,6 +1186,10 @@ progress::-moz-progress-bar {
 /*No Selected tab font style*/
 .edit-view .ui-state-default a, .edit-view .ui-state-default a:link, .edit-view .ui-state-default a:visited {
     color: #3b3b3b;
+    font-weight:bold;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 /*Selected tab font style*/
@@ -1169,7 +1200,6 @@ progress::-moz-progress-bar {
 .edit-view .ui-tabs-panel {
     padding: 0;
 }
-
 .edit-view .navigation-div {
     position: absolute;
     right: 25px;
@@ -1230,7 +1260,6 @@ progress::-moz-progress-bar {
 
 .edit-view .widget-h-box input[type='text'] {
     margin-left: 0;
-    vertical-align: top;
 }
 
 .edit-view .widget-h-box input[type='checkbox'] {
@@ -1261,6 +1290,30 @@ progress::-moz-progress-bar {
 .error-tip {
     background: #F78B83 !important;
     border: 1px solid #D95252 !important;
+}
+
+.qtip2-error-tip{
+    color: rgb(203, 46, 46) !important;
+    background-color:  rgb(203, 46, 46) !important;
+    border-color:  rgb(203, 46, 46) !important;
+    border:0 !important;
+    font-weight:bold;
+}
+.qtip2-error-tip .qtip-content{
+    color:#fff;
+}
+.qtip {
+    position: absolute;
+    left: -28000px;
+    top: -28000px;
+    display: none;
+    max-width: 400px;
+}
+
+.qtip-default {
+    border: 1px solid #e7be00;
+    background-color: #ffff00;
+    color: #555;
 }
 
 .warning-tip {
@@ -1298,6 +1351,9 @@ progress::-moz-progress-bar {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .paging-div:hover {
@@ -1321,6 +1377,13 @@ progress::-moz-progress-bar {
     user-select: none;
     z-index: 1; /*Make sure this show above bottom copryright area*/
     position: relative;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.bottom-div .paging-2-div {
+    margin-top:8px;
 }
 
 .paging-2-div .left-buttons-div {
@@ -1333,7 +1396,13 @@ progress::-moz-progress-bar {
     color: #154b82;
 }
 
-.disabled {
+.context-menu-item.context-menu-hover {
+    color: #000;
+    cursor: pointer;
+    background-color: #ccf2ff;
+}
+
+.disabled, .context-menu-disabled {
     color: #666666;
     -webkit-filter: grayscale(100%);
     -moz-filter: grayscale(100%);
@@ -1353,9 +1422,8 @@ progress::-moz-progress-bar {
     height: 14px;
     width: 17px;
     float: left;
-    margin-top: 4px;
+    margin-top: 5px;
     margin-right: -3px;
-
 }
 
 .paging-2-div .double-right-arrow {
@@ -1364,7 +1432,7 @@ progress::-moz-progress-bar {
     height: 14px;
     width: 17px;
     float: left;
-    margin-top: 4px;
+    margin-top: 5px;
 }
 
 .paging-2-div .right-arrow {
@@ -1372,7 +1440,7 @@ progress::-moz-progress-bar {
     height: 14px;
     width: 12px;
     float: left;
-    margin-top: 4px;
+    margin-top: 5px;
 }
 
 .paging-2-div .left-arrow {
@@ -1380,13 +1448,13 @@ progress::-moz-progress-bar {
     height: 14px;
     width: 12px;
     float: left;
-    margin-top: 4px;
+    margin-top: 5px;
     margin-right: -3px;
 }
 
 .paging-2-div .paging-2-span {
     float: left;
-    margin-top: 3px;
+    margin-top: 5px;
     cursor: pointer;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -1406,10 +1474,9 @@ progress::-moz-progress-bar {
 
 .paging-2-div .page-label-span {
     float: left;
-    margin-top: 3px;
+    margin-top: 5px;
     margin-right: 7px;
     margin-left: 12px;
-
 }
 
 .paging-selector {
@@ -1417,7 +1484,6 @@ progress::-moz-progress-bar {
     min-width: 30px;
     width: 60px;
     margin-right: 13px;
-    margin-top: -1px;
     height: 23px;
 }
 
@@ -1460,202 +1526,203 @@ progress::-moz-progress-bar {
     border-left: 0;
     border-top: 0;
     width: auto;
-
+    text-align: center;
 }
 
 .group-column-label {
     color: #ffffff;
-
 }
 
-.icon-addIcon {
+.context-menu-icon-addIcon {
     background-image: url("global/widgets/ribbon/icons/new_add-35x35.png");
-    background-size: 15px;
 }
 
-.icon-viewIcon {
+.context-menu-icon-viewIcon, .context-menu-icon-viewHTMLIcon {
     background-image: url("global/widgets/ribbon/icons/view-35x35.png");
-    background-size: 15px;
 }
 
-.icon-editIcon {
+.context-menu-icon-editIcon {
     background-image: url("global/widgets/ribbon/icons/edit-35x35.png");
-    background-size: 15px;
 }
 
-.icon-massEditIcon {
+.context-menu-icon-massEditIcon {
     background-image: url("global/widgets/ribbon/icons/mass_edit-35x35.png");
-    background-size: 15px;
 }
 
-.icon-deleteIcon {
+.context-menu-icon-deleteIcon {
     background-image: url("global/widgets/ribbon/icons/delete-35x35.png");
-    background-size: 15px;
 }
 
-.icon-deleteAndNextIcon {
+.context-menu-icon-deleteAndNextIcon {
     background-image: url("global/widgets/ribbon/icons/copy_as_new-35x35.png");
-    background-size: 15px;
 }
 
-.icon-saveIcon {
+.context-menu-icon-saveIcon, .context-menu-icon-saveExistedReportIcon {
     background-image: url("global/widgets/ribbon/icons/save-35x35.png");
-    background-size: 15px;
 }
 
-.icon-saveAndContinueIcon {
+.context-menu-icon-saveAndContinueIcon {
     background-image: url("global/widgets/ribbon/icons/save_and_continue-35x35.png");
-    background-size: 15px;
 }
 
-.icon-saveAndNextIcon {
+.context-menu-icon-saveAndNextIcon {
     background-image: url("global/widgets/ribbon/icons/save_and_next-35x35.png");
-    background-size: 15px;
 }
 
-.icon-saveAndCopyIcon {
+.context-menu-icon-saveAndCopyIcon {
     background-image: url("global/widgets/ribbon/icons/save_and_copy-35x35.png");
-    background-size: 15px;
 }
 
-.icon-saveAndNewIcon {
+.context-menu-icon-saveAndNewIcon, .context-menu-icon-saveNewReportIcon {
     background-image: url("global/widgets/ribbon/icons/save_and_new-35x35.png");
-    background-size: 15px;
 }
 
-.icon-cancelIcon {
+.context-menu-icon-cancelIcon {
     background-image: url("global/widgets/ribbon/icons/cancel-35x35.png");
-    background-size: 15px;
 }
 
-.icon-moveIcon {
+.context-menu-icon-moveIcon {
     background-image: url("global/widgets/ribbon/icons/move-35x35.png");
-    background-size: 15px;
 }
 
-.icon-copyAsNewIcon {
+.context-menu-icon-copyAsNewIcon {
     background-image: url("global/widgets/ribbon/icons/copy_as_new-35x35.png");
-    background-size: 15px;
 }
 
-.icon-copyIcon {
+.context-menu-icon-copyIcon {
     background-image: url("global/widgets/ribbon/icons/copy-35x35.png");
-    background-size: 15px;
 }
 
-.icon-viewDetailIcon {
+.context-menu-icon-viewDetailIcon {
     background-image: url("global/widgets/ribbon/icons/view_detail-35x35.png");
-    background-size: 15px;
 }
 
-.icon-addAbsenceIcon {
+.context-menu-icon-addAbsenceIcon, .context-menu-icon-addPunchIcon {
     background-image: url("global/widgets/ribbon/icons/new_add-35x35.png");
-    background-size: 15px;
 }
 
-.icon-dragCopyIcon {
+.context-menu-icon-dragCopyIcon {
     background-image: url("global/widgets/ribbon/icons/copy-35x35.png");
-    background-size: 15px;
 }
 
-.icon-editEmployeeIcon {
+.context-menu-icon-editEmployeeIcon {
     background-image: url("global/widgets/ribbon/icons/employees-35x35.png");
-    background-size: 15px;
 }
 
-.icon-scheduleIcon {
+.context-menu-icon-scheduleIcon {
     background-image: url("global/widgets/ribbon/icons/schedule-35x35.png");
-    background-size: 15px;
 }
 
-.icon-PayStubIcon {
-    background-image: url("global/widgets/ribbon/icons/pay_stubs-35x35.png");
-    background-size: 15px;
+.context-menu-icon-recurringTemplateIcon, .context-menu-icon-recurringSchedule {
+    background-image: url("global/widgets/ribbon/icons/recurring_schedule-35x35.png");
 }
 
-.icon-EditPayPeriodIcon {
-    background-image: url("global/widgets/ribbon/icons/pay_periods-35x35.png");
-    background-size: 15px;
+.context-menu-icon-inOutIcon, .context-menu-icon-AutoPunch {
+    background-image: url("global/widgets/ribbon/icons/clock_in_out-35x35.png");
 }
 
-.icon-ReCalculateTimeSheet {
-    background-image: url("global/widgets/ribbon/icons/calculate-35x35.png");
-    background-size: 15px;
-}
-
-.icon-GeneratePayStub {
-    background-image: url("global/widgets/ribbon/icons/calculate_paystubs-35x35.png");
-    background-size: 15px;
-}
-
-.icon-importIcon {
-    background-image: url("global/widgets/ribbon/icons/import-35x35.png");
-    background-size: 15px;
-}
-
-.icon-PaymentIcon {
-    background-image: url("global/widgets/ribbon/icons/payment_methods-35x35.png");
-    background-size: 15px;
-}
-
-.icon-PackingSlipIcon {
-    background-image: url("global/widgets/ribbon/icons/packing_slip-35x35.png");
-    background-size: 15px;
-}
-
-.icon-editClientIcon {
-    background-image: url("global/widgets/ribbon/icons/clients-35x35.png");
-    background-size: 15px;
-}
-
-.icon-clientContactIcon {
-    background-image: url("global/widgets/ribbon/icons/clients_contacts-35x35.png");
-    background-size: 15px;
-}
-
-.icon-transactionIcon {
-    background-image: url("global/widgets/ribbon/icons/transactions-35x35.png");
-    background-size: 15px;
-}
-
-.icon-paymentMethodIcon {
-    background-image: url("global/widgets/ribbon/icons/payment_methods-35x35.png");
-    background-size: 15px;
-}
-
-.icon-swapIcon {
-    background-image: url("global/widgets/ribbon/icons/swap_shift-35x35.png");
-    background-size: 15px;
-}
-
-.icon-overrideIcon {
-    background-image: url("global/widgets/ribbon/icons/override-35x35.png");
-    background-size: 15px;
-}
-
-.icon-timesheetIcon {
+.context-menu-icon-accumulatedTimeIcon {
     background-image: url("global/widgets/ribbon/icons/timesheet-35x35.png");
-    background-size: 15px;
 }
 
-.icon-EditPayPeriodScheduleIcon {
+.context-menu-icon-AddRequest {
+    background-image: url("global/widgets/ribbon/icons/requests-35x35.png");
+}
+
+.context-menu-icon-jobInvoiceIcon {
+    background-image: url("global/widgets/ribbon/icons/invoice_wizard-35x35.png");
+}
+
+.context-menu-icon-shareReportIcon {
+    background-image: url("global/widgets/ribbon/icons/copy_as_new-35x35.png");
+}
+
+.context-menu-icon-PayStubIcon {
+    background-image: url("global/widgets/ribbon/icons/pay_stubs-35x35.png");
+}
+
+.context-menu-icon-payStubAmendmentIcon {
+    background-image: url("global/widgets/ribbon/icons/pay_stub_amendments-35x35.png");
+}
+
+.context-menu-icon-PayStubTransactionIcon, .context-menu-icon-directDepositIcon {
+    background-image: url("global/widgets/ribbon/icons/direct_deposit-35x35.png");
+}
+
+.context-menu-icon-employeePayStubsIcon, .context-menu-icon-employerPayStubsIcon {
+    background-image: url("global/widgets/ribbon/icons/pay_stubs-35x35.png");
+}
+
+.context-menu-icon-EditPayPeriodIcon {
+    background-image: url("global/widgets/ribbon/icons/pay_periods-35x35.png");
+}
+
+.context-menu-icon-ReCalculateTimeSheet {
+    background-image: url("global/widgets/ribbon/icons/calculate-35x35.png");
+}
+
+.context-menu-icon-GeneratePayStub {
+    background-image: url("global/widgets/ribbon/icons/calculate_paystubs-35x35.png");
+}
+
+.context-menu-icon-importIcon {
+    background-image: url("global/widgets/ribbon/icons/import-35x35.png");
+}
+
+.context-menu-icon-exportExcelIcon {
+    background-image: url("global/widgets/ribbon/icons/export_to_excel-35x35.png");
+}
+
+.context-menu-icon-PaymentIcon {
+    background-image: url("global/widgets/ribbon/icons/payment_methods-35x35.png");
+}
+
+.context-menu-icon-PackingSlipIcon {
+    background-image: url("global/widgets/ribbon/icons/packing_slip-35x35.png");
+}
+
+.context-menu-icon-editClientIcon {
+    background-image: url("global/widgets/ribbon/icons/clients-35x35.png");
+}
+
+.context-menu-icon-clientContactIcon {
+    background-image: url("global/widgets/ribbon/icons/clients_contacts-35x35.png");
+}
+
+.context-menu-icon-transactionIcon {
+    background-image: url("global/widgets/ribbon/icons/transactions-35x35.png");
+}
+
+.context-menu-icon-paymentMethodIcon {
+    background-image: url("global/widgets/ribbon/icons/payment_methods-35x35.png");
+}
+
+.context-menu-icon-swapIcon {
+    background-image: url("global/widgets/ribbon/icons/swap_shift-35x35.png");
+}
+
+.context-menu-icon-overrideIcon {
+    background-image: url("global/widgets/ribbon/icons/override-35x35.png");
+}
+
+.context-menu-icon-timesheetIcon {
+    background-image: url("global/widgets/ribbon/icons/timesheet-35x35.png");
+}
+
+.context-menu-icon-EditPayPeriodScheduleIcon {
     background-image: url("global/widgets/ribbon/icons/pay_period_schedules-35x35.png");
-    background-size: 15px;
 }
 
-.icon-findAvailableIcon {
+.context-menu-icon-findAvailableIcon {
     background-image: url("global/widgets/ribbon/icons/fillshift-35x35.png");
-    background-size: 15px;
 }
 
-.icon-printIcon {
+.context-menu-icon-printIcon {
     background-image: url("global/widgets/ribbon/icons/print-35x35.png");
-    background-size: 15px;
 }
 
-.icon-mapIcon {
+.context-menu-icon-mapIcon {
     background-image: url("global/widgets/ribbon/icons/map-35x35.png");
-    background-size: 15px;
 }
 
 .disable-element {
@@ -1719,23 +1786,26 @@ progress::-moz-progress-bar {
 }
 
 .drag-over-top {
-
-    /*background: #de5a5a;*/
     background: url("../images/cell_hover.png") repeat-x !important;
     background-size: 100px 3px !important;
 }
 
-.drag-over-center {
+.drag-over-top th {
+    background: none !important;
+}
 
+.drag-over-center {
     background: #de5a5a;
 }
 
 .drag-over-bottom {
-
-    /*background: #de5a5a;*/
     background: url("../images/cell_hover.png") repeat-x !important;
     background-position: bottom !important;
     background-size: 100px 3px !important;
+}
+
+.drag-over-bottom th {
+    background: none !important;
 }
 
 .inside-editor-div {
@@ -1811,7 +1881,7 @@ progress::-moz-progress-bar {
     padding: 0;
 }
 
-.sub-view-title {
+.edit-view .sub-view-title {
     font-weight: bold;
     text-align: center;
     margin-top: 10px;
@@ -2059,7 +2129,7 @@ progress::-moz-progress-bar {
 }
 
 .audit-info .label-div {
-    height: 30px;
+    height: 28px;
     float: left;
     margin-right: 10px;
     border-right: 2px solid #ae0000;
@@ -2129,9 +2199,11 @@ progress::-moz-progress-bar {
 
 }
 
-.sortable-dragging {
+.ui-sortable-helper {
     opacity: 0.5;
+    z-index:50;
 }
+
 
 .dashlet {
 
@@ -2161,7 +2233,11 @@ progress::-moz-progress-bar {
     height: 100%;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
-    overflow: hidden;
+    overflow-y:hidden;
+}
+
+.dashlet-container.news .dashlet .content .report-iframe{
+    height: 98%;
 }
 
 .dashlet .button-bar {
@@ -2372,11 +2448,7 @@ progress::-moz-progress-bar {
     height: 25px;
     line-height: 25px;
     text-align: center;
-    border-right: 1px solid #FFFFFF;
-}
-
-.TimeSheetAuthorizationEditView .accumulated-total-grid-title {
-    margin-left: 1px;
+    width: calc( 100% - 1px );
 }
 
 .t-alert {
@@ -2558,7 +2630,7 @@ progress::-moz-progress-bar {
 }
 
 .signal-strength {
-    height: 20px;
+    height: 25px;
     list-style: none;
     overflow: hidden;
     float: left;
@@ -2574,6 +2646,7 @@ progress::-moz-progress-bar {
     padding-left: 3px;
     padding-right: 2px;
     border-radius: 3px;
+    position: relative;
 }
 
 .signal-strength li {
@@ -2660,6 +2733,11 @@ progress::-moz-progress-bar {
 .google-map-full {
     height: 100%;
     width: 100% !important;
+}
+
+#map_container{
+    height:calc(100% - 60px);
+    width:100%;
 }
 
 .controls {
@@ -2756,7 +2834,6 @@ progress::-moz-progress-bar {
     border-top: 1px solid #C7C7C7;
 }
 #tab_vacancy .third-column .edit-view-form-item-tinymce-textarea-div {
-    border: 1px solid #C7C7C7;
     margin-right: 0px;
 }
 
@@ -2771,6 +2848,10 @@ progress::-moz-progress-bar {
     font-smooth: never;
     -webkit-font-smoothing : none;
     image-rendering: pixelated;
+}
+
+.UNIT_TEST_MODE .notification-box {
+    display:none;
 }
 
 .job-vacancy-summary-description {
@@ -2820,9 +2901,11 @@ progress::-moz-progress-bar {
     min-height:50pt;
 }
 .tax_wizard .wizard_icon_card img {
-    margin-left:0;
-    margin-right:10pt;
-    display:inline-block;
+    margin-left: 0;
+    margin-right: 10pt;
+    display: inline-block;
+    position: relative;
+    top: -13px;
 }
 
 .tax_wizard .description{
@@ -2837,6 +2920,13 @@ progress::-moz-progress-bar {
 .tax_wizard .wizard_icon_card .button_title{
     display:block;
     color:#000;
+    font-size: 1.17em;
+    font-size: 1.17em;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
 }
 
 .tax_wizard .wizard_icon_card div{
@@ -2857,14 +2947,97 @@ progress::-moz-progress-bar {
     border:none;
 }
 
-
-.sandbox_container {
-    border: 5px solid red;
-    width: (100vw - 10px) !important;
+.ui-widget-content {
+    border: 1px solid #ccc;
 }
+
+
+table{
+    border-spacing: 0;
+}
+
+.ui-jqgrid td {
+    text-align: left;
+    font-weight: normal;
+    overflow: hidden;
+    white-space: pre;
+    height: 22px;
+    padding:0px;
+}
+
+th.ui-th-column div {
+    padding: 3px !important;
+}
+
+.ui-jqgrid th:first {
+    width:22px;
+}
+
+.ui-jqgrid .ui-jqgrid-hdiv {
+    border-radius:0 !important;
+}
+
+/**
+ part of the hack to hide the extra junk on the right side of the grid.
+ */
+
+.ui-jqgrid{
+    max-width: 100%;
+    overflow-x: visible;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+}
+.ui-jqgrid .ui-jqgrid-bdiv {
+    overflow-x: hidden;
+    background: #fefefe;
+}
+.ui-jqgrid .ui-jqgrid-htable th div {
+    overflow: visible;
+}
+
+.sandbox_container .content-container-after-login {
+    background: red;
+}
+
+.sandbox_container .top-container-after-login {
+    background: red;
+}
+
+.top-container .ui-state-active, .top-container .ui-widget-content .ui-state-active.context-menu {
+    border: 1px solid #ccc;
+    background: #d8e7f4 !important;
+    border-bottom: none;
+    height:25px;
+}
+
+.top-container .ui-state-active, .top-container .ui-widget-content .ui-state-active.context-menu a {
+    color: #204175;
+}
+
+/**
+#2353 - re-instating juqery-ui deprecated css.
+ */
+.ui-tabs-hide { display: none; }
 
 #tab_pay_stub .t-text-input-readonly{
     background-color:#fff;
+}
+
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active, a.ui-button:active, .ui-button:active, .ui-button.ui-state-active:hover {
+    border: none;
+    outline: none;
+}
+
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
+    background: #99e6ff 50% top repeat-x !important;
+    border: none;
+    color: #000;
+}
+
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight td {
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 
 .wizard.process_transactions_wizard{
@@ -2910,7 +3083,7 @@ progress::-moz-progress-bar {
 .process_transactions_wizard .content{
     width:100%;
     height: calc(100% - 85px) !important;
-    overflow-y:scroll;
+    overflow-y:auto;
     overflow-x:hidden;
     border:#444;
     top:8px !important;
@@ -2923,13 +3096,6 @@ progress::-moz-progress-bar {
 
 .process_transactions_wizard .bottom-actions {
     bottom: 10px !important;
-}
-
-.process_transactions_wizard input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    margin: 0;s
 }
 
 .process_transactions_wizard .download_warning {
@@ -2948,3 +3114,242 @@ progress::-moz-progress-bar {
     background-size: contain;
     background-repeat: no-repeat;
 }
+
+/**
+#2353 - fix black borders appearing in grid when cells are selected
+ */
+
+.ui-jqgrid :focus,
+.ui-jqgrid .ui-state-active,
+.ui-jqgrid .ui-widget-content .ui-state-active,
+.ui-jqgrid .ui-widget-header .ui-state-active,
+.ui-jqgrid a.ui-button:active,
+.ui-jqgrid .ui-button:active,
+.ui-jqgrid .ui-button.ui-state-active:hover {
+    border-right-color: #ddd !important;
+    border-left-color: #ddd !important;
+    border-top-color: #ddd !important;
+    border-bottom-color: #ddd !important;
+}
+
+
+/*.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight td {*/
+    /*border: 1px solid #ddd !important;*/
+    /*border-top: none !important;*/
+    /*border-left: none !important;*/
+/*}*/
+
+.ui-widget-header {
+    border: 1px solid #aed0ea;
+    background: #deedf7 url(jquery-ui/images/ui-bg_highlight-soft_100_deedf7_1x100.png) 50% 50% repeat-x;
+    color: #222222;
+    font-weight: bold;
+}
+.ui-widget-content {
+    border: 1px solid #dddddd;
+    /*background: #f2f5f7 url(jquery-ui/images/ui-bg_highlight-hard_100_f2f5f7_1x100.png) 50% top repeat-x;*/
+    color: #362b36;
+}
+
+.ui-widget-header .ui-icon {
+    background-image: url(jquery-ui/images/ui-icons_72a7cf_256x240.png);
+}
+
+.ui-priority-secondary, .ui-widget-content .ui-priority-secondary, .ui-widget-header .ui-priority-secondary {
+    opacity:1;
+    filter:none;
+    background:#f4f4f4;
+}
+
+#tab_map {
+    overflow: hidden;
+}
+
+
+.ui-jqgrid-resize-mark {
+    position:absolute;
+    width: 2px;
+    left: 0;
+    background: #777;
+    cursor: e-resize;
+    cursor: col-resize;
+    position: absolute;
+    top: 0;
+    height: 22px;
+    overflow: hidden;
+    display: none;
+    border: 0 none;
+    z-index: 99999;
+}
+
+.edit-view .edit-view-tab-bar-label .ui-state-default {
+    border: 1px solid #AAAAAA;
+    background: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    font-size: 12px;
+    border-bottom: none;
+}
+
+.container {
+    max-width:100% !important;
+}
+.home-view .container{
+    margin:0;
+    padding:0;
+}
+
+.jqgfirstrow td {
+    border: 0px !important;
+}
+
+.progress-bar {
+    color: #000;
+    background-color: transparent;
+}
+
+
+progress::-ms-fill {
+    border: none;
+}
+
+progress::-ms-fill {
+    background-color: lightskyblue;
+}
+
+.grid-div .ui-jqgrid {
+    overflow-x: auto;
+}
+
+.ui-jqgrid .td_cbox, .ui-jqgrid .jqgh_cbox {
+    vertical-align: middle;
+    text-align: center;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    /*border-left: 1px solid #ccc;*/
+}
+
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    background-color: #fafafa;
+    color: #fafafa;
+    border: 1px solid #666;
+    border-radius: 3px;
+    display: inline-block;
+    position: relative;
+    height: 16px;
+    width: 16px;
+    text-align:center;
+    font-size:14px;
+}
+
+input[type="checkbox"]:after {
+    content: '✔';
+}
+input[type="checkbox"]:checked {
+    color: #000;
+}
+
+.ui-state-hover {
+    background: #e1eef9 !important;
+}
+
+tr.ui-state-hover.ui-state-highlight, tr.ui-state-hover td {
+    background: #ccf2ff !important;
+    z-index: 999999;
+}
+
+th.ui-state-hover {
+    color:#375979 !important;
+}
+
+.t-grid-header-sort-icon {
+    padding:0px;
+    position:relative;
+    left:2px;
+}
+
+.nanobar {
+    width: 100%;
+    height: 4px;
+    z-index: 9999;
+    top:0
+}
+.bar {
+    width: 0;
+    height: 100%;
+    transition: height .3s;
+    background:red;
+}
+
+.ui-datepicker select.ui-datepicker-month, .ui-datepicker select.ui-datepicker-year {
+    width: 46%;
+}
+
+.ui-resizable-n {
+    cursor: n-resize;
+    height: 7px;
+    width: 100%;
+    top: -0px;
+    left: 0;
+}
+
+.employee-edit-view #tab_qualifications.edit-view-tab-outside-sub-view,
+.JobApplicantEditView #tab_qualifications.edit-view-tab-outside-sub-view,
+.JobApplicantEditView #tab_history.edit-view-tab-outside-sub-view{
+    /* padding: 0 !important; */
+    overflow-y: auto;
+}
+
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+    padding-left: 2px;
+}
+.timesheet-authorization-summary-title {
+    width: calc(100% - 1px) !important;
+}
+
+.request_edit_view_effective_days {
+    height:32px;
+}
+
+th.ui-th-column div.day_hour_div {
+    padding:0px !important;
+}
+
+.ui-jqgrid-view th {
+    cursor: pointer;
+}
+
+#tab_map .edit-view-tab {
+    margin: 0px;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-tabs-active {
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+.ui-jqgrid .ui-jqgrid-resize-ltr {
+    float: right;
+    margin: -2px -2px -2px 0px;
+    width: 0px;
+}
+
+/* This fixes the 1-2px scroll on all grids issue: https://stackoverflow.com/questions/5647313/unnecessary-horizontal-scrollbar-jqgrid */
+div.ui-jqgrid-view table.ui-jqgrid-btable {
+    border-style:none;
+    border-top-style:none;
+    border-collapse:separate;
+}
+div.ui-jqgrid-view table.ui-jqgrid-btable td {
+    border-left-style:none
+}
+div.ui-jqgrid-view table.ui-jqgrid-htable {
+    border-style:none;
+    border-top-style:none;
+    border-collapse:separate;
+}
+div.ui-jqgrid-view table.ui-jqgrid-btable th {
+    border-left-style:none
+}
+/* This fixes the 1-2px scroll on all grids issue */

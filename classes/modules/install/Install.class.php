@@ -757,8 +757,8 @@ class Install {
 
 		$install = FALSE;
 
-		$group = substr( $version, -1, 1);
-		$version_number = substr( $version, 0, (strlen($version) - 1));
+		$group = (string)substr( $version, -1, 1 );
+		$version_number = (int)substr( $version, 0, ( strlen( $version ) - 1 ) );
 
 		global $PRIMARY_KEY_IS_UUID;
 		Debug::text('Version: '. $version .' Version Number: '. $version_number .' Group: '. $group .' Primary Key UUID: '. (int)$PRIMARY_KEY_IS_UUID, __FILE__, __LINE__, __METHOD__, 9);
@@ -774,7 +774,11 @@ class Install {
 				$ss_obj = $sslf->getCurrent();
 				Debug::text('Found System Setting Entry: '. $ss_obj->getValue(), __FILE__, __LINE__, __METHOD__, 9);
 
-				if ( $ss_obj->getValue() < $version_number ) {
+				//The schema group letter is on the end of the schema version in the DB, so make sure if that is the case we always strip it off.
+				$numeric_installed_schema = (int)substr( $ss_obj->getValue(), 0, ( strlen( $ss_obj->getValue() ) - 1 ) );
+				Debug::text('Schema versions, Installed Schema: '. $ss_obj->getValue() .'('. $numeric_installed_schema .') Current Schema: '. $version_number, __FILE__, __LINE__, __METHOD__, 9);
+
+				if ( $numeric_installed_schema < $version_number ) {
 					Debug::text('Schema version is older, installing...', __FILE__, __LINE__, __METHOD__, 9);
 					$install = TRUE;
 				} else {

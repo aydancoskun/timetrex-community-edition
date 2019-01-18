@@ -66,6 +66,7 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 
 		if ( $this.edit_only_mode ) {
 
+			TTPromise.add('UserDateTotalParent', 'init');
 			if ( !$this.edit_view ) {
 				$this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 			}
@@ -77,7 +78,9 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 				user_id: LocalCacheData.all_url_args.user_id,
 				date_stamp: date_stamp
 			};
-			$this.initEditView();
+			TTPromise.wait('UserDateTotalParent', 'init', function(){
+				$this.initEditView();
+			});
 
 		} else {
 			if ( !this.edit_view ) {
@@ -99,10 +102,12 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_user_date_total_parent': $.i18n._( 'Accumulated Time' )
-		} );
+		var tab_model = {
+			'tab_user_date_total_parent': { 'label': $.i18n._( 'Accumulated Time' ) },
+		};
+		this.setTabModel( tab_model );
 
+		TTPromise.resolve('UserDateTotalParent', 'init');
 	},
 
 	setCurrentEditRecordData: function() {
@@ -113,18 +118,9 @@ UserDateTotalParentViewController = BaseViewController.extend( {
 
 	},
 
-	onTabShow: function( e, ui ) {
-		return;
-
-	},
-
-	setTabStatus: function() {
-		return;
-	},
-
 	initSubUserDateTotalView: function( tab_id ) {
-
 		var $this = this;
+
 		if ( this.sub_user_date_total_view_controller ) {
 			this.sub_user_date_total_view_controller.buildContextMenu( true );
 			this.sub_user_date_total_view_controller.setDefaultMenu();
@@ -198,9 +194,9 @@ UserDateTotalParentViewController.loadSubView = function( container, beforeViewL
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				TTPromise.wait('BaseViewController', 'initialize', function() {
-					afterViewLoadedFun(sub_user_date_total_parent_view_controller);
-				});
+				TTPromise.wait( 'BaseViewController', 'initialize', function() {
+					afterViewLoadedFun( sub_user_date_total_parent_view_controller );
+				} );
 			}
 		}
 

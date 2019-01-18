@@ -95,6 +95,8 @@ class APICompanyDeduction extends APIFactory {
 	 * @return array
 	 */
 	function getCompanyDeduction( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('company_tax_deduction', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company_tax_deduction', 'view') OR $this->getPermissionObject()->Check('company_tax_deduction', 'view_own') OR $this->getPermissionObject()->Check('company_tax_deduction', 'view_child')  ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
@@ -111,7 +113,6 @@ class APICompanyDeduction extends APIFactory {
 				}
 			}
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Need to pass this into getObjectAsArray() separately to help handle Edit Employee -> Tax tab and is_owner/is_child columns.
 		if ( isset($data['filter_data']['include_user_id']) ) {

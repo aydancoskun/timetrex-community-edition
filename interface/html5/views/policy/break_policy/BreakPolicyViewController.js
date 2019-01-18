@@ -38,10 +38,11 @@ BreakPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_break_policy': $.i18n._( 'Break Policy' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_break_policy': { 'label': $.i18n._( 'Break Policy' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIBreakPolicy' )),
@@ -53,8 +54,6 @@ BreakPolicyViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -69,14 +68,14 @@ BreakPolicyViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_break_policy_column1, '' );
 
 		form_item_input.parent().width( '45%' );
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( {field: 'description', width: '100%'} );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_break_policy_column1, '', null, null, true );
 
 		form_item_input.parent().width( '45%' );
@@ -84,14 +83,14 @@ BreakPolicyViewController = BaseViewController.extend( {
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_break_policy_column1 );
 
 		//Active After
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'trigger_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'trigger_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Active After' ), form_item_input, tab_break_policy_column1, '', null );
 
@@ -99,7 +98,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 		// Deduction/Addition Time
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'amount', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'amount', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Deduction/Addition Time' ), form_item_input, tab_break_policy_column1, '', null, true );
 
@@ -107,43 +106,43 @@ BreakPolicyViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'auto_detect_type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'auto_detect_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.auto_detect_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Auto-Detect Breaks By' ), form_item_input, tab_break_policy_column1 );
 
 		// Minimum Punch Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_punch_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'minimum_punch_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Punch Time' ), form_item_input, tab_break_policy_column1, '', null, true );
 
 		// Maximum Punch Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_punch_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'maximum_punch_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Maximum Punch Time' ), form_item_input, tab_break_policy_column1, '', null, true );
 
 		// Start Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'start_window', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'start_window', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Start Window' ), form_item_input, tab_break_policy_column1, '', null, true );
 
 		// Window Length
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'window_length', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'window_length', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Window Length' ), form_item_input, tab_break_policy_column1, '', null, true );
 
 		// Include Any Punched Time for Break
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'include_break_punch_time'} );
+		form_item_input.TCheckbox( { field: 'include_break_punch_time' } );
 		this.addEditFieldToColumn( $.i18n._( 'Include Any Punched Time for Break' ), form_item_input, tab_break_policy_column1, '', null, true );
 
 		// Include Multiple Breaks
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'include_multiple_breaks'} );
+		form_item_input.TCheckbox( { field: 'include_multiple_breaks' } );
 		this.addEditFieldToColumn( $.i18n._( 'Include Multiple Breaks' ), form_item_input, tab_break_policy_column1, '', null, true );
 
 		//Pay Code
@@ -169,7 +168,7 @@ BreakPolicyViewController = BaseViewController.extend( {
 			field: 'pay_formula_policy_id',
 			custom_first_label: $.i18n._( '-- Defined By Pay Code --' ),
 			added_items: [
-				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Pay Code --' )}
+				{ value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Pay Code --' ) }
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_break_policy_column1 );
@@ -248,7 +247,8 @@ BreakPolicyViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
-			} )];
+			} )
+		];
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
@@ -295,12 +295,12 @@ BreakPolicyViewController = BaseViewController.extend( {
 
 		if ( this.current_edit_record['type_id'] == 10 || this.current_edit_record['type_id'] == 15 ) {
 
-			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Deduction/Addition Time' ) + ": " );
+			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Deduction/Addition Time' ) + ': ' );
 			this.attachElement( 'include_break_punch_time' );
 			this.attachElement( 'include_multiple_breaks' );
 
 		} else if ( this.current_edit_record['type_id'] == 20 ) {
-			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Break Time' ) + ": " );
+			this.edit_view_form_item_dic['amount'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Break Time' ) + ': ' );
 			this.detachElement( 'include_break_punch_time' );
 			this.detachElement( 'include_multiple_breaks' );
 		}

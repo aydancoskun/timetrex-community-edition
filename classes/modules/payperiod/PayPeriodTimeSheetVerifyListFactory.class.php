@@ -514,9 +514,9 @@ class PayPeriodTimeSheetVerifyListFactory extends PayPeriodTimeSheetVerifyFactor
 								LEFT JOIN '. $this->getTable() .' as pptsvf ON ( uf.id = pptsvf.user_id AND ppf.id = pptsvf.pay_period_id AND pptsvf.deleted = 0 )
 							WHERE uf.company_id = \''. TTUUID::castUUID($company_id) .'\'
 								AND (
-										( ( uf.status_id = 10 AND uf.termination_date IS NULL ) OR ( uf.termination_date IS NOT NULL AND uf.termination_date >= '. $this->getSQLToEpochFunction( 'ppf.start_date' ) .' ) )
+										( ( uf.status_id = 10 AND uf.termination_date IS NULL ) OR ( uf.termination_date IS NOT NULL AND uf.termination_date >= ppf.start_date ) )
 										AND
-										( uf.hire_date IS NULL OR ( uf.hire_date IS NOT NULL AND uf.hire_date <= '. $this->getSQLToEpochFunction( 'ppf.end_date' ) .' ) )
+										( uf.hire_date IS NULL OR ( uf.hire_date IS NOT NULL AND uf.hire_date <= ppf.end_date ) )
 									) ';
 			$query .= '
 								AND ( '. $this->getSQLToEpochFunction( 'ppf.end_date' ) .' - ppsf.timesheet_verify_before_end_date ) <= '. (int)$epoch .'

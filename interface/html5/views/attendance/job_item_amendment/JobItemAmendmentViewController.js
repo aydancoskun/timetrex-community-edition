@@ -35,10 +35,11 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_task_amendment': $.i18n._( 'Task Amendment' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_task_amendment': { 'label': $.i18n._( 'Task Amendment' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIJobItemAmendment' )),
@@ -50,8 +51,6 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -78,15 +77,17 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 			set_empty: false,
 			setRealValueCallBack: (function( val ) {
 
-				if ( val ) job_coder.setValue( val.manual_id );
+				if ( val ) {
+					job_coder.setValue( val.manual_id );
+				}
 			}),
 			field: 'job_id'
 		} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 		var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		job_coder.TTextInput( {field: 'job_quick_search', disable_keyup_event: true} );
+		job_coder.TTextInput( { field: 'job_quick_search', disable_keyup_event: true } );
 		job_coder.addClass( 'job-coder' );
 
 		widgetContainer.append( job_coder );
@@ -104,15 +105,17 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 			set_empty: true,
 			setRealValueCallBack: (function( val ) {
 
-				if ( val ) job_item_coder.setValue( val.manual_id );
+				if ( val ) {
+					job_item_coder.setValue( val.manual_id );
+				}
 			}),
 			field: 'item_id'
 		} );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 		var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		job_item_coder.TTextInput( {field: 'job_item_quick_search', disable_keyup_event: true} );
+		job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
 		job_item_coder.addClass( 'job-coder' );
 
 		widgetContainer.append( job_item_coder );
@@ -121,38 +124,38 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 
 		//Estimated Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'estimate_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'estimate_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Estimated Time' ), form_item_input, tab_task_amendment_column1, '', null, true, true );
 
 		//Billable Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'billable_rate', width: 86} );
+		form_item_input.TTextInput( { field: 'billable_rate', width: 86 } );
 		this.addEditFieldToColumn( $.i18n._( 'Billable Rate' ), form_item_input, tab_task_amendment_column1 );
 
 		//Minimum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'minimum_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Billable Time' ), form_item_input, tab_task_amendment_column1, '', null );
 
 		//Estimated Quantity
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'estimate_quantity', width: 150} );
+		form_item_input.TTextInput( { field: 'estimate_quantity', width: 150 } );
 		this.addEditFieldToColumn( $.i18n._( 'Estimated Quantity' ), form_item_input, tab_task_amendment_column1 );
 
 		//Estimated Bad Quantity
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'estimate_bad_quantity', width: 150} );
+		form_item_input.TTextInput( { field: 'estimate_bad_quantity', width: 150 } );
 		this.addEditFieldToColumn( $.i18n._( 'Estimated Bad Quantity' ), form_item_input, tab_task_amendment_column1 );
 
 		//Bad Quantity Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'bad_quantity_rate', width: 150} );
+		form_item_input.TTextInput( { field: 'bad_quantity_rate', width: 150 } );
 		this.addEditFieldToColumn( $.i18n._( 'Bad Quantity Rate' ), form_item_input, tab_task_amendment_column1 );
 
 	},
@@ -171,7 +174,7 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 				switch ( key ) {
 					case 'item_id':
 						var args = {};
-						args.filter_data = {job_id: this.current_edit_record.job_id};
+						args.filter_data = { job_id: this.current_edit_record.job_id };
 						widget.setDefaultArgs( args );
 						widget.setValue( this.current_edit_record[key] );
 						break;
@@ -203,7 +206,7 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 	},
 
 	/* jshint ignore:start */
-	onFormItemChange: function( target ) {
+	onFormItemChange: function( target, doNotValidate ) {
 		var $this = this;
 
 		this.setIsChanged( target );
@@ -219,8 +222,8 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 		switch ( key ) {
 			case 'job_id':
 				this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-				this.setJobItemValueWhenJobChanged( target.getValue( true ),'item_id',{job_id: $this.current_edit_record.job_id});
-				this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
+				this.setJobItemValueWhenJobChanged( target.getValue( true ), 'item_id', { job_id: $this.current_edit_record.job_id } );
+				this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				break;
 			case 'item_id':
 				this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
@@ -229,12 +232,26 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 				break;
 			case 'job_quick_search':
 			case 'job_item_quick_search':
-				this.onJobQuickSearch( key, c_value );
+				this.onJobQuickSearch( key, c_value, 'job_id', 'item_id' );
+
+				TTPromise.wait( 'BaseViewController', 'onJobQuickSearch', function() {
+					$this.setJobItemAmendmentDefaultData();
+				} );
+
+				TTPromise.wait( 'BaseViewController', 'setJobItemValueWhenJobChanged', function() {
+					$this.setJobItemAmendmentDefaultData();
+				} );
+
+				//Don't validate immediately as onJobQuickSearch is doing async API calls, and it would cause a guaranteed validation failure.
+				var doNotValidate = true;
+
 				break;
 
 		}
 
-		this.validate();
+		if ( !doNotValidate ) {
+			this.validate();
+		}
 	},
 
 	validate: function() {
@@ -279,123 +296,6 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 		} );
 	},
 
-	onJobQuickSearch: function( key, value ) {
-		var args = {};
-		var $this = this;
-
-		if ( key === 'job_quick_search' ) {
-
-			args.filter_data = {manual_id: value};
-
-			this.job_api.getJob( args, {
-				onResult: function( result ) {
-
-					var result_data = result.getResult();
-
-					if ( result_data.length > 0 ) {
-						$this.edit_view_ui_dic['job_id'].setValue( result_data[0].id );
-						$this.current_edit_record.job_id = result_data[0].id;
-						$this.setJobItemValueWhenJobChanged( result_data[0] );
-
-					} else {
-						$this.edit_view_ui_dic['job_id'].setValue( '' );
-						$this.current_edit_record.job_id = false;
-						$this.setJobItemValueWhenJobChanged( false );
-					}
-
-				}
-			} );
-			$this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
-			$this.edit_view_ui_dic['job_id'].setCheckBox( true );
-		} else if ( key === 'job_item_quick_search' ) {
-
-			args.filter_data = {manual_id: value};
-
-			this.job_item_api.getJobItem( args, {
-				onResult: function( result ) {
-					var result_data = result.getResult();
-					if ( result_data.length > 0 ) {
-						$this.edit_view_ui_dic['job_item_id'].setValue( result_data[0].id );
-						$this.current_edit_record.job_item_id = result_data[0].id;
-						$this.setJobItemAmendmentDefaultData();
-
-					} else {
-						$this.edit_view_ui_dic['job_item_id'].setValue( '' );
-						$this.current_edit_record.job_item_id = false;
-					}
-
-				}
-			} );
-			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
-			this.edit_view_ui_dic['job_item_id'].setCheckBox( true );
-		}
-
-	},
-
-	/*
-	 1. Job is switched.
-	 2. If a Task is already selected (and its not Task=0), keep it selected *if its available* in the newly populated Task list.
-	 3. If the task selected is *not* available in the Task list, or the selected Task=0, then check the default_item_id field from the Job and if its *not* 0 also, select that Task by default.
-	 */
-	setJobItemValueWhenJobChanged: function( job ) {
-
-		var $this = this;
-		var job_item_widget = $this.edit_view_ui_dic['item_id'];
-		var current_item_id = job_item_widget.getValue();
-		job_item_widget.setSourceData( null );
-		job_item_widget.setCheckBox( true );
-		this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
-		var args = {};
-		args.filter_data = {job_id: $this.current_edit_record.job_id};
-		$this.edit_view_ui_dic['item_id'].setDefaultArgs( args );
-
-		if ( current_item_id ) {
-
-			var new_arg = Global.clone( args );
-
-			new_arg.filter_data.id = current_item_id;
-			new_arg.filter_columns = $this.edit_view_ui_dic['item_id'].getColumnFilter();
-			$this.job_item_api.getJobItem( new_arg, {
-				onResult: function( task_result ) {
-
-					var data = task_result.getResult();
-
-					if ( data.length > 0 ) {
-						job_item_widget.setValue( current_item_id );
-						$this.current_edit_record.item_id = current_item_id;
-
-						$this.setJobItemAmendmentDefaultData();
-					} else {
-						setDefaultData();
-					}
-
-				}
-			} )
-
-		} else {
-			setDefaultData();
-		}
-
-		function setDefaultData() {
-			if ( $this.current_edit_record.job_id ) {
-				job_item_widget.setValue( job.default_item_id );
-				$this.current_edit_record.item_id = job.default_item_id;
-
-				if ( job.default_item_id === false || job.default_item_id === 0 ) {
-					$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-				} else {
-					$this.setJobItemAmendmentDefaultData();
-				}
-
-			} else {
-				job_item_widget.setValue( '' );
-				$this.current_edit_record.item_id = false;
-				$this.edit_view_ui_dic.job_item_quick_search.setValue( '' );
-
-			}
-		}
-	},
-
 	setJobItemAmendmentDefaultData: function() {
 		var $this = this;
 		var job_item_id;
@@ -407,9 +307,9 @@ JobItemAmendmentViewController = BaseViewController.extend( {
 					if ( !result_data ) {
 						result_data = [];
 					}
+
 					$this.current_default_record = result_data;
 					$this.setCurrentEditRecordData();
-
 				}
 			} );
 		}
@@ -433,9 +333,9 @@ JobItemAmendmentViewController.loadSubView = function( container, beforeViewLoad
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 
-				TTPromise.wait('BaseViewController', 'initialize', function() {
-					afterViewLoadedFun(sub_job_item_amendment_view_controller);
-				});
+				TTPromise.wait( 'BaseViewController', 'initialize', function() {
+					afterViewLoadedFun( sub_job_item_amendment_view_controller );
+				} );
 			}
 		}
 	} );

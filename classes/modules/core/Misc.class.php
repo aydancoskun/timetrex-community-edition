@@ -122,7 +122,9 @@ class Misc {
 					if ( !isset($totals[$sum_key]) ) {
 						$totals[$sum_key] = 0;
 					}
-					if ( !is_numeric( $sum_value ) ) {
+
+					//Both $totals[$sum_key] and $sum_value need to be numeric to add them to each other.
+					if ( !is_numeric( $sum_value ) OR !is_numeric( $totals[$sum_key] ) ) {
 						if ( $include_non_numeric == TRUE AND $sum_value != '' ) {
 							$totals[$sum_key] = $sum_value;
 						}
@@ -1613,6 +1615,11 @@ class Misc {
 		$i = 1;
 		while ( ($data = fgetcsv($handle, $len, $delim) ) !== FALSE) {
 			if ( $data !== array( NULL ) ) { // Ignore blank lines
+				//Skip lines with commas (columns), but *all* columns are blank. The raw line would look like this: ,,,,,,,,,,,... OR "","","","","","",...
+				if ( strlen( implode($data) ) == 0 ) {
+					continue;
+				}
+
 				if ( $head == TRUE AND isset($header) ) {
 					$row = array();
 					foreach ( $header as $key => $heading ) {
@@ -1805,13 +1812,13 @@ class Misc {
 				case 1:
 					//backwards compatibility for v1 encryption.
 					if ( function_exists('mcrypt_module_open') ) {
-						$td = mcrypt_module_open( 'tripledes', '', 'ecb', '' );
-						$iv = mcrypt_create_iv( mcrypt_enc_get_iv_size( $td ), MCRYPT_RAND );
-						$max_key_size = mcrypt_enc_get_key_size( $td );
-						mcrypt_generic_init( $td, substr( $key, 0, $max_key_size ), $iv );
-						$unencrypted_data = rtrim( mdecrypt_generic( $td, $encrypted_string ) );
-						mcrypt_generic_deinit( $td );
-						mcrypt_module_close( $td );
+						$td = @mcrypt_module_open( 'tripledes', '', 'ecb', '' );
+						$iv = @mcrypt_create_iv( mcrypt_enc_get_iv_size( $td ), MCRYPT_RAND );
+						$max_key_size = @mcrypt_enc_get_key_size( $td );
+						@mcrypt_generic_init( $td, substr( $key, 0, $max_key_size ), $iv );
+						$unencrypted_data = rtrim( @mdecrypt_generic( $td, $encrypted_string ) );
+						@mcrypt_generic_deinit( $td );
+						@mcrypt_module_close( $td );
 					} else {
 						Debug::Text( 'ERROR: MCRYPT extension is not installed!', __FILE__, __LINE__, __METHOD__, 10);
 						return FALSE;
@@ -2895,9 +2902,9 @@ class Misc {
 			return FALSE;
 		}
 
-		if ( function_exists('getTTProductEdition') == FALSE OR getTTProductEdition() > TT_PRODUCT_COMMUNITY AND DEPLOYMENT_ON_DEMAND == TRUE ) {
+		if ( function_exists('getTTProductEdition') == FALSE OR ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL AND DEPLOYMENT_ON_DEMAND == TRUE ) ) {
 			$allowed_calls = 500;
-		} elseif( getTTProductEdition() > TT_PRODUCT_COMMUNITY ) {
+		} elseif( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			$allowed_calls = 100;
 		} else {
 			$allowed_calls = 25;

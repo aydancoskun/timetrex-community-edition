@@ -105,11 +105,12 @@ class APIHierarchyLevel extends APIFactory {
 	 * @return array|bool
 	 */
 	function getHierarchyLevel( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('hierarchy', 'enabled')
 				OR !( $this->getPermissionObject()->Check('hierarchy', 'view') OR $this->getPermissionObject()->Check('hierarchy', 'view_own') OR $this->getPermissionObject()->Check('hierarchy', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'hierarchy', 'view' );
 

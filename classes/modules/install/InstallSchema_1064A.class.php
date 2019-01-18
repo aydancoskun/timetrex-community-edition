@@ -942,7 +942,7 @@ class InstallSchema_1064A extends InstallSchema_Base {
 					}
 					unset($urdlf, $urd_obj);
 
-					if ( getTTProductEdition() > TT_PRODUCT_COMMUNITY ) {
+					if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 						//Custom Columns selections and formulas need to be converted as well.
 						$rcclf = TTnew('ReportCustomColumnListFactory');
 						$rcclf->getByCompanyId( $company_obj->getID() );

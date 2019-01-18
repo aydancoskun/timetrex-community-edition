@@ -53,7 +53,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper checkbox-mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 				check_box.change( function() {
 					$this.trigger( 'formItemChange', [$this] );
@@ -117,7 +117,7 @@
 
 		this.getValue = function() {
 
-			if ( this.attr( 'checked' ) || this[0].checked === true ) {
+			if ( this.prop( 'checked' ) || this[0].checked === true ) {
 				return true;
 			}
 			return false;
@@ -126,7 +126,7 @@
 		this.setValue = function( val ) {
 
 			if ( val === true ) {
-				this.attr( 'checked', 'checked' );
+				this.prop( 'checked', 'checked' );
 				this[0].checked = true;
 			} else {
 				this.removeAttr( 'checked' );
@@ -146,13 +146,14 @@
 					$this.setCheckBox( true );
 				}
 
-				if ( $this.attr( 'checked' ) === 'checked' ) {
-					$this.removeAttr( 'checked' );
-					$this[0].checked = false;
-				} else {
-					$this.attr( 'checked', 'checked' );
-					$this[0].checked = true;
-				}
+				//#2353 - Removed for jquery 3.3.1
+				// if ( $this.prop('checked' ) === 'checked' ) {
+				// 	$this.removeAttr( 'checked' );
+				// 	$this[0].checked = false;
+				// } else {
+				// 	$this.prop('checked', 'checked' );
+				// 	$this[0].checked = true;
+				// }
 
 				$this.trigger( 'formItemChange', [$this] );
 			} );

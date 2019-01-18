@@ -30,11 +30,11 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_accrual_account': $.i18n._( 'Accrual Account' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_accrual_account': { 'label': $.i18n._( 'Accrual Account' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )),
@@ -42,7 +42,8 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
@@ -59,7 +60,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_accrual_account_column1, 'first_last' );
 
 		form_item_input.parent().width( '45%' );
@@ -73,7 +74,7 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 
 		//Display Balance on Pay Stub
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_pay_stub_balance_display'} );
+		form_item_input.TCheckbox( { field: 'enable_pay_stub_balance_display' } );
 		this.addEditFieldToColumn( $.i18n._( 'Display Balance on Pay Stub' ), form_item_input, tab_accrual_account_column1 );
 	},
 
@@ -82,14 +83,17 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -97,9 +101,11 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -107,7 +113,9 @@ AccrualPolicyAccountViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
+		];
 	}
 
 

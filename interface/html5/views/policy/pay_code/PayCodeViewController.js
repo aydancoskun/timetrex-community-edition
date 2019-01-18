@@ -212,11 +212,11 @@ PayCodeViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_pay_code': $.i18n._( 'Pay Code' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_pay_code': { 'label': $.i18n._( 'Pay Code' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPayCode' )),
@@ -224,11 +224,10 @@ PayCodeViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -243,7 +242,7 @@ PayCodeViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_pay_code_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -258,76 +257,76 @@ PayCodeViewController = BaseViewController.extend( {
 
 		//Code
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'code', width: 150} );
+		form_item_input.TTextInput( { field: 'code', width: 150 } );
 		this.addEditFieldToColumn( $.i18n._( 'Code' ), form_item_input, tab_pay_code_column1, '' );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_code_column1 );
-/*
-		// Pay Type
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'pay_type_id', set_empty: false} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.pay_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Pay Type' ), form_item_input, tab_pay_code_column1 );
+		/*
+		 // Pay Type
+		 form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		 form_item_input.TComboBox( {field: 'pay_type_id', set_empty: false} );
+		 form_item_input.setSourceData( Global.addFirstItemToArray( $this.pay_type_array ) );
+		 this.addEditFieldToColumn( $.i18n._( 'Pay Type' ), form_item_input, tab_pay_code_column1 );
 
-		// Wage Source
-		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'wage_source_type_id', set_empty: false} );
-		form_item_input.setSourceData( Global.addFirstItemToArray( $this.wage_source_type_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Wage Source' ), form_item_input, tab_pay_code_column1 );
+		 // Wage Source
+		 form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		 form_item_input.TComboBox( {field: 'wage_source_type_id', set_empty: false} );
+		 form_item_input.setSourceData( Global.addFirstItemToArray( $this.wage_source_type_array ) );
+		 this.addEditFieldToColumn( $.i18n._( 'Wage Source' ), form_item_input, tab_pay_code_column1 );
 
-		//Wage Source Contributing Shift
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'wage_source_contributing_shift_policy_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'Wage Source Contributing Shift Policy' ), form_item_input, tab_pay_code_column1 );
+		 //Wage Source Contributing Shift
+		 form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		 form_item_input.AComboBox( {
+		 api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+		 allow_multiple_selection: false,
+		 layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+		 show_search_inputs: true,
+		 set_empty: true,
+		 field: 'wage_source_contributing_shift_policy_id'} );
+		 this.addEditFieldToColumn( $.i18n._( 'Wage Source Contributing Shift Policy' ), form_item_input, tab_pay_code_column1 );
 
-		//Time Source Contributing Shift
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'time_source_contributing_shift_policy_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'Time Source Contributing Shift Policy' ), form_item_input, tab_pay_code_column1 );
+		 //Time Source Contributing Shift
+		 form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		 form_item_input.AComboBox( {
+		 api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
+		 allow_multiple_selection: false,
+		 layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
+		 show_search_inputs: true,
+		 set_empty: true,
+		 field: 'time_source_contributing_shift_policy_id'} );
+		 this.addEditFieldToColumn( $.i18n._( 'Time Source Contributing Shift Policy' ), form_item_input, tab_pay_code_column1 );
 
-		// Wage Group
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIWageGroup' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.WAGE_GROUP,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'wage_group_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'Wage Group' ), form_item_input, tab_pay_code_column1 );
+		 // Wage Group
+		 form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		 form_item_input.AComboBox( {
+		 api_class: (APIFactory.getAPIClass( 'APIWageGroup' )),
+		 allow_multiple_selection: false,
+		 layout_name: ALayoutIDs.WAGE_GROUP,
+		 show_search_inputs: true,
+		 set_empty: true,
+		 field: 'wage_group_id'} );
+		 this.addEditFieldToColumn( $.i18n._( 'Wage Group' ), form_item_input, tab_pay_code_column1 );
 
-		// Rate
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'rate', width: 100} );
-		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab_pay_code_column1 );
+		 // Rate
+		 form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		 form_item_input.TTextInput( {field: 'rate', width: 100} );
+		 this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab_pay_code_column1 );
 
-		// Deposit Accrual Policy
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
-			allow_multiple_selection: false,
-			layout_name: ALayoutIDs.ACCRUAL_POLICY,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'accrual_policy_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'Deposit Accrual Policy' ), form_item_input, tab_pay_code_column1, '' );
-*/
+		 // Deposit Accrual Policy
+		 form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		 form_item_input.AComboBox( {
+		 api_class: (APIFactory.getAPIClass( 'APIAccrualPolicy' )),
+		 allow_multiple_selection: false,
+		 layout_name: ALayoutIDs.ACCRUAL_POLICY,
+		 show_search_inputs: true,
+		 set_empty: true,
+		 field: 'accrual_policy_id'} );
+		 this.addEditFieldToColumn( $.i18n._( 'Deposit Accrual Policy' ), form_item_input, tab_pay_code_column1, '' );
+		 */
 		//Pay Formula Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
@@ -339,9 +338,9 @@ PayCodeViewController = BaseViewController.extend( {
 			field: 'pay_formula_policy_id',
 			custom_first_label: $.i18n._( '-- Defined By Policy --' ),
 			added_items: [
-				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Policy --' )}
+				{ value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Policy --' ) }
 			]
-			} );
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_pay_code_column1 );
 
 		// Pay Stub Account
@@ -352,7 +351,8 @@ PayCodeViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'pay_stub_entry_account_id'} );
+			field: 'pay_stub_entry_account_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Account' ), form_item_input, tab_pay_code_column1 );
 	},
 
@@ -362,24 +362,29 @@ PayCodeViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Formula Policy' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Formula Policy' ),
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
@@ -387,9 +392,11 @@ PayCodeViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Stub Account' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Stub Account' ),
 				in_column: 2,
 				field: 'pay_stub_entry_account_id',
 				layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
@@ -397,9 +404,11 @@ PayCodeViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -407,9 +416,11 @@ PayCodeViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -417,7 +428,9 @@ PayCodeViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
+		];
 	},
 
 
@@ -433,7 +446,7 @@ PayCodeViewController = BaseViewController.extend( {
 
 	onWizardClick: function() {
 		var $this = this;
-		IndexViewController.openWizard( 'PayCodeWizard', null, function(){
+		IndexViewController.openWizard( 'PayCodeWizard', null, function() {
 //			$this.search();
 		} );
 	}

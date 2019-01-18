@@ -205,6 +205,7 @@ var ApplicationRouter = Backbone.Router.extend( {
 			// }
 			$( 'body' ).removeClass( 'login-bg' );
 			Global.loadStyleSheet( '../../theme/default/portal/css/portal.css' + '?v=' + APIGlobal.pre_login_data.application_build );
+			Global.loadStyleSheet( '../../framework/bootstrap-select/css/bootstrap-select.min.css' + '?v=' + APIGlobal.pre_login_data.application_build );
 			$('link[title="application css"]').prop('disabled', true);
 			if ( !$this.headerView ) {
 				$this.headerView = new HeaderViewController();

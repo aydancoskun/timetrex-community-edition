@@ -37,10 +37,11 @@ HolidayViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_holiday': $.i18n._( 'Holiday' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_holiday': { 'label': $.i18n._( 'Holiday' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIHoliday' )),
@@ -52,8 +53,6 @@ HolidayViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -68,7 +67,7 @@ HolidayViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_holiday_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -76,7 +75,7 @@ HolidayViewController = BaseViewController.extend( {
 		//Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'date_stamp'} );
+		form_item_input.TDatePicker( { field: 'date_stamp' } );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_holiday_column1, '' );
 
 	}
@@ -96,8 +95,10 @@ HolidayViewController.loadSubView = function( container, beforeViewLoadedFun, af
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-TTPromise.wait('BaseViewController', 'initialize',function() {				afterViewLoadedFun( sub_holiday_view_controller );});
+				TTPromise.wait( 'BaseViewController', 'initialize', function() {
+					afterViewLoadedFun( sub_holiday_view_controller );
+				} );
 			}
 		}
-	} )
-}
+	} );
+};

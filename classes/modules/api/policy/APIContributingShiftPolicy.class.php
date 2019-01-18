@@ -103,12 +103,13 @@ class APIContributingShiftPolicy extends APIFactory {
 	 * @return array
 	 */
 	function getContributingShiftPolicy( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('contributing_shift_policy', 'enabled')
 				OR !( $this->getPermissionObject()->Check('contributing_shift_policy', 'view') OR $this->getPermissionObject()->Check('contributing_shift_policy', 'view_own') OR $this->getPermissionObject()->Check('contributing_shift_policy', 'view_child')  ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'contributing_shift_policy', 'view' );
 

@@ -45,12 +45,11 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-
-		this.setTabLabels( {
-			'tab_exception_policy': $.i18n._( 'Exception Policy' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_exception_policy': { 'label': $.i18n._( 'Exception Policy' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIExceptionPolicyControl' )),
@@ -76,7 +75,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_exception_policy_column1, 'first_last' );
 
 		form_item_input.parent().width( '45%' );
@@ -91,7 +90,8 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		//Inside editor
 
 		var inside_editor_div = tab_exception_policy.find( '.inside-editor-div' );
-		var args = { active: $.i18n._( 'Active' ),
+		var args = {
+			active: $.i18n._( 'Active' ),
 			code: $.i18n._( 'Code' ),
 			name: $.i18n._( 'Name' ),
 			severity: $.i18n._( 'Severity' ),
@@ -102,7 +102,8 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		this.editor = Global.loadWidgetByName( FormItemType.INSIDE_EDITOR );
 
-		this.editor.InsideEditor( {title: '',
+		this.editor.InsideEditor( {
+			title: '',
 			addRow: this.insideEditorAddRow,
 			getValue: this.insideEditorGetValue,
 			setValue: this.insideEditorSetValue,
@@ -177,11 +178,13 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 			filter.filter_data = {};
 			filter.filter_data.id = [selectedId];
 
-			this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
+			this.api['get' + this.api.key_name]( filter, {
+				onResult: function( result ) {
 
-				$this.onCopyAsNewResult( result );
+					$this.onCopyAsNewResult( result );
 
-			}} );
+				}
+			} );
 		}
 
 	},
@@ -202,70 +205,14 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		if ( !exception_control_id ) {
 
-			this.api_exception_policy.getExceptionPolicyDefaultData( args, true, {onResult: function( res ) {
-
-				if ( !$this.edit_view ) {
-					return;
-				}
-
-				var data = res.getResult();
-				var array_data = [];
-				for ( var key in data ) {
-
-					if ( !data.hasOwnProperty( key ) ) {
-						continue;
-					}
-
-					data[key].id = '';
-					array_data.push( data[ key ] );
-				}
-				array_data = array_data.sort( function( a, b ) {
-					return Global.compare( a, b, 'type_id' );
-				} );
-
-				$this.editor.setValue( array_data );
-
-			}} );
-
-		} else {
-
-			args.filter_data.exception_policy_control_id = exception_control_id;
-
-			this.api_exception_policy.getExceptionPolicyDefaultData( args, true, {onResult: function( res ) {
-
-				if ( !$this.edit_view ) {
-					return;
-				}
-
-				var data = res.getResult();
-				var array_data = [];
-
-				for ( var key in data ) {
-
-					if ( !data.hasOwnProperty( key ) ) {
-						continue;
-					}
-
-					data[key].id = '';
-					array_data.push( data[ key ] );
-				}
-
-				array_data = array_data.sort( function( a, b ) {
-					return Global.compare( a, b, 'type_id' );
-				} );
-
-				$this.editor.setValue( array_data );
-
-				var ep_filter = {};
-				ep_filter.filter_data = {exception_policy_control_id: exception_control_id};
-
-				$this.api_exception_policy.getExceptionPolicy( ep_filter, true, {onResult: function( ep_res ) {
+			this.api_exception_policy.getExceptionPolicyDefaultData( args, true, {
+				onResult: function( res ) {
 
 					if ( !$this.edit_view ) {
 						return;
 					}
 
-					var data = ep_res.getResult();
+					var data = res.getResult();
 					var array_data = [];
 					for ( var key in data ) {
 
@@ -273,7 +220,40 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 							continue;
 						}
 
-						array_data.push( data[ key ] );
+						data[key].id = '';
+						array_data.push( data[key] );
+					}
+					array_data = array_data.sort( function( a, b ) {
+						return Global.compare( a, b, 'type_id' );
+					} );
+
+					$this.editor.setValue( array_data );
+
+				}
+			} );
+
+		} else {
+
+			args.filter_data.exception_policy_control_id = exception_control_id;
+
+			this.api_exception_policy.getExceptionPolicyDefaultData( args, true, {
+				onResult: function( res ) {
+
+					if ( !$this.edit_view ) {
+						return;
+					}
+
+					var data = res.getResult();
+					var array_data = [];
+
+					for ( var key in data ) {
+
+						if ( !data.hasOwnProperty( key ) ) {
+							continue;
+						}
+
+						data[key].id = '';
+						array_data.push( data[key] );
 					}
 
 					array_data = array_data.sort( function( a, b ) {
@@ -282,9 +262,38 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 					$this.editor.setValue( array_data );
 
-				} } );
+					var ep_filter = {};
+					ep_filter.filter_data = { exception_policy_control_id: exception_control_id };
 
-			}} );
+					$this.api_exception_policy.getExceptionPolicy( ep_filter, true, {
+						onResult: function( ep_res ) {
+
+							if ( !$this.edit_view ) {
+								return;
+							}
+
+							var data = ep_res.getResult();
+							var array_data = [];
+							for ( var key in data ) {
+
+								if ( !data.hasOwnProperty( key ) ) {
+									continue;
+								}
+
+								array_data.push( data[key] );
+							}
+
+							array_data = array_data.sort( function( a, b ) {
+								return Global.compare( a, b, 'type_id' );
+							} );
+
+							$this.editor.setValue( array_data );
+
+						}
+					} );
+
+				}
+			} );
 		}
 
 	},
@@ -365,7 +374,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		//Active
 		var form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'active'} );
+		form_item_input.TCheckbox( { field: 'active' } );
 		form_item_input.setValue( data.active );
 		widgets[form_item_input.getField()] = form_item_input;
 		row.children().eq( 0 ).append( form_item_input );
@@ -375,21 +384,21 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		//Code
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'type_id'} );
+		form_item_input.TText( { field: 'type_id' } );
 		form_item_input.setValue( data.type_id );
 		widgets[form_item_input.getField()] = form_item_input;
 		row.children().eq( 1 ).append( form_item_input );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'name'} );
+		form_item_input.TText( { field: 'name' } );
 		form_item_input.setValue( data.name );
 		widgets[form_item_input.getField()] = form_item_input;
 		row.children().eq( 2 ).append( form_item_input );
 
 		//Severity
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'severity_id', set_empty: false } );
+		form_item_input.TComboBox( { field: 'severity_id', set_empty: false } );
 
 		this.setWidgetEnableBaseOnParentController( form_item_input );
 
@@ -401,7 +410,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		if ( data.is_enabled_grace ) {
 			//Grace
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: 'grace', width: 90, need_parser_sec: true} );
+			form_item_input.TTextInput( { field: 'grace', width: 90, need_parser_sec: true } );
 			form_item_input.setValue( data.grace );
 			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 4 ).append( form_item_input );
@@ -413,7 +422,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		if ( data.is_enabled_watch_window ) {
 			//Watch Window
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: 'watch_window', width: 90, need_parser_sec: true} );
+			form_item_input.TTextInput( { field: 'watch_window', width: 90, need_parser_sec: true } );
 			form_item_input.setValue( data.watch_window );
 			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 5 ).append( form_item_input );
@@ -423,7 +432,7 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		//Email Notification
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'email_notification_id', set_empty: false } );
+		form_item_input.TComboBox( { field: 'email_notification_id', set_empty: false } );
 		form_item_input.setSourceData( this.parent_controller.email_notification_array );
 		form_item_input.setValue( data.email_notification_id );
 		widgets[form_item_input.getField()] = form_item_input;
@@ -603,13 +612,15 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 
 		var data = this.editor.getValue( this.refresh_id );
 
-		this.api_exception_policy.setExceptionPolicy( data, {onResult: function( res ) {
+		this.api_exception_policy.setExceptionPolicy( data, {
+			onResult: function( res ) {
 
-			if ( Global.isSet( callBack ) ) {
-				callBack();
+				if ( Global.isSet( callBack ) ) {
+					callBack();
+				}
+
 			}
-
-		}} );
+		} );
 
 	},
 
@@ -618,14 +629,17 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -633,9 +647,11 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -643,7 +659,8 @@ ExceptionPolicyControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	}
 

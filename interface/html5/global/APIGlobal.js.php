@@ -54,7 +54,7 @@ var alternate_session_data = decodeURIComponent(getCookie( 'AlternateSessionData
 
 if ( alternate_session_data ) {
 	alternate_session_data = JSON.parse(alternate_session_data);
-	if ( alternate_session_data.new_session_id ) {
+	if ( alternate_session_data && alternate_session_data.new_session_id ) {
 		setCookie('SessionID', alternate_session_data.new_session_id, 30, APIGlobal.pre_login_data.cookie_base_url);
 
 		alternate_session_data.new_session_id = null;

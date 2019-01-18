@@ -67,7 +67,9 @@ ForgotPasswordWizardController = BaseWizardController.extend( {
 		switch ( this.current_step ) {
 			default:
 				for ( var key in current_step_ui ) {
-					if ( !current_step_ui.hasOwnProperty( key ) ) continue;
+					if ( !current_step_ui.hasOwnProperty( key ) ) {
+						continue;
+					}
 					current_step_data[key] = current_step_ui[key].getValue();
 				}
 				break;
@@ -113,10 +115,10 @@ ForgotPasswordWizardController = BaseWizardController.extend( {
 
 	},
 
-	showErrorAlert: function ( result ) {
+	showErrorAlert: function( result ) {
 		var details = result.getDetails();
 		// if ( details.hasOwnProperty( 'error' ) ) {
-        //
+		//
 		// }
 		if ( !details ) {
 			details = result.getDescription(); // If the details is empty, try to get description to show.
@@ -132,7 +134,7 @@ ForgotPasswordWizardController = BaseWizardController.extend( {
 				}
 
 				for ( var key in val ) {
-					error_string = error_string + val[key] + "<br>";
+					error_string = error_string + val[key] + '<br>';
 				}
 			} );
 		} else {

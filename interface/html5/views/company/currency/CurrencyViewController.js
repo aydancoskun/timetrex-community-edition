@@ -32,13 +32,15 @@ CurrencyViewController = BaseViewController.extend( {
 
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'round_decimal_places', 'round_decimal_places' );
-		this.api.getISOCodesArray( '', false, false, {onResult: function( res ) {
-			res = res.getResult();
-			res = Global.buildRecordArray( res );
-			$this.basic_search_field_ui_dic['iso_code'].setSourceData( res );
-			$this.iso_codes_array = res;
+		this.api.getISOCodesArray( '', false, false, {
+			onResult: function( res ) {
+				res = res.getResult();
+				res = Global.buildRecordArray( res );
+				$this.basic_search_field_ui_dic['iso_code'].setSourceData( res );
+				$this.iso_codes_array = res;
 
-		}} );
+			}
+		} );
 
 	},
 
@@ -48,12 +50,16 @@ CurrencyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_currency': $.i18n._( 'Currency' ),
-			'tab_rates': $.i18n._( 'Rates' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_currency': { 'label': $.i18n._( 'Currency' ) },
+			'tab_rates': {
+				'label': $.i18n._( 'Rates' ),
+				'init_callback': 'initSubCurrencyRateView',
+				'display_on_mass_edit': false
+			},
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APICurrency' )),
@@ -61,11 +67,11 @@ CurrencyViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.CURRENCY,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -80,126 +86,58 @@ CurrencyViewController = BaseViewController.extend( {
 		//Status
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_currency_column1, '' );
 
 		// ISO Currency
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'iso_code'} );
+		form_item_input.TComboBox( { field: 'iso_code' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.iso_codes_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'ISO Currency' ), form_item_input, tab_currency_column1 );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_currency_column1 );
 
 		form_item_input.parent().width( '45%' );
 
 		// Base Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'is_base'} );
+		form_item_input.TCheckbox( { field: 'is_base' } );
 		this.addEditFieldToColumn( $.i18n._( 'Base Currency' ), form_item_input, tab_currency_column1 );
 
 
 		// Conversion Rate
-		form_item_input = Global.loadWidgetByName(FormItemType.TEXT_INPUT);
-		form_item_input.TTextInput({field: 'conversion_rate', width: 114});
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'conversion_rate', width: 114 } );
 
-		var widgetContainer = $("<div class=''></div>");
-		var conversion_rate_clarification_box = $("<span id='conversion_rate_clarification_box'></span>");
+		var widgetContainer = $( '<div class=\'\'></div>' );
+		var conversion_rate_clarification_box = $( '<span id=\'conversion_rate_clarification_box\'></span>' );
 
-		widgetContainer.append(form_item_input);
-		widgetContainer.append(conversion_rate_clarification_box);
-		this.addEditFieldToColumn($.i18n._('Conversion Rate'), [form_item_input], tab_currency_column1, '', widgetContainer, false, true);
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( conversion_rate_clarification_box );
+		this.addEditFieldToColumn( $.i18n._( 'Conversion Rate' ), [form_item_input], tab_currency_column1, '', widgetContainer, false, true );
 
 		// Default Currency
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'is_default'} );
+		form_item_input.TCheckbox( { field: 'is_default' } );
 		this.addEditFieldToColumn( $.i18n._( 'Default Currency' ), form_item_input, tab_currency_column1 );
 
 		// Auto Update
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'auto_update'} );
+		form_item_input.TCheckbox( { field: 'auto_update' } );
 		this.addEditFieldToColumn( $.i18n._( 'Auto Update' ), form_item_input, tab_currency_column1 );
 
 		// Decimal Places
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'round_decimal_places'} );
+		form_item_input.TComboBox( { field: 'round_decimal_places' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.round_decimal_places_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Decimal Places' ), form_item_input, tab_currency_column1, '' );
 
-	},
-
-	onTabShow: function( e, ui ) {
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		//Handle most cases that one tab and on audit tab
-		if ( this.edit_view_tab_selected_index === 1 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_rates' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubCurrencyRateView();
-			} else {
-
-				this.edit_view_tab.find( '#tab_rates' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-
-	},
-
-
-	setTabStatus: function() {
-
-		// exception that edit_view_tab is null
-		if ( !this.edit_view_tab ) {
-			return;
-		}
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li' )[1] ).hide();
-			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			// What's the permission the rates tab need to have if it displays?
-			$( this.edit_view_tab.find( 'ul li' )[1] ).show();
-
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
 	},
 
 	removeEditView: function() {
@@ -208,35 +146,13 @@ CurrencyViewController = BaseViewController.extend( {
 		this.sub_currency_rate_view_controller = null;
 	},
 
-
-	initTabData: function() {
-		//Handle most case that one tab and one audit tab
-		if (  this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_rates' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubCurrencyRateView();
-			} else {
-
-				this.edit_view_tab.find( '#tab_rates' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
-
 	initSubCurrencyRateView: function() {
-
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
 		if ( this.sub_currency_rate_view_controller ) {
 			this.sub_currency_rate_view_controller.buildContextMenu( true );
 			this.sub_currency_rate_view_controller.setDefaultMenu();
@@ -274,28 +190,35 @@ CurrencyViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Name' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'ISO Currency' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'ISO Currency' ),
 				in_column: 1,
 				field: 'iso_code',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -303,9 +226,11 @@ CurrencyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -313,18 +238,20 @@ CurrencyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
+		];
 	},
 
-	onFormItemChange: function (target, doNotValidate) {
+	onFormItemChange: function( target, doNotValidate ) {
 		if ( target.getField() == 'conversion_rate' ) {
-			this.setConversionRateExampleText(target.getValue(), this.edit_view_ui_dic.iso_code.getValue());
+			this.setConversionRateExampleText( target.getValue(), this.edit_view_ui_dic.iso_code.getValue() );
 		}
-		this._super('onFormItemChange', target, doNotValidate);
+		this._super( 'onFormItemChange', target, doNotValidate );
 	},
 
 	initEditView: function( editId, noRefreshUI ) {
-		this._super('initEditView');
-		this.setConversionRateExampleText(this.edit_view_ui_dic.conversion_rate.getValue(), this.edit_view_ui_dic.iso_code.getValue());
-	},
+		this._super( 'initEditView' );
+		this.setConversionRateExampleText( this.edit_view_ui_dic.conversion_rate.getValue(), this.edit_view_ui_dic.iso_code.getValue() );
+	}
 } );

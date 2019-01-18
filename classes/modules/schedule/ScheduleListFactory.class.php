@@ -1313,8 +1313,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 															)
 								WHERE sf_b.id is NULL
 									AND rsf.company_id = \''. TTUUID::castUUID($company_id) .'\'
-									AND ( uf_b.hire_date IS NULL OR '. $this->getSQLToTimeStampFunction() .'(uf_b.hire_date) <= rsf.date_stamp )
-									AND ( uf_b.termination_date IS NULL OR '. $this->getSQLToTimeStampFunction() .'(uf_b.termination_date) >= rsf.date_stamp )';
+									AND ( uf_b.hire_date IS NULL OR uf_b.hire_date <= rsf.date_stamp )
+									AND ( uf_b.termination_date IS NULL OR uf_b.termination_date >= rsf.date_stamp )';
 
 					if ( $exclude_recurring_schedule_ids != FALSE ) {
 						$query .= ' AND rsf.id NOT IN ( '. $this->getListSQL( $exclude_recurring_schedule_ids ) .' ) ';

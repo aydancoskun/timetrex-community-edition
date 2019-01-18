@@ -18,7 +18,7 @@
 		};
 
 		this.setSortStyle = function( sort_type, index ) {
-			var sortIcon = $( "<img class='t-grid-header-sort-icon' />" );
+			var sortIcon = $( '<img class=\'t-grid-header-sort-icon\' />' );
 
 			if ( sort_type === 'asc' ) {
 
@@ -31,7 +31,7 @@
 			this.append( sortIcon );
 
 			if ( index > 0 ) {
-				var sortNumberSpan = $( "<span class='t-grid-header-sort-number'>" + index + "</span>" )
+				var sortNumberSpan = $( '<span class=\'t-grid-header-sort-number\'>' + index + '</span>' );
 
 				this.append( sortNumberSpan );
 			}
@@ -66,7 +66,7 @@
 
 			$( this ).click( function( e ) {
 
-				$( $this ).trigger( 'headerClick', [e, column_model] )
+				$( $this ).trigger( 'headerClick', [e, column_model] );
 
 			} );
 
@@ -76,8 +76,6 @@
 
 	};
 
-	$.fn.TGridHeader.defaults = {
-
-	};
+	$.fn.TGridHeader.defaults = {};
 
 })( jQuery );

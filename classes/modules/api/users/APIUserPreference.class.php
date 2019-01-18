@@ -109,11 +109,12 @@ class APIUserPreference extends APIFactory {
 	 * @return array|bool
 	 */
 	function getUserPreference( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('user_preference', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_preference', 'view') OR $this->getPermissionObject()->Check('user_preference', 'view_own') OR $this->getPermissionObject()->Check('user_preference', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_preference', 'view' );

@@ -90,12 +90,13 @@ class APIRecurringScheduleTemplateControl extends APIFactory {
 	 * @return array
 	 */
 	function getRecurringScheduleTemplateControl( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('recurring_schedule_template', 'enabled')
 				OR !( $this->getPermissionObject()->Check('recurring_schedule_template', 'view') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'view_own') OR $this->getPermissionObject()->Check('recurring_schedule_template', 'view_child')	) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'recurring_schedule_template', 'view' );

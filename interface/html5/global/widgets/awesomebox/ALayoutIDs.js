@@ -1,6 +1,6 @@
 var ALayoutIDs = function() {
 
-}
+};
 
 ALayoutIDs.SORT_COLUMN = 'global_sort_columns';
 
@@ -222,6 +222,9 @@ ALayoutIDs.CUSTOM_COLUMN = 'global_custom_column';
 
 ALayoutIDs.PAYROLL_REMITTANCE_AGENCY = 'global_payroll_remittance_agency';
 
+ALayoutIDs.REMITTANCE_SOURCE_ACCOUNT = 'global_remittance_source_account';
+ALayoutIDs.REMITTANCE_DESTINATION_ACCOUNT = 'global_remittance_destination_account';
+
 ALayoutIDs.JOB_APPLICANT_EMPLOYMENT = 'global_job_applicant_employment';
 
 ALayoutIDs.JOB_APPLICANT_REFERENCE = 'global_job_applicant_reference';
@@ -239,7 +242,7 @@ ALayoutIDs.SIMPLE_NAME = 'global_simple_name';
 
 var ALayoutType = function() {
 
-}
+};
 
 ALayoutType.customize = 1;
 ALayoutType.saved_layout = 10;

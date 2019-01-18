@@ -116,20 +116,20 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				var save_mapping_input = Global.loadWidget( 'global/widgets/text_input/TTextInput.html' );
 				save_mapping_input = $( save_mapping_input ).TTextInput();
 
-				var save_btn = $( "<input class='t-button' style='margin-left: 5px' type='button' value='" + $.i18n._( 'Save' ) + "' />" );
+				var save_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Save' ) + '\' />' );
 
 				saved_layout_div.append( save_mapping_input );
 				saved_layout_div.append( save_btn );
 
-				form_item_label = $( "<span style='margin-left: 5px' >" + $.i18n._( 'Saved Mapping' ) + ":</span>" );
+				form_item_label = $( '<span style=\'margin-left: 5px\' >' + $.i18n._( 'Saved Mapping' ) + ':</span>' );
 
 				var previous_saved_layout_selector = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 				previous_saved_layout_selector = previous_saved_layout_selector.TComboBox();
 				previous_saved_layout_selector.setValueKey( 'id' );
 				previous_saved_layout_selector.setLabelKey( 'name' );
 
-				var update_btn = $( "<input class='t-button' style='margin-left: 5px' type='button' value='" + $.i18n._( 'Update' ) + "' />" );
-				var del_btn = $( "<input class='t-button' style='margin-left: 5px' type='button' value='" + $.i18n._( 'Delete' ) + "' />" );
+				var update_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Update' ) + '\' />' );
+				var del_btn = $( '<input class=\'t-button\' style=\'margin-left: 5px\' type=\'button\' value=\'' + $.i18n._( 'Delete' ) + '\' />' );
 
 				save_btn.unbind( 'click' ).bind( 'click', function() {
 					var name = save_mapping_input.getValue();
@@ -172,7 +172,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				this.content_div.append( action_button_div );
 
 				var grid_id = 'import_data';
-				var grid_div = $( "<div class='grid-div wizard-grid-div'> <table id='" + grid_id + "'></table></div>" );
+				var grid_div = $( '<div class=\'grid-div wizard-grid-div\'> <table id=\'' + grid_id + '\'></table></div>' );
 				this.setImportGrid( grid_id, grid_div );
 
 				add_icon.bind( 'click', function() {
@@ -219,15 +219,14 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		for ( i = 0; i < select_data.length; i++ ) {
 			var item = select_data[i];
 			item.id = 'csv' + id;
+			item.field = item.field ? item.field : TTUUID.zero_id; //Make sure any blank fields are converted to zero_ids to prevent "undefined" from appearing in place of the dropdown box.
 			id = id + 1;
 		}
 
 		this.last_id = id;
 		select_data = this.setSampleRowBaseOnImportFile( select_data );
 
-		grid.clearGridData();
-		grid.setGridParam( {data: select_data} );
-		grid.trigger( 'reloadGrid' );
+		grid.setData( select_data );
 
 		this.bindGridRenderEvents( grid );
 	},
@@ -264,27 +263,27 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		args.filter_data = filter_data;
 		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().getUserGenericData( args, {
 			onResult: function( result ) {
-			var res_data = result.getResult();
-			if ( $.type( res_data ) !== 'array' ) {
-				$this.saveNewMapping( '-Default-' );
-			} else {
+				var res_data = result.getResult();
+				if ( $.type( res_data ) !== 'array' ) {
+					$this.saveNewMapping( $.i18n._( '-Default-' ) );
+				} else {
 
-				res_data.sort( function( a, b ) {
-						return Global.compare( a, b, 'name' );
+					res_data.sort( function( a, b ) {
+								return Global.compare( a, b, 'name' );
 
+							}
+					);
+
+					$this.saved_layout_array = res_data;
+					//if not set select layout, default to first one and update it to current upload columns
+					if ( !select_layout_id ) {
+						select_layout_id = res_data[0].id;
+						$this.updateSelectMapping( select_layout_id );
 					}
-				);
 
-				$this.saved_layout_array = res_data;
-				//if not set select layout, default to first one and update it to current upload columns
-				if ( !select_layout_id ) {
-					select_layout_id = res_data[0].id;
-					$this.updateSelectMapping( select_layout_id );
+					$this.setSavedMappingOptions( res_data, select_layout_id );
+
 				}
-
-				$this.setSavedMappingOptions( res_data, select_layout_id );
-
-			}
 
 			}
 		} );
@@ -308,7 +307,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		var select_layout = this.getLayoutById( select_id );
 		var $this = this;
 
-		if ( select_layout.name === '-Default-' ) {
+		if ( select_layout.name === $.i18n._( '-Default-' ) ) {
 			TAlertManager.showAlert( $.i18n._( 'Can\'t delete default layout' ) );
 			return;
 		}
@@ -317,8 +316,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			if ( flag ) {
 				new (APIFactory.getAPIClass( 'APIUserGenericData' ))().deleteUserGenericData( select_id, {
 					onResult: function( result ) {
-					$this.onSavedLayoutChange( $this.saved_layout_array[0].id );
-					$this.getSavedMapping();
+						$this.onSavedLayoutChange( $this.saved_layout_array[0].id );
+						$this.getSavedMapping();
 					}
 				} );
 			}
@@ -351,11 +350,11 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		new (APIFactory.getAPIClass( 'APIUserGenericData' ))().setUserGenericData( args, {
 			onResult: function( result ) {
-			if ( !result.isValid() ) {
-				TAlertManager.showErrorAlert( result );
-			} else {
-				$this.getSavedMapping( result.getResult() );
-			}
+				if ( !result.isValid() ) {
+					TAlertManager.showErrorAlert( result );
+				} else {
+					$this.getSavedMapping( result.getResult() );
+				}
 
 			}
 		} );
@@ -372,25 +371,25 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			if ( select_layout_id ) {
 				selector.setValue( select_layout_id );
 			}
-	//		selector.empty();
-	//		var len = array.length;
-	//		for ( var i = 0; i < len; i++ ) {
-	//			var item = array[i];
-	//			selector.append( '<option value="' + item.id + '">' + item.name + '</option>' );
-	//		}
-	//
-	//		if ( select_layout_id ) {
-	//			$( selector.find( 'option' ) ).filter(function() {
-	//
-	//				if ( !select_layout_id ) {
-	//					return false;
-	//				}
-	//
-	//				return $( this ).attr( 'value' ) === select_layout_id.toString();
-	//			} ).attr( 'selected', true );
-	//		} else {
-	//			$( selector.find( 'option' )[0] ).attr( 'selected', true );
-	//		}
+			//		selector.empty();
+			//		var len = array.length;
+			//		for ( var i = 0; i < len; i++ ) {
+			//			var item = array[i];
+			//			selector.append( '<option value="' + item.id + '">' + item.name + '</option>' );
+			//		}
+			//
+			//		if ( select_layout_id ) {
+			//			$( selector.find( 'option' ) ).filter(function() {
+			//
+			//				if ( !select_layout_id ) {
+			//					return false;
+			//				}
+			//
+			//				return $( this ).attr( 'value' ) === select_layout_id.toString();
+			//			} ).attr( 'selected', true );
+			//		} else {
+			//			$( selector.find( 'option' )[0] ).attr( 'selected', true );
+			//		}
 
 		}
 		$this.saved_layout_array = array;
@@ -398,11 +397,11 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 	addRow: function() {
 		var grid = this.stepsWidgetDic[this.current_step].import_data;
-		var all_data = grid.getGridParam( 'data' );
+		var all_data = grid.getData();
 
 		var data = {};
 		data.id = 'csv' + this.last_id;
-		data.field = '';
+		data.field = TTUUID.zero_id;
 		data.default_value = '';
 		data.parse_hint = '';
 		data.map_column_name = $.i18n._( 'New Field Column' );
@@ -412,11 +411,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		all_data.push( data );
 
-		grid.clearGridData();
-		grid.setGridParam( {data: all_data} );
-		grid.trigger( 'reloadGrid' );
+		grid.setData( all_data );
 
-		grid.jqGrid( 'setSelection', data.id );
+		grid.grid.jqGrid( 'setSelection', data.id );
 
 		this.bindGridRenderEvents( grid );
 	},
@@ -440,11 +437,9 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			}
 		}
 
-		grid.clearGridData();
-		grid.setGridParam( {data: all_data} );
-		grid.trigger( 'reloadGrid' );
+		grid.setData( all_data );
 
-		grid.jqGrid( 'setSelection', all_data[all_data.length - 1].id );
+		grid.grid.jqGrid( 'setSelection', all_data[all_data.length - 1].id );
 	},
 
 	getGridColumns: function( gridId, callBack ) {
@@ -531,7 +526,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		if ( this.parse_hint_source[row.field] ) {
 			widget = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			widget = widget.TComboBox( {set_empty: false} );
+			widget = widget.TComboBox( { set_empty: false } );
 
 			widget.attr( 'custom_cell', 'true' );
 			widget.attr( 'render_type', 'combobox' );
@@ -550,11 +545,11 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		} else {
 			widget = $( '<input custom_cell="true" ' +
-				'render_type="text" ' +
-				'id="' + row_id + '_' + col_model.name + '" ' +
-				'type="text" ' +
-				'class="t-text-input" ' +
-				'style="width: 97%">' );
+					'render_type="text" ' +
+					'id="' + row_id + '_' + col_model.name + '" ' +
+					'type="text" ' +
+					'class="t-text-input" ' +
+					'style="width: 97%">' );
 
 			widget.text( cell_value );
 		}
@@ -563,23 +558,26 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	},
 
 	onFieldRender: function( cell_value, related_data, row ) {
+		if ( !cell_value ) {
+			return;
+		}
 
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowId;
 
-		var text_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		text_input = text_input.TComboBox( {set_empty: true} );
+		var acombobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		acombobox = acombobox.TComboBox( { set_empty: true } );
 
-		text_input.attr( 'custom_cell', 'true' );
-		text_input.attr( 'render_type', 'combobox' );
-		text_input.attr( 'id', row_id + '_' + col_model.name );
-		text_input.width( '97%' );
+		acombobox.attr( 'custom_cell', 'true' );
+		acombobox.attr( 'render_type', 'combobox' );
+		acombobox.attr( 'id', row_id + '_' + col_model.name );
+		acombobox.width( '97%' );
 
-		text_input.setSourceData( this.field_source );
+		acombobox.setSourceData( this.field_source );
 
-		text_input.setValue( cell_value );
+		$( acombobox[0] ).find( '[value=' + cell_value + ']' ).attr( 'selected', true );
 
-		return text_input.get( 0 ).outerHTML;
+		return acombobox.get( 0 ).outerHTML;
 	},
 
 	onTextInputRender: function( cell_value, related_data, row ) {
@@ -587,11 +585,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowId;
 
-		var text_input = $( '<input custom_cell="true" render_type="text" id="' + row_id + '_' + col_model.name + '" value="" type="text" class="t-text-input" style="width: 97%">' );
-
-		text_input.attr( 'value', cell_value );
-
-		return text_input.get( 0 ).outerHTML;
+		return '<input custom_cell="true" render_type="text" id="' + row_id + '_' + col_model.name + '" value="' + cell_value + '" type="text" class="t-text-input" style="width: 97%">';
 	},
 
 	buildCurrentStepData: function() {
@@ -606,20 +600,20 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			case 1:
 				this.api_import.getImportObjects( {
 					onResult: function( result ) {
-					var combo_box = current_step_ui['import_class'];
-					var array = Global.buildRecordArray( result.getResult() );
-					combo_box.setSourceData( array );
+						var combo_box = current_step_ui['import_class'];
+						var array = Global.buildRecordArray( result.getResult() );
+						combo_box.setSourceData( array );
 
-					if ( current_step_data ) {
-						combo_box.setValue( current_step_data.import_class );
-					} else if ( $this.default_data ) {
-						combo_box.setValue( $this.default_data );
+						if ( current_step_data ) {
+							combo_box.setValue( current_step_data.import_class );
+						} else if ( $this.default_data ) {
+							combo_box.setValue( $this.default_data );
 
-					}
+						}
 
-					var example_label = current_step_ui.example_label;
-					example_label.text( $.i18n._( 'Download example' ) + ' ' + combo_box.getLabel() + ' ' + $.i18n._( 'CSV file' ) )
-					$this.setButtonsStatus(); // set button enabled or disabled
+						var example_label = current_step_ui.example_label;
+						example_label.text( $.i18n._( 'Download example' ) + ' ' + combo_box.getLabel() + ' ' + $.i18n._( 'CSV file' ) );
+						$this.setButtonsStatus(); // set button enabled or disabled
 					}
 				} );
 				break;
@@ -630,9 +624,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 					current_step_data.import_data_for_layout = this.setSampleRowBaseOnImportFile( current_step_data.import_data_for_layout );
 
-					grid.clearGridData();
-					grid.setGridParam( {data: current_step_data.import_data_for_layout} );
-					grid.trigger( 'reloadGrid' );
+					grid.setData( current_step_data.import_data_for_layout );
 
 					$this.bindGridRenderEvents( grid );
 
@@ -644,7 +636,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 				this.api_import.getOptions( 'parse_hint', {
 					onResult: function( result ) {
-					$this.parse_hint_source = result.getResult();
+						$this.parse_hint_source = result.getResult();
 
 					}
 				} );
@@ -655,42 +647,40 @@ ImportCSVWizardController = BaseWizardController.extend( {
 						$this.api_import.getRawData( 1, {
 							onResult: function( getRawDataRes ) {
 
-							var raw_data = getRawDataRes.getResult();
-							raw_data = $this.buildMappingGridDataArray( raw_data[0] );
+								var raw_data = getRawDataRes.getResult();
+								raw_data = $this.buildMappingGridDataArray( raw_data[0] );
 
-							$this.api_import.generateColumnMap( {
-								onResult: function( generateColumnMapRes ) {
-									$this.column_map_data = generateColumnMapRes.getResult();
+								$this.api_import.generateColumnMap( {
+									onResult: function( generateColumnMapRes ) {
+										$this.column_map_data = generateColumnMapRes.getResult();
 
-									var len = raw_data.length;
-									for ( var key in $this.column_map_data ) {
-										for ( var i = 0; i < len; i++ ) {
-											var raw_data_item = raw_data[i];
-											var col_map_data_item = $this.column_map_data[key];
-											if ( raw_data_item.map_column_name === col_map_data_item.map_column_name ) {
-												raw_data_item.field = key;
-												raw_data_item.default_value = $this.column_map_data[key].default_value ? $this.column_map_data[key].default_value : '';
-												raw_data_item.parse_hint = $this.column_map_data[key].parse_hint ? $this.column_map_data[key].parse_hint : '';
+										var len = raw_data.length;
+										for ( var key in $this.column_map_data ) {
+											for ( var i = 0; i < len; i++ ) {
+												var raw_data_item = raw_data[i];
+												var col_map_data_item = $this.column_map_data[key];
+												if ( raw_data_item.map_column_name == col_map_data_item.map_column_name ) {
+													raw_data_item.field = key;
+													raw_data_item.default_value = $this.column_map_data[key].default_value ? $this.column_map_data[key].default_value : '';
+													raw_data_item.parse_hint = $this.column_map_data[key].parse_hint ? $this.column_map_data[key].parse_hint : '';
+												}
 											}
 										}
-									}
 
-									raw_data.sort( function( a, b ) {
-											return Global.compare( a, b, 'map_column_name' );
-										}
-									);
+										raw_data.sort( function( a, b ) {
+													return Global.compare( a, b, 'map_column_name' );
+												}
+										);
 
-									// use to set Sample row to same layout
-									$this.import_data = raw_data;
+										// use to set Sample row to same layout
+										$this.import_data = raw_data;
 
-									grid.clearGridData();
-									grid.setGridParam( {data: raw_data} );
-									grid.trigger( 'reloadGrid' );
+										grid.setData( raw_data );
 
-									$this.bindGridRenderEvents( grid );
+										$this.bindGridRenderEvents( grid );
 
-									$this.getSavedMapping();
-									$this.setButtonsStatus(); // set button enabled or disabled
+										$this.getSavedMapping();
+										$this.setButtonsStatus(); // set button enabled or disabled
 
 									}
 								} );
@@ -703,26 +693,26 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			case 4:
 				this.api_import.getOptions( 'import_options', {
 					onResult: function( result ) {
-					var result_data = Global.buildRecordArray( result.getResult() );
-					var div = $( '<div style="text-align: left;margin-left: 15px;"></div>' );
+						var result_data = Global.buildRecordArray( result.getResult() );
+						var div = $( '<div style="text-align: left;margin-left: 15px;"></div>' );
 
-					for ( var i = 0; i < result_data.length; i++ ) {
-						var item = result_data[i];
-						var check_box = $this.getCheckBox( item.value );
+						for ( var i = 0; i < result_data.length; i++ ) {
+							var item = result_data[i];
+							var check_box = $this.getCheckBox( item.value );
 
-						if ( current_step_data && current_step_data[item.value] ) {
-							check_box.setValue( current_step_data[item.value] );
+							if ( current_step_data && current_step_data[item.value] ) {
+								check_box.setValue( current_step_data[item.value] );
+							}
+
+							var label = $( '<label class="wizard-checkbox-label" style="display: block;">' + item.label + '</label>' );
+							label.prepend( check_box );
+							$this.stepsWidgetDic[$this.current_step][item.value] = check_box;
+
+							div.append( label );
 						}
 
-						var label = $( '<label class="wizard-checkbox-label" style="display: block;">' + item.label + '</label>' );
-						label.prepend( check_box );
-						$this.stepsWidgetDic[$this.current_step][item.value] = check_box;
-
-						div.append( label );
-					}
-
-					$this.content_div.append( div );
-					$this.setButtonsStatus(); // set button enabled or disabled
+						$this.content_div.append( div );
+						$this.setButtonsStatus(); // set button enabled or disabled
 
 					}
 				} );
@@ -735,24 +725,24 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					onResult: function( result ) {
 
 						if ( $this.current_step != 5 ) {
-						return;
-					}
-					if ( result.isValid() ) {
-						var label = $this.getLabel();
-						label.text( $.i18n._( 'Data verification successful' ) );
+							return;
+						}
+						if ( result.isValid() ) {
+							var label = $this.getLabel();
+							label.text( $.i18n._( 'Data verification successful' ) );
 
-						$this.content_div.append( label );
+							$this.content_div.append( label );
 
-					} else {
-						var data_grid_error_source = $this.createErrorSource( result.getDetails() );
-						$this.showErrorGrid( $.i18n._( 'Verification failed due to the following reasons' ) + ': ',
-							data_grid_error_source,
-							$.i18n._( 'Continue to the next step to skip importing invalid records.' ),
-							result.getRecordDetails() );
+						} else {
+							var data_grid_error_source = $this.createErrorSource( result.getDetails() );
+							$this.showErrorGrid( $.i18n._( 'Verification failed due to the following reasons' ) + ': ',
+									data_grid_error_source,
+									$.i18n._( 'Continue to the next step to skip importing invalid records.' ),
+									result.getRecordDetails() );
 
-					}
+						}
 
-					$this.setButtonsStatus(); // set button enabled or disabled
+						$this.setButtonsStatus(); // set button enabled or disabled
 
 					}
 				} );
@@ -765,25 +755,25 @@ ImportCSVWizardController = BaseWizardController.extend( {
 					onResult: function( result ) {
 
 						if ( $this.current_step != 6 ) {
-						return;
-					}
-					if ( result.isValid() ) {
-						var label = $this.getLabel();
-						label.text( $.i18n._( 'Import successful' ) );
+							return;
+						}
+						if ( result.isValid() ) {
+							var label = $this.getLabel();
+							label.text( $.i18n._( 'Import successful' ) );
 
-						$this.content_div.append( label );
+							$this.content_div.append( label );
 
-					} else {
-						var data_grid_error_source = $this.createErrorSource( result.getDetails() );
+						} else {
+							var data_grid_error_source = $this.createErrorSource( result.getDetails() );
 
-						$this.showErrorGrid( $.i18n._( 'Import failed due to the following reasons' ) +':',
-							data_grid_error_source,
-							$.i18n._( 'Invalid records have been skipped, all other records have been imported successfully.' ),
-							result.getRecordDetails() );
+							$this.showErrorGrid( $.i18n._( 'Import failed due to the following reasons' ) + ':',
+									data_grid_error_source,
+									$.i18n._( 'Invalid records have been skipped, all other records have been imported successfully.' ),
+									result.getRecordDetails() );
 
-					}
+						}
 
-					$this.setButtonsStatus(); // set button enabled or disabled
+						$this.setButtonsStatus(); // set button enabled or disabled
 					}
 				} );
 				break;
@@ -796,12 +786,12 @@ ImportCSVWizardController = BaseWizardController.extend( {
 	},
 
 	showErrorGrid: function( top_des, data_grid_error_source, bottom_des, records_details ) {
-		var label = $( "<span class='top-des clear-both-div'></span>" );
+		var label = $( '<span class=\'top-des clear-both-div\'></span>' );
 		label.text( top_des );
 
 		this.content_div.append( label );
 
-		var grid = $( '<table id="grid"></table>' );
+		var grid = $( '<table id="error_grid"></table>' );
 
 		var columns = [];
 
@@ -809,9 +799,10 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			name: 'rowIndex',
 			index: 'rowIndex',
 			label: $.i18n._( 'Row' ),
-			width: 100,
+			width: 60,
 			sortable: false,
-			title: false
+			title: false,
+			fixed:true
 		};
 		columns.push( column_info );
 
@@ -847,30 +838,22 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		this.content_div.append( grid );
 
-		label = $( "<span class='total-des clear-both-div'></span>" );
+		label = $( '<span class=\'total-des clear-both-div\'></span>' );
 		label.text( $.i18n._( 'Records' ) + ':' + $.i18n._( 'Total' ) + ': ' + records_details.total + ' ' + $.i18n._( 'Valid' ) + ': ' + records_details.valid + ' ' + $.i18n._( 'Invalid' ) + ': ' + records_details.invalid );
 
 		this.content_div.append( label );
 
-		label = $( "<span class='bottom-des clear-both-div'></span>" );
+		label = $( '<span class=\'bottom-des clear-both-div\'></span>' );
 		label.text( bottom_des );
 
 		this.content_div.append( label );
 
-		grid = grid.jqGrid( {
-			altRows: true,
-			data: data_grid_error_source,
-			datatype: 'local',
+		grid = new TTGrid( 'error_grid', {
 			sortable: false,
-			width: (this.content_div.width() - 2),
-			height: 200,
-			rowNum: 10000,
-			colNames: [],
-			colModel: columns,
-			viewrecords: true
-
-		} );
-
+			width: (this.content_div.width() - 2)
+		}, columns );
+		grid.setData( data_grid_error_source );
+		grid.setGridColumnsWidth( null, { max_grid_width: (this.content_div.width() - 2) } );
 	},
 
 	createErrorSource: function( error_array ) {
@@ -894,7 +877,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				error_row = {};
 				// #2345 - we always want the row and column name to show in the error report.
 				error_row.rowIndex = parseInt( key ) + 2;
-				error_row.row = $.i18n._('Unknown');
+				error_row.row = $.i18n._( 'Unknown' );
 				error_row.column = error_key;
 				error_row.message = error_info[error_key][0];
 
@@ -916,8 +899,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 	bindGridRenderEvents: function( grid ) {
 		var $this = this;
-		var inputs = grid.find( 'input[custom_cell="true"]' );
-		var select = grid.find( 'select[custom_cell="true"]' );
+		var inputs = grid.grid.find( 'input[custom_cell="true"]' );
+		var select = grid.grid.find( 'select[custom_cell="true"]' );
 
 		inputs.unbind( 'change' ).bind( 'change', function( e ) {
 			$this.onCellInputChange( e );
@@ -943,7 +926,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		var target_id = target.attr( 'id' );
 		var row_id = target_id.split( '_' )[0];
 
-		grid.jqGrid( 'setSelection', row_id );
+		grid.grid.jqGrid( 'setSelection', row_id );
 	},
 
 	onCellInputChange: function( e ) {
@@ -954,7 +937,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 		var target_id = target.attr( 'id' );
 		var row_id = target_id.split( '_' )[0];
 		var field = target_id.substring( target_id.indexOf( '_' ) + 1, target_id.length );
-		var data = grid.getGridParam( 'data' );
+		var data = grid.getData();
 		var target_val = target.val();
 
 		var len = data.length;
@@ -981,14 +964,14 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			if ( $this.parse_hint_source[target_val] ) {
 
 				widget = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-				widget = widget.TComboBox( {set_empty: false} );
+				widget = widget.TComboBox( { set_empty: false } );
 
 				widget.attr( 'custom_cell', 'true' );
 				widget.attr( 'render_type', 'combobox' );
 				widget.attr( 'id', row_id + '_parse_hint' );
 				widget.width( '97%' );
 
-				var source = Global.buildRecordArray( $this.parse_hint_source[target_val] )
+				var source = Global.buildRecordArray( $this.parse_hint_source[target_val] );
 				widget.setSourceData( Global.buildRecordArray( $this.parse_hint_source[target_val] ) );
 				widget.setValue( source[0].value );
 				row_data['parse_hint'] = source[0].value;
@@ -999,12 +982,12 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			} else {
 
 				widget = $( '<input custom_cell="true" ' +
-					'render_type="text" ' +
-					'id="' + row_id + '_parse_hint" ' +
-					'value="" ' +
-					'type="text" ' +
-					'class="t-text-input" ' +
-					'style="width: 97%">' );
+						'render_type="text" ' +
+						'id="' + row_id + '_parse_hint" ' +
+						'value="" ' +
+						'type="text" ' +
+						'class="t-text-input" ' +
+						'style="width: 97%">' );
 
 				parse_hint_widget.parent().append( widget );
 				parse_hint_widget.remove();
@@ -1028,35 +1011,17 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 		this.content_div.append( grid_div );
 
-		var grid = grid_div.find( '#' + gridId );
+		this.getGridColumns( gridId, function( column_model ) {
 
-		this.getGridColumns( gridId, function( result ) {
-
-			grid = grid.jqGrid( {
-				altRows: true,
-				data: [],
-				datatype: 'local',
+			$this.stepsWidgetDic[$this.current_step][gridId] = new TTGrid( gridId, {
 				sortable: false,
 				height: 300,
-				rowNum: 10000,
-				colNames: [],
-				colModel: result,
-				viewrecords: true,
 				multiselect: allMultipleSelection,
 				multiboxonly: allMultipleSelection,
-				editurl: 'clientArray',
+				editurl: 'clientArray'
+			}, column_model );
 
-				onSelectRow: function( id ) {
-//					if ( id ) {
-//
-//					}
-				}
-
-			} );
-
-			$this.stepsWidgetDic[$this.current_step][gridId] = grid;
-
-			$this.setGridSize( grid );
+			$this.setGridSize( $this.stepsWidgetDic[$this.current_step][gridId] );
 
 			$this.setGridGroupColumns( gridId );
 
@@ -1076,7 +1041,7 @@ ImportCSVWizardController = BaseWizardController.extend( {
 			var item = mappingData[key];
 			var data = {};
 			data.id = 'csv' + id;
-			data.field = item.field ? item.field : '';
+			data.field = item.field ? item.field : TTUUID.zero_id;
 			data.default_value = item.default_value ? item.default_value : '';
 			data.parse_hint = item.parse_hint ? item.parse_hint : '';
 			data.map_column_name = item.map_column_name ? item.map_column_name : key;
@@ -1134,15 +1099,15 @@ ImportCSVWizardController = BaseWizardController.extend( {
 
 			$this.api_import.uploadFile( current_step_data.file_uploader, 'object_type=import&object_id=' + this.api_import.className, {
 				onResult: function( upload_file_result ) {
-				if ( upload_file_result.toLowerCase() !== 'true' ) {
-					$this.setButtonsStatus(); // set button enabled or disabled
-					return;
-				}
+					if ( upload_file_result.toLowerCase() !== 'true' ) {
+						$this.setButtonsStatus(); // set button enabled or disabled
+						return;
+					}
 
-				$this.current_step = $this.current_step + 1;
+					$this.current_step = $this.current_step + 1;
 
-				$this.stepsDataDic[$this.current_step] = null;
-				$this.initCurrentStep();
+					$this.stepsDataDic[$this.current_step] = null;
+					$this.initCurrentStep();
 
 				}
 			} );
@@ -1250,8 +1215,8 @@ ImportCSVWizardController = BaseWizardController.extend( {
 				break;
 			case 3:
 				var grid = current_step_ui.import_data;
-				current_step_data.import_data = this.buildImportMapping( grid.getGridParam( 'data' ) );
-				current_step_data.import_data_for_layout = grid.getGridParam( 'data' );
+				current_step_data.import_data = this.buildImportMapping( grid.getData() );
+				current_step_data.import_data_for_layout = grid.getData();
 				current_step_data.saved_mapping = current_step_ui.saved_mapping.getValue();
 				break;
 			case 4:

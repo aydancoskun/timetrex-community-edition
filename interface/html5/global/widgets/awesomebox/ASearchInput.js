@@ -17,13 +17,13 @@
 				$( this ).val( filters[field] );
 				$( this ).addClass( 'search-input-focus-in' );
 			}
-		}
+		};
 
 		this.clearValue = function() {
 			$( this ).val( default_tooltip );
 			$( this ).removeClass( 'search-input-focus-in' );
 			$( this ).addClass( 'search-input-focus-out' );
-		}
+		};
 
 		this.each( function() {
 

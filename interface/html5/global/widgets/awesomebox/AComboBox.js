@@ -289,7 +289,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -375,12 +375,12 @@
 		this.showErrorTip = function( sec ) {
 
 			if ( !Global.isSet( sec ) ) {
-				sec = 2
+				sec = 2;
 			}
 
 			if ( !error_tip_box ) {
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
-				error_tip_box = error_tip_box.ErrorTipBox()
+				error_tip_box = error_tip_box.ErrorTipBox();
 			}
 			if ( $( this ).hasClass( 'a-warning-tip' ) ) {
 				error_tip_box.show( this, error_string, sec, true );
@@ -461,7 +461,7 @@
 				}
 			} else {
 				if ( return_full_value ) {
-					return_value = select_item
+					return_value = select_item;
 				} else {
 					if ( select_item ) {
 
@@ -527,7 +527,7 @@
 		this.getSourceData = function() {
 
 			if ( navigation_mode && navigation_mode_source_data_before_open ) {
-				return navigation_mode_source_data_before_open
+				return navigation_mode_source_data_before_open;
 			}
 
 			//if done search, return the result o
@@ -581,7 +581,7 @@
 			}
 			if ( allow_multiple_selection ) {
 				if ( !val || $.type( val ) === 'array' ) {
-					this.setSelectItems( val )
+					this.setSelectItems( val );
 				} else if ( $.type( val ) === 'string' || $.type( val ) === 'number' ) {
 					this.setSelectItems( [val] );
 				}
@@ -592,7 +592,7 @@
 				//If no default value set first item as default select item
 				//#1187 - this fix might cause problems but is needed to allow proper selection of default value when zero_uuid is selected.
 				if ( !val || val == TTUUID.zero_id ) {
-				// if ( !val ) {
+					// if ( !val ) {
 					if ( !set_empty && !set_any && !set_default && !set_open && !set_all && !set_special_empty && source_data && source_data.length > 0 ) {
 						this.setValue( source_data[0] );
 					} else {
@@ -616,7 +616,7 @@
 			if ( Global.isSet( api_class ) ) {
 
 				//Try api awesomebox first
-				if ( ( !TTUUID.isUUID(val) && parseInt( val ) <= 0 ) || val == TTUUID.zero_id || val == TTUUID.not_exist_id ) {
+				if ( ( !TTUUID.isUUID( val ) && parseInt( val ) <= 0 ) || val == TTUUID.zero_id || val == TTUUID.not_exist_id ) {
 
 					if ( allow_multiple_selection ) {
 						$this.setValue( [this.getLocalSelectItem( val )] );
@@ -629,7 +629,7 @@
 
 				var filter = {};
 				//id is a public member of this class which contains the field id, so we wrapped 'id' in quotes here to show it's not the public member from above.
-				filter.filter_data = {'id': val};
+				filter.filter_data = { 'id': val };
 
 				//#2289 - If you have an employee who can view subordinate punches but not view subordinate employee, you will see permission denied without sending the permission section.
 				if ( default_args && Global.isSet( default_args.permission_section ) ) {
@@ -738,7 +738,7 @@
 			}
 
 			if ( $.type( val ) === 'string' || $.type( val ) === 'number' ) {
-				this.getRealData( val )
+				this.getRealData( val );
 			} else {
 				this.setLabel();
 			}
@@ -789,7 +789,7 @@
 				for ( var i = 0; i < len; i++ ) {
 					item = val[i];
 					if ( $.type( item ) === 'string' ||
-						$.type( item ) === 'number' ) {
+							$.type( item ) === 'number' ) {
 						if ( !do_not_get_real_data ) {
 							this.getRealData( item );
 						} else {
@@ -822,11 +822,11 @@
 
 		this.getRealSelectItemsFromSourceData = function() {
 			var len = source_data.length;
-			var select_items_len = select_items.length;
+			var select_items_len = select_items ? select_items.length : 0; // Fix for JS Exception if select_items is null.
 			var res = [];
 
 			for ( var i = 0; i < select_items_len; i++ ) {
-				var select_value = select_items[i]
+				var select_value = select_items[i];
 				for ( var j = 0; j < len; j++ ) {
 					var source_item = source_data[j];
 
@@ -1044,9 +1044,22 @@
 			user_generic_api.setUserGenericData( filter, {
 				onResult: function( res ) {
 					ALayoutCache.layout_dic[layout_name] = null;
+
 					$this.initColumns();
+
 					source_data = null; //Reload source data if column changed
 
+					//Reload real data if columns have changed, so they display data for any new columns
+					// We can't just pass in the selected_items verbatim here, we need to parse off the 'id' fields and pass that in as an array instead.
+					if ( $.type( select_items ) === 'array' ) {
+						select_items.map( function ( obj ) {
+							if ( obj.hasOwnProperty( 'id' ) ) {
+								return obj['id'];
+							}
+						} );
+					}
+
+					$this.getRealData( select_items );
 				}
 			} );
 
@@ -1129,7 +1142,7 @@
 				return;
 			} else {
 				var filter = {};
-				filter.filter_data = {script: ALayoutIDs.AWESOMEBOX_COLUMNS, name: layout_name};
+				filter.filter_data = { script: ALayoutIDs.AWESOMEBOX_COLUMNS, name: layout_name };
 				user_generic_api.getUserGenericData( filter, {
 					onResult: function( res ) {
 
@@ -1142,7 +1155,7 @@
 							//if saved layout is saved view layout. get it
 							if ( data.type === ALayoutType.saved_layout ) {
 
-								var columns_result_data = api.getOptions( column_option_key, {async: false} ).getResult();
+								var columns_result_data = api.getOptions( column_option_key, { async: false } ).getResult();
 								all_columns = Global.buildColumnArray( columns_result_data );
 
 								var saved_layout_result = user_generic_api.getUserGenericData( {
@@ -1150,7 +1163,7 @@
 										id: data.layout_id,
 										deleted: false
 									}
-								}, {async: false} ).getResult();
+								}, { async: false } ).getResult();
 
 								if ( saved_layout_result && saved_layout_result.length > 0 ) {
 									var saved_layout = saved_layout_result.slice()[0];
@@ -1312,20 +1325,20 @@
 
 		this.onClose = function( e, target ) {
 			if ( a_dropdown == undefined ) {
-				Debug.Text('ERROR: Unable to close AComboBox check to make sure it wasn\'t instantiated twice.','ACombobox.js', 'ACombobox', 'onClose' ,10);
+				Debug.Text( 'ERROR: Unable to close AComboBox check to make sure it wasn\'t instantiated twice.', 'ACombobox.js', 'ACombobox', 'onClose', 10 );
 			}
 
 			if ( allow_multiple_selection ) {
 				//Re load source_data if select items
 				var select_items = a_dropdown.getSelectItems();
-				$this.setValue( select_items )
+				$this.setValue( select_items );
 			} else {
 				var select_item = a_dropdown.getSelectItem();
 				if ( select_item ) { // #2593 - null is not an object (evaluating 'select_item._id_')
-					if (!tree_mode) {
-						$this.setValue(select_item)
-					} else if (select_item._id_) {
-						$this.setValue(select_item._id_)
+					if ( !tree_mode ) {
+						$this.setValue( select_item );
+					} else if ( select_item._id_ ) {
+						$this.setValue( select_item._id_ );
 					}
 				}
 			}
@@ -1385,13 +1398,13 @@
 				}
 			} else if ( e.keyCode === 39 ) { //right
 				if ( allow_multiple_selection && !$( e.target ).hasClass( 'search-input' ) ) {
-				e.preventDefault();
+					e.preventDefault();
 					a_dropdown.onUnSelectGridDoubleClick();
 					a_dropdown.setIsChanged( true );
 				}
 			} else if ( e.keyCode === 37 ) { //left
 				if ( allow_multiple_selection && !$( e.target ).hasClass( 'search-input' ) ) {
-				e.preventDefault();
+					e.preventDefault();
 					a_dropdown.onSelectGridDoubleClick();
 					a_dropdown.setIsChanged( true );
 				}
@@ -1408,31 +1421,40 @@
 				}, 750 );
 				e.preventDefault();
 
-                quick_search_typed_keys = quick_search_typed_keys + String.fromCharCode(e.which).toLowerCase();
-                Debug.Text('Quick search typed keys: ' + quick_search_typed_keys, 'AComboBox.js', 'AComboBox', 'selectNextItem', 10);
-                trimmed_quick_search_typed_keys = quick_search_typed_keys.trim();
+				quick_search_typed_keys = quick_search_typed_keys + String.fromCharCode( e.which ).toLowerCase();
+				Debug.Text( 'Quick search typed keys: ' + quick_search_typed_keys, 'AComboBox.js', 'AComboBox', 'selectNextItem', 10 );
+				trimmed_quick_search_typed_keys = quick_search_typed_keys.trim();
 
 				if ( allow_multiple_selection || tree_mode ) {
 					if ( trimmed_quick_search_typed_keys ) {
 						target_grid = a_dropdown.getFocusInSeletGrid() ? a_dropdown.getSelectGrid() : a_dropdown.getUnSelectGrid();
+
 						var search_index = quick_search_dic[trimmed_quick_search_typed_keys] ? quick_search_dic[trimmed_quick_search_typed_keys] : 0;
-						var tds = $( target_grid.find( 'tr' ).find( 'td:eq(1)' ).filter( function() {
+						var tds = $( target_grid.grid.find( 'tr' ).find( 'td:eq(1)' ).filter( function() {
 							return $.text( [this] ).toLowerCase().indexOf( trimmed_quick_search_typed_keys ) == 0;
 						} ) );
-
 						var td;
 						if ( search_index > 0 && search_index < tds.length ) {
 
 						} else {
-							search_index = 0
+							search_index = 0;
 						}
 
 						td = $( tds[search_index] );
+						a_dropdown.unSelectAll( target_grid.grid, true );
+						//next_index = td.parent().index() - 1;
 
-						a_dropdown.unSelectAll( target_grid, true );
-						next_index = td.parent().index() - 1;
-						next_select_item = target_grid.jqGrid( 'getGridParam', 'data' )[next_index];
+						var next_select_item = false;
+						var grid_data = target_grid.getData();
+						for ( var z = 0; z < grid_data.length; z++ ) {
+							if ( grid_data[z].id == td.parents('tr').attr('id') ) {
+								next_select_item = grid_data[z];
+								break;
+							}
+						}
+
 						select_item = next_select_item;
+
 						a_dropdown.setSelectItem( next_select_item, target_grid );
 						a_dropdown.setIsChanged( true );
 						quick_search_dic = {};
@@ -1441,13 +1463,13 @@
 				} else {
 					if ( trimmed_quick_search_typed_keys ) {
 						search_index = quick_search_dic[trimmed_quick_search_typed_keys] ? quick_search_dic[trimmed_quick_search_typed_keys] : 0;
-						tds = $( a_dropdown.getUnSelectGrid().find( 'tr' ).find( 'td:first' ).filter( function() {
+						tds = $( a_dropdown.getUnSelectGrid().grid.find( 'tr' ).find( 'td:first' ).filter( function() {
 							return $.text( [this] ).toLowerCase().indexOf( trimmed_quick_search_typed_keys ) == 0;
 						} ) );
 						if ( search_index > 0 && search_index < tds.length ) {
 
 						} else {
-							search_index = 0
+							search_index = 0;
 						}
 						td = $( tds[search_index] );
 						next_index = td.parent().index() - 1;
@@ -1516,8 +1538,21 @@
 						source_data = Global.formatGridData( source_data, api.key_name );
 					}
 
+					//#2353 - don't lose selection on showall button
+					if ( !show_all ) {
+						var selected_items = a_dropdown.getSelectItems();
+						for ( var i in selected_items ) {
+							for ( var x in source_data ) {
+								if ( selected_items[i].id == source_data[x].id ) {
+									source_data = source_data.slice( x );
+									break;
+								}
+							}
+						}
+					}
+
 					a_dropdown.setUnselectedGridData( source_data );
-					a_dropdown.setSelectGridData( a_dropdown.getSelectItems() );
+					//a_dropdown.setSelectGridData( a_dropdown.getSelectItems() );
 					a_dropdown.setPagerData( pager_data );
 
 				}
@@ -1591,6 +1626,16 @@
 				args.second_parameter = true;
 			}
 
+			if ( a_dropdown ) { //#2353 - js exception when a_dropdown is not defined yet
+				var selected_ids = a_dropdown.getSelectItems();
+				if ( selected_ids.length > 0 && selected_ids[0] != TTUUID.zero_id ) {
+					args.filter_data.exclude_id = [];
+					for ( var x in selected_ids ) {
+						args.filter_data.exclude_id.push( selected_ids[x].id );
+					}
+				}
+			}
+
 			return args;
 		};
 
@@ -1605,7 +1650,23 @@
 			return args;
 		};
 
+		this.searchIsEmpty = function(a_dropdown){
+			var inputs = a_dropdown.find('input.search-input');
+			for ( var i = 0; i < inputs.length; i++ ) {
+				if ( $(inputs[i]).val() != $.i18n._('click to search') ) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		this.onADropDownSearch = function( targetName, page_action, default_select_item, callBack ) {
+			var this_val = this.getValue();
+			if ( targetName == 'select_grid' && this_val.length == 0 || ( targetName == 'select_grid' && this_val.length == 1 && this_val[0] == TTUUID.not_exist_id ) ) {
+				//#2353 - prevent bug where sorted empty select grid selects everything
+				return;
+			}
+
 			var args = {};
 			args.filter_columns = $this.getColumnFilter();
 			args.filter_items_per_page = row_per_page;
@@ -1656,13 +1717,8 @@
 							result_data = [];
 						}
 
-//					if ( $this.customSearchResultHandler ) {
-//						result_data = $this.customSearchResultHandler( result_data )
-//					}
-
 						//set this outside, to add more data to source_data
 						if ( addition_source_function ) {
-
 							result_data = addition_source_function( $this, result_data );
 						}
 
@@ -1716,13 +1772,13 @@
 
 						a_dropdown && a_dropdown.setPagerData( result.getPagerData() );
 
-						if ( result_data.length < 1 ) {
+						if ( result_data.length < 1 && a_dropdown.getSelectItems().length < 1 ) {
 							a_dropdown && a_dropdown.showNoResultCover( 'unselect_grid' );
 						} else {
 							a_dropdown && a_dropdown.removeNoResultCover( 'unselect_grid' );
 						}
 
-						a_dropdown && a_dropdown.getUnSelectGrid().show();
+						a_dropdown && a_dropdown.getUnSelectGrid().grid.show();
 
 						if ( focused_element.length ) {
 							focused_element.focus();
@@ -1733,36 +1789,38 @@
 
 			} else {
 				args = this.buildSelectGridFilter();
+				if (  args.filter_data.id && args.filter_data.id !== false ) { //prevent returning all available rows when nothing is selected
+					api['get' + custom_key_name]( args, {
+						onResult: function( result ) {
+							var result_data = result.getResult();
+							var focused_element = $( ':focus' );
 
-				api['get' + custom_key_name]( args, {
-					onResult: function( result ) {
-						var result_data = result.getResult();
-						var focused_element = $( ':focus' );
+							if ( $.type( result_data ) != 'array' ) {
+								result_data = [];
+							}
 
-						if ( $.type( result_data ) != 'array' ) {
-							result_data = [];
+							result_data = Global.formatGridData( result_data, api.key_name );
+
+							a_dropdown.setSelectGridSearchResult( result_data ); //set as search result
+
+							if ( result_data.length < 1 ) {
+								a_dropdown.getSelectGrid().grid.clearGridData();
+								a_dropdown.showNoResultCover( 'select_grid' );
+							} else {
+								a_dropdown.removeNoResultCover( 'select_grid' );
+							}
+
+							a_dropdown.setSelectGridDragAble();
+
+							a_dropdown.getSelectGrid().grid.show();
+
+							if ( focused_element.length > 0 ) {
+								focused_element.focus();
+							}
+
 						}
-
-						result_data = Global.formatGridData( result_data, api.key_name );
-
-						a_dropdown.setSelectGridSearchResult( result_data ); //set as search result
-
-						if ( result_data.length < 1 ) {
-							a_dropdown.showNoResultCover( 'select_grid' );
-						} else {
-							a_dropdown.removeNoResultCover( 'select_grid' );
-						}
-
-						a_dropdown.setSelectGridDragAble();
-
-						a_dropdown.getSelectGrid().show();
-
-						if ( focused_element.length > 0 ) {
-							focused_element.focus();
-						}
-
-					}
-				} );
+					} );
+				}
 			}
 
 		};
@@ -1789,12 +1847,12 @@
 			for ( var j = 0; j < len1; j++ ) {
 				for ( var i = 0; i < len; i++ ) {
 					if ( !display_columns[j] ) {
-						continue
+						continue;
 					}
 					if ( Global.isSet( display_columns[j].name ) ) { //jQgrid column format
 						var name = display_columns[j].name;
 					} else if ( Global.isSet( display_columns[j].value ) ) {  //ViewColumn format,	label and value
-						name = display_columns[j].value
+						name = display_columns[j].value;
 					}
 					if ( name === all_columns[i].value ) {
 						result_display_columns.push( all_columns[i] );
@@ -1878,7 +1936,7 @@
 
 			var no_first_item = false;
 			if ( !target_data ) {
-				target_data = source_data
+				target_data = source_data;
 			}
 
 			if ( target_data.hasOwnProperty( 0 ) ) {
@@ -1888,7 +1946,7 @@
 					}
 
 				} else {
-					if ( target_data[0][key] === TTUUID.zero_id) {
+					if ( target_data[0][key] === TTUUID.zero_id ) {
 						return;
 					}
 				}
@@ -1997,10 +2055,10 @@
 			}
 
 			if ( layout_name !== ALayoutIDs.OPTION_COLUMN && //Simple options
-				layout_name !== ALayoutIDs.TREE_COLUMN && //Tree Mode
-				layout_name !== ALayoutIDs.SORT_COLUMN &&
-				layout_name !== ALayoutIDs.TIMESHEET &&
-				layout_name !== ALayoutIDs.ABSENCE ) {
+					layout_name !== ALayoutIDs.TREE_COLUMN && //Tree Mode
+					layout_name !== ALayoutIDs.SORT_COLUMN &&
+					layout_name !== ALayoutIDs.TIMESHEET &&
+					layout_name !== ALayoutIDs.ABSENCE ) {
 				this.initColumns();
 			}
 
@@ -2016,12 +2074,12 @@
 
 		this.shouldInitColumns = function() {
 			if ( layout_name === ALayoutIDs.OPTION_COLUMN || //Simple options
-				layout_name === ALayoutIDs.TREE_COLUMN || //Tree Mode
-				layout_name === ALayoutIDs.SORT_COLUMN ||
-				layout_name === ALayoutIDs.TIMESHEET ||
-				layout_name === ALayoutIDs.ABSENCE ||
-				layout_name === ALayoutIDs.SIMPLE_NAME ||
-				layout_name === ALayoutIDs.SIMPLE_NAME +'_navigation' ) {
+					layout_name === ALayoutIDs.TREE_COLUMN || //Tree Mode
+					layout_name === ALayoutIDs.SORT_COLUMN ||
+					layout_name === ALayoutIDs.TIMESHEET ||
+					layout_name === ALayoutIDs.ABSENCE ||
+					layout_name === ALayoutIDs.SIMPLE_NAME ||
+					layout_name === ALayoutIDs.SIMPLE_NAME + '_navigation' ) {
 
 				return false;
 			}
@@ -2068,7 +2126,7 @@
 		};
 
 		this.addHideIdColumn = function( display_columns ) {
-			var id_column = {name: 'id', index: 'id', label: '', width: 0, hidden: true};
+			var id_column = { name: 'id', index: 'id', label: '', width: 0, hidden: true };
 
 			display_columns.push( id_column );
 
@@ -2177,11 +2235,11 @@
 			}
 
 			if ( o.allow_multiple_selection ) {
-				allow_multiple_selection = o.allow_multiple_selection
+				allow_multiple_selection = o.allow_multiple_selection;
 			}
 
 			if ( o.set_any ) {
-				set_any = o.set_any
+				set_any = o.set_any;
 			}
 
 			if ( o.set_empty ) {
@@ -2228,7 +2286,7 @@
 			}
 
 			if ( o.show_search_inputs ) {
-				show_search_inputs = o.show_search_inputs
+				show_search_inputs = o.show_search_inputs;
 			}
 
 			if ( o.tree_mode ) {
@@ -2265,6 +2323,8 @@
 				if ( e.keyCode === 13 || e.keyCode === 32 ) {
 					e.stopPropagation();
 					e.preventDefault();
+
+					TTPromise.add( 'AComboBox', 'init' );
 					openADropDown();
 				}
 			} );
@@ -2281,13 +2341,13 @@
 				e.stopPropagation();
 				if ( !enabled ) {
 					if ( LocalCacheData.current_open_sub_controller &&
-						LocalCacheData.current_open_sub_controller.edit_view &&
-						LocalCacheData.current_open_sub_controller.is_viewing ) {
+							LocalCacheData.current_open_sub_controller.edit_view &&
+							LocalCacheData.current_open_sub_controller.is_viewing ) {
 						error_string = Global.view_mode_message;
 						$this.showErrorTip( 10 );
 					} else if ( LocalCacheData.current_open_primary_controller &&
-						LocalCacheData.current_open_primary_controller.edit_view &&
-						LocalCacheData.current_open_primary_controller.is_viewing ) {
+							LocalCacheData.current_open_primary_controller.edit_view &&
+							LocalCacheData.current_open_primary_controller.is_viewing ) {
 						error_string = Global.view_mode_message;
 						$this.showErrorTip( 10 );
 					}
@@ -2296,6 +2356,7 @@
 					if ( dontOpen === true ) {
 						return;
 					}
+					TTPromise.add( 'AComboBox', 'init' );
 					openADropDown();
 				}
 			} );
@@ -2353,6 +2414,7 @@
 			}
 
 			function openADropDown() {
+
 				if ( !enabled ) {
 					return;
 				}
@@ -2404,7 +2466,7 @@
 					on_tree_grid_row_select: on_tree_grid_row_select
 				} );
 
-				a_dropdown_div = $( "<div id='" + id + "a_dropdown_div' class='a-dropdown-div'></div>" );
+				a_dropdown_div = $( '<div id=\'' + id + 'a_dropdown_div\' class=\'a-dropdown-div\'></div>' );
 
 				a_dropdown_div.append( a_dropdown );
 
@@ -2417,6 +2479,48 @@
 				} );
 
 				$( 'body' ).append( a_dropdown_div );
+
+				TTPromise.wait( 'AComboBox', 'init', function() {
+					a_dropdown.setGridColumnsWidths();
+
+					if ( allow_multiple_selection && $this.getValue().length > 0  && api) {
+						args = {};
+						args.filter_data = { id: $this.getValue() };
+						args.filter_columns = $this.getColumnFilter();
+						args.filter_items_per_page = 10000;
+
+						api['get'+custom_key_name]( args, {
+							onResult: function( result ) {
+								doNext(result)
+							}
+						} );
+					} else {
+						doNext();
+					}
+					function doNext( result ) {
+						if ( result ) {
+							a_dropdown.setRealSelectItems( result.getResult(), $this.getValue() );
+						}
+						a_dropdown_div.css( 'opacity', '1' );
+
+						//#2353 - remove the right side border from jqgrid.
+						var tables = $this.find( '.ui-jqgrid' ).find( 'table' );
+						if ( tables.length > 0 ) {
+							for ( var i = 0; i < tables.length; i++ ) {
+								//resize awesomebox grid tables to remove right-size gap.
+								var width = $( tables[0] ).parents( '.ui-jqgrid' ).find( '.ui-jqgrid-bdiv' ).width() - 11;
+								$( tables[0] ).parents( '.ui-jqgrid' ).find( '.ui-jqgrid-view' ).width( width );
+								$( tables[i] ).width( width );
+							}
+						}
+
+						a_dropdown.setUnSelectGridDragAble();
+						a_dropdown.setSelectGridDragAble();
+					}
+
+
+				} );
+
 
 				a_dropdown.bind( 'close', $this.onClose );
 
@@ -2481,18 +2585,17 @@
 					dropdown_width = dropdown_width * 2 + 30 + 15;
 				}
 
-				if ( dropdown_width + $( $this ).offset().left + 50 > Global.bodyWidth() ) {
-					a_dropdown_div.css( 'left', Global.bodyWidth() - dropdown_width - 50 );
+				if ( ( dropdown_width + $( $this ).offset().left + 50 ) > Global.bodyWidth() ) {
+					a_dropdown_div.css( 'left', ( Global.bodyWidth() - dropdown_width - 50 ) );
 				} else {
-
 					a_dropdown_div.css( 'left', $( $this ).offset().left );
 				}
 
 				// makes sure it shown on the screen, will calculte position after source setting
-				if ( $( $this ).offset().top + 25 + 275 < Global.bodyHeight() ) {
-					a_dropdown_div.css( 'top', $( $this ).offset().top + 25 );
+				if ( ( $( $this ).offset().top + 25 + 275 ) < Global.bodyHeight() ) {
+					a_dropdown_div.css( 'top', ( $( $this ).offset().top + 25 ) );
 				} else {
-					a_dropdown_div.css( 'top', ($( $this ).offset().top - 275) );
+					a_dropdown_div.css( 'top', ( $( $this ).offset().top - 275 ) );
 				}
 
 				// This will never change when search in search input. Set it back to dropdown every time when open
@@ -2501,6 +2604,8 @@
 
 					//Error: TypeError: api is null in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141117-112033 line 2364
 					if ( !api ) {
+
+						TTPromise.resolve( 'AComboBox', 'init' );
 						return;
 					}
 
@@ -2537,14 +2642,14 @@
 								if ( get_real_data_when_open ) {
 									get_real_data_when_open = false;
 									var args = {};
-									args.filter_data = {id: select_items};
+									args.filter_data = { id: select_items };
 									args.filter_columns = $this.getColumnFilter();
 									args.filter_items_per_page = 10000;
 									var local_data = false;
 
 									//Error: TypeError: null is not an object (evaluating 'select_items.length') in /interface/html5/global/widgets/awesomebox/AComboBox.js?v=8.0.0-20141230-113526 line 2441
 									//if select items contains data like 0, for example Employee in Recurring Schedule edit view
-									if ( select_items && select_items.length > 0 && select_items[0] == TTUUID.zero_id) {
+									if ( select_items && select_items.length > 0 && select_items[0] == TTUUID.zero_id ) {
 										local_data = $this.getLocalSelectItem( select_items[0] );
 									}
 
@@ -2560,14 +2665,17 @@
 
 //									a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
 											setADropDownSelectValues( select_items );
+											TTPromise.resolve( 'AComboBox', 'init' );
 										}
 									} );
 								} else {
+									TTPromise.resolve( 'AComboBox', 'init' );
 									a_dropdown.setUnselectedGridData( source_data );
 //								a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
 									setADropDownSelectValues( select_items );
 								}
 							} else {
+								TTPromise.resolve( 'AComboBox', 'init' );
 
 								if ( set_empty || set_any || set_default || set_open || set_special_empty ) {
 									$this.createFirstItem();
@@ -2582,12 +2690,12 @@
 							a_dropdown.setPagerData( pager_data );
 
 							if ( !Global.isEmpty( cached_search_inputs_filter ) || !Global.isEmpty( cached_sort_filter ) ) {
-								a_dropdown.getUnSelectGrid().hide();
+								a_dropdown.getUnSelectGrid().grid.hide();
 								$this.onADropDownSearch( 'unselect_grid' );
 							}
 
 							if ( !Global.isEmpty( cached_select_grid_search_inputs_filter ) || !Global.isEmpty( cached_selected_grid_sort_filter ) ) {
-								a_dropdown.getSelectGrid().hide();
+								a_dropdown.getSelectGrid().grid.hide();
 								$this.onADropDownSearch( 'select_grid' );
 							}
 
@@ -2608,7 +2716,7 @@
 						if ( get_real_data_when_open ) {
 							get_real_data_when_open = false;
 							args = {};
-							args.filter_data = {id: select_items};
+							args.filter_data = { id: select_items };
 							args.filter_columns = $this.getColumnFilter();
 							args.filter_items_per_page = 10000;
 							var local_data = false;
@@ -2631,6 +2739,7 @@
 									a_dropdown.setUnselectedGridData( source_data );
 //								a_dropdown.setSelectGridData( select_items ); //set Selected Data after set sourceData
 									setADropDownSelectValues( select_items );
+									TTPromise.resolve( 'AComboBox', 'init' );
 
 								}
 							} );
@@ -2638,28 +2747,30 @@
 							a_dropdown.setUnselectedGridData( source_data );
 //							a_dropdown.setSelectGridData( select_items );
 							setADropDownSelectValues( select_items );
+							TTPromise.resolve( 'AComboBox', 'init' );
 						}
 
 					} else {
 						a_dropdown.setUnselectedGridData( source_data );
 						a_dropdown.setSelectItem( select_item );
+						TTPromise.resolve( 'AComboBox', 'init' );
 					}
 
 					a_dropdown.setPagerData( pager_data );
 
 					if ( !Global.isEmpty( cached_search_inputs_filter ) || !Global.isEmpty( cached_sort_filter ) ) {
-						a_dropdown.getUnSelectGrid().hide();
+						a_dropdown.getUnSelectGrid().grid.hide();
 						$this.onADropDownSearch( 'unselect_grid' );
 						current_open_page = 1;
 					} else {
 						if ( current_open_page > 1 && current_open_page <= pager_data.last_page_number ) {
-							a_dropdown.getUnSelectGrid().hide();
+							a_dropdown.getUnSelectGrid().grid.hide();
 							$this.onADropDownSearch( 'unselect_grid', current_open_page );
 						}
 					}
 
 					if ( !Global.isEmpty( cached_select_grid_search_inputs_filter ) || !Global.isEmpty( cached_selected_grid_sort_filter ) ) {
-						a_dropdown.getSelectGrid().hide();
+						a_dropdown.getSelectGrid().grid.hide();
 						$this.onADropDownSearch( 'select_grid' );
 					}
 

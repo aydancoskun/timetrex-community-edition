@@ -420,7 +420,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 							a.user_id,
 							a.company_deduction_id,
 
-							CASE WHEN a.length_of_service_date IS NULL THEN '. $this->getSQLToTimeStampFunction() .'( uf.hire_date ) ELSE a.length_of_service_date END as length_of_service_date,
+							CASE WHEN a.length_of_service_date IS NULL THEN uf.hire_date ELSE a.length_of_service_date END as length_of_service_date,
 							CASE WHEN a.start_date IS NULL THEN cdf.start_date ELSE a.start_date END as start_date,
 							CASE WHEN a.end_date IS NULL THEN cdf.end_date ELSE a.end_date END as end_date,
 
@@ -495,7 +495,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 							a.user_id,
 							a.company_deduction_id,
 
-							CASE WHEN a.length_of_service_date IS NULL THEN '. $this->getSQLToTimeStampFunction() .'( uf.hire_date ) ELSE a.length_of_service_date END as length_of_service_date,
+							CASE WHEN a.length_of_service_date IS NULL THEN uf.hire_date ELSE a.length_of_service_date END as length_of_service_date,
 							CASE WHEN a.start_date IS NULL THEN cdf.start_date ELSE a.start_date END as start_date,
 							CASE WHEN a.end_date IS NULL THEN cdf.end_date ELSE a.end_date END as end_date,
 
@@ -587,7 +587,7 @@ class UserDeductionListFactory extends UserDeductionFactory implements IteratorA
 							a.user_id,
 							a.company_deduction_id,
 
-							CASE WHEN a.length_of_service_date IS NULL THEN '. $this->getSQLToTimeStampFunction() .'( uf.hire_date ) ELSE a.length_of_service_date END as length_of_service_date,
+							CASE WHEN a.length_of_service_date IS NULL THEN uf.hire_date ELSE a.length_of_service_date END as length_of_service_date,
 							CASE WHEN a.start_date IS NULL THEN cdf.start_date ELSE a.start_date END as start_date,
 							CASE WHEN a.end_date IS NULL THEN cdf.end_date ELSE a.end_date END as end_date,
 

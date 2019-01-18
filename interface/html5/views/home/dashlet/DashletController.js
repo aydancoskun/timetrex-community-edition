@@ -56,52 +56,24 @@ DashletController = Backbone.View.extend( {
 
 		//BUG#2070 - Break resizable for mobile because it negatively impacts usability
 		if ( Global.detectMobileBrowser() == false ) {
-			// interact will not be available on mobile now.
-			interact( '#' + $( this.el ).attr( 'id' ) ).unset();
-			interact('#' + $(this.el).attr('id'))
-				.resizable({
-				edges: {left: true, right: true, bottom: true, top: true}
-				})
-				.on('resizestart', function (event) {
+			$( '#' + $( this.el ).attr( 'id' ) ).resizable( {
+				handles: 'all',
+				start: function(e, ui){},
+				resize: function(e, ui){
+					$this.setGridSize();
+				},
+				stop: function(e, ui){
+					$this.addIframeBack();
+					var height = Math.floor(ui.size.height);
+					var width = Math.floor(ui.size.width);
 
-				})
-				.on('resizemove', function (event) {
+					$this.saveSize(height, width);
 
-				var target = event.target;
-					var xUnit = parseInt(event.rect.width / 20);
-					var yUnit = parseInt(event.rect.height / 20);
-					var left = parseFloat($(target).css('left'));
-					var top = parseFloat($(target).css('top'));
-					if (xUnit > 1) {
-					var percentage_width = ((xUnit * 20) / $this.homeViewController.dashboard_container.width() * 100);
-						if (Math.abs(percentage_width - 33) < 2) {
-						percentage_width = 33;
-					}
-						var currentWidth = $(target).width();
-					target.style.width = percentage_width + '%';
-						var newWidth = $(target).width();
-					var widthChanged = newWidth - currentWidth;
-						if (event.edges.left) {
-							$(target).css('left', left - widthChanged);
-					}
-				}
-					if (yUnit > 1) {
-					var height = (yUnit * 20);
-						var currentHeight = $(target).height();
-					target.style.height = height + 'px';
-						var newHeight = $(target).height();
-					var heightChanged = newHeight - currentHeight;
-						if (event.edges.top) {
-							$(target).css('top', top - heightChanged);
-					}
-				}
-				$this.setGridSize();
-				})
-				.on('resizeend', function (event) {
-				$this.addIframeBack();
-				$this.homeViewController.updateLayout();
-				$this.saveSize();
-				});
+					$this.homeViewController.updateLayout();
+					$this.homeViewController.dashboard_container.masonry( 'reloadItems' );
+				},
+			} );
+			//$( '#' + $( this.el ).attr( 'id' ) ).resizable( 'option', 'handles','all' );
 		}
 
 		this.homeViewController.dashboard_container.parent().scroll( function() {
@@ -181,17 +153,17 @@ DashletController = Backbone.View.extend( {
 		if ( this.data.data.dashlet_type == 'custom_list' ) {
 			target_view = this.data.data.view_name;
 			if ( target_view === 'Request-Authorization' ) {
-				target_view = 'RequestAuthorization'
+				target_view = 'RequestAuthorization';
 			} else if ( target_view === 'PayPeriodTimeSheetVerify' ) {
-				target_view = 'TimeSheetAuthorization'
+				target_view = 'TimeSheetAuthorization';
 			} else if ( target_view === 'UserExpense-Authorization' ) {
-				target_view = 'ExpenseAuthorization'
+				target_view = 'ExpenseAuthorization';
 			} else if ( target_view === 'User' ) {
-				target_view = 'Employee'
+				target_view = 'Employee';
 			} else if ( target_view === 'Transaction' ) {
-				target_view = 'InvoiceTransaction'
+				target_view = 'InvoiceTransaction';
 			} else if ( target_view === 'UserWage' ) {
-				target_view = 'Wage'
+				target_view = 'Wage';
 			}
 		} else {
 			switch ( this.data.data.dashlet_type ) {
@@ -244,11 +216,11 @@ DashletController = Backbone.View.extend( {
 		cell_value = Global.decodeCellValue( cell_value );
 		var col_model = related_data.colModel;
 		var row_id = related_data.rowid;
-		var content_div = $( "<div class='punch-content-div'></div>" );
+		var content_div = $( '<div class=\'punch-content-div\'></div>' );
 		var punch_info;
 		if ( related_data.pos === 0 ) {
 			if ( row.type === DashletController.TOTAL_ROW ) {
-				punch_info = $( "<span class='total' style='font-size: 11px'></span>" );
+				punch_info = $( '<span class=\'total\' style=\'font-size: 11px\'></span>' );
 				if ( Global.isSet( cell_value ) ) {
 					punch_info.text( cell_value );
 				} else {
@@ -257,7 +229,7 @@ DashletController = Backbone.View.extend( {
 				return punch_info.get( 0 ).outerHTML;
 			} else if ( row.type === DashletController.REGULAR_ROW ) {
 
-				punch_info = $( "<span class='top-line-span' style='font-size: 11px'></span>" );
+				punch_info = $( '<span class=\'top-line-span\' style=\'font-size: 11px\'></span>' );
 				if ( Global.isSet( cell_value ) ) {
 					punch_info.text( cell_value );
 				} else {
@@ -280,7 +252,7 @@ DashletController = Backbone.View.extend( {
 		var data;
 		if ( row.type === DashletController.TOTAL_ROW ) {
 			data = row[col_model.name + '_data'];
-			time_span = $( "<span class='total'></span>" );
+			time_span = $( '<span class=\'total\'></span>' );
 			if ( Global.isSet( cell_value ) ) {
 				if ( data ) {
 					if ( data.hasOwnProperty( 'override' ) && data.override === true ) {
@@ -299,7 +271,7 @@ DashletController = Backbone.View.extend( {
 		} else if ( row.type === DashletController.REGULAR_ROW ) {
 			content_div.addClass( 'top-line' );
 			data = row[col_model.name + '_data'];
-			time_span = $( "<span ></span>" );
+			time_span = $( '<span ></span>' );
 			if ( Global.isSet( cell_value ) ) {
 				if ( data ) {
 					if ( data.hasOwnProperty( 'override' ) && data.override === true ) {
@@ -316,7 +288,7 @@ DashletController = Backbone.View.extend( {
 			content_div.prepend( time_span );
 		} else if ( row.type === DashletController.ACCUMULATED_TIME_ROW ) {
 			data = row[col_model.name + '_data'];
-			time_span = $( "<span></span>" );
+			time_span = $( '<span></span>' );
 			if ( Global.isSet( cell_value ) ) {
 				if ( data ) {
 					if ( data.hasOwnProperty( 'override' ) && data.override === true ) {
@@ -332,7 +304,7 @@ DashletController = Backbone.View.extend( {
 			}
 			content_div.prepend( time_span );
 		} else {
-			time_span = $( "<span class='punch-time'></span>" );
+			time_span = $( '<span class=\'punch-time\'></span>' );
 			if ( Global.isSet( cell_value ) ) {
 				time_span.text( cell_value );
 			} else {
@@ -387,7 +359,7 @@ DashletController = Backbone.View.extend( {
 		var $this = this;
 		this.api = this.getAPIByViewName( view_name );
 		// set grid id
-		if ( !Global.isSet( this.grid ) ) {
+		if ( !Global.isSet( this.grid ) || !Global.isSet( this.grid.grid ) ) {
 			var grid = $( this.el ).find( '#grid' );
 			grid.attr( 'id', 'dashlet_' + this.data.id + '_grid' );  //Grid's id is ScriptName + _grid
 		}
@@ -449,7 +421,9 @@ DashletController = Backbone.View.extend( {
 
 	buildAccumulatedTotalData: function() {
 		// There will be no grid when no start date and end date when calling getTimeSheetData
-		if(!this.grid) return;
+		if ( !this.grid ) {
+			return;
+		}
 		this.accmulated_order_map = {};
 		this.accumulated_total_grid_source = [];
 		var accumulated_user_date_total_data = this.full_timesheet_data.accumulated_user_date_total_data;
@@ -467,7 +441,7 @@ DashletController = Backbone.View.extend( {
 		if ( Global.isSet( accumulated_time ) ) {
 			this.buildSubGridsData( accumulated_time, 'pay_period', this.accumulated_total_grid_source_map, this.accumulated_total_grid_source, 'accumulated_time' );
 		} else {
-			accumulated_time = {total: {label: 'Total Time', total_time: '0'}};
+			accumulated_time = { total: { label: 'Total Time', total_time: '0' } };
 			this.buildSubGridsData( accumulated_time, 'pay_period', this.accumulated_total_grid_source_map, this.accumulated_total_grid_source, 'accumulated_time' );
 		}
 		if ( Global.isSet( premium_time ) ) {
@@ -476,7 +450,7 @@ DashletController = Backbone.View.extend( {
 		if ( Global.isSet( absence_time ) ) {
 			this.buildSubGridsData( absence_time, 'pay_period', this.accumulated_total_grid_source_map, this.accumulated_total_grid_source, 'absence_time' );
 		}
-		accumulated_time = {total: {label: 'Total Time', total_time: '0'}};
+		accumulated_time = { total: { label: 'Total Time', total_time: '0' } };
 		this.buildSubGridsData( accumulated_time, 'week', this.accumulated_total_grid_source_map, this.accumulated_total_grid_source, 'accumulated_time' );
 		for ( var key in accumulated_user_date_total_data ) {
 			//Build Accumulated Total Grid week column data
@@ -498,10 +472,7 @@ DashletController = Backbone.View.extend( {
 			}
 		}
 		this.sortAccumulatedTotalData();
-		this.markRegularRow( this.accumulated_total_grid_source );
-		this.grid.clearGridData();
-		this.grid.setGridParam( {data: this.accumulated_total_grid_source} );
-		this.grid.trigger( 'reloadGrid' );
+		this.grid.setData( this.accumulated_total_grid_source );
 	},
 
 	sortAccumulatedTotalData: function() {
@@ -509,48 +480,57 @@ DashletController = Backbone.View.extend( {
 		this.accumulated_total_grid_source.sort( Global.m_sort_by( sort_fields ) );
 	},
 
-	markRegularRow: function( source ) {
-		var len = source.length;
-		for ( var i = 0; i < source.length; i++ ) {
-			var row = source[i];
-			if ( row.key && row.key.indexOf( 'regular_time' ) === 0 ) {
-				row.type = DashletController.REGULAR_ROW;
-				return;
-			}
-		}
-	},
-
 	buildSubGridsData: function( array, date_string, map, result_array, parent_key ) {
 		var row;
+		var marked_regular_row = false; //Only mark the first regular time row, as thats where the bold top-line is going to go.
 		for ( var key  in array ) {
 			if ( !map[key] ) {
 				row = {};
 				row.parent_key = parent_key;
 				row.key = key;
+
 				if ( parent_key === 'accumulated_time' ) {
-					row.type = DashletController.TOTAL_ROW;
+
+					if ( key === 'total' || key === 'worked_time' ) {
+						row.type = DashletController.TOTAL_ROW;
+					} else if ( marked_regular_row == false && key.indexOf( 'regular_time' ) === 0 ) {
+						row.type = DashletController.REGULAR_ROW;
+						marked_regular_row = true;
+					} else {
+						row.type = DashletController.ACCUMULATED_TIME_ROW;
+					}
+
 					if ( array[key].override ) {
 						row.is_override_row = true;
 					}
+
+				} else if ( parent_key === 'premium_time' ) {
+					row.type = DashletController.PREMIUM_ROW;
 				}
+
 				if ( this.accmulated_order_map[key] ) {
 					row.order = this.accmulated_order_map[key];
 				}
+
 				row.punch_info = array[key].label;
+
 				var key_array = key.split( '_' );
 				var no_id = false;
 				if ( key_array.length > 1 && key_array[1] == '0' ) {
 					no_id = true;
 				}
+
 				array[key].key = key;
 				row[date_string] = Global.secondToHHMMSS( array[key].total_time );
 				row[date_string + '_data'] = array[key];
+
 				//if id == 0, put the row as first row.
 				if ( no_id ) {
 					result_array.unshift( row );
 				} else {
 					result_array.push( row );
 				}
+
 				map[key] = row;
 			} else {
 				row = map[key];
@@ -558,12 +538,15 @@ DashletController = Backbone.View.extend( {
 					array[key].key = key;
 					row[date_string] = Global.secondToHHMMSS( array[key].total_time );
 					row[date_string + '_data'] = array[key];
+
 					if ( row.parent_key === 'accumulated_time' ) {
 						if ( array[key].override ) {
 							row.is_override_row = true;
 						}
 					}
+
 				} else {
+
 					array[key].key = key;
 					row[date_string] = Global.secondToHHMMSS( array[key].total_time );
 					row[date_string + '_data'] = array[key];
@@ -597,9 +580,9 @@ DashletController = Backbone.View.extend( {
 	buildAccumulatedTotalGrid: function() {
 		var $this = this;
 		var columns = [];
-		var grid;
+		var grid_id;
 		if ( !Global.isSet( this.grid ) ) {
-			grid = $( this.el ).find( '#' + 'dashlet_' + this.data.id + '_grid' );
+			grid_id = 'dashlet_' + this.data.id + '_grid';
 		}
 		var punch_in_out_column = {
 			name: 'punch_info',
@@ -634,44 +617,26 @@ DashletController = Backbone.View.extend( {
 		};
 		columns.push( column_1 );
 		columns.push( column_2 );
-		if ( !this.grid && grid ) { //#2571 - this.grid.jqGrid is not a function
-			this.grid = grid;
-			this.grid.jqGrid( {
-				altRows: true,
-				data: [],
-				datatype: 'local',
-				sortable: false,
-				scrollOffset: 0,
-				width: Global.bodyWidth() - 14,
+		grid_data = {};
+		if ( !this.grid ) { //#2571 - this.grid.jqGrid is not a function
+			grid_data = {
+
+				multiselectPosition: 'none',
 				gridComplete: function() {
 					if ( $( this ).jqGrid( 'getGridParam', 'data' ).length > 0 ) {
 						$this.setGridColumnsWidth();
 					}
-				},
-				rowNum: 10000,
-				colNames: [],
-				colModel: columns,
-				viewrecords: true
-
-			} );
+				}
+			};
 		} else {
-			this.grid.jqGrid( 'GridUnload' );
-			this.grid = null;
-			grid = $( this.el ).find( '#' + 'dashlet_' + this.data.id + '_grid' );
-			this.grid = $( grid );
-			this.grid.jqGrid( {
-				altRows: true,
-				data: [],
-				rowNum: 10000,
-				sortable: false,
-				scrollOffset: 0,
-				datatype: 'local',
-				width: Global.bodyWidth() - 14,
-				colNames: [],
-				colModel: columns,
-				viewrecords: true
-			} );
+			grid_data = {
+				shrinkToFit: false
+			}; //use the defaults
 		}
+
+		grid_data.onResizeGrid = false; //we take care of dashlet grid sizing here.
+		this.grid = new TTGrid( grid_id, grid_data, columns );
+
 		$this.setGridSize();
 	},
 
@@ -710,11 +675,11 @@ DashletController = Backbone.View.extend( {
 		$this.getDefaultDashletData( function() {
 			$this.getAllColumns( function() {
 				$this.setSelectLayout();
-				$this.grid.clearGridData();
 				var data = Global.formatGridData( $this.dashboard_data.data, $this.data.data.dashlet_type );
 				data = $this.processId( data );
-				$this.grid.setGridParam( {data: data} );
-				$this.grid.trigger( 'reloadGrid' );
+				if ( $this.grid ) {
+					$this.grid.setData( data );
+				}
 				$( '.button-rotate' ).removeClass( 'button-rotate' );
 				if ( !Global.isArray( $this.dashboard_data.data ) || $this.dashboard_data.data.length < 1 ) {
 					$this.showNoResultCover();
@@ -755,28 +720,21 @@ DashletController = Backbone.View.extend( {
 		$( $this.el ).find( '#iframe' ).remove();
 	},
 
-	saveSize: function() {
-		var $his = this;
-        //Error: Uncaught TypeError: Cannot read property 'style' of undefined in /html5/?desktop=1#!m=Exception line 755
-		if(!$( this.el )[0]) return;
-		var height = $( this.el )[0].style.height;
-		var width = $( this.el )[0].style.width;
-		this.data.data.width = width.replace( '%', '' );
-		this.data.data.height = height.replace( 'px', '' );
+	saveSize: function( h, w ) {
+		this.data.data.width = Math.floor(w/$('.dashboard-container').width() * 100 ); //needs a percentage
+		this.data.data.height = h;
+		console.log(this.data.data);
 		this.user_generic_data_api.setUserGenericData( this.data, {
-			onResult: function( result ) {
-			}
+			onResult: function( result ) { }
 		} );
-
 	},
 
 	setGridSize: function() {
-		if ( (!this.grid || !this.grid.is( ':visible' )) ) {
+		if ( (!this.grid || !this.grid.grid || !this.grid.grid.is( ':visible' )) ) {
 			return;
 		}
-		this.grid.setGridWidth( $( this.el ).width() - 6 );
-		var height_offset = $( this.el ).find( '.ui-jqgrid-sortable' ).height() + 43;
-		this.grid.setGridHeight( $( this.el ).height() - height_offset );
+		this.grid.grid.setGridWidth( $(this.el).find('.content').width() );
+		this.grid.grid.setGridHeight( $(this.el).find('.content').height() - 28 );
 	},
 
 	initReportContent: function() {
@@ -807,12 +765,12 @@ DashletController = Backbone.View.extend( {
 				onResult: function( result ) {
 					var config = result.getResult();
 					config.other = {
-						"page_orientation": "P",
-						"font_size": 0,
-						"auto_refresh": false,
-						"disable_grand_total": false,
-						"maximum_page_limit": 100,
-						"show_duplicate_values": false,
+						'page_orientation': 'P',
+						'font_size': 0,
+						'auto_refresh': false,
+						'disable_grand_total': false,
+						'maximum_page_limit': 100,
+						'show_duplicate_values': false,
 						is_embedded: true
 					};
 					$this.api['get' + $this.api.key_name]( config, 'html', {
@@ -839,7 +797,7 @@ DashletController = Backbone.View.extend( {
 						if ( result_data[0].data.config.other ) {
 							result_data[0].data.config.other.is_embedded = true;
 						} else {
-							result_data[0].data.config.other = {is_embedded: true};
+							result_data[0].data.config.other = { is_embedded: true };
 						}
 						$this.api['get' + $this.api.key_name]( result_data[0].data.config, 'html', {
 							onResult: function( res ) {
@@ -872,16 +830,16 @@ DashletController = Backbone.View.extend( {
 				} else if ( $this.data.data.dashlet_type == 'custom_report' ) {
 					$this.initReportData();
 				} else if ( $this.data.data.dashlet_type == 'exception_summary' ||
-					$this.data.data.dashlet_type == 'request_summary' ||
-					$this.data.data.dashlet_type == 'message_summary' ||
-					$this.data.data.dashlet_type == 'exception_summary_child' ||
-					$this.data.data.dashlet_type == 'request_authorize_summary' ||
-					$this.data.data.dashlet_type == 'accrual_balance_summary' ||
-					$this.data.data.dashlet_type == 'user_active_shift_summary' ||
-					$this.data.data.dashlet_type == 'timesheet_verification_summary' ||
-					$this.data.data.dashlet_type == 'timesheet_verification_summary_child' ||
-					$this.data.data.dashlet_type == 'schedule_summary' ||
-					$this.data.data.dashlet_type == 'schedule_summary_child' ) {
+						$this.data.data.dashlet_type == 'request_summary' ||
+						$this.data.data.dashlet_type == 'message_summary' ||
+						$this.data.data.dashlet_type == 'exception_summary_child' ||
+						$this.data.data.dashlet_type == 'request_authorize_summary' ||
+						$this.data.data.dashlet_type == 'accrual_balance_summary' ||
+						$this.data.data.dashlet_type == 'user_active_shift_summary' ||
+						$this.data.data.dashlet_type == 'timesheet_verification_summary' ||
+						$this.data.data.dashlet_type == 'timesheet_verification_summary_child' ||
+						$this.data.data.dashlet_type == 'schedule_summary' ||
+						$this.data.data.dashlet_type == 'schedule_summary_child' ) {
 					$this.initDefaultDashletData();
 				} else if ( $this.data.data.dashlet_type == 'timesheet_summary' ) {
 					$this.initDefaultTimesheetData();
@@ -925,13 +883,12 @@ DashletController = Backbone.View.extend( {
 	},
 
 	setGridCellBackGround: function() {
-		var data;
+		var data = this.grid.getData();
 		var len;
 		var i;
 		var item;
 		if ( this.data.data.dashlet_type === 'exception_summary' ||
-			this.data.data.dashlet_type === 'exception_summary_child' ) {
-			data = this.grid.getGridParam( 'data' );
+				this.data.data.dashlet_type === 'exception_summary_child' ) {
 			//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 			if ( !data ) {
 				return;
@@ -940,18 +897,17 @@ DashletController = Backbone.View.extend( {
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.exception_background_color ) {
-					var severity = $( this.el ).find( "tr[id='" + item.id + "']" ).find( 'td[aria-describedby="dashlet_' + this.data.id + '_grid_severity"]' );
+					var severity = $( this.el ).find( 'tr[id=\'' + item.id + '\']' ).find( 'td[aria-describedby="dashlet_' + this.data.id + '_grid_severity"]' );
 					severity.css( 'background-color', item.exception_background_color );
 					severity.css( 'font-weight', 'bold' );
 				}
 				if ( item.exception_color ) {
-					var code = $( this.el ).find( "tr[id='" + item.id + "']" ).find( 'td[aria-describedby="dashlet_' + this.data.id + '_grid_exception_policy_type_id"]' );
+					var code = $( this.el ).find( 'tr[id=\'' + item.id + '\']' ).find( 'td[aria-describedby="dashlet_' + this.data.id + '_grid_exception_policy_type_id"]' );
 					code.css( 'color', item.exception_color );
 					code.css( 'font-weight', 'bold' );
 				}
 			}
 		} else if ( this.data.data.dashlet_type === 'message_summary' ) {
-			data = this.grid.getGridParam( 'data' );
 			//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 			if ( !data ) {
 				return;
@@ -960,11 +916,10 @@ DashletController = Backbone.View.extend( {
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.status_id == 10 ) {
-					$( this.el ).find( "tr[id='" + item.id + "'] td" ).css( 'font-weight', 'bold' );
+					$( this.el ).find( 'tr[id=\'' + item.id + '\'] td' ).css( 'font-weight', 'bold' );
 				}
 			}
 		} else if ( this.data.data.dashlet_type === 'request_summary' ) {
-			data = this.grid.getGridParam( 'data' );
 			//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 			if ( !data ) {
 				return;
@@ -973,11 +928,10 @@ DashletController = Backbone.View.extend( {
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.status_id == 30 ) {
-					$( this.el ).find( "tr[id='" + item.id + "']" ).addClass( 'bolder-request' );
+					$( this.el ).find( 'tr[id=\'' + item.id + '\']' ).addClass( 'bolder-request' );
 				}
 			}
 		} else if ( this.data.data.dashlet_type === 'user_active_shift_summary' ) {
-			data = this.grid.getGridParam( 'data' );
 			//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 			if ( !data ) {
 				return;
@@ -986,14 +940,13 @@ DashletController = Backbone.View.extend( {
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item._status_id == 10 ) {
-					$( this.el ).find( "tr[id='" + (i + 1) + "']" ).addClass( 'light-green' );
+					$( this.el ).find( 'tr[id=\'' + item.id + '\']' ).addClass( 'light-green' );
 				} else if ( item.status === 'Out' ) {
-					$( this.el ).find( "tr[id='" + (i + 1) + "']" ).addClass( 'light-red' );
+					$( this.el ).find( 'tr[id=\'' + item.id + '\']' ).addClass( 'light-red' );
 				}
 			}
 		} else if ( this.data.data.dashlet_type === 'schedule_summary' ||
-			this.data.data.dashlet_type === 'schedule_summary_child' ) {
-			data = this.grid.getGridParam( 'data' );
+				this.data.data.dashlet_type === 'schedule_summary_child' ) {
 			//Error: TypeError: data is undefined in /interface/html5/framework/jquery.min.js?v=7.4.6-20141027-074127 line 2 > eval line 70
 			if ( !data ) {
 				return;
@@ -1002,7 +955,7 @@ DashletController = Backbone.View.extend( {
 			for ( i = 0; i < len; i++ ) {
 				item = data[i];
 				if ( item.status_id == 20 ) {
-					$( $( this.el ).find( "tr" )[ i + 2 ] ).addClass( 'red-absence' ); //Do not use ids or coloring gets broken by recurring schedules without ids
+					$( this.el ).find( 'tr[id=\'' + item.id + '\']' ).addClass( 'red-absence' ); //Do not use ids or coloring gets broken by recurring schedules without ids
 				}
 			}
 		}
@@ -1027,16 +980,16 @@ DashletController = Backbone.View.extend( {
 		$this.getCustomListDashboardData( function() {
 			$this.getAllColumns( function() {
 				$this.setSelectLayout();
-				$this.grid.clearGridData();
-				$this.grid.setGridParam( {data: Global.formatGridData( $this.dashboard_data.data )} );
-				$this.grid.trigger( 'reloadGrid' );
+				$this.grid.setData( Global.formatGridData( $this.dashboard_data.data ) );
 				$( '.button-rotate' ).removeClass( 'button-rotate' );
 				if ( !Global.isArray( $this.dashboard_data.data ) ) {
 					$this.showNoResultCover();
 				} else {
 					$this.removeNoResultCover();
 				}
-				$this.setGridCellBackGround();
+				TTPromise.wait( null, null, function() {
+					$this.setGridCellBackGround();
+				} );
 			} );
 		} );
 	},
@@ -1096,9 +1049,12 @@ DashletController = Backbone.View.extend( {
 
 	setSelectLayout: function() {
 		var $this = this;
-		var grid;
+		var grid_id;
 		if ( !Global.isSet( this.grid ) ) {
-			grid = $( this.el ).find( '#' + 'dashlet_' + this.data.id + '_grid' );
+			grid_id = 'dashlet_' + this.data.id + '_grid';
+			if ( $( '#' + grid_id ).length > 0 ) {
+				$( '#' + grid_id ).jqGrid( 'GridUnload' ); // prevent js exception where grid gets detached
+			}
 		}
 		var display_columns = this.buildDisplayColumns( this.dashboard_data.display_columns );
 		//Set Data Grid on List view
@@ -1118,16 +1074,10 @@ DashletController = Backbone.View.extend( {
 			column_info_array.push( column_info );
 		}
 
-		if ( !this.grid && grid ) { // #2571 -this.grid.jqGrid is not a function
-			this.grid = grid;
-			this.grid = this.grid.jqGrid( {
-				altRows: true,
-				data: [],
-				datatype: 'local',
-				sortable: false,
-				width: (Global.bodyWidth() - 14),
-				rowNum: 10000,
-				colNames: [],
+		if ( !this.grid ) { // #2571 -this.grid.jqGrid is not a function
+			var grid_data = {
+				multiselectPosition: 'none',
+				onSelectRow: $.proxy( this.onGridSelectRow, this ),
 				ondblClickRow: function() {
 					$this.onGridDblClickRow();
 				},
@@ -1135,39 +1085,11 @@ DashletController = Backbone.View.extend( {
 					if ( $( this ).jqGrid( 'getGridParam', 'data' ).length > 0 ) {
 						$this.setGridColumnsWidth();
 					}
-				},
-				onSelectRow: $.proxy( this.onGridSelectRow, this ),
-				colModel: column_info_array,
-				viewrecords: true
+				}
+			};
 
-			} );
-		} else {
-			this.grid.jqGrid( 'GridUnload' );
-			this.grid = null;
-			grid = $( this.el ).find( '#dashlet_' + this.data.id + '_grid' );
-			this.grid = $( grid );
-			this.grid = this.grid.jqGrid( {
-				altRows: true,
-				onSelectRow: $.proxy( this.onGridSelectRow, this ),
-				data: [],
-				rowNum: 10000,
-				ondblClickRow: function() {
-					$this.onGridDblClickRow();
-				},
-				gridComplete: function() {
-					if ( $( this ).jqGrid( 'getGridParam', 'data' ).length > 0 ) {
-
-						$this.setGridColumnsWidth();
-					}
-				},
-				sortable: false,
-				datatype: 'local',
-				width: (Global.bodyWidth() - 14),
-				colNames: [],
-				colModel: column_info_array,
-				viewrecords: true
-			} );
-
+			grid_data.onResizeGrid = false; //we take care of dashlet grid sizing here.
+			this.grid = new TTGrid( grid_id, grid_data, column_info_array );
 		}
 		$this.setGridSize();
 	},
@@ -1181,7 +1103,8 @@ DashletController = Backbone.View.extend( {
 				is_new: false,
 				message: this.getNoResultMessage()
 			} );
-			this.no_result_box.attr( 'id', '#dashlet_' + this.data.id + '_no_result_box' );
+			this.no_result_box.attr( 'id', 'dashlet_' + this.data.id + '_no_result_box' );
+			$( '#dashlet_' + this.data.id + '_no_result_box' ).remove(); //prevent doubleups
 			var grid_div = $( this.el ).find( '.content' );
 			grid_div.append( this.no_result_box );
 		}
@@ -1483,7 +1406,7 @@ DashletController = Backbone.View.extend( {
 					width = header_width + 20;
 				}
 				this.grid_total_width += width + 5;
-				this.grid.setColProp( field, {widthOrg: width + 5} );
+				this.grid.grid.setColProp( field, { widthOrg: width } );
 				width_test.remove();
 			}
 		}
@@ -1496,3 +1419,6 @@ DashletController = Backbone.View.extend( {
 
 DashletController.TOTAL_ROW = 4;
 DashletController.REGULAR_ROW = 5;
+DashletController.ABSENCE_ROW = 6;
+DashletController.ACCUMULATED_TIME_ROW = 7;
+DashletController.PREMIUM_ROW = 8;

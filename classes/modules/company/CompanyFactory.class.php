@@ -1751,7 +1751,7 @@ class CompanyFactory extends Factory {
 		$name = ucwords( trim($name) );
 		if ( DEMO_MODE == FALSE OR $force == TRUE ) {
 			global $config_vars;
-			if ( $force == FALSE AND $this->isNew() == FALSE AND isset($config_vars['other']['primary_company_id']) AND $config_vars['other']['primary_company_id'] == $this->getId() AND getTTProductEdition() > 10 ) {
+			if ( $force == FALSE AND $this->isNew() == FALSE AND isset($config_vars['other']['primary_company_id']) AND $config_vars['other']['primary_company_id'] == $this->getId() AND getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 				//Don't change company name
 				unset($name); //Satisfy coding standards.
 			} else {

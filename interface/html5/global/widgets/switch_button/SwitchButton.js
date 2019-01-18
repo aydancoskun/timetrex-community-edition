@@ -19,7 +19,7 @@
 			enabled = val;
 
 			if ( !val ) {
-				this.removeClass( 'disable-element' ).addClass( 'disable-element' )
+				this.removeClass( 'disable-element' ).addClass( 'disable-element' );
 			} else {
 				this.removeClass( 'disable-element' );
 			}
@@ -50,14 +50,14 @@
 		};
 
 		this.setIcon = function( val ) {
-			btn.addClass( val )
+			btn.addClass( val );
 		};
 
 		this.each( function() {
 
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 
-			btn = $( "<div></div>" );
+			btn = $( '<div></div>' );
 
 			$this.append( btn );
 
@@ -72,7 +72,7 @@
 				if ( !enabled ) {
 					e.stopImmediatePropagation();
 					e.stopPropagation();
-					return
+					return;
 				}
 
 				$this.setValue( !$this.getValue() );
@@ -90,7 +90,7 @@
 
 var SwitchButtonIcon = function() {
 
-}
+};
 
 SwitchButtonIcon.daily_total = 'daily';
 SwitchButtonIcon.weekly_total = 'weekly';

@@ -50,7 +50,7 @@ AccrualViewController = BaseViewController.extend( {
 			this.initData();
 		}
 		this.setSelectRibbonMenuIfNecessary( 'Accrual' );
-		TTPromise.resolve('AccrualViewController', 'init');
+		TTPromise.resolve( 'AccrualViewController', 'init' );
 	},
 
 	initPermission: function() {
@@ -105,15 +105,15 @@ AccrualViewController = BaseViewController.extend( {
 	},
 
 	buildEditViewUI: function() {
-
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_accrual': $.i18n._( 'Accrual' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_accrual': { 'label': $.i18n._( 'Accrual' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIAccrual' )),
@@ -125,8 +125,6 @@ AccrualViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -146,7 +144,7 @@ AccrualViewController = BaseViewController.extend( {
 
 		if ( this.sub_view_mode ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-			form_item_input.TText( {field: 'full_name'} );
+			form_item_input.TText( { field: 'full_name' } );
 			this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_accrual_column1, '' );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -169,7 +167,7 @@ AccrualViewController = BaseViewController.extend( {
 
 		if ( this.sub_view_mode ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-			form_item_input.TText( {field: 'accrual_policy_account'} );
+			form_item_input.TText( { field: 'accrual_policy_account' } );
 			this.addEditFieldToColumn( $.i18n._( 'Accrual Account' ), form_item_input, tab_accrual_column1 );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -188,19 +186,19 @@ AccrualViewController = BaseViewController.extend( {
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.user_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_accrual_column1 );
 
 		// Amount
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'amount', need_parser_sec: true, mode: 'time_unit'} );
+		form_item_input.TTextInput( { field: 'amount', need_parser_sec: true, mode: 'time_unit' } );
 		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab_accrual_column1, '', null );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'time_stamp'} );
+		form_item_input.TDatePicker( { field: 'time_stamp' } );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_accrual_column1, '', null );
 
 		//Note
@@ -291,7 +289,7 @@ AccrualViewController = BaseViewController.extend( {
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
-			
+
 			new SearchField( {
 				label: $.i18n._( 'Created By' ),
 				in_column: 2,
@@ -342,9 +340,9 @@ AccrualViewController = BaseViewController.extend( {
 		//use the user_type_array in edit mode and new mode, use the system_type_array in view mode
 		//this prevents users from choosing type_ids that are for system use only but can see the system type_ids when viewing
 		if ( this.is_viewing ) {
-			this.edit_view_ui_dic.type_id.setSourceData(this.system_type_array);
+			this.edit_view_ui_dic.type_id.setSourceData( this.system_type_array );
 		} else {
-			this.edit_view_ui_dic.type_id.setSourceData(this.user_type_array);
+			this.edit_view_ui_dic.type_id.setSourceData( this.user_type_array );
 		}
 
 		var $this = this;
@@ -413,7 +411,7 @@ AccrualViewController = BaseViewController.extend( {
 	getFilterColumnsFromDisplayColumns: function() {
 		var column_filter = {};
 		column_filter.type_id = true;
-		if (this.sub_view_mode) {
+		if ( this.sub_view_mode ) {
 			column_filter.accrual_policy_account = true;
 			column_filter.accrual_policy_account_id = true;
 			column_filter.user_id = true;
@@ -421,18 +419,18 @@ AccrualViewController = BaseViewController.extend( {
 		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
-	onGridSelectAll: function(){
+	onGridSelectAll: function() {
 		this.edit_enabled = this.editEnabled();
-		this.delete_enabled = this.deleteEnabled()
+		this.delete_enabled = this.deleteEnabled();
 		this.setDefaultMenu();
 	},
 
-	deleteEnabled: function(){
+	deleteEnabled: function() {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		if ( grid_selected_id_array.length > 0 ) {
-			for ( var i = grid_selected_id_array.length -1; i >= 0; i-- ) {
-				var selected_item = this.getRecordFromGridById(grid_selected_id_array[i]);
-				if (Global.isSet(this.delete_type_array[selected_item.type_id])) {
+			for ( var i = grid_selected_id_array.length - 1; i >= 0; i-- ) {
+				var selected_item = this.getRecordFromGridById( grid_selected_id_array[i] );
+				if ( Global.isSet( this.delete_type_array[selected_item.type_id] ) ) {
 					return true;
 				}
 			}
@@ -443,9 +441,9 @@ AccrualViewController = BaseViewController.extend( {
 	editEnabled: function() {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		if ( grid_selected_id_array.length > 0 ) {
-			for ( var i = grid_selected_id_array.length -1; i >= 0; i-- ) {
-				var selected_item = this.getRecordFromGridById(grid_selected_id_array[i]);
-				if (Global.isSet(this.user_type_array[selected_item.type_id])) {
+			for ( var i = grid_selected_id_array.length - 1; i >= 0; i-- ) {
+				var selected_item = this.getRecordFromGridById( grid_selected_id_array[i] );
+				if ( Global.isSet( this.user_type_array[selected_item.type_id] ) ) {
 					return true;
 				}
 			}
@@ -463,7 +461,7 @@ AccrualViewController = BaseViewController.extend( {
 			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
 
 			this.edit_enabled = this.editEnabled();
-			this.delete_enabled = this.deleteEnabled()
+			this.delete_enabled = this.deleteEnabled();
 		}
 
 		this.setDefaultMenu();
@@ -560,6 +558,8 @@ AccrualViewController = BaseViewController.extend( {
 	},
 
 	buildContextMenuModels: function() {
+		var menu = this._super( 'buildContextMenuModels' )[0];
+
 
 		//Context Menu
 		var menu = new RibbonMenu( {
@@ -742,83 +742,45 @@ AccrualViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		if ( Global.isSet( menu_name ) ) {
-			var id = menu_name;
-		} else {
-			context_btn = $( context_btn );
+	getGridSetup: function(){
+		var $this = this;
 
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+		var grid_setup = {
+			container_selector: this.sub_view_mode ? '.edit-view-tab' : '.view',
+			sub_grid_mode: this.sub_view_mode,
+			onSelectRow: function() {
+				$this.onGridSelectRow();
+			},
+			onCellSelect: function() {
+				$this.onGridSelectRow();
+			},
+			onSelectAll: function() {
+				$this.onGridSelectAll();
+			},
+			ondblClickRow: function( e ) {
+				$this.onGridDblClickRow( e );
+			},
+			onRightClickRow: function( rowId ) {
+				var id_array = $this.getGridSelectIdArray();
+				if ( id_array.indexOf( rowId ) < 0 ) {
+					$this.grid.grid.resetSelection();
+					$this.grid.grid.setSelection( rowId );
+					$this.onGridSelectRow();
+				}
+			},
+		};
 
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
+		return grid_setup;
+	},
 
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.add:
-				ProgressBar.showOverlay();
-				this.onAddClick();
-				break;
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.save:
-				ProgressBar.showOverlay();
-				this.onSaveClick();
-				break;
-			case ContextMenuIconName.save_and_next:
-				ProgressBar.showOverlay();
-				this.onSaveAndNextClick();
-				break;
-			case ContextMenuIconName.save_and_new:
-				ProgressBar.showOverlay();
-				this.onSaveAndNewClick();
-				break;
-			case ContextMenuIconName.save_and_copy:
-				ProgressBar.showOverlay();
-				this.onSaveAndCopy();
-				break;
-			case ContextMenuIconName.edit:
-				ProgressBar.showOverlay();
-				this.onEditClick();
-				break;
-			case ContextMenuIconName.mass_edit:
-				ProgressBar.showOverlay();
-				this.onMassEditClick();
-				break;
-			case ContextMenuIconName.delete_icon:
-				this.onDeleteClick();
-				break;
-			case ContextMenuIconName.delete_and_next:
-				ProgressBar.showOverlay();
-				this.onDeleteAndNextClick();
-				break;
-
-			case ContextMenuIconName.copy:
-				ProgressBar.showOverlay();
-				this.onCopyClick();
-				break;
-			case ContextMenuIconName.copy_as_new:
-				ProgressBar.showOverlay();
-				this.onCopyAsNewClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
 			case ContextMenuIconName.timesheet:
 				this.onNavigationClick();
 				break;
-
 			case ContextMenuIconName.import_icon:
-				ProgressBar.showOverlay();
 				this.onImportClick();
 				break;
-			case ContextMenuIconName.export_excel:
-				this.onExportClick('exportAccrual');
-				break;
-
 		}
 	},
 
@@ -849,7 +811,7 @@ AccrualViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -917,7 +879,7 @@ AccrualViewController = BaseViewController.extend( {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -980,7 +942,7 @@ AccrualViewController = BaseViewController.extend( {
 					this.setDefaultMenuViewIcon( context_btn, 'punch' );
 					break;
 				case ContextMenuIconName.export_excel:
-					this.setDefaultMenuExportIcon( context_btn);
+					this.setDefaultMenuExportIcon( context_btn );
 					break;
 			}
 
@@ -992,8 +954,8 @@ AccrualViewController = BaseViewController.extend( {
 
 	onNavigationClick: function() {
 		var $this = this;
-		var filter = {filter_data: {}};
-		var label = this.sub_view_mode ? $.i18n._( "Accrual Balances" ) : $.i18n._( "Accruals" );
+		var filter = { filter_data: {} };
+		var label = this.sub_view_mode ? $.i18n._( 'Accrual Balances' ) : $.i18n._( 'Accruals' );
 
 		if ( Global.isSet( this.current_edit_record ) ) {
 
@@ -1070,180 +1032,19 @@ AccrualViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	search: function( set_default_menu, page_action, page_number, callBack ) {
-		if ( !Global.isSet( set_default_menu ) ) {
-			set_default_menu = true;
-		}
-
-		var $this = this;
-		var filter = {};
-		filter.filter_data = {};
-		filter.filter_sort = {};
-		filter.filter_columns = this.getFilterColumnsFromDisplayColumns();
-		filter.filter_items_per_page = 0; // Default to 0 to load user preference defined
-		if ( this.pager_data ) {
-
-			if ( LocalCacheData.paging_type === 0 ) {
-				if ( page_action === 'next' ) {
-					filter.filter_page = this.pager_data.next_page;
-				} else {
-					filter.filter_page = 1;
-				}
-			} else {
-
-				switch ( page_action ) {
-					case 'next':
-						filter.filter_page = this.pager_data.next_page;
-						break;
-					case 'last':
-						filter.filter_page = this.pager_data.previous_page;
-						break;
-					case 'start':
-						filter.filter_page = 1;
-						break;
-					case 'end':
-						filter.filter_page = this.pager_data.last_page_number;
-						break;
-					case 'go_to':
-						filter.filter_page = page_number;
-						break;
-					default:
-						filter.filter_page = this.pager_data.current_page;
-						break;
-				}
-
-			}
-
-		} else {
-			filter.filter_page = 1;
-		}
-
-		if ( this.sub_view_mode && this.parent_key ) {
-			this.select_layout.data.filter_data[this.parent_key] = this.parent_value;
-		}
-		//If sub view controller set custom filters, get it
-		if ( Global.isSet( this.getSubViewFilter ) ) {
-
-			this.select_layout.data.filter_data = this.getSubViewFilter( this.select_layout.data.filter_data );
-
-		}
-
-		//select_layout will not be null, it's set in setSelectLayout function
-
-		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
-		filter.filter_sort = this.select_layout.data.filter_sort;
-
-		if ( TTUUID.isUUID(this.refresh_id) && !this.sub_view_mode ) {
-			filter.filter_data = {};
-			filter.filter_data.id = this.refresh_id;
-		} else {
-			this.last_select_ids = this.getGridSelectIdArray();
-		}
-
-		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
-				var result_data = result.getResult();
-				if ( !Global.isArray( result_data ) ) {
-					$this.showNoResultCover()
-				} else {
-					$this.removeNoResultCover();
-					if ( Global.isSet( $this.__createRowId ) ) {
-						result_data = $this.__createRowId( result_data );
-					}
-					result_data = Global.formatGridData( result_data, $this.api.key_name );
-				}
-
-				if ( TTUUID.isUUID($this.refresh_id) && !$this.sub_view_mode ) {
-					$this.refresh_id = null;
-					var grid_source_data = $this.grid.getGridParam( 'data' );
-					var len = grid_source_data.length;
-
-					if ( $.type( grid_source_data ) !== 'array' ) {
-						grid_source_data = [];
-					}
-
-					var found = false;
-					var new_record = result_data[0];
-					for ( var i = 0; i < len; i++ ) {
-						var record = grid_source_data[i];
-
-						if ( record.id === new_record.id ) {
-							$this.grid.setRowData( new_record.id, new_record );
-							found = true;
-							break
-						}
-					}
-
-					if ( !found ) {
-						$this.grid.clearGridData();
-						$this.grid.setGridParam( {data: grid_source_data.concat( new_record )} );
-						$this.grid.trigger( 'reloadGrid' );
-						$this.highLightGridRowById( new_record.id );
-					}
-
-				} else {
-
-					//Set Page data to widget, next show display info when setDefault Menu
-					$this.pager_data = result.getPagerData();
-
-					//CLick to show more mode no need this step
-					if ( LocalCacheData.paging_type !== 0 ) {
-						$this.paging_widget.setPagerData( $this.pager_data );
-						$this.paging_widget_2.setPagerData( $this.pager_data );
-					}
-
-					if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
-						var current_data = $this.grid.getGridParam( 'data' );
-						result_data = current_data.concat( result_data );
-					}
-
-					$this.grid.clearGridData();
-					$this.grid.setGridParam( {data: result_data} );
-					$this.grid.trigger( 'reloadGrid' );
-					$this.reSelectLastSelectItems();
-
-				}
-
-				$this.setGridCellBackGround(); //Set cell background for some views
-
-				ProgressBar.closeOverlay(); //Add this in initData
-
-				if ( set_default_menu ) {
-					$this.setDefaultMenu( true );
-				}
-
-				if ( LocalCacheData.paging_type === 0 ) {
-					if ( !$this.pager_data || $this.pager_data.is_last_page ) {
-						$this.paging_widget.css( 'display', 'none' );
-					} else {
-						$this.paging_widget.css( 'display', 'block' );
-					}
-				}
-
-				$this.sub_view_grid_data = result_data[0];
-				if ( callBack ) {
-					callBack( result );
-				}
-				// when call this from save and new result, we don't call auto open, because this will call onAddClick twice
-				if ( set_default_menu ) {
-					$this.autoOpenEditViewIfNecessary();
-				}
-
-				if ( Global.isSet( $this.is_trigger_add ) && $this.is_trigger_add ) {
-					$this.onAddClick();
-					$this.is_trigger_add = false;
-				}
-				$this.searchDone();
-
-			}
-		} );
-
-	},
-
 	searchDone: function() {
-		var result_data = this.grid.getGridParam( 'data' );
-		this._super( 'searchDone' );
+		var $this = this;
+
+		//When Attendance -> Accrual Balance, New icon is clicked, open the Balance view first, then trigger the New icon to create a new accrual entry from there.
+		if ( Global.isSet( $this.is_trigger_add ) && $this.is_trigger_add ) {
+			$this.onAddClick();
+			$this.is_trigger_add = false;
+		}
+
 		if ( this.sub_view_mode ) {
+			TTPromise.resolve( 'initSubAccrualView', 'init' );
+
+			var result_data = this.grid.getGridParam( 'data' );
 			if ( !Global.isArray( result_data ) || result_data.length < 1 ) {
 				this.onCancelClick();
 				if ( this.parent_view_controller ) {
@@ -1251,43 +1052,23 @@ AccrualViewController = BaseViewController.extend( {
 				}
 			}
 		}
-		this.setGridSize();
+
+		this._super( 'searchDone' );
 	},
-
-	setTabStatus: function() {
-
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing || this.sub_view_mode ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else if ( !this.sub_view_mode ) {
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-		}
-
-		this.editFieldResize( 0 );
-	}
-
 } );
 
 AccrualViewController.loadView = function() {
 
 	Global.loadViewSource( 'Accrual', 'AccrualView.html', function( result ) {
 
-		TTPromise.wait('BaseViewController', 'initialize', function () {
+		TTPromise.wait( 'BaseViewController', 'initialize', function() {
 
 			var args = {};
-			var template = _.template(result);
+			var template = _.template( result );
 
-			Global.contentContainer().html(template(args));
-		});
-	} )
+			Global.contentContainer().html( template( args ) );
+		} );
+	} );
 
 };
 
@@ -1295,20 +1076,20 @@ AccrualViewController.loadSubView = function( container, beforeViewLoadedFun, af
 	Global.loadViewSource( 'Accrual', 'SubAccrualView.html', function( result ) {
 
 		var args = {};
-		var template = _.template(result);
+		var template = _.template( result );
 
-		if (Global.isSet(beforeViewLoadedFun)) {
+		if ( Global.isSet( beforeViewLoadedFun ) ) {
 			beforeViewLoadedFun();
 		}
 
-		if (Global.isSet(container)) {
-			container.html(template(args));
-			if (Global.isSet(afterViewLoadedFun)) {
-				TTPromise.add('AccrualViewController', 'init');
-				TTPromise.wait('AccrualViewController', 'init', function () {
-					afterViewLoadedFun(sub_accrual_view_controller);
-				});
+		if ( Global.isSet( container ) ) {
+			container.html( template( args ) );
+			if ( Global.isSet( afterViewLoadedFun ) ) {
+				TTPromise.add( 'AccrualViewController', 'init' );
+				TTPromise.wait( 'AccrualViewController', 'init', function() {
+					afterViewLoadedFun( sub_accrual_view_controller );
+				} );
 			}
 		}
-	} )
-}
+	} );
+};

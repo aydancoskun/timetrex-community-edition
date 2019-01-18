@@ -568,16 +568,13 @@ class Form941Report extends Report {
 		return $retarr;
 	}
 
-	function doesPayPeriodInclude12thOfLastMoQ( $start_date, $end_date ) {
-		$year_quarter = TTDate::getYearQuarterMonthNumber( $start_date );
-		if ( $year_quarter == 3 ) { //3rd month in quarter
-			$target_date = mktime(0, 0, 0, TTDate::getMonth( $start_date ), 12, TTDate::getYear( $start_date ) ); //Should be the 12 day of the last month of the quarter.
-			if ( $start_date <= $target_date AND $end_date >= $target_date ) {
-				return TRUE;
-			}
-		}
+	function get12thOfLastMoQ( $last_date, $quarter ) {
+		$quarter_dates = TTDate::getYearQuarters( $last_date, $quarter );
 
-		return FALSE;
+		$target_date = mktime(0, 0, 0, TTDate::getMonth( $quarter_dates['end'] ), 12, TTDate::getYear( $quarter_dates['end'] ) ); //Should be the 12 day of the last month of the quarter.
+
+		Debug::Text(' 12th of Last MoQ Date: '. TTDate::getDate('DATE', $target_date ) .' Quarter: '. $quarter .' Year: '. TTDate::getDate('DATE', $last_date ), __FILE__, __LINE__, __METHOD__, 10);
+		return $target_date;
 	}
 
 	/**
@@ -586,7 +583,7 @@ class Form941Report extends Report {
 	 * @return bool
 	 */
 	function _getData( $format = NULL ) {
-		$this->tmp_data = array( 'pay_stub_entry' => array() );
+		$this->tmp_data = array( 'pay_stub_entry' => array(), 'ytd_pay_stub_entry' => array() );
 
 		$filter_data = $this->getFilterConfig();
 		$form_data = $this->formatFormConfig();
@@ -598,6 +595,32 @@ class Form941Report extends Report {
 		$social_security_wage_limit = $pd_obj->getSocialSecurityMaximumEarnings();
 		$medicare_additional_threshold_limit = $pd_obj->getMedicareAdditionalEmployerThreshold();
 		Debug::Text('Social Security Wage Limit: '. $social_security_wage_limit .' Medicare Threshold: '. $medicare_additional_threshold_limit .' Date: '. TTDate::getDate('DATE', $filter_data['end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
+
+		//Get the total number of employees paid for the pay period that covers the 12th day of the last month of the quarter. (Part 1, Line 1 on the 941 form)
+		//  If the pay peiod starts on June 12th and end on June 26th, but isn't paid until July 5th, that would technically be excluded from the 941 report in Quarter 2, but we need to count the employees in that pay period still.
+		//  So that is why we need to run a completely separate query to get this data, rather than trying to count the employees with dollars appearing on the report.
+		$report_quarter = TTDate::getYearQuarter( $filter_data['end_date'] );
+
+		$employee_count_date = $this->get12thOfLastMoQ( $filter_data['end_date'], $report_quarter );
+		Debug::Text('Employee Count Date: '. TTDate::getDate('DATE', $employee_count_date ), __FILE__, __LINE__, __METHOD__, 10);
+
+		$pplf = TTnew('PayPeriodListFactory');
+		$employee_count_pay_periods = $pplf->getIDSByListFactory( $pplf->getByCompanyIdAndOverlapStartDateAndEndDate( $this->getUserObject()->getCompany(), $employee_count_date, $employee_count_date ) );
+
+		$pslf = TTnew( 'PayStubListFactory' );
+		$employee_count_filter_data = $filter_data;
+		$employee_count_filter_data['pay_period_id'] = $employee_count_pay_periods;
+		unset( $employee_count_filter_data['start_date'], $employee_count_filter_data['end_date']);
+		$pslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $employee_count_filter_data );
+		if ( $pslf->getRecordCount() > 0 ) {
+			foreach( $pslf as $ps_obj ) {
+				if ( $ps_obj->getStatus() != 25 ) {
+					$legal_entity_id = $ps_obj->getColumn( 'legal_entity_id' );
+					$this->user_ids[ $legal_entity_id ][ $ps_obj->getUser() ] = TRUE; //Used for counting total number of employees.
+				}
+			}
+		}
+		unset( $pplf, $pslf, $legal_entity_id, $employee_count_date, $employee_count_pay_periods );
 
 		//Need to get totals up to the beginning of this quarter so we can determine if any employees have exceeded the social security/additional medicare limit.
 		$pself = TTnew( 'PayStubEntryListFactory' );
@@ -673,12 +696,6 @@ class Form941Report extends Report {
 																'pay_period_transaction_date' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
 																'pay_period' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
 															);
-				}
-
-				//The number of employees on your payroll for the pay period including March 12, June 12, September 12, or December 12
-				$is_paid_on_12th_of_month = $this->doesPayPeriodInclude12thOfLastMoQ( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_start_date'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['pay_period_end_date'] );
-				if ( $is_paid_on_12th_of_month == TRUE ) {
-					$this->user_ids[$legal_entity_id][$user_id] = TRUE; //Used for counting total number of employees.
 				}
 
 				if ( isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['psen_ids'][$pay_stub_entry_name_id]) ) {

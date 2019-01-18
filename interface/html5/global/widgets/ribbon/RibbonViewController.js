@@ -11,17 +11,20 @@ RibbonViewController = Backbone.View.extend( {
 
 		TopMenuManager.ribbon_view_controller = this;
 		var $this = this;
+
 		$this.render();
 	},
 
 	onMenuSelect: function( e, ui ) {
-		if ( TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) >= 0 ) {
-			$( '.context-menu-active' ).removeClass( 'context-menu-active' );
-		}
-		TopMenuManager.selected_menu_id = $( ui.tab ).attr( 'ref' );
-		if ( TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) >= 0 ) {
-			$( ui.tab ).parent().addClass( 'context-menu-active' );
-		}
+		return;
+		// No longer used because we only support a single context menu now.
+		// if ( TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) >= 0 ) {
+		// 	$( '.context-menu-active' ).removeClass( 'context-menu-active' );
+		// }
+		// TopMenuManager.selected_menu_id = $( e.currentTarget ).attr( 'ref' );
+		// if ( TopMenuManager.selected_menu_id && TopMenuManager.selected_menu_id.indexOf( 'ContextMenu' ) >= 0 ) {
+		// 	$( e.target ).parent().addClass( 'context-menu-active' );
+		// }
 	},
 
 	onSubMenuNavClick: function( target, id ) {
@@ -37,36 +40,37 @@ RibbonViewController = Backbone.View.extend( {
 			}
 		}
 		showNavItems();
+
 		function showNavItems() {
 			var items = sub_menu.get( 'items' );
-			var box = $( "<ul id='sub_nav" + id + "' class='ribbon-sub-menu-nav'> </ul>" );
+			var box = $( '<ul id=\'sub_nav' + id + '\' class=\'ribbon-sub-menu-nav\'> </ul>' );
 			for ( var i = 0; i < items.length; i++ ) {
 				var item = items[i];
-				var item_node = $( "<li class='ribbon-sub-menu-nav-item' id='" + item.get( 'id' ) + "'><span class='label'>" + item.get( 'label' ) + "</span></li>" )
+				var item_node = $( '<li class=\'ribbon-sub-menu-nav-item\' id=\'' + item.get( 'id' ) + '\'><span class=\'label\'>' + item.get( 'label' ) + '</span></li>' );
 				box.append( item_node );
 
 				item_node.unbind( 'click' ).click( function() {
 
 					var id = $( this ).attr( 'id' );
-					$this.onReportMenuClick( id )
+					$this.onReportMenuClick( id );
 				} );
 			}
 			box = box.RibbonSubMenuNavWidget();
 			LocalCacheData.openRibbonNaviMenu = box;
-			$( target ).append( box )
+			$( target ).append( box );
 		}
 
 	},
 
 	onReportMenuClick: function( id ) {
-		Global.closeEditViews( function( ) {
-			if ( id === 'AffordableCareReport' && !(LocalCacheData.getCurrentCompany().product_edition_id > 10) ) {
-				TAlertManager.showAlert(Global.getUpgradeMessage());
+		Global.closeEditViews( function() {
+			if ( id === 'AffordableCareReport' && !(LocalCacheData.getCurrentCompany().product_edition_id >= 15) ) {
+				TAlertManager.showAlert( Global.getUpgradeMessage() );
 			} else {
 				var parent_view = LocalCacheData.current_open_edit_only_controller ? LocalCacheData.current_open_edit_only_controller : LocalCacheData.current_open_primary_controller;
-				IndexViewController.openReport( parent_view, id);
+				IndexViewController.openReport( parent_view, id );
 			}
-		});
+		} );
 
 	},
 
@@ -79,11 +83,10 @@ RibbonViewController = Backbone.View.extend( {
 		Global.closeEditViews( function() {
 			$this.setSelectSubMenu( id );
 			$this.openSelectView( id );
-		})
+		} );
 	},
 
 	buildRibbonMenus: function() {
-
 		var $this = this;
 		this.subMenuNavMap = {};
 		var ribbon_menu_array = TopMenuManager.ribbon_menus;
@@ -107,8 +110,8 @@ RibbonViewController = Backbone.View.extend( {
 			for ( var x = 0; x < len1; x++ ) {
 				var ribbon_menu_group = ribbon_menu_group_array[x];
 				var ribbon_sub_menu_array = ribbon_menu_group.get( 'sub_menus' );
-				var sub_menu_ui_nodes = $( "<ul></ul>" );
-				var ribbon_menu_group_ui = $( '<div class="menu top-ribbon-menu" ondragstart="return false;" />' );
+				var sub_menu_ui_nodes = $( '<ul></ul>' );
+				var ribbon_menu_group_ui = $( '<div class="menu top-ribbon-menu"/>' );
 
 				var len2 = ribbon_sub_menu_array.length;
 				for ( var y = 0; y < len2; y++ ) {
@@ -135,7 +138,7 @@ RibbonViewController = Backbone.View.extend( {
 						sub_menu_ui_nodes.append( sub_menu_ui_node );
 
 						sub_menu_ui_node.click( function( e ) {
-							var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
+							var id = $( this ).find( '.ribbon-sub-menu-icon' ).attr( 'id' );
 							$this.onSubMenuClick( id );
 						} );
 					}
@@ -162,7 +165,7 @@ RibbonViewController = Backbone.View.extend( {
 
 		}
 
-		this.setRibbonMenuVisibility()
+		this.setRibbonMenuVisibility();
 
 	},
 
@@ -178,7 +181,7 @@ RibbonViewController = Backbone.View.extend( {
 
 			var tab_content = Global.topContainer().find( '#' + menu_id ).find( 'li' );
 			if ( tab_content.length < 1 ) {
-				var tab = Global.topContainer().find( "a[ref='" + menu_id + "']" );
+				var tab = Global.topContainer().find( 'a[ref=\'' + menu_id + '\']' );
 				tab.parent().hide();
 			}
 		}
@@ -200,9 +203,13 @@ RibbonViewController = Backbone.View.extend( {
 
 		this.buildRibbonMenus();
 
-		$( this.el ).tabs();
-
-		$( this.el ).bind( 'tabsselect', this.onMenuSelect );
+		var $this = this;
+		$( this.el ).tabs( {
+			// No longer used because we only support a single context menu now.
+			// activate: function( e, ui ) {
+			// 	$this.onMenuSelect( e, ui );
+			// }
+		} );
 
 		this.setSelectMenu( TopMenuManager.selected_menu_id );
 
@@ -214,15 +221,29 @@ RibbonViewController = Backbone.View.extend( {
 		if ( LocalCacheData.getLoginUserPreference() ) {
 			$( '#leftLogo' ).unbind( 'click' ).bind( 'click', function() {
 				Global.closeEditViews( function() {
-					TopMenuManager.goToView('Home')
-				});
+					TopMenuManager.goToView( 'Home' );
+				} );
 
 			} );
 		}
 	},
 
 	setSelectMenu: function( name ) {
-		$( this.el ).tabs( {selected: name} );
+		// if ( name ) {
+		// 	var index = $(this.el).find('#ribbon a[ref=' + name + ']').parent().index();
+		// 	//$(this.el).tabs({'selected': index});
+		// 	$(this.el).tabs('option','active',index)
+		// 	TopMenuManager.selected_menu_id = name;
+		// }
+		//#2353 - exception: can't find #ribbon a[ref=]
+		if ( !name ) {
+			name = 'Home';
+		}
+
+		var index = $( this.el ).find( '#ribbon a[ref=' + name + ']' ).parent().index();
+		if ( index >= 0 ) { //Without this check, the last tab is always selected first and causes more obvious "flashing" when refreshing the browser. This just changes it to the first tab instead is all though.
+			$( this.el ).tabs( 'option', 'active', index );
+		}
 		TopMenuManager.selected_menu_id = name;
 	},
 
@@ -239,7 +260,7 @@ RibbonViewController = Backbone.View.extend( {
 				break;
 			case 'QuickStartWizard':
 				if ( PermissionManager.checkTopLevelPermission( 'QuickStartWizard' ) ) {
-					IndexViewController.openWizard('QuickStartWizard');
+					IndexViewController.openWizard( 'QuickStartWizard' );
 				}
 				break;
 			case 'InOut':
@@ -253,10 +274,11 @@ RibbonViewController = Backbone.View.extend( {
 			case 'About':
 				if ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.viewId == name ) { //#2557 - A - Ensure that opening edit only views on top of same edit only view just resets the edit menu
 					LocalCacheData.current_open_edit_only_controller.setEditMenu();
+					$( '#ribbon_view_container .context-menu:visible a' ).click();
 				} else if ( LocalCacheData.current_open_edit_only_controller ) { //#2557 - B - Ensure that opening edit only views on top of different edit only  view sets the parent to the existing edit only view
-					IndexViewController.openEditView(LocalCacheData.current_open_edit_only_controller, name);
+					IndexViewController.openEditView( LocalCacheData.current_open_edit_only_controller, name );
 				} else {
-					IndexViewController.openEditView(LocalCacheData.current_open_primary_controller, name); //#2557 - C - Ensure that opening edit views as normal works as before
+					IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, name ); //#2557 - C - Ensure that opening edit views as normal works as before
 				}
 				break;
 			case 'Logout':
@@ -266,22 +288,22 @@ RibbonViewController = Backbone.View.extend( {
 				this.doPortalLogout();
 				break;
 			case 'AdminGuide':
-				var url = 'https://www.timetrex.com/h?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				var url = 'https://www.timetrex.com/h?id=admin_guide&v=' + LocalCacheData.getLoginData().application_version + '&e=' + LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'FAQS':
-				url = 'https://www.timetrex.com/h?id=faq&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				url = 'https://www.timetrex.com/h?id=faq&v=' + LocalCacheData.getLoginData().application_version + '&e=' + LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'WhatsNew':
-				url = 'https://www.timetrex.com/h?id=changelog&v=' + LocalCacheData.getLoginData().application_version +'&e='+ LocalCacheData.getCurrentCompany().product_edition_id;
+				url = 'https://www.timetrex.com/h?id=changelog&v=' + LocalCacheData.getLoginData().application_version + '&e=' + LocalCacheData.getCurrentCompany().product_edition_id;
 				window.open( url, '_blank' );
 				break;
 			case 'EmailHelp':
 
-				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 					url = 'mailto:support@timetrex.com?subject=Company: ' + LocalCacheData.getCurrentCompany().name + '&body=Company: ' + LocalCacheData.getCurrentCompany().name + '  ' +
-					'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
+							'Registration Key: ' + LocalCacheData.getLoginData().registration_key;
 				} else {
 					url = 'https://www.timetrex.com/r?id=29';
 				}
@@ -319,7 +341,7 @@ RibbonViewController = Backbone.View.extend( {
 				} );
 				break;
 			case 'LegalEntity':
-				if (LocalCacheData.getCurrentCompany().product_edition_id > 10) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 					TopMenuManager.goToView( TopMenuManager.selected_sub_menu_id );
 				} else {
 					IndexViewController.openEditView( LocalCacheData.current_open_primary_controller, name, false );
@@ -329,9 +351,9 @@ RibbonViewController = Backbone.View.extend( {
 				//#2557 - When opening a view from the submenus, ensure that similarily named edit only views are cancelled (with confirm) first.
 				if ( LocalCacheData.current_open_edit_only_controller && LocalCacheData.current_open_edit_only_controller.viewId == name ) {
 					LocalCacheData.current_open_edit_only_controller.onCancelClick();
-					TTPromise.wait('base','onCancelClick', function(){
+					TTPromise.wait( 'base', 'onCancelClick', function() {
 						TopMenuManager.goToView( TopMenuManager.selected_sub_menu_id );
-					});
+					} );
 				} else {
 					TopMenuManager.goToView( TopMenuManager.selected_sub_menu_id );
 				}
@@ -377,6 +399,10 @@ RibbonViewController = Backbone.View.extend( {
 
 				}
 
+				if ( !name ) {
+					name = 'Home';
+				}
+
 				$( '#' + name ).addClass( 'selected-menu' );
 				TopMenuManager.selected_sub_menu_id = name;
 
@@ -394,7 +420,7 @@ RibbonViewController = Backbone.View.extend( {
 		Global.setAnalyticDimensions();
 		if ( typeof(ga) != 'undefined' && APIGlobal.pre_login_data.analytics_enabled === true ) {
 			try {
-				ga('send', 'pageview', {'sessionControl': 'end'});
+				ga( 'send', 'pageview', { 'sessionControl': 'end' } );
 			} catch(e) {
 				throw e;
 			}
@@ -403,16 +429,18 @@ RibbonViewController = Backbone.View.extend( {
 		//A bare "if" wrapped around lh_inst doesn't work here for some reason.
 		if ( typeof(lh_inst) != 'undefined' ) {
 			//stop the update loop for live chat with support
-			clearTimeout(lh_inst.timeoutStatuscheck);
+			clearTimeout( lh_inst.timeoutStatuscheck );
 		}
 
 		//This code is duplicated at LocalCacheData.getRequiredLocalCache()
 		Global.clearSessionCookie();
 		LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
-		LocalCacheData.setLoginUser(null);
-		LocalCacheData.setCurrentCompany(null);
+		LocalCacheData.setLoginUser( null );
+		LocalCacheData.setCurrentCompany( null );
 		sessionStorage.clear();
 		TopMenuManager.goToView( 'Login' );
+
+		return;
 	}
 } );
 

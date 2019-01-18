@@ -946,7 +946,7 @@ class Form940Report extends Report {
 
 				$f940->year = TTDate::getYear( $filter_data['end_date'] );
 
-				$f940->ein = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getPrimaryIdentification(); //Always use EIN from Federal Agency.
+				$f940->ein = ( isset( $this->form_data['remittance_agency'][$legal_entity_id]['00'] ) ? $this->form_data['remittance_agency'][$legal_entity_id]['00']->getPrimaryIdentification() : NULL ); //Always use EIN from Federal Agency.
 				$f940->name = $legal_entity_obj->getLegalName();
 				$f940->trade_name = $legal_entity_obj->getTradeName();
 				$f940->address = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();

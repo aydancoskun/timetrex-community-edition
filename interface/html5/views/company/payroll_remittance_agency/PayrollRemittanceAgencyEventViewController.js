@@ -3,7 +3,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 	el: '#payroll_remittance_agency_event_view_container', //Must set el here and can only set string, so events can work
 
 	user_api: null,
-    status_array: null,
+	status_array: null,
 	action_array: null,
 	agency_array: null,
 	payment_frequency_array: null,
@@ -22,7 +22,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 	remittance_source_account_array: null,
 	sub_event_view_controller: null,
 
-	_required_files: ['APIPayrollRemittanceAgency', 'APIPayrollRemittanceAgencyEvent', 'APIUserGroup', 'APICompany', 'APIDate', 'APIPayPeriodSchedule', 'APIUserReportData' ],
+	_required_files: ['APIPayrollRemittanceAgency', 'APIPayrollRemittanceAgencyEvent', 'APIUserGroup', 'APICompany', 'APIDate', 'APIPayPeriodSchedule', 'APIUserReportData'],
 
 	init: function( options ) {
 
@@ -39,7 +39,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		this.date_api = new (APIFactory.getAPIClass( 'APIDate' ))();
 		this.api_user_report = new (APIFactory.getAPIClass( 'APIUserReportData' ))();
-		this.month_of_quarter_array = Global.buildRecordArray( {1: 1, 2: 2, 3: 3} );
+		this.month_of_quarter_array = Global.buildRecordArray( { 1: 1, 2: 2, 3: 3 } );
 
 		this.render();
 
@@ -60,7 +60,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 	//override required because this is a subview in an edit view.
 	_setGridSizeGridWidthOfSubViewMode: function() {
-		this.grid.setGridWidth(  $( this.el ).parents('.edit-view-tab').parent().parent().width() - 10 );
+		this.grid.setGridWidth( $( this.el ).parents( '.edit-view-tab' ).parent().parent().width() - 10 );
 	},
 
 	//Don't initOptions if edit_only_mode. Do it in sub views
@@ -69,10 +69,10 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		this.initDropDownOption( 'status' );
 		this.initDropDownOption( 'frequency' );
-		this.initDropDownOption( 'payroll_remittance_agency' , 'payroll_remittance_agency' );
+		this.initDropDownOption( 'payroll_remittance_agency', 'payroll_remittance_agency' );
 
 		this.api.getOptions( 'week', {
-			onResult: function(res) {
+			onResult: function( res ) {
 				res = res.getResult();
 				$this.frequency_week_array = res;
 			}
@@ -84,10 +84,12 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 				$this.month_of_year_array = res;
 			}
 		} );
-		this.date_api.getDayOfMonthArray( {onResult: function( res ) {
-			res = res.getResult();
-			$this.day_of_month_array = Global.buildRecordArray( res );
-		}} );
+		this.date_api.getDayOfMonthArray( {
+			onResult: function( res ) {
+				res = res.getResult();
+				$this.day_of_month_array = Global.buildRecordArray( res );
+			}
+		} );
 		this.date_api.getDayOfWeekArray( {
 			onResult: function( res ) {
 				res = res.getResult();
@@ -96,14 +98,14 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		} );
 	},
 
-	getTypeOptions: function( ) {
+	getTypeOptions: function() {
 		var $this = this;
 		var type_params = {
 			'payroll_remittance_agency_id': this.edit_view_ui_dic.payroll_remittance_agency_id.getValue()
 		};
 
 		this.api.getOptions( 'type', type_params, {
-			onResult: function(res) {
+			onResult: function( res ) {
 				res = res.getResult();
 				$this.edit_view_ui_dic.type_id.setSourceData( Global.buildRecordArray( res ) );
 
@@ -111,18 +113,18 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 				//must update current edit record in case the previous type has been removed from list
 				$this.current_edit_record.type_id = $this.edit_view_ui_dic.type_id.getValue();
 
-				TTPromise.resolve('PayrollRemittanceAgencyEvent','updateUI');
+				TTPromise.resolve( 'PayrollRemittanceAgencyEvent', 'updateUI' );
 			}
 		} );
 	},
 
 	getReportOptions: function() {
 		var $this = this;
-		this.api_user_report.getUserReportData( { filter_data: { include_user_report_id: this.current_edit_record.user_report_data_id }}, {
-			onResult: function ( res ) {
+		this.api_user_report.getUserReportData( { filter_data: { include_user_report_id: this.current_edit_record.user_report_data_id } }, {
+			onResult: function( res ) {
 				$this.edit_view_ui_dic.user_report_data_id.setSourceData( res.getResult() );
 			}
-		});
+		} );
 	},
 
 	setEditViewDataDone: function() {
@@ -143,8 +145,8 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
 		var c_value = target.getValue();
-		Debug.Text('key: '+ key + ' value: '+ c_value, 'PayrollRemittanceAgencyEventViewController.js', 'PayrollRemittanceAgencyEventViewController', 'onFormItemChange', 10);
-		TTPromise.add('PayrollRemittanceAgencyEvent','updateUI');
+		Debug.Text( 'key: ' + key + ' value: ' + c_value, 'PayrollRemittanceAgencyEventViewController.js', 'PayrollRemittanceAgencyEventViewController', 'onFormItemChange', 10 );
+		TTPromise.add( 'PayrollRemittanceAgencyEvent', 'updateUI' );
 		switch ( key ) {
 			case 'payroll_remittance_agency_id':
 				this.getTypeOptions(); //must be dynamically connected every time stuff changes.
@@ -154,35 +156,35 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 				this.current_edit_record[key] = c_value;
 				this.validate();
 				this.updateFutureDates();
-				TTPromise.reject('PayrollRemittanceAgencyEvent','updateUI');
+				TTPromise.reject( 'PayrollRemittanceAgencyEvent', 'updateUI' );
 				break;
 			default:
-				TTPromise.resolve('PayrollRemittanceAgencyEvent','updateUI');
-			break;
+				TTPromise.resolve( 'PayrollRemittanceAgencyEvent', 'updateUI' );
+				break;
 		}
 
 		var $this = this;
 		// Hit when all promises are done...
-		TTPromise.wait('PayrollRemittanceAgencyEvent','updateUI',function(){
+		TTPromise.wait( 'PayrollRemittanceAgencyEvent', 'updateUI', function() {
 			$this.onFrequencyChange();
 			$this.current_edit_record[key] = c_value;
 			$this.validate();
 			$this.updateFutureDates();
-		});
+		} );
 	},
 
 	updateFutureDates: function() {
-		Debug.Text('Updating remittance agency event dates.', null, null, null, 10);
+		Debug.Text( 'Updating remittance agency event dates.', null, null, null, 10 );
 		var $this = this;
-		this.api.calculateNextRunDate(this.current_edit_record, {
-			onResult: function (result) {
+		this.api.calculateNextRunDate( this.current_edit_record, {
+			onResult: function( result ) {
 				result = result.getResult();
-				$this.edit_view_ui_dic.start_date.setValue(result.start_date);
-				$this.edit_view_ui_dic.end_date.setValue(result.end_date);
-				$this.edit_view_ui_dic.due_date.setValue(result.due_date);
-				$this.edit_view_ui_dic.next_reminder_date.setValue(result.next_reminder_date);
+				$this.edit_view_ui_dic.start_date.setValue( result.start_date );
+				$this.edit_view_ui_dic.end_date.setValue( result.end_date );
+				$this.edit_view_ui_dic.due_date.setValue( result.due_date );
+				$this.edit_view_ui_dic.next_reminder_date.setValue( result.next_reminder_date );
 			}
-		});
+		} );
 	},
 
 	onFrequencyChange: function( arg ) {
@@ -194,7 +196,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 			arg = this.current_edit_record['frequency_id'];
 		}
-		Debug.Text( 'Selected Frequency: '+arg, null, null, null, 10 );
+		Debug.Text( 'Selected Frequency: ' + arg, null, null, null, 10 );
 		this.detachElement( 'week' );
 		this.detachElement( 'primary_month' );
 		this.detachElement( 'primary_day_of_month' );
@@ -210,33 +212,33 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 			this.attachElement( 'due_date_delay_days' );
 		} else if ( arg == 2000 ) { //annually
 			this.attachElement( 'primary_month' );
-			this.edit_view_ui_dic.primary_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Month');
+			this.edit_view_ui_dic.primary_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Month' );
 			this.attachElement( 'primary_day_of_month' );
-			this.edit_view_ui_dic.primary_day_of_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Day Of Month');
+			this.edit_view_ui_dic.primary_day_of_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Day Of Month' );
 		} else if ( arg == 2100 ) { //Year-To-Date
 			this.attachElement( 'primary_day_of_month' );
-			this.edit_view_ui_dic.primary_day_of_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Day Of Month');
+			this.edit_view_ui_dic.primary_day_of_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Day Of Month' );
 			this.attachElement( 'primary_month' );
-			this.edit_view_ui_dic.primary_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Month');
+			this.edit_view_ui_dic.primary_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Month' );
 			this.attachElement( 'due_date_delay_days' );
 		} else if ( arg == 2200 ) { //Semi-Annually
 			this.attachElement( 'primary_day_of_month' );
-			this.edit_view_ui_dic.primary_day_of_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Primary Day Of Month');
+			this.edit_view_ui_dic.primary_day_of_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Primary Day Of Month' );
 			this.attachElement( 'primary_month' );
-			this.edit_view_ui_dic.primary_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Primary Month');
+			this.edit_view_ui_dic.primary_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Primary Month' );
 			this.attachElement( 'secondary_month' );
 			this.attachElement( 'secondary_day_of_month' );
 			this.attachElement( 'due_date_delay_days' );
 		} else if ( arg == 3000 ) {//Quarterly
-		 	this.attachElement( 'primary_day_of_month' );
-		 	this.edit_view_ui_dic.primary_day_of_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Day Of Month');
+			this.attachElement( 'primary_day_of_month' );
+			this.edit_view_ui_dic.primary_day_of_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Day Of Month' );
 			this.attachElement( 'quarter_month' );
 		} else if ( arg == 4100 ) { //monthly
 			this.attachElement( 'primary_day_of_month' );
-			this.edit_view_ui_dic.primary_day_of_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Day Of Month');
+			this.edit_view_ui_dic.primary_day_of_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Day Of Month' );
 		} else if ( arg == 4200 ) { //semimonthly
 			this.attachElement( 'primary_day_of_month' );
-			this.edit_view_ui_dic.primary_day_of_month.parents('.edit-view-form-item-div').find('.edit-view-form-item-label').html('Primary Day Of Month');
+			this.edit_view_ui_dic.primary_day_of_month.parents( '.edit-view-form-item-div' ).find( '.edit-view-form-item-label' ).html( 'Primary Day Of Month' );
 			this.attachElement( 'secondary_day_of_month' );
 			this.attachElement( 'due_date_delay_days' );
 		} else if ( arg == 5100 ) { //weekly
@@ -251,10 +253,10 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		this.editFieldResize();
 	},
 
-	setDefaultMenuMassEditIcon: function( context_btn, grid_selected_length ){
+	setDefaultMenuMassEditIcon: function( context_btn, grid_selected_length ) {
 		context_btn.addClass( 'invisible-image' );
 	},
-	setDefaultMenuSaveAndCopyIcon: function( context_btn, grid_selected_length ){
+	setDefaultMenuSaveAndCopyIcon: function( context_btn, grid_selected_length ) {
 		context_btn.addClass( 'invisible-image' );
 	},
 
@@ -300,7 +302,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 	},
 
-	preCopyAsNew: function record(record) {
+	preCopyAsNew: function record( record ) {
 		record['id'] = '';
 		record['start_date'] = '';
 		record['end_date'] = '';
@@ -311,25 +313,11 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		return record;
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		this._super( 'onContextMenuClick', context_btn, menu_name );
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
-				ProgressBar.showOverlay();
 				this.onImportClick();
 				break;
-
 		}
 	},
 
@@ -397,11 +385,6 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		} );
 	},
 
-	removeEditView: function() {
-		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
-	},
-
 	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn );
 
@@ -431,10 +414,11 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		var $this = this;
 		var form_item_input;
 
-		this.setTabLabels({
-			'tab_payroll_remittance_agency_event': $.i18n._('Remittance Agency Event'),
-			'tab_audit': $.i18n._( 'Audit' )
-		});
+		var tab_model = {
+			'tab_payroll_remittance_agency_event': { 'label': $.i18n._( 'Remittance Agency Event' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPayrollRemittanceAgencyEvent' )),
@@ -463,12 +447,12 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Remittance Agency' ), form_item_input, tab_payroll_remittance_agency_event_column_1 );
 
-        form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-        form_item_input.TComboBox( {
-            field: 'status_id'
-        } );
-        form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
-        this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_payroll_remittance_agency_event_column_1 );
+		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+		form_item_input.TComboBox( {
+			field: 'status_id'
+		} );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
+		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_payroll_remittance_agency_event_column_1 );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 		form_item_input.TComboBox( {
@@ -486,49 +470,49 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		// Payment Frequency Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'primary_month'} );
+		form_item_input.TComboBox( { field: 'primary_month' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.month_of_year_array ) ) );
 		this.addEditFieldToColumn( $.i18n._( 'Primary Month' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Day Of Month
 		// Day of the Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'primary_day_of_month'} );
+		form_item_input.TComboBox( { field: 'primary_day_of_month' } );
 		var day_of_month_array = $this.day_of_month_array;
 		day_of_month_array.push( {
-				fullValue: -1,
-				value: -1,
-				label: $.i18n._( '- Last Day Of Month -' ),
-				id: 2000
-			}
+					fullValue: -1,
+					value: -1,
+					label: $.i18n._( '- Last Day Of Month -' ),
+					id: 2000
+				}
 		);
 		form_item_input.setSourceData( Global.addFirstItemToArray( day_of_month_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Primary Day of Month' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'secondary_month'} );
+		form_item_input.TComboBox( { field: 'secondary_month' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.month_of_year_array ) ) );
 		this.addEditFieldToColumn( $.i18n._( 'Secondary Month' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Day Of Month
 		// Day of the Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'secondary_day_of_month'} );
+		form_item_input.TComboBox( { field: 'secondary_day_of_month' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( day_of_month_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Secondary Day of Month' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'week'} );
+		form_item_input.TComboBox( { field: 'week' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.frequency_week_array ) ) );
 		this.addEditFieldToColumn( $.i18n._( 'Week' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency quarter Month
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'quarter_month'} );
+		form_item_input.TComboBox( { field: 'quarter_month' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.month_of_quarter_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Month of Quarter' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
@@ -536,7 +520,7 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 		// Day of the week
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'day_of_week'} );
+		form_item_input.TComboBox( { field: 'day_of_week' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( Global.buildRecordArray( $this.day_of_week_array ) ) );
 		this.addEditFieldToColumn( $.i18n._( 'Day of week' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
@@ -547,17 +531,17 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.PAY_PERIOD_SCHEDULE,
 			show_search_inputs: true,
 			set_special_empty: true,
-			set_any:true,
+			set_any: true,
 			field: 'pay_period_schedule_id'
 		} );
-		form_item_input.setSourceData( Global.addFirstItemToArray($this.saved_report_array) );
+		form_item_input.setSourceData( Global.addFirstItemToArray( $this.saved_report_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Schedule' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		// Payment Frequency Days After Transaction Date
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'due_date_delay_days', width: 50} );
+		form_item_input.TTextInput( { field: 'due_date_delay_days', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Due Date Delay Days' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 
@@ -592,37 +576,37 @@ PayrollRemittanceAgencyEventViewController = BaseViewController.extend( {
 
 		// Payment Frequency reminder days
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'reminder_days', width: 50} );
+		form_item_input.TTextInput( { field: 'reminder_days', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Reminder Days' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '' );
 
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( {field: 'note', width: '100%', rows:5} );
+		form_item_input.TTextArea( { field: 'note', width: '100%', rows: 5 } );
 		this.addEditFieldToColumn( $.i18n._( 'Notes' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true, true );
 		form_item_input.parent().width( '50%' );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_recalculate_dates'} );
+		form_item_input.TCheckbox( { field: 'enable_recalculate_dates' } );
 		this.addEditFieldToColumn( $.i18n._( 'Recalculate Dates' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'start_date'} );
+		form_item_input.TText( { field: 'start_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'end_date'} );
+		form_item_input.TText( { field: 'end_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'due_date'} );
+		form_item_input.TText( { field: 'due_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Due Date' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'next_reminder_date'} );
+		form_item_input.TText( { field: 'next_reminder_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Reminder Date' ), form_item_input, tab_payroll_remittance_agency_event_column_1, '', null, true );
 
-	},
+	}
 
 
 } );

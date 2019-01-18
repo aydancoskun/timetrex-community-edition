@@ -2,8 +2,8 @@ StationViewController = BaseViewController.extend( {
 	el: '#station_view_container',
 
 	_required_files: {
-		10: ["APIStation", "APIUserGroup", "APIUserPreference", "APIBranch", "APIDepartment"],
-		20: ["APIJob", "APIJobItem", ],
+		10: ['APIStation', 'APIUserGroup', 'APIUserPreference', 'APIBranch', 'APIDepartment'],
+		20: ['APIJob', 'APIJobItem']
 	},
 
 	user_group_api: null,
@@ -58,16 +58,16 @@ StationViewController = BaseViewController.extend( {
 		var $this = this;
 
 		var options = [
-			{option_name: 'status', field_name: null, api: null},
-			{option_name: 'type', field_name: null, api: null},
-			{option_name: 'time_zone', field_name: 'time_zone', api: $this.user_preference_api},
-			{option_name: 'time_clock_command', field_name: null, api: null},
-			{option_name: 'poll_frequency', field_name: null, api: null},
-			{option_name: 'push_frequency', field_name: null, api: null},
-			{option_name: 'partial_push_frequency', field_name: null, api: null},
-			{option_name: 'group_selection_type', field_name: null, api: null},
-			{option_name: 'branch_selection_type', field_name: null, api: null},
-			{option_name: 'department_selection_type', field_name: null, api: null}
+			{ option_name: 'status', field_name: null, api: null },
+			{ option_name: 'type', field_name: null, api: null },
+			{ option_name: 'time_zone', field_name: 'time_zone', api: $this.user_preference_api },
+			{ option_name: 'time_clock_command', field_name: null, api: null },
+			{ option_name: 'poll_frequency', field_name: null, api: null },
+			{ option_name: 'push_frequency', field_name: null, api: null },
+			{ option_name: 'partial_push_frequency', field_name: null, api: null },
+			{ option_name: 'group_selection_type', field_name: null, api: null },
+			{ option_name: 'branch_selection_type', field_name: null, api: null },
+			{ option_name: 'department_selection_type', field_name: null, api: null }
 
 		];
 
@@ -89,29 +89,6 @@ StationViewController = BaseViewController.extend( {
 
 		} );
 
-	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-		if ( this.edit_view_tab_selected_index === 3 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
 	},
 
 	setCurrentEditRecordData: function() {
@@ -141,7 +118,7 @@ StationViewController = BaseViewController.extend( {
 					case 'job_item_id':
 						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 							var args = {};
-							args.filter_data = {job_id: this.current_edit_record.job_id};
+							args.filter_data = { job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
 							widget.setValue( this.current_edit_record[key] );
 						}
@@ -180,7 +157,7 @@ StationViewController = BaseViewController.extend( {
 			case 'job_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.setJobItemValueWhenJobChanged( target.getValue( true ),'job_item_id', {job_id: this.current_edit_record.job_id} );
+					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'job_item_id', { job_id: this.current_edit_record.job_id } );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
@@ -252,15 +229,15 @@ StationViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		if ( parseInt( this.current_edit_record['type_id'] ) == 100 ||
-			parseInt( this.current_edit_record['type_id'] ) == 150 ||
-			parseInt( this.current_edit_record['type_id'] ) == 28 ||
-			parseInt( this.current_edit_record['type_id'] ) == 65 ) {
+				parseInt( this.current_edit_record['type_id'] ) == 150 ||
+				parseInt( this.current_edit_record['type_id'] ) == 28 ||
+				parseInt( this.current_edit_record['type_id'] ) == 65 ) {
 
 			$( this.edit_view_tab.find( 'ul li' )[2] ).show();
 			var tab_2_label = this.edit_view.find( 'a[ref=tab_time_clock]' );
 
 			if ( parseInt( this.current_edit_record['type_id'] ) == 100 ||
-				parseInt( this.current_edit_record['type_id'] ) == 150 ) {
+					parseInt( this.current_edit_record['type_id'] ) == 150 ) {
 				tab_2_label.text( $.i18n._( 'TimeClock' ) );
 
 				if ( parseInt( this.current_edit_record['type_id'] ) != 150 ) {
@@ -286,19 +263,18 @@ StationViewController = BaseViewController.extend( {
 			}
 
 
-
 			this.initModeFlag();
 
 			//#2590 - ensure field is only visible in valid types.
 			if ( parseInt( this.current_edit_record['type_id'] ) == 65 ) {
 				this.initDefaultModeFlag();
 			} else {
-				this.edit_view_ui_dic['default_mode_flag'].parents('.edit-view-form-item-div').hide();
+				this.edit_view_ui_dic['default_mode_flag'].parents( '.edit-view-form-item-div' ).hide();
 			}
 
 		} else {
 			$( this.edit_view_tab.find( 'ul li' )[2] ).hide();
-			this.edit_view_tab.tabs( 'select', 0 );
+			this.edit_view_tab.tabs( 'option', 'active', 0 );
 
 		}
 
@@ -328,44 +304,10 @@ StationViewController = BaseViewController.extend( {
 				$this.edit_view_ui_dic['default_mode_flag'].setSourceData( result_data );
 				var value = ( $this.current_edit_record.default_mode_flag != 0 ) ? $this.current_edit_record.default_mode_flag : TTUUID.zero_id;
 				$this.edit_view_ui_dic['default_mode_flag'].setValue( value );
-				$this.edit_view_ui_dic['default_mode_flag'].parents('.edit-view-form-item-div').show();
+				$this.edit_view_ui_dic['default_mode_flag'].parents( '.edit-view-form-item-div' ).show();
 
 			}
 		} );
-	},
-
-	setTabStatus: function() {
-
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		$( this.edit_view_tab.find( 'ul li a[ref="tab_time_clock"]' ) ).parent().hide();
-		this.editFieldResize( 0 );
-
-	},
-
-	initTabData: function() {
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
 	},
 
 	setEditViewDataDone: function() {
@@ -378,12 +320,12 @@ StationViewController = BaseViewController.extend( {
 		this.onDepartmentSelectionTypeChange();
 		this.isDisableIncludeEmployees();
 
-		var runButton = this.edit_view_form_item_dic['manual_command'].find( "button[type='button']" );
+		var runButton = this.edit_view_form_item_dic['manual_command'].find( 'button[type=\'button\']' );
 		if ( $this.is_mass_editing || $this.is_viewing ) {
 			this.edit_view_ui_dic['manual_command'].setEnabled( false );
 			runButton.attr( 'disabled', true );
 		} else {
-			runButton.off('click').on('click', function() {
+			runButton.off( 'click' ).on( 'click', function() {
 				$this.onSaveAndContinue( true );
 			} );
 		}
@@ -564,12 +506,13 @@ StationViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_station': $.i18n._( 'Station' ),
-			'tab_employee_criteria': $.i18n._( 'Employee Criteria' ),
-			'tab_time_clock': $.i18n._( 'TimeClock' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_station': { 'label': $.i18n._( 'Station' ) },
+			'tab_employee_criteria': { 'label': $.i18n._( 'Employee Criteria' ) },
+			'tab_time_clock': { 'label': $.i18n._( 'TimeClock' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
@@ -597,32 +540,32 @@ StationViewController = BaseViewController.extend( {
 		//Status
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_station_column1, '' );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_station_column1 );
 
 		//Station
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'station_id', width: 254} );
+		form_item_input.TTextInput( { field: 'station_id', width: 254 } );
 		this.addEditFieldToColumn( $.i18n._( 'Station' ), form_item_input, tab_station_column1 );
 
 		//Source
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'source', width: 289} );
+		form_item_input.TTextInput( { field: 'source', width: 289 } );
 		this.addEditFieldToColumn( $.i18n._( 'Source' ), form_item_input, tab_station_column1 );
 
 		//Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		form_item_input.TTextInput( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_station_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -666,15 +609,17 @@ StationViewController = BaseViewController.extend( {
 				set_empty: true,
 				setRealValueCallBack: (function( val ) {
 
-					if ( val ) job_coder.setValue( val.manual_id );
+					if ( val ) {
+						job_coder.setValue( val.manual_id );
+					}
 				}),
 				field: 'job_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_coder.TTextInput( {field: 'job_quick_search', disable_keyup_event: true} );
+			job_coder.TTextInput( { field: 'job_quick_search', disable_keyup_event: true } );
 			job_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_coder );
@@ -692,15 +637,17 @@ StationViewController = BaseViewController.extend( {
 				set_empty: true,
 				setRealValueCallBack: (function( val ) {
 
-					if ( val ) job_item_coder.setValue( val.manual_id );
+					if ( val ) {
+						job_item_coder.setValue( val.manual_id );
+					}
 				}),
 				field: 'job_item_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_item_coder.TTextInput( {field: 'job_item_quick_search', disable_keyup_event: true} );
+			job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
 			job_item_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_item_coder );
@@ -719,17 +666,17 @@ StationViewController = BaseViewController.extend( {
 		this.edit_view_tabs[1].push( tab_employee_criteria_column1 );
 
 		//Employee group
-		var v_box = $( "<div class='v-box'></div>" );
+		var v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'user_group_selection_type_id'} );
+		form_item_input.TComboBox( { field: 'user_group_selection_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.group_selection_type_array ) );
 
 		var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -750,16 +697,16 @@ StationViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Employee Groups' ), [form_item_input, form_item_input_1], tab_employee_criteria_column1, 'first', v_box, false, true );
 
 		//Branches
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'branch_selection_type_id'} );
+		form_item_input.TComboBox( { field: 'branch_selection_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.branch_selection_type_array ) );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -780,15 +727,15 @@ StationViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Branches' ), [form_item_input, form_item_input_1], tab_employee_criteria_column1, '', v_box, false, true );
 
 		// Departments
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 		// Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'department_selection_type_id'} );
+		form_item_input.TComboBox( { field: 'department_selection_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.department_selection_type_array ) );
 
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Selection Type' ) );
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -846,33 +793,33 @@ StationViewController = BaseViewController.extend( {
 		// Password/COMM Key
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'password', width: 254} );
+		form_item_input.TTextInput( { field: 'password', width: 254 } );
 		this.addEditFieldToColumn( $.i18n._( 'Password/COMM Key' ), form_item_input, tab_time_clock_column1, '', null, true );
 
 		// Port
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'port', width: 254} );
+		form_item_input.TTextInput( { field: 'port', width: 254 } );
 		this.addEditFieldToColumn( $.i18n._( 'Port' ), form_item_input, tab_time_clock_column1, '', null, true );
 
 		// Force Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'time_zone', set_empty: true} );
+		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Force Time Zone' ), form_item_input, tab_time_clock_column1 );
 
 		// Enable Automatic Punch Status
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_auto_punch_status'} );
+		form_item_input.TCheckbox( { field: 'enable_auto_punch_status' } );
 		this.addEditFieldToColumn( $.i18n._( 'Enable Automatic Punch Status' ), form_item_input, tab_time_clock_column1, '' );
 
 		// Manual Command
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'manual_command'} );
+		form_item_input.TComboBox( { field: 'manual_command' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_clock_command_array ) );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<button type='button' class=' t-button widget-right-label'>" + $.i18n._( 'Run' ) + "</button>" );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<button type=\'button\' class=\' t-button widget-right-label\'>' + $.i18n._( 'Run' ) + '</button>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -881,14 +828,14 @@ StationViewController = BaseViewController.extend( {
 
 		// Download Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'poll_frequency'} );
+		form_item_input.TComboBox( { field: 'poll_frequency' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.poll_frequency_array ) );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'Last Download' ) + ': ' + " </span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Last Download' ) + ': ' + ' </span>' );
 
 		var widget_text = Global.loadWidgetByName( FormItemType.TEXT );
-		widget_text.TText( {field: 'last_push_date'} );
+		widget_text.TText( { field: 'last_push_date' } );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -898,14 +845,14 @@ StationViewController = BaseViewController.extend( {
 
 		// Full Upload Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'push_frequency'} );
+		form_item_input.TComboBox( { field: 'push_frequency' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.push_frequency_array ) );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'Last Upload' ) + ': ' + " </span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Last Upload' ) + ': ' + ' </span>' );
 
 		widget_text = Global.loadWidgetByName( FormItemType.TEXT );
-		widget_text.TText( {field: 'last_poll_date'} );
+		widget_text.TText( { field: 'last_poll_date' } );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -914,13 +861,13 @@ StationViewController = BaseViewController.extend( {
 
 		// Partial Upload Frequency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'partial_push_frequency'} );
+		form_item_input.TComboBox( { field: 'partial_push_frequency' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.push_frequency_array ) );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'Last Upload' ) + ": </span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Last Upload' ) + ': </span>' );
 		widget_text = Global.loadWidgetByName( FormItemType.TEXT );
-		widget_text.TText( {field: 'last_partial_push_date'} );
+		widget_text.TText( { field: 'last_partial_push_date' } );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -929,7 +876,7 @@ StationViewController = BaseViewController.extend( {
 
 		// Last Downloaded Punch
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'last_punch_time_stamp'} );
+		form_item_input.TText( { field: 'last_punch_time_stamp' } );
 		this.addEditFieldToColumn( $.i18n._( 'Last Downloaded Punch' ), form_item_input, tab_time_clock_column2 );
 
 		// Configuration Modes

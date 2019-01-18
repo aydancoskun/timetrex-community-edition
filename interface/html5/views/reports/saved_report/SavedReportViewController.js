@@ -59,12 +59,12 @@ SavedReportViewController = BaseViewController.extend( {
 		switch ( id ) {
 			case ContextMenuIconName.share_report:
 
-				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 					var default_data = [];
 					if ( this.edit_view && this.current_edit_record.id ) {
 						default_data.push( this.current_edit_record.id );
 					} else if ( !this.edit_view ) {
-						default_data = this.getGridSelectIdArray()
+						default_data = this.getGridSelectIdArray();
 					}
 					IndexViewController.openWizard( 'ShareReportWizard', default_data );
 				} else {
@@ -203,6 +203,53 @@ SavedReportViewController = BaseViewController.extend( {
 
 	},
 
+	getGridSetup: function() {
+		var $this = this;
+
+		var grid_setup = {
+			container_selector: this.sub_view_mode ? '#tab_saved_reports' : '.view', //tab4 = Saved Report tab.
+			sub_grid_mode: this.sub_view_mode,
+			onSelectRow: function() {
+				$this.onGridSelectRow();
+			},
+			onCellSelect: function() {
+				$this.onGridSelectRow();
+			},
+			onSelectAll: function() {
+				$this.onGridSelectAll();
+			},
+			ondblClickRow: function( e ) {
+				$this.onGridDblClickRow( e );
+			},
+			onRightClickRow: function( rowId ) {
+				var id_array = $this.getGridSelectIdArray();
+				if ( id_array.indexOf( rowId ) < 0 ) {
+					$this.grid.grid.resetSelection();
+					$this.grid.grid.setSelection( rowId );
+					$this.onGridSelectRow();
+				}
+			},
+		};
+
+		//Only use custom grid sizing when in sub_view_mode, since we need to use the BaseViewController grid sizing otherwise.
+		if ( this.sub_view_mode ) {
+			grid_setup.setGridSize = function() {
+				if ( $this.sub_view_mode ) {
+					$this.baseViewSubTabGridResize( '#tab_saved_reports' );
+				}
+			};
+
+			grid_setup.onResizeGrid = function() {
+				if ( $this.sub_view_mode ) {
+					$this.baseViewSubTabGridResize( '#tab_saved_reports' );
+				}
+			};
+		}
+
+		return grid_setup;
+
+	},
+
 	onViewClick: function( editId, noRefreshUI ) {
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var id = grid_selected_id_array[0];
@@ -214,7 +261,7 @@ SavedReportViewController = BaseViewController.extend( {
 			LocalCacheData.current_doing_context_action = 'view';
 			LocalCacheData.default_edit_id_for_next_open_edit_view = id;
 
-			switch (report_name) {
+			switch ( report_name ) {
 				case 'AccrualBalanceSummaryReport':
 				case 'ActiveShiftReport':
 				case 'AuditTrailReport':
@@ -255,20 +302,20 @@ SavedReportViewController = BaseViewController.extend( {
 					report_name = 'JobAnalysisReport';
 					break;
 				case 'AffordableCareReport':
-					if (LocalCacheData.getCurrentCompany().product_edition_id == 10) {
-						TAlertManager.showAlert(Global.getUpgradeMessage());
+					if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
+						TAlertManager.showAlert( Global.getUpgradeMessage() );
 						report_name = null;
 					}
 					break;
 				default:
 					ProgressBar.closeOverlay();
-					Debug.Text('ERROR: Saved Report name not defined: ' + report_name, 'SavedReportViewController.js', '', 'onViewClick', 10);
+					Debug.Text( 'ERROR: Saved Report name not defined: ' + report_name, 'SavedReportViewController.js', '', 'onViewClick', 10 );
 					report_name = null;
 					break;
 			}
 
-			if (Global.isSet(report_name) && report_name) {
-				IndexViewController.openReport(this, report_name);
+			if ( Global.isSet( report_name ) && report_name ) {
+				IndexViewController.openReport( this, report_name );
 			}
 		}
 	},
@@ -278,11 +325,12 @@ SavedReportViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_report': $.i18n._( 'Report' ),
-			'tab_schedule': $.i18n._( 'Schedule' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_report': { 'label': $.i18n._( 'Report' ) },
+			'tab_schedule': { 'label': $.i18n._( 'Schedule' ), 'init_callback': 'initSubReportScheduleView' },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
@@ -312,7 +360,7 @@ SavedReportViewController = BaseViewController.extend( {
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_report_column1, '' );
 		form_item_input.parent().width( '45%' );
 
@@ -320,14 +368,14 @@ SavedReportViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
 
-		form_item_input.TCheckbox( {field: 'is_default'} );
+		form_item_input.TCheckbox( { field: 'is_default' } );
 		this.addEditFieldToColumn( $.i18n._( 'Default' ), form_item_input, tab_report_column1 );
 
 		// Description
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		form_item_input.TTextInput( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_report_column1, '', null, null, true );
 
 		form_item_input.parent().width( '45%' );
@@ -385,35 +433,44 @@ SavedReportViewController = BaseViewController.extend( {
 	},
 
 	initSubReportScheduleView: function() {
-
-
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
 		var $this = this;
 
-			if (this.sub_report_schedule_view_controller) {
-				this.sub_report_schedule_view_controller.buildContextMenu(true);
-			this.sub_report_schedule_view_controller.setDefaultMenu();
-			$this.sub_report_schedule_view_controller.parent_value = $this.current_edit_record.id;
-			$this.sub_report_schedule_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_report_schedule_view_controller.initData(); //Init data in this parent view
+		if ( !this.current_edit_record.id ) {
 			return;
 		}
 
-			Global.loadViewSource('ReportSchedule', 'ReportScheduleViewController.js', function () {
+		$this.sub_view_mode = true;
 
-				var tab = $this.edit_view_tab.find('#tab_schedule');
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			if ( this.sub_report_schedule_view_controller ) {
+				this.sub_report_schedule_view_controller.buildContextMenu( true );
+				this.sub_report_schedule_view_controller.setDefaultMenu();
+				$this.sub_report_schedule_view_controller.parent_value = $this.current_edit_record.id;
+				$this.sub_report_schedule_view_controller.parent_edit_record = $this.current_edit_record;
+				$this.sub_report_schedule_view_controller.initData(); //Init data in this parent view
+				return;
+			}
 
-				var firstColumn = tab.find('.first-column-sub-view');
+			Global.loadViewSource( 'ReportSchedule', 'ReportScheduleViewController.js', function() {
+				var tab = $this.edit_view_tab.find( '#tab_schedule' );
 
-				Global.trackView('Sub' + 'ReportSchedule' + 'View');
-				ReportScheduleViewController.loadSubView(firstColumn, beforeLoadView, afterLoadView);
+				var firstColumn = tab.find( '.first-column-sub-view' );
 
-			});
+				TTPromise.add( 'initSubReportScheduleView', 'init' );
+				TTPromise.wait( 'initSubReportScheduleView', 'init', function() {
+					firstColumn.css('opacity', '1');
+				} );
+
+				firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
+
+				Global.trackView( 'Sub' + 'ReportSchedule' + 'View' );
+				ReportScheduleViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+			} );
 		} else {
 			this.edit_view_tab.find( '#tab_schedule' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' )
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			this.edit_view.find( '.save-and-continue-button-div' ).css('display', 'none');
+			this.edit_view.find( '.save-and-continue-button-div' ).css( 'display', 'none' );
 		}
 
 		function beforeLoadView() {
@@ -421,12 +478,13 @@ SavedReportViewController = BaseViewController.extend( {
 		}
 
 		function afterLoadView( subViewController ) {
-
 			$this.sub_report_schedule_view_controller = subViewController;
 			$this.sub_report_schedule_view_controller.parent_key = 'user_report_data_id';
 			$this.sub_report_schedule_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_report_schedule_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_report_schedule_view_controller.parent_view_controller = $this;
+			$this.sub_report_schedule_view_controller.sub_view_mode = true;
+
 			$this.sub_report_schedule_view_controller.initData(); //Init data in this parent view
 		}
 	},
@@ -453,70 +511,6 @@ SavedReportViewController = BaseViewController.extend( {
 
 	onSaveAndNextDone: function( result ) {
 		this.onSaveDone( result );
-	},
-
-	//Call this from setEditViewData
-	initTabData: function() {
-		//Handle most case that one tab and one audit tab
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if (LocalCacheData.getCurrentCompany().product_edition_id > 10) {
-				if (this.current_edit_record.id) {
-					this.edit_view.find('.save-and-continue-div').css('display', 'none');
-					this.edit_view_tab.find('#tab_schedule').find('.first-column-sub-view').css('display', 'block');
-				this.initSubReportScheduleView();
-			} else {
-					this.edit_view_tab.find('#tab_schedule').find('.first-column-sub-view').css('display', 'none');
-					this.edit_view.find('.permission-defined-div').css('display', 'none');
-				}
-			}
-		}
-	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		//Handle most cases that one tab and on audit tab
-		if ( this.edit_view_tab_selected_index === 1 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_schedule' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubReportScheduleView();
-			} else {
-				this.edit_view_tab.find( '#tab_schedule' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( !this.current_edit_record || !this.current_edit_record.id ) {
-
-		} else {
-			$( this.edit_view_tab.find( 'ul li' )[1] ).show();
-
-		}
-
-		this.editFieldResize( 0 );
 	},
 
 	getFilterColumnsFromDisplayColumns: function() {
@@ -558,24 +552,13 @@ SavedReportViewController = BaseViewController.extend( {
 
 	},
 
-	onAddResult: function( result ) {
-//		  var $this = this;
-//		  var result_data = result.getResult();
-//
-//		  if ( !result_data ) {
-//			  result_data = [];
-//		  }
-//
-//		  result_data.company = LocalCacheData.current_company.name;
-//
-//		  if ( $this.sub_view_mode && $this.parent_key ) {
-//			  result_data[$this.parent_key] = $this.parent_value;
-//		  }
-//
-//		  $this.current_edit_record = result_data;
-//		  $this.initEditView();
+	searchDone: function() {
+		$('window').trigger('resize');
+		if ( this.sub_view_mode ) {
+			TTPromise.resolve( 'SubSavedReportView', 'init' );
+		}
+		this._super('searchDone');
 	}
-
 } );
 
 SavedReportViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
@@ -592,13 +575,13 @@ SavedReportViewController.loadSubView = function( container, beforeViewLoadedFun
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				TTPromise.wait('BaseViewController', 'initialize', function(){
+				TTPromise.wait( 'BaseViewController', 'initialize', function() {
 					afterViewLoadedFun( sub_saved_report_controller );
-				});
+				} );
 			}
 
 		}
 
 	} );
 
-}
+};

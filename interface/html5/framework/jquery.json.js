@@ -1,17 +1,29 @@
 /**
- * jQuery JSON plugin 2.4.0
+ * jQuery JSON plugin v2.6.0
+ * https://github.com/Krinkle/jquery-json
  *
  * @author Brantley Harris, 2009-2011
- * @author Timo Tijhof, 2011-2012
+ * @author Timo Tijhof, 2011-2016
  * @source This plugin is heavily influenced by MochiKit's serializeJSON, which is
  *         copyrighted 2005 by Bob Ippolito.
  * @source Brantley Harris wrote this plugin. It is based somewhat on the JSON.org
  *         website's http://www.json.org/json2.js, which proclaims:
  *         "NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.", a sentiment that
  *         I uphold.
- * @license MIT License <http://www.opensource.org/licenses/mit-license.php>
+ * @license MIT License <https://opensource.org/licenses/MIT>
  */
-(function ($) {
+(function (factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD
+		define(['jquery'], factory);
+	} else if (typeof exports === 'object') {
+		// CommonJS
+		factory(require('jquery'));
+	} else {
+		// Browser globals
+		factory(jQuery);
+	}
+}(function ($) {
 	'use strict';
 
 	var escape = /["\\\x00-\x1f\x7f-\x9f]/g,
@@ -21,7 +33,7 @@
 			'\n': '\\n',
 			'\f': '\\f',
 			'\r': '\\r',
-			'"' : '\\"',
+			'"': '\\"',
 			'\\': '\\\\'
 		},
 		hasOwn = Object.prototype.hasOwnProperty;
@@ -160,9 +172,9 @@
 	$.secureEvalJSON = typeof JSON === 'object' && JSON.parse ? JSON.parse : function (str) {
 		var filtered =
 			str
-			.replace(/\\["\\\/bfnrtu]/g, '@')
-			.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
-			.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
+				.replace(/\\["\\\/bfnrtu]/g, '@')
+				.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']')
+				.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
 
 		if (/^[\],:{}\s]*$/.test(filtered)) {
 			/*jshint evil: true */
@@ -196,4 +208,4 @@
 		return '"' + str + '"';
 	};
 
-}(jQuery));
+}));

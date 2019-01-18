@@ -171,7 +171,7 @@ class TimeTrexSoapClient {
 	 */
 	function isUpdateNotifyEnabled() {
 		global $config_vars;
-		if ( getTTProductEdition() > 10 AND DEPLOYMENT_ON_DEMAND == TRUE AND isset( $config_vars['other']['enable_update_notify'] ) AND $config_vars['other']['enable_update_notify'] == FALSE ) {
+		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL AND DEPLOYMENT_ON_DEMAND == TRUE AND isset( $config_vars['other']['enable_update_notify'] ) AND $config_vars['other']['enable_update_notify'] == FALSE ) {
 			return FALSE; //Disabled with On-Demand service.
 		}
 

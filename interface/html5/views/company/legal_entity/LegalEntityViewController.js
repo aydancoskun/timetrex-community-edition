@@ -1,7 +1,7 @@
 LegalEntityViewController = BaseViewController.extend( {
 	el: '#legal_entity_view_container',
 
-	_required_files: ['APILegalEntity','APICompany','TImage','TImageAdvBrowser'],
+	_required_files: ['APILegalEntity', 'APICompany', 'TImage', 'TImageAdvBrowser'],
 
 	status_array: null,
 	type_array: null,
@@ -65,7 +65,7 @@ LegalEntityViewController = BaseViewController.extend( {
 		if ( this.current_edit_record.id ) {
 			url = Global.getBaseURL() + '../send_file.php?api=1&object_type=legal_entity_logo&object_id=' + this.current_edit_record.id;
 		}
-		Debug.Text(url, 'LegalEntityViewController.js', 'LegalEntityViewController', 'getLogoUrl', 10 );
+		Debug.Text( url, 'LegalEntityViewController.js', 'LegalEntityViewController', 'getLogoUrl', 10 );
 		return url;
 	},
 
@@ -284,22 +284,22 @@ LegalEntityViewController = BaseViewController.extend( {
 
 	},
 
-	openEditView: function(id) {
+	openEditView: function( id ) {
 		if ( id == false ) {
 			var $this = this;
 			this.initOptions();
-			this.api.getLegalEntity({filter_items_per_page:1},{
-				onResult: function(result) {
+			this.api.getLegalEntity( { filter_items_per_page: 1 }, {
+				onResult: function( result ) {
 					var record = result.getResult();
 					if ( typeof record == 'object' ) {
-						$this.initEditViewUI($this.viewId, $this.edit_view_tpl);
+						$this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 						$this.current_edit_record = record[0];
 						$this.initEditView();
 					}
 				}
-			});
+			} );
 		} else {
-			this._super('openEditView');
+			this._super( 'openEditView' );
 		}
 	},
 
@@ -308,27 +308,23 @@ LegalEntityViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_legal_entity': $.i18n._( 'Legal Entity' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
-		var tab_0_label = this.edit_view.find( 'a[ref=tab_legal_entity]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab_audit]' );
-		tab_0_label.text( $.i18n._( 'Legal Entity' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		var tab_model = {
+			'tab_legal_entity': { 'label': $.i18n._( 'Legal Entity' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		var form_item_input;
 
 		if ( this.navigation ) {
-			this.navigation.AComboBox({
-				api_class: (APIFactory.getAPIClass('APILegalEntity')),
+			this.navigation.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APILegalEntity' )),
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.LEGAL_ENTITY,
 				navigation_mode: true,
 				show_search_inputs: true
-			});
+			} );
 
 			this.setNavigation();
 		}
@@ -346,19 +342,19 @@ LegalEntityViewController = BaseViewController.extend( {
 		//Status
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_legal_entity_column1, '' );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_legal_entity_column1, '' );
 
 		// Classification Code
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'classification_code'} );
+		form_item_input.TComboBox( { field: 'classification_code' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.classification_code_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Classification Code' ), form_item_input, tab_legal_entity_column1, '' );
 
@@ -366,7 +362,7 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'legal_name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'legal_name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Legal Name' ), form_item_input, tab_legal_entity_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -375,7 +371,7 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'trade_name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'trade_name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Trade Name' ), form_item_input, tab_legal_entity_column1 );
 		form_item_input.parent().width( '45%' );
 
@@ -383,7 +379,7 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
+		form_item_input.TTextInput( { field: 'address1', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 1)' ), form_item_input, tab_legal_entity_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -392,7 +388,7 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
+		form_item_input.TTextInput( { field: 'address2', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab_legal_entity_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -401,40 +397,40 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'city', width: 149} );
+		form_item_input.TTextInput( { field: 'city', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_legal_entity_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'country', set_empty: true} );
+		form_item_input.TComboBox( { field: 'country', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_legal_entity_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'province'} );
+		form_item_input.TComboBox( { field: 'province' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_legal_entity_column1 );
 
 		//Postcode
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'postal_code', width: 149} );
+		form_item_input.TTextInput( { field: 'postal_code', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_legal_entity_column1 );
 
 		// Phone
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'work_phone', width: 149} );
+		form_item_input.TTextInput( { field: 'work_phone', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab_legal_entity_column1 );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'fax_phone', width: 149} );
+		form_item_input.TTextInput( { field: 'fax_phone', width: 149 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_legal_entity_column1 );
 
@@ -442,57 +438,63 @@ LegalEntityViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'start_date'} );
+		form_item_input.TDatePicker( { field: 'start_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_legal_entity_column1 );
 
 		//End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'end_date'} );
+		form_item_input.TDatePicker( { field: 'end_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_legal_entity_column1 );
 
-		if ( typeof FormData == "undefined" ) {
+		if ( typeof FormData == 'undefined' ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
 
-			this.file_browser = form_item_input.TImageBrowser( {field: '', default_width: 128, default_height: 128} );
+			this.file_browser = form_item_input.TImageBrowser( { field: '', default_width: 128, default_height: 128 } );
 
 			this.file_browser.bind( 'imageChange', function( e, target ) {
-				new ServiceCaller().uploadFile( target.getValue(), 'object_type=legal_entity_logo&object_id='+ $this.current_edit_record.id, {onResult: function( result ) {
+				new ServiceCaller().uploadFile( target.getValue(), 'object_type=legal_entity_logo&object_id=' + $this.current_edit_record.id, {
+					onResult: function( result ) {
 
-					if ( result.toLowerCase() === 'true' ) {
-						$this.file_browser.setImage( $this.getLogoUrl() );
-					} else {
-						TAlertManager.showAlert( result, 'Error' );
+						if ( result.toLowerCase() === 'true' ) {
+							$this.file_browser.setImage( $this.getLogoUrl() );
+						} else {
+							TAlertManager.showAlert( result, 'Error' );
+						}
 					}
-				}} );
+				} );
 
-			} )
+			} );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_AVD_BROWSER );
 
-			this.file_browser = form_item_input.TImageAdvBrowser( {field: '', callBack: function( form_data ) {
-				new ServiceCaller().uploadFile( form_data, 'object_type=legal_entity_logo&object_id='+ $this.current_edit_record.id, {onResult: function( result ) {
+			this.file_browser = form_item_input.TImageAdvBrowser( {
+				field: '', callBack: function( form_data ) {
+					new ServiceCaller().uploadFile( form_data, 'object_type=legal_entity_logo&object_id=' + $this.current_edit_record.id, {
+						onResult: function( result ) {
 
-					if ( result.toLowerCase() === 'true' ) {
-						$this.file_browser.setImage( $this.getLogoUrl() );
-					} else {
-						TAlertManager.showAlert( result, 'Error' );
-					}
-				}} )
+							if ( result.toLowerCase() === 'true' ) {
+								$this.file_browser.setImage( $this.getLogoUrl() );
+							} else {
+								TAlertManager.showAlert( result, 'Error' );
+							}
+						}
+					} );
 
-			}} );
+				}
+			} );
 		}
 
 
 		if ( this.is_edit ) {
-			this.file_browser.setEnableDelete(true);
-			this.file_browser.bind('deleteClick', function (e, target) {
-				$this.api.deleteImage($this.current_edit_record.id, {
-					onResult: function (result) {
+			this.file_browser.setEnableDelete( true );
+			this.file_browser.bind( 'deleteClick', function( e, target ) {
+				$this.api.deleteImage( $this.current_edit_record.id, {
+					onResult: function( result ) {
 						$this.onDeleteImage();
 					}
-				});
-			});
+				} );
+			} );
 		}
 
 		this.addEditFieldToColumn( $.i18n._( 'Logo' ), this.file_browser, tab_legal_entity_column1, '', null, false, true );

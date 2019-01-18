@@ -431,7 +431,7 @@ switch ($object_type) {
 
 		$max_upload_file_size = 50000;
 
-		if ( getTTProductEdition() > 10 ) {
+		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			if ( ( ( DEPLOYMENT_ON_DEMAND == FALSE AND $current_company->getId() == 1 ) OR ( isset($config_vars['other']['primary_company_id']) AND $current_company->getId() == $config_vars['other']['primary_company_id'] ) ) ) {
 				if ( ( $permission->Check('company', 'add') OR $permission->Check('company', 'edit') OR $permission->Check('company', 'edit_own') OR $permission->Check('company', 'edit_child') ) ) {
 					$upload->set_max_filesize( $max_upload_file_size ); //20K or less

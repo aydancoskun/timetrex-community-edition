@@ -76,7 +76,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -165,7 +165,7 @@
 			var value = $( this ).children( 'option:selected' ).attr( 'value' );
 
 			//#2624 - Avoid parsing float value if we have a value larger than zero with a leading zero so that numeric string (eg province) ISO codes are not converted from '01' to 1
-			if ( $.isNumeric(value) && ( value === '0' || value.toString()[0] !== '0' ) ) {
+			if ( $.isNumeric( value ) && ( value === '0' || value.toString()[0] !== '0' ) ) {
 				value = parseFloat( value );
 			}
 
@@ -179,17 +179,17 @@
 			return this[0].selectedIndex;
 		};
 
-		this.setSelectedIndex = function ( set_index ) {
+		this.setSelectedIndex = function( set_index ) {
 			if ( set_index < 0 ) {
 				set_index = 0;
 			}
-			if( set_index >= this[0].length ) {
+			if ( set_index >= this[0].length ) {
 				set_index = this[0].length - 1;
 			}
 			this[0].selectedIndex = set_index;
 			this.setValue( this[0].value );
 		}
-;
+		;
 		this.getLabel = function() {
 			//if value is number convert to number type
 			var value = $( this ).children( 'option:selected' ).text();
@@ -223,7 +223,6 @@
 			$( $( this ).find( 'option' ) ).removeAttr( 'selected' );
 
 			$( $( this ).find( 'option' ) ).filter( function() {
-
 				if ( val === null || val === undefined ) {
 					return false;
 				}
@@ -257,17 +256,23 @@
 			}
 
 			source_data = val;
+			var option_array = [];
 
 			if ( $.isArray( val ) ) {
 				var len = val.length;
 				for ( var i = 0; i < len; i++ ) {
-					var item = val[i];
-					$( this ).append( '<option value="' + item[valueKey] + '">' + item[labelKey] + '</option>' );
+					option_array.push( '<option value="' +  val[i][valueKey] + '">' +  val[i][labelKey] + '</option>' );
+					// $( this ).append( '<option value="' + item[valueKey] + '">' + item[labelKey] + '</option>' );
 				}
 			} else {
 				for ( var j in val ) {
-					$( this ).append( '<option value="' + j + '">' + val[j] + '</option>' );
+					// $( this ).append( '<option value="' + j + '">' + val[j] + '</option>' );
+					option_array.push( '<option value="' + j + '">' + val[j] + '</option>' );
 				}
+			}
+
+			if ( $(this)[0] ) {
+				$( this )[0].innerHTML = option_array.join( '' );
 			}
 
 			if ( set_select_item_when_set_source_data ) {
@@ -285,7 +290,7 @@
 				set_empty = o.set_empty;
 			}
 
-			if( o.customFirstItemLabel){
+			if ( o.customFirstItemLabel ) {
 				customFirstItemLabel = o.customFirstItemLabel;
 			}
 
@@ -306,7 +311,7 @@
 				}
 
 				if ( check_box ) {
-					$this.setCheckBox(true);
+					$this.setCheckBox( true );
 				}
 
 				$this.trigger( 'formItemChange', [$this] );
@@ -316,13 +321,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-							LocalCacheData.current_open_sub_controller.edit_view &&
-							LocalCacheData.current_open_sub_controller.is_viewing ) {
+								LocalCacheData.current_open_sub_controller.edit_view &&
+								LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-							LocalCacheData.current_open_primary_controller.edit_view &&
-							LocalCacheData.current_open_primary_controller.is_viewing ) {
+								LocalCacheData.current_open_primary_controller.edit_view &&
+								LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}

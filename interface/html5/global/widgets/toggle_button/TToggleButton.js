@@ -39,15 +39,15 @@
 			var len = data_provider.length;
 			for ( var i = 0; i < len; i++ ) {
 				var button_data = data_provider[i];
-				var btn = $( "<button></button>" );
+				var btn = $( '<button></button>' );
 				if ( i === 0 ) {
-					btn.addClass( 'toggle-button first' )
+					btn.addClass( 'toggle-button first' );
 				} else if ( i === len - 1 ) {
-					btn.addClass( 'toggle-button last' )
+					btn.addClass( 'toggle-button last' );
 				} else if ( i === 0 && i === len - 1 ) {
-					btn.addClass( 'toggle-button first-last' )
+					btn.addClass( 'toggle-button first-last' );
 				} else {
-					btn.addClass( 'toggle-button middle' )
+					btn.addClass( 'toggle-button middle' );
 				}
 
 				btn_dic[button_data.value] = btn;

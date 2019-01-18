@@ -47,13 +47,18 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_holiday_policy': $.i18n._( 'Holiday Policy' ),
-			'tab_eligibility': $.i18n._( 'Eligibility' ),
-			'tab_holiday_time': $.i18n._( 'Holiday Time' ),
-			'tab_holidays': $.i18n._( 'Holidays' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_holiday_policy': { 'label': $.i18n._( 'Holiday Policy' ) },
+			'tab_eligibility': { 'label': $.i18n._( 'Eligibility' ) },
+			'tab_holiday_time': { 'label': $.i18n._( 'Holiday Time' ) },
+			'tab_holidays': {
+				'label': $.i18n._( 'Holidays' ),
+				'init_callback': 'initSubHolidayView',
+				'display_on_mass_edit': false
+			},
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIHolidayPolicy' )),
@@ -79,7 +84,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_holiday_policy_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -96,14 +101,14 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_holiday_policy_column1 );
 
 		// Default Schedules Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'default_schedule_status_id'} );
+		form_item_input.TComboBox( { field: 'default_schedule_status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.default_schedule_status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Default Schedules Status' ), form_item_input, tab_holiday_policy_column1 );
 
@@ -131,25 +136,25 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		// Minimum Employed Days
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'minimum_employed_days', width: 50} );
+		form_item_input.TTextInput( { field: 'minimum_employed_days', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Employed Days' ), form_item_input, tab_eligibility_column1, '' );
 
 		// Employee Must Work at Least
 		var form_item_minimum_worked_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_minimum_worked_days_input.TTextInput( {field: 'minimum_worked_days', width: 30} );
+		form_item_minimum_worked_days_input.TTextInput( { field: 'minimum_worked_days', width: 30 } );
 
 		var form_item_minimum_worked_period_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_minimum_worked_period_days_input.TTextInput( {field: 'minimum_worked_period_days', width: 30} );
+		form_item_minimum_worked_period_days_input.TTextInput( { field: 'minimum_worked_period_days', width: 30 } );
 
 		var form_item_worked_scheduled_days_combobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_worked_scheduled_days_combobox.TComboBox( {field: 'worked_scheduled_days'} );
+		form_item_worked_scheduled_days_combobox.TComboBox( { field: 'worked_scheduled_days' } );
 		form_item_worked_scheduled_days_combobox.setSourceData( Global.addFirstItemToArray( $this.worked_scheduled_days_array ) );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
-		var label_1 = $( "<span class='widget-right-label'> " + $.i18n._( 'of the' ) + " </span>" );
-		var label_2 = $( "<span class='widget-right-label'> " + $.i18n._( 'prior to the holiday' ) + " </span>" );
-		var label_3 = $( "<span class='widget-right-label'> " + $.i18n._( ' ' ) + " </span>" );
+		var label_1 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'of the' ) + ' </span>' );
+		var label_2 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'prior to the holiday' ) + ' </span>' );
+		var label_3 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( ' ' ) + ' </span>' );
 
 		widgetContainer.append( form_item_minimum_worked_days_input );
 		widgetContainer.append( label_1 );
@@ -163,27 +168,30 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		// Default Schedules Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'shift_on_holiday_type_id'} );
+		form_item_input.TComboBox( { field: 'shift_on_holiday_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.shift_on_holiday_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'On the Holiday, the Employee' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 
 		// Employee Must Work at Least
 		form_item_minimum_worked_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_minimum_worked_days_input.TTextInput( {field: 'minimum_worked_after_days', width: 30} );
+		form_item_minimum_worked_days_input.TTextInput( { field: 'minimum_worked_after_days', width: 30 } );
 
 		form_item_minimum_worked_period_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_minimum_worked_period_days_input.TTextInput( {field: 'minimum_worked_after_period_days', width: 30} );
+		form_item_minimum_worked_period_days_input.TTextInput( {
+			field: 'minimum_worked_after_period_days',
+			width: 30
+		} );
 
 		form_item_worked_scheduled_days_combobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_worked_scheduled_days_combobox.TComboBox( {field: 'worked_after_scheduled_days'} );
+		form_item_worked_scheduled_days_combobox.TComboBox( { field: 'worked_after_scheduled_days' } );
 		form_item_worked_scheduled_days_combobox.setSourceData( Global.addFirstItemToArray( $this.worked_scheduled_days_array ) );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
-		label_1 = $( "<span class='widget-right-label'> " + $.i18n._( 'of the' ) + " </span>" );
-		label_2 = $( "<span class='widget-right-label'> " + $.i18n._( 'following the holiday' ) + " </span>" );
-		label_3 = $( "<span class='widget-right-label'> " + $.i18n._( ' ' ) + " </span>" );
+		label_1 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'of the' ) + ' </span>' );
+		label_2 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'following the holiday' ) + ' </span>' );
+		label_3 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( ' ' ) + ' </span>' );
 
 		widgetContainer.append( form_item_minimum_worked_days_input );
 		widgetContainer.append( label_1 );
@@ -202,7 +210,8 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'eligible_contributing_shift_policy_id'} );
+			field: 'eligible_contributing_shift_policy_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Contributing Shift Policy' ), form_item_input, tab_eligibility_column1, '', null, true );
 
 		// tab 2 start
@@ -217,32 +226,32 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 		// Total Time over
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'average_time_days', width: 30} );
+		form_item_input.TTextInput( { field: 'average_time_days', width: 30 } );
 
 		var form_item_average_time_frequency_combobox = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_average_time_frequency_combobox.TComboBox( {field: 'average_time_frequency_type_id'} );
+		form_item_average_time_frequency_combobox.TComboBox( { field: 'average_time_frequency_type_id' } );
 		form_item_average_time_frequency_combobox.setSourceData( Global.addFirstItemToArray( $this.average_time_frequency_type_array ) );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( form_item_average_time_frequency_combobox );
 
-		this.addEditFieldToColumn( $.i18n._( 'Total Time Over' ), [form_item_input, form_item_average_time_frequency_combobox ], tab_holiday_time_column1, '', widgetContainer, true );
+		this.addEditFieldToColumn( $.i18n._( 'Total Time Over' ), [form_item_input, form_item_average_time_frequency_combobox], tab_holiday_time_column1, '', widgetContainer, true );
 
 
 		// Average Time over
 		var form_item_average_time_worked_days_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_average_time_worked_days_checkbox.TCheckbox( {field: 'average_time_worked_days'} );
+		form_item_average_time_worked_days_checkbox.TCheckbox( { field: 'average_time_worked_days' } );
 
 		var form_item_average_days_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_average_days_input.TTextInput( {field: 'average_days', width: 30} );
+		form_item_average_days_input.TTextInput( { field: 'average_days', width: 30 } );
 
-		widgetContainer = $( "<div class='widget-h-box '></div>" );
+		widgetContainer = $( '<div class=\'widget-h-box \'></div>' );
 
-		label_1 = $( "<span class='widget-right-label'> " + $.i18n._( 'Worked Days Only' ) + ': ' + " </span>" );
-		label_2 = $( "<span class='widget-right-label'> " + $.i18n._( 'or' ) + " </span>" );
-		label_3 = $( "<span class='widget-right-label'> " + $.i18n._( 'days' ) + " </span>" );
+		label_1 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Worked Days Only' ) + ': ' + ' </span>' );
+		label_2 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'or' ) + ' </span>' );
+		label_3 = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'days' ) + ' </span>' );
 
 		widgetContainer.append( label_1 );
 		widgetContainer.append( form_item_average_time_worked_days_checkbox );
@@ -262,28 +271,29 @@ HolidayPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'contributing_shift_policy_id'} );
+			field: 'contributing_shift_policy_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Contributing Shift Policy' ), form_item_input, tab_holiday_time_column1, '', null, true );
 
 		// Holiday Time
 		// Minimum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'minimum_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'minimum_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Holiday Time' ), form_item_input, tab_holiday_time_column1, '', null, true );
 
 		// Maximum Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'maximum_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Maximum Time' ), form_item_input, tab_holiday_time_column1, '', null, true );
 
 		// Always Apply Over Time/Premium Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'force_over_time_policy'} );
+		form_item_input.TCheckbox( { field: 'force_over_time_policy' } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label '> (" + $.i18n._( 'Even if they are not eligible for holiday pay' ) + ")</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label \'> (' + $.i18n._( 'Even if they are not eligible for holiday pay' ) + ')</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -314,26 +324,6 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Absence Policy' ), form_item_input, tab_holiday_time_column1, '' );
 
-	},
-
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_holidays"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-		} else {
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_holidays"]' ) ).parent().show();
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
@@ -384,7 +374,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 			this.detachElement( 'average_time_days' );
 			this.detachElement( 'average_time_worked_days' );
-			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Holiday Time' ) + ": " );
+			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Holiday Time' ) + ': ' );
 
 			this.detachElement( 'maximum_time' );
 			this.detachElement( 'force_over_time_policy' );
@@ -399,7 +389,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 			this.detachElement( 'average_time_days' );
 			this.detachElement( 'average_time_worked_days' );
-			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Holiday Time' ) + ": " );
+			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Holiday Time' ) + ': ' );
 
 			this.detachElement( 'maximum_time' );
 			this.detachElement( 'force_over_time_policy' );
@@ -414,7 +404,7 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 			this.attachElement( 'average_time_days' );
 			this.attachElement( 'average_time_worked_days' );
-			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Minimum Time' ) + ": " );
+			this.edit_view_form_item_dic['minimum_time'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Minimum Time' ) + ': ' );
 
 			this.attachElement( 'maximum_time' );
 			this.attachElement( 'force_over_time_policy' );
@@ -431,24 +421,29 @@ HolidayPolicyViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -456,9 +451,11 @@ HolidayPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -466,44 +463,17 @@ HolidayPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
-	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 3 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_holidays' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubHolidayView();
-			} else {
-				this.edit_view_tab.find( '#tab_holidays' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 4 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
 	},
 
 	initSubHolidayView: function() {
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
 
 		if ( this.sub_holiday_view_controller ) {
 			this.sub_holiday_view_controller.buildContextMenu( true );
@@ -539,33 +509,8 @@ HolidayPolicyViewController = BaseViewController.extend( {
 
 	},
 
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_holidays' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubHolidayView();
-			} else {
-				this.edit_view_tab.find( '#tab_holidays' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 4 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
 	removeEditView: function() {
-
 		this._super( 'removeEditView' );
 		this.sub_holiday_view_controller = null;
-
 	}
-
-
 } );

@@ -2,14 +2,14 @@ ActiveShiftReportViewController = ReportBaseViewController.extend( {
 
 	_required_files: {
 		10: ['APIActiveShiftReport'],
-		20: ['APIJob', 'APIJobGroup', 'APIJobItemGroup', 'APIJobItem'],
+		20: ['APIJob', 'APIJobGroup', 'APIJobItemGroup', 'APIJobItem']
 	},
 
 	initReport: function( options ) {
 		this.script_name = 'ActiveShiftReport';
 		this.viewId = 'ActiveShiftReport';
 		this.context_menu_name = $.i18n._( 'Whos In Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'ActiveShiftReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIActiveShiftReport' ))();
 	},
@@ -97,51 +97,6 @@ ActiveShiftReportViewController = ReportBaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
-		switch ( id ) {
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.view_html:
-				ProgressBar.showOverlay();
-				this.onViewClick( 'html' );
-				break;
-			case ContextMenuIconName.view_html_new_window:
-				ProgressBar.showOverlay();
-				this.onViewClick( 'html', true );
-				break;
-			case ContextMenuIconName.export_excel:
-				this.onViewExcelClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
-			case ContextMenuIconName.save_existed_report: //All report view
-				this.onSaveExistedReportClick();
-				break;
-			case ContextMenuIconName.save_new_report: //All report view
-				this.onSaveNewReportClick();
-				break;
-			case ContextMenuIconName.save_setup: //All report view
-				this.onSaveSetup();
-				break;
-		}
-	},
-
 	processFilterField: function() {
 		for ( var i = 0; i < this.setup_fields_array.length; i++ ) {
 			var item = this.setup_fields_array[i];
@@ -157,7 +112,7 @@ ActiveShiftReportViewController = ReportBaseViewController.extend( {
 
 	onFormItemChangeProcessFilterField: function( target, key ) {
 		var filter = target.getValue();
-		this.visible_report_values[key] = {user_status_id: filter};
+		this.visible_report_values[key] = { user_status_id: filter };
 	}
 
 } );

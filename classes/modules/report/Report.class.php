@@ -97,7 +97,9 @@ class Report {
 												)
 							);
 
-	public $duplicate_value_ignored_columns = array('full_name' => TRUE, 'first_name' => TRUE, 'last_name' => TRUE, 'verified_time_sheet_date' => TRUE, 'date_stamp' => TRUE, 'start_date' => TRUE, 'end_date' => TRUE, 'start_time' => TRUE, 'end_time' => TRUE); //Columns that should never be considered "duplicate" and therefore have their data blanked out in subsequent rows.
+	//Columns that should never be considered "duplicate" and therefore have their data blanked out in subsequent rows.
+	//  Don't include "full_name" here, as that makes certain reports like TimeSheet Detail, All Time By Employee/Date template to look bad.
+	public $duplicate_value_ignored_columns = array( 'first_name' => TRUE, 'last_name' => TRUE, 'verified_time_sheet' => TRUE, 'verified_time_sheet_date' => TRUE, 'date_stamp' => TRUE, 'start_date' => TRUE, 'end_date' => TRUE, 'start_time' => TRUE, 'end_time' => TRUE);
 
 	protected $maximum_memory_limit = FALSE;
 
@@ -3152,12 +3154,11 @@ class Report {
 	function _html_Table() {
 		$this->profiler->startTimer( 'HTML Table' );
 
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), count($this->data), NULL, TTi18n::getText('Generating HTML...') );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), ( is_array( $this->data ) ? count( $this->data ) : 0 ), NULL, TTi18n::getText('Generating HTML...') );
 
 		$static_column_options = (array)Misc::trimSortPrefix( $this->getOptions('static_columns') );
 
-		//Remove some columns from sort by that may be common but we don't want duplicate values to be removed. This could be moved to each report if the list gets too large.
-		$sort_by_columns = array_diff_key( (array)$this->getSortConfig(), $this->duplicate_value_ignored_columns );
+		$sort_by_columns = $this->getSortConfig();
 		$group_by_columns = $this->getGroupConfig();
 
 		//Make sure we ignore a group_by_columns that is an array( 0 => FALSE )
@@ -3288,7 +3289,7 @@ class Report {
 							if ( $this->config['other']['show_duplicate_values'] == FALSE /*AND $new_page == FALSE*/ AND !isset($prev_row['_subtotal'])
 								AND isset($prev_row[$column]) AND isset($row[$column]) AND !is_float($row[$column]) AND $prev_row[$column] === $row[$column]
 								AND $prev_row[$column] !== $this->config['other']['blank_value_placeholder']
-								AND ( isset($static_column_options[$column]) AND ( isset($sort_by_columns[$column]) OR isset($group_by_columns[$column]) ) ) ) {
+								AND ( isset($static_column_options[$column]) AND ( ( isset($sort_by_columns[$column]) AND !isset($this->duplicate_value_ignored_columns[$column]) ) OR isset($group_by_columns[$column]) ) ) ) {
 								//This needs to be a space otherwise cell background colors won't be shown.
 								$value = ( $this->config['other']['duplicate_value_placeholder'] != '' ) ? $this->config['other']['duplicate_value_placeholder'] : ' ';
 							}
@@ -3374,7 +3375,7 @@ class Report {
 			}
 
 			$this->html .= '<tr>';
-			$this->html .= '<td class="no-result">'.'['. $error_msg .']'.'</td>';
+			$this->html .= '<td class="no-result" colspan="'. $columns_count .'">'.'['. $error_msg .']'.'</td>';
 			$this->html .= '</tr>';
 
 			unset($error_msg);
@@ -3500,7 +3501,7 @@ class Report {
 
 			Debug::Text(' Adding charts to PDF...', __FILE__, __LINE__, __METHOD__, 10);
 
-			$total_images = count($this->chart_images);
+			$total_images = ( is_array( $this->chart_images ) ) ? count($this->chart_images) : 0;
 			if ( is_array($this->chart_images) AND $total_images > 0 ) {
 				$margins = $this->pdf->getMargins();
 
@@ -3560,7 +3561,7 @@ class Report {
 
 			Debug::Text(' Adding charts to PDF...', __FILE__, __LINE__, __METHOD__, 10);
 
-			$total_images = count($this->chart_images);
+			$total_images = ( is_array( $this->chart_images ) ) ? count($this->chart_images) : 0;
 			if ( is_array($this->chart_images) AND $total_images > 0 ) {
 
 				$this->html .= "<tr><td>&nbsp;</td></tr>";
@@ -4066,7 +4067,7 @@ class Report {
 		$border = 0;
 
 		//Remove some columns from sort by that may be common but we don't want duplicate values to be removed. This could be moved to each report if the list gets too large.
-		$sort_by_columns = array_diff_key( (array)$this->getSortConfig(), $this->duplicate_value_ignored_columns );
+		$sort_by_columns = $this->getSortConfig();
 		$group_by_columns = $this->getGroupConfig();
 
 		//Make sure we ignore a group_by_columns that is an array( 0 => FALSE )
@@ -4208,7 +4209,7 @@ class Report {
 							if ( $this->config['other']['show_duplicate_values'] == FALSE AND $new_page == FALSE AND !isset($prev_row['_subtotal'])
 									AND isset($prev_row[$column]) AND isset($row[$column]) AND !is_float($row[$column]) AND $prev_row[$column] === $row[$column]
 									AND $prev_row[$column] !== $this->config['other']['blank_value_placeholder']
-									AND ( isset($static_column_options[$column]) AND ( isset($sort_by_columns[$column]) OR isset($group_by_columns[$column]) ) ) ) {
+									AND ( isset($static_column_options[$column]) AND ( ( isset($sort_by_columns[$column]) AND !isset($this->duplicate_value_ignored_columns[$column]) ) OR isset($group_by_columns[$column]) ) ) ) {
 								//This needs to be a space otherwise cell background colors won't be shown.
 								$value = ( $this->config['other']['duplicate_value_placeholder'] != '' ) ? $this->config['other']['duplicate_value_placeholder'] : ' ';
 							}

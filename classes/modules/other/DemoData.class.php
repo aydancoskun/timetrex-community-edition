@@ -596,6 +596,9 @@ class DemoData {
 		$cf->setPostalCode( '12345' );
 		$cf->setWorkPhone( '555-555-5555' );
 
+		$cf->setLatitude( $this->getRandomCoordinates('latitude' ) );
+		$cf->setLongitude( $this->getRandomCoordinates('longitude' ) );
+
 		//$cf->setEnableAddLegalEntity(FALSE);
 		//$cf->setEnableAddCurrency(FALSE);
 
@@ -989,6 +992,9 @@ class DemoData {
 				$bf->setManualId( 4 );
 				break;
 		}
+
+		$bf->setLatitude( $this->getRandomCoordinates('latitude' ) );
+		$bf->setLongitude( $this->getRandomCoordinates('longitude' ) );
 
 		if ( $bf->isValid() ) {
 			$insert_id = $bf->Save( FALSE );
@@ -3444,6 +3450,9 @@ class DemoData {
 		$ccf->setPasswordResetDate( ( $this->getDate() - ( 86400 * rand(1, 30) ) ) );
 		$ccf->setNote('');
 
+		$ccf->setLatitude( $this->getRandomCoordinates('latitude' ) );
+		$ccf->setLongitude( $this->getRandomCoordinates('longitude' ) );
+
 		if ( $ccf->isValid() ) {
 			$insert_id = $ccf->Save();
 			Debug::Text('Client Contact ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -3719,7 +3728,7 @@ class DemoData {
 	 * @param string $ethnic_group_ids UUID
 	 * @return bool
 	 */
-	function createUser( $company_id, $legal_entity_id, $type, $policy_group_id = NULL, $default_branch_id = NULL, $default_department_id = NULL, $default_currency_id = NULL, $user_group_id = NULL, $user_title_id = NULL, $ethnic_group_ids = NULL, $remittance_source_account_ids = NULL ) {
+	function createUser( $company_id, $legal_entity_id, $type, $policy_group_id = NULL, $default_branch_id = NULL, $default_department_id = NULL, $default_currency_id = NULL, $user_group_id = NULL, $user_title_id = NULL, $ethnic_group_ids = NULL, $remittance_source_account_ids = NULL, $coordinates = NULL ) {
 		if ( $policy_group_id === NULL ) {
 			$policy_group_id = TTUUID::getZeroID();
 		}
@@ -4215,6 +4224,14 @@ class DemoData {
 
 		$uf->setPassword( 'demo', NULL, TRUE );
 
+		if ( isset( $coordinates ) AND is_array($coordinates) ) {
+			$uf->setLatitude( $coordinates[0] );
+			$uf->setLongitude( $coordinates[1] );
+		} else {
+			$uf->setLatitude( $this->getRandomCoordinates('latitude' ) );
+			$uf->setLongitude( $this->getRandomCoordinates('longitude' ) );
+		}
+
 		if ( $uf->isValid() ) {
 			$insert_id = $uf->Save( TRUE, TRUE );
 			Debug::Text('User ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -4386,6 +4403,8 @@ class DemoData {
 		$jal->setPostalCode( rand(98000, 99499) );
 		$jal->setStartDate( ( $this->getDate() - ( 86400 * rand( 365, 730 ) ) ) );
 		$jal->setEndDate( ( $this->getDate() - ( 86400 * rand( 100, 300 ) ) ) );
+		$jal->setLatitude( $this->getRandomCoordinates('latitude' ) );
+		$jal->setLongitude( $this->getRandomCoordinates('longitude' ) );
 		if ( $jal->isValid() ) {
 			$insert_id = $jal->Save();
 			Debug::Text('Job Applicant Location ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -4552,6 +4571,9 @@ class DemoData {
 			$jaf->setCriminalRecord( FALSE );
 			$jaf->setCreatedDate( ( $this->getDate() - ( 86400 * rand(31, 365) ) ) );
 		}
+
+		$jaf->setLatitude( $this->getRandomCoordinates('latitude' ) );
+		$jaf->setLongitude( $this->getRandomCoordinates('longitude' ) );
 
 		if ( $jaf->isValid() ) {
 			$insert_id = $jaf->Save();
@@ -6678,6 +6700,9 @@ class DemoData {
 				break;
 		}
 
+		$jf->setLatitude( $this->getRandomCoordinates('latitude' ) );
+		$jf->setLongitude( $this->getRandomCoordinates('longitude' ) );
+
 		if ( $jf->isValid() ) {
 			$insert_id = $jf->Save( FALSE );
 			Debug::Text('Job ID: '. $insert_id, __FILE__, __LINE__, __METHOD__, 10);
@@ -7287,11 +7312,11 @@ class DemoData {
 	 * @param int $status_id
 	 * @param $time_stamp
 	 * @param $data
-	 * @param null $coordinate
+	 * @param null $coordinates
 	 * @param bool $calc_total_time
 	 * @return bool
 	 */
-	function createPunch( $user_id, $type_id, $status_id, $time_stamp, $data, $coordinate = NULL, $calc_total_time = TRUE ) {
+	function createPunch( $user_id, $type_id, $status_id, $time_stamp, $data, $coordinates = NULL, $calc_total_time = TRUE ) {
 		$fail_transaction = FALSE;
 
 		Debug::Text('User ID: '. $user_id .' Time Stamp: '. TTDate::getDate('DATE+TIME', $time_stamp), __FILE__, __LINE__, __METHOD__, 10);
@@ -7307,8 +7332,8 @@ class DemoData {
 		$pf->setStatus( $status_id );
 		$pf->setTimeStamp( $time_stamp );
 
-		$pf->setLatitude( $coordinate[0] );
-		$pf->setLongitude( $coordinate[1] );
+		$pf->setLatitude( $coordinates[0] );
+		$pf->setLongitude( $coordinates[1] );
 
 		if ( $pf->isNew() ) {
 			$pf->setActualTimeStamp( $time_stamp );
@@ -7570,10 +7595,10 @@ class DemoData {
 	 * @param $out_time_stamp
 	 * @param null $data
 	 * @param bool $calc_total_time
-	 * @param null $coordinate
+	 * @param null $coordinates
 	 * @return bool
 	 */
-	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE, $coordinate = NULL ) {
+	function createPunchPair( $user_id, $in_time_stamp, $out_time_stamp, $data = NULL, $calc_total_time = TRUE, $coordinates = NULL ) {
 		$fail_transaction = FALSE;
 
 		Debug::Text('Punch Full In Time Stamp: ('.$in_time_stamp.') '. TTDate::getDate('DATE+TIME', $in_time_stamp) .' Out: ('.$out_time_stamp.') '. TTDate::getDate('DATE+TIME', $out_time_stamp), __FILE__, __LINE__, __METHOD__, 10);
@@ -7591,9 +7616,9 @@ class DemoData {
 			$pf_in->setStatus( 20 );
 			$pf_in->setTimeStamp( $out_time_stamp );
 			$pf_in->setPositionAccuracy( mt_rand(10, 100) );
-			if ( isset( $coordinate ) AND is_array($coordinate) ) {
-				$pf_in->setLatitude( $coordinate[0] );
-				$pf_in->setLongitude( $coordinate[1] );
+			if ( isset( $coordinates ) AND is_array( $coordinates) ) {
+				$pf_in->setLatitude( $coordinates[0] );
+				$pf_in->setLongitude( $coordinates[1] );
 			} else {
 				$pf_in->setLongitude( $this->getRandomCoordinates('longitude' ) );
 				$pf_in->setLatitude( $this->getRandomCoordinates('latitude' ) );
@@ -7624,9 +7649,9 @@ class DemoData {
 			$pf_out->setStatus( 10 );
 			$pf_out->setTimeStamp( $in_time_stamp );
 			$pf_out->setPositionAccuracy( mt_rand(10, 100) );
-			if ( isset( $coordinate ) AND is_array($coordinate) ) {
-				$pf_out->setLatitude( $coordinate[0] );
-				$pf_out->setLongitude( $coordinate[1] );
+			if ( isset( $coordinates ) AND is_array( $coordinates) ) {
+				$pf_out->setLatitude( $coordinates[0] );
+				$pf_out->setLongitude( $coordinates[1] );
 			} else {
 				$pf_out->setLongitude( $this->getRandomCoordinates('longitude' ) );
 				$pf_out->setLatitude( $this->getRandomCoordinates('latitude' ) );
@@ -8130,6 +8155,12 @@ class DemoData {
 			$branch_ids[] = $this->createBranch( $company_id, 30 ); //ON
 			$branch_ids[] = $this->createBranch( $company_id, 40 ); //BC
 
+			//Break coordinates up into different buckets based on physical location.
+			$coordinates['ALL'] = $this->coordinates;
+			$coordinates['NY'] = (array)array_slice( $this->coordinates, 0, 10 );
+			$coordinates['WA'] = (array)array_slice( $this->coordinates, 10, 12 );
+			$coordinates['00'] = (array)array_slice( $this->coordinates, 22 );
+
 			//Create departments
 			$department_ids[] = $this->createDepartment( $company_id, 10 );
 			$department_ids[] = $this->createDepartment( $company_id, 20 );
@@ -8219,28 +8250,28 @@ class DemoData {
 			$this->createCompanyDeduction( $company_id, $current_user->getId(), $legal_entity_ids[3] );
 
 			//Users
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 11, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 12, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 13, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 14, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 15, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 16, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 17, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 18, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 19, 0, $branch_ids[0], $department_ids[1], $currency_ids[1], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 20, 0, $branch_ids[1], $department_ids[1], $currency_ids[1], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 21, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 22, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 23, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 24, 0, $branch_ids[2], $department_ids[2], $currency_ids[1], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 25, 0, $branch_ids[2], $department_ids[2], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 26, 0, $branch_ids[2], $department_ids[1], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 27, 0, $branch_ids[2], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 28, 0, $branch_ids[3], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 29, 0, $branch_ids[3], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 30, 0, $branch_ids[3], $department_ids[0], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
-			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 40, 0, $branch_ids[3], $department_ids[0], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 10, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 11, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 12, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 13, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[0], $user_title_ids[0], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 14, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 15, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 16, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 17, 0, $branch_ids[0], $department_ids[1], $currency_ids[0], $user_group_ids[1], $user_title_ids[1], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 18, 0, $branch_ids[0], $department_ids[0], $currency_ids[0], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[0], 19, 0, $branch_ids[0], $department_ids[1], $currency_ids[1], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['NY'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 20, 0, $branch_ids[1], $department_ids[1], $currency_ids[1], $user_group_ids[2], $user_title_ids[2], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['WA'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 21, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['WA'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 22, 0, $branch_ids[1], $department_ids[1], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['WA'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[1], 23, 0, $branch_ids[1], $department_ids[2], $currency_ids[0], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['WA'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 24, 0, $branch_ids[2], $department_ids[2], $currency_ids[1], $user_group_ids[3], $user_title_ids[3], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['00'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 25, 0, $branch_ids[2], $department_ids[2], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['00'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 26, 0, $branch_ids[2], $department_ids[1], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['00'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[2], 27, 0, $branch_ids[2], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['00'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 28, 0, $branch_ids[3], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['00'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 29, 0, $branch_ids[3], $department_ids[3], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['00'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 30, 0, $branch_ids[3], $department_ids[0], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['00'] );
+			$user_ids[] = $this->createUser( $company_id, $legal_entity_ids[3], 40, 0, $branch_ids[3], $department_ids[0], $currency_ids[1], $user_group_ids[4], $user_title_ids[4], $ethnic_group_ids, $remittance_source_account_ids, $coordinates['00'] );
 
 			//Create random users.
 			Debug::Text('Creating random users: '. $this->getMaxRandomUsers(), __FILE__, __LINE__, __METHOD__, 10);
@@ -8909,15 +8940,15 @@ class DemoData {
 						//$punch_full_time_stamp = strtotime($pc_data['date_stamp'].' '.$pc_data['time_stamp']);
 						$exception_cutoff_date = ( $current_epoch - (86400 * 14) );
 						if ( ($i % 25) == 0 ) {
-							$user_random_coordinates = (array)array_slice( $this->coordinates, 22 );// outside new york, seattle
+							$user_random_coordinates = $coordinates['00']; // outside new york, seattle
 							$user_random_job_ids = $job_ids;
 						} else {
 							if ( ($i % 2) == 0 ) {
 								$user_random_job_ids = (array)array_slice($job_ids, 0, 7); // new york
-								$user_random_coordinates = (array)array_slice( $this->coordinates, 0, 10 ); // inside new york
+								$user_random_coordinates = $coordinates['NY']; // inside new york
 							} else {
 								$user_random_job_ids = (array)array_slice($job_ids, 8); // seattle
-								$user_random_coordinates = (array)array_slice( $this->coordinates, 10, 12 ); // inside seattle
+								$user_random_coordinates = $coordinates['WA']; // inside seattle
 							}
 						}
 						if ( date('w', $punch_date) != 0 AND date('w', $punch_date) != 6 ) {

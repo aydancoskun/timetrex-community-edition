@@ -45,10 +45,10 @@ ReportBaseViewController = BaseViewController.extend( {
 	do_validate_after_create_ui: false, //Do validate if there is a saved report
 
 	form_setup_changed: false,
-	invisible_context_menu_dic:[],
+	invisible_context_menu_dic: [],
 
-	preInit:function ( options ) {
-		this.preInitReport()
+	preInit: function( options ) {
+		this.preInitReport();
 	},
 
 	init: function( options ) {
@@ -63,32 +63,35 @@ ReportBaseViewController = BaseViewController.extend( {
 		LocalCacheData.current_open_report_controller = this;
 
 		var $this = this;
-		require([
-			'APIPayPeriodSchedule',
-			'APIUserReportData',
-			'APIDepartment',
-			'APIBranch',
-			'APIUserGroup',
-			'APIUserTitle',
-			'APILegalEntity',
-			'APIPayStub',
-			],
-			function() {
-				$this.api_user_report = new (APIFactory.getAPIClass( 'APIUserReportData' ))();
-				$this.initReport();
-				$this.buildContextMenu();
-				TTPromise.resolve('Reports','openReport');
-				$this.postInitReport();
-		});
+		require( [
+					'APIPayPeriodSchedule',
+					'APIUserReportData',
+					'APIDepartment',
+					'APIBranch',
+					'APIUserGroup',
+					'APIUserTitle',
+					'APILegalEntity',
+					'APIPayStub'
+				],
+				function() {
+					$this.api_user_report = new (APIFactory.getAPIClass( 'APIUserReportData' ))();
+					$this.initReport();
+					$this.buildContextMenu();
+					TTPromise.resolve( 'Reports', 'openReport' );
+					$this.postInitReport();
+				} );
 	},
 
 	// Removed because the require callback in init() serves this function and calls postInitReport() at the proper time.
 	// postInit: function(){
 	// },
 
-	preInitReport: function( options ) { },
-	initReport: function( options ) { },
-	postInitReport: function( options ) { },
+	preInitReport: function( options ) {
+	},
+	initReport: function( options ) {
+	},
+	postInitReport: function( options ) {
+	},
 
 	render: function() {
 
@@ -109,11 +112,11 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	//this prevents the function of the same name in base class from hiding all of the export to excel buttons on all reports due to their lack of a grid.
-	setDefaultMenuExportIcon: function( context_btn, grid_selected_length, pId ) {},
+	setDefaultMenuExportIcon: function( context_btn, grid_selected_length, pId ) {
+	},
 
 	openEditView: function() {
 		var $this = this;
-
 		var $context_menu_array = $this.context_menu_array;
 		this.initOptions( function() {
 			// Always need override
@@ -125,33 +128,34 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			$this.do_validate_after_create_ui = true;
 
-			if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
-				$this.navigation.setValue( LocalCacheData.default_edit_id_for_next_open_edit_view );
-				$this.api_user_report.getUserReportData( { filter_data: { id: LocalCacheData.default_edit_id_for_next_open_edit_view } }, {
-					onResult: function( result ) {
-						result = result.getResult();
-						$this.current_saved_report = result[0];
-						$this.current_edit_record = {};
-						$this.visible_report_values = {};
-						$this.initEditView();
-				}});
+			TTPromise.wait('init', 'init', function(){
+				if ( LocalCacheData.default_edit_id_for_next_open_edit_view ) {
+					$this.navigation.setValue( LocalCacheData.default_edit_id_for_next_open_edit_view );
+					$this.api_user_report.getUserReportData( { filter_data: { id: LocalCacheData.default_edit_id_for_next_open_edit_view } }, {
+						onResult: function( result ) {
+							result = result.getResult();
+							$this.current_saved_report = result[0];
+							$this.current_edit_record = {};
+							$this.visible_report_values = {};
+							$this.initEditView();
+					}});
 
-			} else {
-				$this.api_user_report.getUserReportData( { filter_data: { script: $this.script_name, is_default: true  } }, {
-					onResult: function( result ) {
-						var data = result.getResult();
-						$this.current_saved_report = {};
-						if ( data && data.length > 0 ) {
-							$this.current_saved_report = data[0];
-						}
-						$this.current_edit_record = {};
-						$this.visible_report_values = {};
-						$this.initEditView();
-				}});
-			}
+				} else {
+					$this.api_user_report.getUserReportData( { filter_data: { script: $this.script_name, is_default: true  } }, {
+						onResult: function( result ) {
+							var data = result.getResult();
+							$this.current_saved_report = {};
+							if ( data && data.length > 0 ) {
+								$this.current_saved_report = data[0];
+							}
+							$this.current_edit_record = {};
+							$this.visible_report_values = {};
+							$this.initEditView();
+					}});
+				}
 
-		} );
-
+			} );
+		});
 	},
 
 	setDefaultConfigData: function() {
@@ -161,9 +165,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			onResult: function( config_result ) {
 
 				if ( $this.current_saved_report &&
-					$this.current_saved_report.data &&
-					$this.current_saved_report.data.config &&
-					$this.current_saved_report.data.config.other
+						$this.current_saved_report.data &&
+						$this.current_saved_report.data.config &&
+						$this.current_saved_report.data.config.other
 				) {
 					//do nothing
 				} else {
@@ -184,9 +188,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			onResult: function( config_result ) {
 
 				if ( $this.current_saved_report &&
-					$this.current_saved_report.data &&
-					$this.current_saved_report.data.config &&
-					$this.current_saved_report.data.config.chart
+						$this.current_saved_report.data &&
+						$this.current_saved_report.data.config &&
+						$this.current_saved_report.data.config.chart
 				) {
 					//do nothing
 				} else {
@@ -201,7 +205,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 				}
 			}
-		} )
+		} );
 
 	},
 
@@ -218,7 +222,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		var $this = this;
 		var args = {};
-		args.filter_data = {script: this.script_name};
+		args.filter_data = { script: this.script_name };
 		this.api_user_report.getUserReportData( args, {
 			onResult: function( result ) {
 
@@ -233,13 +237,13 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	initOptions: function( callBack ) {
 		var options = [
-			{option_name: 'page_orientation'},
-			{option_name: 'font_size'},
-			{option_name: 'auto_refresh'},
-			{option_name: 'chart_display_mode'},
-			{option_name: 'chart_type'},
-			{option_name: 'templates'},
-			{option_name: 'setup_fields'}
+			{ option_name: 'page_orientation' },
+			{ option_name: 'font_size' },
+			{ option_name: 'auto_refresh' },
+			{ option_name: 'chart_display_mode' },
+			{ option_name: 'chart_type' },
+			{ option_name: 'templates' },
+			{ option_name: 'setup_fields' }
 
 		];
 
@@ -251,11 +255,24 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	//Call this from setEditViewData
 	initEditViewData: function() {
-
 		var $this = this;
-		var navigation_div = this.edit_view.find( '.navigation-div' );
 
+		//Set Navigation Awesomebox
+		var navigation_div = this.edit_view.find( '.navigation-div' );
 		navigation_div.css( 'display', 'block' );
+
+		//init navigation only when open edit view
+		if ( !this.navigation.getSourceData() ) {
+			this.navigation.setSourceData( this.saved_report_array );
+			if ( LocalCacheData.getLoginUserPreference() ) {
+				this.navigation.setRowPerPage( LocalCacheData.getLoginUserPreference().items_per_page );
+			}
+			this.navigation.setPagerData( this.pager_data );
+
+			var default_args = {};
+			default_args.filter_data = { script: this.script_name };
+			this.navigation.setDefaultArgs( default_args );
+		}
 
 		this.navigation.setValue( this.current_saved_report );
 		this.setUIWidgetFieldsToCurrentEditRecord();
@@ -263,8 +280,10 @@ ReportBaseViewController = BaseViewController.extend( {
 		// Create this function alone because of the column value of view is different from each other, some columns need to be handle specially. and easily to rewrite this function in sub-class.
 		this.setCurrentEditRecordData();
 
+		//Can't hide navigation box if there aren't any saved reports, without having to make an API call and count how many saved reports there are first, which kind of defeats the purpose.
+
 		//Init *Please save this record before modifying any related data* box
-		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( {related_view_controller: this} );
+		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( { related_view_controller: this } );
 		this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'none' );
 	},
 
@@ -291,10 +310,10 @@ ReportBaseViewController = BaseViewController.extend( {
 			current_url = current_url + '&sm=' + $this.viewId;
 		}
 
-		if (  window.location.href.indexOf( '&tab=' ) > 0 ) {
+		if ( window.location.href.indexOf( '&tab=' ) > 0 ) {
 			var tab_name = window.location.href;
-			tab_name = tab_name.substr( ( window.location.href.indexOf('&tab=') + 5 ) ); //get the selected tab name
-			tab_name = tab_name.substr(0, window.location.href.indexOf('&')); // incase there are subsequent arguments after the tab argument
+			tab_name = tab_name.substr( ( window.location.href.indexOf( '&tab=' ) + 5 ) ); //get the selected tab name
+			tab_name = tab_name.substr( 0, window.location.href.indexOf( '&' ) ); // incase there are subsequent arguments after the tab argument
 			current_url += '&tab=' + tab_name;
 		}
 
@@ -308,7 +327,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.navigation.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
+		this.navigation.off( 'formItemChange' ).on( 'formItemChange', function( e, target ) {
 			var next_select_item_id = target.getValue();
 			$this.edit_view_error_ui_dic = {};
 			if ( !next_select_item_id ) {
@@ -335,8 +354,9 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	initSubCustomColumnView: function( callBack ) {
-
 		var $this = this;
+
+		$this.sub_view_mode = true;
 
 		if ( this.sub_custom_column_view_controller ) {
 			$this.sub_custom_column_view_controller.edit_only_mode = false;
@@ -347,15 +367,16 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		Global.loadViewSource( 'CustomColumn', 'CustomColumnViewController.js', function() {
-
-			var tabIndex = 3;
-			if ( $this.include_form_setup ) {
-				tabIndex = 4;
-			}
-
-			var tab = $this.edit_view_tab.find( '#tab' + tabIndex );
+			var tab = $this.edit_view_tab.find( '#tab_custom_columns' );
 
 			var firstColumn = tab.find( '.first-column-sub-view' );
+
+			TTPromise.add( 'SubCustomColumnView', 'init' );
+			TTPromise.wait( 'SubCustomColumnView', 'init', function() {
+				firstColumn.css('opacity', '1');
+			} );
+
+			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
 
 			Global.trackView( 'Sub' + 'ReportSchedule' + 'View' );
 			CustomColumnViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
@@ -367,12 +388,12 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		function afterLoadView( subViewController ) {
-
 			$this.sub_custom_column_view_controller = subViewController;
 			$this.sub_custom_column_view_controller.parent_key = 'script';
 			$this.sub_custom_column_view_controller.parent_value = $this.script_name;
 			$this.sub_custom_column_view_controller.parent_view_controller = $this;
 			$this.sub_custom_column_view_controller.edit_only_mode = false;
+			$this.sub_custom_column_view_controller.sub_view_mode = true;
 
 			//init complete
 			if ( callBack ) {
@@ -387,8 +408,9 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	initSubSavedReportView: function( callBack ) {
-
 		var $this = this;
+
+		$this.sub_view_mode = true;
 
 		if ( this.sub_saved_report_view_controller ) {
 			$this.sub_saved_report_view_controller.edit_only_mode = false;
@@ -399,14 +421,16 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		Global.loadViewSource( 'SavedReport', 'SavedReportViewController.js', function() {
-			var tabIndex = 4;
-			if ( $this.include_form_setup ) {
-				tabIndex = 5;
-			}
-
-			var tab = $this.edit_view_tab.find( '#tab' + tabIndex );
+			var tab = $this.edit_view_tab.find( '#tab_saved_reports' );
 
 			var firstColumn = tab.find( '.first-column-sub-view' );
+
+			TTPromise.add( 'SubSavedReportView', 'init' );
+			TTPromise.wait( 'SubSavedReportView', 'init', function() {
+				firstColumn.css('opacity', '1');
+			} );
+
+			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
 
 			Global.trackView( 'Sub' + 'ReportSchedule' + 'View' );
 			SavedReportViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
@@ -424,6 +448,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.sub_saved_report_view_controller.parent_value = $this.script_name;
 			$this.sub_saved_report_view_controller.parent_view_controller = $this;
 			$this.sub_saved_report_view_controller.edit_only_mode = false;
+			$this.sub_saved_report_view_controller.sub_view_mode = true;
 
 			//init complete
 			if ( callBack ) {
@@ -463,12 +488,11 @@ ReportBaseViewController = BaseViewController.extend( {
 		var tab_0_label = this.edit_view.find( 'a[ref=tab_report]' );
 		var tab_1_label = this.edit_view.find( 'a[ref=tab_setup]' );
 		var tab_2_label = this.edit_view.find( 'a[ref=tab_chart]' );
-		var tab_3_label = this.edit_view.find( 'a[ref=tab3]' );
-		var tab_4_label = this.edit_view.find( 'a[ref=tab4]' );
 
 		if ( this.include_form_setup ) {
-
-			var tab_5_label = this.edit_view.find( 'a[ref=tab5]' );
+			var tab_3_label = this.edit_view.find( 'a[ref=tab_form_setup]' );
+			var tab_4_label = this.edit_view.find( 'a[ref=tab_custom_columns]' );
+			var tab_5_label = this.edit_view.find( 'a[ref=tab_saved_reports]' );
 
 			tab_0_label.text( $.i18n._( 'Report' ) );
 			tab_1_label.text( $.i18n._( 'Setup' ) );
@@ -478,8 +502,10 @@ ReportBaseViewController = BaseViewController.extend( {
 			tab_5_label.text( $.i18n._( 'Saved Reports' ) );
 
 			this.buildFormSetupUI();
-
 		} else {
+			var tab_3_label = this.edit_view.find( 'a[ref=tab_custom_columns]' );
+			var tab_4_label = this.edit_view.find( 'a[ref=tab_saved_reports]' );
+
 			tab_0_label.text( $.i18n._( 'Report' ) );
 			tab_1_label.text( $.i18n._( 'Setup' ) );
 			tab_2_label.text( $.i18n._( 'Chart' ) );
@@ -495,7 +521,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			default_args: { filter_data: { script: this.script_name } },
 			navigation_mode: true,
 			show_search_inputs: true,
-			set_empty: true,
+			set_empty: true, //Required in case there are saved reports but none of them are the default.
 			always_search_full_columns: true
 		} );
 
@@ -509,7 +535,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		// Template
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'template', set_empty: true} );
+		form_item_input.TComboBox( { field: 'template', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.templates_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Template' ), form_item_input, tab0_column1 );
 
@@ -534,35 +560,35 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		//Page Orientation
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'page_orientation', set_empty: false} );
+		form_item_input.TComboBox( { field: 'page_orientation', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.page_orientation_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Page Orientation' ), form_item_input, tab1_column1 );
 
 		//Font Size
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'font_size', set_empty: false} );
+		form_item_input.TComboBox( { field: 'font_size', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.font_size_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Font Size' ), form_item_input, tab1_column1 );
 
 		//Disable Grand Total
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'disable_grand_total'} );
+		form_item_input.TCheckbox( { field: 'disable_grand_total' } );
 		this.addEditFieldToColumn( $.i18n._( 'Disable Grand Total' ), form_item_input, tab1_column1 );
 
 		//Show Duplicate Values
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'show_duplicate_values'} );
+		form_item_input.TCheckbox( { field: 'show_duplicate_values' } );
 		this.addEditFieldToColumn( $.i18n._( 'Show Duplicate Values' ), form_item_input, tab1_column1 );
 
 		//Auto-Refresh
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'auto_refresh', set_empty: false} );
+		form_item_input.TComboBox( { field: 'auto_refresh', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.auto_refresh_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Auto-Refresh' ), form_item_input, tab1_column1 );
 
 		//Maximum Pages
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_page_limit', width: 50} );
+		form_item_input.TTextInput( { field: 'maximum_page_limit', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Maximum Pages' ), form_item_input, tab1_column1 );
 
 		//Tab 2 start
@@ -571,36 +597,38 @@ ReportBaseViewController = BaseViewController.extend( {
 
 		//Enable
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable'} );
+		form_item_input.TCheckbox( { field: 'enable' } );
 		this.addEditFieldToColumn( $.i18n._( 'Enable' ), form_item_input, tab2_column1, '' );
 
 		//Display
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'display_mode', set_empty: false} );
+		form_item_input.TComboBox( { field: 'display_mode', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.chart_display_mode_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Display' ), form_item_input, tab2_column1 );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type', set_empty: false} );
+		form_item_input.TComboBox( { field: 'type', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.chart_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab2_column1 );
 
 		//Chart Sub-Totals
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'include_sub_total'} );
+		form_item_input.TCheckbox( { field: 'include_sub_total' } );
 		this.addEditFieldToColumn( $.i18n._( 'Chart Sub-Totals' ), form_item_input, tab2_column1 );
 
 		//Consistent Axis Scales
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'axis_scale_static'} );
+		form_item_input.TCheckbox( { field: 'axis_scale_static' } );
 		this.addEditFieldToColumn( $.i18n._( 'Consistent Axis Scales' ), form_item_input, tab2_column1 );
 
 		//Consistent Axis Scales
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'combine_columns'} );
+		form_item_input.TCheckbox( { field: 'combine_columns' } );
 		this.addEditFieldToColumn( $.i18n._( 'Combine Columns' ), form_item_input, tab2_column1, '' );
 
+
+		TTPromise.resolve('init', 'init');
 	},
 
 	buildFormSetupUI: function() {
@@ -675,7 +703,9 @@ ReportBaseViewController = BaseViewController.extend( {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
-			if ( !this.current_edit_record.hasOwnProperty( key ) )    continue;
+			if ( !this.current_edit_record.hasOwnProperty( key ) ) {
+				continue;
+			}
 
 			var widget = this.edit_view_ui_dic[key];
 			if ( Global.isSet( widget ) ) {
@@ -684,7 +714,7 @@ ReportBaseViewController = BaseViewController.extend( {
 						widget.setValue( this.current_edit_record[key] );
 						break;
 					case 'country': //popular case
-						this.setCountryValue(widget, key);
+						this.setCountryValue( widget, key );
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -728,17 +758,20 @@ ReportBaseViewController = BaseViewController.extend( {
 		//Set url selected tab.
 		if ( window.location.href.indexOf( '&tab=' ) > 0 ) {
 			var tab_name = window.location.href;
-			tab_name = tab_name.substr( ( window.location.href.indexOf('&tab=') + 5 ) ); //get the selected tab name
-			tab_name = tab_name.substr(0, window.location.href.indexOf('&')); // incase there are subsequent arguments after the tab argument
+			tab_name = tab_name.substr( ( window.location.href.indexOf( '&tab=' ) + 5 ) ); //get the selected tab name
+			tab_name = tab_name.substr( 0, window.location.href.indexOf( '&' ) ); // incase there are subsequent arguments after the tab argument
 			var my_tabs = this.edit_view_tab.find( '.edit-view-tab-bar-label' ).children();
 
-			for( var n = 0; n < my_tabs; n++ ) {
-				if( $(my_tabs[n]).find('a').length > 0 && tab_name == $(my_tabs[n]).find('a').html().replace( /\/|\s+/g, '' ) ) {
-					$(my_tabs[n]).find('a').click();
+			for ( var n = 0; n < my_tabs; n++ ) {
+				if ( $( my_tabs[n] ).find( 'a' ).length > 0 && tab_name == $( my_tabs[n] ).find( 'a' ).html().replace( /\/|\s+/g, '' ) ) {
+					$( my_tabs[n] ).find( 'a' ).click();
 					break;
 				}
 			}
 		}
+
+		TTPromise.resolve( 'init', 'init' );
+		$('.edit-view-tab-bar').css('opacity', 1);
 
 	},
 
@@ -810,13 +843,13 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	//Shim method to allow override for classes that need their own onFormItemChange for a specific purpose ie payroll export reports
 	//eg in payroll export, when export_type is changed, we need to execute code but also need the default behaviour of onFormItemChange.
-	preFormItemChange: function (target, doNotDoValidate) {
+	preFormItemChange: function( target, doNotDoValidate ) {
 		return true;
 	},
 
 	/* jshint ignore:start */
 	onFormItemChange: function( target, doNotDoValidate ) {
-		this.preFormItemChange(target); //shim for child class
+		this.preFormItemChange( target ); //shim for child class
 		var $this = this;
 		this.setIsChanged( target );
 		var key = target.getField();
@@ -834,7 +867,7 @@ ReportBaseViewController = BaseViewController.extend( {
 				time_period = target.getValue();
 
 				if ( !this.visible_report_values[key] || this.visible_report_values[key].time_period !== time_period ) {
-					this.visible_report_values[key] = {time_period: time_period};
+					this.visible_report_values[key] = { time_period: time_period };
 					this.onTimePeriodChange( target );
 				}
 
@@ -848,7 +881,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			} else if ( key === 'membership_renewal_date' ) {
 				membership_renewal_date = target.getValue();
-				this.visible_report_values[key] = {time_period: membership_renewal_date};
+				this.visible_report_values[key] = { time_period: membership_renewal_date };
 
 				this.onMembershipRenewalDateChange( target );
 			} else if ( key === 'start_date_1' || key === 'end_date_1' || key === 'pay_period_id_1' || key === 'pay_period_schedule_id_1' ) {
@@ -857,7 +890,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			} else if ( key === 'skill_expiry_date' ) {
 				skill_expiry_date = target.getValue();
-				this.visible_report_values[key] = {time_period: skill_expiry_date};
+				this.visible_report_values[key] = { time_period: skill_expiry_date };
 
 				this.onSkillExpiryDate( target );
 			} else if ( key === 'start_date_2' || key === 'end_date_2' || key === 'pay_period_id_2' || key === 'pay_period_schedule_id_2' ) {
@@ -866,7 +899,7 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			} else if ( key === 'license_expiry_date' ) {
 				license_expiry_date = target.getValue();
-				this.visible_report_values[key] = {time_period: license_expiry_date};
+				this.visible_report_values[key] = { time_period: license_expiry_date };
 
 				this.onLicenseExpiryDate( target );
 			} else if ( key === 'start_date_3' || key === 'end_date_3' || key === 'pay_period_id_3' || key === 'pay_period_schedule_id_3' ) {
@@ -896,17 +929,12 @@ ReportBaseViewController = BaseViewController.extend( {
 			$this.onTemplateChange( this.current_edit_record[key] );
 			$this.setEditMenu(); //clean error, set edit menu
 		} else {
-
-			if ( this.edit_view_tab_selected_index === 0 ) {
-				if ( !doNotDoValidate ) {
-					this.validate();
-				}
-
+			if ( !doNotDoValidate ) {
+				this.validate();
 			}
-
 		}
 
-		if ( this.include_form_setup && this.edit_view_tab_selected_index === 3 ) {
+		if ( this.include_form_setup && key === 3 ) {
 			this.form_setup_changed = true;
 		}
 	},
@@ -928,23 +956,24 @@ ReportBaseViewController = BaseViewController.extend( {
 		var result = Global.buildRecordArray( result_data );
 
 		var len = result.length;
-		$this.current_edit_record.setup_field = [];
-		$this.visible_report_values = {};
+		if ( $this.current_edit_record ) {
+			$this.current_edit_record.setup_field = [];
+			$this.visible_report_values = {};
 
-		for ( var i = 0; i < len; i++ ) {
-			var item = result[i];
+			for ( var i = 0; i < len; i++ ) {
+				var item = result[i];
 
-			if ( item.value === 'template' ) {
-				continue;
+				if ( item.value === 'template' ) {
+					continue;
+				}
+
+				$this.visible_report_values[item.value] = item.label; // set value to model
+				$this.current_edit_record.setup_field.push( item.value );
+
 			}
 
-			$this.visible_report_values[item.value] = item.label; // set value to model
-			$this.current_edit_record.setup_field.push( item.value );
-
+			$this.createUI( result );
 		}
-
-		$this.createUI( result );
-
 	},
 
 	getFieldLabel: function( field ) {
@@ -1003,9 +1032,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 			//Add widget first
 			if ( field.indexOf( 'time_period' ) >= 0 ||
-				field === 'membership_renewal_date' ||
-				field === 'skill_expiry_date' ||
-				field == 'license_expiry_date' ) {
+					field === 'membership_renewal_date' ||
+					field === 'skill_expiry_date' ||
+					field == 'license_expiry_date' ) {
 				this.addEditFieldToColumn( $.i18n._( this.getFieldLabel( field ) ), widget, tab0_column1, '', null, true, true );
 				$this.edit_view_form_item_dic[field].attr( 'id', 'report_' + field + '_div' );
 
@@ -1070,9 +1099,9 @@ ReportBaseViewController = BaseViewController.extend( {
 	//
 	// },
 	/* jshint ignore:start */
-	onTabShow: function( e, ui ) {
+	onTabShow: function( e ) {
 		var $this = this;
-		var key = ui.index;
+		var key = $( e.target ).tabs( 'option', 'active' );
 
 		this.editFieldResize( key );
 
@@ -1080,24 +1109,22 @@ ReportBaseViewController = BaseViewController.extend( {
 			return;
 		}
 
-		var last_index = this.edit_view_tab_selected_index;
-
-		this.edit_view_tab_selected_index = ui.index;
+		var last_index = this.getEditViewTabIndex();
 
 		if ( !this.include_form_setup ) {
-			if ( (last_index === 1 || this.need_refresh_display_columns) && ui.index === 0 ) {
+			if ( (last_index === 1 || this.need_refresh_display_columns) && key === 0 ) {
 				this.buildReportUIBaseOnSetupFields();
 				this.buildContextMenu( true );
 				this.setEditMenu();
-			} else if ( ui.index === 1 ) {
+			} else if ( key === 1 ) {
 				this.edit_view_ui_dic.setup_field.setValue( this.current_edit_record.setup_field );
 				if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
 					this.edit_view_ui_dic.auto_refresh.parent().parent().css( 'display', 'none' );
 				}
 				this.buildContextMenu( true );
 				this.setEditMenu();
-			} else if ( ui.index === 2 ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+			} else if ( key === 2 ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 					this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				} else {
@@ -1105,38 +1132,38 @@ ReportBaseViewController = BaseViewController.extend( {
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 				}
-			} else if ( ui.index === 3 ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-					this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+			} else if ( key === 3 ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+					this.edit_view_tab.find( '#tab_custom_columns' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 					this.initSubCustomColumnView();
 				} else {
-					this.edit_view_tab.find( '#tab3' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+					this.edit_view_tab.find( '#tab_custom_columns' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 
 				}
 
-			} else if ( ui.index === 4 ) {
+			} else if ( key === 4 ) {
 				this.initSubSavedReportView();
 			} else {
 				this.buildContextMenu( true );
 				this.setEditMenu();
 			}
 		} else {
-			if ( (last_index === 1 || this.need_refresh_display_columns) && ui.index === 0 ) {
+			if ( (last_index === 1 || this.need_refresh_display_columns) && key === 0 ) {
 				this.buildReportUIBaseOnSetupFields();
 				this.buildContextMenu( true );
 				this.setEditMenu();
-			} else if ( ui.index === 1 ) {
+			} else if ( key === 1 ) {
 				this.edit_view_ui_dic.setup_field.setValue( this.current_edit_record.setup_field );
 				if ( LocalCacheData.getCurrentCompany().product_edition_id == 10 ) {
 					this.edit_view_ui_dic.auto_refresh.parent().parent().css( 'display', 'none' );
 				}
 				this.buildContextMenu( true );
 				this.setEditMenu();
-			} else if ( ui.index === 2 ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+			} else if ( key === 2 ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 					this.edit_view_tab.find( '#tab_chart' ).find( '.first-column' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 				} else {
@@ -1144,29 +1171,29 @@ ReportBaseViewController = BaseViewController.extend( {
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 				}
-			} else if ( ui.index === 4 ) {
-				if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-					this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
+			} else if ( key === 4 ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+					this.edit_view_tab.find( '#tab_form_setup' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 					this.initSubCustomColumnView();
 				} else {
-					this.edit_view_tab.find( '#tab4' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+					this.edit_view_tab.find( '#tab_form_setup' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
 					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 					this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 
 				}
-			} else if ( ui.index === 5 ) {
+			} else if ( key === 5 ) {
 				this.initSubSavedReportView();
 			} else {
 				this.buildContextMenu( true );
 				this.setEditMenu();
 			}
 
-			this.checkFormSetupSaved(last_index);
+			this.checkFormSetupSaved( last_index );
 
 		}
 
-		if ( ui.index === 0 ) {
+		if ( key === 0 ) {
 			this.validate();
 		}
 	},
@@ -1176,21 +1203,21 @@ ReportBaseViewController = BaseViewController.extend( {
 	 * FIXME: might need to go into BaseViewController eventually
 	 * @param label
 	 */
-	checkFormSetupSaved: function ( last_index, label ) {
+	checkFormSetupSaved: function( last_index, label ) {
 		var $this = this;
 
 		if ( label == undefined ) {
 			label = $.i18n._( 'Form Setup' );
 		}
 
-			if ( last_index === 3 && this.form_setup_changed ) {
+		if ( last_index === 3 && this.form_setup_changed ) {
 			$this.form_setup_changed = false;
-			TAlertManager.showConfirmAlert( $.i18n._( 'You have modified') + ' ' + label + ' ' + $.i18n._('data without saving, would you like to save your data now?' ), '', function ( flag ) {
-					if ( flag ) {
+			TAlertManager.showConfirmAlert( $.i18n._( 'You have modified' ) + ' ' + label + ' ' + $.i18n._( 'data without saving, would you like to save your data now?' ), '', function( flag ) {
+				if ( flag ) {
 					$this.onSaveSetup( label );
-					}
-				} );
-			}
+				}
+			} );
+		}
 	},
 
 	/* jshint ignore:end */
@@ -1236,199 +1263,199 @@ ReportBaseViewController = BaseViewController.extend( {
 			widget = this.getSimpleTComboBox( field, false );
 		} else {
 
-		switch ( field ) {
-			case 'is_reprint':
-				widget = this.getCheckBox( field );
-				break;
-			case 'columns':
-			case 'sub_total':
-			case 'group':
-			case 'user_review_control_type_id':
-			case 'user_review_control_status_id':
-			case 'severity_id':
-			case 'term_id':
-			case 'kpi_type_id':
-			case 'kpi_status_id':
-			case 'fluency_id':
-			case 'qualification_type_id':
-			case 'proficiency_id':
-			case 'competency_id':
-			case 'ownership_id':
-			case 'invoice_status_id':
-			case 'user_status_id':
-			case 'pay_stub_status_id':
-			case 'filter':
-			case 'pay_period_time_sheet_verify_status_id':
-			case 'job_status_id':
-			case 'job_item_status_id':
-			case 'client_status_id':
-			case 'product_type_id':
-			case 'custom_filter':
-			case 'log_action_id':
-			case 'log_table_name_id':
-			case 'accrual_type_id':
-			case 'accrual_policy_type_id':
-			case 'exception_policy_severity_id':
-			case 'exception_policy_type_id':
-			case 'expense_policy_require_receipt_id':
-			case 'expense_policy_type_id':
-			case 'user_expense_payment_method_id':
-			case 'user_expense_status_id':
-			case 'job_applicant_sex_id':
-			case 'job_applicant_status_id':
-			case 'job_application_status_id':
-			case 'job_application_type_id':
-			case 'job_vacancy_employment_status_id':
-			case 'job_vacancy_level_id':
-			case 'job_vacancy_status_id':
-			case 'job_vacancy_type_id':
-			case 'job_vacancy_wage_type_id':
-			case 'pay_stub_run_id':
-			case 'pay_stub_type_id':
-			case 'remittance_source_account_type_id':
-			case 'transaction_type_id':
-			case 'transaction_status_id':
-				widget = this.getSimpleTComboBox( field );
-				break;
-			case 'sort':
-				widget = this.getSortComboBox( field );
-				break;
-			case 'license_expiry_date':
-			case 'membership_renewal_date':
-			case 'skill_expiry_date':
-				widget = this.getComboBox( field );
-				break;
-			case 'user_group_id':
-			case 'qualification_group_id':
-			case 'kpi_group_id':
-			case 'job_group_id':
-			case 'job_item_group_id':
-			case 'client_group_id':
-			case 'product_group_id':
-				widget = this.getTreeModeAComboBox( field );
-				break;
-			case 'user_tag':
-			case 'review_tag':
-			case 'job_tag':
-			case 'job_item_tag':
-				widget = this.getTag( field );
-				break;
-			case 'include_user_id':
-			case 'exclude_user_id':
-			case 'client_sales_contact_id':
-			case 'created_by_id':
-			case 'updated_by_id':
-			case 'include_reviewer_user_id':
-			case 'exclude_reviewer_user_id':
-			case 'job_applicant_interviewer_user_id':
-			case 'job_application_interviewer_user_id':
-				widget = this.getTComboBox( field, ALayoutIDs.USER, (APIFactory.getAPIClass( 'APIUser' )) );
-				break;
-			case 'user_title_id':
-				widget = this.getTComboBox( field, ALayoutIDs.USER_TITLE, (APIFactory.getAPIClass( 'APIUserTitle' )) );
-				break;
-			case 'payroll_remittance_agency_id':
-				widget = this.getTComboBox( field, ALayoutIDs.PAYROLL_REMITTANCE_AGENCY, (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' )) );
-				break;
-			case 'legal_entity_id':
-				widget = this.getTComboBox( field, ALayoutIDs.LEGAL_ENTITY, (APIFactory.getAPIClass( 'APILegalEntity' )) );
-				break;
-			case 'default_branch_id':
-			case 'schedule_branch_id':
-			case 'punch_branch_id':
+			switch ( field ) {
+				case 'is_reprint':
+					widget = this.getCheckBox( field );
+					break;
+				case 'columns':
+				case 'sub_total':
+				case 'group':
+				case 'user_review_control_type_id':
+				case 'user_review_control_status_id':
+				case 'severity_id':
+				case 'term_id':
+				case 'kpi_type_id':
+				case 'kpi_status_id':
+				case 'fluency_id':
+				case 'qualification_type_id':
+				case 'proficiency_id':
+				case 'competency_id':
+				case 'ownership_id':
+				case 'invoice_status_id':
+				case 'user_status_id':
+				case 'pay_stub_status_id':
+				case 'filter':
+				case 'pay_period_time_sheet_verify_status_id':
+				case 'job_status_id':
+				case 'job_item_status_id':
+				case 'client_status_id':
+				case 'product_type_id':
+				case 'custom_filter':
+				case 'log_action_id':
+				case 'log_table_name_id':
+				case 'accrual_type_id':
+				case 'accrual_policy_type_id':
+				case 'exception_policy_severity_id':
+				case 'exception_policy_type_id':
+				case 'expense_policy_require_receipt_id':
+				case 'expense_policy_type_id':
+				case 'user_expense_payment_method_id':
+				case 'user_expense_status_id':
+				case 'job_applicant_sex_id':
+				case 'job_applicant_status_id':
+				case 'job_application_status_id':
+				case 'job_application_type_id':
+				case 'job_vacancy_employment_status_id':
+				case 'job_vacancy_level_id':
+				case 'job_vacancy_status_id':
+				case 'job_vacancy_type_id':
+				case 'job_vacancy_wage_type_id':
+				case 'pay_stub_run_id':
+				case 'pay_stub_type_id':
+				case 'remittance_source_account_type_id':
+				case 'transaction_type_id':
+				case 'transaction_status_id':
+					widget = this.getSimpleTComboBox( field );
+					break;
+				case 'sort':
+					widget = this.getSortComboBox( field );
+					break;
+				case 'license_expiry_date':
+				case 'membership_renewal_date':
+				case 'skill_expiry_date':
+					widget = this.getComboBox( field );
+					break;
+				case 'user_group_id':
+				case 'qualification_group_id':
+				case 'kpi_group_id':
+				case 'job_group_id':
+				case 'job_item_group_id':
+				case 'client_group_id':
+				case 'product_group_id':
+					widget = this.getTreeModeAComboBox( field );
+					break;
+				case 'user_tag':
+				case 'review_tag':
+				case 'job_tag':
+				case 'job_item_tag':
+					widget = this.getTag( field );
+					break;
+				case 'include_user_id':
+				case 'exclude_user_id':
+				case 'client_sales_contact_id':
+				case 'created_by_id':
+				case 'updated_by_id':
+				case 'include_reviewer_user_id':
+				case 'exclude_reviewer_user_id':
+				case 'job_applicant_interviewer_user_id':
+				case 'job_application_interviewer_user_id':
+					widget = this.getTComboBox( field, ALayoutIDs.USER, (APIFactory.getAPIClass( 'APIUser' )) );
+					break;
+				case 'user_title_id':
+					widget = this.getTComboBox( field, ALayoutIDs.USER_TITLE, (APIFactory.getAPIClass( 'APIUserTitle' )) );
+					break;
+				case 'payroll_remittance_agency_id':
+					widget = this.getTComboBox( field, ALayoutIDs.PAYROLL_REMITTANCE_AGENCY, (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' )) );
+					break;
+				case 'legal_entity_id':
+					widget = this.getTComboBox( field, ALayoutIDs.LEGAL_ENTITY, (APIFactory.getAPIClass( 'APILegalEntity' )) );
+					break;
+				case 'default_branch_id':
+				case 'schedule_branch_id':
+				case 'punch_branch_id':
 
-				widget = this.getTComboBox( field, ALayoutIDs.BRANCH, (APIFactory.getAPIClass( 'APIBranch' )) );
-				break;
-			case 'default_department_id':
-			case 'schedule_department_id':
-			case 'punch_department_id':
-				widget = this.getTComboBox( field, ALayoutIDs.DEPARTMENT, (APIFactory.getAPIClass( 'APIDepartment' )) );
-				break;
+					widget = this.getTComboBox( field, ALayoutIDs.BRANCH, (APIFactory.getAPIClass( 'APIBranch' )) );
+					break;
+				case 'default_department_id':
+				case 'schedule_department_id':
+				case 'punch_department_id':
+					widget = this.getTComboBox( field, ALayoutIDs.DEPARTMENT, (APIFactory.getAPIClass( 'APIDepartment' )) );
+					break;
 				case 'default_job_id':
 				case 'punch_job_id':
-			case 'include_job_id':
-			case 'exclude_job_id':
-				widget = this.getTComboBox( field, ALayoutIDs.JOB, (APIFactory.getAPIClass( 'APIJob' )) );
-				break;
+				case 'include_job_id':
+				case 'exclude_job_id':
+					widget = this.getTComboBox( field, ALayoutIDs.JOB, (APIFactory.getAPIClass( 'APIJob' )) );
+					break;
 				case 'default_job_item_id':
 				case 'punch_job_item_id':
-			case 'include_job_item_id':
-			case 'exclude_job_item_id':
-				widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, (APIFactory.getAPIClass( 'APIJobItem' )) );
-				break;
-			case 'absence_policy_id':
-				widget = this.getTComboBox( field, ALayoutIDs.ABSENCES_POLICY, (APIFactory.getAPIClass( 'APIAbsencePolicy' )) );
-				break;
-			case 'currency_id':
-				widget = this.getTComboBox( field, ALayoutIDs.CURRENCY, (APIFactory.getAPIClass( 'APICurrency' )) );
-				break;
-			case 'include_no_data_rows':
-			case 'exclude_ytd_adjustment':
-			case 'show_child_expenses':
-				widget = this.getCheckBox( field );
-				break;
-			case 'accrual_policy_id':
-				widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY, (APIFactory.getAPIClass( 'APIAccrualPolicy' )) );
-				break;
-			case 'pay_period_id':
-				widget = this.getTComboBox( field, ALayoutIDs.PAY_PERIOD, (APIFactory.getAPIClass( 'APIPayPeriod' )) );
-				break;
-			case 'job_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-					widget = this.getTComboBox( field, ALayoutIDs.JOB, (APIFactory.getAPIClass( 'APIJob' )) );
-				}
-				break;
-			case 'job_item_id':
-				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+				case 'include_job_item_id':
+				case 'exclude_job_item_id':
 					widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, (APIFactory.getAPIClass( 'APIJobItem' )) );
-				}
-				break;
-			case 'expense_policy_id':
-				widget = this.getTComboBox( field, ALayoutIDs.EXPENSE_POLICY, (APIFactory.getAPIClass( 'APIExpensePolicy' )) );
-				break;
-			case 'pay_stub_entry_account_id':
-				widget = this.getTComboBox( field, ALayoutIDs.PAY_STUB_ACCOUNT, (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )) );
-				break;
-			case 'product_id':
-			case 'exclude_product_id':
-			case 'include_product_id':
-				widget = this.getTComboBox( field, ALayoutIDs.PRODUCT, (APIFactory.getAPIClass( 'APIProduct' )) );
-				break;
-			case 'job_client_id':
-			case 'exclude_client_id':
-			case 'include_client_id':
-				widget = this.getTComboBox( field, ALayoutIDs.CLIENT, (APIFactory.getAPIClass( 'APIClient' )) );
-				break;
-			case 'company_deduction_id':
-				widget = this.getTComboBox( field, ALayoutIDs.COMPANY_DEDUCTION, (APIFactory.getAPIClass( 'APICompanyDeduction' )) );
-				break;
-			case 'qualification_id':
-				widget = this.getTComboBox( field, ALayoutIDs.QUALIFICATION, (APIFactory.getAPIClass( 'APIQualification' )) );
-				break;
-			case 'kpi_id':
-				widget = this.getTComboBox( field, ALayoutIDs.KPI, (APIFactory.getAPIClass( 'APIKPI' )) );
-				break;
-			case 'job_applicant_id':
-				widget = this.getTComboBox( field, ALayoutIDs.JOB_APPLICANT, (APIFactory.getAPIClass( 'APIJobApplicant' )) );
-				break;
-			case 'job_vacancy_id':
-				widget = this.getTComboBox( field, ALayoutIDs.JOB_VACANCY, (APIFactory.getAPIClass( 'APIJobVacancy' )) );
-				break;
-			case 'accrual_policy_account_id':
-				widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY_ACCOUNT, (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )) );
-				break;
+					break;
+				case 'absence_policy_id':
+					widget = this.getTComboBox( field, ALayoutIDs.ABSENCES_POLICY, (APIFactory.getAPIClass( 'APIAbsencePolicy' )) );
+					break;
+				case 'currency_id':
+					widget = this.getTComboBox( field, ALayoutIDs.CURRENCY, (APIFactory.getAPIClass( 'APICurrency' )) );
+					break;
+				case 'include_no_data_rows':
+				case 'exclude_ytd_adjustment':
+				case 'show_child_expenses':
+					widget = this.getCheckBox( field );
+					break;
+				case 'accrual_policy_id':
+					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY, (APIFactory.getAPIClass( 'APIAccrualPolicy' )) );
+					break;
+				case 'pay_period_id':
+					widget = this.getTComboBox( field, ALayoutIDs.PAY_PERIOD, (APIFactory.getAPIClass( 'APIPayPeriod' )) );
+					break;
+				case 'job_id':
+					if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						widget = this.getTComboBox( field, ALayoutIDs.JOB, (APIFactory.getAPIClass( 'APIJob' )) );
+					}
+					break;
+				case 'job_item_id':
+					if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+						widget = this.getTComboBox( field, ALayoutIDs.JOB_ITEM, (APIFactory.getAPIClass( 'APIJobItem' )) );
+					}
+					break;
+				case 'expense_policy_id':
+					widget = this.getTComboBox( field, ALayoutIDs.EXPENSE_POLICY, (APIFactory.getAPIClass( 'APIExpensePolicy' )) );
+					break;
+				case 'pay_stub_entry_account_id':
+					widget = this.getTComboBox( field, ALayoutIDs.PAY_STUB_ACCOUNT, (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )) );
+					break;
+				case 'product_id':
+				case 'exclude_product_id':
+				case 'include_product_id':
+					widget = this.getTComboBox( field, ALayoutIDs.PRODUCT, (APIFactory.getAPIClass( 'APIProduct' )) );
+					break;
+				case 'job_client_id':
+				case 'exclude_client_id':
+				case 'include_client_id':
+					widget = this.getTComboBox( field, ALayoutIDs.CLIENT, (APIFactory.getAPIClass( 'APIClient' )) );
+					break;
+				case 'company_deduction_id':
+					widget = this.getTComboBox( field, ALayoutIDs.COMPANY_DEDUCTION, (APIFactory.getAPIClass( 'APICompanyDeduction' )) );
+					break;
+				case 'qualification_id':
+					widget = this.getTComboBox( field, ALayoutIDs.QUALIFICATION, (APIFactory.getAPIClass( 'APIQualification' )) );
+					break;
+				case 'kpi_id':
+					widget = this.getTComboBox( field, ALayoutIDs.KPI, (APIFactory.getAPIClass( 'APIKPI' )) );
+					break;
+				case 'job_applicant_id':
+					widget = this.getTComboBox( field, ALayoutIDs.JOB_APPLICANT, (APIFactory.getAPIClass( 'APIJobApplicant' )) );
+					break;
+				case 'job_vacancy_id':
+					widget = this.getTComboBox( field, ALayoutIDs.JOB_VACANCY, (APIFactory.getAPIClass( 'APIJobVacancy' )) );
+					break;
+				case 'accrual_policy_account_id':
+					widget = this.getTComboBox( field, ALayoutIDs.ACCRUAL_POLICY_ACCOUNT, (APIFactory.getAPIClass( 'APIAccrualPolicyAccount' )) );
+					break;
 
-			default:
+				default:
 
-				if ( !Global.isSet( ReportBaseViewController.ReportMissedField ) ) {
-					ReportBaseViewController.ReportMissedField = {};
-				}
+					if ( !Global.isSet( ReportBaseViewController.ReportMissedField ) ) {
+						ReportBaseViewController.ReportMissedField = {};
+					}
 
-				ReportBaseViewController.ReportMissedField[field] = true;
+					ReportBaseViewController.ReportMissedField[field] = true;
 
-				break;
+					break;
 
-		}
+			}
 		}
 
 		return widget;
@@ -1437,7 +1464,7 @@ ReportBaseViewController = BaseViewController.extend( {
 	getTag: function( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
-		widget.TTagInput( {field: field} );
+		widget.TTagInput( { field: field } );
 
 		return widget;
 	},
@@ -1902,7 +1929,7 @@ ReportBaseViewController = BaseViewController.extend( {
 	getDatePicker: function( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		widget.TDatePicker( {field: field} );
+		widget.TDatePicker( { field: field } );
 
 		return widget;
 	},
@@ -1945,7 +1972,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'license_expiry_date', false, false );
 			$this.initSourceData( 'license_expiry_date', time_period );
@@ -1972,9 +1999,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
 
@@ -1986,7 +2013,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'license_expiry_date', false, false );
 			$this.initSourceData( 'license_expiry_date', time_period );
@@ -2015,9 +2042,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
@@ -2049,7 +2076,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'license_expiry_date', false, false );
 			$this.initSourceData( 'license_expiry_date', time_period );
@@ -2085,11 +2112,11 @@ ReportBaseViewController = BaseViewController.extend( {
 			} );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item3 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
@@ -2125,7 +2152,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'skill_expiry_date', false, false );
 			$this.initSourceData( 'skill_expiry_date', time_period );
@@ -2152,9 +2179,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
 
@@ -2166,7 +2193,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'skill_expiry_date', false, false );
 			$this.initSourceData( 'skill_expiry_date', time_period );
@@ -2195,9 +2222,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
@@ -2229,7 +2256,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'skill_expiry_date', false, false );
 			$this.initSourceData( 'skill_expiry_date', time_period );
@@ -2265,11 +2292,11 @@ ReportBaseViewController = BaseViewController.extend( {
 			} );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item3 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
@@ -2305,7 +2332,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'membership_renewal_date', false, false );
 			$this.initSourceData( 'membership_renewal_date', time_period );
@@ -2332,9 +2359,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
 
@@ -2346,7 +2373,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'membership_renewal_date', false, false );
 			$this.initSourceData( 'membership_renewal_date', time_period );
@@ -2375,9 +2402,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
@@ -2409,7 +2436,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( 'membership_renewal_date', false, false );
 			$this.initSourceData( 'membership_renewal_date', time_period );
@@ -2445,11 +2472,11 @@ ReportBaseViewController = BaseViewController.extend( {
 			} );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item3 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 62 );
 
@@ -2480,7 +2507,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( field, false, false );
 			$this.initSourceData( field, time_period );
@@ -2506,9 +2533,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 120 );
 
@@ -2520,7 +2547,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( field, false, false );
 			$this.initSourceData( field, time_period );
@@ -2548,9 +2575,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			form_input_div.append( v_box );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 70 );
 
@@ -2582,7 +2609,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			var form_input_div = $( form_item_div.children()[1] );
 			form_input_div.empty();
 
-			var v_box = $( "<div class='v-box'></div>" );
+			var v_box = $( '<div class=\'v-box\'></div>' );
 
 			var time_period = $this.getSimpleTComboBox( field, false, false );
 			$this.initSourceData( field, time_period );
@@ -2617,11 +2644,11 @@ ReportBaseViewController = BaseViewController.extend( {
 			} );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item2 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 			v_box.append( form_item3 );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			$this.setEditFieldSize( v_box.find( '.edit-view-form-item-sub-label-div > span' ), 62 );
 
@@ -2654,9 +2681,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			}
 
 			if ( key === 'time_period' ||
-				key === 'membership_renewal_date' ||
-				key === 'skill_expiry_date' ||
-				key === 'license_expiry_date' ) {
+					key === 'membership_renewal_date' ||
+					key === 'skill_expiry_date' ||
+					key === 'license_expiry_date' ) {
 				if ( this.visible_report_widgets[key] && this.visible_report_widgets[key].is( ':visible' ) ) {
 					this.visible_report_widgets[key].setErrorStyle( error_list[key], true );
 					found_in_current_tab = true;
@@ -2829,17 +2856,17 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		if ( !synchronous ) {
-		this.api['validateReport']( config, 'pdf', {
-			onResult: function( result ) {
-				$this.validateResult( result );
-			}
-		} );
+			this.api['validateReport']( config, 'pdf', {
+				onResult: function( result ) {
+					$this.validateResult( result );
+				}
+			} );
 
 			return null;
 		} else {
 			//#2293 - synchronous call to validation api allows us to return the value in realtime
-			var result = this.api['validateReport'](config, 'pdf', {async: false});
-			this.validateResult(result);
+			var result = this.api['validateReport']( config, 'pdf', { async: false } );
+			this.validateResult( result );
 
 			return result.getResult();
 		}
@@ -2849,13 +2876,13 @@ ReportBaseViewController = BaseViewController.extend( {
 	onViewExcelClick: function( message_override ) {
 
 		var config = this.getPostReportJson();
-		var post_data = {0: config, 1: 'csv'};
+		var post_data = { 0: config, 1: 'csv' };
 
 		if ( this.include_form_setup ) {
 
 			if ( this.show_empty_message ) {
 				var message = $.i18n._( 'Setup data for this report has not been completed yet. Please click on the Form Setup tab to do so now.' );
-				if( message_override ) {
+				if ( message_override ) {
 					message = message_override;
 				}
 				TAlertManager.showAlert( message );
@@ -2868,10 +2895,20 @@ ReportBaseViewController = BaseViewController.extend( {
 		this.doFormIFrameCall( post_data );
 	},
 
+	getVisibleReportValues: function() {
+		//#2353 - cut out any zero uuid strings, they are likely --none-- in a multiselect
+		for ( var i in this.visible_report_values.filter ) {
+			if ( this.visible_report_values.filter[i] == TTUUID.zero_id ) {
+				delete this.visible_report_values.filter[i];
+			}
+		}
+		return this.visible_report_values;
+	},
+
 	getPostReportJson: function( noPreFix ) {
 		var other = this.getFormValues();
 		var chart = this.getChartValues();
-		var report = this.visible_report_values;
+		var report = this.getVisibleReportValues();
 
 		if ( report.sort ) {
 			report.sort = this.convertSortValues( report.sort );
@@ -2901,7 +2938,22 @@ ReportBaseViewController = BaseViewController.extend( {
 		return config;
 	},
 
+	//Reports don't share many icons with other views, so override the entire function here.
 	onContextMenuClick: function( context_btn, menu_name ) {
+		ProgressBar.showOverlay();
+		//this flag is turned off in ProgressBarManager::closeOverlay, or 2s whichever happens first
+		if ( window.clickProcessing == true ) {
+			return;
+		} else {
+			window.clickProcessing = true;
+			window.clickProcessingHandle = window.setTimeout( function() {
+				if ( window.clickProcessing == true ) {
+					window.clickProcessing = false;
+					ProgressBar.closeOverlay();
+					TTPromise.wait();
+				}
+			}, 1000 );
+		}
 		var id;
 		if ( Global.isSet( menu_name ) ) {
 			id = menu_name;
@@ -2911,6 +2963,7 @@ ReportBaseViewController = BaseViewController.extend( {
 			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			if ( context_btn.hasClass( 'disable-image' ) ) {
+				ProgressBar.closeOverlay();
 				return;
 			}
 		}
@@ -2942,6 +2995,22 @@ ReportBaseViewController = BaseViewController.extend( {
 				break;
 			case ContextMenuIconName.save_setup: //All report view
 				this.onSaveSetup();
+				break;
+			case ContextMenuIconName.view_form: //All report view
+				this.onViewClick( 'pdf_form' );
+				break;
+			case ContextMenuIconName.e_file: //All report view
+				this.onViewClick( 'efile' );
+				break;
+			case ContextMenuIconName.timesheet_view: //All report view
+				this.onViewClick( 'pdf_timesheet' );
+				break;
+			case ContextMenuIconName.timesheet_view_detail: //All report view
+				this.onViewClick( 'pdf_timesheet_detail' );
+				break;
+			default:
+				ProgressBar.closeOverlay();
+				this.onCustomContextClick( id, context_btn );
 				break;
 		}
 	},
@@ -2998,7 +3067,7 @@ ReportBaseViewController = BaseViewController.extend( {
 		}
 
 		var config = this.getPostReportJson();
-		var post_data = {0: config, 1: key};
+		var post_data = { 0: config, 1: key };
 		if ( this.include_form_setup ) {
 			if ( this.show_empty_message ) {
 				var message = $.i18n._( 'Setup data for this report has not been completed yet. Please click on the Form Setup tab to do so now.' );
@@ -3039,9 +3108,9 @@ ReportBaseViewController = BaseViewController.extend( {
 			refresh_request += ' try {';
 			refresh_request += '		$.ajax({';
 			refresh_request += '			dataType: "JSON",';
-			refresh_request += "			data: {json:'" + JSON.stringify( post_data ).replace(/'/g, "\\'") + "'},";
+			refresh_request += '			data: {json:\'' + JSON.stringify( post_data ).replace( /'/g, '\\\'' ) + '\'},';
 			refresh_request += '			type: "POST",';
-			refresh_request += "            url: '" + url + "',";
+			refresh_request += '            url: \'' + url + '\',';
 			refresh_request += '			success: function(result) {';
 			refresh_request += '			if(console){ console.log( "Auto refreshing report..." ) }';
 			refresh_request += '			var newDoc = result.api_retval + $(\'body\').children(\':last\')[0].outerHTML; document.open("text/html"); document.write(newDoc); document.close(); ';
@@ -3078,7 +3147,8 @@ ReportBaseViewController = BaseViewController.extend( {
 				onResult: function( result ) {
 					var retval = result.getResult();
 					if ( retval ) {
-						UserGenericStatusWindowController.open( retval, LocalCacheData.getLoginUser().id, function() {} );
+						UserGenericStatusWindowController.open( retval, LocalCacheData.getLoginUser().id, function() {
+						} );
 						ProgressBar.closeOverlay();
 					}
 				}
@@ -3090,9 +3160,9 @@ ReportBaseViewController = BaseViewController.extend( {
 
 	},
 
-	processTransactions: function (key) {
-		var args = this.getPostReportJson(true);
-		var post_data = {0: {filter_data: args}, 1: true, 2: key};
+	processTransactions: function( key ) {
+		var args = this.getPostReportJson( true );
+		var post_data = { 0: { filter_data: args }, 1: true, 2: key };
 		var pay_stub_api = new (APIFactory.getAPIClass( 'APIPayStub' ))();
 		var url = ServiceCaller.getURLWithSessionId( 'Class=' + pay_stub_api.className + '&Method=' + 'get' + pay_stub_api.key_name );
 		Global.APIFileDownload( pay_stub_api.className, pay_stub_api.key_name, post_data, url );
@@ -3220,21 +3290,23 @@ ReportBaseViewController = BaseViewController.extend( {
 	},
 
 	//#2543 - fixing disconnected menu leading to page_orientation JavaScript exception
-	onCloseIconClick: function() {
-		if ( LocalCacheData.current_open_sub_controller ) {
-			LocalCacheData.current_open_sub_controller.onCancelClick();
-		} else {
-			var $this = this;
-			this.onCancelClick(null,null, function(){
-				if ( !this.edit_view ) {
-					$this.parent_view_controller.buildContextMenu();
-					$this.parent_view_controller.setDefaultMenu();
-				} else {
-					$this.buildEditMenu();
-				}
-			});
-		}
-	}
+	//This caused a bug that if you go to Dashboard, then Report -> TimeSheet Report, then click the X at the top right, the ribbon menu would get out of sync and have the last "Help" top level menu selected.
+	// onCloseIconClick: function() {
+	// 	if ( LocalCacheData.current_open_sub_controller ) {
+	// 		LocalCacheData.current_open_sub_controller.onCancelClick();
+	// 	} else {
+	// 		var $this = this;
+	// 		this.onCancelClick( null, null, function() {
+	// 			if ( !this.edit_view ) {
+	// 				$this.parent_view_controller.buildContextMenu();
+	// 				$this.parent_view_controller.setDefaultMenu();
+	// 				//$this.onCancelClick();
+	// 			} else {
+	// 				$this.buildEditMenu();
+	// 			}
+	// 		} );
+	// 	}
+	// }
 
 } );
 

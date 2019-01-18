@@ -3,6 +3,10 @@
     margin-right: 10px;
 }
 
+.switch-button-div div {
+ padding:12px !important;
+}
+
 .switch-button-div .daily {
     background-image: url("../ribbon/icons/show_daily_totals-18x18.png");
     background-position: 50% center, 50% center;
@@ -10,7 +14,6 @@
     cursor: pointer;
     height: 18px;
     width: 18px;
-    padding: 3px;
     border-radius: 3px;
 }
 
@@ -25,7 +28,6 @@
     cursor: pointer;
     height: 18px;
     width: 18px;
-    padding: 3px;
     border-radius: 3px;
 }
 
@@ -40,7 +42,6 @@
     cursor: pointer;
     height: 18px;
     width: 18px;
-    padding: 3px;
     border-radius: 3px;
 }
 
@@ -55,7 +56,6 @@
     cursor: pointer;
     height: 18px;
     width: 18px;
-    padding: 3px;
     border-radius: 3px;
 }
 
@@ -75,7 +75,6 @@
     cursor: pointer;
     height: 18px;
     width: 18px;
-    padding: 3px;
     border-radius: 3px;
 }
 

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-03 15:44-0700\n"
+"POT-Creation-Date: 2018-10-19 08:10-0700\n"
 "PO-Revision-Date: 2013-05-16 15:15+0000\n"
 "Last-Translator: jose alexandre <alexandreomedio@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>\n"
@@ -680,6 +680,9 @@ msgstr "AUTORIZAÇÃO ABERTA"
 msgid "AUTHORIZED"
 msgstr ""
 
+msgid "AWESOMEBOX TESTING VIEW"
+msgstr ""
+
 msgid "Aberdeen"
 msgstr ""
 
@@ -819,6 +822,9 @@ msgid "Account Number"
 msgstr ""
 
 msgid "Account Type"
+msgstr ""
+
+msgid "Account Type must be specified"
 msgstr ""
 
 msgid "Account number must not be a part of the Description"
@@ -2168,9 +2174,6 @@ msgstr ""
 msgid "Attachment  Name"
 msgstr ""
 
-msgid "Attachments"
-msgstr "Anexos"
-
 msgid "Attendance"
 msgstr "Comparecimento"
 
@@ -2351,9 +2354,6 @@ msgstr ""
 msgid "Available Hours Per Week(Minimum)"
 msgstr ""
 
-msgid "Available Immediate Drug Test"
-msgstr ""
-
 msgid "Available Start Date"
 msgstr ""
 
@@ -2423,8 +2423,17 @@ msgstr "Avg"
 msgid "Awarded"
 msgstr "Concedido"
 
+msgid "AwesomBox Test"
+msgstr ""
+
+msgid "AwesomeBox Test"
+msgstr ""
+
 msgid "Azerbaijan"
 msgstr "Azerbaijan"
+
+msgid "Azua"
+msgstr ""
 
 msgid "BASIC SEARCH"
 msgstr ""
@@ -2475,6 +2484,9 @@ msgid "Bahamas"
 msgstr "Bahamas"
 
 msgid "Bahia"
+msgstr ""
+
+msgid "Bahoruco"
 msgstr ""
 
 msgid "Bahrain"
@@ -2568,6 +2580,9 @@ msgid "Bar - Horizontal"
 msgstr ""
 
 msgid "Bar - Vertical"
+msgstr ""
+
+msgid "Barahona"
 msgstr ""
 
 msgid "Barbados"
@@ -3560,9 +3575,6 @@ msgstr ""
 msgid "Classification Code"
 msgstr ""
 
-msgid "Clear"
-msgstr "Espaço livre"
-
 msgid "Clear Last Punch Time"
 msgstr "Limpar Ultima Batida de Ponto"
 
@@ -3867,6 +3879,9 @@ msgid "Configure Available Fields"
 msgstr ""
 
 msgid "Confirm #"
+msgstr ""
+
+msgid "Confirm Email"
 msgstr ""
 
 msgid "Confirm Password"
@@ -4485,6 +4500,9 @@ msgid "Daily Time"
 msgstr ""
 
 msgid "Daily Totals"
+msgstr ""
+
+msgid "Dajabón"
 msgstr ""
 
 msgid "Daman and Diu"
@@ -5162,6 +5180,9 @@ msgstr ""
 msgid "Distrito Federal"
 msgstr ""
 
+msgid "Distrito Nacional"
+msgstr ""
+
 msgid "Djibouti"
 msgstr "Djibouti"
 
@@ -5280,6 +5301,9 @@ msgid "Drivers License"
 msgstr ""
 
 msgid "Drug Test"
+msgstr ""
+
+msgid "Duarte"
 msgstr ""
 
 msgid "Dudley"
@@ -5708,7 +5732,13 @@ msgstr ""
 msgid "El Salvador"
 msgstr "El Salvador"
 
+msgid "El Seibo"
+msgstr ""
+
 msgid "Electronically signed by"
+msgstr ""
+
+msgid "Elias Piña"
 msgstr ""
 
 msgid "Eligibility"
@@ -6026,6 +6056,9 @@ msgstr "Holerites do empregado"
 msgid "Employee Pay<br>Stubs"
 msgstr ""
 
+msgid "Employee Payment Method"
+msgstr ""
+
 msgid "Employee Payment Methods"
 msgstr ""
 
@@ -6084,6 +6117,9 @@ msgid "Employee Tax / Deductions"
 msgstr "Imposto/deduções do empregado"
 
 msgid "Employee Termination Date"
+msgstr ""
+
+msgid "Employee TimeClock"
 msgstr ""
 
 msgid "Employee TimeSheet"
@@ -6172,6 +6208,9 @@ msgstr ""
 
 msgid "Employee number must only be digits"
 msgstr "O número do empregado deve somente ser dígitos"
+
+msgid "Employee payment method is invalid"
+msgstr ""
 
 msgid "Employee's Hire Date"
 msgstr ""
@@ -6585,6 +6624,9 @@ msgid "Eritrea"
 msgstr "Eritrea"
 
 msgid "Escuintla"
+msgstr ""
+
+msgid "Espaillat"
 msgstr ""
 
 msgid "Espirito Santo"
@@ -7151,6 +7193,9 @@ msgstr ""
 msgid "File checksums do not match, some"
 msgstr ""
 
+msgid "File exceeds maximum number of records (%1) that can be imported at one time"
+msgstr ""
+
 msgid "File is invalid, unable to save"
 msgstr ""
 
@@ -7185,6 +7230,9 @@ msgid "Final End Date"
 msgstr ""
 
 msgid "Final Pay Period Ending Date"
+msgstr ""
+
+msgid "Final Pay Period Ending Date must be on or after Last Day Paid"
 msgstr ""
 
 msgid "Final Pay Stub End Date"
@@ -7328,10 +7376,10 @@ msgstr ""
 msgid "For help, please visit"
 msgstr "Para a ajuda, visitar por favor"
 
-msgid "For installation support, please contact "
+msgid "For installation assistance, please contact "
 msgstr ""
 
-msgid "For installation support, please join our community "
+msgid "For installation assistance, please join our community "
 msgstr ""
 
 msgid "For more information please click here."
@@ -7526,7 +7574,10 @@ msgstr ""
 msgid "Full Name"
 msgstr "Nome cheio"
 
-msgid "Full Shift (Majority of Shift)"
+msgid "Full Shift (Majority of Shift Observed)"
+msgstr ""
+
+msgid "Full Shift (Majority of Shift Worked)"
 msgstr ""
 
 msgid "Full Shift (Must End)"
@@ -7838,6 +7889,9 @@ msgstr "Gronelândia"
 msgid "Grenada"
 msgstr "Grenada"
 
+msgid "Grid Test"
+msgstr ""
+
 msgid "Gross Amount"
 msgstr ""
 
@@ -7861,6 +7915,9 @@ msgstr ""
 
 msgid "Group"
 msgstr "Grupo"
+
+msgid "Group (Multi)"
+msgstr ""
 
 msgid "Group - Combined"
 msgstr ""
@@ -8030,6 +8087,9 @@ msgstr ""
 msgid "Haryana"
 msgstr ""
 
+msgid "Hato Mayor"
+msgstr ""
+
 msgid "Have no effect"
 msgstr ""
 
@@ -8070,6 +8130,9 @@ msgid "Heredia"
 msgstr ""
 
 msgid "Herefordshire"
+msgstr ""
+
+msgid "Hermanas Mirabal"
 msgstr ""
 
 msgid "Herrera"
@@ -8231,6 +8294,9 @@ msgstr ""
 msgid "Hour Based"
 msgstr "Hora Baseada"
 
+msgid "Hour Of Day"
+msgstr ""
+
 msgid "Hour Type"
 msgstr ""
 
@@ -8272,6 +8338,12 @@ msgstr "Código de Horas"
 
 msgid "Hours/Pay Criteria"
 msgstr "Critérios de Pagamento/Horas"
+
+msgid "Hours/Week (Max)"
+msgstr ""
+
+msgid "Hours/Week (Min)"
+msgstr ""
 
 msgid "Hrs/Units"
 msgstr "Horas/unidades"
@@ -8430,6 +8502,9 @@ msgid "Immediate Dest."
 msgstr ""
 
 msgid "Immediate Dest. Name"
+msgstr ""
+
+msgid "Immediate Drug Test"
 msgstr ""
 
 msgid "Immediate Origin"
@@ -9494,9 +9569,6 @@ msgstr ""
 msgid "Incorrect month"
 msgstr ""
 
-msgid "Incorrect name length"
-msgstr ""
-
 msgid "Incorrect option to enable calendar synchronization"
 msgstr ""
 
@@ -9630,6 +9702,9 @@ msgid "Incurred date is invalid"
 msgstr ""
 
 msgid "Independence Day"
+msgstr ""
+
+msgid "Independencia"
 msgstr ""
 
 msgid "India"
@@ -10538,6 +10613,9 @@ msgstr ""
 msgid "Job Details By Supervisor"
 msgstr ""
 
+msgid "Job End Date"
+msgstr ""
+
 msgid "Job Estimate Bad Quantity"
 msgstr ""
 
@@ -10598,7 +10676,13 @@ msgstr "Tarefa de Análise da folha de pagamento"
 msgid "Job Reports"
 msgstr "Relatórios de trabalho"
 
+msgid "Job Search"
+msgstr ""
+
 msgid "Job Selection Type"
+msgstr ""
+
+msgid "Job Start Date"
 msgstr ""
 
 msgid "Job Status"
@@ -10907,6 +10991,9 @@ msgstr "BAIXO"
 msgid "L`Aquila"
 msgstr ""
 
+msgid "La Altagracia"
+msgstr ""
+
 msgid "La Guajira"
 msgstr ""
 
@@ -10916,10 +11003,16 @@ msgstr ""
 msgid "La Paz"
 msgstr ""
 
+msgid "La Romana"
+msgstr ""
+
 msgid "La Spezia"
 msgstr ""
 
 msgid "La Union"
+msgstr ""
+
+msgid "La Vega"
 msgstr ""
 
 msgid "Label"
@@ -11049,6 +11142,9 @@ msgid "Last Check Number"
 msgstr ""
 
 msgid "Last Day For Which Paid"
+msgstr ""
+
+msgid "Last Day Paid must be after First Day Worked"
 msgstr ""
 
 msgid "Last Download"
@@ -11615,9 +11711,6 @@ msgstr ""
 msgid "MBSTRING Enabled"
 msgstr ""
 
-msgid "MCRYPT Enabled"
-msgstr ""
-
 msgid "ME-UC-1"
 msgstr ""
 
@@ -11889,6 +11982,9 @@ msgid "Martinique"
 msgstr "Martinica"
 
 msgid "Maryland"
+msgstr ""
+
+msgid "María Trinidad Sánchez"
 msgstr ""
 
 msgid "Masaya"
@@ -12440,6 +12536,9 @@ msgstr "O número de Celular é inválido"
 msgid "Modena"
 msgstr ""
 
+msgid "Modified Business Tax Return"
+msgstr ""
+
 msgid "Modified Shifts"
 msgstr ""
 
@@ -12470,7 +12569,16 @@ msgstr "Mongolia"
 msgid "Monmouthshire"
 msgstr ""
 
+msgid "Monseñor Nouel"
+msgstr ""
+
 msgid "Montana"
+msgstr ""
+
+msgid "Monte Cristi"
+msgstr ""
+
+msgid "Monte Plata"
 msgstr ""
 
 msgid "Montenegro"
@@ -12543,6 +12651,9 @@ msgid "Mountain"
 msgstr ""
 
 msgid "Move"
+msgstr ""
+
+msgid "Move All"
 msgstr ""
 
 msgid "Moyle"
@@ -12767,11 +12878,11 @@ msgstr ""
 msgid "Net Pay"
 msgstr "Pagamento líquido"
 
+msgid "Net Pay (%1) is a negative amount, deductions (%2) exceed earnings (%3)"
+msgstr ""
+
 msgid "Net Pay doesn't match earnings or deductions"
 msgstr "O pagamento líquido não combina o salário ou as deduções"
-
-msgid "Net Pay is a negative amount, deductions exceed earnings"
-msgstr ""
 
 msgid "Net pay doesn't match total of all pending or paid transactions"
 msgstr ""
@@ -14201,7 +14312,7 @@ msgstr "Senha"
 msgid "Password (confirm)"
 msgstr ""
 
-msgid "Password - Phone"
+msgid "Password - Quick Punch"
 msgstr ""
 
 msgid "Password - Web"
@@ -14750,6 +14861,9 @@ msgstr ""
 msgid "Payroll<br>Reports"
 msgstr ""
 
+msgid "Pedernales"
+msgstr ""
+
 msgid "Pembrokeshire"
 msgstr ""
 
@@ -14818,6 +14932,9 @@ msgstr ""
 
 msgid "Per Weight"
 msgstr "Por Peso"
+
+msgid "Peravia"
+msgstr ""
 
 msgid "Percent"
 msgstr "Por cento"
@@ -15602,6 +15719,9 @@ msgstr ""
 msgid "Puebla"
 msgstr ""
 
+msgid "Puerto Plata"
+msgstr ""
+
 msgid "Puerto Rico"
 msgstr "Puerto Rico"
 
@@ -15639,6 +15759,9 @@ msgid "Punch Mode: QRCode"
 msgstr ""
 
 msgid "Punch Mode: Quick Punch"
+msgstr ""
+
+msgid "Punch Note"
 msgstr ""
 
 msgid "Punch Notes"
@@ -15946,9 +16069,6 @@ msgstr ""
 
 msgid "Quick Punch ID or Password is incorrect"
 msgstr ""
-
-msgid "Quick Punch Login"
-msgstr "Logar Marcação Rápida"
 
 msgid "Quick Punch Password"
 msgstr ""
@@ -16400,9 +16520,6 @@ msgstr ""
 msgid "Remittance Agency Event"
 msgstr ""
 
-msgid "Remittance Destination Account"
-msgstr ""
-
 msgid "Remittance Source Account"
 msgstr ""
 
@@ -16416,12 +16533,6 @@ msgid "Remittance Summary Report"
 msgstr "Relatório sumário da remessa"
 
 msgid "Remittance agency is invalid"
-msgstr ""
-
-msgid "Remittance destination account"
-msgstr ""
-
-msgid "Remittance destination account is invalid"
 msgstr ""
 
 msgid "Remittance source account"
@@ -16508,6 +16619,9 @@ msgstr ""
 msgid "Request - Employee"
 msgstr ""
 
+msgid "Request - Schedule"
+msgstr ""
+
 msgid "Request Authorization"
 msgstr ""
 
@@ -16572,6 +16686,9 @@ msgid "Result"
 msgstr ""
 
 msgid "Resume"
+msgstr ""
+
+msgid "Resume Keywords"
 msgstr ""
 
 msgid "Retail Trade"
@@ -16865,6 +16982,9 @@ msgstr ""
 msgid "Run"
 msgstr ""
 
+msgid "Run tests?"
+msgstr ""
+
 msgid "Running Scheduled Report"
 msgstr ""
 
@@ -16997,6 +17117,9 @@ msgstr ""
 msgid "Salford"
 msgstr ""
 
+msgid "Samaná"
+msgstr ""
+
 msgid "Samar"
 msgstr ""
 
@@ -17015,7 +17138,16 @@ msgstr ""
 msgid "San Blas"
 msgstr ""
 
+msgid "San Cristóbal"
+msgstr ""
+
 msgid "San Jose"
+msgstr ""
+
+msgid "San José de Ocoa"
+msgstr ""
+
+msgid "San Juan"
 msgstr ""
 
 msgid "San Luis Potosi"
@@ -17028,6 +17160,9 @@ msgid "San Marino"
 msgstr "San Marino"
 
 msgid "San Miguel"
+msgstr ""
+
+msgid "San Pedro de Macorís"
 msgstr ""
 
 msgid "San Salvador"
@@ -17052,6 +17187,15 @@ msgid "Santa Rosa"
 msgstr ""
 
 msgid "Santander"
+msgstr ""
+
+msgid "Santiago"
+msgstr ""
+
+msgid "Santiago Rodríguez"
+msgstr ""
+
+msgid "Santo Domingo"
 msgstr ""
 
 msgid "Sao Paulo"
@@ -17136,6 +17280,9 @@ msgid "Saved<br>Reports"
 msgstr ""
 
 msgid "Savings"
+msgstr ""
+
+msgid "Savings Account"
 msgstr ""
 
 msgid "Savona"
@@ -17231,10 +17378,13 @@ msgstr "Ausência programada"
 msgid "Scheduled Days"
 msgstr ""
 
+msgid "Scheduled Employees/Hour"
+msgstr ""
+
 msgid "Scheduled Report"
 msgstr ""
 
-msgid "Scheduled Shift to replace does not exist."
+msgid "Scheduled Shift to replace does not exist"
 msgstr ""
 
 msgid "Scheduled Shifts"
@@ -17606,6 +17756,9 @@ msgstr "Emitido"
 msgid "Sep"
 msgstr "Setembro"
 
+msgid "Separated_box: if you see this, the test is passing."
+msgstr ""
+
 msgid "September"
 msgstr "Setembro"
 
@@ -17625,6 +17778,9 @@ msgid "Serial number should be between 9 and 15 digits"
 msgstr ""
 
 msgid "Server"
+msgstr ""
+
+msgid "Server Time Zone"
 msgstr ""
 
 msgid "Service"
@@ -18611,6 +18767,9 @@ msgstr ""
 msgid "System log is invalid"
 msgstr ""
 
+msgid "Sánchez Ramírez"
+msgstr ""
+
 msgid "T"
 msgstr "T"
 
@@ -18656,10 +18815,43 @@ msgstr ""
 msgid "TC-941R Filing"
 msgstr ""
 
+msgid "TCheckbox"
+msgstr ""
+
+msgid "TColorPicker"
+msgstr ""
+
+msgid "TDatePicker"
+msgstr ""
+
+msgid "TDateRange"
+msgstr ""
+
+msgid "TImageAdvBrowser"
+msgstr ""
+
+msgid "TPasswordInput"
+msgstr ""
+
 msgid "TQ01C Filing"
 msgstr ""
 
+msgid "TTagInput"
+msgstr ""
+
+msgid "TText"
+msgstr ""
+
+msgid "TTextArea"
+msgstr ""
+
+msgid "TTimePicker"
+msgstr ""
+
 msgid "TX-17 Filing"
+msgstr ""
+
+msgid "TXR-020.04 Filing"
 msgstr ""
 
 msgid "Tabasco"
@@ -19238,6 +19430,9 @@ msgstr ""
 msgid "This remittance source account is currently in use by employee payment methods assigned to a different legal entity. (%1)"
 msgstr ""
 
+msgid "This remittance source account is currently in use by employee payment methods in a different country"
+msgstr ""
+
 msgid "This station is currently pending activation by a supervisor..."
 msgstr ""
 
@@ -19278,6 +19473,9 @@ msgid "Time"
 msgstr "Tempo"
 
 msgid "Time & Attendance"
+msgstr ""
+
+msgid "Time (Actual)"
 msgstr ""
 
 msgid "Time Accrued"
@@ -19587,6 +19785,12 @@ msgid "Total Employees"
 msgstr ""
 
 msgid "Total Employees Hired By Month"
+msgstr ""
+
+msgid "Total Employees Scheduled By Date/Hour of Day"
+msgstr ""
+
+msgid "Total Employees Scheduled By Day of Week/Hour of Day"
 msgstr ""
 
 msgid "Total Employees Terminated By Month"
@@ -20483,6 +20687,12 @@ msgstr "Usado"
 msgid "Used to search for the user, for anonymous binding enter: anonymous"
 msgstr ""
 
+msgid "User"
+msgstr ""
+
+msgid "User ( Big multi select)"
+msgstr ""
+
 msgid "User Date Total ID is invalid"
 msgstr "O total ID da data do usuário é inválido"
 
@@ -20819,6 +21029,9 @@ msgstr ""
 msgid "Value9"
 msgstr ""
 
+msgid "Valverde"
+msgstr ""
+
 msgid "Vanuatu"
 msgstr "Vanuatu"
 
@@ -20862,9 +21075,6 @@ msgid "Verification Window Starts is too large"
 msgstr ""
 
 msgid "Verification Window Starts is too small"
-msgstr ""
-
-msgid "Verification Windows Ends"
 msgstr ""
 
 msgid "Verification failed due to the following reasons"
@@ -21422,6 +21632,9 @@ msgstr "Whos em resumo"
 msgid "Whos In/Out"
 msgstr ""
 
+msgid "Widget Test"
+msgstr ""
+
 msgid "Width"
 msgstr ""
 
@@ -21660,9 +21873,6 @@ msgid "Workers Safety and Compensation Commission"
 msgstr ""
 
 msgid "Workers' Compensation Fee Form"
-msgstr ""
-
-msgid "Workforce Management Software"
 msgstr ""
 
 msgid "Working"
@@ -22070,9 +22280,6 @@ msgstr ""
 msgid "by remittance agencies"
 msgstr ""
 
-msgid "by remittance destination accounts"
-msgstr ""
-
 msgid "by remittance sources"
 msgstr ""
 
@@ -22269,6 +22476,9 @@ msgid "is unable to connect to its database, please make sure that the database 
 msgstr ""
 
 msgid "is_empty(expression) - Example: if( is_empty(#PA3206#) = 0, #PA3206#, 0)"
+msgstr ""
+
+msgid "item(s) selected"
 msgstr ""
 
 msgid "items selected"
@@ -22856,6 +23066,9 @@ msgstr ""
 #~ msgid "Attach Existing Document"
 #~ msgstr "Anexar Documento Existente"
 
+#~ msgid "Attachments"
+#~ msgstr "Anexos"
+
 #~ msgid "Attendance History"
 #~ msgstr "História do comparecimento"
 
@@ -23083,6 +23296,9 @@ msgstr ""
 
 #~ msgid "City:"
 #~ msgstr "Cidade:"
+
+#~ msgid "Clear"
+#~ msgstr "Espaço livre"
 
 #~ msgid "Click the \"...\" icon to upload a company logo. (170px by 40px)"
 #~ msgstr "Clique no ícone \"...\" para fazer o Upload do logo da empresa. (170px by 40px)"
@@ -25143,6 +25359,9 @@ msgstr ""
 
 #~ msgid "Quarter:"
 #~ msgstr "Trimestre:"
+
+#~ msgid "Quick Punch Login"
+#~ msgstr "Logar Marcação Rápida"
 
 #~ msgid "ROE List"
 #~ msgstr "Lista dos ROE"

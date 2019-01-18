@@ -56,12 +56,12 @@ BaseWizardController = BaseWindowController.extend( {
 		} else {
 			for ( var edition_id in this._required_files ) {
 				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
-					retval = retval.concat(this._required_files[edition_id])
+					retval = retval.concat( this._required_files[edition_id] );
 				}
 			}
 		}
 
-		Debug.Arr(retval,'RETVAL','BaseWizardController.js','BaseWizardController','filterRequiredFiles',10)
+		Debug.Arr( retval, 'RETVAL', 'BaseWizardController.js', 'BaseWizardController', 'filterRequiredFiles', 10 );
 		return retval;
 	},
 
@@ -80,11 +80,11 @@ BaseWizardController = BaseWindowController.extend( {
 
 		LocalCacheData.current_open_wizard_controller = this;
 		var $this = this;
-		require( this.filterRequiredFiles(),function() {
+		require( this.filterRequiredFiles(), function() {
 			$this.setDefaultDataToSteps();
 			$this.init();
-			TTPromise.resolve('BaseViewController', 'initialize');
-		});
+			TTPromise.resolve( 'BaseViewController', 'initialize' );
+		} );
 	},
 
 	setDefaultDataToSteps: function() {
@@ -121,7 +121,7 @@ BaseWizardController = BaseWindowController.extend( {
 
 		title.text( this.title );
 		title_1.text( this.title );
-		TTPromise.resolve('init', 'init');
+		TTPromise.resolve( 'init', 'init' );
 	},
 
 	setButtonsStatus: function() {
@@ -331,7 +331,7 @@ BaseWizardController = BaseWindowController.extend( {
 		var args = {};
 
 		if ( this.script_name ) {
-			args.filter_data = {script: this.script_name, deleted: false};
+			args.filter_data = { script: this.script_name, deleted: false };
 			this.user_generic_data_api.getUserGenericData( args, {
 				onResult: function( result ) {
 
@@ -345,7 +345,7 @@ BaseWizardController = BaseWindowController.extend( {
 						$this.saved_user_generic_data.script = $this.script_name;
 						$this.saved_user_generic_data.name = $this.script_name;
 						$this.saved_user_generic_data.is_default = false;
-						$this.saved_user_generic_data.data = {current_step: 1};
+						$this.saved_user_generic_data.data = { current_step: 1 };
 
 					}
 
@@ -393,13 +393,13 @@ BaseWizardController = BaseWindowController.extend( {
 	},
 
 	getLabel: function() {
-		var label = $( "<span class='wizard-label clear-both-div'></span>" );
+		var label = $( '<span class=\'wizard-label clear-both-div\'></span>' );
 		return label;
 	},
 
 	getCheckBox: function( field ) {
 		var check_box = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		check_box.TCheckbox( {field: field} );
+		check_box.TCheckbox( { field: field } );
 
 		return check_box;
 	},
@@ -407,7 +407,7 @@ BaseWizardController = BaseWindowController.extend( {
 	getDatePicker: function( field ) {
 		var widget = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		widget.TDatePicker( {field: field} );
+		widget.TDatePicker( { field: field } );
 
 		return widget;
 	},
@@ -572,9 +572,10 @@ BaseWizardController = BaseWindowController.extend( {
 
 		var grid = grid_div.find( '#' + gridId );
 
-		this.getGridColumns( gridId, function( result ) {
+		this.getGridColumns( gridId, function( column_model ) {
 
-			grid = grid.jqGrid( {
+			$this.stepsWidgetDic[$this.current_step][gridId] = new TTGrid( gridId, {
+				container_selector: '.wizard',
 				altRows: true,
 				onSelectRow: function( e ) {
 					$this.onGridSelectRow( e );
@@ -587,22 +588,14 @@ BaseWizardController = BaseWindowController.extend( {
 				ondblClickRow: function() {
 					$this.onGridDblClickRow();
 				},
-				data: [],
-				datatype: 'local',
 				sortable: false,
 				height: 75,
-				rowNum: 10000,
-				colNames: [],
-				colModel: result,
-				viewrecords: true,
 				multiselect: allMultipleSelection,
 				multiboxonly: allMultipleSelection
 
-			} );
+			}, column_model );
 
-			$this.stepsWidgetDic[$this.current_step][gridId] = grid;
-
-			$this.setGridSize( grid );
+			$this.setGridSize( $this.stepsWidgetDic[$this.current_step][gridId] );
 
 			$this.setGridGroupColumns( gridId );
 
@@ -615,8 +608,8 @@ BaseWizardController = BaseWindowController.extend( {
 	},
 
 	setGridSize: function( grid ) {
-		grid.setGridWidth( $( this.content_div.find( '.grid-div' ) ).width() - 11 );
-		grid.setGridHeight( this.content_div.height() - 150 ); //During merge, this wasn't in MASTER branch.
+		grid.grid.setGridWidth( $( this.content_div.find( '.grid-div' ) ).width() - 11 );
+		grid.grid.setGridHeight( this.content_div.height() - 150 ); //During merge, this wasn't in MASTER branch.
 	},
 
 	getGridColumns: function( gridId, callBack ) {
@@ -639,19 +632,18 @@ BaseWizardController = BaseWindowController.extend( {
 	},
 
 
-	showNoResultCover: function(grid_div) {
-		this.removeNoResultCover(grid_div);
+	showNoResultCover: function( grid_div ) {
+		this.removeNoResultCover( grid_div );
 		var no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
-		no_result_box.NoResultBox( {related_view_controller: this, is_new: false} );
+		no_result_box.NoResultBox( { related_view_controller: this, is_new: false } );
 		no_result_box.attr( 'class', 'no-result-div' );
 
 		grid_div.append( no_result_box );
 	},
 
-	removeNoResultCover: function(grid_div) {
-		grid_div.find('.no-result-div').remove();
-	},
-
+	removeNoResultCover: function( grid_div ) {
+		grid_div.find( '.no-result-div' ).remove();
+	}
 
 
 } );
@@ -660,7 +652,7 @@ BaseWizardController.default_data = null;
 BaseWizardController.callBack = null;
 
 BaseWizardController.openWizard = function( viewId, templateName ) {
-	if (  viewId != 'ReportViewWizard' && LocalCacheData.current_open_wizard_controller ) {
+	if ( viewId != 'ReportViewWizard' && LocalCacheData.current_open_wizard_controller ) {
 		LocalCacheData.current_open_wizard_controller.onCloseClick();
 	}
 	Global.loadViewSource( viewId, templateName, function( result ) {

@@ -38,11 +38,11 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_rounding_policy': $.i18n._( 'Rounding Policy' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_rounding_policy': { 'label': $.i18n._( 'Rounding Policy' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRoundIntervalPolicy' )),
@@ -68,7 +68,7 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_rounding_policy_column1, '' );
 		form_item_input.parent().width( '45%' );
 
@@ -83,67 +83,71 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		//Punch Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'punch_type_id', set_empty: false } );
+		form_item_input.TComboBox( { field: 'punch_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.punch_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab_rounding_policy_column1 );
 
 		//Round Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'round_type_id', set_empty: false } );
+		form_item_input.TComboBox( { field: 'round_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.round_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Round Type' ), form_item_input, tab_rounding_policy_column1 );
 
 		// Interval
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'round_interval', mode:'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'round_interval', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Interval' ), form_item_input, tab_rounding_policy_column1, '', null );
 
 		//Grace Period
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'grace', mode:'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'grace', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Grace Period' ), form_item_input, tab_rounding_policy_column1, '', null );
 
 		// Strict Schedule
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'strict'} );
+		form_item_input.TCheckbox( { field: 'strict' } );
 		this.addEditFieldToColumn( $.i18n._( 'Strict Schedule' ), form_item_input, tab_rounding_policy_column1, '' );
 
 		//SEPARATED
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( { label: $.i18n._( 'Only Round Punches Within The Following Window' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Only Round Punches Within The Following Window' ) } );
 		this.addEditFieldToColumn( '', form_item_input, tab_rounding_policy_column1, '', null, true, false, 'sp_box' );
 
 		//Window Based On
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'condition_type_id', set_empty: false } );
+		form_item_input.TComboBox( { field: 'condition_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.condition_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Window Based On' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Static Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
-		form_item_input.TTimePicker( {field: 'condition_static_time'} );
+		form_item_input.TTimePicker( { field: 'condition_static_time' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Static Time' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Static Total Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'condition_static_total_time', mode:'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( {
+			field: 'condition_static_total_time',
+			mode: 'time_unit',
+			need_parser_sec: true
+		} );
 
 		this.addEditFieldToColumn( $.i18n._( 'Static Total Time' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Start Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'condition_start_window', mode:'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'condition_start_window', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Start Window' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
 		// Stop Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'condition_stop_window', mode:'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'condition_stop_window', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Stop Window' ), form_item_input, tab_rounding_policy_column1, '', null, true );
 
@@ -154,33 +158,40 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Punch Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Punch Type' ),
 				in_column: 1,
 				field: 'punch_type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Round Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Round Type' ),
 				in_column: 1,
 				field: 'round_type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -188,9 +199,11 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -198,7 +211,8 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
@@ -242,35 +256,35 @@ RoundIntervalPolicyViewController = BaseViewController.extend( {
 		var condition_start_window = this.edit_view_form_item_dic.condition_start_window;
 		var condition_stop_window = this.edit_view_form_item_dic.condition_stop_window;
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id < 15 ) {
-			this.detachElement('condition_type_id');
-			this.detachElement('sp_box');
-			this.detachElement('condition_static_total_time');
-			this.detachElement('condition_start_window');
-			this.detachElement('condition_stop_window');
-			this.detachElement('condition_static_time');
+		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 ) {
+			this.detachElement( 'condition_type_id' );
+			this.detachElement( 'sp_box' );
+			this.detachElement( 'condition_static_total_time' );
+			this.detachElement( 'condition_start_window' );
+			this.detachElement( 'condition_stop_window' );
+			this.detachElement( 'condition_static_time' );
 			return;
 		}
 
-		this.detachElement('condition_static_total_time');
-		this.detachElement('condition_start_window');
-		this.detachElement('condition_stop_window');
-		this.detachElement('condition_static_time');
+		this.detachElement( 'condition_static_total_time' );
+		this.detachElement( 'condition_start_window' );
+		this.detachElement( 'condition_stop_window' );
+		this.detachElement( 'condition_static_time' );
 
 		if ( condition_type_id == 10 || condition_type_id == 20 ) {
-			this.attachElement('condition_start_window');
-			this.attachElement('condition_stop_window');
+			this.attachElement( 'condition_start_window' );
+			this.attachElement( 'condition_stop_window' );
 
 		} else if ( condition_type_id == 30 ) {
-			this.attachElement('condition_static_time');
-			this.attachElement('condition_stop_window');
-			this.attachElement('condition_start_window');
+			this.attachElement( 'condition_static_time' );
+			this.attachElement( 'condition_stop_window' );
+			this.attachElement( 'condition_start_window' );
 
 		} else if ( condition_type_id == 40 ) {
 
-			this.attachElement('condition_static_total_time');
-			this.attachElement('condition_stop_window');
-			this.attachElement('condition_start_window');
+			this.attachElement( 'condition_static_total_time' );
+			this.attachElement( 'condition_stop_window' );
+			this.attachElement( 'condition_start_window' );
 		}
 
 		this.editFieldResize();

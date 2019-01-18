@@ -994,6 +994,8 @@ class Import {
 			$parse_hint = 'first_name';
 		}
 
+		$input = preg_replace( '/\s+/', ' ', $input ); //Remove duplicate spaces that may cause problems with explode() below.
+
 		$retval = preg_replace('!\s+!', ' ', $input); //Replace any double or more spaces with single to avoid problems with parsing middle/first names below.
 		switch ( $parse_hint ) {
 			case 'first_name':

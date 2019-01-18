@@ -1,7 +1,7 @@
 ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 	el: '.wizard',
-	_required_files:['APIAccrualPolicy', 'APIPayPeriod', 'APITimesheetSummaryReport', 'APIPayPeriodSchedule', 'APIUser'],
+	_required_files: ['APIAccrualPolicy', 'APIPayPeriod', 'APITimesheetSummaryReport', 'APIPayPeriodSchedule', 'APIUser'],
 
 	init: function( options ) {
 		//this._super('initialize', options );
@@ -32,7 +32,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				label.text( $.i18n._( 'Select one or more accrual policies' ) + ':' );
 
 				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIAccrualPolicy' )), true, ALayoutIDs.ACCRUAL_POLICY, 'accrual_policy_id' );
-				var div = $( "<div class='wizard-acombobox-div'></div>" );
+				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step][a_combobox.getField()] = a_combobox;
@@ -120,7 +120,7 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				label.text( $.i18n._( 'Select one or more employees' ) + ':' );
 
 				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIUser' )), true, ALayoutIDs.USER, 'user_id', true );
-				div = $( "<div class='wizard-acombobox-div'></div>" );
+				div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -175,7 +175,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 		time_period.time_period = this.stepsDataDic[2].time_period;
 
 		for ( var key in this.stepsDataDic[2] ) {
-			if ( !this.stepsDataDic[2].hasOwnProperty( [key] ) || key === 'time_period' || key === 'effective_date' ) continue;
+			if ( !this.stepsDataDic[2].hasOwnProperty( [key] ) || key === 'time_period' || key === 'effective_date' ) {
+				continue;
+			}
 
 			time_period[key] = this.stepsDataDic[2][key];
 
@@ -183,14 +185,16 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 		var accrual_policy_api = new (APIFactory.getAPIClass( 'APIAccrualPolicy' ))();
 
-		accrual_policy_api.recalculateAccrual( accrual_policy_id, time_period, user_ids, {onResult: function( result ) {
-			$this.onCloseClick();
+		accrual_policy_api.recalculateAccrual( accrual_policy_id, time_period, user_ids, {
+			onResult: function( result ) {
+				$this.onCloseClick();
 
-			if ( $this.call_back ) {
-				$this.call_back();
+				if ( $this.call_back ) {
+					$this.call_back();
+				}
+
 			}
-
-		}} );
+		} );
 	},
 
 	buildCurrentStepData: function() {
@@ -201,7 +205,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 			case 1:
 				if ( current_step_data ) {
 					for ( var key in current_step_data ) {
-						if ( !current_step_data.hasOwnProperty( key ) ) continue;
+						if ( !current_step_data.hasOwnProperty( key ) ) {
+							continue;
+						}
 
 						current_step_ui[key].setValue( current_step_data[key] );
 					}
@@ -209,23 +215,26 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 
 				break;
 			case 2:
-				new (APIFactory.getAPIClass( 'APITimesheetSummaryReport' ))().getOptions( 'time_period', {onResult: function( result ) {
+				new (APIFactory.getAPIClass( 'APITimesheetSummaryReport' ))().getOptions( 'time_period', {
+					onResult: function( result ) {
 
-					current_step_ui['time_period'].setSourceData( Global.buildRecordArray( result.getResult() ) );
+						current_step_ui['time_period'].setSourceData( Global.buildRecordArray( result.getResult() ) );
 
-					if ( !current_step_data ) {
-						var date = new Date();
-						current_step_ui.time_period.setValue( 'last_month' );
-					} else {
-						for ( var key in current_step_data ) {
-							if ( !current_step_data.hasOwnProperty( key ) ) continue;
+						if ( !current_step_data ) {
+							var date = new Date();
+							current_step_ui.time_period.setValue( 'last_month' );
+						} else {
+							for ( var key in current_step_data ) {
+								if ( !current_step_data.hasOwnProperty( key ) ) {
+									continue;
+								}
 
-							current_step_ui[key].setValue( current_step_data[key] );
+								current_step_ui[key].setValue( current_step_data[key] );
+							}
 						}
-					}
 
-					$this.onTimePeriodChange( current_step_ui['time_period'] );
-				}
+						$this.onTimePeriodChange( current_step_ui['time_period'] );
+					}
 				} );
 				break;
 			case 3:
@@ -234,7 +243,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 					current_step_ui['user_id'].setValue( TTUUID.not_exist_id );
 				} else {
 					for ( key in current_step_data ) {
-						if ( !current_step_data.hasOwnProperty( key ) ) continue;
+						if ( !current_step_data.hasOwnProperty( key ) ) {
+							continue;
+						}
 
 						current_step_ui[key].setValue( current_step_data[key] );
 					}
@@ -243,7 +254,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				break;
 			default:
 				for ( key in current_step_data ) {
-					if ( !current_step_data.hasOwnProperty( key ) ) continue;
+					if ( !current_step_data.hasOwnProperty( key ) ) {
+						continue;
+					}
 
 					current_step_ui[key].setValue( current_step_data[key] );
 				}
@@ -262,7 +275,9 @@ ReCalculateAccrualWizardController = BaseWizardController.extend( {
 				break;
 			case 2:
 				for ( var key in current_step_ui ) {
-					if ( !current_step_ui.hasOwnProperty( key ) ) continue;
+					if ( !current_step_ui.hasOwnProperty( key ) ) {
+						continue;
+					}
 
 					if ( current_step_ui[key].is( ':visible' ) ) {
 						current_step_data[key] = current_step_ui[key].getValue();

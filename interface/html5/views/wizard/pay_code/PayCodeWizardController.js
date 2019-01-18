@@ -8,7 +8,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 		this.title = $.i18n._( 'Migrate Pay Codes' );
 		this.steps = 2;
 		this.current_step = 1;
-		$(this.el ).width( 1010 );
+		$( this.el ).width( 1010 );
 
 		this.render();
 	},
@@ -26,15 +26,15 @@ PayCodeWizardController = BaseWizardController.extend( {
 		this.content_div.empty();
 		switch ( this.current_step ) {
 			case 1:
-				var label = this.getLabel()
+				var label = this.getLabel();
 				label.html( $.i18n._( 'This wizard will migrate data associated with one pay code to another pay code without recalculating timesheets or otherwise affecting employees time or wages. ' ) + '<br><br>' +
-							'<span style="color: #ff0000; font-weight: bold;">' + $.i18n._('WARNING') + ': ' + '</span>' +
-							$.i18n._( 'This operation can not be reversed once complete.' ) );
+						'<span style="color: #ff0000; font-weight: bold;">' + $.i18n._( 'WARNING' ) + ': ' + '</span>' +
+						$.i18n._( 'This operation can not be reversed once complete.' ) );
 
 				this.content_div.append( label );
 				break;
 			case 2:
-				var content = $($( this.el ).find( '.wizard-content' ));
+				var content = $( $( this.el ).find( '.wizard-content' ) );
 
 				var content_clone = content.clone();
 
@@ -42,7 +42,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 				// Select Source Pay Codes
 
-				var first_hr = content_clone.find('.first-hr');
+				var first_hr = content_clone.find( '.first-hr' );
 				first_hr.find( '.wizard-item-label > span' ).text( $.i18n._( 'Select Source Pay Codes' ) + ': ' );
 				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayCode' )), true, ALayoutIDs.PAY_CODE, 'source_pay_code_ids' );
 				first_hr.find( '.wizard-item-widget' ).append( a_combobox );
@@ -51,7 +51,7 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 				// Select Destination Pay Code
 
-				var second_hr = content_clone.find('.second-hr');
+				var second_hr = content_clone.find( '.second-hr' );
 				second_hr.find( '.wizard-item-label > span' ).text( $.i18n._( 'Select Destination Pay Code' ) + ': ' );
 				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayCode' )), false, ALayoutIDs.PAY_CODE, 'dest_pay_code_id' );
 				second_hr.find( '.wizard-item-widget' ).append( a_combobox );
@@ -77,20 +77,22 @@ PayCodeWizardController = BaseWizardController.extend( {
 
 		var pay_code_api = new (APIFactory.getAPIClass( 'APIPayCode' ))();
 
-		pay_code_api.migratePayCode( source_pay_code_ids, dest_pay_code_id, {onResult: function( result ) {
-			var result_data = result.getResult();
-			if ( result_data ) {
-				$this.onCloseClick();
+		pay_code_api.migratePayCode( source_pay_code_ids, dest_pay_code_id, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				if ( result_data ) {
+					$this.onCloseClick();
 
-				if ( $this.call_back ) {
-					$this.call_back();
+					if ( $this.call_back ) {
+						$this.call_back();
+					}
+				} else {
+					TAlertManager.showErrorAlert( result );
 				}
-			} else {
-				TAlertManager.showErrorAlert( result );
+
+
 			}
-
-
-		}} );
+		} );
 	},
 
 	setCurrentStepValues: function() {

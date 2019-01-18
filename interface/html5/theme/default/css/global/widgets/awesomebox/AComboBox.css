@@ -3,10 +3,9 @@
     height: 24px;
     cursor: pointer;
     text-align: left;
-    margin-right: 3px;
+    margin-right: 1px;
     font-size: 0;
     vertical-align: middle;
-
 }
 
 .a-combobox > * {
@@ -148,6 +147,7 @@
     padding-right: 3px;
     max-width: 200px;
     vertical-align: text-bottom;
+    min-width:100px;
 
 }
 
@@ -193,4 +193,5 @@
     -webkit-box-shadow: 6px 6px 10px 0 #666666;
     z-index: 100;
 
+    opacity:0;
 }

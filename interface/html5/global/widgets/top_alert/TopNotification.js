@@ -38,14 +38,14 @@
 			}
 
 			el.width( biggest_width + 25 );
-		}
+		};
 
 		var removeRowOnTime = function( row_tpl, delay ) {
 			setTimeout( function() {
 				removeRow( row_tpl );
 				setExpendButton();
 			}, (delay * 1000) );
-		}
+		};
 
 		var setCloseButton = function( row_tpl ) {
 
@@ -53,7 +53,7 @@
 				removeRow( row_tpl );
 				setExpendButton();
 			} );
-		}
+		};
 
 		var removeRow = function( row ) {
 
@@ -72,7 +72,7 @@
 			}
 
 			setBarWidth();
-		}
+		};
 
 		var setDestination = function( row_tpl, item ) {
 
@@ -81,7 +81,7 @@
 
 				if ( item.destination ) {
 
-					if ( (typeof item.destination["indexOf"]) !== 'undefined' && ( item.destination.indexOf( 'http://' ) > -1 || item.destination.indexOf( 'https://' ) > -1 ) ) {
+					if ( (typeof item.destination['indexOf']) !== 'undefined' && ( item.destination.indexOf( 'http://' ) > -1 || item.destination.indexOf( 'https://' ) > -1 ) ) {
 						window.open( item.destination, '_blank' );
 
 					} else if ( item.destination.hasOwnProperty( 'menu_name' ) ) {
@@ -96,7 +96,7 @@
 
 			} );
 
-		}
+		};
 
 		var setExpendButton = function() {
 			if ( row_box.children().length > 1 ) {
@@ -132,7 +132,7 @@
 				}
 
 			}
-		}
+		};
 
 		this.show = function( arg ) {
 
@@ -154,7 +154,7 @@
 					var row_tpl = $( Global.loadWidget( 'global/widgets/top_alert/NotificationRow.html' ) );
 
 					row_tpl.children().eq( 0 ).text( item.message );
-					row_tpl.css( "backgroundColor", item.bg_color );
+					row_tpl.css( 'backgroundColor', item.bg_color );
 
 					setCloseButton( row_tpl );
 
@@ -187,7 +187,7 @@
 				el.children().eq( 0 ).empty();
 			}
 
-		}
+		};
 
 		this.each( function() {
 
@@ -204,8 +204,6 @@
 
 	};
 
-	$.fn.TopNotification.defaults = {
-
-	};
+	$.fn.TopNotification.defaults = {};
 
 })( jQuery );

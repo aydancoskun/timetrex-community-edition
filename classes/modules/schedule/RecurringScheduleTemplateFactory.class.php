@@ -459,7 +459,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 */
 	function setJob( $value ) {
 		$value = TTUUID::castUUID( $value );
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 
 		}
@@ -479,7 +479,7 @@ class RecurringScheduleTemplateFactory extends Factory {
 	 */
 	function setJobItem( $value ) {
 		$value = TTUUID::castUUID( $value );
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		return $this->setGenericDataValue( 'job_item_id', $value );
@@ -565,8 +565,8 @@ class RecurringScheduleTemplateFactory extends Factory {
 			//Handle DST by adding 12hrs to the date to get the mid-day epoch, then forcing it back to the beginning of the day.
 			$i = TTDate::getBeginDayEpoch( $i );
 
-			if ( ( $this->getColumn('hire_date') != '' AND $i < $this->getColumn('hire_date') )
-					OR ( $this->getColumn('termination_date') != '' AND $i > $this->getColumn('termination_date') )
+			if ( ( $this->getColumn('hire_date') != '' AND $i < strtotime( $this->getColumn('hire_date') ) )
+					OR ( $this->getColumn('termination_date') != '' AND $i > strtotime( $this->getColumn('termination_date') ) )
 					) {
 				//Debug::text('Skipping due to Hire/Termination date: User ID: '. $this->getColumn('user_id') .' I: '. $i .' Hire Date: '. $this->getColumn('hire_date') .' Termination Date: '. $this->getColumn('termination_date'), __FILE__, __LINE__, __METHOD__, 10);
 				continue;

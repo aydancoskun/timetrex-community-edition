@@ -6,21 +6,17 @@ require.config( {
 	paths: {'CookieSetting': '../../global/CookieSetting',
 		'APIGlobal': '../../global/APIGlobal.js.php?disable_db='+ DISABLE_DB,
 		'async': '../../framework/require_async_plugin',
-		'jquery_cookie': '../../framework/jquery.cookie',
 		'jquery_json': '../../framework/jquery.json',
 		'jquery_tablednd': '../../framework/jquery.tablednd',
 		'jquery_ba_resize': '../../framework/jquery.ba-resize',
 		'fastclick': '../../framework/fastclick',
-		'stacktrace': '../../framework/stacktrace',
 		'html2canvas': '../../framework/html2canvas',
-		'datejs': '../../framework/date',
-		'moment': '../../framework/moment.min',
+		'moment': '../../framework/moment',
 		'timepicker_addon': '../../framework/widgets/datepicker/jquery-ui-timepicker-addon',
-		'grid_locale': '../../framework/widgets/jqgrid/grid.locale-en',
-		'jqGrid': '../../framework/widgets/jqgrid/jquery.jqGrid.src',
+
+		'jqGrid': '../../framework/widgets/jqgrid/jquery.jqgrid.min',
 		'ImageAreaSelect': '../../framework/jquery.imgareaselect',
 
-		'jqGrid_extend': '../../framework/widgets/jqgrid/jquery.jqGrid.extend',
 		'SearchPanel': '../../global/widgets/search_panel/SearchPanel',
 		'FormItemType': '../../global/widgets/search_panel/FormItemType',
 		'TGridHeader': '../../global/widgets/jqgrid/TGridHeader',
@@ -85,32 +81,28 @@ require.config( {
 		'UserGenericStatusWindowController': '../../views/wizard/user_generic_data_status/UserGenericStatusWindowController',
 		'ReportBaseViewController': '../../views/reports/ReportBaseViewController',
 		'sonic': '../../framework/sonic',
-		'qtip': '../../framework/jquery.qtip.min',
+		'qtip': '../../framework/widgets/jquery.qtip/jquery.qtip.min',
 		'rightclickmenu': '../../framework/rightclickmenu/rightclickmenu',
-		'jquery.ui.position': '../../framework/rightclickmenu/jquery.ui.position',
+		//'jquery.ui.position': '../../framework/rightclickmenu/jquery.ui.position',
 
 		'jquery': '../../framework/jquery.min',
 		'jquery.form.min': '../../framework/jquery.form.min',
-		'jquery-ui': '../../framework/jqueryui/js/jquery-ui.custom.min',
+		'jquery-ui': '../../framework/jqueryui/jquery-ui.min',
 		'jquery.i18n': '../../framework/jquery.i18n',
 		'underscore-min': '../../framework/backbone/underscore-min',
 		'backbone': '../../framework/backbone/backbone-min',
-		'jquery.masonry': '../../framework/jquery.masonry.min',
+		'jquery.masonry': '../../framework/masonry.min',
 		'interact': '../../framework/interact.min',
 		'jquery.sortable': '../../framework/jquery.sortable',
 		'Global': '../../global/Global',
 		'LocalCacheData': '../../global/LocalCacheData',
 
 		'underscore': '../../framework/backbone/underscore-min',
-		'backbone': '../../framework/backbone/backbone-min',
 		'ttpromise': '../../global/TTPromise',
 		'TTUUID': '../../global/TTUUID',
-		'RateLimiter': '../../global/RateLimiter',
-		'LocalCacheData': '../../global/LocalCacheData',
 		'RateLimit': '../../global/RateLimit',
 		'jquery-bridget': '../../framework/jquery.bridget',
 
-		'APIAuthentication': '../../services/unauthenticated/APIAuthentication',
 		'nanobar': '../../framework/nanobar.min',
 
 
@@ -313,8 +305,8 @@ require.config( {
 
 		'tinymce': '../../framework/tinymce/tinymce.min',
 
-		'bootstrap': '../../framework/bootstrap/js/bootstrap.min',
-		'bootstrap-select': '../../framework/bootstrap-select/dist/js/bootstrap-select',
+		'bootstrap': '../../framework/bootstrap/js/bootstrap.bundle',
+		'bootstrap-select': '../../framework/bootstrap-select/js/bootstrap-select.min',
 		'bootstrap-toolkit': '../../framework/bootstrap-toolkit.min',
 
 		'HeaderViewController': '../../views/portal/header/HeaderViewController',
@@ -391,6 +383,12 @@ require.config( {
 				'HeaderViewController',
 			]
 		},
+		'bootstrap': {
+			deps: ['jquery']
+		},
+		'bootstrap-select': {
+			deps: ['bootstrap']
+		},
 		'jquery.i18n': {
 			deps: ['jquery']
 		},
@@ -406,12 +404,9 @@ require.config( {
 		'jquery_json': {
 			deps: ['jquery']
 		},
-		'jquery_cookie': {
-			deps: ['jquery']
-		},
-		'jquery.ui.position': {
-			deps: ['jquery']
-		},
+		// 'jquery.ui.position': {
+		// 	deps: ['jquery']
+		// },
 		'jquery.form': {
 			deps: ['jquery']
 		},
@@ -490,9 +485,9 @@ require.config( {
 		},
 
 		//Make sure jqGrid_extend load after jgGrid
-		'jqGrid_extend': {
-			deps: ['jqGrid']
-		},
+		// 'jqGrid_extend': {
+		// 	deps: ['jqGrid']
+		// },
 		'APIReturnHandler': {
 			deps: ['Base']
 		},
@@ -544,6 +539,7 @@ require.config( {
 require( [
 	'backbone',
 	'jquery',
+	'html2canvas',
 	'jquery-ui',
 	'TTUUID',
 	'RateLimit',
@@ -553,7 +549,6 @@ require( [
 	'jquery-ui',
 	'jquery.i18n',
 	'jquery_ba_resize',
-	'jquery_cookie',
 	'fastclick',
 	'moment',
 	'IndexController',
@@ -572,8 +567,8 @@ require( [
 	'ttpromise',
 
 	'APIAuthentication',
-], function(BackBone, $) {
-
+], function(BackBone, $, html2canvas) {
+	window.html2canvas = html2canvas;
 	Global.url_offset = '../../';
 	Global.addCss("right_click_menu/rightclickmenu.css");
 	Global.addCss("views/wizard/Wizard.css");
@@ -594,7 +589,7 @@ require( [
 			var c_value = progress_bar.attr("value");
 
 			if (c_value < 90) {
-				progress_bar.attr("value", c_value + 10);
+				progress_bar.prop("value", c_value + 10);
 			}
 		}, 1000);
 	}
@@ -621,29 +616,23 @@ require( [
 		}
 	}
 
-	if ( window.sessionStorage ) {
-		LocalCacheData.isSupportHTML5LocalCache = true;
-	} else {
-		LocalCacheData.isSupportHTML5LocalCache = false;
-	}
-
 	is_browser_iOS = ( navigator.userAgent.match( /(iPad|iPhone|iPod)/g ) ? true : false );
-
-	ie = (function() {
-
+	ie = ( function () {
 		var undef,
 			v = 3,
 			div = document.createElement( 'div' ),
 			all = div.getElementsByTagName( 'i' );
 
 		while (
-			div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
+			div.innerHTML = '<!--[if gt IE ' + ( ++v ) + ']><i></i><![endif]-->',
 				all[0]
-			);
+			) {
+			;
+		}
 
 		return v > 4 ? v : 11;
+	}() );
 
-	}());
 	$( function() {
 		$.support.cors = true; // For IE
 		cleanProgress();
@@ -695,7 +684,7 @@ require( [
 		} );
 
 		var cUrl = window.location.href;
-		if ( $.cookie( 'js_debug' ) ) {
+		if ( getCookie( 'js_debug' ) ) {
 			var script = Global.loadScript( 'local_testing/LocalURL.js' );
 			if ( script === true ) {
 				cUrl = LocalURL.url();
@@ -788,7 +777,7 @@ require( [
 			LocalCacheData.productEditionId = loginData.product_edition;
 
 			var controller = new IndexViewController();
-			// if ( $.cookie( 'PreviousSessionID' ) ) {
+			// if ( getCookie( 'PreviousSessionID' ) ) {
 			// 	TAlertManager.showPreSessionAlert();
 			// }
 		}
@@ -802,14 +791,10 @@ require( [
 			'TTUUID',
 			'nanobar', //only in timesheet
 			'jquery_json',
-			'stacktrace',
-			'html2canvas',
-			'datejs',
 			'jquery.sortable',
-			'jquery.ui.position',
+			//'jquery.ui.position',
 			'rightclickmenu',
 			'html2canvas',
-			'datejs',
 			'jquery_tablednd',
 			'TTagInput',
 			'timepicker_addon',
@@ -833,8 +818,6 @@ require( [
 			'RibbonSubMenuNavItem',
 			'RibbonSubMenuNavWidget',
 			'SearchPanel',
-			'grid_locale',
-			'jqGrid_extend',
 			'ImageAreaSelect',
 			'qtip',
 			'SearchField',

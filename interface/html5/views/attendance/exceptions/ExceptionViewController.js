@@ -20,24 +20,9 @@ ExceptionViewController = BaseViewController.extend( {
 
 		this.initData();
 		this.setSelectRibbonMenuIfNecessary();
-
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		this._super( 'onContextMenuClick', context_btn, menu_name );
-
-		if ( Global.isSet( menu_name ) ) {
-			var id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.edit_employee:
 			case ContextMenuIconName.edit_pay_period:
@@ -46,17 +31,15 @@ ExceptionViewController = BaseViewController.extend( {
 			case ContextMenuIconName.timesheet:
 				this.onNavigationClick( id );
 				break;
-
 		}
-
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
 
-        //Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
-        if (!this.context_menu_array) {
-            return;
-        }
+		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
+		if ( !this.context_menu_array ) {
+			return;
+		}
 
 		if ( !Global.isSet( doNotSetFocus ) || !doNotSetFocus ) {
 			this.selectContextMenu();
@@ -71,7 +54,7 @@ ExceptionViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -126,7 +109,6 @@ ExceptionViewController = BaseViewController.extend( {
 	},
 
 
-
 	setDefaultMenuEditEmployeeIcon: function( context_btn, grid_selected_length ) {
 		if ( !this.editChildPermissionValidate( 'user' ) ) {
 			context_btn.addClass( 'invisible-image' );
@@ -142,8 +124,8 @@ ExceptionViewController = BaseViewController.extend( {
 	onNavigationClick: function( iconName ) {
 		var select_item = this.getSelectedItem();
 		//There are cases where select_item might be null. The export button for example.
-		if(select_item != null) {
-		var user_id = select_item.user_id;
+		if ( select_item != null ) {
+			var user_id = select_item.user_id;
 		}
 		switch ( iconName ) {
 			case ContextMenuIconName.edit_employee:
@@ -162,8 +144,8 @@ ExceptionViewController = BaseViewController.extend( {
 				}
 				break;
 			case ContextMenuIconName.schedule:
-				var filter = {filter_data: {}};
-				var include_users = {value: [user_id] };
+				var filter = { filter_data: {} };
+				var include_users = { value: [user_id] };
 				filter.filter_data.include_user_ids = include_users;
 				filter.select_date = select_item.date_stamp;
 				Global.addViewTab( this.viewId, 'Exception', window.location.href );
@@ -171,7 +153,7 @@ ExceptionViewController = BaseViewController.extend( {
 
 				break;
 			case ContextMenuIconName.timesheet:
-				filter = {filter_data: {}};
+				filter = { filter_data: {} };
 				filter.user_id = user_id;
 				filter.base_date = select_item.date_stamp;
 				Global.addViewTab( this.viewId, 'Exception', window.location.href );
@@ -188,17 +170,19 @@ ExceptionViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'type', 'exception_policy_type_id', new (APIFactory.getAPIClass( 'APIExceptionPolicy' ))() );
 
 		var user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
-		user_group_api.getUserGroup( '', false, false, {onResult: function( res ) {
+		user_group_api.getUserGroup( '', false, false, {
+			onResult: function( res ) {
 
-			res = res.getResult();
-			res = Global.buildTreeRecord( res );
+				res = res.getResult();
+				res = Global.buildTreeRecord( res );
 
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-				$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+					$this.adv_search_field_ui_dic['group_id'].setSourceData( res );
+				}
+
 			}
-
-		}} );
+		} );
 
 	},
 
@@ -309,7 +293,7 @@ ExceptionViewController = BaseViewController.extend( {
 		var $this = this;
 		$.each( target_ui_dic, function( key, content ) {
 
-			$this.filter_data[key] = {field: key, id: '', value: target_ui_dic[key].getValue( true )};
+			$this.filter_data[key] = { field: key, id: '', value: target_ui_dic[key].getValue( true ) };
 
 			if ( key === 'show_pre_mature' && $this.filter_data[key].value !== true ) {
 
@@ -337,176 +321,6 @@ ExceptionViewController = BaseViewController.extend( {
 
 	},
 
-	search: function( set_default_menu, page_action, page_number ) {
-		if ( !Global.isSet( set_default_menu ) ) {
-			set_default_menu = true;
-		}
-
-		var $this = this;
-		var filter = {};
-		filter.filter_data = {};
-		filter.filter_sort = {};
-		filter.filter_columns = this.getFilterColumnsFromDisplayColumns();
-		filter.filter_items_per_page = 0; // Default to 0 to load user preference defined
-
-		if ( this.pager_data ) {
-
-			if ( LocalCacheData.paging_type === 0 ) {
-				if ( page_action === 'next' ) {
-					filter.filter_page = this.pager_data.next_page;
-				} else {
-					filter.filter_page = 1;
-				}
-			} else {
-
-				switch ( page_action ) {
-					case 'next':
-						filter.filter_page = this.pager_data.next_page;
-						break;
-					case 'last':
-						filter.filter_page = this.pager_data.previous_page;
-						break;
-					case 'start':
-						filter.filter_page = 1;
-						break;
-					case 'end':
-						filter.filter_page = this.pager_data.last_page_number;
-						break;
-					case 'go_to':
-						filter.filter_page = page_number;
-						break;
-					default:
-						filter.filter_page = this.pager_data.current_page;
-						break;
-				}
-
-			}
-
-		} else {
-			filter.filter_page = 1;
-		}
-
-		if ( this.sub_view_mode && this.parent_key ) {
-			this.select_layout.data.filter_data[this.parent_key] = this.parent_value;
-		}
-		//If sub view controller set custom filters, get it
-		if ( Global.isSet( this.getSubViewFilter ) ) {
-
-			this.select_layout.data.filter_data = this.getSubViewFilter( this.select_layout.data.filter_data );
-
-		}
-
-		//select_layout will not be null, it's set in setSelectLayout function
-
-		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
-		filter.filter_sort = this.select_layout.data.filter_sort;
-
-		if ( TTUUID.isUUID(this.refresh_id) ) {
-			filter.filter_data = {};
-			filter.filter_data.id = [this.refresh_id];
-		} else {
-			this.last_select_ids = this.getGridSelectIdArray();
-		}
-
-		if ( filter.filter_data.show_pre_mature === true ) {
-			filter.filter_data.type_id = [5];
-		} else {
-			filter.filter_data.type_id = [30, 40, 50, 55, 60, 70];
-		}
-
-		this.api['get' + this.api.key_name]( filter, {onResult: function( result ) {
-
-			var result_data = result.getResult();
-			if ( !Global.isArray( result_data ) ) {
-				$this.showNoResultCover()
-			} else {
-				$this.removeNoResultCover();
-				if ( Global.isSet( $this.__createRowId ) ) {
-					result_data = $this.__createRowId( result_data );
-				}
-
-				result_data = Global.formatGridData( result_data, $this.api.key_name );
-			}
-
-			if ( TTUUID.isUUID($this.refresh_id) ) {
-				$this.refresh_id = null;
-				var grid_source_data = $this.grid.getGridParam( 'data' );
-				var len = grid_source_data.length;
-
-				if ( $.type( grid_source_data ) !== 'array' ) {
-					grid_source_data = [];
-				}
-
-				var found = false;
-				var new_record = result_data[0];
-				for ( var i = 0; i < len; i++ ) {
-					var record = grid_source_data[i];
-
-					//Fixed === issue. The id set by jQGrid is string type.
-					// if ( !isNaN( parseInt( record.id ) ) ) {
-					// 	record.id = parseInt( record.id );
-					// }
-
-					if ( record.id == new_record.id ) {
-						$this.grid.setRowData( new_record.id, new_record );
-						found = true;
-						break
-					}
-				}
-
-				if ( !found ) {
-					$this.grid.clearGridData();
-					$this.grid.setGridParam( {data: grid_source_data.concat( new_record )} );
-					$this.grid.trigger( 'reloadGrid' );
-					$this.highLightGridRowById( new_record.id );
-				}
-
-			} else {
-
-				//Set Page data to widget, next show display info when setDefault Menu
-				$this.pager_data = result.getPagerData();
-
-				//CLick to show more mode no need this step
-				if ( LocalCacheData.paging_type !== 0 ) {
-					$this.paging_widget.setPagerData( $this.pager_data );
-					$this.paging_widget_2.setPagerData( $this.pager_data );
-				}
-
-				if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
-					var current_data = $this.grid.getGridParam( 'data' );
-					result_data = current_data.concat( result_data );
-				}
-
-				$this.grid.clearGridData();
-				$this.grid.setGridParam( {data: result_data} );
-				$this.grid.trigger( 'reloadGrid' );
-				$this.reSelectLastSelectItems();
-
-			}
-
-			$this.setGridCellBackGround(); //Set cell background for some views
-
-			ProgressBar.closeOverlay(); //Add this in initData
-			if ( set_default_menu ) {
-				$this.setDefaultMenu( true );
-			}
-
-			if ( LocalCacheData.paging_type === 0 ) {
-				if ( !$this.pager_data || $this.pager_data.is_last_page ) {
-					$this.paging_widget.css( 'display', 'none' );
-				} else {
-					$this.paging_widget.css( 'display', 'block' );
-				}
-			}
-
-			$this.autoOpenEditViewIfNecessary();
-
-			$this.searchDone();
-
-		}} );
-
-	},
-
 	onGridDblClickRow: function() {
 
 		var len = this.context_menu_array.length;
@@ -519,7 +333,7 @@ ExceptionViewController = BaseViewController.extend( {
 				break;
 			}
 
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			switch ( id ) {
@@ -538,7 +352,7 @@ ExceptionViewController = BaseViewController.extend( {
 				break;
 			}
 
-			context_btn = this.context_menu_array[i];
+			context_btn = $( this.context_menu_array[i] );
 			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			switch ( id ) {
@@ -559,15 +373,18 @@ ExceptionViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Employee Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Employee Status' ),
 				in_column: 1,
 				field: 'user_status_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Pay Period' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Period' ),
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
@@ -575,8 +392,10 @@ ExceptionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Employee' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Employee' ),
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
@@ -584,24 +403,30 @@ ExceptionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Severity' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Severity' ),
 				in_column: 1,
 				field: 'severity_id',
 				multiple: true,
 				adv_search: true,
 				basic_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Exception' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Exception' ),
 				in_column: 1,
 				field: 'exception_policy_type_id',
 				multiple: true,
 				adv_search: true,
 				basic_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Group' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Group' ),
 				in_column: 2,
 				multiple: true,
 				field: 'group_id',
@@ -609,8 +434,10 @@ ExceptionViewController = BaseViewController.extend( {
 				tree_mode: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Default Branch' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Default Branch' ),
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -618,8 +445,10 @@ ExceptionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Default Department' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Default Department' ),
 				field: 'default_department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -627,8 +456,10 @@ ExceptionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Branch' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Branch' ),
 				in_column: 2,
 				field: 'branch_id',
 				layout_name: ALayoutIDs.BRANCH,
@@ -636,8 +467,10 @@ ExceptionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Department' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Department' ),
 				field: 'department_id',
 				in_column: 2,
 				layout_name: ALayoutIDs.DEPARTMENT,
@@ -645,9 +478,11 @@ ExceptionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Title' ),
+			new SearchField( {
+				label: $.i18n._( 'Title' ),
 				in_column: 3,
 				field: 'title_id',
 				layout_name: ALayoutIDs.JOB_TITLE,
@@ -655,18 +490,21 @@ ExceptionViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Show Pre-Mature' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Show Pre-Mature' ),
 				in_column: 3,
 				field: 'show_pre_mature',
 				basic_search: false,
 				adv_search: true,
-				form_item_type: FormItemType.CHECKBOX} )
+				form_item_type: FormItemType.CHECKBOX
+			} )
 
 		];
 	},
 
-	getFilterColumnsFromDisplayColumns: function( ) {
+	getFilterColumnsFromDisplayColumns: function() {
 		var column_filter = {};
 		column_filter.exception_color = true;
 		column_filter.exception_background_color = true;
@@ -674,7 +512,7 @@ ExceptionViewController = BaseViewController.extend( {
 		column_filter.pay_period_id = true;
 		column_filter.pay_period_schedule_id = true;
 
-		return this._getFilterColumnsFromDisplayColumns(column_filter,  true );
+		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
 	setGridCellBackGround: function() {
@@ -691,20 +529,19 @@ ExceptionViewController = BaseViewController.extend( {
 			var item = data[i];
 
 			if ( item.exception_background_color ) {
-				var severity = $( "tr[id='" + item.id + "']" ).find( 'td[aria-describedby="' + this.ui_id + '_grid_severity"]' );
+				var severity = $( 'tr[id=\'' + item.id + '\']' ).find( 'td[aria-describedby="' + this.ui_id + '_grid_severity"]' );
 				severity.css( 'background-color', item.exception_background_color );
 				severity.css( 'font-weight', 'bold' );
 			}
 
 			if ( item.exception_color ) {
-				var code = $( "tr[id='" + item.id + "']" ).find( 'td[aria-describedby="' + this.ui_id + '_grid_exception_policy_type_id"]' );
+				var code = $( 'tr[id=\'' + item.id + '\']' ).find( 'td[aria-describedby="' + this.ui_id + '_grid_exception_policy_type_id"]' );
 				code.css( 'color', item.exception_color );
 				code.css( 'font-weight', 'bold' );
 			}
 
 		}
-	}
-
+	},
 } );
 
 ExceptionViewController.loadView = function() {
@@ -714,7 +551,7 @@ ExceptionViewController.loadView = function() {
 		var args = {};
 		var template = _.template( result );
 
-		Global.contentContainer().html( template(args) );
-	} )
+		Global.contentContainer().html( template( args ) );
+	} );
 
 };

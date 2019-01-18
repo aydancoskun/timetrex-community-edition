@@ -538,6 +538,7 @@ class CompanyDeductionFactory extends Factory {
 										'-1030-legal_entity_legal_name' => TTi18n::gettext('Legal Entity'),
 										'-1040-payroll_remittance_agency' => TTi18n::gettext('Remittance Agency'),
 										'-1050-name' => TTi18n::gettext('Name'),
+										'-1055-description' => TTi18n::gettext('Description'),
 										'-1060-calculation' => TTi18n::gettext('Calculation'),
 
 										'-1070-start_date' => TTi18n::gettext('Start Date'),
@@ -634,6 +635,7 @@ class CompanyDeductionFactory extends Factory {
 										'legal_entity_id'	=> 'LegalEntity',
 										'legal_entity_legal_name'	=> FALSE,
 										'name' => 'Name',
+										'description' => 'Description',
 										'start_date' => 'StartDate',
 										'end_date' => 'EndDate',
 										'minimum_length_of_service_unit_id' => 'MinimumLengthOfServiceUnit', //Must go before minimum_length_of_service_days, for calculations to not fail.
@@ -887,6 +889,22 @@ class CompanyDeductionFactory extends Factory {
 	function setName( $value) {
 		$value = trim($value);
 		return $this->setGenericDataValue( 'name', $value );
+	}
+
+	/**
+	 * @return bool|mixed
+	 */
+	function getDescription() {
+		return $this->getGenericDataValue( 'description' );
+	}
+
+	/**
+	 * @param $value
+	 * @return bool
+	 */
+	function setDescription( $value) {
+		$value = trim($value);
+		return $this->setGenericDataValue( 'description', $value );
 	}
 
 	/**
@@ -1434,7 +1452,8 @@ class CompanyDeductionFactory extends Factory {
 			$user_age = TTDate::getYearDifference( $birth_date, $pp_transaction_date );
 			Debug::Text('User Age: '. $user_age .' Min: '. $this->getMinimumUserAge() .' Max: '. $this->getMaximumUserAge(), __FILE__, __LINE__, __METHOD__, 10);
 
-			if ( $this->getMinimumUserAge() == 0 OR $this->getMaximumUserAge() == 0 ) {
+			//Make sure if no age is specified (no birth date), that we just always assume CPP is being deducted.
+			if ( $user_age == '' OR $this->getMinimumUserAge() == 0 OR $this->getMaximumUserAge() == 0 ) {
 				return TRUE;
 			} elseif ( $user_age >= ( $this->getMinimumUserAge() - 0.25 ) AND $user_age <= ( $this->getMaximumUserAge() + 0.25 ) ) {
 				//Check to see if they are within a few months of the min/max ages
@@ -1487,9 +1506,9 @@ class CompanyDeductionFactory extends Factory {
 		if ( $this->getCalculation() == 90 ) { //CPP
 			return $this->isCPPAgeEligible( $birth_date, $pp_transaction_date );
 		} else {
-		if ( ( $this->getMinimumUserAge() == 0 OR $user_age >= $this->getMinimumUserAge() ) AND ( $this->getMaximumUserAge() == 0 OR $user_age <= $this->getMaximumUserAge() ) ) {
-			return TRUE;
-		}
+			if ( ( $this->getMinimumUserAge() == 0 OR $user_age >= $this->getMinimumUserAge() ) AND ( $this->getMaximumUserAge() == 0 OR $user_age <= $this->getMaximumUserAge() ) ) {
+				return TRUE;
+			}
 		}
 
 		return FALSE;

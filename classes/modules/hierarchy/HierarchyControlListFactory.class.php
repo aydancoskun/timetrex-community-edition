@@ -181,7 +181,7 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 		}
 
 		//Make sure we always ensure that we return valid object_types for the product edition.
-		$valid_object_type_ids = $this->getOptions('object_type');
+		$valid_object_type_ids = Misc::trimSortPrefix( $this->getOptions('object_type') );
 
 		foreach ($lf as $obj) {
 			if ( isset($valid_object_type_ids[$obj->getColumn('object_type_id')])) {
@@ -282,6 +282,48 @@ class HierarchyControlListFactory extends HierarchyControlFactory implements Ite
 					from '. $this->getTable() .' as a
 					LEFT JOIN '. $hotf->getTable() .' as b ON a.id = b.hierarchy_control_id
 					LEFT JOIN '. $huf->getTable() .' as c ON a.id = c.hierarchy_control_id
+					where	a.company_id = ?
+							AND c.user_id = ?
+							AND a.deleted = 0
+				';
+		$query .= $this->getWhereSQL( $where );
+		$query .= $this->getSortSQL( $order );
+
+		$this->ExecuteSQL( $query, $ph );
+
+		return $this;
+	}
+
+	/**
+	 * @param string $company_id UUID
+	 * @param string $user_id UUID
+	 * @param array $where Additional SQL WHERE clause in format of array( $column => $filter, ... ). ie: array( 'id' => 1, ... )
+	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
+	 * @return bool|HierarchyControlListFactory
+	 */
+	function getObjectTypeAppendedListByCompanyIDAndSuperiorUserID( $company_id, $user_id, $where = NULL, $order = NULL) {
+		if ( $company_id == '' ) {
+			return FALSE;
+		}
+
+		if ( $user_id == '' ) {
+			return FALSE;
+		}
+
+		$hotf = new HierarchyObjectTypeFactory();
+		$hlf = new HierarchyLevelFactory();
+
+		$ph = array(
+				'company_id' => TTUUID::castUUID($company_id),
+				'user_id' => TTUUID::castUUID($user_id),
+		);
+
+		$query = '
+					select	a.*,
+							b.object_type_id
+					from '. $this->getTable() .' as a
+					LEFT JOIN '. $hotf->getTable() .' as b ON a.id = b.hierarchy_control_id
+					LEFT JOIN '. $hlf->getTable() .' as c ON a.id = c.hierarchy_control_id
 					where	a.company_id = ?
 							AND c.user_id = ?
 							AND a.deleted = 0

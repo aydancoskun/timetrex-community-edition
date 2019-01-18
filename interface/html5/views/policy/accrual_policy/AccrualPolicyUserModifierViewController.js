@@ -45,51 +45,65 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	},
 
-    initSubLogView: function( tab_id ) {
-        var $this = this;
-        if ( this.sub_log_view_controller ) {
-            this.sub_log_view_controller.buildContextMenu( true );
-            this.sub_log_view_controller.setDefaultMenu();
-            $this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-            $this.sub_log_view_controller.getSubViewFilter = function( filter ) {
-                filter['table_name_object_id'] = {
-                    'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id],
-                };
+	initSubLogView: function( tab_id ) {
+		var $this = this;
 
-                return filter;
-            };
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
 
-            $this.sub_log_view_controller.initData();
-            return;
-        }
+		if ( this.sub_log_view_controller ) {
+			this.sub_log_view_controller.buildContextMenu( true );
+			this.sub_log_view_controller.setDefaultMenu();
+			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+				filter['table_name_object_id'] = {
+					'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id]
+				};
 
-        Global.loadScript( 'views/core/log/LogViewController.js', function() {
-            var tab = $this.edit_view_tab.find( '#' + tab_id );
-            var firstColumn = tab.find( '.first-column-sub-view' );
-            Global.trackView( 'Sub' + 'Log' + 'View' );
-            LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
-        } );
+				return filter;
+			};
 
-        function beforeLoadView() {
+			$this.sub_log_view_controller.initData();
+			return;
+		}
 
-        }
+		Global.loadScript( 'views/core/log/LogViewController.js', function() {
+			var tab = $this.edit_view_tab.find( '#' + tab_id );
 
-        function afterLoadView( subViewController ) {
-            $this.sub_log_view_controller = subViewController;
-            $this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-            $this.sub_log_view_controller.getSubViewFilter = function( filter ) {
-                filter['table_name_object_id'] = {
-                    'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id],
-                };
+			var firstColumn = tab.find( '.first-column-sub-view' );
 
-                return filter;
-            };
-            $this.sub_log_view_controller.parent_view_controller = $this;
-            $this.sub_log_view_controller.postInit = function() {
-                this.initData();
-            }
-        }
-    },
+			TTPromise.add( 'initSubAudit', 'init' );
+			TTPromise.wait( 'initSubAudit', 'init', function() {
+				firstColumn.css('opacity', '1');
+			} );
+
+			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
+
+			Global.trackView( 'Sub' + 'Log' + 'View' );
+			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+		} );
+
+		function beforeLoadView() {
+
+		}
+
+		function afterLoadView( subViewController ) {
+			$this.sub_log_view_controller = subViewController;
+			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
+			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+				filter['table_name_object_id'] = {
+					'accrual_policy_user_modifier': [this.parent_edit_record.accrual_policy_id]
+				};
+
+				return filter;
+			};
+			$this.sub_log_view_controller.parent_view_controller = $this;
+			$this.sub_log_view_controller.postInit = function() {
+				this.initData();
+			};
+		}
+	},
 
 	onAddClick: function() {
 		var $this = this;
@@ -139,8 +153,8 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		var column_info;
 
 		if ( !this.select_layout ) { //Set to default layout if no layout at all
-			this.select_layout = {id: ''};
-			this.select_layout.data = {filter_data: {}, filter_sort: {}};
+			this.select_layout = { id: '' };
+			this.select_layout.data = { filter_data: {}, filter_sort: {} };
 			this.select_layout.data.display_columns = this.default_display_columns;
 		}
 		var layout_data = this.select_layout.data;
@@ -176,156 +190,118 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			start_from = column_start_from;
 		}
 
-//		for ( i = start_from; i < len; i++ ) {
-//			var view_column_data = display_columns[i];
-//
-//			var column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
-//			column_info_array.push( column_info );
-//		}
-
-		if ( this.parent_view === 'accrual_policy' ) {
-			column_info = {
-				name: 'full_name',
-				index: 'full_name',
-				label: $.i18n._( 'Employee' ),
-				width: 50,
-				sortable: false,
-				title: false
-			};
-			column_info_array.push( column_info );
-
-		} else if ( this.parent_view === 'employee' ) {
-			column_info = {
-				name: 'accrual_policy',
-				index: 'accrual_policy',
-				label: $.i18n._( 'Accrual Policy' ),
-				width: 50,
-				sortable: false,
-				title: false
-			};
-			column_info_array.push( column_info );
-		}
-
-		column_info = {
-			name: 'length_of_service_date',
-			index: 'length_of_service_date',
-			label: $.i18n._( 'Length of Service Date' ),
-			width: 80,
-			sortable: false,
-			title: false
-		};
-		column_info_array.push( column_info );
-
-		column_info = {
-			name: 'length_of_service_modifier',
-			index: 'length_of_service_modifier',
-			label: $.i18n._( 'Length of Service Modifier' ),
-			width: 90,
-			sortable: false,
-			title: false
-		};
-		column_info_array.push( column_info );
-
-		column_info = {
-			name: 'accrual_rate_modifier',
-			index: 'accrual_rate_modifier',
-			label: $.i18n._( 'Accrual Rate Modifier' ),
-			width: 80,
-			sortable: false,
-			title: false
-		};
-		column_info_array.push( column_info );
-
-		column_info = {
-			name: 'annual_maximum_time_modifier',
-			index: 'annual_maximum_time_modifier',
-			label: $.i18n._( 'Annual Accrual Maximum Modifier' ),
-			width: 110,
-			sortable: false,
-			title: false
-		};
-		column_info_array.push( column_info );
-
-		column_info = {
-			name: 'maximum_time_modifier',
-			index: 'maximum_time_modifier',
-			label: $.i18n._( 'Accrual Maximum Balance Modifier' ),
-			width: 110,
-			sortable: false,
-			title: false
-		};
-		column_info_array.push( column_info );
-
-//		column_info = {name: 'minimum_time_modifier', index: 'minimum_time_modifier', label: 'Accrual Total Minimum Modifier', width:110, sortable: false, title: false};
-//		column_info_array.push( column_info );
-
-		column_info = {
-			name: 'rollover_time_modifier',
-			index: 'rollover_time_modifier',
-			label: $.i18n._( 'Annual Maximum Rollover Modifier' ),
-			width: 110,
-			sortable: false,
-			title: false
-		};
-		column_info_array.push( column_info );
-
 		if ( !this.grid ) {
-			this.grid = grid;
+	//		for ( i = start_from; i < len; i++ ) {
+	//			var view_column_data = display_columns[i];
+	//
+	//			var column_info = {name: view_column_data.value, index: view_column_data.value, label: view_column_data.label, width: 100, sortable: false, title: false};
+	//			column_info_array.push( column_info );
+	//		}
 
-			this.grid = this.grid.jqGrid( {
-				altRows: true,
-				data: [],
-				datatype: 'local',
+			if ( this.parent_view === 'accrual_policy' ) {
+				column_info = {
+					name: 'full_name',
+					index: 'full_name',
+					label: $.i18n._( 'Employee' ),
+					width: 50,
+					sortable: false,
+					title: false
+				};
+				column_info_array.push( column_info );
+
+			} else if ( this.parent_view === 'employee' ) {
+				column_info = {
+					name: 'accrual_policy',
+					index: 'accrual_policy',
+					label: $.i18n._( 'Accrual Policy' ),
+					width: 50,
+					sortable: false,
+					title: false
+				};
+				column_info_array.push( column_info );
+			}
+
+			column_info = {
+				name: 'length_of_service_date',
+				index: 'length_of_service_date',
+				label: $.i18n._( 'Length of Service Date' ),
+				width: 80,
 				sortable: false,
-				width: (Global.bodyWidth() - 14),
-				rowNum: 10000,
-				colNames: [],
-				ondblClickRow: function() {
-					$this.onGridDblClickRow();
-				},
-				onSelectAll: function() {
-					$this.onGridSelectAll();
-				},
-				onSelectRow: $.proxy( this.onGridSelectRow, this ),
-				colModel: column_info_array,
-				multiselect: true,
-				multiboxonly: true,
-				viewrecords: true
+				title: false
+			};
+			column_info_array.push( column_info );
 
-			} );
-
-		} else {
-
-			this.grid.jqGrid( 'GridUnload' );
-			this.grid = null;
-
-			grid = $( this.el ).find( '#' + this.ui_id + '_grid' );
-			this.grid = $( grid );
-
-			this.grid = this.grid.jqGrid( {
-				altRows: true,
-				onSelectRow: $.proxy( this.onGridSelectRow, this ),
-				data: [],
-				rowNum: 10000,
-				onSelectAll: function() {
-					$this.onGridSelectAll();
-				},
-				ondblClickRow: function() {
-					$this.onGridDblClickRow();
-				},
+			column_info = {
+				name: 'length_of_service_modifier',
+				index: 'length_of_service_modifier',
+				label: $.i18n._( 'Length of Service Modifier' ),
+				width: 90,
 				sortable: false,
-				datatype: 'local',
-				width: (Global.bodyWidth() - 14),
-				colNames: [],
-				colModel: column_info_array,
-				multiselect: true,
-				multiboxonly: true,
-				viewrecords: true
-			} );
+				title: false
+			};
+			column_info_array.push( column_info );
 
+			column_info = {
+				name: 'accrual_rate_modifier',
+				index: 'accrual_rate_modifier',
+				label: $.i18n._( 'Accrual Rate Modifier' ),
+				width: 80,
+				sortable: false,
+				title: false
+			};
+			column_info_array.push( column_info );
+
+			column_info = {
+				name: 'annual_maximum_time_modifier',
+				index: 'annual_maximum_time_modifier',
+				label: $.i18n._( 'Annual Accrual Maximum Modifier' ),
+				width: 110,
+				sortable: false,
+				title: false
+			};
+			column_info_array.push( column_info );
+
+			column_info = {
+				name: 'maximum_time_modifier',
+				index: 'maximum_time_modifier',
+				label: $.i18n._( 'Accrual Maximum Balance Modifier' ),
+				width: 110,
+				sortable: false,
+				title: false
+			};
+			column_info_array.push( column_info );
+
+	//		column_info = {name: 'minimum_time_modifier', index: 'minimum_time_modifier', label: 'Accrual Total Minimum Modifier', width:110, sortable: false, title: false};
+	//		column_info_array.push( column_info );
+
+			column_info = {
+				name: 'rollover_time_modifier',
+				index: 'rollover_time_modifier',
+				label: $.i18n._( 'Annual Maximum Rollover Modifier' ),
+				width: 110,
+				sortable: false,
+				title: false
+			};
+			column_info_array.push( column_info );
+
+			var container = 'body';
+
+			if ( $this.sub_view_mode ) {
+				if ($('#tab_accruals:visible').length > 0 ) {
+					container = '#tab_accruals';
+				} else {
+					container = '#tab_employee_settings';
+				}
+			}
+
+			var grid_setup = this.getGridSetup();
+			this.grid = new TTGrid( this.ui_id + '_grid', grid_setup, column_info_array);
 		}
+		// else {
+		// 	grid = $( this.el ).find( '#' + this.ui_id + '_grid' );
+		// }
 
-		$this.setGridSize();
+		//$this.setGridSize();
 
 		//Add widget on UI and bind events. Next set data in it in search result.
 		if ( LocalCacheData.paging_type === 0 ) {
@@ -334,7 +310,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 			}
 
 			this.paging_widget.css( 'width', this.grid.width() );
-			this.grid.append( this.paging_widget );
+			this.grid.grid.append( this.paging_widget );
 
 			this.paging_widget.click( $.proxy( this.onPaging, this ) );
 
@@ -369,11 +345,42 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 	},
 
+	setGridSetup: function(){
+		var $this = this;
+		return {
+			height: 200,
+			container_selector: '.grid-div',
+			onResizeGrid: true,
+			sub_grid_mode: this.sub_view_mode,
+			container_selector: container,
+			onSelectRow: function() {
+				$this.onGridSelectRow();
+			},
+			onCellSelect: function() {
+				$this.onGridSelectRow();
+			},
+			onSelectAll: function() {
+				$this.onGridSelectAll();
+			},
+			ondblClickRow: function( e ) {
+				$this.onGridDblClickRow( e );
+			},
+			onRightClickRow: function( rowId ) {
+				var id_array = $this.getGridSelectIdArray();
+				if ( id_array.indexOf( rowId ) < 0 ) {
+					$this.grid.grid.resetSelection();
+					$this.grid.grid.setSelection( rowId );
+					$this.onGridSelectRow();
+				}
+			}
+		};
+	},
+
 	getFilterColumnsFromDisplayColumns: function() {
 		// Error: Unable to get property 'getGridParam' of undefined or null reference
 		var display_columns = [];
 		if ( this.grid ) {
-			display_columns = this.grid.getGridParam( 'colModel' );
+			display_columns = this.grid.grid.getGridParam( 'colModel' );
 		}
 		var column_filter = {};
 		column_filter.is_owner = true;
@@ -421,7 +428,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		LocalCacheData.current_doing_context_action = 'edit';
 		$this.openEditView();
 
-		if ( TTUUID.isUUID(selectedId) && selectedId != TTUUID.not_exist_id && selectedId != TTUUID.zero_id ) {
+		if ( TTUUID.isUUID( selectedId ) && selectedId != TTUUID.not_exist_id && selectedId != TTUUID.zero_id ) {
 
 			var filter = {};
 
@@ -567,7 +574,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
 		filter.filter_sort = this.select_layout.data.filter_sort;
 
-		if ( TTUUID.isUUID(this.refresh_id) ) {
+		if ( TTUUID.isUUID( this.refresh_id ) ) {
 			filter.filter_data = {};
 			filter.filter_data.id = [this.refresh_id];
 
@@ -592,7 +599,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 				var len;
 
 				if ( !Global.isArray( result_data ) ) {
-					$this.showNoResultCover()
+					$this.showNoResultCover();
 				} else {
 					$this.removeNoResultCover();
 					if ( Global.isSet( $this.__createRowId ) ) {
@@ -603,9 +610,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 					len = result_data.length;
 				}
-				if ( TTUUID.isUUID($this.refresh_id) ) {
+				if ( TTUUID.isUUID( $this.refresh_id ) ) {
 					$this.refresh_id = null;
-					var grid_source_data = $this.grid.getGridParam( 'data' );
+					var grid_source_data = $this.grid.getData();
 					len = grid_source_data.length;
 
 					if ( $.type( grid_source_data ) !== 'array' ) {
@@ -628,9 +635,9 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 							// }
 
 							if ( record.id == new_record.id ) {
-								$this.grid.setRowData( new_record.id, new_record );
+								$this.grid.grid.setRowData( new_record.id, new_record );
 								found = true;
-								break
+								break;
 							}
 
 							if ( record.id < 0 && record.user_id == new_record.user_id ) {
@@ -646,12 +653,12 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 							// $this.grid.setGridParam( {data: new_grid_source_data.concat( new_record )} );
 							$this.search();
 
-							if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGridHeight ) ) {
-								len = Global.isSet( len ) ? len : 0;
-								$this.resizeSubGridHeight( len + 1 );
-							}
+							// if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
+							// 	len = Global.isSet( len ) ? len : 0;
+							// 	$this.resizeSubGrid( len + 1 );
+							// }
 
-							$this.grid.trigger( 'reloadGrid' );
+							//s$this.grid.grid.trigger( 'reloadGrid' );
 							$this.reSelectLastSelectItems();
 							$this.highLightGridRowById( new_record.id );
 						}
@@ -668,17 +675,17 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 					}
 
 					if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
-						var current_data = $this.grid.getGridParam( 'data' );
+						var current_data = $this.grid.getData();
 						result_data = current_data.concat( result_data );
 					}
-					$this.grid.clearGridData();
-					$this.grid.setGridParam( {data: result_data} );
+					// $this.grid.grid.clearGridData();
+					$this.grid.setData( result_data );
 
-					if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGridHeight ) ) {
-						$this.resizeSubGridHeight( len );
-					}
+					// if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
+					// 	$this.resizeSubGrid( len );
+					// }
 
-					$this.grid.trigger( 'reloadGrid' );
+					//$this.grid.grid.trigger( 'reloadGrid' );
 					$this.reSelectLastSelectItems();
 
 				}
@@ -723,25 +730,11 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_employee_accrual_modifier': this.parent_view === 'employee' ? $.i18n._( 'Accrual' ) : $.i18n._( 'Employee Accrual Modifier' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
-//		var tab_0_label = this.edit_view.find( 'a[ref=tab_employee_accrual_modifier]' );
-//		var tab_1_label = this.edit_view.find( 'a[ref=tab_audit]' );
-//
-//		if ( this.parent_view === 'accrual_policy' ) {
-//			this.context_menu_name = $.i18n._( 'Employee Accrual Modifier' );
-//			$( '.ribbonTabLabel' ).find("a[ref=" + this.viewId + "ContextMenu" + "]").text( $.i18n._( 'Employee Accrual Modifier' ) );
-//
-//			tab_0_label.text( $.i18n._( 'Employee Accrual Modifier' ) );
-//
-//		} else if ( this.parent_view === 'employee' ) {
-//			tab_0_label.text( $.i18n._( 'Accrual' ) );
-//		}
-//
-//		tab_1_label.text( $.i18n._( 'Audit' ) );
+		var tab_model = {
+			'tab_employee_accrual_modifier': { 'label': this.parent_view === 'employee' ? $.i18n._( 'Accrual' ) : $.i18n._( 'Employee Accrual Modifier' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIAccrualPolicyUserModifier' )),
@@ -805,63 +798,63 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'length_of_service_date', width: 120} );
+		form_item_input.TDatePicker( { field: 'length_of_service_date', width: 120 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Length of Service Date' ), form_item_input, tab_employee_accrual_modifier_column1, '', null );
 
 		//Modifier Rates
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Modifier Rates' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Modifier Rates' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_employee_accrual_modifier_column1, '', null, true, false, 'separated_1' );
 
 		// Length of Service Modifier
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'length_of_service_modifier', width: 40} );
+		form_item_input.TTextInput( { field: 'length_of_service_modifier', width: 40 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Length of Service' ), form_item_input, tab_employee_accrual_modifier_column1 );
 
 		// Accrual Rate Modifier
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'accrual_rate_modifier', width: 40} );
+		form_item_input.TTextInput( { field: 'accrual_rate_modifier', width: 40 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Rate' ), form_item_input, tab_employee_accrual_modifier_column1 );
 
 		//Annual Accrual Maximum
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'annual_maximum_time_modifier', width: 40} );
+		form_item_input.TTextInput( { field: 'annual_maximum_time_modifier', width: 40 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Annual Accrual Maximum' ), form_item_input, tab_employee_accrual_modifier_column1, '', null, true );
 
 		// "Accrual Maximum Balance Modifier
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'maximum_time_modifier', width: 40} );
+		form_item_input.TTextInput( { field: 'maximum_time_modifier', width: 40 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Maximum Balance' ), form_item_input, tab_employee_accrual_modifier_column1 );
 
 		//Annual Maximum Rollover Modifier
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'rollover_time_modifier', width: 40} );
+		form_item_input.TTextInput( { field: 'rollover_time_modifier', width: 40 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Annual Maximum Rollover' ), form_item_input, tab_employee_accrual_modifier_column1 );
 
 		//Modifier Rates
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Current Milestone' ) + ': '} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Current Milestone' ) + ': ' } );
 		this.addEditFieldToColumn( null, form_item_input, tab_employee_accrual_modifier_column1, '', null, true, false, 'separated_2' );
 
 		// Accrual Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'accrual_rate'} );
+		form_item_input.TText( { field: 'accrual_rate' } );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Rate' ), form_item_input, tab_employee_accrual_modifier_column1, '', null, true );
 
 		// "Accrual Maximum Balance Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'maximum_time'} );
+		form_item_input.TText( { field: 'maximum_time' } );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Maximum Balance Time' ), form_item_input, tab_employee_accrual_modifier_column1, '', null, true );
 
 		// Accrual Maximum Rollover
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'rollover_time'} );
+		form_item_input.TText( { field: 'rollover_time' } );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Maximum Rollover' ), form_item_input, tab_employee_accrual_modifier_column1, '', null, true );
 
 	},
@@ -1009,7 +1002,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		if ( this.parent_view === 'accrual_policy' ) {
 
 			this.context_menu_name = $.i18n._( 'Employee Settings' );
-			$( '.ribbonTabLabel' ).find( "a[ref=" + this.viewId + "ContextMenu" + "]" ).text( $.i18n._( 'Employee Settings' ) );
+			$( '.ribbonTabLabel' ).find( 'a[ref=' + this.viewId + 'ContextMenu' + ']' ).text( $.i18n._( 'Employee Settings' ) );
 		}
 
 	},
@@ -1027,7 +1020,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		if ( Global.isSet( editId ) ) {
-			var selectedId = editId
+			var selectedId = editId;
 		} else {
 			if ( grid_selected_length > 0 ) {
 				selectedId = grid_selected_id_array[0];
@@ -1081,7 +1074,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		this.mass_edit_record_ids = [];
 
 		$.each( grid_selected_id_array, function( index, value ) {
-			$this.mass_edit_record_ids.push( value )
+			$this.mass_edit_record_ids.push( value );
 		} );
 
 		filter.filter_data = {};
@@ -1259,7 +1252,7 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		} );
 	},
 
-	setDefaultMenuDeleteIcon : function( context_btn, grid_selected_length, pId ) {
+	setDefaultMenuDeleteIcon: function( context_btn, grid_selected_length, pId ) {
 		if ( (!this.addPermissionValidate( pId ) && !this.editPermissionValidate( pId )) || this.edit_only_mode ) {
 			context_btn.addClass( 'invisible-image' );
 		}
@@ -1268,15 +1261,20 @@ AccrualPolicyUserModifierViewController = BaseViewController.extend( {
 		var enabled = false;
 
 		for ( var i in grid_selected_id_array ) {
-			if ( TTUUID.isUUID(grid_selected_id_array[i]) ) {
+			if ( TTUUID.isUUID( grid_selected_id_array[i] ) ) {
 				enabled = true;
 			}
 		}
 
-		if(!enabled){
-			context_btn.addClass('disable-image');
+		if ( !enabled ) {
+			context_btn.addClass( 'disable-image' );
 		}
 	},
+
+	searchDone: function(){
+		this.__super('searchDone');
+		TTPromise.resolve( 'AccrualView', 'init' );
+	}
 
 } );
 

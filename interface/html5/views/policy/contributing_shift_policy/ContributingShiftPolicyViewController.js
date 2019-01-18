@@ -2,8 +2,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 	el: '#contributing_shift_policy_view_container',
 
 	_required_files: {
-		10: ['APIContributingShiftPolicy', 'APIHolidayPolicy', 'APIBranch', 'APIDepartment',],
-		20: ['APIJobGroup', 'APIJobItemGroup', 'APIJob', 'APIJobItem',],
+		10: ['APIContributingShiftPolicy', 'APIHolidayPolicy', 'APIBranch', 'APIDepartment'],
+		20: ['APIJobGroup', 'APIJobItemGroup', 'APIJob', 'APIJobItem']
 	},
 
 	type_array: null,
@@ -63,21 +63,25 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'job_item_selection_type' );
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			this.job_group_api.getJobGroup( '', false, false, {onResult: function( res ) {
+			this.job_group_api.getJobGroup( '', false, false, {
+				onResult: function( res ) {
 
-				res = res.getResult();
-				res = Global.buildTreeRecord( res )
-				$this.job_group_array = res;
+					res = res.getResult();
+					res = Global.buildTreeRecord( res );
+					$this.job_group_array = res;
 
-			}} );
+				}
+			} );
 
-			this.job_item_group_api.getJobItemGroup( '', false, false, {onResult: function( res ) {
+			this.job_item_group_api.getJobItemGroup( '', false, false, {
+				onResult: function( res ) {
 
-				res = res.getResult();
-				res = Global.buildTreeRecord( res )
-				$this.job_item_group_array = res;
+					res = res.getResult();
+					res = Global.buildTreeRecord( res );
+					$this.job_item_group_array = res;
 
-			}} );
+				}
+			} );
 		}
 	},
 
@@ -87,12 +91,14 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_contributing_shift_policy': $.i18n._( 'Contributing Shift Policy' ),
-			'tab_date_criteria': $.i18n._( 'Date/Time Criteria' ),
-			'tab_differential_criteria': $.i18n._( 'Differential Criteria' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+
+		var tab_model = {
+			'tab_contributing_shift_policy': { 'label': $.i18n._( 'Contributing Shift Policy' ) },
+			'tab_date_criteria': { 'label': $.i18n._( 'Date/Time Criteria' ), 'init_callback': 'initSubDateCriteriaView' },
+			'tab_differential_criteria': { 'label': $.i18n._( 'Differential Criteria' ), 'init_callback': 'initSubDifferentialCriteriaView' },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIContributingShiftPolicy' )),
@@ -100,7 +106,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.OVER_TIME_POLICY,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
 
@@ -116,7 +123,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_contributing_shift_policy_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -136,7 +143,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'contributing_pay_code_policy_id'} );
+			field: 'contributing_pay_code_policy_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Contributing Pay Code Policy' ), form_item_input, tab_contributing_shift_policy_column1 );
 
 		//Tab 1 start
@@ -150,9 +158,9 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'filter_start_date'} );
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( '(Leave blank for no start date)' ) + "</span>" );
+		form_item_input.TDatePicker( { field: 'filter_start_date' } );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Leave blank for no start date)' ) + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
@@ -160,10 +168,10 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'filter_end_date'} );
+		form_item_input.TDatePicker( { field: 'filter_end_date' } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Leave blank for no end date)' ) + "</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Leave blank for no end date)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -171,10 +179,10 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		// Start Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
-		form_item_input.TTimePicker( {field: 'filter_start_time'} );
+		form_item_input.TTimePicker( { field: 'filter_start_time' } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Leave blank for no start time)' ) + "</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Leave blank for no start time)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -182,10 +190,10 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		// End Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
-		form_item_input.TTimePicker( {field: 'filter_end_time'} );
+		form_item_input.TTimePicker( { field: 'filter_end_time' } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Leave blank for no end time)' ) + "</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Leave blank for no end time)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -193,35 +201,35 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		// Effective Days
 		var form_item_sun_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_sun_checkbox.TCheckbox( {field: 'sun'} );
+		form_item_sun_checkbox.TCheckbox( { field: 'sun' } );
 
 		var form_item_mon_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_mon_checkbox.TCheckbox( {field: 'mon'} );
+		form_item_mon_checkbox.TCheckbox( { field: 'mon' } );
 
 		var form_item_tue_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_tue_checkbox.TCheckbox( {field: 'tue'} );
+		form_item_tue_checkbox.TCheckbox( { field: 'tue' } );
 
 		var form_item_wed_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_wed_checkbox.TCheckbox( {field: 'wed'} );
+		form_item_wed_checkbox.TCheckbox( { field: 'wed' } );
 
 		var form_item_thu_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_thu_checkbox.TCheckbox( {field: 'thu'} );
+		form_item_thu_checkbox.TCheckbox( { field: 'thu' } );
 
 		var form_item_fri_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_fri_checkbox.TCheckbox( {field: 'fri'} );
+		form_item_fri_checkbox.TCheckbox( { field: 'fri' } );
 
 		var form_item_sat_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_sat_checkbox.TCheckbox( {field: 'sat'} );
+		form_item_sat_checkbox.TCheckbox( { field: 'sat' } );
 
-		widgetContainer = $( "<div class=''></div>" );
+		widgetContainer = $( '<div class=\'\'></div>' );
 
-		var sun = $( "<span class='widget-top-label'> " + $.i18n._( 'Sun' ) + " <br> " + " </span>" );
-		var mon = $( "<span class='widget-top-label'> " + $.i18n._( 'Mon' ) + " <br> " + " </span>" );
-		var tue = $( "<span class='widget-top-label'> " + $.i18n._( 'Tue' ) + " <br> " + " </span>" );
-		var wed = $( "<span class='widget-top-label'> " + $.i18n._( 'Wed' ) + " <br> " + " </span>" );
-		var thu = $( "<span class='widget-top-label'> " + $.i18n._( 'Thu' ) + " <br> " + " </span>" );
-		var fri = $( "<span class='widget-top-label'> " + $.i18n._( 'Fri' ) + " <br> " + " </span>" );
-		var sat = $( "<span class='widget-top-label'> " + $.i18n._( 'Sat' ) + " <br> " + " </span>" );
+		var sun = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Sun' ) + ' <br> ' + ' </span>' );
+		var mon = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Mon' ) + ' <br> ' + ' </span>' );
+		var tue = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Tue' ) + ' <br> ' + ' </span>' );
+		var wed = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Wed' ) + ' <br> ' + ' </span>' );
+		var thu = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Thu' ) + ' <br> ' + ' </span>' );
+		var fri = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Fri' ) + ' <br> ' + ' </span>' );
+		var sat = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Sat' ) + ' <br> ' + ' </span>' );
 
 		sun.append( form_item_sun_checkbox );
 		mon.append( form_item_mon_checkbox );
@@ -243,7 +251,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		// Holidays
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'include_holiday_type_id', set_empty: false } );
+		form_item_input.TComboBox( { field: 'include_holiday_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.include_holiday_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Holidays' ), form_item_input, tab_date_criteria_column1 );
 
@@ -261,14 +269,14 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		// Include Shift Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'include_shift_type_id', set_empty: false } );
+		form_item_input.TComboBox( { field: 'include_shift_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.include_shift_type_array ) );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( '(Between above start/end times)' ) + "</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Between above start/end times)' ) + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
-		this.addEditFieldToColumn( $.i18n._( 'Shift Criteria' ), form_item_input, tab_date_criteria_column1,'', widgetContainer );
+		this.addEditFieldToColumn( $.i18n._( 'Shift Criteria' ), form_item_input, tab_date_criteria_column1, '', widgetContainer );
 
 		//
 		// Tab2 start
@@ -282,17 +290,17 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		this.edit_view_tabs[2].push( tab_differential_criteria_column1 );
 
 		// Branches
-		var v_box = $( "<div class='v-box'></div>" )
+		var v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'branch_selection_type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'branch_selection_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.branch_selection_type_array ) );
 
-		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -303,7 +311,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'branch'} );
+			field: 'branch'
+		} );
 
 		var form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 
@@ -312,7 +321,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		// Exclude Default
 		var form_item_input_2 = Global.loadWidgetByName( FormItemType.CHECKBOX );
 
-		form_item_input_2.TCheckbox( {field: 'exclude_default_branch'} );
+		form_item_input_2.TCheckbox( { field: 'exclude_default_branch' } );
 
 		form_item = this.putInputToInsideFormItem( form_item_input_2, 'Exclude Default' );
 
@@ -321,17 +330,17 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Branches' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 
 		// Departments
-		v_box = $( "<div class='v-box'></div>" )
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'department_selection_type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'department_selection_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.department_selection_type_array ) );
 
-		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -342,7 +351,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'department'} );
+			field: 'department'
+		} );
 
 		form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 
@@ -351,7 +361,7 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		// Exclude Default
 		form_item_input_2 = Global.loadWidgetByName( FormItemType.CHECKBOX );
 
-		form_item_input_2.TCheckbox( {field: 'exclude_default_department'} );
+		form_item_input_2.TCheckbox( { field: 'exclude_default_department' } );
 
 		form_item = this.putInputToInsideFormItem( form_item_input_2, 'Exclude Default' );
 
@@ -361,17 +371,17 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 			// Job Groups
-			v_box = $( "<div class='v-box'></div>" );
+			v_box = $( '<div class=\'v-box\'></div>' );
 
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'job_group_selection_type_id', set_empty: false} );
+			form_item_input.TComboBox( { field: 'job_group_selection_type_id', set_empty: false } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_group_selection_type_array ) );
 
-			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			//Selection
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -381,7 +391,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.TREE_COLUMN,
 				set_empty: true,
-				field: 'job_group'} );
+				field: 'job_group'
+			} );
 
 			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_group_array ) );
 
@@ -392,17 +403,17 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Job Groups' ), [form_item_input, form_item_input_1], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Jobs
-			v_box = $( "<div class='v-box'></div>" )
+			v_box = $( '<div class=\'v-box\'></div>' );
 
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'job_selection_type_id', set_empty: false} );
+			form_item_input.TComboBox( { field: 'job_selection_type_id', set_empty: false } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_selection_type_array ) );
 
-			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			//Selection
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -413,7 +424,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
 				set_empty: true,
-				field: 'job'} );
+				field: 'job'
+			} );
 
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 
@@ -421,24 +433,24 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 
 			// Exclude Default
 			form_item_input_2 = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_input_2.TCheckbox( {field: 'exclude_default_job'} );
+			form_item_input_2.TCheckbox( { field: 'exclude_default_job' } );
 			form_item = this.putInputToInsideFormItem( form_item_input_2, 'Exclude Default' );
 			v_box.append( form_item );
 
 			this.addEditFieldToColumn( $.i18n._( 'Jobs' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Task Groups
-			v_box = $( "<div class='v-box'></div>" )
+			v_box = $( '<div class=\'v-box\'></div>' );
 
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'job_item_group_selection_type_id', set_empty: false} );
+			form_item_input.TComboBox( { field: 'job_item_group_selection_type_id', set_empty: false } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_group_selection_type_array ) );
 
-			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			//Selection
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -448,7 +460,8 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.TREE_COLUMN,
 				set_empty: true,
-				field: 'job_item_group'} );
+				field: 'job_item_group'
+			} );
 
 			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_item_group_array ) );
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
@@ -457,17 +470,17 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Task Groups' ), [form_item_input, form_item_input_1], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Tasks
-			v_box = $( "<div class='v-box'></div>" )
+			v_box = $( '<div class=\'v-box\'></div>' );
 
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'job_item_selection_type_id', set_empty: false} );
+			form_item_input.TComboBox( { field: 'job_item_selection_type_id', set_empty: false } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_selection_type_array ) );
 
-			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			//Selection
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -478,14 +491,15 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
 				set_empty: true,
-				field: 'job_item'} );
+				field: 'job_item'
+			} );
 
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 			v_box.append( form_item );
 
 			// Exclude Default
 			form_item_input_2 = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_input_2.TCheckbox( {field: 'exclude_default_job_item'} );
+			form_item_input_2.TCheckbox( { field: 'exclude_default_job_item' } );
 			form_item = this.putInputToInsideFormItem( form_item_input_2, 'Exclude Default' );
 			v_box.append( form_item );
 
@@ -636,84 +650,29 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		}
 	},
 
-	onTabShow: function( e, ui ) {
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		//Handle most cases that one tab and on audit tab
-		if ( this.edit_view_tab_selected_index == 1 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_date_criteria' ).find( '.first-column' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-			} else {
-				this.edit_view_tab.find( '#tab_date_criteria' ).find( '.first-column' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			}
+	initSubDateCriteriaView: function() {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			this.edit_view_tab.find( '#tab_date_criteria' ).find( '.first-column' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			this.buildContextMenu( true );
 			this.setEditMenu();
-		} else if ( this.edit_view_tab_selected_index == 2 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-			} else {
-				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			}
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		} else if ( this.edit_view_tab_selected_index === 3 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
 		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
+			this.edit_view_tab.find( '#tab_date_criteria' ).find( '.first-column' ).css( 'display', 'none' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
-
 	},
 
-	initTabData: function() {
-		//Handle most case that one tab and one audit tab
-
-		if ( this.edit_view_tab_selected_index == 1 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_date_criteria' ).find( '.first-column' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-			} else {
-				this.edit_view_tab.find( '#tab_date_criteria' ).find( '.first-column' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			}
-		} else if ( this.edit_view_tab_selected_index == 2 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-			} else {
-				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
+	initSubDifferentialCriteriaView: function() {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
+			this.buildContextMenu( true );
+			this.setEditMenu();
+		} else {
+			this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'none' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
 	},
 
@@ -722,15 +681,18 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Contributing Pay Code' ),
+			new SearchField( {
+				label: $.i18n._( 'Contributing Pay Code' ),
 				in_column: 1,
 				field: 'contributing_pay_code_policy_id',
 				layout_name: ALayoutIDs.CONTRIBUTING_PAY_CODE_POLICY,
@@ -738,9 +700,11 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -748,9 +712,11 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -758,7 +724,9 @@ ContributingShiftPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
+		];
 	}
 
 

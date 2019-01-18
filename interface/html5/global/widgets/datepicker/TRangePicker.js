@@ -95,7 +95,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -127,12 +127,12 @@
 		this.showErrorTip = function( sec ) {
 
 			if ( !Global.isSet( sec ) ) {
-				sec = 2
+				sec = 2;
 			}
 
 			if ( !error_tip_box ) {
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
-				error_tip_box = error_tip_box.ErrorTipBox()
+				error_tip_box = error_tip_box.ErrorTipBox();
 			}
 			if ( date_picker_input.hasClass( 'warning-tip' ) ) {
 				error_tip_box.show( this, error_string, sec, true );
@@ -199,8 +199,8 @@
 
 		this.autoResize = function() {
 			var content_width, example_width;
-			example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().date_format_display, 12 );
-			content_width = Global.calculateTextWidth( date_picker_input.val(), 12, example_width, ((example_width * 2) + 100), 28 );
+			example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().date_format_display );
+			content_width = Global.calculateTextWidth( date_picker_input.val(), { min_width: example_width, max_width: ((example_width * 2) + 100), padding: 28 } );
 			date_picker.width( content_width + 'px' );
 		};
 
@@ -210,7 +210,7 @@
 				return;
 			}
 
-			var tab_index = tab_bars.tabs( 'option', 'selected' );
+			var tab_index = tab_bars.tabs( 'option', 'active' );
 
 			ranger_picker.remove();
 			is_open = false;
@@ -309,7 +309,7 @@
 			}
 
 			if ( this.rows_widgets_array.length > 0 && !data ) {
-				var current_data = this.rows_widgets_array[this.rows_widgets_array.length - 1].start_date_stamp.getValue()
+				var current_data = this.rows_widgets_array[this.rows_widgets_array.length - 1].start_date_stamp.getValue();
 
 				if ( !current_data ) {
 					current_data = new Date();
@@ -385,7 +385,31 @@
 			start_picker_label.text( $.i18n._( 'Start' ) + ':' );
 			end_picker_label.text( $.i18n._( 'End' ) + ':' );
 			var format = LocalCacheData.getLoginUserPreference().date_format_1;
+
+			$.datepicker._gotoToday = function( id ) {
+				var target = $( id );
+				var inst = this._getInst( target[0] );
+				if ( this._get( inst, 'gotoCurrent' ) && inst.currentDay ) {
+					inst.selectedDay = inst.currentDay;
+					inst.drawMonth = inst.selectedMonth = inst.currentMonth;
+					inst.drawYear = inst.selectedYear = inst.currentYear;
+				}
+				else {
+					var date = new Date();
+					inst.selectedDay = date.getDate();
+					inst.drawMonth = inst.selectedMonth = date.getMonth();
+					inst.drawYear = inst.selectedYear = date.getFullYear();
+					// the below two lines are new
+					this._setDateDatepicker( target, date );
+					this._selectDate( id, this._getDateDatepicker( target ) );
+					$( target ).datepicker( 'setDate', date );
+				}
+				this._notifyChange( inst );
+				this._adjustDate( target );
+			};
+
 			range_start_picker.datepicker( {
+				showOtherMonths: true,
 				showTime: false,
 				dateFormat: format,
 				showHour: false,
@@ -397,18 +421,22 @@
 				showAnim: '',
 				yearRange: '-100:+10',
 				showOn: '',
-				dayNamesMin: [$.i18n._( "Sun" ), $.i18n._( "Mon" ), $.i18n._( "Tue" ),
-					$.i18n._( "Wed" ), $.i18n._( "Thu" ), $.i18n._( "Fri" ), $.i18n._( "Sat" )],
+				dayNamesMin: [
+					$.i18n._( 'Sun' ), $.i18n._( 'Mon' ), $.i18n._( 'Tue' ),
+					$.i18n._( 'Wed' ), $.i18n._( 'Thu' ), $.i18n._( 'Fri' ), $.i18n._( 'Sat' )
+				],
 				currentText: $.i18n._( 'Today' ),
-				monthNamesShort: [$.i18n._( "Jan" ), $.i18n._( "Feb" ),
-					$.i18n._( "Mar" ), $.i18n._( "Apr" ), $.i18n._( "May" ),
-					$.i18n._( "Jun" ), $.i18n._( "Jul" ), $.i18n._( "Aug" ),
-					$.i18n._( "Sep" ), $.i18n._( "Oct" ), $.i18n._( "Nov" ),
-					$.i18n._( "Dec" )]
-
+				monthNamesShort: [
+					$.i18n._( 'Jan' ), $.i18n._( 'Feb' ),
+					$.i18n._( 'Mar' ), $.i18n._( 'Apr' ), $.i18n._( 'May' ),
+					$.i18n._( 'Jun' ), $.i18n._( 'Jul' ), $.i18n._( 'Aug' ),
+					$.i18n._( 'Sep' ), $.i18n._( 'Oct' ), $.i18n._( 'Nov' ),
+					$.i18n._( 'Dec' )
+				],
 			} );
 
 			range_end_picker.datepicker( {
+				showOtherMonths: true,
 				showTime: false,
 				dateFormat: format,
 				showHour: false,
@@ -420,21 +448,25 @@
 				showAnim: '',
 				yearRange: '-100:+10',
 				showOn: '',
-				dayNamesMin: [$.i18n._( "Sun" ), $.i18n._( "Mon" ), $.i18n._( "Tue" ),
-					$.i18n._( "Wed" ), $.i18n._( "Thu" ), $.i18n._( "Fri" ), $.i18n._( "Sat" )],
+				dayNamesMin: [
+					$.i18n._( 'Sun' ), $.i18n._( 'Mon' ), $.i18n._( 'Tue' ),
+					$.i18n._( 'Wed' ), $.i18n._( 'Thu' ), $.i18n._( 'Fri' ), $.i18n._( 'Sat' )
+				],
 				currentText: $.i18n._( 'Today' ),
-				monthNamesShort: [$.i18n._( "Jan" ), $.i18n._( "Feb" ),
-					$.i18n._( "Mar" ), $.i18n._( "Apr" ), $.i18n._( "May" ),
-					$.i18n._( "Jun" ), $.i18n._( "Jul" ), $.i18n._( "Aug" ),
-					$.i18n._( "Sep" ), $.i18n._( "Oct" ), $.i18n._( "Nov" ),
-					$.i18n._( "Dec" )]
+				monthNamesShort: [
+					$.i18n._( 'Jan' ), $.i18n._( 'Feb' ),
+					$.i18n._( 'Mar' ), $.i18n._( 'Apr' ), $.i18n._( 'May' ),
+					$.i18n._( 'Jun' ), $.i18n._( 'Jul' ), $.i18n._( 'Aug' ),
+					$.i18n._( 'Sep' ), $.i18n._( 'Oct' ), $.i18n._( 'Nov' ),
+					$.i18n._( 'Dec' )
+				]
 
 			} );
 
 			var close_icon = ranger_picker.find( '.close-icon' );
 
 			close_icon.click( function() {
-				$this.close()
+				$this.close();
 			} );
 
 			//Add render in tab 1
@@ -470,7 +502,7 @@
 			tab_bars = $( ranger_picker.find( '.edit-view-tab-bar' ) );
 
 			tab_bars = tab_bars.tabs( {
-				show: function( e, ui ) {
+				activate: function( e, ui ) {
 
 					if ( !tab_bars || !tab_bars.is( ':visible' ) ) {
 						return;
@@ -511,15 +543,15 @@
 				range_start_picker.datepicker( 'setDate', result_array[0] );
 				range_end_picker.datepicker( 'setDate', result_array[1] );
 			} else if ( result && $.type( result ) === 'array' ) {
-				tab_bars.tabs( 'select', 1 );
+				tab_bars.tabs( 'option', 'active', 1 );
 
 				editor.setValue( result );
 			}
 
-		}
+		};
 
 		this.setPlaceHolder = function( val ) {
-			date_picker_input.attr( 'placeholder', val )
+			date_picker_input.attr( 'placeholder', val );
 		};
 
 		this.each( function() {
@@ -529,7 +561,7 @@
 			date_picker = $( this );
 
 			field = o.field;
-			if( o.validation_field){
+			if ( o.validation_field ) {
 				validation_field = o.validation_field;
 			}
 			icon = $( this ).find( '.t-date-picker-icon' );
@@ -540,15 +572,15 @@
 
 			date_picker_input.change( function() {
 				if ( check_box ) {
-					$this.setCheckBox(true);
+					$this.setCheckBox( true );
 				}
 				result = [date_picker_input.val()];
 				$this.trigger( 'formItemChange', [$this] );
 				$this.autoResize();
+				return true;
 			} );
 
-			icon.bind( 'mouseup', function() {
-
+			icon.bind( 'mouseup', function() { //Need to use 'mouseup' event as main.js binds 'mousedown' for closing when clicked off.
 				if ( !enabled ) {
 					return;
 				}
@@ -557,12 +589,8 @@
 					show();
 					is_open = true;
 				} else {
+					$this.close();
 					is_open = false;
-					if ( focus_out_timer ) {
-						clearTimeout( focus_out_timer );
-						focus_out_timer = null;
-					}
-
 				}
 
 			} );

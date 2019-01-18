@@ -20,7 +20,7 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 		var $this = this;
 		this._super( 'render' );
 		// $( this.el ).css( {left:  ( Global.bodyWidth() - $(this.el ).width() )/2} );
-        //
+		//
 		// $( window ).resize( function() {
 		// 	$( $this.el ).css( {left:  ( Global.bodyWidth() - $($this.el ).width() )/2} );
 		// } );
@@ -81,7 +81,9 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 			default:
 
 				for ( var key in current_step_ui ) {
-					if ( !current_step_ui.hasOwnProperty( key ) ) continue;
+					if ( !current_step_ui.hasOwnProperty( key ) ) {
+						continue;
+					}
 
 					current_step_data[key] = current_step_ui[key].getValue();
 				}
@@ -107,7 +109,7 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 				}
 			}
 		}
-		window.location = location;
+		Global.setURLToBrowser( location );
 	},
 
 	onDoneClick: function() {
@@ -121,30 +123,30 @@ ResetForgotPasswordWizardController = BaseWizardController.extend( {
 		this.stepsWidgetDic[1].new_password.clearErrorStyle();
 		this.stepsWidgetDic[1].confirm_password.clearErrorStyle();
 
-		if ( typeof LocalCacheData.all_url_args.key == 'undefined'  ) {
-			this.stepsWidgetDic[1].confirm_password.setErrorStyle($.i18n._('Password reset key is invalid, please try resetting your password again (u)'), true);
+		if ( typeof LocalCacheData.all_url_args.key == 'undefined' ) {
+			this.stepsWidgetDic[1].confirm_password.setErrorStyle( $.i18n._( 'Password reset key is invalid, please try resetting your password again (u)' ), true );
 		} else if ( !new_password ) {
 			this.stepsWidgetDic[1].new_password.setErrorStyle( $.i18n._( 'New password can\'t be empty' ), true );
 		} else if ( new_password !== confirm_password ) {
 			this.stepsWidgetDic[1].confirm_password.setErrorStyle( $.i18n._( 'New password does not match' ), true );
 		} else {
 			this.api.passwordReset( LocalCacheData.all_url_args.key,
-				new_password,
-				confirm_password
-				, {
-					onResult: function( result ) {
+					new_password,
+					confirm_password
+					, {
+						onResult: function( result ) {
 
-						if ( !result.isValid() ) {
-							TAlertManager.showErrorAlert( result );
-						} else {
-							$this.onCloseClick();
-							if ( $this.call_back ) {
-								$this.call_back();
+							if ( !result.isValid() ) {
+								TAlertManager.showErrorAlert( result );
+							} else {
+								$this.onCloseClick();
+								if ( $this.call_back ) {
+									$this.call_back();
+								}
 							}
-						}
 
-					}
-				} )
+						}
+					} );
 		}
 
 	}

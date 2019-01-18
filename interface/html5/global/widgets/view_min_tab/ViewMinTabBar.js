@@ -35,7 +35,7 @@
 						break;
 					default:
 //						IndexViewController.goToView( view_id );
-						window.location.href = url;
+						Global.setURLToBrowser( url );
 				}
 
 			} );
@@ -46,7 +46,7 @@
 			} );
 
 			$this.append( tab );
-		}
+		};
 
 		this.buildTabs = function( tab_map ) {
 
@@ -66,7 +66,7 @@
 
 			}
 
-		}
+		};
 
 		this.each( function() {
 

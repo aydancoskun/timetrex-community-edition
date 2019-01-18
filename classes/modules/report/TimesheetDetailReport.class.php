@@ -1236,7 +1236,7 @@ class TimesheetDetailReport extends Report {
 		$utlf = TTnew( 'UserTitleListFactory' );
 		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array() ); //Dont send filter data as permission_children_ids intended for users corrupts the filter
 		Debug::Text(' User Title Total Rows: '. $dlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-		$user_title_column_config = array_merge( (array)Misc::removeKeyPrefix( 'user_title_', (array)$this->getColumnDataConfig() ), array('id' => TRUE, 'name' => TRUE ) ); //Always include title_id column so we can merge title data.
+		$user_title_column_config = array_merge( (array)Misc::removeKeyPrefix( 'user_title_', (array)$this->getColumnDataConfig() ), array('id' => TRUE, 'name' => TRUE, 'other_id1' => TRUE, 'other_id2' => TRUE, 'other_id3' => TRUE, 'other_id4' => TRUE, 'other_id5' => TRUE ) ); //Always include title_id column so we can merge title data.
 		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $utlf->getRecordCount(), NULL, TTi18n::getText('Retrieving Titles...') );
 		foreach ( $utlf as $key => $ut_obj ) {
 			$this->tmp_data['user_title'][$ut_obj->getId()] = Misc::addKeyPrefix( 'user_title_', (array)$ut_obj->getObjectAsArray( $user_title_column_config ) );

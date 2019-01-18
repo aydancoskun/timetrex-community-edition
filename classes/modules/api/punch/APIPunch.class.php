@@ -438,12 +438,13 @@ class APIPunch extends APIFactory {
 	 * @return array|bool
 	 */
 	function getPunch( $data = NULL, $disable_paging = FALSE ) {
+
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
 				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
 

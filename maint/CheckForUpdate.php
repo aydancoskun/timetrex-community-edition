@@ -63,7 +63,7 @@ if ( $ttsc->isUpdateNotifyEnabled() == TRUE ) {
 
 			//Check for new license once it starts expiring.
 			//Help -> About, checking for new versions also gets the updated license file.
-			if ( $i == 0 AND getTTProductEdition() > TT_PRODUCT_COMMUNITY ) {
+			if ( $i == 0 AND getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 				if ( !isset($system_settings['license']) ) {
 					$system_settings['license'] = NULL;
 				}

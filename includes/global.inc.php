@@ -58,8 +58,8 @@ if ( ini_get('max_execution_time') < 1800 ) {
 //Check: http://ca3.php.net/manual/en/security.magicquotes.php#61188 for disabling magic_quotes_gpc
 ini_set( 'magic_quotes_runtime', 0 );
 
-define('APPLICATION_VERSION', '11.2.6' );
-define('APPLICATION_VERSION_DATE', 1535526000 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("29-Aug-2018")."\n\n";'
+define('APPLICATION_VERSION', '11.3.0' );
+define('APPLICATION_VERSION_DATE', 1538722800 ); //Release date of version. CMD: php -r 'echo "\n". strtotime("05-Oct-2018")."\n\n";'
 
 if ( strtoupper( substr(PHP_OS, 0, 3) ) == 'WIN' ) {
 	define('OPERATING_SYSTEM', 'WIN' );
@@ -123,7 +123,7 @@ if ( isset($config_vars['other']['primary_company_id']) AND $config_vars['other'
 if ( PRODUCTION == TRUE ) {
 	define('APPLICATION_BUILD', APPLICATION_VERSION .'-'. date('Ymd', APPLICATION_VERSION_DATE ) .'-'. date('His', filemtime( __FILE__ ) ) );
 } else {
-	define('APPLICATION_BUILD', APPLICATION_VERSION .'-'. date('Ymd-Hi00') ); //Dont show seconds, as they will never match across multiple API calls.
+	define('APPLICATION_BUILD', APPLICATION_VERSION .'-'. date('Ymd') ); //Keep as static as possible as if this changes during JS debugging it will wipe out any temporary break points.
 }
 
 //Windows doesn't define LC_MESSAGES, so lets do it manually here.

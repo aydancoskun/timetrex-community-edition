@@ -127,16 +127,13 @@ class APIUserDateTotal extends APIFactory {
 	 * @return array|bool
 	 */
 	function getUserDateTotal( $data = NULL, $disable_paging = FALSE ) {
-		//if ( !$this->getPermissionObject()->Check('punch', 'enabled')
-		//OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_child')	) ) {
+		$data = $this->initializeFilterAndPager( $data );
 
 		//Regular employees with permissions to edit their own absences need this.
 		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
 				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Parse date string sent by HTML5 interface for searching.
 		if ( isset($data['filter_data']['date_stamp']) ) {

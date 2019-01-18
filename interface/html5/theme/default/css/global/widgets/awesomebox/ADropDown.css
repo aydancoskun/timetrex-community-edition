@@ -1,7 +1,7 @@
 .a-dropdown {
-
     float: left;
     margin-bottom: 5px;
+    white-space: nowrap;
 }
 
 .a-dropdown .unselect-grid-div {
@@ -10,7 +10,7 @@
     border-radius: 6px;
     height: auto;
     /*padding-bottom: 10px;*/
-    width: 464px;
+    width: 450px;
     float: left;
 }
 
@@ -20,10 +20,9 @@
 
 .a-dropdown .search-input {
     outline: none;
-    border: 1px inset;
+    border-style: solid;
     border-right: none;
-    padding-left: 0;
-    padding-right: 0;
+    border-width: 1px;
     height: 20px;
 }
 
@@ -58,8 +57,8 @@
     position: relative;
     left: 10px;
     border: 2px solid red;
-    width: 442px;
-    overflow: auto;
+    width: 432px;
+    overflow-x: auto;
 
 }
 
@@ -90,19 +89,21 @@
     margin-left: -130px;
 }
 
+.a-dropdown .ui-jqgrid {
+    min-height: 100px;
+}
 .a-dropdown .unselect-grid-div .ui-jqgrid {
     position: relative;
     border-radius: 0;
 }
 
 .a-dropdown .select-grid-div {
-
     background-color: #34628D;
     border-radius: 6px;
     height: auto;
     padding-bottom: 10px;
-    width: 464px;
-    float: left;
+    width: 450px;
+    display: inline-block;
 }
 
 .a-dropdown .select-grid-div .select-grid-title-bar {
@@ -117,7 +118,7 @@
     position: relative;
     left: 10px;
     border: 2px solid #00ff00;
-    width: 442px;
+    width: 432px;
     overflow: auto;
 
 }
@@ -301,15 +302,13 @@
 }
 
 .a-dropdown .close-btn {
-    background: url("../../../../images/close.png") repeat scroll 0 0 rgba(0, 0, 0, 0);
+    background: rgba(0, 0, 0, 0);
     border: medium none;
     cursor: pointer;
     height: 12px;
     position: relative;
-    width: 12px;
     padding: 0;
-    right: -3px;
-    top: 2px;
+    width: 21px !important;
 }
 
 .a-dropdown .edit-columnIcon-div {
@@ -323,5 +322,15 @@
 }
 
 .a-dropdown .selected-tree-cell {
-    color: #999;
+    color: #8c8c8c;
+}
+
+.a-dropdown .a-grid-button {
+    top: -3px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+}
+
+.a-dropdown .a-grid-close-button {
+    top: -2px;
 }

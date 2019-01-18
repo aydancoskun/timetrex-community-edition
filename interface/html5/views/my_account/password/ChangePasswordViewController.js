@@ -48,7 +48,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 			this.showPassword = false;
 		}
 
-		if ( PermissionManager.validate( "user", "edit_own_phone_password" ) ) {
+		if ( PermissionManager.validate( 'user', 'edit_own_phone_password' ) ) {
 			this.showPhonePassword = true;
 		} else {
 			this.showPhonePassword = false;
@@ -57,6 +57,45 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 	render: function() {
 		this._super( 'render' );
+	},
+
+	buildContextMenuModels: function() {
+
+		//Context Menu
+		var menu = new RibbonMenu( {
+			label: this.context_menu_name,
+			id: this.viewId + 'ContextMenu',
+			sub_menu_groups: []
+		} );
+
+		//menu group
+		var editor_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Editor' ),
+			id: this.viewId + 'Editor',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+
+		var save = new RibbonSubMenu( {
+			label: $.i18n._( 'Save' ),
+			id: ContextMenuIconName.save,
+			group: editor_group,
+			icon: Icons.save,
+			permission_result: true,
+			permission: null
+		} );
+
+		var cancel = new RibbonSubMenu( {
+			label: $.i18n._( 'Cancel' ),
+			id: ContextMenuIconName.cancel,
+			group: editor_group,
+			icon: Icons.cancel,
+			permission_result: true,
+			permission: null
+		} );
+
+		return [menu];
+
 	},
 
 	saveValidate: function( context_btn, p_id ) {
@@ -109,7 +148,6 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 			$this.current_edit_record = {};
 
-
 			$this.initEditView();
 
 		} else {
@@ -118,29 +156,26 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 	},
 
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.showPassword ) {
-//			this.edit_view_tab.tabs( 'select', 0 );
-			this.editFieldResize( 0 );
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_web_password"]' ) ).parent().show();
+	checkTabPermissions: function( tab ) {
+		retval = false;
 
-		} else {
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_web_password"]' ) ).parent().hide();
+		switch ( tab ) {
+			case 'tab_web_password':
+				if ( this.showPassword ) {
+					retval = true;
+				}
+				break;
+			case 'tab_quick_punch_password':
+				if ( this.showPhonePassword ) {
+					retval = true;
+				}
+				break;
+			default:
+				retval = this._super( 'checkTabPermissions', tab );
+				break;
 		}
 
-		if ( this.showPhonePassword ) {
-			this.edit_view_tab.tabs( 'select', 1 );
-			this.editFieldResize( 1 );
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_quick_punch_password"]' ) ).parent().show();
-		} else {
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_quick_punch_password"]' ) ).parent().hide();
-		}
-
-		if ( this.showPassword ) {
-			this.edit_view_tab.tabs( 'select', 0 );
-		}
-
+		return retval;
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
@@ -156,32 +191,18 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 	},
 
-	onTabShow: function( e, ui ) {
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		this.buildContextMenu( true );
-		this.setEditMenu();
-
-	},
-
-	initTabData: function() {
-
-	},
-
 	onSaveClick: function( ignoreWarning ) {
 		var $this = this;
+
 		var record = this.current_edit_record;
 		LocalCacheData.current_doing_context_action = 'save';
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
 		}
 		this.clearErrorTips();
-		if ( this.edit_view_tab_selected_index === 0 ) {
+
+		var key = this.getEditViewTabIndex();
+		if ( key === 0 ) {
 			if ( !record['web.current_password'] ) {
 				TAlertManager.showAlert( $.i18n._( 'Current password can\'t be empty' ) );
 				ProgressBar.closeOverlay();
@@ -197,7 +218,7 @@ ChangePasswordViewController = BaseViewController.extend( {
 				} );
 
 			}
-		} else if ( this.edit_view_tab_selected_index === 1 ) {
+		} else if ( key === 1 ) {
 			if ( !record['phone.current_password'] ) {
 				TAlertManager.showAlert( $.i18n._( 'Current password can\'t be empty' ) );
 				ProgressBar.closeOverlay();
@@ -269,26 +290,31 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 	saveWebPassword: function( record, callBack ) {
 		var $this = this;
-		this.api['changePassword']( record['web.current_password'], record['web.password'], record['web.password2'], 'web', {onResult: function( result ) {
-			callBack( result );
-		}} );
+		this.api['changePassword']( record['web.current_password'], record['web.password'], record['web.password2'], 'web', {
+			onResult: function( result ) {
+				callBack( result );
+			}
+		} );
 	},
 
 	savePhonePassword: function( record, callBack ) {
 		var $this = this;
-		this.api['changePassword']( record['phone.current_password'], record['phone.password'], record['phone.password2'], 'phone', {onResult: function( result ) {
-			callBack( result );
-		}} );
+		this.api['changePassword']( record['phone.current_password'], record['phone.password'], record['phone.password2'], 'phone', {
+			onResult: function( result ) {
+				callBack( result );
+			}
+		} );
 	},
 
 	buildEditViewUI: function() {
 		var $this = this;
 		this._super( 'buildEditViewUI' );
 
-		this.setTabLabels( {
-			'tab_web_password': $.i18n._( 'Web Password' ),
-			'tab_quick_punch_password': $.i18n._( 'Quick Punch Password' )
-		} );
+		var tab_model = {
+			'tab_web_password': { 'label': $.i18n._( 'Web Password' ) },
+			'tab_quick_punch_password': { 'label': $.i18n._( 'Quick Punch Password' ) },
+		};
+		this.setTabModel( tab_model );
 
 		//Tab 0 start
 
@@ -302,22 +328,22 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 		// User Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'user_name'} );
+		form_item_input.TText( { field: 'user_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'User Name' ), form_item_input, tab_web_password_column1, '' );
 
 		// Current Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-		form_item_input.TPasswordInput( {field: 'web.current_password', width: 200} );
+		form_item_input.TPasswordInput( { field: 'web.current_password', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_web_password_column1 );
 
 		// New Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-		form_item_input.TPasswordInput( {field: 'web.password', width: 200} );
+		form_item_input.TPasswordInput( { field: 'web.password', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'New Password' ), form_item_input, tab_web_password_column1 );
 
 		// New Password(confirm)
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-		form_item_input.TPasswordInput( {field: 'web.password2', width: 200} );
+		form_item_input.TPasswordInput( { field: 'web.password2', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'New Password(confirm)' ), form_item_input, tab_web_password_column1, '' );
 
 		//Tab 1 start
@@ -332,24 +358,23 @@ ChangePasswordViewController = BaseViewController.extend( {
 
 		// Quick Punch ID
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'phone_id'} );
+		form_item_input.TText( { field: 'phone_id' } );
 		this.addEditFieldToColumn( $.i18n._( 'Quick Punch ID' ), form_item_input, tab_quick_punch_password_column1, '' );
 
 		// Current Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-		form_item_input.TPasswordInput( {field: 'phone.current_password', width: 200} );
+		form_item_input.TPasswordInput( { field: 'phone.current_password', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Current Password' ), form_item_input, tab_quick_punch_password_column1 );
 
 		// New Password
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-		form_item_input.TPasswordInput( {field: 'phone.password', width: 200} );
+		form_item_input.TPasswordInput( { field: 'phone.password', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'New Password' ), form_item_input, tab_quick_punch_password_column1 );
 
 		// New Password(confirm)
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
-		form_item_input.TPasswordInput( {field: 'phone.password2', width: 200} );
+		form_item_input.TPasswordInput( { field: 'phone.password2', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'New Password(confirm)' ), form_item_input, tab_quick_punch_password_column1, '' );
-
 	}
 
 

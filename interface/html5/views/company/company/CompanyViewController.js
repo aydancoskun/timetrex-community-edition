@@ -1,6 +1,6 @@
 CompanyViewController = BaseViewController.extend( {
 
-	_required_files: ['TImage','TImageAdvBrowser', 'APICompany'],
+	_required_files: ['TImage', 'TImageAdvBrowser', 'APICompany'],
 
 	product_edition_array: null,
 	industry_array: null,
@@ -46,14 +46,14 @@ CompanyViewController = BaseViewController.extend( {
 	initOptions: function( callBack ) {
 
 		var options = [
-			{option_name: 'product_edition'},
-			{option_name: 'industry'},
-			{option_name: 'country'},
-			{option_name: 'password_policy_type'},
-			{option_name: 'password_minimum_permission_level', field_name: 'password_minimum_permission_level'},
-			{option_name: 'password_minimum_strength', field_name: 'password_minimum_strength'},
-			{option_name: 'ldap_authentication_type'}
-		]
+			{ option_name: 'product_edition' },
+			{ option_name: 'industry' },
+			{ option_name: 'country' },
+			{ option_name: 'password_policy_type' },
+			{ option_name: 'password_minimum_permission_level', field_name: 'password_minimum_permission_level' },
+			{ option_name: 'password_minimum_strength', field_name: 'password_minimum_strength' },
+			{ option_name: 'ldap_authentication_type' }
+		];
 
 		this.initDropDownOptions( options, function( result ) {
 
@@ -69,15 +69,17 @@ CompanyViewController = BaseViewController.extend( {
 		var $this = this;
 
 		// First to get current company's user default data, if no have any data to get the default data which has been set up in (APIFactory.getAPIClass( 'APIUserDefault.' ))
-		var args = {filter_data: {id: LocalCacheData.getLoginUser().company_id}};
+		var args = { filter_data: { id: LocalCacheData.getLoginUser().company_id } };
 
-		$this.api['get' + $this.api.key_name]( args, {onResult: function( result ) {
-			var result_data = result.getResult();
-			if ( Global.isSet( result_data[0] ) ) {
-				callBack( result_data[0] );
+		$this.api['get' + $this.api.key_name]( args, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				if ( Global.isSet( result_data[0] ) ) {
+					callBack( result_data[0] );
+				}
+
 			}
-
-		}} );
+		} );
 	},
 
 	openEditView: function() {
@@ -140,7 +142,7 @@ CompanyViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'country':
-						this.setCountryValue(widget, key);
+						this.setCountryValue( widget, key );
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -162,79 +164,20 @@ CompanyViewController = BaseViewController.extend( {
 		this.onTypeChange();
 	},
 
-	setTabStatus: function() {
-
-		$( this.edit_view_tab.find( 'ul li a[ref="tab_company"]' ) ).parent().show();
-
-		this.editFieldResize( 0 );
-
-	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 3 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index == 1 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_password_policy' ).find( '.first-column' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-			} else {
-				this.edit_view_tab.find( '#tab_password_policy' ).find( '.first-column' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			}
-		} else {
+	initSubPasswordPolicyView: function() {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			this.edit_view_tab.find( '#tab_password_policy' ).find( '.first-column' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			this.buildContextMenu( true );
 			this.setEditMenu();
+		} else {
+			this.edit_view_tab.find( '#tab_password_policy' ).find( '.first-column' ).css( 'display', 'none' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
 	},
 
-//	  setEditingMenu: function() {
-//
-//		  if ( this.is_viewing ) {
-//			  this.setEditMenu();
-//			  return;
-//		  }
-//		  this.selectContextMenu();
-//		  var len = this.context_menu_array.length;
-//
-//		  for ( var i = 0; i < len; i++ ) {
-//			  var context_btn = this.context_menu_array[i];
-//			  var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-//			  context_btn.removeClass( 'disable-image' );
-//
-//			  switch ( id ) {
-//				  case ContextMenuIconName.save:
-//					  this.saveValidate( context_btn );
-//
-//					  if ( this.is_viewing ) {
-//						  context_btn.addClass( 'disable-image' );
-//					  }
-//					  break;
-//				  case ContextMenuIconName.cancel:
-//					  break;
-//				  default:
-//					  break;
-//			  }
-//
-//		  }
-//	  },
-
-	setEditMenuSaveIcon: function( context_btn, pId ){
+	setEditMenuSaveIcon: function( context_btn, pId ) {
 		//#2542 - Always needs a save icon as this view is always in edit-only mode, ver in view mode
 	},
 
@@ -278,27 +221,30 @@ CompanyViewController = BaseViewController.extend( {
 		}
 		LocalCacheData.current_doing_context_action = 'save';
 		doNext();
-		function doNext() {
-			$this.api['set' + $this.api.key_name]( record, false, ignoreWarning, {onResult: function( result ) {
 
-				if ( result.isValid() ) {
-					var result_data = result.getResult();
-					if ( result_data === true ) {
-						$this.refresh_id = $this.current_edit_record.id;
-					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-						$this.refresh_id = result_data
+		function doNext() {
+			$this.api['set' + $this.api.key_name]( record, false, ignoreWarning, {
+				onResult: function( result ) {
+
+					if ( result.isValid() ) {
+						var result_data = result.getResult();
+						if ( result_data === true ) {
+							$this.refresh_id = $this.current_edit_record.id;
+						} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
+							$this.refresh_id = result_data;
+						}
+
+						$this.removeEditView();
+
+						$this.updateCurrentCompanyCache();
+
+					} else {
+						$this.setErrorTips( result );
+						$this.setErrorMenu();
 					}
 
-					$this.removeEditView();
-
-					$this.updateCurrentCompanyCache();
-
-				} else {
-					$this.setErrorTips( result );
-					$this.setErrorMenu();
 				}
-
-			}} );
+			} );
 		}
 
 	},
@@ -306,7 +252,7 @@ CompanyViewController = BaseViewController.extend( {
 	updateCurrentCompanyCache: function() {
 
 		var authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
-		authentication_api.getCurrentCompany( {onResult: this.onGetCurrentCompany} );
+		authentication_api.getCurrentCompany( { onResult: this.onGetCurrentCompany } );
 	},
 
 	onGetCurrentCompany: function( e ) {
@@ -326,7 +272,7 @@ CompanyViewController = BaseViewController.extend( {
 		$( '#rightLogo' ).css( 'opacity', 0 );
 		$( '#rightLogo' ).attr( 'src', ServiceCaller.companyLogo + '&t=' + d.getTime() );
 
-		$( '#rightLogo' ).load( function() {
+		$( '#rightLogo' ).on( 'load', function() {
 
 			var ratio = 42 / $( this ).height();
 
@@ -353,7 +299,7 @@ CompanyViewController = BaseViewController.extend( {
 		var len = this.context_menu_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -368,85 +314,6 @@ CompanyViewController = BaseViewController.extend( {
 		}
 	},
 
-//	setErrorTips: function( result ) {
-//
-//		this.clearErrorTips();
-//
-//		var details = result.getDetails();
-//		var error_list = details[0];
-//		var key;
-//
-//		var tab_company = this.edit_view_tab.find( '#tab_company' );
-//		var tab_password_policy = this.edit_view_tab.find( '#tab_password_policy' );
-//		var tab_ldap = this.edit_view_tab.find( '#tab_ldap' );
-//
-//		var found_in_current_tab = false;
-//
-//		for ( key in error_list ) {
-//
-//			if ( !error_list.hasOwnProperty( key ) ) {
-//				continue;
-//			}
-//
-//			if ( !Global.isSet( this.edit_view_ui_dic[key] ) ) {
-//				continue;
-//			}
-//
-//			if ( this.edit_view_ui_dic[key].is( ':visible' ) ) {
-//
-//				this.edit_view_ui_dic[key].setErrorStyle( error_list[key], true );
-//				found_in_current_tab = true;
-//
-//			} else {
-//
-//				this.edit_view_ui_dic[key].setErrorStyle( error_list[key] );
-//			}
-//
-//			this.edit_view_error_ui_dic[key] = this.edit_view_ui_dic[key];
-//
-//		}
-//
-//		if ( !found_in_current_tab ) {
-//
-//			for ( key in this.edit_view_error_ui_dic ) {
-//
-//				if ( !error_list.hasOwnProperty( key ) ) {
-//					continue;
-//				}
-//
-//				var widget = this.edit_view_error_ui_dic[key];
-//				if ( tab_company.has( widget ).length > 0 ) {
-//					this.edit_view_tab.tabs( 'select', 0 );
-//
-//				} else if ( tab_password_policy.has( widget ).length > 0 ) {
-//					this.edit_view_tab.tabs( 'select', 1 );
-//
-//				} else if ( tab_ldap.has( widget ).length > 0 ) {
-//					this.edit_view_tab.tabs( 'select', 2 );
-//
-//				}
-//				widget.showErrorTip();
-//
-//				return;
-//			}
-//
-//		}
-//	},
-
-	//Call this from setEditViewData
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
 	setProvince: function( val, m ) {
 		var $this = this;
 
@@ -455,15 +322,17 @@ CompanyViewController = BaseViewController.extend( {
 
 		} else {
 
-			this.api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.province_array = Global.buildRecordArray( res );
+
 				}
-
-				$this.province_array = Global.buildRecordArray( res );
-
-			}} );
+			} );
 		}
 	},
 
@@ -475,21 +344,23 @@ CompanyViewController = BaseViewController.extend( {
 			$this.e_province_array = [];
 			province_widget.setSourceData( [] );
 		} else {
-			this.api.getOptions( 'province', val, {onResult: function( res ) {
-				res = res.getResult();
-				if ( !res ) {
-					res = [];
+			this.api.getOptions( 'province', val, {
+				onResult: function( res ) {
+					res = res.getResult();
+					if ( !res ) {
+						res = [];
+					}
+
+					$this.e_province_array = Global.buildRecordArray( res );
+					if ( refresh && $this.e_province_array.length > 0 ) {
+						$this.current_edit_record.province = $this.e_province_array[0].value;
+						province_widget.setValue( $this.current_edit_record.province );
+					}
+
+					province_widget.setSourceData( $this.e_province_array );
+
 				}
-
-				$this.e_province_array = Global.buildRecordArray( res );
-				if ( refresh && $this.e_province_array.length > 0 ) {
-					$this.current_edit_record.province = $this.e_province_array[0].value;
-					province_widget.setValue( $this.current_edit_record.province );
-				}
-
-				province_widget.setSourceData( $this.e_province_array );
-
-			}} );
+			} );
 		}
 	},
 
@@ -498,16 +369,14 @@ CompanyViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 
 
-		this.setTabLabels( {
-			'tab_company': $.i18n._( 'Company' ),
-			'tab_password_policy': $.i18n._( 'Password Policy' ),
-			'tab_ldap': $.i18n._( 'LDAP Authentication' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_company': { 'label': $.i18n._( 'Company' ) },
+			'tab_password_policy': { 'label': $.i18n._( 'Password Policy' ), 'init_callback': 'initSubPasswordPolicyView' },
+			'tab_ldap': { 'label': $.i18n._( 'LDAP Authentication' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
-
-
-//		  this.edit_view_tab.css( 'width', '1000' );
 
 		//Tab 0 start
 
@@ -526,27 +395,27 @@ CompanyViewController = BaseViewController.extend( {
 		// Product Edition
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'product_edition_id'} );
+		form_item_input.TComboBox( { field: 'product_edition_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.product_edition_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Product Edition' ), form_item_input, tab_company_column1, '' );
 
 		// Full Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Full Name' ), form_item_input, tab_company_column1 );
 
 		form_item_input.parent().width( '45%' );
 
 		// Short Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'short_name', width: 128} );
+		form_item_input.TTextInput( { field: 'short_name', width: 128 } );
 		this.addEditFieldToColumn( $.i18n._( 'Short Name' ), form_item_input, tab_company_column1 );
 
 		// Industry
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'industry_id'} );
+		form_item_input.TComboBox( { field: 'industry_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.industry_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Industry' ), form_item_input, tab_company_column1 );
 
@@ -557,53 +426,53 @@ CompanyViewController = BaseViewController.extend( {
 
 		// Address (Line 1)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
+		form_item_input.TTextInput( { field: 'address1', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 1)' ), form_item_input, tab_company_column1 );
 		form_item_input.parent().width( '45%' );
 
 		// Address (Line 2)
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
+		form_item_input.TTextInput( { field: 'address2', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab_company_column1 );
 
 		form_item_input.parent().width( '45%' );
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'city', width: 149} );
+		form_item_input.TTextInput( { field: 'city', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_company_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'country', set_empty: true} );
+		form_item_input.TComboBox( { field: 'country', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_company_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'province'} );
+		form_item_input.TComboBox( { field: 'province' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_company_column1 );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'postal_code', width: 149} );
+		form_item_input.TTextInput( { field: 'postal_code', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_company_column1, '' );
 
 		// Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'work_phone', width: 149} );
+		form_item_input.TTextInput( { field: 'work_phone', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab_company_column2, '' );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'fax_phone', width: 149} );
+		form_item_input.TTextInput( { field: 'fax_phone', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_company_column2 );
 
 		// Administrative Contact
@@ -663,7 +532,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		// Company Settings
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Company Settings' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Company Settings' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_company_column2 );
 
 		// Data Center / Immediate Destination
@@ -675,49 +544,55 @@ CompanyViewController = BaseViewController.extend( {
 
 		// Logo
 
-		if ( typeof FormData == "undefined" ) {
+		if ( typeof FormData == 'undefined' ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
 
-			this.file_browser = form_item_input.TImageBrowser( {field: '', default_width: 128, default_height: 128} );
+			this.file_browser = form_item_input.TImageBrowser( { field: '', default_width: 128, default_height: 128 } );
 
 			this.file_browser.bind( 'imageChange', function( e, target ) {
-				new ServiceCaller().uploadFile( target.getValue(), 'object_type=company_logo', {onResult: function( result ) {
+				new ServiceCaller().uploadFile( target.getValue(), 'object_type=company_logo', {
+					onResult: function( result ) {
 
-					if ( result.toLowerCase() === 'true' ) {
-						$this.file_browser.setImage( ServiceCaller.companyLogo );
-						$this.updateCompanyLogo();
-					} else {
-						TAlertManager.showAlert( result, 'Error' );
+						if ( result.toLowerCase() === 'true' ) {
+							$this.file_browser.setImage( ServiceCaller.companyLogo );
+							$this.updateCompanyLogo();
+						} else {
+							TAlertManager.showAlert( result, 'Error' );
+						}
 					}
-				}} );
+				} );
 
-			} )
+			} );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_AVD_BROWSER );
 
-			this.file_browser = form_item_input.TImageAdvBrowser( {field: '', callBack: function( form_data ) {
-				new ServiceCaller().uploadFile( form_data, 'object_type=company_logo', {onResult: function( result ) {
+			this.file_browser = form_item_input.TImageAdvBrowser( {
+				field: '', callBack: function( form_data ) {
+					new ServiceCaller().uploadFile( form_data, 'object_type=company_logo', {
+						onResult: function( result ) {
 
-					if ( result.toLowerCase() === 'true' ) {
-						$this.file_browser.setImage( ServiceCaller.companyLogo );
-						$this.updateCompanyLogo();
-					} else {
-						TAlertManager.showAlert( result, 'Error' );
-					}
-				}} )
+							if ( result.toLowerCase() === 'true' ) {
+								$this.file_browser.setImage( ServiceCaller.companyLogo );
+								$this.updateCompanyLogo();
+							} else {
+								TAlertManager.showAlert( result, 'Error' );
+							}
+						}
+					} );
 
-			}} );
+				}
+			} );
 		}
 
 		if ( this.is_edit || this.edit_only_mode ) {
-			this.file_browser.setEnableDelete(true);
-			this.file_browser.bind('deleteClick', function (e, target) {
-				$this.api.deleteImage($this.current_edit_record.id, {
-					onResult: function (result) {
-						$this.initEditView(result);
+			this.file_browser.setEnableDelete( true );
+			this.file_browser.bind( 'deleteClick', function( e, target ) {
+				$this.api.deleteImage( $this.current_edit_record.id, {
+					onResult: function( result ) {
+						$this.initEditView( result );
 					}
-				});
-			});
+				} );
+			} );
 		}
 
 		this.addEditFieldToColumn( $.i18n._( 'Logo' ), this.file_browser, tab_company_column2, '', null, false, true );
@@ -740,7 +615,7 @@ CompanyViewController = BaseViewController.extend( {
 		// Password Policy
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'password_policy_type_id'} );
+		form_item_input.TComboBox( { field: 'password_policy_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_policy_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Password Policy' ), form_item_input, tab_password_policy_column1, '' );
 
@@ -748,7 +623,7 @@ CompanyViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'password_minimum_permission_level'} );
+		form_item_input.TComboBox( { field: 'password_minimum_permission_level' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_minimum_permission_level_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Permission Level' ), form_item_input, tab_password_policy_column1 );
 
@@ -756,22 +631,22 @@ CompanyViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'password_minimum_strength'} );
+		form_item_input.TComboBox( { field: 'password_minimum_strength' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.password_minimum_strength_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Strength' ), form_item_input, tab_password_policy_column1 );
 
 		// Minimum Length
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'password_minimum_length', width: 30} );
+		form_item_input.TTextInput( { field: 'password_minimum_length', width: 30 } );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Length' ), form_item_input, tab_password_policy_column1 );
 
 		// Minimum Age
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'password_minimum_age', width: 30} );
+		form_item_input.TTextInput( { field: 'password_minimum_age', width: 30 } );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( 'in Days' ) + "</span>" );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'in Days' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -781,10 +656,10 @@ CompanyViewController = BaseViewController.extend( {
 		// Maximum Age
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'password_maximum_age', width: 30} );
+		form_item_input.TTextInput( { field: 'password_maximum_age', width: 30 } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'in Days' ) + "</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'in Days' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -806,16 +681,16 @@ CompanyViewController = BaseViewController.extend( {
 		//
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'ldap_authentication_type_id'} );
+		form_item_input.TComboBox( { field: 'ldap_authentication_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.ldap_authentication_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'LDAP Authentication' ), form_item_input, tab_ldap_column1 );
 
 		// Server
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ldap_host', width: 240 } );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( '(ie: ldap.example.com or ldaps://ldap.example.com for SSL)' ) + "</span>" );
+		form_item_input.TTextInput( { field: 'ldap_host', width: 240 } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(ie: ldap.example.com or ldaps://ldap.example.com for SSL)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -824,9 +699,9 @@ CompanyViewController = BaseViewController.extend( {
 		// Port
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ldap_port', width: 50} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( '(ie: 389 or 636 for SSL)' ) + "</span>" );
+		form_item_input.TTextInput( { field: 'ldap_port', width: 50 } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(ie: 389 or 636 for SSL)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -835,9 +710,9 @@ CompanyViewController = BaseViewController.extend( {
 		// Bind User Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ldap_bind_user_name'} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'Used to search for the user, for anonymous binding enter: anonymous' ) + "</span>" );
+		form_item_input.TTextInput( { field: 'ldap_bind_user_name' } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Used to search for the user, for anonymous binding enter: anonymous' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -846,16 +721,16 @@ CompanyViewController = BaseViewController.extend( {
 		// Bind Password
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ldap_bind_password'} );
+		form_item_input.TTextInput( { field: 'ldap_bind_password' } );
 		this.addEditFieldToColumn( $.i18n._( 'Bind Password' ), form_item_input, tab_ldap_column1, '', null, true );
 
 		// Base DN
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ldap_base_dn', width: 300} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( '(ie: ou=People,dc=example,dc=com)' ) + "</span>" );
+		form_item_input.TTextInput( { field: 'ldap_base_dn', width: 300 } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(ie: ou=People,dc=example,dc=com)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -864,9 +739,9 @@ CompanyViewController = BaseViewController.extend( {
 		// Bind Attribute
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ldap_bind_attribute', width: 150} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'For binding the LDAP user. (ie: AD/openLDAP: userPrincipalName, Mac OSX: uid)' ) + "</span>" );
+		form_item_input.TTextInput( { field: 'ldap_bind_attribute', width: 150 } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'For binding the LDAP user. (ie: AD/openLDAP: userPrincipalName, Mac OSX: uid)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -875,9 +750,9 @@ CompanyViewController = BaseViewController.extend( {
 		// User Filter
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ldap_user_filter', width: 150} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'Additional filter parameters. (ie: is_timetrex_user=1)' ) + "</span>" );
+		form_item_input.TTextInput( { field: 'ldap_user_filter', width: 150 } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Additional filter parameters. (ie: is_timetrex_user=1)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -886,9 +761,9 @@ CompanyViewController = BaseViewController.extend( {
 		// Login Attribute
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ldap_login_attribute', width: 150} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + $.i18n._( 'For searching the LDAP user. (ie: AD: sAMAccountName, openLDAP: dn, Mac OSX: dn)' ) + "</span>" );
+		form_item_input.TTextInput( { field: 'ldap_login_attribute', width: 150 } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'For searching the LDAP user. (ie: AD: sAMAccountName, openLDAP: dn, Mac OSX: dn)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -898,24 +773,24 @@ CompanyViewController = BaseViewController.extend( {
 
 	onTypeChange: function() {
 		if ( this.current_edit_record.ldap_authentication_type_id == 0 ) {
-			this.detachElement('ldap_host');
-			this.detachElement('ldap_port');
-			this.detachElement('ldap_bind_user_name');
-			this.detachElement('ldap_bind_password');
-			this.detachElement('ldap_base_dn');
-			this.detachElement('ldap_bind_attribute');
-			this.detachElement('ldap_user_filter');
-			this.detachElement('ldap_login_attribute');
+			this.detachElement( 'ldap_host' );
+			this.detachElement( 'ldap_port' );
+			this.detachElement( 'ldap_bind_user_name' );
+			this.detachElement( 'ldap_bind_password' );
+			this.detachElement( 'ldap_base_dn' );
+			this.detachElement( 'ldap_bind_attribute' );
+			this.detachElement( 'ldap_user_filter' );
+			this.detachElement( 'ldap_login_attribute' );
 
 		} else {
-			this.attachElement('ldap_host');
-			this.attachElement('ldap_port');
-			this.attachElement('ldap_bind_user_name');
-			this.attachElement('ldap_bind_password');
-			this.attachElement('ldap_base_dn');
-			this.attachElement('ldap_bind_attribute');
-			this.attachElement('ldap_user_filter');
-			this.attachElement('ldap_login_attribute');
+			this.attachElement( 'ldap_host' );
+			this.attachElement( 'ldap_port' );
+			this.attachElement( 'ldap_bind_user_name' );
+			this.attachElement( 'ldap_bind_password' );
+			this.attachElement( 'ldap_base_dn' );
+			this.attachElement( 'ldap_bind_attribute' );
+			this.attachElement( 'ldap_user_filter' );
+			this.attachElement( 'ldap_login_attribute' );
 		}
 
 		this.editFieldResize();

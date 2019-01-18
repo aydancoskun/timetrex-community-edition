@@ -63,10 +63,11 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_recurring_schedule': $.i18n._( 'Recurring Schedule' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_recurring_schedule': { 'label': $.i18n._( 'Recurring Schedule' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		var form_item_input;
 		var widgetContainer;
@@ -81,8 +82,6 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -109,19 +108,19 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		// Start Week
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'start_week', width: 40} );
+		form_item_input.TTextInput( { field: 'start_week', width: 40 } );
 		this.addEditFieldToColumn( $.i18n._( 'Template Start Week' ), form_item_input, tab_recurring_schedule_column1 );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'start_date'} );
+		form_item_input.TDatePicker( { field: 'start_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_recurring_schedule_column1, '', null );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'end_date'} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'>" + $.i18n._( '(Leave blank for no end date)' ) + "</span>" );
+		form_item_input.TDatePicker( { field: 'end_date' } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'>' + $.i18n._( '(Leave blank for no end date)' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -129,15 +128,15 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 		// Display Weeks
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'display_weeks', width: 20} );
+		form_item_input.TTextInput( { field: 'display_weeks', width: 20 } );
 		this.addEditFieldToColumn( $.i18n._( 'Display Weeks' ), form_item_input, tab_recurring_schedule_column1, '', null );
 
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
 			// Auto-Punch
 			form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_input.TCheckbox( {field: 'auto_fill'} );
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
-			label = $( "<span class='widget-right-label t-checkbox-padding-left'> (" + $.i18n._( 'Punches employees in/out automatically' ) + ")</span>" );
+			form_item_input.TCheckbox( { field: 'auto_fill' } );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+			label = $( '<span class=\'widget-right-label t-checkbox-padding-left\'> (' + $.i18n._( 'Punches employees in/out automatically' ) + ')</span>' );
 			widgetContainer.append( form_item_input );
 			widgetContainer.append( label );
 			this.addEditFieldToColumn( $.i18n._( 'Auto-Punch' ), form_item_input, tab_recurring_schedule_column1, '', widgetContainer );
@@ -146,7 +145,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		// Employees
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		var default_args = {};
-		if ( ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) ) {
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				allow_multiple_selection: true,
@@ -167,7 +166,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 				},
 				added_items: [
-					{value: TTUUID.zero_id, label: Global.open_item}
+					{ value: TTUUID.zero_id, label: Global.open_item }
 				]
 
 			} );
@@ -305,7 +304,8 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				basic_search: false,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
-			} )];
+			} )
+		];
 	},
 
 	onEmployeeSourceCreate: function( target, source_data ) {
@@ -335,7 +335,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	buildContextMenuModels: function() {
 		//Context Menu
-		var menu = this._super('buildContextMenuModels')[0];
+		var menu = this._super( 'buildContextMenuModels' )[0];
 		//menu group
 		var navigation_group = new RibbonSubMenuGroup( {
 			label: $.i18n._( 'Navigation' ),
@@ -366,84 +366,16 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		if ( Global.isSet( menu_name ) ) {
-			var id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.add:
-				ProgressBar.showOverlay();
-				this.onAddClick();
-				break;
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.save:
-				ProgressBar.showOverlay();
-				this.onSaveClick();
-				break;
-			case ContextMenuIconName.save_and_continue:
-				ProgressBar.showOverlay();
-				this.onSaveAndContinue();
-				break;
-			case ContextMenuIconName.save_and_next:
-				ProgressBar.showOverlay();
-				this.onSaveAndNextClick();
-				break;
-			case ContextMenuIconName.save_and_new:
-				ProgressBar.showOverlay();
-				this.onSaveAndNewClick();
-				break;
-			case ContextMenuIconName.save_and_copy:
-				ProgressBar.showOverlay();
-				this.onSaveAndCopy();
-				break;
-			case ContextMenuIconName.edit:
-				ProgressBar.showOverlay();
-				this.onEditClick();
-				break;
-			case ContextMenuIconName.mass_edit:
-				ProgressBar.showOverlay();
-				this.onMassEditClick();
-				break;
-			case ContextMenuIconName.delete_icon:
-				ProgressBar.showOverlay();
-				this.onDeleteClick();
-				break;
-			case ContextMenuIconName.delete_and_next:
-				ProgressBar.showOverlay();
-				this.onDeleteAndNextClick();
-				break;
-
-			case ContextMenuIconName.copy:
-				ProgressBar.showOverlay();
-				this.onCopyClick();
-				break;
-			case ContextMenuIconName.copy_as_new:
-				ProgressBar.showOverlay();
-				this.onCopyAsNewClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
 			case ContextMenuIconName.recurring_template:
 			case ContextMenuIconName.schedule:
 			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
-
 		}
 	},
+
 
 	//set tab 0 visible after all data set done. This be hide when init edit view data
 	setEditViewDataDone: function() {
@@ -458,7 +390,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	},
 
-	parseToUserId: function ( id ) {
+	parseToUserId: function( id ) {
 		if ( !id ) {
 			return false;
 		}
@@ -508,7 +440,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		if ( Global.isSet( editId ) ) {
-			var selectedId = editId
+			var selectedId = editId;
 		} else {
 			if ( grid_selected_length > 0 ) {
 				selectedId = grid_selected_id_array[0];
@@ -570,7 +502,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		this.mass_edit_record_ids = [];
 
 		$.each( grid_selected_id_array, function( index, value ) {
-			$this.mass_edit_record_ids.push( value )
+			$this.mass_edit_record_ids.push( value );
 		} );
 
 		filter.filter_data = {};
@@ -656,15 +588,15 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 	},
 
-	onEditClickResult: function( result , id, user_id) {
+	onEditClickResult: function( result, id, user_id ) {
 		var $this = this;
 		var result_data = result.getResult();
 		var index = 0;
 
-		for ( var i = 0; i < result_data.length; i++) {
+		for ( var i = 0; i < result_data.length; i++ ) {
 			if ( result_data[i].id == id && result_data[i].user_id == user_id ) {
 				index = i;
-		}
+			}
 		}
 		result_data = result_data[index];
 
@@ -831,7 +763,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		switch ( iconName ) {
 			case ContextMenuIconName.schedule:
 
-				var filter = {filter_data: {}};
+				var filter = { filter_data: {} };
 				var selected_item = this.getSelectedItem();
 				var include_users = null;
 				var now_date = new Date();
@@ -841,7 +773,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					var temp_filter = {};
 					temp_filter.filter_data = {};
 					temp_filter.filter_data.id = [selected_item.id];
-					temp_filter.filter_columns = {user_id: true};
+					temp_filter.filter_columns = { user_id: true };
 
 					this.api['get' + this.api.key_name]( temp_filter, {
 						onResult: function( result ) {
@@ -855,7 +787,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 							include_users = [result_data.user_id];
 
-							filter.filter_data.include_user_ids = {value: include_users};
+							filter.filter_data.include_user_ids = { value: include_users };
 							filter.select_date = now_date.format();
 							Global.addViewTab( $this.viewId, 'Recurring Schedules', window.location.href );
 							IndexViewController.goToView( 'Schedule', filter );
@@ -865,7 +797,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 				} else {
 					include_users = [selected_item.user_id];
-					filter.filter_data.include_user_ids = {value: include_users};
+					filter.filter_data.include_user_ids = { value: include_users };
 					filter.select_date = now_date.format();
 
 					Global.addViewTab( this.viewId, 'Recurring Schedules', window.location.href );
@@ -876,14 +808,14 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				break;
 			case ContextMenuIconName.recurring_template:
 
-				filter = {filter_data: {}};
+				filter = { filter_data: {} };
 				selected_item = this.getSelectedItem();
 
 				if ( !Global.isSet( selected_item.recurring_schedule_template_control_id ) ) {
 
 					temp_filter = {};
 					temp_filter.filter_data = {};
-					temp_filter.filter_data.id = [ this.parseToRecordId( selected_item.id ) ];
+					temp_filter.filter_data.id = [this.parseToRecordId( selected_item.id )];
 
 					this.api['get' + this.api.key_name]( temp_filter, {
 						onResult: function( result ) {
@@ -913,29 +845,29 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 				break;
 			case ContextMenuIconName.export_excel:
-				this.onExportClick('exportRecurringScheduleControl');
+				this.onExportClick( 'exportRecurringScheduleControl' );
 				break;
 		}
 	},
 
-	getRightArrowClickSelectedIndex:function (selected_index) {
+	getRightArrowClickSelectedIndex: function( selected_index ) {
 		if ( selected_index == 0 ) {
 			//selected_index is wrong because of the underscore in id.
 			var source_data = this.navigation.getSourceData();
-			var hash_arr = window.location.hash.split('&');
+			var hash_arr = window.location.hash.split( '&' );
 			var hash_id = '0_0';
 			for ( var i = 0; i < hash_arr.length; i++ ) {
-				if ( hash_arr[i].indexOf('id=') != -1 ) {
-					hash_id = hash_arr[i].substring(3);
+				if ( hash_arr[i].indexOf( 'id=' ) != -1 ) {
+					hash_id = hash_arr[i].substring( 3 );
 				}
 			}
 
-			if ( hash_id.indexOf('_') != -1 ) {
-				for (var i = 0; i < source_data.length; i++) {
-					if (hash_id == source_data[i].id) {
+			if ( hash_id.indexOf( '_' ) != -1 ) {
+				for ( var i = 0; i < source_data.length; i++ ) {
+					if ( hash_id == source_data[i].id ) {
 						selected_index = i;
 						break; //exit loop
-		}
+					}
 				}
 			}
 		}
@@ -963,7 +895,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -1125,7 +1057,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 
 				var result_data = result.getResult();
 				if ( !Global.isArray( result_data ) ) {
-					$this.showNoResultCover()
+					$this.showNoResultCover();
 				} else {
 					$this.removeNoResultCover();
 					if ( Global.isSet( $this.__createRowId ) ) {
@@ -1158,8 +1090,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 				}
 
 				$this.grid.clearGridData();
-				$this.grid.setGridParam( {data: result_data} );
-				$this.grid.trigger( 'reloadGrid' );
+				$this.grid.setData( result_data );
 
 				$this.reSelectLastSelectItems();
 
@@ -1198,7 +1129,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		var column_filter = {};
 		column_filter.user_id = true;
 
-		return this._getFilterColumnsFromDisplayColumns(column_filter,  true);
+		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
 	setEditMenu: function() {
@@ -1206,7 +1137,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -1274,7 +1205,7 @@ RecurringScheduleControlViewController = BaseViewController.extend( {
 					this.setEditMenuScheduleIcon( context_btn );
 					break;
 				case ContextMenuIconName.export_excel:
-					this.setDefaultMenuExportIcon( context_btn);
+					this.setDefaultMenuExportIcon( context_btn );
 					break;
 			}
 

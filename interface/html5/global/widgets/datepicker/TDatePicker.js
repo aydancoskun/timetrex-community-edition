@@ -31,7 +31,7 @@
 				//$this.attr( 'disabled', 'true' );
 				date_picker_input.addClass( 't-date-picker-readonly' );
 				icon.css( 'display', 'none' );
-				date_picker_input.attr( 'readonly', 'readonly' )
+				date_picker_input.attr( 'readonly', 'readonly' );
 				if ( check_box ) {
 					check_box.hide();
 				}
@@ -68,7 +68,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -100,12 +100,12 @@
 		this.showErrorTip = function( sec ) {
 
 			if ( !Global.isSet( sec ) ) {
-				sec = 2
+				sec = 2;
 			}
 
 			if ( !error_tip_box ) {
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
-				error_tip_box = error_tip_box.ErrorTipBox()
+				error_tip_box = error_tip_box.ErrorTipBox();
 			}
 			if ( date_picker_input.hasClass( 'warning-tip' ) ) {
 				error_tip_box.show( this, error_string, sec, true );
@@ -151,7 +151,7 @@
 		};
 
 		this.setPlaceHolder = function( val ) {
-			date_picker_input.attr( 'placeholder', val )
+			date_picker_input.attr( 'placeholder', val );
 		};
 
 		this.getValue = function() {
@@ -164,7 +164,7 @@
 		};
 
 		this.setValue = function( val ) {
-			//Error: Uncaught TypeError: Cannot read property 'val' of undefined in /interface/html5/global/widgets/datepicker/TDatePicker.js?v=8.0.0-20141230-130626 line 144 
+			//Error: Uncaught TypeError: Cannot read property 'val' of undefined in /interface/html5/global/widgets/datepicker/TDatePicker.js?v=8.0.0-20141230-130626 line 144
 			if ( !date_picker_input ) {
 				return;
 			}
@@ -177,7 +177,7 @@
 
 		this.setDefaultWidgetValue = function() {
 			if ( $( this ).attr( 'widget-value' ) ) {
-				this.setValue( $( this ).attr( 'widget-value' ) )
+				this.setValue( $( this ).attr( 'widget-value' ) );
 			}
 		};
 
@@ -190,11 +190,11 @@
 			}
 			if ( !is_static_width ) {
 				if ( mode === 'date' ) {
-					example_width = Global.calculateTextWidth( example_display, 12 );
+					example_width = Global.calculateTextWidth( example_display );
 				} else if ( mode === 'date_time' ) {
-					example_width = Global.calculateTextWidth( example_display + ' ' + LocalCacheData.getLoginUserPreference().time_format_displa, 12 );
+					example_width = Global.calculateTextWidth( example_display + ' ' + LocalCacheData.getLoginUserPreference().time_format_display );
 				}
-				content_width = Global.calculateTextWidth( date_picker_input.val(), 12, example_width, (example_width + 100), 28 );
+				content_width = Global.calculateTextWidth( date_picker_input.val(), { min_width: example_width, max_width: (example_width + 100), padding: 28 } );
 				$this.width( content_width + 'px' );
 			}
 		};
@@ -207,13 +207,17 @@
 			}
 			multiple = o.multiple; // This is used to test Punches -> Edit view Date
 			if ( Global.isSet( o.mode ) ) {
-				mode = o.mode
+				mode = o.mode;
 			}
 			icon = $( this ).find( '.t-date-picker-icon' );
 			date_picker_input = $( this ).find( '.t-date-picker' );
 			icon.attr( 'src', Global.getRealImagePath( 'images/cal.png' ) );
-			icon.bind( 'mouseup', function() {
 
+			icon.bind( 'mousedown', function( e ) {
+				e.stopPropagation(); //Stop jquery-ui datepickers own mousedown event from firing, which cause the date picker to close, then the below 'mouseup' event opens it again.
+			} );
+
+			icon.bind( 'mouseup', function() { //Need to use 'mouseup' event as main.js binds 'mousedown' for closing when clicked off.
 				if ( !enabled ) {
 					return;
 				}
@@ -222,14 +226,9 @@
 					date_picker_input.datepicker( 'show' );
 					is_open = true;
 				} else {
+					date_picker_input.datepicker( 'hide');
 					is_open = false;
-					if ( focus_out_timer ) {
-						clearTimeout( focus_out_timer );
-						focus_out_timer = null;
-					}
-
 				}
-
 			} );
 
 			var time_format = 'h:mm TT';
@@ -239,17 +238,48 @@
 				format = LocalCacheData.getLoginUserPreference().date_format_1;
 				time_format = LocalCacheData.getLoginUserPreference().time_format_1;
 			}
-			var day_name_min = [$.i18n._( "Sun" ), $.i18n._( "Mon" ), $.i18n._( "Tue" ),
-				$.i18n._( "Wed" ), $.i18n._( "Thu" ), $.i18n._( "Fri" ), $.i18n._( "Sat" )];
-			var month_name_short = [$.i18n._( "Jan" ), $.i18n._( "Feb" ),
-				$.i18n._( "Mar" ), $.i18n._( "Apr" ), $.i18n._( "May" ),
-				$.i18n._( "Jun" ), $.i18n._( "Jul" ), $.i18n._( "Aug" ),
-				$.i18n._( "Sep" ), $.i18n._( "Oct" ), $.i18n._( "Nov" ),
-				$.i18n._( "Dec" )];
+			var day_name_min = [
+				$.i18n._( 'Sun' ), $.i18n._( 'Mon' ), $.i18n._( 'Tue' ),
+				$.i18n._( 'Wed' ), $.i18n._( 'Thu' ), $.i18n._( 'Fri' ), $.i18n._( 'Sat' )
+			];
+			var month_name_short = [
+				$.i18n._( 'Jan' ), $.i18n._( 'Feb' ),
+				$.i18n._( 'Mar' ), $.i18n._( 'Apr' ), $.i18n._( 'May' ),
+				$.i18n._( 'Jun' ), $.i18n._( 'Jul' ), $.i18n._( 'Aug' ),
+				$.i18n._( 'Sep' ), $.i18n._( 'Oct' ), $.i18n._( 'Nov' ),
+				$.i18n._( 'Dec' )
+			];
 			var current_text = $.i18n._( 'Today' );
 			var close_text = $.i18n._( 'Close' );
+
+			$.datepicker._gotoToday = function( id ) {
+				//This fixes JS exception when using the "TODAY" button in the date pickers: Uncaught TypeError: Cannot read property 'selectedYear' of undefined
+				$( id ).datepicker( 'setDate', new Date() ).datepicker( 'hide' ).change();
+
+				// var target = $( id );
+				// var inst = this._getInst( target[0] );
+				// if ( this._get( inst, 'gotoCurrent' ) && inst.currentDay ) {
+				// 	inst.selectedDay = inst.currentDay;
+				// 	inst.drawMonth = inst.selectedMonth = inst.currentMonth;
+				// 	inst.drawYear = inst.selectedYear = inst.currentYear;
+				// }
+				// else {
+				// 	var date = new Date();
+				// 	inst.selectedDay = date.getDate();
+				// 	inst.drawMonth = inst.selectedMonth = date.getMonth();
+				// 	inst.drawYear = inst.selectedYear = date.getFullYear();
+				// 	// the below two lines are new
+				// 	this._setDateDatepicker( target, date );
+				// 	this._selectDate( id, this._getDateDatepicker( target ) );
+				// 	$( target ).datepicker( 'setDate', date );
+				// }
+				// this._notifyChange( inst );
+				// this._adjustDate( target );
+			};
+
 			if ( mode === 'date' ) {
 				date_picker_input = date_picker_input.datepicker( {
+					showOtherMonths: true,
 					showTime: false,
 					dateFormat: format,
 					showHour: false,
@@ -272,15 +302,18 @@
 					},
 
 					onClose: function() {
-						focus_out_timer = setTimeout( function() {
-							is_open = false;
-							$this.autoResize();
-							if ( o.onClose ) {
-								o.onClose();
-							}
+						is_open = false;
+						$this.autoResize();
+						if ( o.onClose ) {
+							o.onClose();
+						}
+					},
 
-						}, 100 );
-					}
+					//#2353 - removed because it breaks the month navigation buttons
+					// onChangeMonthYear: function( year, month, args ) {
+					// 	var day = $.datepicker.formatDate( 'dd', $( this ).datepicker( 'getDate' ) );
+					// 	$( this ).val( $.datepicker.formatDate( format, new Date( year, month - 1, day ) ) );
+					// }
 
 				} );
 
@@ -293,6 +326,7 @@
 
 			} else if ( mode === 'date_time' ) {
 				date_picker_input = date_picker_input.datetimepicker( {
+					showOtherMonths: true,
 					dateFormat: format,
 					timeFormat: time_format,
 					showTime: true,
@@ -310,16 +344,13 @@
 					monthNamesShort: month_name_short,
 					currentText: current_text,
 					onClose: function() {
-						focus_out_timer = setTimeout( function() {
-							is_open = false;
-							$this.autoResize();
-							if ( o.onClose ) {
-								o.onClose();
-							}
-						}, 100 );
+						is_open = false;
+						$this.autoResize();
+						if ( o.onClose ) {
+							o.onClose();
+						}
 					}
 				} );
-
 				$this.setPlaceHolder( LocalCacheData.loginUserPreference.date_format_display + ' ' + LocalCacheData.loginUserPreference.time_format_display );
 			}
 
@@ -352,13 +383,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-							LocalCacheData.current_open_sub_controller.edit_view &&
-							LocalCacheData.current_open_sub_controller.is_viewing ) {
+								LocalCacheData.current_open_sub_controller.edit_view &&
+								LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-							LocalCacheData.current_open_primary_controller.edit_view &&
-							LocalCacheData.current_open_primary_controller.is_viewing ) {
+								LocalCacheData.current_open_primary_controller.edit_view &&
+								LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -391,6 +422,7 @@
 		return this;
 
 	};
+
 
 	$.fn.TDatePicker.defaults = {};
 

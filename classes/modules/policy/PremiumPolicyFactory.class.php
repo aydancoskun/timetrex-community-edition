@@ -1134,7 +1134,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function getJobGroup() {
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
 		}
 
@@ -1162,7 +1162,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setJobGroup( $ids) {
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
 		}
 
@@ -1255,7 +1255,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function getJob() {
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
 		}
 
@@ -1284,7 +1284,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setJob( $ids) {
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
 		}
 
@@ -1375,7 +1375,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function getJobItemGroup() {
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
 		}
 
@@ -1403,7 +1403,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setJobItemGroup( $ids) {
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
 		}
 
@@ -1479,7 +1479,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function getJobItem() {
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
 		}
 
@@ -1507,7 +1507,7 @@ class PremiumPolicyFactory extends Factory {
 	 * @return bool
 	 */
 	function setJobItem( $ids) {
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			return FALSE;
 		}
 

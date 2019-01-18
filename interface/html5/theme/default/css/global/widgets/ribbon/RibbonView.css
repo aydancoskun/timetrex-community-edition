@@ -17,7 +17,9 @@
     left: 0;
     cursor: pointer;
     z-index: 1;
-
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .ribbon-view .right-logo {
@@ -26,7 +28,9 @@
     right: 5px;
     max-width: 170px;
     max-height: 42px;
-
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .top-container .right-tab-bg {
@@ -78,7 +82,7 @@
     margin-right: 10px;
     padding-bottom: 10px;
     display: inline-block;
-    height: 80px;
+    height: 97px;
     background: #e6e6e6;
     margin-top: 5px;
     margin-left: 5px;
@@ -214,18 +218,21 @@
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 3px;
-
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 /*override css styles*/
 .top-container .ui-tabs .ui-tabs-nav {
-
     margin: 0;
     padding: 0 60px 0;
     padding-right: 0;
     border-radius: 0;
     height: 30px;
-
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .top-container .ui-widget-content {
@@ -293,6 +300,10 @@
     font-size: 11px;
     padding: 4px 7px 4px;
     text-decoration: none;
+    font-weight: bold;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .top-container .ui-state-active a, .top-container .ui-state-active a:link, .top-container .ui-state-active a:visited {

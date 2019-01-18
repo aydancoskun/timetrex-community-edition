@@ -665,7 +665,7 @@ class RecurringScheduleFactory extends Factory {
 	 */
 	function setJob( $value ) {
 		$value = TTUUID::castUUID( $value );
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		//Allow setting to Default (-1) so we can update it in real-time for the regular schedule view.
@@ -685,7 +685,7 @@ class RecurringScheduleFactory extends Factory {
 	 */
 	function setJobItem( $value ) {
 		$value = TTUUID::castUUID( $value );
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		//Allow setting to Default (-1) so we can update it in real-time for the regular schedule view.

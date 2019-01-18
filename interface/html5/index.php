@@ -45,6 +45,152 @@ if ( isset( $_SERVER['REQUEST_URI'] ) AND strpos( $_SERVER['REQUEST_URI'], '//' 
 
 forceNoCacheHeaders(); //Send headers to disable caching.
 
+//PreLoad CSS
+header('Link: <theme/default/css/application.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/views/login/LoginView.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/global/widgets/loading_bar/LoadingBox.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <framework/bootstrap/css/bootstrap.min.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <framework/bootstrap/css/bootstrap-reboot.min.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/text_layer_builder.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/right_click_menu/rightclickmenu.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/global/widgets/timepicker/TTimePicker.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/global/widgets/datepicker/TDatePicker.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/global/widgets/ribbon/RibbonView.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/global/widgets/search_panel/SearchPanel.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/views/attendance/timesheet/TimeSheetView.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/views/attendance/schedule/ScheduleView.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/jquery-ui/jquery-ui.min.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <framework/widgets/jquery.qtip/jquery.qtip.min.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/image_area_select/imgareaselect-default.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/views/wizard/Wizard.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+header('Link: <theme/default/css/ui.jqgrid.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
+	header('Link: <framework/leaflet/leaflet.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+	header('Link: <framework/leaflet/leaflet-draw/leaflet.draw.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+	header('Link: <framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.css?v='. APPLICATION_BUILD .'>; rel=preload; as=style', FALSE);
+}
+
+//PreLoad JS
+header('Link: <global/APIGlobal.js.php?disable_db='. ( isset($disable_database_connection) ? (int)$disable_database_connection : 0 ) .'&v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <global/CookieSetting.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+
+header('Link: <framework/html2canvas.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <global/Debug.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <framework/require_async_plugin.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <framework/require.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <global/RateLimit.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <global/LocalCacheData.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <global/Global.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <main.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <IndexController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <model/Base.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <model/APIReturnHandler.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <model/ResponseObject.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/BaseWindowController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/BaseViewController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/wizard/BaseWizardController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/TAlertManager.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/ProgressBarManager.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/text_input/TTextInput.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/text_input/TPasswordInput.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/combobox/TComboBox.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/loading_bar/LoadingBox.html?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/login/LoginView.html?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+header('Link: <views/login/LoginViewController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+
+header('Link: <global/TTPromise.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/TTUUID.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/APIFactory.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/ContextMenuConstant.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/fastclick.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/sonic.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/backbone/underscore-min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/backbone/backbone-min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/jquery.min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/jquery.json.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/jquery.i18n.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/jqueryui/jquery-ui.min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/jquery.bridget.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/jquery.ba-resize.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/jquery.tablednd.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <theme/default/images/login_view_bg.jpg?v='. APPLICATION_BUILD .'>; rel=preload; as=image', FALSE);
+//header('Link: <../send_file.php?api=1&object_type=primary_company_logo&v='. APPLICATION_BUILD .'>; rel=preload; as=image', FALSE);
+//header('Link: <../send_file.php?api=1&object_type=copyright&v='. APPLICATION_BUILD .'>; rel=preload; as=image', FALSE);
+//header('Link: <theme/default/images/50_bg.png?v='. APPLICATION_BUILD .'>; rel=preload; as=image', FALSE);
+
+//header('Link: <framework/google/analytics/analytics.js>; rel=preload; as=script', FALSE); //Skip APPLICATION_BUILD on this one.
+//header('Link: <framework/jquery.imgareaselect.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/moment.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/widgets/jquery.qtip/jquery.qtip.min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/masonry.min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/nanobar.min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/rightclickmenu/rightclickmenu.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/widgets/datepicker/jquery-ui-timepicker-addon.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/widgets/jqgrid/jquery.jqgrid.min.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <framework/widgets/jqgrid/jquery.jqgrid.winmultiselect.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/ttgrid/TTGrid.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <model/SearchField.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/search_panel/FormItemType.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/search_panel/SearchPanel.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/wizard/Wizard.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/wizard/WizardStep.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/inside_editor/InsideEditor.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/error_tip/ErrorTipBox.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/feedback/TFeedback.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/toggle_button/TToggleButton.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/switch_button/SwitchButton.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/view_min_tab/ViewMinTabBar.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/top_alert/TopNotification.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/ribbon/RibbonSubMenuNavWidget.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/PermissionManager.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/TopMenuManager.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/jqgrid/TGridHeader.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/awesomebox/ADropDown.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/awesomebox/AComboBox.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/awesomebox/ASearchInput.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/awesomebox/ALayoutCache.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/awesomebox/ALayoutIDs.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/column_editor/ColumnEditor.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/message_box/SaveAndContinueBox.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/message_box/NoHierarchyBox.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/message_box/NoResultBox.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/separated_box/SeparatedBox.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/tag_input/TTagInput.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/datepicker/TDatePicker.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/timepicker/TTimePicker.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/datepicker/TRangePicker.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/textarea/TTextArea.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/text/TText.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/list/TList.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/checkbox/TCheckbox.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <global/widgets/paging/Paging2.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <model/RibbonMenu.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <model/RibbonSubMenu.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <model/RibbonSubMenuGroup.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <model/RibbonSubMenuNavItem.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/wizard/user_generic_data_status/UserGenericStatusWindowController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/reports/ReportBaseViewController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/common/AuthorizationHistoryCommon.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/common/RequestViewCommonController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/common/EmbeddedMessageCommon.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <views/common/BaseTreeViewController.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/ServiceCaller.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/unauthenticated/APIAuthentication.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/APIDate.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/APICurrentUser.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/core/APIProgressBar.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/core/APILog.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/core/APINotification.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/core/APICurrency.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/core/APIMisc.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/core/APIPermission.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/core/APIPermissionControl.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/core/APIOtherField.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/users/APIUser.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/users/APIUserGenericData.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/users/APIUserPreference.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+//header('Link: <services/company/APICompany.js?v='. APPLICATION_BUILD .'>; rel=preload; as=script', FALSE);
+
 //Break out of any domain masking that may exist for security reasons.
 Misc::checkValidDomain();
 
@@ -121,8 +267,10 @@ unset($authentication);
 					use_composite_css_files = true;
 				</script>
 			<?php } else { ?>
-				<link rel="stylesheet" type="text/css" href="theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
-				<link rel="stylesheet" type="text/css" href="theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="framework/bootstrap/css/bootstrap.min.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="framework/bootstrap/css/bootstrap-reboot.min.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/jquery-ui/jquery-ui.min.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="framework/widgets/jquery.qtip/jquery.qtip.min.css?v=<?php echo APPLICATION_BUILD?>">
 				<link rel="stylesheet" type="text/css" href="theme/default/css/ui.jqgrid.css?v=<?php echo APPLICATION_BUILD?>">
 				<link rel="stylesheet" type="text/css" href="theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
 				<link rel="stylesheet" type="text/css" href="theme/default/css/global/widgets/ribbon/RibbonView.css?v=<?php echo APPLICATION_BUILD?>">
@@ -139,7 +287,9 @@ unset($authentication);
 					<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-draw/leaflet.draw.css?v=<?php echo APPLICATION_BUILD?>">
 					<link rel="stylesheet" type="text/css" href="framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.css?v=<?php echo APPLICATION_BUILD?>">
 				<?php } ?>
-			<link rel="stylesheet" type="text/css" href="theme/default/css/text_layer_builder.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/text_layer_builder.css?v=<?php echo APPLICATION_BUILD?>">
+				<link rel="stylesheet" type="text/css" href="theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
+
 				<script>
 					use_composite_css_files = false;
 				</script>
@@ -200,7 +350,7 @@ unset($authentication);
 			<!--<![endif]-->
 		</div>
 	</div>
-	<div id="bottomContainer" class="bottom-container" ondragstart="return false;">
+	<div id="bottomContainer" class="bottom-container">
 		<ul class="signal-strength">
 			<li class="signal-strength-very-weak"><div></div></li>
 			<li class="signal-strength-weak"><div></div></li>
@@ -220,12 +370,12 @@ unset($authentication);
 		</div>
 	</div>
 	<div id="overlay" class=""></div>
-	</body>
 
 	<iframe style="display: none" id="hideReportIFrame" name="hideReportIFrame"></iframe>
 
 	<script src="framework/require.js?v=<?php echo APPLICATION_BUILD?>" data-main="main.js?v=<?php echo APPLICATION_BUILD?>"></script>
 	<!-- <?php echo Misc::getInstanceIdentificationString( $primary_company, $system_settings );?>  -->
+	</body>
 	</html>
 <?php
 Debug::writeToLog();

@@ -95,13 +95,13 @@
 		};
 
 
-		this.setEnableDelete = function(val) {
+		this.setEnableDelete = function( val ) {
 			var image = $this.find( '.image' );
 			if ( !val ) {
 				image.removeAttr( 'enable-delete' );
 				return;
 			} else {
-				image.attr('enable-delete', 1);
+				image.attr( 'enable-delete', 1 );
 			}
 		};
 
@@ -140,9 +140,9 @@
 			}
 
 			if ( Global.isSet( o.deleteImageHandler ) ) {
-				$this.find( '.file-browser' ).on('deleteClick', function(){
+				$this.find( '.file-browser' ).on( 'deleteClick', function() {
 					o.deleteImageHandler();
-				});
+				} );
 
 			}
 
@@ -156,11 +156,11 @@
 
 					result_form_data = form_data;
 
-				} )
+				} );
 			} );
 
 			image = $( this ).children().eq( 0 );
-			image.load( function() {
+			image.on( 'load', function() {
 				$this.onImageLoad( this );
 			} );
 
@@ -172,8 +172,6 @@
 
 	};
 
-	$.fn.TImageAdvBrowser.defaults = {
-
-	};
+	$.fn.TImageAdvBrowser.defaults = {};
 
 })( jQuery );

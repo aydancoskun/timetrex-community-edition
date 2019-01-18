@@ -101,7 +101,9 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 			default:
 
 				for ( var key in current_step_ui ) {
-					if ( !current_step_ui.hasOwnProperty( key ) ) continue;
+					if ( !current_step_ui.hasOwnProperty( key ) ) {
+						continue;
+					}
 
 					current_step_data[key] = current_step_ui[key].getValue();
 				}
@@ -152,24 +154,24 @@ ResetPasswordWizardController = BaseWizardController.extend( {
 			}
 
 			this.api.changePassword( this.default_data.user_name,
-				current_password,
-				new_password,
-				confirm_password
-				, {
-					onResult: function( result ) {
+					current_password,
+					new_password,
+					confirm_password
+					, {
+						onResult: function( result ) {
 
-						if ( !result.isValid() ) {
-							TAlertManager.showErrorAlert( result );
-						} else {
-							$this.onCloseClick();
+							if ( !result.isValid() ) {
+								TAlertManager.showErrorAlert( result );
+							} else {
+								$this.onCloseClick();
 
-							if ( $this.call_back ) {
-								$this.call_back();
+								if ( $this.call_back ) {
+									$this.call_back();
+								}
 							}
-						}
 
-					}
-				} )
+						}
+					} );
 		}
 
 	}

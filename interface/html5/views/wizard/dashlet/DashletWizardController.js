@@ -4,17 +4,17 @@ DashletWizardController = BaseWizardController.extend( {
 	user_generic_data_api: null,
 	api_user_report: null,
 	numArray: [
-		{label: $.i18n._( 'Default' ), value: 0},
-		{label: 5, value: 5},
-		{label: 10, value: 10},
-		{label: 15, value: 15},
-		{label: 20, value: 20},
-		{label: 25, value: 25},
-		{label: 50, value: 50},
-		{label: 100, value: 100},
-		{label: 250, value: 250},
-		{label: 500, value: 500},
-		{label: 1000, value: 1000}
+		{ label: $.i18n._( 'Default' ), value: 0 },
+		{ label: 5, value: 5 },
+		{ label: 10, value: 10 },
+		{ label: 15, value: 15 },
+		{ label: 20, value: 20 },
+		{ label: 25, value: 25 },
+		{ label: 50, value: 50 },
+		{ label: 100, value: 100 },
+		{ label: 250, value: 250 },
+		{ label: 500, value: 500 },
+		{ label: 1000, value: 1000 }
 	],
 	report_apis: {
 		AccrualBalanceSummaryReport: 'APIAccrualBalanceSummaryReport',
@@ -71,9 +71,9 @@ DashletWizardController = BaseWizardController.extend( {
 					$this.stepsDataDic[2] = null;
 					$this.stepsWidgetDic[2] = null;
 				} );
-				combobox.off('change').on('change', function(e){
-					$this.step1ComboboxChanged( $(e.target).val() );
-				});
+				combobox.off( 'change' ).on( 'change', function( e ) {
+					$this.step1ComboboxChanged( $( e.target ).val() );
+				} );
 				this.content_div.append( combobox );
 				this.stepsWidgetDic[this.current_step][combobox.getField()] = combobox;
 
@@ -235,8 +235,8 @@ DashletWizardController = BaseWizardController.extend( {
 	},
 
 	step1ComboboxChanged: function( value ) {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id < 15 && ( value == 'custom_list' || value == 'custom_report' ) ) {
-			TAlertManager.showAlert( Global.getUpgradeMessage(), $.i18n._('Denied'));
+		if ( LocalCacheData.getCurrentCompany().product_edition_id <= 10 && ( value == 'custom_list' || value == 'custom_report' ) ) {
+			TAlertManager.showAlert( Global.getUpgradeMessage(), $.i18n._( 'Denied' ) );
 			Global.setWidgetEnabled( this.next_btn, false );
 		} else {
 			Global.setWidgetEnabled( this.next_btn, true );
@@ -247,7 +247,7 @@ DashletWizardController = BaseWizardController.extend( {
 		var step_2_ui = this.stepsWidgetDic[2];
 		var step_1_ui = this.stepsWidgetDic[1];
 		if ( dashlet_type === 'custom_list' ) {
-			step_2_ui.name.setValue( step_2_ui.script.getLabel() )
+			step_2_ui.name.setValue( step_2_ui.script.getLabel() );
 		} else if ( dashlet_type === 'custom_report' ) {
 			step_2_ui.name.setValue( step_2_ui.report.getLabel() );
 		} else {
@@ -283,7 +283,7 @@ DashletWizardController = BaseWizardController.extend( {
 												current_step_ui.dashlet_type.setValue( current_step_data.saved_dashlet.data.dashlet_type );
 											}
 										}
-									} )
+									} );
 								}
 
 							}
@@ -377,7 +377,7 @@ DashletWizardController = BaseWizardController.extend( {
 		var script = step_2_widgets.report.getValue();
 		var template_combobox = step_2_widgets.template;
 		var report_api = new (APIFactory.getAPIClass( this.report_apis[script] ))();
-		var template_options_result = report_api.getOptions( 'templates', {async: false} );
+		var template_options_result = report_api.getOptions( 'templates', { async: false } );
 		var templates = template_options_result.getResult();
 		templates = Global.buildRecordArray( templates );
 		templates.unshift( {
@@ -415,18 +415,20 @@ DashletWizardController = BaseWizardController.extend( {
 				var result_data = result.getResult();
 				if ( result_data && result_data.length > 0 ) {
 					result_data.sort( function( a, b ) {
-							return Global.compare( a, b, 'name' );
-						}
+								return Global.compare( a, b, 'name' );
+							}
 					);
 				} else {
-					result_data = [{
-						fullValue: 0,
-						id: 0,
-						name: Global.empty_item,
-						label: Global.empty_item,
-						orderValue: 0,
-						value: 0
-					}];
+					result_data = [
+						{
+							fullValue: 0,
+							id: 0,
+							name: Global.empty_item,
+							label: Global.empty_item,
+							orderValue: 0,
+							value: 0
+						}
+					];
 				}
 				layout_combobox.setSourceData( result_data );
 				if ( step_2_data && step_2_data.layout ) {
@@ -452,11 +454,11 @@ DashletWizardController = BaseWizardController.extend( {
 				var result_data = result.getResult();
 				if ( result_data && result_data.length > 0 ) {
 					result_data.sort( function( a, b ) {
-							return Global.compare( a, b, 'name' );
-						}
+								return Global.compare( a, b, 'name' );
+							}
 					);
 				} else {
-					result_data = [{id: 0, name: '- ' + $.i18n._( 'Default' ) + ' -'}]
+					result_data = [{ id: 0, name: '- ' + $.i18n._( 'Default' ) + ' -' }];
 				}
 				layout_combobox.setSourceData( result_data );
 				if ( step_2_data && step_2_data.layout ) {

@@ -56,7 +56,6 @@ class APIUser extends APIFactory {
 	 * @return array
 	 */
 	function getUserDefaultData( $tmp_company_id = NULL ) {
-
 		//Allow getting default data from other companies, so it makes it easier to create the first employee of a company.
 		if ( $tmp_company_id != '' AND TTUUID::isUUID($tmp_company_id) AND $tmp_company_id != TTUUID::getZeroID() AND $tmp_company_id != TTUUID::getNotExistID() AND $this->getPermissionObject()->Check('company', 'enabled') AND $this->getPermissionObject()->Check('company', 'view') ) {
 			$company_id = $tmp_company_id;
@@ -132,6 +131,21 @@ class APIUser extends APIFactory {
 			$data['hire_date'] = TTDate::getAPIDate( 'DATE', time() );
 		}
 
+		//Try to default the hierarchy as best we can if its a supervisor (subordinates only) creating the employee record.
+		if ( $this->getPermissionObject()->Check('user', 'view') == FALSE AND $this->getPermissionObject()->Check('user', 'view_child') == TRUE ) {
+			$api_hc = new APIHierarchyControl;
+			$hierarchy_control_options = $this->stripReturnHandler( $api_hc->getHierarchyControlOptions( FALSE ) ); //Don't include blank.
+			if ( is_array($hierarchy_control_options) ) {
+				foreach( $hierarchy_control_options as $hierarchy_object_type => $hierarchy_control_ids ) {
+					if ( count($hierarchy_control_ids) == 1 ) {
+						$data['hierarchy_control'][$hierarchy_object_type] = Misc::trimSortPrefix( key($hierarchy_control_ids) );
+					}
+				}
+
+			}
+			unset($api_hc);
+		}
+
 		return $this->returnHandler( $data );
 	}
 
@@ -154,11 +168,12 @@ class APIUser extends APIFactory {
 	 * @return array|bool
 	 */
 	function getUser( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user', 'view') OR $this->getPermissionObject()->Check('user', 'view_own') OR $this->getPermissionObject()->Check('user', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//We need to take into account different permissions, ie: punch->view, view_child, view_own when displaying the dropdown
 		//box in the TimeSheet view and other views as well. Allow the caller of this function to pass a "permission_section"

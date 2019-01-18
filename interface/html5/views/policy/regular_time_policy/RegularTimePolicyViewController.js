@@ -3,7 +3,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 	_required_files: {
 		10: ['APIRegularTimePolicy', 'APIPayCode', 'APIPayFormulaPolicy', 'APIContributingShiftPolicy', 'APIBranch', 'APIDepartment'],
-		20: ['APIJob', 'APIJobItem', 'APIJobGroup', 'APIJobItemGroup' ]
+		20: ['APIJob', 'APIJobItem', 'APIJobGroup', 'APIJobItemGroup']
 	},
 	type_array: null,
 
@@ -57,17 +57,21 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'job_item_selection_type' );
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			this.job_group_api.getJobGroup( '', false, false, {onResult: function( res ) {
-				res = res.getResult();
-				res = Global.buildTreeRecord( res )
-				$this.job_group_array = res;
-			}} );
+			this.job_group_api.getJobGroup( '', false, false, {
+				onResult: function( res ) {
+					res = res.getResult();
+					res = Global.buildTreeRecord( res );
+					$this.job_group_array = res;
+				}
+			} );
 
-			this.job_item_group_api.getJobItemGroup( '', false, false, {onResult: function( res ) {
-				res = res.getResult();
-				res = Global.buildTreeRecord( res )
-				$this.job_item_group_array = res;
-			}} );
+			this.job_item_group_api.getJobItemGroup( '', false, false, {
+				onResult: function( res ) {
+					res = res.getResult();
+					res = Global.buildTreeRecord( res );
+					$this.job_item_group_array = res;
+				}
+			} );
 		}
 
 	},
@@ -78,11 +82,12 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_regular_time_policy': $.i18n._( 'Regular Time Policy' ),
-			'tab_differential_criteria': $.i18n._( 'Differential Criteria' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_regular_time_policy': { 'label': $.i18n._( 'Regular Time Policy' ) },
+			'tab_differential_criteria': { 'label': $.i18n._( 'Differential Criteria' ), 'init_callback': 'initSubDifferentialCriteriaView' },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRegularTimePolicy' )),
@@ -90,11 +95,10 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -109,7 +113,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_regular_time_policy_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -129,7 +133,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'contributing_shift_policy_id'} );
+			field: 'contributing_shift_policy_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Contributing Shift Policy' ), form_item_input, tab_regular_time_policy_column1 );
 
 		//Pay Code
@@ -140,7 +145,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.PAY_CODE,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'pay_code_id'} );
+			field: 'pay_code_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Code' ), form_item_input, tab_regular_time_policy_column1 );
 
 		//Pay Formula Policy
@@ -154,7 +160,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			field: 'pay_formula_policy_id',
 			custom_first_label: $.i18n._( '-- Defined By Pay Code --' ),
 			added_items: [
-				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Pay Code --' )}
+				{ value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Pay Code --' ) }
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Formula Policy' ), form_item_input, tab_regular_time_policy_column1 );
@@ -162,7 +168,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		//Calculation Order
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'calculation_order', width: 50} );
+		form_item_input.TTextInput( { field: 'calculation_order', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Calculation Order' ), form_item_input, tab_regular_time_policy_column1, '' );
 
 		//
@@ -177,17 +183,17 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.edit_view_tabs[1].push( tab_differential_criteria_column1 );
 
 		// Branches
-		var v_box = $( "<div class='v-box'></div>" );
+		var v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'branch_selection_type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'branch_selection_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.branch_selection_type_array ) );
 
-		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -198,7 +204,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'branch'} );
+			field: 'branch'
+		} );
 
 		var form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 
@@ -207,7 +214,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		// Exclude Default
 		var form_item_input_2 = Global.loadWidgetByName( FormItemType.CHECKBOX );
 
-		form_item_input_2.TCheckbox( {field: 'exclude_default_branch'} );
+		form_item_input_2.TCheckbox( { field: 'exclude_default_branch' } );
 
 		form_item = this.putInputToInsideFormItem( form_item_input_2, 'Exclude Default' );
 
@@ -216,17 +223,17 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Branches' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 
 		// Departments
-		v_box = $( "<div class='v-box'></div>" )
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'department_selection_type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'department_selection_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.department_selection_type_array ) );
 
-		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+		form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -237,7 +244,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'department'} );
+			field: 'department'
+		} );
 
 		form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 
@@ -246,7 +254,7 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		// Exclude Default
 		form_item_input_2 = Global.loadWidgetByName( FormItemType.CHECKBOX );
 
-		form_item_input_2.TCheckbox( {field: 'exclude_default_department'} );
+		form_item_input_2.TCheckbox( { field: 'exclude_default_department' } );
 
 		form_item = this.putInputToInsideFormItem( form_item_input_2, 'Exclude Default' );
 
@@ -258,17 +266,17 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 
 			// Job Groups
-			v_box = $( "<div class='v-box'></div>" );
+			v_box = $( '<div class=\'v-box\'></div>' );
 
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'job_group_selection_type_id', set_empty: false} );
+			form_item_input.TComboBox( { field: 'job_group_selection_type_id', set_empty: false } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_group_selection_type_array ) );
 
-			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			//Selection
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -278,7 +286,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.TREE_COLUMN,
 				set_empty: true,
-				field: 'job_group'} );
+				field: 'job_group'
+			} );
 
 			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_group_array ) );
 
@@ -289,17 +298,17 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Job Groups' ), [form_item_input, form_item_input_1], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Jobs
-			v_box = $( "<div class='v-box'></div>" )
+			v_box = $( '<div class=\'v-box\'></div>' );
 
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'job_selection_type_id', set_empty: false} );
+			form_item_input.TComboBox( { field: 'job_selection_type_id', set_empty: false } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_selection_type_array ) );
 
-			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			//Selection
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -310,7 +319,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
 				set_empty: true,
-				field: 'job'} );
+				field: 'job'
+			} );
 
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 
@@ -318,24 +328,24 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 
 			// Exclude Default
 			form_item_input_2 = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_input_2.TCheckbox( {field: 'exclude_default_job'} );
+			form_item_input_2.TCheckbox( { field: 'exclude_default_job' } );
 			form_item = this.putInputToInsideFormItem( form_item_input_2, 'Exclude Default' );
 			v_box.append( form_item );
 
 			this.addEditFieldToColumn( $.i18n._( 'Jobs' ), [form_item_input, form_item_input_1, form_item_input_2], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Task Groups
-			v_box = $( "<div class='v-box'></div>" );
+			v_box = $( '<div class=\'v-box\'></div>' );
 
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'job_item_group_selection_type_id', set_empty: false} );
+			form_item_input.TComboBox( { field: 'job_item_group_selection_type_id', set_empty: false } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_group_selection_type_array ) );
 
 			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			//Selection
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -345,7 +355,8 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				allow_multiple_selection: true,
 				layout_name: ALayoutIDs.TREE_COLUMN,
 				set_empty: true,
-				field: 'job_item_group'} );
+				field: 'job_item_group'
+			} );
 
 			form_item_input_1.setSourceData( Global.addFirstItemToArray( $this.job_item_group_array ) );
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
@@ -354,17 +365,17 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 			this.addEditFieldToColumn( $.i18n._( 'Task Groups' ), [form_item_input, form_item_input_1], tab_differential_criteria_column1, '', v_box, false, true );
 
 			// Tasks
-			v_box = $( "<div class='v-box'></div>" );
+			v_box = $( '<div class=\'v-box\'></div>' );
 
 			//Selection Type
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'job_item_selection_type_id', set_empty: false} );
+			form_item_input.TComboBox( { field: 'job_item_selection_type_id', set_empty: false } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( $this.job_item_selection_type_array ) );
 
-			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' )
+			form_item = this.putInputToInsideFormItem( form_item_input, 'Selection Type' );
 
 			v_box.append( form_item );
-			v_box.append( "<div class='clear-both-div'></div>" );
+			v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 			//Selection
 			form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -375,14 +386,15 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
 				set_empty: true,
-				field: 'job_item'} );
+				field: 'job_item'
+			} );
 
 			form_item = this.putInputToInsideFormItem( form_item_input_1, 'Selection' );
 			v_box.append( form_item );
 
 			// Exclude Default
 			form_item_input_2 = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_input_2.TCheckbox( {field: 'exclude_default_job_item'} );
+			form_item_input_2.TCheckbox( { field: 'exclude_default_job_item' } );
 			form_item = this.putInputToInsideFormItem( form_item_input_2, 'Exclude Default' );
 			v_box.append( form_item );
 
@@ -519,15 +531,18 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Code' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Code' ),
 				in_column: 1,
 				field: 'pay_code_id',
 				layout_name: ALayoutIDs.PAY_CODE,
@@ -535,9 +550,11 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Formula Policy' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Formula Policy' ),
 				in_column: 1,
 				field: 'pay_formula_policy_id',
 				layout_name: ALayoutIDs.PAY_FORMULA_POLICY,
@@ -545,9 +562,11 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -555,9 +574,11 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -565,66 +586,21 @@ RegularTimePolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
+		];
 	},
 
-	onTabShow: function( e, ui ) {
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		//Handle most cases that one tab and on audit tab
-		if ( this.edit_view_tab_selected_index == 1 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-			} else {
-				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			}
+	initSubDifferentialCriteriaView: function() {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 			this.buildContextMenu( true );
 			this.setEditMenu();
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
 		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
+			this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'none' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
 	},
-
-	initTabData: function() {
-		//Handle most case that one tab and one audit tab
-		if ( this.edit_view_tab_selected_index == 1 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-			} else {
-				this.edit_view_tab.find( '#tab_differential_criteria' ).find( '.first-column' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	}
-
 } );

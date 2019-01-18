@@ -1,7 +1,7 @@
 InOutViewController = BaseViewController.extend( {
 
 	_required_files: {
-		10: ['APIPunch', 'APIStation', 'APIBranch', 'APIDepartment' , 'APICompany'],
+		10: ['APIPunch', 'APIStation', 'APIBranch', 'APIDepartment', 'APICompany'],
 		20: ['APIJob', 'APIJobItem']
 	},
 	type_array: null,
@@ -23,8 +23,8 @@ InOutViewController = BaseViewController.extend( {
 	original_note: false,
 	new_note: false,
 
-    init: function( options ) {
-		Global.setUINotready(true);
+	init: function( options ) {
+		Global.setUINotready( true );
 
 		this.permission_id = 'punch';
 		this.viewId = 'InOut';
@@ -59,6 +59,7 @@ InOutViewController = BaseViewController.extend( {
 		this.initPermission();
 
 		this.initData();
+		this.is_changed == true;
 	},
 
 	addPermissionValidate: function( p_id ) {
@@ -79,58 +80,58 @@ InOutViewController = BaseViewController.extend( {
 	},
 
 	jobUIValidate: function() {
-		if ( PermissionManager.validate( "job", 'enabled' ) &&
-			PermissionManager.validate( "punch", 'edit_job' ) ) {
+		if ( PermissionManager.validate( 'job', 'enabled' ) &&
+				PermissionManager.validate( 'punch', 'edit_job' ) ) {
 			return true;
 		}
 		return false;
 	},
 
 	jobItemUIValidate: function() {
-		if ( PermissionManager.validate( "punch", 'edit_job_item' ) ) {
+		if ( PermissionManager.validate( 'punch', 'edit_job_item' ) ) {
 			return true;
 		}
 		return false;
 	},
 
 	branchUIValidate: function() {
-		if ( PermissionManager.validate( "punch", 'edit_branch' ) ) {
+		if ( PermissionManager.validate( 'punch', 'edit_branch' ) ) {
 			return true;
 		}
 		return false;
 	},
 
 	departmentUIValidate: function() {
-		if ( PermissionManager.validate( "punch", 'edit_department' ) ) {
+		if ( PermissionManager.validate( 'punch', 'edit_department' ) ) {
 			return true;
 		}
 		return false;
 	},
 
 	goodQuantityUIValidate: function() {
-		if ( PermissionManager.validate( "punch", 'edit_quantity' ) ) {
+		if ( PermissionManager.validate( 'punch', 'edit_quantity' ) ) {
 			return true;
 		}
 		return false;
 	},
 
 	badQuantityUIValidate: function() {
-		if ( PermissionManager.validate( "punch", 'edit_quantity' ) &&
-			PermissionManager.validate( "punch", 'edit_bad_quantity' ) ) {
+		if ( PermissionManager.validate( 'punch', 'edit_quantity' ) &&
+				PermissionManager.validate( 'punch', 'edit_bad_quantity' ) ) {
 			return true;
 		}
 		return false;
 	},
 
 	transferUIValidate: function() {
-		if ( PermissionManager.validate( "punch", 'edit_transfer' ) ) {
+		if ( PermissionManager.validate( 'punch', 'edit_transfer' ) ) {
 			return true;
 		}
 		return false;
 	},
 
 	noteUIValidate: function() {
-		if ( PermissionManager.validate( "punch", 'edit_note' ) ) {
+		if ( PermissionManager.validate( 'punch', 'edit_note' ) ) {
 			return true;
 		}
 		return false;
@@ -191,7 +192,7 @@ InOutViewController = BaseViewController.extend( {
 		// Error: Uncaught TypeError: (intermediate value).isBranchAndDepartmentAndJobAndJobItemEnabled is not a function on line 207
 		var company_api = new (APIFactory.getAPIClass( 'APICompany' ))();
 		if ( company_api && _.isFunction( company_api.isBranchAndDepartmentAndJobAndJobItemEnabled ) ) {
-			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( {async: false} );
+			result = company_api.isBranchAndDepartmentAndJobAndJobItemEnabled( { async: false } );
 		}
 
 		//tried to fix Unable to get property 'getResult' of undefined or null reference, added if(!result)
@@ -233,8 +234,8 @@ InOutViewController = BaseViewController.extend( {
 	initOptions: function( callBack ) {
 
 		var options = [
-			{option_name: 'type'},
-			{option_name: 'status'}
+			{ option_name: 'type' },
+			{ option_name: 'status' }
 		];
 
 		this.initDropDownOptions( options, function( result ) {
@@ -274,7 +275,7 @@ InOutViewController = BaseViewController.extend( {
 			}
 
 			var res_data = result.getResult();
-			//$.cookie( 'StationID', res_data, {expires: 10000, path: LocalCacheData.cookie_path} );
+			//setCookie( 'StationID',  res_data );
 			Global.setStationID( res_data );
 
 			$this.api.getUserPunch( {
@@ -282,14 +283,14 @@ InOutViewController = BaseViewController.extend( {
 					var result_data = result.getResult();
 					//keep the inout view fields consistent for screenshots in unit test mode
 					if ( Global.UNIT_TEST_MODE === true ) {
-						result_data.punch_date = "UNITTEST";
-						result_data.punch_time = "UNITTEST";
+						result_data.punch_date = 'UNITTEST';
+						result_data.punch_time = 'UNITTEST';
 					}
 
 					if ( !result.isValid() ) {
 						TAlertManager.showErrorAlert( result );
 						$this.onCancelClick();
-						return
+						return;
 					}
 
 					if ( Global.isSet( result_data ) ) {
@@ -307,16 +308,21 @@ InOutViewController = BaseViewController.extend( {
 
 	},
 
+	onCancelClick: function() {
+		this.is_changed = true;
+		this._super( 'onCancelClick' );
+	},
+
 	openEditView: function() {
 		var $this = this;
 
-		if ( this.edit_only_mode && this.api) {
+		if ( this.edit_only_mode && this.api ) {
 
 			this.initOptions( function( result ) {
-
 				if ( !$this.edit_view ) {
 					$this.initEditViewUI( 'InOut', 'InOutEditView.html' );
 				}
+
 
 				$this.getUserPunch( function( result ) {
 					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
@@ -324,8 +330,8 @@ InOutViewController = BaseViewController.extend( {
 
 					//keep fields consistent in unit test mode for consistent screenshots
 					if ( Global.UNIT_TEST_MODE === true ) {
-						$this.current_edit_record.punch_date = "UNITTEST";
-						$this.current_edit_record.punch_time = "UNITTEST";
+						$this.current_edit_record.punch_date = 'UNITTEST';
+						$this.current_edit_record.punch_time = 'UNITTEST';
 					}
 
 					$this.initEditView();
@@ -368,6 +374,9 @@ InOutViewController = BaseViewController.extend( {
 			case 'job_item_quick_search':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.onJobQuickSearch( key, c_value );
+
+					//Don't validate immediately as onJobQuickSearch is doing async API calls, and it would cause a guaranteed validation failure.
+					doNotValidate = true;
 				}
 				break;
 
@@ -429,62 +438,9 @@ InOutViewController = BaseViewController.extend( {
 		} else if ( typeof initial_load == 'undefined' || initial_load === false ) {
 
 			this.new_note = this.edit_view_ui_dic.note.getValue();
-			this.edit_view_ui_dic.note.setValue(this.original_note ? this.original_note : '');
+			this.edit_view_ui_dic.note.setValue( this.original_note ? this.original_note : '' );
 			this.current_edit_record.note = this.original_note ? this.original_note : '';
 		}
-	},
-
-	onJobQuickSearch: function( key, value ) {
-		var args = {};
-		var $this = this;
-
-		if ( key === 'job_quick_search' ) {
-
-			args.filter_data = {manual_id: value, user_id: this.current_edit_record.user_id, status_id: "10"};
-
-			this.job_api.getJob( args, {
-				onResult: function( result ) {
-
-					var result_data = result.getResult();
-
-					if ( result_data.length > 0 ) {
-						$this.edit_view_ui_dic['job_id'].setValue( result_data[0].id );
-						$this.current_edit_record.job_id = result_data[0].id;
-						$this.setJobItemValueWhenJobChanged( result_data[0] );
-
-					} else {
-						$this.edit_view_ui_dic['job_id'].setValue( '' );
-						$this.current_edit_record.job_id = false;
-						$this.setJobItemValueWhenJobChanged( null );
-
-					}
-
-				}
-			} );
-			$this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
-			$this.edit_view_ui_dic['job_id'].setCheckBox( true );
-		} else if ( key === 'job_item_quick_search' ) {
-
-			args.filter_data = {manual_id: value, job_id: this.current_edit_record.job_id, status_id: "10"};
-
-			this.job_item_api.getJobItem( args, {
-				onResult: function( result ) {
-					var result_data = result.getResult();
-					if ( result_data.length > 0 ) {
-						$this.edit_view_ui_dic['job_item_id'].setValue( result_data[0].id );
-						$this.current_edit_record.job_item_id = result_data[0].id;
-
-					} else {
-						$this.edit_view_ui_dic['job_item_id'].setValue( '' );
-						$this.current_edit_record.job_item_id = false;
-					}
-
-				}
-			} );
-			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
-			this.edit_view_ui_dic['job_item_id'].setCheckBox( true );
-		}
-
 	},
 
 	//Make sure this.current_edit_record is updated before validate
@@ -541,7 +497,7 @@ InOutViewController = BaseViewController.extend( {
 					if ( result_data === true && $this.current_edit_record ) {
 						$this.refresh_id = $this.current_edit_record.id;
 					} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-						$this.refresh_id = result_data
+						$this.refresh_id = result_data;
 					}
 
 
@@ -565,7 +521,7 @@ InOutViewController = BaseViewController.extend( {
 		var len = this.context_menu_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -590,10 +546,11 @@ InOutViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_punch': $.i18n._( 'Punch' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_punch': { 'label': $.i18n._( 'Punch' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		//Tab 0 start
 
@@ -620,7 +577,7 @@ InOutViewController = BaseViewController.extend( {
 		// Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
 
-		form_item_input.TTimePicker( {field: 'punch_time'} );
+		form_item_input.TTimePicker( { field: 'punch_time' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab_punch_column1 );
 
@@ -628,14 +585,14 @@ InOutViewController = BaseViewController.extend( {
 //		  punch_date, punch_dates
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'punch_date'} );
+		form_item_input.TDatePicker( { field: 'punch_date' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1 );
 
 		//Transfer
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'transfer'} );
+		form_item_input.TCheckbox( { field: 'transfer' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Transfer' ), form_item_input, tab_punch_column1, '', null, true );
 
@@ -646,7 +603,7 @@ InOutViewController = BaseViewController.extend( {
 		// Punch
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 
 		this.addEditFieldToColumn( $.i18n._( 'Punch Type' ), form_item_input, tab_punch_column1 );
@@ -654,7 +611,7 @@ InOutViewController = BaseViewController.extend( {
 		// In/Out
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab_punch_column1 );
 
@@ -691,7 +648,7 @@ InOutViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_department_ui ) {
-			this.detachElement( 'department_id' )
+			this.detachElement( 'department_id' );
 		}
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
@@ -709,15 +666,17 @@ InOutViewController = BaseViewController.extend( {
 				set_empty: true,
 				setRealValueCallBack: (function( val ) {
 
-					if ( val ) job_coder.setValue( val.manual_id );
+					if ( val ) {
+						job_coder.setValue( val.manual_id );
+					}
 				}),
 				field: 'job_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_coder.TTextInput( {field: 'job_quick_search', disable_keyup_event: true} );
+			job_coder.TTextInput( { field: 'job_quick_search', disable_keyup_event: true } );
 			job_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_coder );
@@ -739,15 +698,17 @@ InOutViewController = BaseViewController.extend( {
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: (function( val ) {
-					if ( val ) job_item_coder.setValue( val.manual_id );
+					if ( val ) {
+						job_item_coder.setValue( val.manual_id );
+					}
 				}),
 				field: 'job_item_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_item_coder.TTextInput( {field: 'job_item_quick_search', disable_keyup_event: true} );
+			job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
 			job_item_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_item_coder );
@@ -765,18 +726,18 @@ InOutViewController = BaseViewController.extend( {
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
 			var good = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			good.TTextInput( {field: 'quantity', width: 40} );
+			good.TTextInput( { field: 'quantity', width: 40 } );
 			good.addClass( 'quantity-input' );
 
-			var good_label = $( "<span class='widget-right-label'>" + $.i18n._( 'Good' ) + ": </span>" );
+			var good_label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Good' ) + ': </span>' );
 
 			var bad = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			bad.TTextInput( {field: 'bad_quantity', width: 40} );
+			bad.TTextInput( { field: 'bad_quantity', width: 40 } );
 			bad.addClass( 'quantity-input' );
 
-			var bad_label = $( "<span class='widget-right-label'>/ " + $.i18n._( 'Bad' ) + ": </span>" );
+			var bad_label = $( '<span class=\'widget-right-label\'>/ ' + $.i18n._( 'Bad' ) + ': </span>' );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			widgetContainer.append( good_label );
 			widgetContainer.append( good );
@@ -804,7 +765,7 @@ InOutViewController = BaseViewController.extend( {
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note', width: '100%'} );
+		form_item_input.TTextArea( { field: 'note', width: '100%' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_punch_column1, '', null, true, true );
 
@@ -823,7 +784,9 @@ InOutViewController = BaseViewController.extend( {
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 
-			if ( !this.current_edit_record.hasOwnProperty( key ) ) continue;
+			if ( !this.current_edit_record.hasOwnProperty( key ) ) {
+				continue;
+			}
 
 			var widget = this.edit_view_ui_dic[key];
 			if ( Global.isSet( widget ) ) {
@@ -834,7 +797,7 @@ InOutViewController = BaseViewController.extend( {
 					case 'job_id':
 						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 							var args = {};
-							args.filter_data = {status_id: 10, user_id: this.current_edit_record.user_id};
+							args.filter_data = { status_id: 10, user_id: this.current_edit_record.user_id };
 							widget.setDefaultArgs( args );
 							widget.setValue( this.current_edit_record[key] );
 						}
@@ -842,7 +805,7 @@ InOutViewController = BaseViewController.extend( {
 					case 'job_item_id':
 						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 							args = {};
-							args.filter_data = {status_id: 10, job_id: this.current_edit_record.job_id};
+							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
 							widget.setValue( this.current_edit_record[key] );
 						}
@@ -893,7 +856,7 @@ InOutViewController.loadView = function() {
 		var args = {};
 		var template = _.template( result );
 
-		Global.contentContainer().html( template(args) );
+		Global.contentContainer().html( template( args ) );
 	} )
 
 };

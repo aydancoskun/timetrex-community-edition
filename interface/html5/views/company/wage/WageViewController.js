@@ -156,14 +156,14 @@ WageViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		var copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.copy,
-			group: editor_group,
-			icon: Icons.copy_as_new,
-			permission_result: true,
-			permission: null
-		} );
+		// var copy = new RibbonSubMenu( {
+		// 	label: $.i18n._( 'Copy' ),
+		// 	id: ContextMenuIconName.copy,
+		// 	group: editor_group,
+		// 	icon: Icons.copy_as_new,
+		// 	permission_result: true,
+		// 	permission: null
+		// } );
 
 		var copy_as_new = new RibbonSubMenu( {
 			label: $.i18n._( 'Copy<br>as New' ),
@@ -264,7 +264,7 @@ WageViewController = BaseViewController.extend( {
 				this.onTypeChange( true );
 				break;
 			case 'user_id':
-				if ( $.isArray(this.current_edit_record.user_id) && this.current_edit_record.user_id.length > 1 ) {
+				if ( $.isArray( this.current_edit_record.user_id ) && this.current_edit_record.user_id.length > 1 ) {
 					this.is_mass_adding = true;
 				} else {
 					this.is_mass_adding = false;
@@ -305,7 +305,7 @@ WageViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'invisible-image' );
 			context_btn.removeClass( 'disable-image' );
@@ -412,25 +412,11 @@ WageViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		this._super( 'onContextMenuClick', context_btn, menu_name );
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
-				ProgressBar.showOverlay();
 				this.onImportClick();
 				break;
-
 		}
 	},
 
@@ -506,13 +492,6 @@ WageViewController = BaseViewController.extend( {
 		} );
 	},
 
-	removeEditView: function() {
-
-		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
-
-	},
-
 	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn );
 
@@ -562,7 +541,7 @@ WageViewController = BaseViewController.extend( {
 		var $this = this;
 		if ( Global.isSet( this.current_edit_record.user_id ) ) {
 			var filter = {};
-			filter.filter_data = {user_id: this.current_edit_record.user_id};
+			filter.filter_data = { user_id: this.current_edit_record.user_id };
 
 			this.currency_api.getCurrency( filter, false, false, {
 				onResult: function( res ) {
@@ -584,9 +563,9 @@ WageViewController = BaseViewController.extend( {
 
 		var $this = this;
 		if ( this.current_edit_record.wage &&
-			this.current_edit_record.weekly_time &&
-			this.current_edit_record.type_id &&
-			this.current_edit_record.type_id != 10 ) {
+				this.current_edit_record.weekly_time &&
+				this.current_edit_record.type_id &&
+				this.current_edit_record.type_id != 10 ) {
 
 
 			//wwkly_time need value before pasrse to seconds.
@@ -627,11 +606,12 @@ WageViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_wage': $.i18n._( 'Wage' ),
-			'tab_attachment': $.i18n._( 'Attachment' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_wage': { 'label': $.i18n._( 'Wage' ) },
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserWage' )),
@@ -693,7 +673,7 @@ WageViewController = BaseViewController.extend( {
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_wage_column1 );
 
@@ -701,11 +681,11 @@ WageViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'wage', width: 90} );
+		form_item_input.TTextInput( { field: 'wage', width: 90 } );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		this.currency = $( "<span class='widget-left-label'></span>" );
-		this.code = $( "<span class='widget-right-label'></span>" );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		this.currency = $( '<span class=\'widget-left-label\'></span>' );
+		this.code = $( '<span class=\'widget-right-label\'></span>' );
 
 		widgetContainer.append( this.currency );
 		widgetContainer.append( form_item_input );
@@ -716,10 +696,10 @@ WageViewController = BaseViewController.extend( {
 		//Average Time / Week
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'weekly_time', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'weekly_time', need_parser_sec: true } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'>( " + $.i18n._( 'ie' ) + ': ' + $.i18n._( '40 hours / week' ) + " )</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '40 hours / week' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -729,17 +709,17 @@ WageViewController = BaseViewController.extend( {
 		//Annual Hourly Rate
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'hourly_rate'} );
+		form_item_input.TTextInput( { field: 'hourly_rate' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Annual Hourly Rate' ), form_item_input, tab_wage_column1, '', null, true );
 
 		//Labor Burden Percent
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'labor_burden_percent', width: 50} );
+		form_item_input.TTextInput( { field: 'labor_burden_percent', width: 50 } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>% ( " + $.i18n._( 'ie' ) + ': ' + $.i18n._( '25% burden' ) + " )</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>% ( ' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '25% burden' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -749,12 +729,12 @@ WageViewController = BaseViewController.extend( {
 		//Effective Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'effective_date', width: 120} );
+		form_item_input.TDatePicker( { field: 'effective_date', width: 120 } );
 		this.addEditFieldToColumn( $.i18n._( 'Effective Date' ), form_item_input, tab_wage_column1 );
 
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( {field: 'note', width: 389, height: 117} );
+		form_item_input.TTextArea( { field: 'note', width: 389, height: 117 } );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_wage_column1, '', null, null, true );
 
 	},
@@ -852,7 +832,7 @@ WageViewController = BaseViewController.extend( {
 
 		this._super( 'buildSearchFields' );
 
-		var default_args = {permission_section: 'wage'};
+		var default_args = { permission_section: 'wage' };
 		this.search_fields = [
 			new SearchField( {
 				label: $.i18n._( 'Employee' ),
@@ -1004,91 +984,10 @@ WageViewController = BaseViewController.extend( {
 
 	},
 
-	initTabData: function() {
-		//Handle most case that one tab and one audit tab
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
-	onTabShow: function( e, ui ) {
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 1 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-
-	},
-
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-	},
+	searchDone: function(){
+		TTPromise.resolve( 'WageView', 'init' );
+		this._super('searchDone' );
+	}
 
 } );
 

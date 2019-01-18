@@ -97,12 +97,13 @@ class APIBreakPolicy extends APIFactory {
 	 * @return array
 	 */
 	function getBreakPolicy( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('break_policy', 'enabled')
 				OR !( $this->getPermissionObject()->Check('break_policy', 'view') OR $this->getPermissionObject()->Check('break_policy', 'view_own') OR $this->getPermissionObject()->Check('break_policy', 'view_child')  ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'break_policy', 'view' );
 

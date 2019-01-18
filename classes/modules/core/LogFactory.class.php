@@ -226,7 +226,7 @@ class LogFactory extends Factory {
 											'legal_entity'						=> TTi18n::getText('Legal Entity'),
 											'payroll_remittance_agency'			=> TTi18n::getText('Payroll Remittance Agency'),
 											'remittance_source_account'			=> TTi18n::getText('Remittance Source Account'),
-											'remittance_destination_account'	=> TTi18n::getText('Remittance Destination Account'),
+											'remittance_destination_account'	=> TTi18n::getText('Employee Payment Method'),
 											'geo_fence'							=> TTi18n::getText('GEO Fence')
 									);
 				asort( $retval ); //Sort by name so its easier to find objects.
@@ -815,7 +815,7 @@ class LogFactory extends Factory {
 	 * @return array|bool|mixed
 	 */
 	function getDetails() {
-		if ( getTTProductEdition() > 10 AND $this->isNew() == FALSE AND is_object( $this->getUserObject() ) ) {
+		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL AND $this->isNew() == FALSE AND is_object( $this->getUserObject() ) ) {
 			$global_table_map = array();
 			//Get class for this table
 			Debug::Text( 'Table: '. $this->getTableName(), __FILE__, __LINE__, __METHOD__, 10);

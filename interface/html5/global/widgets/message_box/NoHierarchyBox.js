@@ -27,7 +27,7 @@
 			var len = related_view_controller.context_menu_array.length;
 
 			if ( !PermissionManager.checkTopLevelPermission( 'HierarchyControl' ) ) {
-				ribbon_button.addClass( 'disable-image' )
+				ribbon_button.addClass( 'disable-image' );
 			}
 
 			ribbon_button.bind( 'click', function() {

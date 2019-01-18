@@ -1258,6 +1258,7 @@ class PayStubListFactory extends PayStubFactory implements IteratorAggregate {
 
 		$query = '
 					select	a.*,
+							b.legal_entity_id as legal_entity_id,
 							b.first_name as first_name,
 							b.last_name as last_name,
 							b.status_id as user_status_id,

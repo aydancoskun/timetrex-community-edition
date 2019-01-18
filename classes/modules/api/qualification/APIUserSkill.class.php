@@ -83,11 +83,12 @@ class APIUserSkill extends APIFactory {
 	 * @return array|bool
 	 */
 	function getUserSkill( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('user_skill', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_skill', 'view') OR $this->getPermissionObject()->Check('user_skill', 'view_own') OR $this->getPermissionObject()->Check('user_skill', 'view_child')	 ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_skill', 'view' );
 

@@ -29,10 +29,11 @@ SchedulePolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_schedule_policy': $.i18n._( 'Schedule Policy' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_schedule_policy': { 'label': $.i18n._( 'Schedule Policy' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
@@ -58,7 +59,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_schedule_policy_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -82,7 +83,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			custom_first_label: $.i18n._( '-- No Meal --' ),
 			addition_source_function: this.onMealOrBreakSourceCreate,
 			added_items: [
-				{value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Policy Group --' )}
+				{ value: TTUUID.zero_id, label: $.i18n._( '-- Defined By Policy Group --' ) }
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Meal Policy' ), form_item_input, tab_schedule_policy_column1 );
@@ -99,13 +100,13 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			custom_first_label: '-- ' + $.i18n._( 'No Break' ) + ' --',
 			addition_source_function: this.onMealOrBreakSourceCreate,
 			added_items: [
-				{value: TTUUID.zero_id, label: '-- ' + $.i18n._( 'Defined By Policy Group' ) + ' --'}
+				{ value: TTUUID.zero_id, label: '-- ' + $.i18n._( 'Defined By Policy Group' ) + ' --' }
 			]
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Break Policy' ), form_item_input, tab_schedule_policy_column1 );
 
 		// Regular Time Policy
-		var v_box = $( "<div class='v-box'></div>" );
+		var v_box = $( '<div class=\'v-box\'></div>' );
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 		form_item_input.AComboBox( {
@@ -120,7 +121,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -142,11 +143,11 @@ SchedulePolicyViewController = BaseViewController.extend( {
 
 		//Overtime Policy
 
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		var default_args = {};
 		default_args.filter_data = {};
-		default_args.filter_data.type_id = [10, 40, 50, 60, 70, 80, 90, 100, 180, 200 ];
+		default_args.filter_data.type_id = [10, 40, 50, 60, 70, 80, 90, 100, 180, 200];
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -164,7 +165,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -187,7 +188,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Overtime Policy' ), [form_item_input, form_item_input_1], tab_schedule_policy_column1, '', v_box, false, true );
 
 		//Premium Policy
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -203,7 +204,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -246,10 +247,10 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			field: 'partial_shift_absence_policy_id'
 		} );
 		this.addEditFieldToColumn( $.i18n._( 'Partial Shift Undertime Absence Policy' ), form_item_input, tab_schedule_policy_column1 );
-		
+
 		//Start / Stop Window
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'start_stop_window', mode:'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'start_stop_window', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Start / Stop Window' ), form_item_input, tab_schedule_policy_column1, '', null );
 
@@ -285,7 +286,7 @@ SchedulePolicyViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'country': //popular case
-						this.setCountryValue(widget, key);
+						this.setCountryValue( widget, key );
 						break;
 					default:
 						widget.setValue( this.current_edit_record[key] );
@@ -325,14 +326,17 @@ SchedulePolicyViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Full Shift Absence Policy' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Full Shift Absence Policy' ),
 				in_column: 1,
 				field: 'full_shift_absence_policy_id',
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
@@ -340,8 +344,10 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Partial Shift Absence Policy' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Partial Shift Absence Policy' ),
 				in_column: 1,
 				field: 'partial_shift_absence_policy_id',
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
@@ -349,8 +355,10 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -358,9 +366,11 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -368,7 +378,8 @@ SchedulePolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	}
 

@@ -46,11 +46,11 @@
 					$this.remove();
 				}, sec * 1000 );
 			}
-		}
+		};
 
 		this.remove = function() {
 			$( this ).remove();
-		}
+		};
 
 		this.each( function() {
 

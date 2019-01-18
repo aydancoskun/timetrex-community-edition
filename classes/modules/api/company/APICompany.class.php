@@ -98,12 +98,13 @@ class APICompany extends APIFactory {
 	 * @return array
 	 */
 	function getCompany( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( !( $this->getPermissionObject()->Check('company', 'view') AND $this->getCurrentCompanyObject()->getId() == PRIMARY_COMPANY_ID ) ) {
 			//Force ID to current company.
@@ -442,11 +443,12 @@ class APICompany extends APIFactory {
 	 * @return array|bool
 	 */
 	function getCompanyMinAvgMaxUserCounts( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
 			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {
@@ -513,11 +515,12 @@ class APICompany extends APIFactory {
 	 * @return array|bool
 	 */
 	function getCompanyEmailAddresses( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
 			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {
@@ -568,11 +571,12 @@ class APICompany extends APIFactory {
 	 * @return array|bool
 	 */
 	function getCompanyPhonePunchData( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
 			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {
@@ -630,11 +634,12 @@ class APICompany extends APIFactory {
 	 * @return array|bool
 	 */
 	function getCompanyStationCounts( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
 			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {
@@ -688,11 +693,12 @@ class APICompany extends APIFactory {
 	 * @return array|bool
 	 */
 	function getCompanyTimeClockStations( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('company', 'enabled')
 				OR !( $this->getPermissionObject()->Check('company', 'view') OR $this->getPermissionObject()->Check('company', 'view_own') OR $this->getPermissionObject()->Check('company', 'view_child')	) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		if ( $this->getPermissionObject()->Check('company', 'view') == FALSE ) {
 			if ( $this->getPermissionObject()->Check('company', 'view_child') ) {

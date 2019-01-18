@@ -53,11 +53,11 @@ class HierarchyControlFactory extends Factory {
 		switch( $name ) {
 			case 'object_type':
 				$hotlf = TTnew( 'HierarchyObjectTypeListFactory' );
-				$retval = $hotlf->getOptions('object_type');
+				$retval = $hotlf->getOptions( 'object_type' ); //Must contain sort prefixes, otherwise Edit Employee -> Hierarchy tab will be in the wrong order.
 				break;
 			case 'short_object_type':
 				$hotlf = TTnew( 'HierarchyObjectTypeListFactory' );
-				$retval = $hotlf->getOptions('short_object_type');
+				$retval = $hotlf->getOptions( 'short_object_type' );
 				break;
 			case 'columns':
 				$retval = array(
@@ -201,7 +201,7 @@ class HierarchyControlFactory extends Factory {
 	 */
 	function getObjectTypeDisplay() {
 		$object_type_ids = $this->getObjectType();
-		$object_types = $this->getOptions('short_object_type');
+		$object_types = Misc::trimSortPrefix( $this->getOptions('short_object_type') );
 
 		$retval = array();
 		if ( is_array($object_type_ids) ) {
@@ -220,7 +220,7 @@ class HierarchyControlFactory extends Factory {
 	 * @return array|bool
 	 */
 	function getObjectType() {
-		$valid_object_type_ids = $this->getOptions('object_type');
+		$valid_object_type_ids = Misc::trimSortPrefix( $this->getOptions('object_type') );
 
 		$hotlf = TTnew( 'HierarchyObjectTypeListFactory' );
 		$hotlf->getByHierarchyControlId( $this->getId() );

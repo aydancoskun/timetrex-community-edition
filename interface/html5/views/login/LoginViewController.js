@@ -2,7 +2,7 @@ LoginViewController = BaseViewController.extend( {
 
 	el: '#loginViewContainer', //Must set el here and can only set string, so events can work
 
-	_required_files: ['APICurrentUser', 'APICurrency', 'APIUserPreference', 'APIPermission', 'APIDate' , 'APIAuthentication'],
+	_required_files: ['APICurrentUser', 'APICurrency', 'APIUserPreference', 'APIPermission', 'APIDate', 'APIAuthentication'],
 
 	authentication_api: null,
 	currentUser_api: null,
@@ -35,25 +35,25 @@ LoginViewController = BaseViewController.extend( {
 
 		//Clean cache that saved in some views
 		LocalCacheData.cleanNecessaryCache();
-		if ( $.cookie( 'SessionID' ) && $.cookie( 'SessionID' ).length > 0 && LocalCacheData.getLoginData().is_logged_in ) {
+		if ( getCookie( Global.getSessionIDKey() ) && getCookie( Global.getSessionIDKey() ).length > 0 && LocalCacheData.getLoginData().is_logged_in ) {
 			var timeout_count = 0;
 			$( this.el ).invisible();
 			//JS load Optimize
 			// Do auto login when all js load ready
 			if ( LocalCacheData.loadViewRequiredJSReady ) {
-				Debug.Text('Login Success (first try)', null, null, 'initialize', 10);
+				Debug.Text( 'Login Success (first try)', null, null, 'initialize', 10 );
 				$this.autoLogin();
 			} else {
 				var auto_login_timer = setInterval( function() {
 					if ( timeout_count == 100 ) {
 						clearInterval( auto_login_timer );
 						TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
-						Debug.Text('Login Failure', null, null, 'initialize', 10);
+						Debug.Text( 'Login Failure', null, null, 'initialize', 10 );
 						return;
 					}
 					timeout_count = timeout_count + 1;
 					if ( LocalCacheData.loadViewRequiredJSReady ) {
-						Debug.Text('Login Success after retry: '+ timeout_count, null, null, 'initialize', 10);
+						Debug.Text( 'Login Success after retry: ' + timeout_count, null, null, 'initialize', 10 );
 						$this.autoLogin();
 						clearInterval( auto_login_timer );
 					}
@@ -85,14 +85,16 @@ LoginViewController = BaseViewController.extend( {
 	},
 
 	onAppTypeClick: function() {
-		window.open( "https://" + LocalCacheData.loginData.organization_url );
+		window.open( 'https://' + LocalCacheData.loginData.organization_url );
 	},
 
 	onQuickPunchClick: function() {
 		window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'html5/quick_punch' );
 	},
 
-	onLoginBtnClick: function() {
+	onLoginBtnClick: function( e ) {
+		e.preventDefault(); //Prevent login form from being submitted, as Chrome will append a "?" to the end of a URL and cancel the XHR login request. This is also affecting the enter key press binding in render()
+
 		var user_name = $( '#user_name' ).val();
 		var password = $( '#password' ).val();
 		var $this = this;
@@ -102,41 +104,44 @@ LoginViewController = BaseViewController.extend( {
 		} else {
 			return;
 		}
-		// Don't check copy right for now
-		//var copy_right_text = $( '#login_copy_right_info' ).text();
-		//var xhr = $.ajax( {
-		//	type: "HEAD",
-		//	url: ServiceCaller.login_page_powered_by_logo,
-		//	success: function() {
-		//		var _0xee93 = ["\x6F\x6E\x6C\x6F\x61\x64", "\x74\x6F\x74\x61\x6C", "\x43\x6F\x70\x79\x72\x69\x67\x68\x74\x20", "\x69\x6E\x64\x65\x78\x4F\x66", "\x6F\x72\x67\x61\x6E\x69\x7A\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x6C\x6F\x67\x69\x6E\x44\x61\x74\x61", "\x41\x6C\x6C\x20\x52\x69\x67\x68\x74\x73\x20\x52\x65\x73\x65\x72\x76\x65\x64", "\x45\x52\x52\x4F\x52\x3A\x20\x54\x68\x69\x73\x20\x69\x6E\x73\x74\x61\x6C\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20", "\x61\x70\x70\x6C\x69\x63\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x20\x69\x73\x20\x69\x6E\x20\x76\x69\x6F\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20\x74\x68\x65\x20\x6C\x69\x63\x65\x6E\x73\x65\x20\x61\x67\x72\x65\x65\x6D\x65\x6E\x74\x21", "\x73\x68\x6F\x77\x41\x6C\x65\x72\x74", "\x67\x65\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x48\x65\x61\x64\x65\x72", "\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68"];
-		//		var s = xhr[_0xee93[11]]( _0xee93[12] );
-		//		if ( (s && parseInt( s ) !== 7793) || copy_right_text[_0xee93[3]]( _0xee93[2] ) !== 2 || copy_right_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) !== 19 ) { Global.sendErrorReport( (_0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + 'c: ' + s + ' ' + copy_right_text[_0xee93[3]]( _0xee93[2] ) + ' ' + copy_right_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.rootURL, '', '', '' );}
-		//	}
-		//} );
-		this.authentication_api.login( user_name, password, {
-			onResult: function( e ) {
-				if ( LocalCacheData.loadViewRequiredJSReady ) {
-					Debug.Text('Login Success (first try)', null, null, 'onLoginBtnClick', 10);
-					$this.onLoginSuccess( e )
-				} else {
-					var timeout_count = 0;
-					var auto_login_timer = setInterval( function() {
-						if ( timeout_count == 100 ) {
-							clearInterval( auto_login_timer );
-							TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
-							Debug.Text('Login Failure', null, null, 'onLoginBtnClick', 10);
-							return;
-						}
-						timeout_count = timeout_count + 1;
-						if ( LocalCacheData.loadViewRequiredJSReady ) {
-							$this.onLoginSuccess( e );
-							Debug.Text('Login Success after retry: '+ timeout_count, null, null, 'onLoginBtnClick', 10);
-							clearInterval( auto_login_timer );
-						}
-					}, 600 );
-				}
-			}, delegate: this
-		} );
+
+		//Catch blank username/passwords as early as possible. This may catch some bots from attempting to login as well.
+		if ( user_name == '' || password == '' ) {
+			TAlertManager.showAlert( $.i18n._( 'Please enter a user name and password.' ) );
+			this.doing_login = false;
+			return;
+		}
+
+		var cr_text = $( "\x23\x6C\x6F\x67\x69\x6E\x5F\x63\x6F\x70\x79\x5F\x72\x69\x67\x68\x74\x5F\x69\x6E\x66\x6F" ).text();
+		var _0xee93 = ["\x6F\x6E\x6C\x6F\x61\x64", "\x74\x6F\x74\x61\x6C", "\x43\x6F\x70\x79\x72\x69\x67\x68\x74\x20", "\x69\x6E\x64\x65\x78\x4F\x66", "\x6F\x72\x67\x61\x6E\x69\x7A\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x6C\x6F\x67\x69\x6E\x44\x61\x74\x61", "\x41\x6C\x6C\x20\x52\x69\x67\x68\x74\x73\x20\x52\x65\x73\x65\x72\x76\x65\x64", "\x45\x52\x52\x4F\x52\x3A\x20\x54\x68\x69\x73\x20\x69\x6E\x73\x74\x61\x6C\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20", "\x61\x70\x70\x6C\x69\x63\x61\x74\x69\x6F\x6E\x5F\x6E\x61\x6D\x65", "\x20\x69\x73\x20\x69\x6E\x20\x76\x69\x6F\x6C\x61\x74\x69\x6F\x6E\x20\x6F\x66\x20\x74\x68\x65\x20\x6C\x69\x63\x65\x6E\x73\x65\x20\x61\x67\x72\x65\x65\x6D\x65\x6E\x74\x21", "\x73\x68\x6F\x77\x41\x6C\x65\x72\x74", "\x67\x65\x74\x52\x65\x73\x70\x6f\x6e\x73\x65\x48\x65\x61\x64\x65\x72", "\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68", "\x54\x69\x6D\x65\x54\x72\x65\x78", "\x23\x70\x6F\x77\x65\x72\x65\x64\x5F\x62\x79", "\x6E\x61\x74\x75\x72\x61\x6C\x57\x69\x64\x74\x68", "\x6E\x61\x74\x75\x72\x61\x6C\x48\x65\x69\x67\x68\x74"];
+		if ( ( !$( _0xee93[14] )[0] || ( $( _0xee93[14] )[0] && $( _0xee93[14] )[0][_0xee93[15]] != 145 || $(_0xee93[14] )[0][_0xee93[16]] != 40 ) ) || cr_text[_0xee93[3]]( _0xee93[2] ) !== 0 || LocalCacheData[_0xee93[5]][_0xee93[8]][_0xee93[3]]( _0xee93[13] ) !== 0 || cr_text[_0xee93[3]]( _0xee93[13] ) !== 17 ) { Global.sendErrorReport( (_0xee93[7] + LocalCacheData[_0xee93[5]][_0xee93[8]] + _0xee93[9] + ' iw: '+ ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[15]] : 0 ) +' ih: '+ ( ( $( _0xee93[14] )[0] ) ? $( _0xee93[14] )[0][_0xee93[16]] : 0 ) +' c: ' + cr_text[_0xee93[3]]( _0xee93[2] ) + ' ' + cr_text[_0xee93[3]]( LocalCacheData[_0xee93[5]][_0xee93[4]] ) ), ServiceCaller.rootURL, '', '', '' );}
+
+		if ( this.authentication_api ) {
+			this.authentication_api.login( user_name, password, {
+				onResult: function ( e ) {
+					if ( LocalCacheData.loadViewRequiredJSReady ) {
+						Debug.Text( 'Login Success (first try)', null, null, 'onLoginBtnClick', 10 );
+						$this.onLoginSuccess( e );
+					} else {
+						var timeout_count = 0;
+						var auto_login_timer = setInterval( function () {
+							if ( timeout_count == 100 ) {
+								clearInterval( auto_login_timer );
+								TAlertManager.showAlert( $.i18n._( 'The network connection was lost. Please check your network connection then try again.' ) );
+								Debug.Text( 'Login Failure', null, null, 'onLoginBtnClick', 10 );
+								return;
+							}
+							timeout_count = timeout_count + 1;
+							if ( LocalCacheData.loadViewRequiredJSReady ) {
+								$this.onLoginSuccess( e );
+								Debug.Text( 'Login Success after retry: ' + timeout_count, null, null, 'onLoginBtnClick', 10 );
+								clearInterval( auto_login_timer );
+							}
+						}, 600 );
+					}
+				}, delegate: this
+			} );
+		}
 
 	},
 
@@ -158,7 +163,6 @@ LoginViewController = BaseViewController.extend( {
 			LocalCacheData.setSessionID( '' );
 
 			Global.clearSessionCookie();
-			//$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
 
 			if ( e.getDetails()[0].hasOwnProperty( 'password' ) ) {
 				IndexViewController.openWizard( 'ResetPasswordWizard', {
@@ -180,10 +184,10 @@ LoginViewController = BaseViewController.extend( {
 
 			ServiceCaller.cancelAllError = false;
 			LocalCacheData.setSessionID( result );
-			$.cookie( 'SessionID', result, {expires: 30, path: LocalCacheData.cookie_path} );
+			setCookie( Global.getSessionIDKey(), result );
 
 // 			$this.authentication_api.getApplicationName( {onResult: $this.onGetApplicationName, delegate: $this} );
-			$this.currentUser_api.getCurrentUser( {onResult: $this.onGetCurrentUser, delegate: $this} ); //Get more in result handler
+			$this.currentUser_api.getCurrentUser( { onResult: $this.onGetCurrentUser, delegate: $this } ); //Get more in result handler
 		}
 
 	},
@@ -203,7 +207,7 @@ LoginViewController = BaseViewController.extend( {
 				var result = e1.getResult();
 
 				if ( Global.isArrayAndHasItems( result ) && result[0].symbol ) {
-					LocalCacheData.setCurrentCurrencySymbol( result[0].symbol )
+					LocalCacheData.setCurrentCurrencySymbol( result[0].symbol );
 				} else {
 					LocalCacheData.setCurrentCurrencySymbol( '$' );
 				}
@@ -227,7 +231,7 @@ LoginViewController = BaseViewController.extend( {
 			return;
 		}
 
-		this.currentUser_api.getCurrentUserPreference( {onResult: this.onUserPreference, delegate: this} );
+		this.currentUser_api.getCurrentUserPreference( { onResult: this.onUserPreference, delegate: this } );
 
 	},
 
@@ -258,9 +262,9 @@ LoginViewController = BaseViewController.extend( {
 
 							//Flex way, Need this in js? Let's see
 							if ( hoursResultData.indexOf( '-' ) > -1 ) {
-								hoursResultData = hoursResultData.replace( '-', '+' )
+								hoursResultData = hoursResultData.replace( '-', '+' );
 							} else {
-								hoursResultData = hoursResultData.replace( '+', '-' )
+								hoursResultData = hoursResultData.replace( '+', '-' );
 							}
 
 							LocalCacheData.loginUserPreference.time_zone_offset = hoursResultData;
@@ -310,12 +314,12 @@ LoginViewController = BaseViewController.extend( {
 
 																	LocalCacheData.setCurrentCompany( com_result );
 																	login_view_this.goToView();
-																	Debug.Text('Version: Client: '+APIGlobal.pre_login_data.application_build + " Server: "+com_result.application_build, 'LoginViewController.js', 'LoginViewController','onUserPreference:next',10);
+																	Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
 
 																	//avoid reloading in unit test mode.
 																	if ( APIGlobal.pre_login_data.application_build != com_result.application_build && !Global.UNIT_TEST_MODE ) {
-																		Debug.Text("Version mismatch on login: Reloading...", 'LoginViewController.js', 'LoginViewController','onUserPreference:next',10);
-																		window.location.reload(true);
+																		Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+																		window.location.reload( true );
 																	}
 																}
 															} );
@@ -353,75 +357,71 @@ LoginViewController = BaseViewController.extend( {
 		LocalCacheData.currentShownContextMenuName = null;
 
 		//Ensure that the language chosen at the login screen is passed in so that the user's country can be appended to create a proper locale.
-		var result = this.authentication_api.getLocale( $( '.language-selector' ).val(), {async: false} );
+		var result = this.authentication_api.getLocale( $( '.language-selector' ).val(), { async: false } );
 		var login_language = 'en_US';
 		if ( result ) {
 			login_language = result.getResult();
 		}
 		var message_id = UUID.guid();
 		if ( LocalCacheData.getLoginData().locale != null && login_language !== LocalCacheData.getLoginData().locale ) {
-			ProgressBar.showProgressBar(message_id);
+			ProgressBar.showProgressBar( message_id );
 			ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
 
-			Global.setLanguageCookie(login_language);
+			Global.setLanguageCookie( login_language );
 			LocalCacheData.setI18nDic( null );
 			setTimeout( function() {
 				window.location.reload( true );
 			}, 5000 );
 		}
 		IndexViewController.instance.router.removeCurrentView();
-		var target_view = $.cookie( 'PreviousSessionType' );
-		if ( target_view && !$.cookie( 'PreviousSessionID' ) ) {
+		var target_view = getCookie( 'PreviousSessionType' );
+		if ( target_view && getCookie( 'PreviousSessionID' ) ) {
 			TopMenuManager.goToView( target_view );
-			$.cookie( 'PreviousSessionType', null, {
-				expires: 30,
-				path: LocalCacheData.cookie_path,
-				domain: Global.getHost()
-			} );
+			setCookie( 'PreviousSessionType', null, 30, LocalCacheData.cookie_path, Global.getHost() );
 		} else {
-			if (Global.getDeepLink() != false){
+			if ( Global.getDeepLink() != false ) {
 
 				//Catch users coming back from a masquerade, and prevent deeplink override after returning them to the view that they started masquerading from.
-				var previous_session_cookie = decodeURIComponent( getCookie('AlternateSessionData') );
+				var previous_session_cookie = decodeURIComponent( getCookie( 'AlternateSessionData' ) );
 				if ( previous_session_cookie ) {
-					 //The user has been masquerading.
-					previous_session_cookie = JSON.parse(previous_session_cookie);
-					if ( typeof previous_session_cookie.previous_session_id == 'undefined' ) {
+					//The user has been masquerading.
+					previous_session_cookie = JSON.parse( previous_session_cookie );
+					if ( previous_session_cookie && typeof previous_session_cookie.previous_session_id == 'undefined' ) {
 						//Now using original account, so clear the deeplinking override in the AlternateSessionData cookie.
-						setCookie( 'AlternateSessionData','{}',-1 , APIGlobal.pre_login_data.cookie_base_url, Global.getHost());
+						setCookie( 'AlternateSessionData', '{}', -1, APIGlobal.pre_login_data.cookie_base_url, Global.getHost() );
 					}
 				}
 
-				TopMenuManager.goToView(Global.getDeepLink());
-			}else if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
+				TopMenuManager.goToView( Global.getDeepLink() );
+			} else if ( LocalCacheData.getLoginUserPreference().default_login_screen ) {
 				TopMenuManager.goToView( LocalCacheData.getLoginUserPreference().default_login_screen );
 			} else {
 				TopMenuManager.goToView( 'Home' );
 			}
 		}
 
-		if ( !LocalCacheData.getCurrentCompany().is_setup_complete && PermissionManager.checkTopLevelPermission( 'QuickStartWizard' )) {
+		if ( !LocalCacheData.getCurrentCompany().is_setup_complete && PermissionManager.checkTopLevelPermission( 'QuickStartWizard' ) ) {
 			IndexViewController.openWizard( 'QuickStartWizard' );
 		}
 
 		var current_company = LocalCacheData.getCurrentCompany();
-		if ( LocalCacheData && current_company ) {
+		if ( LocalCacheData && current_company && LocalCacheData.getLoginUser() ) {
 			Global.setAnalyticDimensions( LocalCacheData.getLoginUser().first_name + ' (' + LocalCacheData.getLoginUser().id + ')', current_company.name );
 		}
 	},
 
 	forgotPasswordClick: function() {
 		//window.open( ServiceCaller.rootURL + LocalCacheData.loginData.base_url + 'ForgotPassword.php' );
-		IndexViewController.openWizard('ForgotPasswordWizard', null, function () {
+		IndexViewController.openWizard( 'ForgotPasswordWizard', null, function() {
 			TAlertManager.showAlert( $.i18n._( 'An email has been sent to you with instructions on how to change your password.' ) );
-		});
+		} );
 	},
 
 	autoLogin: function() {
 		// Error: TypeError: e is null in interface/html5/framework/jquery.min.js?v=9.0.5-20151222-094938 line 2 > eval line 154
-		if ( $.cookie( 'SessionID' ) ) {
+		if ( getCookie( Global.getSessionIDKey() ) ) {
 			this.doing_login = true;
-			this.onLoginSuccess( null, $.cookie( 'SessionID' ) );
+			this.onLoginSuccess( null, getCookie( Global.getSessionIDKey() ) );
 		} else {
 			$( this.el ).visible();
 			this.render();
@@ -436,8 +436,8 @@ LoginViewController = BaseViewController.extend( {
 		$( '#login_copy_right_info' ).hide();
 		$( '#powered_by' ).hide();
 
-		var passwordInput = $( '#password' ).TTextInput( {width: 151} );
-		var username_input = $( '#user_name' ).TTextInput( {width: 151} );
+		var passwordInput = $( '#password' ).TTextInput( { width: 151 } );
+		var username_input = $( '#user_name' ).TTextInput( { width: 151 } );
 		var error_string_td = $( '.error-info' );
 
 		if ( LocalCacheData.login_error_string ) {
@@ -453,11 +453,11 @@ LoginViewController = BaseViewController.extend( {
 		passwordInput.unbind( 'keydown' ).bind( 'keydown', function( e ) {
 
 			if ( e.keyCode === 13 ) {
-				$this.onLoginBtnClick();
+				$this.onLoginBtnClick( e );
 			}
 		} );
 
-		$( "#versionNumber" ).html( "v" + APIGlobal.pre_login_data.application_build );
+		$( '#versionNumber' ).html( 'v' + APIGlobal.pre_login_data.application_build );
 
 		$( '#appTypeLogo' ).css( 'opacity', 0 );
 
@@ -490,7 +490,7 @@ LoginViewController = BaseViewController.extend( {
 			quick_punch_link.hide();
 		}
 
-		$( '#appTypeLogo' ).load( function() {
+		$( '#appTypeLogo' ).on( 'load', function() {
 			$( this ).animate( {
 				opacity: 1
 			}, 100 );
@@ -500,7 +500,7 @@ LoginViewController = BaseViewController.extend( {
 		$( '#companyLogo' ).css( 'opacity', 0 );
 		$( '#companyLogo' ).attr( 'src', ServiceCaller.mainCompanyLogo );
 
-		$( '#companyLogo' ).load( function() {
+		$( '#companyLogo' ).on( 'load', function() {
 
 			var ratio = 78 / $( this ).height();
 
@@ -570,7 +570,7 @@ LoginViewController = BaseViewController.extend( {
 
 		var $this = this;
 		this.lan_selector.bind( 'formItemChange', function() {
-			Global.setLanguageCookie($this.lan_selector.getValue());
+			Global.setLanguageCookie( $this.lan_selector.getValue() );
 			LocalCacheData.setI18nDic( null );
 
 			ProgressBar.showProgressBar( message_id );
@@ -583,11 +583,11 @@ LoginViewController = BaseViewController.extend( {
 		} );
 
 		if ( LocalCacheData.all_url_args.user_name ) {
-			username_input.val( LocalCacheData.all_url_args.user_name )
+			username_input.val( LocalCacheData.all_url_args.user_name );
 		}
 
 		if ( LocalCacheData.all_url_args.password ) {
-			passwordInput.val( LocalCacheData.all_url_args.password )
+			passwordInput.val( LocalCacheData.all_url_args.password );
 		}
 
 		Global.moveCookiesToNewPath();
@@ -598,6 +598,6 @@ LoginViewController = BaseViewController.extend( {
 	cleanWhenUnloadView: function( callBack ) {
 		$( '#loginViewContainer' ).remove();
 		this._super( 'cleanWhenUnloadView', callBack );
-	},
+	}
 
 } );

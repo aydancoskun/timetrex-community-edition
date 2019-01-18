@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: timetrex\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-03 15:44-0700\n"
+"POT-Creation-Date: 2018-10-19 08:10-0700\n"
 "PO-Revision-Date: 2015-03-19 20:51+0000\n"
 "Last-Translator: Mohammed naeem <Unknown>\n"
 "Language-Team: Arabic <ar@li.org>\n"
@@ -682,6 +682,9 @@ msgstr "التفويض مفتوح (متاح)"
 msgid "AUTHORIZED"
 msgstr "مفوض (مقبول)"
 
+msgid "AWESOMEBOX TESTING VIEW"
+msgstr ""
+
 msgid "Aberdeen"
 msgstr "أبردين"
 
@@ -822,6 +825,9 @@ msgstr "رقم الحساب"
 
 msgid "Account Type"
 msgstr "نوع الحساب"
+
+msgid "Account Type must be specified"
+msgstr ""
 
 msgid "Account number must not be a part of the Description"
 msgstr ""
@@ -2170,9 +2176,6 @@ msgstr "ملحق"
 msgid "Attachment  Name"
 msgstr "إسم الملحق"
 
-msgid "Attachments"
-msgstr "ملحقات"
-
 msgid "Attendance"
 msgstr "الحضور"
 
@@ -2353,9 +2356,6 @@ msgstr ""
 msgid "Available Hours Per Week(Minimum)"
 msgstr ""
 
-msgid "Available Immediate Drug Test"
-msgstr "متاح فورا لإختبار المخدرات"
-
 msgid "Available Start Date"
 msgstr "تاريخ بدء التوفر"
 
@@ -2425,8 +2425,17 @@ msgstr "متوسط"
 msgid "Awarded"
 msgstr "منحت"
 
+msgid "AwesomBox Test"
+msgstr ""
+
+msgid "AwesomeBox Test"
+msgstr ""
+
 msgid "Azerbaijan"
 msgstr "أذربيجان"
+
+msgid "Azua"
+msgstr ""
 
 msgid "BASIC SEARCH"
 msgstr "بحث أساسي"
@@ -2478,6 +2487,9 @@ msgstr "جزر البهاما"
 
 msgid "Bahia"
 msgstr "باهيا"
+
+msgid "Bahoruco"
+msgstr ""
 
 msgid "Bahrain"
 msgstr "البحرين"
@@ -2571,6 +2583,9 @@ msgstr "عامود - أفقي"
 
 msgid "Bar - Vertical"
 msgstr "عامود - رأسي"
+
+msgid "Barahona"
+msgstr ""
 
 msgid "Barbados"
 msgstr "بربادوس"
@@ -3562,9 +3577,6 @@ msgstr "الفئة %1 غير موجودة."
 msgid "Classification Code"
 msgstr ""
 
-msgid "Clear"
-msgstr "محو"
-
 msgid "Clear Last Punch Time"
 msgstr "محو آخر وقت تبصيم"
 
@@ -3870,6 +3882,9 @@ msgstr ""
 
 msgid "Confirm #"
 msgstr ""
+
+msgid "Confirm Email"
+msgstr "تأكيد البريد الإلكتروني"
 
 msgid "Confirm Password"
 msgstr "تأكيد كلمة المرور"
@@ -4488,6 +4503,9 @@ msgstr "الوقت اليومي"
 
 msgid "Daily Totals"
 msgstr "الإجماليات اليومية"
+
+msgid "Dajabón"
+msgstr ""
 
 msgid "Daman and Diu"
 msgstr "دامان وديو"
@@ -5164,6 +5182,9 @@ msgstr ""
 msgid "Distrito Federal"
 msgstr ""
 
+msgid "Distrito Nacional"
+msgstr ""
+
 msgid "Djibouti"
 msgstr "جيبوتي"
 
@@ -5283,6 +5304,9 @@ msgstr "رخصة برنامج التشغيل"
 
 msgid "Drug Test"
 msgstr "إختبار مخدرات"
+
+msgid "Duarte"
+msgstr ""
 
 msgid "Dudley"
 msgstr "دادلي"
@@ -5710,8 +5734,14 @@ msgstr "البروجريسو"
 msgid "El Salvador"
 msgstr "السلفادور"
 
+msgid "El Seibo"
+msgstr ""
+
 msgid "Electronically signed by"
 msgstr "وقعت إلكترونياً"
+
+msgid "Elias Piña"
+msgstr ""
 
 msgid "Eligibility"
 msgstr "جدارة (أهلية)"
@@ -6028,6 +6058,9 @@ msgstr ""
 msgid "Employee Pay<br>Stubs"
 msgstr ""
 
+msgid "Employee Payment Method"
+msgstr ""
+
 msgid "Employee Payment Methods"
 msgstr ""
 
@@ -6087,6 +6120,9 @@ msgstr "خصومات/ضرائب الموظف"
 
 msgid "Employee Termination Date"
 msgstr "تاريخ إنهاء خدمات الموظف"
+
+msgid "Employee TimeClock"
+msgstr ""
 
 msgid "Employee TimeSheet"
 msgstr "ساعات عمل الموظف"
@@ -6174,6 +6210,9 @@ msgstr "يجب تحديد رقم الموظف للموظفين الناشطين"
 
 msgid "Employee number must only be digits"
 msgstr "رقم الموظف يجب أن يكون أرقام فقط"
+
+msgid "Employee payment method is invalid"
+msgstr ""
 
 msgid "Employee's Hire Date"
 msgstr "تاريخ توظيف الموظف"
@@ -6588,6 +6627,9 @@ msgstr "إريتريا"
 
 msgid "Escuintla"
 msgstr "ايسكوينتلا"
+
+msgid "Espaillat"
+msgstr ""
 
 msgid "Espirito Santo"
 msgstr "اسبيريتو سانتو"
@@ -7153,6 +7195,9 @@ msgstr ""
 msgid "File checksums do not match, some"
 msgstr ""
 
+msgid "File exceeds maximum number of records (%1) that can be imported at one time"
+msgstr ""
+
 msgid "File is invalid, unable to save"
 msgstr ""
 
@@ -7188,6 +7233,9 @@ msgstr ""
 
 msgid "Final Pay Period Ending Date"
 msgstr "تاريخ إنتهاء فترة الدفع النهائية"
+
+msgid "Final Pay Period Ending Date must be on or after Last Day Paid"
+msgstr ""
 
 msgid "Final Pay Stub End Date"
 msgstr ""
@@ -7330,10 +7378,10 @@ msgstr "لربط مستخدم LDAP. (مثال: AD/openLDAP: userPrincipalName, M
 msgid "For help, please visit"
 msgstr "للمساعدة، من فضلك قم بزيارة"
 
-msgid "For installation support, please contact "
+msgid "For installation assistance, please contact "
 msgstr ""
 
-msgid "For installation support, please join our community "
+msgid "For installation assistance, please join our community "
 msgstr ""
 
 msgid "For more information please click here."
@@ -7528,7 +7576,10 @@ msgstr "فروزينوني"
 msgid "Full Name"
 msgstr "الإسم الكامل"
 
-msgid "Full Shift (Majority of Shift)"
+msgid "Full Shift (Majority of Shift Observed)"
+msgstr ""
+
+msgid "Full Shift (Majority of Shift Worked)"
 msgstr ""
 
 msgid "Full Shift (Must End)"
@@ -7840,6 +7891,9 @@ msgstr "جرينلاند"
 msgid "Grenada"
 msgstr "جرينادا"
 
+msgid "Grid Test"
+msgstr ""
+
 msgid "Gross Amount"
 msgstr "المبلغ الإجمالي"
 
@@ -7863,6 +7917,9 @@ msgstr "جروسيتو"
 
 msgid "Group"
 msgstr "المجموعة"
+
+msgid "Group (Multi)"
+msgstr ""
 
 msgid "Group - Combined"
 msgstr "المجموعة - مجمعة"
@@ -8032,6 +8089,9 @@ msgstr "هارتلبول"
 msgid "Haryana"
 msgstr "هاريانا"
 
+msgid "Hato Mayor"
+msgstr ""
+
 msgid "Have no effect"
 msgstr "ليس لها أي تأثير"
 
@@ -8073,6 +8133,9 @@ msgstr "هيريديا"
 
 msgid "Herefordshire"
 msgstr "هيريفوردشاير"
+
+msgid "Hermanas Mirabal"
+msgstr ""
 
 msgid "Herrera"
 msgstr "هيريرا"
@@ -8233,6 +8296,9 @@ msgstr "ساعة"
 msgid "Hour Based"
 msgstr "على أساس الساعة"
 
+msgid "Hour Of Day"
+msgstr ""
+
 msgid "Hour Type"
 msgstr ""
 
@@ -8274,6 +8340,12 @@ msgstr "رمز الساعة"
 
 msgid "Hours/Pay Criteria"
 msgstr "معيار ساعة/دفع"
+
+msgid "Hours/Week (Max)"
+msgstr ""
+
+msgid "Hours/Week (Min)"
+msgstr ""
 
 msgid "Hrs/Units"
 msgstr "وحدات/ساعة"
@@ -8432,6 +8504,9 @@ msgid "Immediate Dest."
 msgstr ""
 
 msgid "Immediate Dest. Name"
+msgstr ""
+
+msgid "Immediate Drug Test"
 msgstr ""
 
 msgid "Immediate Origin"
@@ -9496,9 +9571,6 @@ msgstr "الحد الأدنى لكمية المشتريات غير صحيح"
 msgid "Incorrect month"
 msgstr ""
 
-msgid "Incorrect name length"
-msgstr "طول الإسم غير صحيح"
-
 msgid "Incorrect option to enable calendar synchronization"
 msgstr "خيار غير صحيح لتمكين مزامنة التقويم"
 
@@ -9633,6 +9705,9 @@ msgstr "تاريخ التكبد غير صالح"
 
 msgid "Independence Day"
 msgstr "يوم الإستقلال"
+
+msgid "Independencia"
+msgstr ""
 
 msgid "India"
 msgstr "الهند"
@@ -10540,6 +10615,9 @@ msgstr "تفاصيل الوظيفة عن طريق عميل"
 msgid "Job Details By Supervisor"
 msgstr "تفاصيل الوظيفة عن طريق رئيس"
 
+msgid "Job End Date"
+msgstr ""
+
 msgid "Job Estimate Bad Quantity"
 msgstr "تقدير الكمية السيئة للوظيفة"
 
@@ -10600,8 +10678,14 @@ msgstr "تحليل كشف رواتب الوظيفة"
 msgid "Job Reports"
 msgstr "تقارير الوظيفة"
 
+msgid "Job Search"
+msgstr ""
+
 msgid "Job Selection Type"
 msgstr "نوع إختيار الوظيفة"
+
+msgid "Job Start Date"
+msgstr ""
 
 msgid "Job Status"
 msgstr "حالة الوظيفة"
@@ -10909,6 +10993,9 @@ msgstr "منخفض"
 msgid "L`Aquila"
 msgstr "لأكويلا"
 
+msgid "La Altagracia"
+msgstr ""
+
 msgid "La Guajira"
 msgstr "لا جواجيرا"
 
@@ -10918,11 +11005,17 @@ msgstr "حرية"
 msgid "La Paz"
 msgstr "لاباز"
 
+msgid "La Romana"
+msgstr ""
+
 msgid "La Spezia"
 msgstr "لا سبيتسيا"
 
 msgid "La Union"
 msgstr "الاتحاد"
+
+msgid "La Vega"
+msgstr ""
 
 msgid "Label"
 msgstr "ملصق"
@@ -11052,6 +11145,9 @@ msgstr ""
 
 msgid "Last Day For Which Paid"
 msgstr "آخر يوم تم الدفع فيع"
+
+msgid "Last Day Paid must be after First Day Worked"
+msgstr ""
 
 msgid "Last Download"
 msgstr "آخر تحميل"
@@ -11617,9 +11713,6 @@ msgstr ""
 msgid "MBSTRING Enabled"
 msgstr ""
 
-msgid "MCRYPT Enabled"
-msgstr ""
-
 msgid "ME-UC-1"
 msgstr ""
 
@@ -11892,6 +11985,9 @@ msgstr "مارتينيك"
 
 msgid "Maryland"
 msgstr "ماريلاند"
+
+msgid "María Trinidad Sánchez"
+msgstr ""
 
 msgid "Masaya"
 msgstr "مسايا"
@@ -12442,6 +12538,9 @@ msgstr "رقم الجوال غير صالح"
 msgid "Modena"
 msgstr "مودينا"
 
+msgid "Modified Business Tax Return"
+msgstr ""
+
 msgid "Modified Shifts"
 msgstr "المناوبات المعدلة"
 
@@ -12472,8 +12571,17 @@ msgstr "منجوليا"
 msgid "Monmouthshire"
 msgstr "مونماوثشاير"
 
+msgid "Monseñor Nouel"
+msgstr ""
+
 msgid "Montana"
 msgstr "مونتانا"
+
+msgid "Monte Cristi"
+msgstr ""
+
+msgid "Monte Plata"
+msgstr ""
 
 msgid "Montenegro"
 msgstr ""
@@ -12546,6 +12654,9 @@ msgstr "جبل"
 
 msgid "Move"
 msgstr "تحرك"
+
+msgid "Move All"
+msgstr ""
 
 msgid "Moyle"
 msgstr ""
@@ -12769,11 +12880,11 @@ msgstr "الملبغ الصافي"
 msgid "Net Pay"
 msgstr "صافي الدفع"
 
+msgid "Net Pay (%1) is a negative amount, deductions (%2) exceed earnings (%3)"
+msgstr ""
+
 msgid "Net Pay doesn't match earnings or deductions"
 msgstr "صافي الدفع لا يتطابق مع الأرباح أو الخصومات"
-
-msgid "Net Pay is a negative amount, deductions exceed earnings"
-msgstr ""
 
 msgid "Net pay doesn't match total of all pending or paid transactions"
 msgstr ""
@@ -14203,7 +14314,7 @@ msgstr "كلمة المرور"
 msgid "Password (confirm)"
 msgstr ""
 
-msgid "Password - Phone"
+msgid "Password - Quick Punch"
 msgstr ""
 
 msgid "Password - Web"
@@ -14752,6 +14863,9 @@ msgstr ""
 msgid "Payroll<br>Reports"
 msgstr ""
 
+msgid "Pedernales"
+msgstr ""
+
 msgid "Pembrokeshire"
 msgstr ""
 
@@ -14819,6 +14933,9 @@ msgid "Per Unit"
 msgstr ""
 
 msgid "Per Weight"
+msgstr ""
+
+msgid "Peravia"
 msgstr ""
 
 msgid "Percent"
@@ -15604,6 +15721,9 @@ msgstr ""
 msgid "Puebla"
 msgstr ""
 
+msgid "Puerto Plata"
+msgstr ""
+
 msgid "Puerto Rico"
 msgstr ""
 
@@ -15641,6 +15761,9 @@ msgid "Punch Mode: QRCode"
 msgstr ""
 
 msgid "Punch Mode: Quick Punch"
+msgstr ""
+
+msgid "Punch Note"
 msgstr ""
 
 msgid "Punch Notes"
@@ -15947,9 +16070,6 @@ msgid "Quick Punch ID must be digits only"
 msgstr ""
 
 msgid "Quick Punch ID or Password is incorrect"
-msgstr ""
-
-msgid "Quick Punch Login"
 msgstr ""
 
 msgid "Quick Punch Password"
@@ -16402,9 +16522,6 @@ msgstr ""
 msgid "Remittance Agency Event"
 msgstr ""
 
-msgid "Remittance Destination Account"
-msgstr ""
-
 msgid "Remittance Source Account"
 msgstr ""
 
@@ -16418,12 +16535,6 @@ msgid "Remittance Summary Report"
 msgstr ""
 
 msgid "Remittance agency is invalid"
-msgstr ""
-
-msgid "Remittance destination account"
-msgstr ""
-
-msgid "Remittance destination account is invalid"
 msgstr ""
 
 msgid "Remittance source account"
@@ -16510,6 +16621,9 @@ msgstr ""
 msgid "Request - Employee"
 msgstr ""
 
+msgid "Request - Schedule"
+msgstr ""
+
 msgid "Request Authorization"
 msgstr ""
 
@@ -16574,6 +16688,9 @@ msgid "Result"
 msgstr ""
 
 msgid "Resume"
+msgstr ""
+
+msgid "Resume Keywords"
 msgstr ""
 
 msgid "Retail Trade"
@@ -16867,6 +16984,9 @@ msgstr ""
 msgid "Run"
 msgstr ""
 
+msgid "Run tests?"
+msgstr ""
+
 msgid "Running Scheduled Report"
 msgstr ""
 
@@ -16999,6 +17119,9 @@ msgstr ""
 msgid "Salford"
 msgstr ""
 
+msgid "Samaná"
+msgstr ""
+
 msgid "Samar"
 msgstr ""
 
@@ -17017,7 +17140,16 @@ msgstr ""
 msgid "San Blas"
 msgstr ""
 
+msgid "San Cristóbal"
+msgstr ""
+
 msgid "San Jose"
+msgstr ""
+
+msgid "San José de Ocoa"
+msgstr ""
+
+msgid "San Juan"
 msgstr ""
 
 msgid "San Luis Potosi"
@@ -17030,6 +17162,9 @@ msgid "San Marino"
 msgstr ""
 
 msgid "San Miguel"
+msgstr ""
+
+msgid "San Pedro de Macorís"
 msgstr ""
 
 msgid "San Salvador"
@@ -17054,6 +17189,15 @@ msgid "Santa Rosa"
 msgstr ""
 
 msgid "Santander"
+msgstr ""
+
+msgid "Santiago"
+msgstr ""
+
+msgid "Santiago Rodríguez"
+msgstr ""
+
+msgid "Santo Domingo"
 msgstr ""
 
 msgid "Sao Paulo"
@@ -17138,6 +17282,9 @@ msgid "Saved<br>Reports"
 msgstr ""
 
 msgid "Savings"
+msgstr ""
+
+msgid "Savings Account"
 msgstr ""
 
 msgid "Savona"
@@ -17233,10 +17380,13 @@ msgstr ""
 msgid "Scheduled Days"
 msgstr ""
 
+msgid "Scheduled Employees/Hour"
+msgstr ""
+
 msgid "Scheduled Report"
 msgstr ""
 
-msgid "Scheduled Shift to replace does not exist."
+msgid "Scheduled Shift to replace does not exist"
 msgstr ""
 
 msgid "Scheduled Shifts"
@@ -17608,6 +17758,9 @@ msgstr ""
 msgid "Sep"
 msgstr ""
 
+msgid "Separated_box: if you see this, the test is passing."
+msgstr ""
+
 msgid "September"
 msgstr ""
 
@@ -17627,6 +17780,9 @@ msgid "Serial number should be between 9 and 15 digits"
 msgstr ""
 
 msgid "Server"
+msgstr ""
+
+msgid "Server Time Zone"
 msgstr ""
 
 msgid "Service"
@@ -18613,6 +18769,9 @@ msgstr ""
 msgid "System log is invalid"
 msgstr ""
 
+msgid "Sánchez Ramírez"
+msgstr ""
+
 msgid "T"
 msgstr "الثلاثاء"
 
@@ -18658,10 +18817,43 @@ msgstr ""
 msgid "TC-941R Filing"
 msgstr ""
 
+msgid "TCheckbox"
+msgstr ""
+
+msgid "TColorPicker"
+msgstr ""
+
+msgid "TDatePicker"
+msgstr ""
+
+msgid "TDateRange"
+msgstr ""
+
+msgid "TImageAdvBrowser"
+msgstr ""
+
+msgid "TPasswordInput"
+msgstr ""
+
 msgid "TQ01C Filing"
 msgstr ""
 
+msgid "TTagInput"
+msgstr ""
+
+msgid "TText"
+msgstr ""
+
+msgid "TTextArea"
+msgstr ""
+
+msgid "TTimePicker"
+msgstr ""
+
 msgid "TX-17 Filing"
+msgstr ""
+
+msgid "TXR-020.04 Filing"
 msgstr ""
 
 msgid "Tabasco"
@@ -19240,6 +19432,9 @@ msgstr ""
 msgid "This remittance source account is currently in use by employee payment methods assigned to a different legal entity. (%1)"
 msgstr ""
 
+msgid "This remittance source account is currently in use by employee payment methods in a different country"
+msgstr ""
+
 msgid "This station is currently pending activation by a supervisor..."
 msgstr ""
 
@@ -19280,6 +19475,9 @@ msgid "Time"
 msgstr "وقت"
 
 msgid "Time & Attendance"
+msgstr ""
+
+msgid "Time (Actual)"
 msgstr ""
 
 msgid "Time Accrued"
@@ -19589,6 +19787,12 @@ msgid "Total Employees"
 msgstr ""
 
 msgid "Total Employees Hired By Month"
+msgstr ""
+
+msgid "Total Employees Scheduled By Date/Hour of Day"
+msgstr ""
+
+msgid "Total Employees Scheduled By Day of Week/Hour of Day"
 msgstr ""
 
 msgid "Total Employees Terminated By Month"
@@ -20485,6 +20689,12 @@ msgstr ""
 msgid "Used to search for the user, for anonymous binding enter: anonymous"
 msgstr ""
 
+msgid "User"
+msgstr ""
+
+msgid "User ( Big multi select)"
+msgstr ""
+
 msgid "User Date Total ID is invalid"
 msgstr ""
 
@@ -20821,6 +21031,9 @@ msgstr ""
 msgid "Value9"
 msgstr ""
 
+msgid "Valverde"
+msgstr ""
+
 msgid "Vanuatu"
 msgstr ""
 
@@ -20864,9 +21077,6 @@ msgid "Verification Window Starts is too large"
 msgstr ""
 
 msgid "Verification Window Starts is too small"
-msgstr ""
-
-msgid "Verification Windows Ends"
 msgstr ""
 
 msgid "Verification failed due to the following reasons"
@@ -21424,6 +21634,9 @@ msgstr ""
 msgid "Whos In/Out"
 msgstr ""
 
+msgid "Widget Test"
+msgstr ""
+
 msgid "Width"
 msgstr ""
 
@@ -21662,9 +21875,6 @@ msgid "Workers Safety and Compensation Commission"
 msgstr ""
 
 msgid "Workers' Compensation Fee Form"
-msgstr ""
-
-msgid "Workforce Management Software"
 msgstr ""
 
 msgid "Working"
@@ -22072,9 +22282,6 @@ msgstr ""
 msgid "by remittance agencies"
 msgstr ""
 
-msgid "by remittance destination accounts"
-msgstr ""
-
 msgid "by remittance sources"
 msgstr ""
 
@@ -22271,6 +22478,9 @@ msgid "is unable to connect to its database, please make sure that the database 
 msgstr ""
 
 msgid "is_empty(expression) - Example: if( is_empty(#PA3206#) = 0, #PA3206#, 0)"
+msgstr ""
+
+msgid "item(s) selected"
 msgstr ""
 
 msgid "items selected"
@@ -22603,8 +22813,14 @@ msgstr ""
 #~ msgid "At anytime you can access either from the navigation menu, as shown below."
 #~ msgstr "في أي وقت يمكنك الدخول إما من قائمة التنقل، كما هو مبين أدناه."
 
+#~ msgid "Attachments"
+#~ msgstr "ملحقات"
+
 #~ msgid "Auto-submitting in"
 #~ msgstr "تلقائية التقديم في"
+
+#~ msgid "Available Immediate Drug Test"
+#~ msgstr "متاح فورا لإختبار المخدرات"
 
 #~ msgid "BCMATH Enabled:"
 #~ msgstr "BCMATH مفعل:"
@@ -22672,6 +22888,9 @@ msgstr ""
 #~ msgid "City:"
 #~ msgstr "المدينة:"
 
+#~ msgid "Clear"
+#~ msgstr "محو"
+
 #~ msgid "Columbus Day"
 #~ msgstr "يوم كولومبوس"
 
@@ -22683,9 +22902,6 @@ msgstr ""
 
 #~ msgid "Company Short Name:"
 #~ msgstr "إسم الشركة القصير (المختصر)"
-
-#~ msgid "Confirm Email"
-#~ msgstr "تأكيد البريد الإلكتروني"
 
 #~ msgid "Connection test to your database as a non-privileged user has <b>FAILED</b>! Please correct them and try again."
 #~ msgstr "عملية إختبار الإتصال بقاعدة البيانات الخاصة بك كمستخدم ليس له صلاحيات <b>فشلت</b>!، من فضلك صحح الخطأ و حاول مرة أخرى."
@@ -22965,6 +23181,9 @@ msgstr ""
 
 #~ msgid "Incorrect advance transaction date"
 #~ msgstr "تاريخ العملية المسبق غير صحيح"
+
+#~ msgid "Incorrect name length"
+#~ msgstr "طول الإسم غير صحيح"
 
 #~ msgid "Independence Day CR"
 #~ msgstr "يوم الإستقلال CR"

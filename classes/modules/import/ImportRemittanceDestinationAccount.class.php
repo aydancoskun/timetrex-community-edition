@@ -65,7 +65,13 @@ class ImportRemittanceDestinationAccount extends Import {
 	 * @return mixed
 	 */
 	function _preParseRow( $row_number, $raw_row ) {
-		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getRemittanceDestinationAccountDefaultData() );
+		//Try to determine if its a checking or savings account, so we at least have a chance at specifying a default name for the account.
+		$ach_transaction_type = 22;
+		if ( isset($raw_row['ach_transaction_type']) ) {
+			$ach_transaction_type = $this->parse_ach_transaction_type( $raw_row['ach_transaction_type'] );
+		}
+
+		$retval = $this->getObject()->stripReturnHandler( $this->getObject()->getRemittanceDestinationAccountDefaultData( $ach_transaction_type ) );
 		foreach ( $raw_row as $key => $value ) {
 			$retval[$key] = $value;
 		}

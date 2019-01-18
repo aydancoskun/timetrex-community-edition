@@ -41,7 +41,7 @@ PermissionControlViewController = BaseViewController.extend( {
 		var $this = this;
 
 		if ( this.edit_view_tab_selected_index === 0 && !LocalCacheData.openAwesomeBox &&
-			(focus.length < 1 || focus[0].localName !== 'input') ) {
+				(focus.length < 1 || focus[0].localName !== 'input') ) {
 			var a_dropdown = this.edit_view_ui_dic.permission;
 
 			if ( e.keyCode === 39 ) { //right
@@ -63,8 +63,8 @@ PermissionControlViewController = BaseViewController.extend( {
 			} else {
 
 				if ( e.keyCode === 16 ||
-					e.keyCode === 17 ||
-					e.keyCode === 91 ) {
+						e.keyCode === 17 ||
+						e.keyCode === 91 ) {
 					return;
 				}
 
@@ -86,7 +86,7 @@ PermissionControlViewController = BaseViewController.extend( {
 					if ( this.quick_search_typed_keys ) {
 						target_grid = a_dropdown.getFocusInSeletGrid() ? a_dropdown.getSelectGrid() : a_dropdown.getUnSelectGrid();
 						var search_index = this.quick_search_dic[this.quick_search_typed_keys] ? this.quick_search_dic[this.quick_search_typed_keys] : 0;
-						var tds = $( target_grid.find( 'tr' ).find( 'td:eq(1)' ).filter( function() {
+						var tds = $( target_grid.grid.find( 'tr' ).find( 'td:eq(1)' ).filter( function() {
 							return $.text( [this] ).toLowerCase().indexOf( $this.quick_search_typed_keys ) == 0;
 						} ) );
 
@@ -94,7 +94,7 @@ PermissionControlViewController = BaseViewController.extend( {
 						if ( search_index > 0 && search_index < tds.length ) {
 
 						} else {
-							search_index = 0
+							search_index = 0;
 						}
 
 						td = $( tds[search_index] );
@@ -102,7 +102,7 @@ PermissionControlViewController = BaseViewController.extend( {
 						a_dropdown.unSelectAll( target_grid, true );
 
 						next_index = td.parent().index() - 1;
-						next_select_item = target_grid.jqGrid( 'getGridParam', 'data' )[next_index];
+						next_select_item = target_grid.grid.jqGrid( 'getGridParam', 'data' )[next_index];
 						a_dropdown.setSelectItem( next_select_item, target_grid );
 						this.quick_search_dic = {};
 						this.quick_search_dic[this.quick_search_typed_keys] = search_index + 1;
@@ -117,7 +117,7 @@ PermissionControlViewController = BaseViewController.extend( {
 						if ( search_index > 0 && search_index < tds.length ) {
 
 						} else {
-							search_index = 0
+							search_index = 0;
 						}
 
 						td = $( tds[search_index] );
@@ -137,8 +137,12 @@ PermissionControlViewController = BaseViewController.extend( {
 	},
 
 	initSubLogView: function( tab_id ) {
-
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
 		if ( this.sub_log_view_controller ) {
 			this.sub_log_view_controller.buildContextMenu( true );
 			this.sub_log_view_controller.setDefaultMenu();
@@ -159,7 +163,16 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		Global.loadScript( 'views/core/log/LogViewController.js', function() {
 			var tab = $this.edit_view_tab.find( '#' + tab_id );
+
 			var firstColumn = tab.find( '.first-column-sub-view' );
+
+			TTPromise.add( 'initSubAudit', 'init' );
+			TTPromise.wait( 'initSubAudit', 'init', function() {
+				firstColumn.css('opacity', '1');
+			} );
+
+			firstColumn.css('opacity', '0'); //Hide the grid while its loading/sizing.
+
 			Global.trackView( 'Sub' + 'Log' + 'View', LocalCacheData.current_doing_context_action );
 			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 		} );
@@ -183,7 +196,7 @@ PermissionControlViewController = BaseViewController.extend( {
 			$this.sub_log_view_controller.parent_view_controller = $this;
 			$this.sub_log_view_controller.postInit = function() {
 				this.initData();
-			}
+			};
 		}
 	},
 
@@ -365,7 +378,7 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		var permission_grid = this.edit_view_ui_dic.permission;
 
-		permission_grid.setHeight( (this.edit_view_tab.height() - 290) );
+		permission_grid.setHeight( (this.edit_view_tab.height() - 325) );
 
 	},
 
@@ -437,7 +450,7 @@ PermissionControlViewController = BaseViewController.extend( {
 			for ( var cKey in result[key] ) {
 				var item = result[key];
 				var resItem = {};
-				resItem.value = key + "->" + cKey;
+				resItem.value = key + '->' + cKey;
 				val_array.push( resItem.value );
 				resItem.sortKey = key;
 				resItem.label = item[cKey];
@@ -496,6 +509,7 @@ PermissionControlViewController = BaseViewController.extend( {
 			}
 		}
 		this.collectUIDataToCurrentEditRecord();
+		this.edit_view_ui_dic.permission.setGridColumnsWidths();
 		this.setEditViewDataDone();
 	},
 
@@ -506,7 +520,7 @@ PermissionControlViewController = BaseViewController.extend( {
 			var ar = [];
 			for ( var cKey in permission[key] ) {
 				if ( permission[key][cKey] === true ) {
-					ar.push( key + "->" + cKey );
+					ar.push( key + '->' + cKey );
 				}
 			}
 			result = result.concat( ar );
@@ -542,10 +556,11 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		this.edit_view.children().eq( 0 ).css( 'min-width', 1170 );
 
-		this.setTabLabels( {
-			'tab_permission_group': $.i18n._( 'Permission Group' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_permission_group': { 'label': $.i18n._( 'Permission Group' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPermissionControl' )),
@@ -571,7 +586,7 @@ PermissionControlViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_permission_group_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -580,14 +595,14 @@ PermissionControlViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		form_item_input.TTextInput( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_permission_group_column1 );
 
 		form_item_input.parent().width( '45%' );
 
 		// Level
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'level'} );
+		form_item_input.TComboBox( { field: 'level' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.level_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Level' ), form_item_input, tab_permission_group_column1 );
 
@@ -619,9 +634,10 @@ PermissionControlViewController = BaseViewController.extend( {
 			allow_drag_to_order: false,
 			display_close_btn: false,
 			auto_sort: true,
-			display_column_settings: false
+			display_column_settings: false,
+			default_height: (this.edit_view_tab.height() - 325),
 		} );
-
+		form_item_input.addClass( 'splayed-adropdown' );
 		this.addEditFieldToColumn( $.i18n._( 'Permissions' ), form_item_input, tab_permission_group_column1, '', null, true, true );
 
 		form_item_input.setColumns( display_columns );
@@ -639,16 +655,16 @@ PermissionControlViewController = BaseViewController.extend( {
 		var val = this.edit_view_ui_dic.permission.getValue();
 		var permission = {};
 
-		var key = "";
+		var key = '';
 		for ( var i = 0; i < val.length; i++ ) {
 			var item = val[i].value;
-			key = item.split( "->" )[0];
+			key = item.split( '->' )[0];
 
 			if ( !permission[key] ) {
 				permission[key] = {};
 			}
 
-			permission[key][item.split( "->" )[1]] = true;
+			permission[key][item.split( '->' )[1]] = true;
 
 		}
 

@@ -10,7 +10,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'FormW2Report';
 		this.viewId = 'FormW2Report';
 		this.context_menu_name = $.i18n._( 'Form W2/W3' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'FormW2ReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIFormW2Report' ))();
 		this.include_form_setup = true;
@@ -103,31 +103,35 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 			permission: null
 		} );
 
-		var view_print = new RibbonSubMenu( {label: $.i18n._( 'View' ),
+		var view_print = new RibbonSubMenu( {
+			label: $.i18n._( 'View' ),
 			id: ContextMenuIconName.view_print,
 			group: form_setup_group,
 			icon: 'view-35x35.png',
 			type: RibbonSubMenuType.NAVIGATION,
 			items: [],
 			permission_result: true,
-			permission: true} );
+			permission: true
+		} );
 
-		var pdf_form_government = new RibbonSubMenuNavItem( {label: $.i18n._( 'Government (Multiple Employees/Page)' ),
+		var pdf_form_government = new RibbonSubMenuNavItem( {
+			label: $.i18n._( 'Government (Multiple Employees/Page)' ),
 			id: 'pdf_form_government',
 			nav: view_print
 		} );
 
-		var pdf_form = new RibbonSubMenuNavItem( {label: $.i18n._( 'Employee (One Employee/Page)' ),
+		var pdf_form = new RibbonSubMenuNavItem( {
+			label: $.i18n._( 'Employee (One Employee/Page)' ),
 			id: 'pdf_form',
 			nav: view_print
 		} );
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
-			var pdf_form_publish_employee = new RibbonSubMenuNavItem({
-				label: $.i18n._('Publish Employee Forms'),
+			var pdf_form_publish_employee = new RibbonSubMenuNavItem( {
+				label: $.i18n._( 'Publish Employee Forms' ),
 				id: 'pdf_form_publish_employee',
 				nav: view_print
-			});
+			} );
 		}
 
 		// var print_print = new RibbonSubMenu( {label: $.i18n._( 'Print' ),
@@ -174,81 +178,34 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 	initOptions: function( callBack ) {
 		var $this = this;
 		var options = [
-			{option_name: 'page_orientation'},
-			{option_name: 'font_size'},
-			{option_name: 'chart_display_mode'},
-			{option_name: 'chart_type'},
-			{option_name: 'templates'},
-			{option_name: 'setup_fields'},
-			{option_name: 'kind_of_employer'},
-			{option_name: 'auto_refresh'}
+			{ option_name: 'page_orientation' },
+			{ option_name: 'font_size' },
+			{ option_name: 'chart_display_mode' },
+			{ option_name: 'chart_type' },
+			{ option_name: 'templates' },
+			{ option_name: 'setup_fields' },
+			{ option_name: 'kind_of_employer' },
+			{ option_name: 'auto_refresh' }
 		];
 
 		this.initDropDownOptions( options, function( result ) {
-			new (APIFactory.getAPIClass( 'APICompany' ))().getOptions( 'province', 'US', {onResult: function( provinceResult ) {
+			new (APIFactory.getAPIClass( 'APICompany' ))().getOptions( 'province', 'US', {
+				onResult: function( provinceResult ) {
 
-				$this.province_array = Global.buildRecordArray( provinceResult.getResult() );
+					$this.province_array = Global.buildRecordArray( provinceResult.getResult() );
 
-				var eFile_array = Global.buildRecordArray( provinceResult.getResult() );
+					var eFile_array = Global.buildRecordArray( provinceResult.getResult() );
 
-				eFile_array.unshift( {id: 999, label: $.i18n._('Federal'), value: '0'} );
+					eFile_array.unshift( { id: 999, label: $.i18n._( 'Federal' ), value: '0' } );
 
-				$this.efile_state_array = eFile_array;
+					$this.efile_state_array = eFile_array;
 
-				callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
-			}} );
+					callBack( result ); // First to initialize drop down options, and then to initialize edit view UI.
+				}
+			} );
 
 		} );
 
-	},
-
-	onContextMenuClick: function( context_btn, menu_name ) {
-
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
-		switch ( id ) {
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.view_html:
-				ProgressBar.showOverlay();
-				this.onViewClick('html');
-				break;
-			case ContextMenuIconName.view_html_new_window:
-				ProgressBar.showOverlay();
-				this.onViewClick('html', true);
-				break;
-			case ContextMenuIconName.export_excel:
-				this.onViewExcelClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
-			case ContextMenuIconName.save_existed_report: //All report view
-				this.onSaveExistedReportClick();
-				break;
-			case ContextMenuIconName.save_new_report: //All report view
-				this.onSaveNewReportClick();
-				break;
-			case ContextMenuIconName.save_setup: //All report view
-				this.onSaveSetup();
-				break;
-			case ContextMenuIconName.e_file: //All report view
-				this.onViewClick( 'efile' );
-				break;
-		}
 	},
 
 	onReportMenuClick: function( id ) {
@@ -259,7 +216,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		var $this = this;
 
-		var tab3 = this.edit_view_tab.find( '#tab3' );
+		var tab3 = this.edit_view_tab.find( '#tab_form_setup' );
 
 		var tab3_column1 = tab3.find( '.first-column' );
 
@@ -269,12 +226,12 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		//Kind of Employer
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'kind_of_employer', set_empty: false} );
+		form_item_input.TComboBox( { field: 'kind_of_employer', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.kind_of_employer_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Kind of Employer' ), form_item_input, tab3_column1 );
 
 		//Wages, Tips, Other Compensation (Box 1)
-		var v_box = $( "<div class='v-box'></div>" );
+		var v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -290,7 +247,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -311,7 +268,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Wages, Tips, Other Compensation (Box 1)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Federal Income Tax Withheld (Box 2)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -327,7 +284,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -348,7 +305,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Federal Income Tax Withheld (Box 2)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Social Security Wages (Box 3)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -364,7 +321,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -385,7 +342,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Social Security Wages (Box 3)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Social Security Tax Withheld (Box 4)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -401,7 +358,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -422,7 +379,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Social Security Tax Withheld (Box 4)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Medicare Wages and Tips (Box 5)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -438,7 +395,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -459,7 +416,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Medicare Wages and Tips (Box 5)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Medicare Tax Withheld (Box 6)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -475,7 +432,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -496,7 +453,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Medicare Tax Withheld (Box 6)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Social Security Tips (Box 7)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -512,7 +469,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -533,7 +490,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Social Security Tips (Box 7)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Allocated Tips (Box 8)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -549,7 +506,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -570,7 +527,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Allocated Tips (Box 8)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Dependent Care Benefits (Box 10)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -586,7 +543,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -607,7 +564,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Dependent Care Benefits (Box 10)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Nonqualified Plans (Box 11)
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -623,7 +580,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -644,7 +601,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Nonqualified Plans (Box 11)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Box 12a:
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -661,7 +618,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -679,10 +636,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		var custom_label_widget = $( "<div class='h-box'></div>" );
+		var custom_label_widget = $( '<div class=\'h-box\'></div>' );
 		var label = $( '<span class="edit-view-form-item-label"></span>' );
 		var box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		box.TTextInput( {field: 'l12a_code', width: 50} );
+		box.TTextInput( { field: 'l12a_code', width: 50 } );
 		box.css( 'float', 'right' );
 		box.bind( 'formItemChange', function( e, target ) {
 			$this.onFormItemChange( target );
@@ -698,7 +655,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
 		//Box 12b:
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -715,7 +672,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -733,10 +690,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		custom_label_widget = $( "<div class='h-box'></div>" );
+		custom_label_widget = $( '<div class=\'h-box\'></div>' );
 		label = $( '<span class="edit-view-form-item-label"></span>' );
 		box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		box.TTextInput( {field: 'l12b_code', width: 50} );
+		box.TTextInput( { field: 'l12b_code', width: 50 } );
 		box.css( 'float', 'right' );
 		box.bind( 'formItemChange', function( e, target ) {
 			$this.onFormItemChange( target );
@@ -752,7 +709,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
 		//Box 12c:
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -769,7 +726,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -787,10 +744,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		custom_label_widget = $( "<div class='h-box'></div>" );
+		custom_label_widget = $( '<div class=\'h-box\'></div>' );
 		label = $( '<span class="edit-view-form-item-label"></span>' );
 		box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		box.TTextInput( {field: 'l12c_code', width: 50} );
+		box.TTextInput( { field: 'l12c_code', width: 50 } );
 		box.css( 'float', 'right' );
 		box.bind( 'formItemChange', function( e, target ) {
 			$this.onFormItemChange( target );
@@ -806,7 +763,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
 		//Box 12d:
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -823,7 +780,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -841,10 +798,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		custom_label_widget = $( "<div class='h-box'></div>" );
+		custom_label_widget = $( '<div class=\'h-box\'></div>' );
 		label = $( '<span class="edit-view-form-item-label"></span>' );
 		box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		box.TTextInput( {field: 'l12d_code', width: 50} );
+		box.TTextInput( { field: 'l12d_code', width: 50 } );
 		box.css( 'float', 'right' );
 		box.bind( 'formItemChange', function( e, target ) {
 			$this.onFormItemChange( target );
@@ -860,7 +817,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
 		//Box 14a:
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -877,7 +834,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -895,10 +852,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		custom_label_widget = $( "<div class='h-box'></div>" );
+		custom_label_widget = $( '<div class=\'h-box\'></div>' );
 		label = $( '<span class="edit-view-form-item-label"></span>' );
 		box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		box.TTextInput( {field: 'l14a_name', width: 50} );
+		box.TTextInput( { field: 'l14a_name', width: 50 } );
 		box.css( 'float', 'right' );
 		box.bind( 'formItemChange', function( e, target ) {
 			$this.onFormItemChange( target );
@@ -914,7 +871,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
 		//Box 14b:
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -931,7 +888,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -949,10 +906,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		custom_label_widget = $( "<div class='h-box'></div>" );
+		custom_label_widget = $( '<div class=\'h-box\'></div>' );
 		label = $( '<span class="edit-view-form-item-label"></span>' );
 		box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		box.TTextInput( {field: 'l14b_name', width: 50} );
+		box.TTextInput( { field: 'l14b_name', width: 50 } );
 		box.css( 'float', 'right' );
 		box.bind( 'formItemChange', function( e, target ) {
 			$this.onFormItemChange( target );
@@ -968,7 +925,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
 		//Box 14c:
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -985,7 +942,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -1003,10 +960,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		custom_label_widget = $( "<div class='h-box'></div>" );
+		custom_label_widget = $( '<div class=\'h-box\'></div>' );
 		label = $( '<span class="edit-view-form-item-label"></span>' );
 		box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		box.TTextInput( {field: 'l14c_name', width: 50} );
+		box.TTextInput( { field: 'l14c_name', width: 50 } );
 		box.css( 'float', 'right' );
 		box.bind( 'formItemChange', function( e, target ) {
 			$this.onFormItemChange( target );
@@ -1022,7 +979,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Box' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true, false, false, custom_label_widget );
 
 		//Box 14c:
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Include
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -1039,7 +996,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Exclude
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -1057,10 +1014,10 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		v_box.append( form_item );
 
-		custom_label_widget = $( "<div class='h-box'></div>" );
+		custom_label_widget = $( '<div class=\'h-box\'></div>' );
 		label = $( '<span class="edit-view-form-item-label"></span>' );
 		box = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		box.TTextInput( {field: 'l14d_name', width: 50} );
+		box.TTextInput( { field: 'l14d_name', width: 50 } );
 		box.css( 'float', 'right' );
 		box.bind( 'formItemChange', function( e, target ) {
 			$this.onFormItemChange( target );
@@ -1081,59 +1038,95 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 		other.kind_of_employer = this.current_edit_record.kind_of_employer;
 
-		other.l1 = {include_pay_stub_entry_account: this.current_edit_record.l1_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l1_exclude_pay_stub_entry_account};
+		other.l1 = {
+			include_pay_stub_entry_account: this.current_edit_record.l1_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l1_exclude_pay_stub_entry_account
+		};
 
-		other.l2 = {include_pay_stub_entry_account: this.current_edit_record.l2_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l2_exclude_pay_stub_entry_account};
+		other.l2 = {
+			include_pay_stub_entry_account: this.current_edit_record.l2_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l2_exclude_pay_stub_entry_account
+		};
 
-		other.l3 = {include_pay_stub_entry_account: this.current_edit_record.l3_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l3_exclude_pay_stub_entry_account};
+		other.l3 = {
+			include_pay_stub_entry_account: this.current_edit_record.l3_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l3_exclude_pay_stub_entry_account
+		};
 
-		other.l4 = {include_pay_stub_entry_account: this.current_edit_record.l4_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l4_exclude_pay_stub_entry_account};
+		other.l4 = {
+			include_pay_stub_entry_account: this.current_edit_record.l4_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l4_exclude_pay_stub_entry_account
+		};
 
-		other.l5 = {include_pay_stub_entry_account: this.current_edit_record.l5_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l5_exclude_pay_stub_entry_account};
+		other.l5 = {
+			include_pay_stub_entry_account: this.current_edit_record.l5_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l5_exclude_pay_stub_entry_account
+		};
 
-		other.l6 = {include_pay_stub_entry_account: this.current_edit_record.l6_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l6_exclude_pay_stub_entry_account};
+		other.l6 = {
+			include_pay_stub_entry_account: this.current_edit_record.l6_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l6_exclude_pay_stub_entry_account
+		};
 
-		other.l7 = {include_pay_stub_entry_account: this.current_edit_record.l7_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l7_exclude_pay_stub_entry_account};
+		other.l7 = {
+			include_pay_stub_entry_account: this.current_edit_record.l7_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l7_exclude_pay_stub_entry_account
+		};
 
-		other.l8 = {include_pay_stub_entry_account: this.current_edit_record.l8_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l8_exclude_pay_stub_entry_account};
+		other.l8 = {
+			include_pay_stub_entry_account: this.current_edit_record.l8_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l8_exclude_pay_stub_entry_account
+		};
 
-		other.l10 = {include_pay_stub_entry_account: this.current_edit_record.l10_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l10_exclude_pay_stub_entry_account};
+		other.l10 = {
+			include_pay_stub_entry_account: this.current_edit_record.l10_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l10_exclude_pay_stub_entry_account
+		};
 
-		other.l11 = {include_pay_stub_entry_account: this.current_edit_record.l11_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l11_exclude_pay_stub_entry_account};
+		other.l11 = {
+			include_pay_stub_entry_account: this.current_edit_record.l11_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l11_exclude_pay_stub_entry_account
+		};
 
-		other.l12a = {include_pay_stub_entry_account: this.current_edit_record.l12a_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l12a_exclude_pay_stub_entry_account};
+		other.l12a = {
+			include_pay_stub_entry_account: this.current_edit_record.l12a_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l12a_exclude_pay_stub_entry_account
+		};
 
-		other.l12b = {include_pay_stub_entry_account: this.current_edit_record.l12b_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l12b_exclude_pay_stub_entry_account};
+		other.l12b = {
+			include_pay_stub_entry_account: this.current_edit_record.l12b_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l12b_exclude_pay_stub_entry_account
+		};
 
-		other.l12c = {include_pay_stub_entry_account: this.current_edit_record.l12c_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l12c_exclude_pay_stub_entry_account};
+		other.l12c = {
+			include_pay_stub_entry_account: this.current_edit_record.l12c_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l12c_exclude_pay_stub_entry_account
+		};
 
-		other.l12d = {include_pay_stub_entry_account: this.current_edit_record.l12d_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l12d_exclude_pay_stub_entry_account};
+		other.l12d = {
+			include_pay_stub_entry_account: this.current_edit_record.l12d_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l12d_exclude_pay_stub_entry_account
+		};
 
-		other.l14a = {include_pay_stub_entry_account: this.current_edit_record.l14a_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l14a_exclude_pay_stub_entry_account};
+		other.l14a = {
+			include_pay_stub_entry_account: this.current_edit_record.l14a_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l14a_exclude_pay_stub_entry_account
+		};
 
-		other.l14b = {include_pay_stub_entry_account: this.current_edit_record.l14b_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l14b_exclude_pay_stub_entry_account};
+		other.l14b = {
+			include_pay_stub_entry_account: this.current_edit_record.l14b_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l14b_exclude_pay_stub_entry_account
+		};
 
-		other.l14c = {include_pay_stub_entry_account: this.current_edit_record.l14c_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l14c_exclude_pay_stub_entry_account};
+		other.l14c = {
+			include_pay_stub_entry_account: this.current_edit_record.l14c_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l14c_exclude_pay_stub_entry_account
+		};
 
-		other.l14d = {include_pay_stub_entry_account: this.current_edit_record.l14d_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.l14d_exclude_pay_stub_entry_account};
+		other.l14d = {
+			include_pay_stub_entry_account: this.current_edit_record.l14d_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.l14d_exclude_pay_stub_entry_account
+		};
 
 		other.l12a_code = this.current_edit_record.l12a_code;
 		other.l12b_code = this.current_edit_record.l12b_code;
@@ -1156,7 +1149,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 		if ( res_Data ) {
 			if ( res_Data.l1 ) {
 				this.edit_view_ui_dic.l1_exclude_pay_stub_entry_account.setValue( res_Data.l1.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l1_include_pay_stub_entry_account.setValue( res_Data.l1.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l1_include_pay_stub_entry_account.setValue( res_Data.l1.include_pay_stub_entry_account );
 
 				this.current_edit_record.l1_include_pay_stub_entry_account = res_Data.l1.include_pay_stub_entry_account;
 				this.current_edit_record.l1_exclude_pay_stub_entry_account = res_Data.l1.exclude_pay_stub_entry_account;
@@ -1165,7 +1158,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l2 ) {
 				this.edit_view_ui_dic.l2_exclude_pay_stub_entry_account.setValue( res_Data.l2.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l2_include_pay_stub_entry_account.setValue( res_Data.l2.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l2_include_pay_stub_entry_account.setValue( res_Data.l2.include_pay_stub_entry_account );
 
 				this.current_edit_record.l2_include_pay_stub_entry_account = res_Data.l2.include_pay_stub_entry_account;
 				this.current_edit_record.l2_exclude_pay_stub_entry_account = res_Data.l2.exclude_pay_stub_entry_account;
@@ -1174,7 +1167,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l3 ) {
 				this.edit_view_ui_dic.l3_exclude_pay_stub_entry_account.setValue( res_Data.l3.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l3_include_pay_stub_entry_account.setValue( res_Data.l3.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l3_include_pay_stub_entry_account.setValue( res_Data.l3.include_pay_stub_entry_account );
 
 				this.current_edit_record.l3_include_pay_stub_entry_account = res_Data.l3.include_pay_stub_entry_account;
 				this.current_edit_record.l3_exclude_pay_stub_entry_account = res_Data.l3.exclude_pay_stub_entry_account;
@@ -1183,7 +1176,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l4 ) {
 				this.edit_view_ui_dic.l4_exclude_pay_stub_entry_account.setValue( res_Data.l4.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l4_include_pay_stub_entry_account.setValue( res_Data.l4.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l4_include_pay_stub_entry_account.setValue( res_Data.l4.include_pay_stub_entry_account );
 
 				this.current_edit_record.l4_include_pay_stub_entry_account = res_Data.l4.include_pay_stub_entry_account;
 				this.current_edit_record.l4_exclude_pay_stub_entry_account = res_Data.l4.exclude_pay_stub_entry_account;
@@ -1192,7 +1185,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l5 ) {
 				this.edit_view_ui_dic.l5_exclude_pay_stub_entry_account.setValue( res_Data.l5.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l5_include_pay_stub_entry_account.setValue( res_Data.l5.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l5_include_pay_stub_entry_account.setValue( res_Data.l5.include_pay_stub_entry_account );
 
 				this.current_edit_record.l5_include_pay_stub_entry_account = res_Data.l5.include_pay_stub_entry_account;
 				this.current_edit_record.l5_exclude_pay_stub_entry_account = res_Data.l5.exclude_pay_stub_entry_account;
@@ -1201,7 +1194,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l6 ) {
 				this.edit_view_ui_dic.l6_exclude_pay_stub_entry_account.setValue( res_Data.l6.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l6_include_pay_stub_entry_account.setValue( res_Data.l6.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l6_include_pay_stub_entry_account.setValue( res_Data.l6.include_pay_stub_entry_account );
 
 				this.current_edit_record.l6_include_pay_stub_entry_account = res_Data.l6.include_pay_stub_entry_account;
 				this.current_edit_record.l6_exclude_pay_stub_entry_account = res_Data.l6.exclude_pay_stub_entry_account;
@@ -1210,7 +1203,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l7 ) {
 				this.edit_view_ui_dic.l7_exclude_pay_stub_entry_account.setValue( res_Data.l7.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l7_include_pay_stub_entry_account.setValue( res_Data.l7.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l7_include_pay_stub_entry_account.setValue( res_Data.l7.include_pay_stub_entry_account );
 
 				this.current_edit_record.l7_include_pay_stub_entry_account = res_Data.l7.include_pay_stub_entry_account;
 				this.current_edit_record.l7_exclude_pay_stub_entry_account = res_Data.l7.exclude_pay_stub_entry_account;
@@ -1219,7 +1212,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l8 ) {
 				this.edit_view_ui_dic.l8_exclude_pay_stub_entry_account.setValue( res_Data.l8.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l8_include_pay_stub_entry_account.setValue( res_Data.l8.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l8_include_pay_stub_entry_account.setValue( res_Data.l8.include_pay_stub_entry_account );
 
 				this.current_edit_record.l8_include_pay_stub_entry_account = res_Data.l8.include_pay_stub_entry_account;
 				this.current_edit_record.l8_exclude_pay_stub_entry_account = res_Data.l8.exclude_pay_stub_entry_account;
@@ -1228,7 +1221,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l10 ) {
 				this.edit_view_ui_dic.l10_exclude_pay_stub_entry_account.setValue( res_Data.l10.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l10_include_pay_stub_entry_account.setValue( res_Data.l10.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l10_include_pay_stub_entry_account.setValue( res_Data.l10.include_pay_stub_entry_account );
 
 				this.current_edit_record.l10_include_pay_stub_entry_account = res_Data.l10.include_pay_stub_entry_account;
 				this.current_edit_record.l10_exclude_pay_stub_entry_account = res_Data.l10.exclude_pay_stub_entry_account;
@@ -1237,7 +1230,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l11 ) {
 				this.edit_view_ui_dic.l11_exclude_pay_stub_entry_account.setValue( res_Data.l11.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l11_include_pay_stub_entry_account.setValue( res_Data.l11.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l11_include_pay_stub_entry_account.setValue( res_Data.l11.include_pay_stub_entry_account );
 
 				this.current_edit_record.l11_include_pay_stub_entry_account = res_Data.l11.include_pay_stub_entry_account;
 				this.current_edit_record.l11_exclude_pay_stub_entry_account = res_Data.l11.exclude_pay_stub_entry_account;
@@ -1246,7 +1239,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l12a ) {
 				this.edit_view_ui_dic.l12a_exclude_pay_stub_entry_account.setValue( res_Data.l12a.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l12a_include_pay_stub_entry_account.setValue( res_Data.l12a.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l12a_include_pay_stub_entry_account.setValue( res_Data.l12a.include_pay_stub_entry_account );
 
 				this.current_edit_record.l12a_include_pay_stub_entry_account = res_Data.l12a.include_pay_stub_entry_account;
 				this.current_edit_record.l12a_exclude_pay_stub_entry_account = res_Data.l12a.exclude_pay_stub_entry_account;
@@ -1255,7 +1248,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l12b ) {
 				this.edit_view_ui_dic.l12b_exclude_pay_stub_entry_account.setValue( res_Data.l12b.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l12b_include_pay_stub_entry_account.setValue( res_Data.l12b.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l12b_include_pay_stub_entry_account.setValue( res_Data.l12b.include_pay_stub_entry_account );
 
 				this.current_edit_record.l12b_include_pay_stub_entry_account = res_Data.l12b.include_pay_stub_entry_account;
 				this.current_edit_record.l12b_exclude_pay_stub_entry_account = res_Data.l12b.exclude_pay_stub_entry_account;
@@ -1264,7 +1257,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l12c ) {
 				this.edit_view_ui_dic.l12c_exclude_pay_stub_entry_account.setValue( res_Data.l12c.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l12c_include_pay_stub_entry_account.setValue( res_Data.l12c.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l12c_include_pay_stub_entry_account.setValue( res_Data.l12c.include_pay_stub_entry_account );
 
 				this.current_edit_record.l12c_include_pay_stub_entry_account = res_Data.l12c.include_pay_stub_entry_account;
 				this.current_edit_record.l12c_exclude_pay_stub_entry_account = res_Data.l12c.exclude_pay_stub_entry_account;
@@ -1273,7 +1266,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l12d ) {
 				this.edit_view_ui_dic.l12d_exclude_pay_stub_entry_account.setValue( res_Data.l12d.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l12d_include_pay_stub_entry_account.setValue( res_Data.l12d.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l12d_include_pay_stub_entry_account.setValue( res_Data.l12d.include_pay_stub_entry_account );
 
 				this.current_edit_record.l12d_include_pay_stub_entry_account = res_Data.l12d.include_pay_stub_entry_account;
 				this.current_edit_record.l12d_exclude_pay_stub_entry_account = res_Data.l12d.exclude_pay_stub_entry_account;
@@ -1282,7 +1275,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l14a ) {
 				this.edit_view_ui_dic.l14a_exclude_pay_stub_entry_account.setValue( res_Data.l14a.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l14a_include_pay_stub_entry_account.setValue( res_Data.l14a.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l14a_include_pay_stub_entry_account.setValue( res_Data.l14a.include_pay_stub_entry_account );
 
 				this.current_edit_record.l14a_include_pay_stub_entry_account = res_Data.l14a.include_pay_stub_entry_account;
 				this.current_edit_record.l14a_exclude_pay_stub_entry_account = res_Data.l14a.exclude_pay_stub_entry_account;
@@ -1291,7 +1284,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l14b ) {
 				this.edit_view_ui_dic.l14b_exclude_pay_stub_entry_account.setValue( res_Data.l14b.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l14b_include_pay_stub_entry_account.setValue( res_Data.l14b.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l14b_include_pay_stub_entry_account.setValue( res_Data.l14b.include_pay_stub_entry_account );
 
 				this.current_edit_record.l14b_include_pay_stub_entry_account = res_Data.l14b.include_pay_stub_entry_account;
 				this.current_edit_record.l14b_exclude_pay_stub_entry_account = res_Data.l14b.exclude_pay_stub_entry_account;
@@ -1300,7 +1293,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l14c ) {
 				this.edit_view_ui_dic.l14c_exclude_pay_stub_entry_account.setValue( res_Data.l14c.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l14c_include_pay_stub_entry_account.setValue( res_Data.l14c.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l14c_include_pay_stub_entry_account.setValue( res_Data.l14c.include_pay_stub_entry_account );
 
 				this.current_edit_record.l14c_include_pay_stub_entry_account = res_Data.l14c.include_pay_stub_entry_account;
 				this.current_edit_record.l14c_exclude_pay_stub_entry_account = res_Data.l14c.exclude_pay_stub_entry_account;
@@ -1309,7 +1302,7 @@ FormW2ReportViewController = ReportBaseViewController.extend( {
 
 			if ( res_Data.l14d ) {
 				this.edit_view_ui_dic.l14d_exclude_pay_stub_entry_account.setValue( res_Data.l14d.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.l14d_include_pay_stub_entry_account.setValue( res_Data.l14d.include_pay_stub_entry_account )
+				this.edit_view_ui_dic.l14d_include_pay_stub_entry_account.setValue( res_Data.l14d.include_pay_stub_entry_account );
 
 				this.current_edit_record.l14d_include_pay_stub_entry_account = res_Data.l14d.include_pay_stub_entry_account;
 				this.current_edit_record.l14d_exclude_pay_stub_entry_account = res_Data.l14d.exclude_pay_stub_entry_account;

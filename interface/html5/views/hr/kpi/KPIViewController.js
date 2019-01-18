@@ -33,13 +33,6 @@ KPIViewController = BaseViewController.extend( {
 
 	},
 
-	removeEditView: function() {
-
-		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
-
-	},
-
 	initOptions: function() {
 		var $this = this;
 
@@ -49,55 +42,28 @@ KPIViewController = BaseViewController.extend( {
 		this.kpi_group_api.getKPIGroup( '', false, false, {
 			onResult: function( res ) {
 				res = Global.clone( res.getResult() );
-			var all = {};
-			all.name = '-- ' + $.i18n._( 'All' ) + ' --';
-			all.level = 1;
-			all.id = -1;
+				var all = {};
+				all.name = '-- ' + $.i18n._( 'All' ) + ' --';
+				all.level = 1;
+				all.id = -1;
 
-				if ( res.hasOwnProperty( "0" ) && res[0].hasOwnProperty( 'children' ) ) {
-				res[0].children.unshift( all );
-			} else {
-				res = [
-					{children: [all], id: 0, level: 0, name: 'Root'}
-				];
-			}
+				if ( res.hasOwnProperty( '0' ) && res[0].hasOwnProperty( 'children' ) ) {
+					res[0].children.unshift( all );
+				} else {
+					res = [
+						{ children: [all], id: 0, level: 0, name: 'Root' }
+					];
+				}
 
-			res = Global.buildTreeRecord( res );
-			$this.kpi_group_array = res;
-			if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
-				$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
-			}
+				res = Global.buildTreeRecord( res );
+				$this.kpi_group_array = res;
+				if ( !$this.sub_view_mode && $this.basic_search_field_ui_dic['group_id'] ) {
+					$this.basic_search_field_ui_dic['group_id'].setSourceData( res );
+				}
 
 			}
 		} );
 
-	},
-
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
 	},
 
 	buildEditViewUI: function() {
@@ -106,11 +72,12 @@ KPIViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_key_performance_indicator': $.i18n._( 'Key Performance Indicator' ),
-			'tab_attachment': $.i18n._( 'Attachments' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_key_performance_indicator': { 'label': $.i18n._( 'Key Performance Indicator' ) },
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIKPI' )),
@@ -135,20 +102,20 @@ KPIViewController = BaseViewController.extend( {
 
 		//Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_key_performance_indicator_column1, '' );
 
 		//Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_key_performance_indicator_column1 );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_key_performance_indicator_column1 );
 		form_item_input.parent().width( '45%' );
 
@@ -168,19 +135,19 @@ KPIViewController = BaseViewController.extend( {
 		//Minimum Rating
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'minimum_rate', width: 50} );
+		form_item_input.TTextInput( { field: 'minimum_rate', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Minimum Rating' ), form_item_input, tab_key_performance_indicator_column1, '', null, true );
 
 		//Maximum Rating
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'maximum_rate', width: 50} );
+		form_item_input.TTextInput( { field: 'maximum_rate', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Maximum Rating' ), form_item_input, tab_key_performance_indicator_column1, '', null, true );
 
 		//Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		form_item_input.TTextInput( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_key_performance_indicator_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -188,7 +155,7 @@ KPIViewController = BaseViewController.extend( {
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
-		form_item_input.TTagInput( {field: 'tag', object_type_id: 310} );
+		form_item_input.TTagInput( { field: 'tag', object_type_id: 310 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_key_performance_indicator_column1, '', null, null, true );
 
 	},
@@ -348,58 +315,4 @@ KPIViewController = BaseViewController.extend( {
 
 		this.editFieldResize();
 	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
 } );

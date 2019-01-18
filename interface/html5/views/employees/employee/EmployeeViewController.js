@@ -2,11 +2,13 @@ EmployeeViewController = BaseViewController.extend( {
 	el: '#employee_view_container', //Must set el here and can only set string, so events can work
 
 	_required_files: {
-		10: ['APIUserGroup', 'APIHierarchyControl', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APICompanyGenericTag', 'TImage', 'APILegalEntity',
-			'APIPayPeriodSchedule', 'APIPolicyGroup', 'APICurrency', 'APIEthnicGroup','APIUserSkill', 'APIQualification', 'APIQualificationGroup',
-			'APIUserEducation', 'APIUserMembership', 'APIUserLicense', 'APIUserLanguage', 'APIRemittanceDestinationAccount', 'APIUserDefault', 'APIRemittanceSourceAccount','APIAccrualPolicyUserModifier',
-			'APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI','TImageAdvBrowser'],
-		20: ['APIJob', 'APIJobItem', ],
+		10: [
+			'APIUserGroup', 'APIHierarchyControl', 'APIBranch', 'APIDepartment', 'APIUserTitle', 'APICompanyGenericTag', 'TImage', 'APILegalEntity',
+			'APIPayPeriodSchedule', 'APIPolicyGroup', 'APICurrency', 'APIEthnicGroup', 'APIUserSkill', 'APIQualification', 'APIQualificationGroup',
+			'APIUserEducation', 'APIUserMembership', 'APIUserLicense', 'APIUserLanguage', 'APIRemittanceDestinationAccount', 'APIUserDefault', 'APIRemittanceSourceAccount', 'APIAccrualPolicyUserModifier',
+			'APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI', 'TImageAdvBrowser'
+		],
+		20: ['APIJob', 'APIJobItem']
 	},
 
 	user_api: null,
@@ -76,23 +78,74 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		var $this = this;
-		require([
+		require( [
 			'TImageAdvBrowser',//only in the upload wizard
-			'TImage',//only in the upload wizard
-		],function(){
+			'TImage'//only in the upload wizard
+		], function() {
 			$this.render();
+
+			var context_menu_model = {
+				'exclude': [ContextMenuIconName.copy],
+				'include': [
+					{
+						label: $.i18n._( 'TimeSheet' ),
+						id: ContextMenuIconName.timesheet,
+						group: 'navigation',
+						icon: Icons.timesheet,
+					},
+
+					{
+						label: $.i18n._( 'Schedule' ),
+						id: ContextMenuIconName.schedule,
+						group: 'navigation',
+						icon: Icons.schedule,
+					},
+
+					{
+						label: $.i18n._( 'Pay<br>Stubs' ),
+						id: ContextMenuIconName.pay_stub,
+						group: 'navigation',
+						icon: Icons.pay_stubs,
+					},
+
+					{
+						label: $.i18n._( 'Pay Stub<br>Amendments' ),
+						id: ContextMenuIconName.pay_stub_amendment,
+						group: 'navigation',
+						icon: Icons.pay_stub_amendment,
+					},
+
+					{
+						label: $.i18n._( 'Map' ),
+						id: ContextMenuIconName.map,
+						group: 'other',
+						icon: Icons.map,
+					},
+
+					{
+						label: $.i18n._( 'Import' ),
+						id: ContextMenuIconName.import_icon,
+						group: 'other',
+						icon: Icons.import_icon,
+						permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
+						sort_order: 8000
+					},
+
+				],
+			};
+			$this.setContextMenuModel( context_menu_model );
 			$this.buildContextMenu();
 			$this.initData();
 			$this.setSelectRibbonMenuIfNecessary();
-		});
+		} );
 
 	},
 
 	jobUIValidate: function() {
-		if ( PermissionManager.validate( "job", 'enabled' ) &&
-			(PermissionManager.validate( 'job', 'view' ) ||
-			PermissionManager.validate( 'job', 'view_child' ) ||
-			PermissionManager.validate( 'job', 'view_own' )) ) {
+		if ( PermissionManager.validate( 'job', 'enabled' ) &&
+				(PermissionManager.validate( 'job', 'view' ) ||
+						PermissionManager.validate( 'job', 'view_child' ) ||
+						PermissionManager.validate( 'job', 'view_own' )) ) {
 			return true;
 		}
 		return false;
@@ -100,10 +153,10 @@ EmployeeViewController = BaseViewController.extend( {
 
 	jobItemUIValidate: function() {
 
-		if ( PermissionManager.validate( "job_item", 'enabled' ) &&
-			(PermissionManager.validate( 'job_item', 'view' ) ||
-			PermissionManager.validate( 'job_item', 'view_child' ) ||
-			PermissionManager.validate( 'job_item', 'view_own' )) ) {
+		if ( PermissionManager.validate( 'job_item', 'enabled' ) &&
+				(PermissionManager.validate( 'job_item', 'view' ) ||
+						PermissionManager.validate( 'job_item', 'view_child' ) ||
+						PermissionManager.validate( 'job_item', 'view_own' )) ) {
 			return true;
 		}
 		return false;
@@ -126,261 +179,270 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
-	buildContextMenuModels: function() {
-
-		//Context Menu
-		var menu = new RibbonMenu( {
-			label: this.context_menu_name,
-			id: this.viewId + 'ContextMenu',
-			sub_menu_groups: []
-		} );
-
-		//menu group
-		var editor_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Editor' ),
-			id: this.viewId + 'Editor',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var navigation_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Navigation' ),
-			id: this.viewId + 'navigation',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var other_group = new RibbonSubMenuGroup( {
-			label: $.i18n._( 'Other' ),
-			id: this.viewId + 'other',
-			ribbon_menu: menu,
-			sub_menus: []
-		} );
-
-		var add = new RibbonSubMenu( {
-			label: $.i18n._( 'New' ),
-			id: ContextMenuIconName.add,
-			group: editor_group,
-			icon: Icons.new_add,
-			permission_result: true,
-			permission: null
-		} );
-
-		var view = new RibbonSubMenu( {
-			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
-			group: editor_group,
-			icon: Icons.view,
-			permission_result: true,
-			permission: null
-		} );
-
-		var edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Edit' ),
-			id: ContextMenuIconName.edit,
-			group: editor_group,
-			icon: Icons.edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var mass_edit = new RibbonSubMenu( {
-			label: $.i18n._( 'Mass<br>Edit' ),
-			id: ContextMenuIconName.mass_edit,
-			group: editor_group,
-			icon: Icons.mass_edit,
-			permission_result: true,
-			permission: null
-		} );
-
-		var del = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete' ),
-			id: ContextMenuIconName.delete_icon,
-			group: editor_group,
-			icon: Icons.delete_icon,
-			permission_result: true,
-			permission: null
-		} );
-
-		var delAndNext = new RibbonSubMenu( {
-			label: $.i18n._( 'Delete<br>& Next' ),
-			id: ContextMenuIconName.delete_and_next,
-			group: editor_group,
-			icon: Icons.delete_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy' ),
-			id: ContextMenuIconName.copy,
-			group: editor_group,
-			icon: Icons.copy_as_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var copy_as_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Copy<br>as New' ),
-			id: ContextMenuIconName.copy_as_new,
-			group: editor_group,
-			icon: Icons.copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save = new RibbonSubMenu( {
-			label: $.i18n._( 'Save' ),
-			id: ContextMenuIconName.save,
-			group: editor_group,
-			icon: Icons.save,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_continue = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Continue' ),
-			id: ContextMenuIconName.save_and_continue,
-			group: editor_group,
-			icon: Icons.save_and_continue,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_next = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Next' ),
-			id: ContextMenuIconName.save_and_next,
-			group: editor_group,
-			icon: Icons.save_and_next,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_copy = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& Copy' ),
-			id: ContextMenuIconName.save_and_copy,
-			group: editor_group,
-			icon: Icons.save_and_copy,
-			permission_result: true,
-			permission: null
-		} );
-
-		var save_and_new = new RibbonSubMenu( {
-			label: $.i18n._( 'Save<br>& New' ),
-			id: ContextMenuIconName.save_and_new,
-			group: editor_group,
-			icon: Icons.save_and_new,
-			permission_result: true,
-			permission: null
-		} );
-
-		var cancel = new RibbonSubMenu( {
-			label: $.i18n._( 'Cancel' ),
-			id: ContextMenuIconName.cancel,
-			group: editor_group,
-			icon: Icons.cancel,
-			permission_result: true,
-			permission: null
-		} );
-
-		var timesheet = new RibbonSubMenu( {
-			label: $.i18n._( 'TimeSheet' ),
-			id: ContextMenuIconName.timesheet,
-			group: navigation_group,
-			icon: Icons.timesheet,
-			permission_result: true,
-			permission: null
-		} );
-
-		var schedule_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Schedule' ),
-			id: ContextMenuIconName.schedule,
-			group: navigation_group,
-			icon: Icons.schedule,
-			permission_result: true,
-			permission: null
-		} );
-
-		var pay_stub_view = new RibbonSubMenu( {
-			label: $.i18n._( 'Pay<br>Stubs' ),
-			id: ContextMenuIconName.pay_stub,
-			group: navigation_group,
-			icon: Icons.pay_stubs,
-			permission_result: true,
-			permission: null
-		} );
-
-		var pay_stub_amendments = new RibbonSubMenu( {
-			label: $.i18n._( 'Pay Stub<br>Amendments' ),
-			id: ContextMenuIconName.pay_stub_amendment,
-			group: navigation_group,
-			icon: Icons.pay_stub_amendment,
-			permission_result: true,
-			permission: null
-		} );
-
-		var map = new RibbonSubMenu( {
-			label: $.i18n._( 'Map' ),
-			id: ContextMenuIconName.map,
-			group: other_group,
-			icon: Icons.map,
-			permission_result: true,
-			permission: null
-		} );
-
-		var import_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Import' ),
-			id: ContextMenuIconName.import_icon,
-			group: other_group,
-			icon: Icons.import_icon,
-			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
-			permission: null,
-			sort_order: 8000
-		} );
-
-		var export_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Export' ),
-			id: ContextMenuIconName.export_excel,
-			group: other_group,
-			icon: Icons.export_excel,
-			permission_result: true,
-			permission: null,
-			sort_order: 9000
-		} );
-
-		return [menu];
-
-	},
+	// buildContextMenuModels: function() {
+	//
+	// 	//Context Menu
+	// 	var menu = new RibbonMenu( {
+	// 		label: this.context_menu_name,
+	// 		id: this.viewId + 'ContextMenu',
+	// 		sub_menu_groups: []
+	// 	} );
+	//
+	// 	//menu group
+	// 	var editor_group = new RibbonSubMenuGroup( {
+	// 		label: $.i18n._( 'Editor' ),
+	// 		id: this.viewId + 'Editor',
+	// 		ribbon_menu: menu,
+	// 		sub_menus: []
+	// 	} );
+	//
+	// 	var navigation_group = new RibbonSubMenuGroup( {
+	// 		label: $.i18n._( 'Navigation' ),
+	// 		id: this.viewId + 'navigation',
+	// 		ribbon_menu: menu,
+	// 		sub_menus: []
+	// 	} );
+	//
+	// 	var other_group = new RibbonSubMenuGroup( {
+	// 		label: $.i18n._( 'Other' ),
+	// 		id: this.viewId + 'other',
+	// 		ribbon_menu: menu,
+	// 		sub_menus: []
+	// 	} );
+	//
+	// 	var add = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'New' ),
+	// 		id: ContextMenuIconName.add,
+	// 		group: editor_group,
+	// 		icon: Icons.new_add,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var view = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'View' ),
+	// 		id: ContextMenuIconName.view,
+	// 		group: editor_group,
+	// 		icon: Icons.view,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var edit = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Edit' ),
+	// 		id: ContextMenuIconName.edit,
+	// 		group: editor_group,
+	// 		icon: Icons.edit,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var mass_edit = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Mass<br>Edit' ),
+	// 		id: ContextMenuIconName.mass_edit,
+	// 		group: editor_group,
+	// 		icon: Icons.mass_edit,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var del = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Delete' ),
+	// 		id: ContextMenuIconName.delete_icon,
+	// 		group: editor_group,
+	// 		icon: Icons.delete_icon,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var delAndNext = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Delete<br>& Next' ),
+	// 		id: ContextMenuIconName.delete_and_next,
+	// 		group: editor_group,
+	// 		icon: Icons.delete_and_next,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	// var copy = new RibbonSubMenu( {
+	// 	// 	label: $.i18n._( 'Copy' ),
+	// 	// 	id: ContextMenuIconName.copy,
+	// 	// 	group: editor_group,
+	// 	// 	icon: Icons.copy_as_new,
+	// 	// 	permission_result: true,
+	// 	// 	permission: null
+	// 	// } );
+	//
+	// 	var copy_as_new = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Copy<br>as New' ),
+	// 		id: ContextMenuIconName.copy_as_new,
+	// 		group: editor_group,
+	// 		icon: Icons.copy,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var save = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Save' ),
+	// 		id: ContextMenuIconName.save,
+	// 		group: editor_group,
+	// 		icon: Icons.save,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var save_and_continue = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Save<br>& Continue' ),
+	// 		id: ContextMenuIconName.save_and_continue,
+	// 		group: editor_group,
+	// 		icon: Icons.save_and_continue,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var save_and_next = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Save<br>& Next' ),
+	// 		id: ContextMenuIconName.save_and_next,
+	// 		group: editor_group,
+	// 		icon: Icons.save_and_next,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var save_and_copy = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Save<br>& Copy' ),
+	// 		id: ContextMenuIconName.save_and_copy,
+	// 		group: editor_group,
+	// 		icon: Icons.save_and_copy,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var save_and_new = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Save<br>& New' ),
+	// 		id: ContextMenuIconName.save_and_new,
+	// 		group: editor_group,
+	// 		icon: Icons.save_and_new,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var cancel = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Cancel' ),
+	// 		id: ContextMenuIconName.cancel,
+	// 		group: editor_group,
+	// 		icon: Icons.cancel,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var timesheet = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'TimeSheet' ),
+	// 		id: ContextMenuIconName.timesheet,
+	// 		group: navigation_group,
+	// 		icon: Icons.timesheet,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var schedule_view = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Schedule' ),
+	// 		id: ContextMenuIconName.schedule,
+	// 		group: navigation_group,
+	// 		icon: Icons.schedule,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var pay_stub_view = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Pay<br>Stubs' ),
+	// 		id: ContextMenuIconName.pay_stub,
+	// 		group: navigation_group,
+	// 		icon: Icons.pay_stubs,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var pay_stub_amendments = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Pay Stub<br>Amendments' ),
+	// 		id: ContextMenuIconName.pay_stub_amendment,
+	// 		group: navigation_group,
+	// 		icon: Icons.pay_stub_amendment,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var map = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Map' ),
+	// 		id: ContextMenuIconName.map,
+	// 		group: other_group,
+	// 		icon: Icons.map,
+	// 		permission_result: true,
+	// 		permission: null
+	// 	} );
+	//
+	// 	var import_csv = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Import' ),
+	// 		id: ContextMenuIconName.import_icon,
+	// 		group: other_group,
+	// 		icon: Icons.import_icon,
+	// 		permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVEmployee' ),
+	// 		permission: null,
+	// 		sort_order: 8000
+	// 	} );
+	//
+	// 	var export_csv = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Export' ),
+	// 		id: ContextMenuIconName.export_excel,
+	// 		group: other_group,
+	// 		icon: Icons.export_excel,
+	// 		permission_result: true,
+	// 		permission: null,
+	// 		sort_order: 9000
+	// 	} );
+	//
+	// 	return [menu];
+	//
+	// },
 
 	openEditView: function( id ) {
-		var $this = this;
-		if ( $this.edit_only_mode ) {
-
-			$this.initOptions( function( result ) {
-				if ( !$this.edit_view ) {
-					$this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
+		if ( this.edit_only_mode ) {
+			var $this_obj = this;
+			this.initOptions( function( result ) {
+				if ( !$this_obj.edit_view ) {
+					$this_obj.initEditViewUI( $this_obj.viewId, $this_obj.edit_view_tpl );
+					var $this = this;
+					doNext();
+				}else {
+					doNext();
 				}
-
-				$this.getEmployeeData( id, function( result ) {
-					//Error: Uncaught TypeError: Cannot read property 'user_id' of null in interface/html5/#!m=TimeSheet&date=20150915&user_id=42175&show_wage=0 line 79
-					if ( !result ) {
-						TAlertManager.showAlert( $.i18n._( 'Invalid employee id' ) );
-						$this.onCancelClick();
-					} else {
-						// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
-						$this.current_edit_record = result;
-						$this.initEditView();
-					}
-
-				} );
 
 			} );
 
 		} else {
 			if ( !this.edit_view ) {
-				this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
+				this.initEditViewUI( this.viewId, this.edit_view_tpl );
 			}
+		}
 
+		function doNext(){
+			$this_obj.getEmployeeData( id, function( result ) {
+				//Error: Uncaught TypeError: Cannot read property 'user_id' of null in interface/html5/#!m=TimeSheet&date=20150915&user_id=42175&show_wage=0 line 79
+				if ( !result ) {
+					TAlertManager.showAlert( $.i18n._( 'Invalid employee id' ) );
+					$this_obj.onCancelClick();
+				} else {
+					// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
+					$this_obj.current_edit_record = result;
+					$this_obj.initEditView();
+				}
+
+				if ( $this_obj.edit_only_mode ) {
+					$('.edit-view-tab-bar').css('opacity', 1);
+				}
+
+
+			} );
 		}
 	},
 
@@ -416,9 +478,9 @@ EmployeeViewController = BaseViewController.extend( {
 	initOptions: function( callBack ) {
 
 		var options = [
-			{option_name: 'status'},
-			{option_name: 'sex'},
-			{option_name: 'country', field_name: 'country', api: this.company_api}
+			{ option_name: 'status' },
+			{ option_name: 'sex' },
+			{ option_name: 'country', field_name: 'country', api: this.company_api }
 		];
 
 		this.initDropDownOptions( options, function( result ) {
@@ -440,30 +502,17 @@ EmployeeViewController = BaseViewController.extend( {
 
 			$this.hierarchyControlAPI.getOptions( 'object_type', {
 				onResult: function( res_1 ) {
-
 					var data_1 = res_1.getResult();
 					if ( data_1 ) {
-
 						var array = [];
 
 						for ( var key in data_1 ) {
-							array.push( {id: key, value: data_1[key]} );
+							array.push( { id: Global.removeSortPrefix( key ), value: data_1[key] } );
 						}
-
-						array.sort( function( a, b ) {
-
-							if ( parseInt( a["id"] ) < parseInt( b['id'] ) ) {
-								return 1;
-							}
-							if ( parseInt( a["id"] ) > parseInt( b['id'] ) ) {
-								return -1;
-							}
-							return 0;
-
-						} );
 
 						$this.hierarchy_ui_model = array;
 					}
+
 					complete_count = complete_count + 1;
 					if ( complete_count === len ) {
 						callBack( option_result );
@@ -520,8 +569,8 @@ EmployeeViewController = BaseViewController.extend( {
 				callBack( option_result );
 			}
 		}
-
 	},
+
 	/* jshint ignore:start */
 	setDefaultMenu: function( doNotSetFocus ) {
 
@@ -543,7 +592,7 @@ EmployeeViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -611,10 +660,10 @@ EmployeeViewController = BaseViewController.extend( {
 					this.setDefaultMenuPayStubIcon( context_btn, grid_selected_length, 'pay_stub' );
 					break;
 				case ContextMenuIconName.export_excel:
-					this.setDefaultMenuExportIcon( context_btn);
+					this.setDefaultMenuExportIcon( context_btn );
 					break;
 				case ContextMenuIconName.map:
-					this.setDefaultMenuMapIcon( context_btn);
+					this.setDefaultMenuMapIcon( context_btn );
 					break;
 			}
 
@@ -639,135 +688,17 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 	},
 
-	onTabShow: function( e, ui ) {
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 3 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_wage' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubWageView();
-			} else {
-				this.edit_view_tab.find( '#tab_wage' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 4 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_tax' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubCompanyTaxView();
-			} else {
-				this.edit_view_tab.find( '#tab_tax' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 5 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_payment_methods' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubPaymentMethodsView();
-			} else {
-				this.edit_view_tab.find( '#tab_payment_methods' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 6 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_contacts' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubUserContactView();
-			} else {
-				this.edit_view_tab.find( '#tab_contacts' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 7 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_applications' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubJobApplicationView();
-			} else {
-				this.edit_view_tab.find( '#tab_applications' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab_selected_index === 8 ) {
-
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-
-				if ( this.current_edit_record.id ) {
-					this.edit_view_tab.find( '#tab_accruals' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-					this.initSubAccrualPolicyUserModifier();
-				} else {
-					this.edit_view_tab.find( '#tab_accruals' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-					this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-				}
-
-			} else {
-				this.edit_view_tab.find( '#tab_accruals' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 9 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_qualifications' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubQualificationView();
-			} else {
-				this.edit_view_tab.find( '#tab_qualifications' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 10 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_reviews' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubUserReviewControlView();
-			} else {
-				this.edit_view_tab.find( '#tab_reviews' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 11 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 12 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-
-	},
-
 	initSubQualificationView: function() {
 		var $this = this;
 
-		$('#tab_qualifications').hide();
-		TTPromise.add('Employee_Qualifications_Tab', 'initSubQualificationView');
-		TTPromise.wait( null, null, function() {
-			$('#tab_qualifications').show();
-		});
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
 
+		$( '#tab_qualifications .first-column-sub-view' ).css('opacity', '0');
+		TTPromise.add( 'Employee_Qualifications_Tab', 'initSubQualificationView' );
 
-		TTPromise.add('Employee_Qualifications_Tab', 'UserSkillViewController');
+		TTPromise.add( 'Employee_Qualifications_Tab', 'UserSkillViewController' );
 		Global.loadScript( 'views/hr/qualification/UserSkillViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.first-sub-view' );
@@ -776,7 +707,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
-		TTPromise.add('Employee_Qualifications_Tab', 'UserEducationViewController');
+		TTPromise.add( 'Employee_Qualifications_Tab', 'UserEducationViewController' );
 		Global.loadScript( 'views/hr/qualification/UserEducationViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.second-sub-view' );
@@ -785,7 +716,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
-		TTPromise.add('Employee_Qualifications_Tab', 'UserMembershipViewController');
+		TTPromise.add( 'Employee_Qualifications_Tab', 'UserMembershipViewController' );
 		Global.loadScript( 'views/hr/qualification/UserMembershipViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.third-sub-view' );
@@ -794,7 +725,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
-		TTPromise.add('Employee_Qualifications_Tab', 'UserLicenseViewController');
+		TTPromise.add( 'Employee_Qualifications_Tab', 'UserLicenseViewController' );
 		Global.loadScript( 'views/hr/qualification/UserLicenseViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.forth-sub-view' );
@@ -803,7 +734,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		} );
 
-		TTPromise.add('Employee_Qualifications_Tab', 'UserLanguageViewController');
+		TTPromise.add( 'Employee_Qualifications_Tab', 'UserLanguageViewController' );
 		Global.loadScript( 'views/hr/qualification/UserLanguageViewController.js', function() {
 			var tab_qualifications = $this.edit_view_tab.find( '#tab_qualifications' );
 			var firstColumn = tab_qualifications.find( '.first-column-sub-view' ).find( '.fifth-sub-view' );
@@ -825,7 +756,6 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_skill_view_controller.parent_view_controller = $this;
 			$this.sub_user_skill_view_controller.postInit = function() {
 				this.initData();
-				TTPromise.resolve('Employee_Qualifications_Tab', 'UserSkillViewController');
 			};
 		}
 
@@ -838,7 +768,6 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_license_view_controller.parent_view_controller = $this;
 			$this.sub_user_license_view_controller.postInit = function() {
 				this.initData();
-				TTPromise.resolve('Employee_Qualifications_Tab', 'UserLicenseViewController');
 			};
 		}
 
@@ -851,7 +780,6 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_language_view_controller.parent_view_controller = $this;
 			$this.sub_user_language_view_controller.postInit = function() {
 				this.initData();
-				TTPromise.resolve('Employee_Qualifications_Tab', 'UserLanguageViewController');
 			};
 		}
 
@@ -864,7 +792,6 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_education_view_controller.parent_view_controller = $this;
 			$this.sub_user_education_view_controller.postInit = function() {
 				this.initData();
-				TTPromise.resolve('Employee_Qualifications_Tab', 'UserEducationViewController');
 			};
 		}
 
@@ -876,16 +803,26 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_membership_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_user_membership_view_controller.parent_view_controller = $this;
 			$this.sub_user_membership_view_controller.postInit = function() {
-				$this.sub_user_membership_view_controller.initData();
-				TTPromise.resolve('Employee_Qualifications_Tab', 'UserMembershipViewController');
+				this.initData();
 			};
 		}
 
-		TTPromise.resolve('Employee_Qualifications_Tab', 'initSubQualificationView');
+		TTPromise.wait( 'Employee_Qualifications_Tab', null, function () {
+			$( '#contentContainer' ).trigger( 'resize' );
+			$( '#tab_qualifications .first-column-sub-view' ).css( 'opacity', '1' );
+		} );
+
+		TTPromise.resolve( 'Employee_Qualifications_Tab', 'initSubQualificationView' );
 	},
 
 	initSubCompanyTaxView: function() {
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
+		TTPromise.add( 'TaxView', 'init' );
 
 		if ( this.sub_company_tax_view_controller ) {
 			this.sub_company_tax_view_controller.buildContextMenu( true );
@@ -918,13 +855,18 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_company_tax_view_controller.parent_view_controller = $this;
 			TTPromise.wait( 'BaseViewController', 'initialize', function() {
 				$this.sub_company_tax_view_controller.initData();
-			});
+			} );
 		}
-
 	},
 
-	initSubUserReviewControlView: function() {
+	initSubUserReviewControlView: function() {;
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
+		TTPromise.add( 'ReviewView', 'init' );
 
 		if ( this.sub_user_review_control_view_controller ) {
 			this.sub_user_review_control_view_controller.buildContextMenu( true );
@@ -967,6 +909,12 @@ EmployeeViewController = BaseViewController.extend( {
 	initSubPaymentMethodsView: function() {
 		var $this = this;
 
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
+		TTPromise.add( 'PaymentMethodsView', 'init' );
+
 		if ( this.sub_payment_methods_view_controller ) {
 			this.sub_payment_methods_view_controller.buildContextMenu( true );
 			this.sub_payment_methods_view_controller.setDefaultMenu();
@@ -1002,13 +950,19 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_payment_methods_view_controller.parent_view_controller = $this;
 			TTPromise.wait( 'BaseViewController', 'initialize', function() {
 				$this.sub_payment_methods_view_controller.initData();
-			});
+			} );
 		}
 
 	},
 
 	initSubJobApplicationView: function() {
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
+		TTPromise.add( 'JobAppView', 'init' );
 
 		if ( this.sub_job_application_view_controller ) {
 			this.sub_job_application_view_controller.buildContextMenu( true );
@@ -1043,13 +997,18 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_job_application_view_controller.parent_view_controller = $this;
 			TTPromise.wait( 'BaseViewController', 'initialize', function() {
 				$this.sub_job_application_view_controller.initData();
-			});
+			} );
 		}
-
 	},
 
 	initSubUserContactView: function() {
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
+		TTPromise.add( 'ContactView', 'init' );
 
 		if ( this.sub_user_contact_view_controller ) {
 			this.sub_user_contact_view_controller.buildContextMenu( true );
@@ -1084,14 +1043,18 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_user_contact_view_controller.parent_view_controller = $this;
 			TTPromise.wait( 'BaseViewController', 'initialize', function() {
 				$this.sub_user_contact_view_controller.initData();
-			});
+			} );
 		}
-
 	},
 
 	initSubWageView: function() {
-
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
+		TTPromise.add( 'WageView', 'init' );
 
 		if ( this.sub_wage_view_controller ) {
 			this.sub_wage_view_controller.buildContextMenu( true );
@@ -1099,6 +1062,7 @@ EmployeeViewController = BaseViewController.extend( {
 			$this.sub_wage_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_wage_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_wage_view_controller.initData(); //Init data in this parent view
+			TTPromise.resolve( 'WageView', 'init' );
 			return;
 		}
 
@@ -1107,9 +1071,7 @@ EmployeeViewController = BaseViewController.extend( {
 				return;
 			}
 			var tab_employee = $this.edit_view_tab.find( '#tab_wage' );
-
 			var firstColumn = tab_employee.find( '.first-column-sub-view' );
-
 			Global.trackView( 'Sub' + 'Wage' + 'View' );
 			WageViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 
@@ -1119,7 +1081,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 		}
 
-		function afterLoadView( subViewController ) {
+		function afterLoadView( subViewController, firstColumn ) {
 
 			$this.sub_wage_view_controller = subViewController;
 			$this.sub_wage_view_controller.parent_key = 'user_id';
@@ -1131,13 +1093,18 @@ EmployeeViewController = BaseViewController.extend( {
 				if ( $this.sub_wage_view_controller ) {
 					$this.sub_wage_view_controller.initData(); //Init data in this parent view
 				}
-			});
+			} );
 		}
 	},
 
 	initSubAccrualPolicyUserModifier: function() {
-
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
+		TTPromise.add( 'AccrualView', 'init' );
 
 		if ( this.sub_accrual_policy_user_modifier_view_controller ) {
 			this.sub_accrual_policy_user_modifier_view_controller.buildContextMenu( true );
@@ -1149,41 +1116,49 @@ EmployeeViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScript( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function() {
-			if ( !$this.edit_view_tab ) {
-				return;
-			}
-			var tab_employee = $this.edit_view_tab.find( '#tab_accruals' );
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 
-			var firstColumn = tab_employee.find( '.first-column-sub-view' );
+			Global.loadScript( 'views/policy/accrual_policy/AccrualPolicyUserModifierViewController.js', function() {
+				if ( !$this.edit_view_tab ) {
+					return;
+				}
+				var tab_employee = $this.edit_view_tab.find( '#tab_accruals' );
 
-			Global.trackView( 'Sub' + 'AccrualPolicyUserModifier' + 'View' );
-			AccrualPolicyUserModifierViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+				var firstColumn = tab_employee.find( '.first-column-sub-view' );
 
-		} );
+				Global.trackView( 'Sub' + 'AccrualPolicyUserModifier' + 'View' );
+				AccrualPolicyUserModifierViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
+
+			} );
+		} else {
+			this.edit_view_tab.find( '#tab_accruals' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
+		}
 
 		function beforeLoadView( tpl ) {
+			var args = { parent_view: 'employee' };
 
-			var args = {parent_view: 'employee'};
-
-			return {template: _.template( tpl ), args: args};
-
+			return { template: _.template( tpl ), args: args };
 		}
 
 		function afterLoadView( subViewController ) {
-
 			$this.sub_accrual_policy_user_modifier_view_controller = subViewController;
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_key = 'user_id';
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_value = $this.current_edit_record.id;
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_edit_record = $this.current_edit_record;
 			$this.sub_accrual_policy_user_modifier_view_controller.parent_view_controller = $this;
+			$this.sub_accrual_policy_user_modifier_view_controller.sub_view_mode = true;
 			TTPromise.wait( 'BaseViewController', 'initialize', function() {
 				$this.sub_accrual_policy_user_modifier_view_controller.initData(); //Init data in this parent view
-			});
+			} );
 		}
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
+		var $this = this;
+
 		this.setIsChanged( target );
 		this.setMassEditingFieldsWhenFormChange( target );
 		var key = target.getField();
@@ -1231,7 +1206,11 @@ EmployeeViewController = BaseViewController.extend( {
 			case 'default_job_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'default_job_item_id', { status_id: 10, job_id: this.current_edit_record.default_job_id, company_id: this.select_company_id });
+					this.setJobItemValueWhenJobChanged( target.getValue( true ), 'default_job_item_id', {
+						status_id: 10,
+						job_id: this.current_edit_record.default_job_id,
+						company_id: this.select_company_id
+					} );
 					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
@@ -1244,7 +1223,10 @@ EmployeeViewController = BaseViewController.extend( {
 			case 'job_quick_search':
 			case 'job_item_quick_search':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-					this.onJobQuickSearch( key, target.getValue() );
+					this.onJobQuickSearch( key, target.getValue(), 'default_job_id', 'default_job_item_id',  { status_id: 10, company_id: $this.select_company_id } );
+
+					//Don't validate immediately as onJobQuickSearch is doing async API calls, and it would cause a guaranteed validation failure.
+					doNotValidate = true;
 				}
 				break;
 		}
@@ -1263,7 +1245,7 @@ EmployeeViewController = BaseViewController.extend( {
 	hierarchyPermissionValidate: function( p_id, selected_item ) {
 
 		if ( PermissionManager.validate( 'hierarchy', 'edit' ) ||
-			PermissionManager.validate( 'user', 'edit_hierarchy' ) ) {
+				PermissionManager.validate( 'user', 'edit_hierarchy' ) ) {
 
 			return true;
 		}
@@ -1272,100 +1254,63 @@ EmployeeViewController = BaseViewController.extend( {
 
 	},
 
-	setTabStatus: function() {
-		if ( this.is_mass_editing ) {
+	checkTabPermissions: function( tab ) {
+		retval = false;
 
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_hierarchy"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_wage"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_tax"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_payment_methods"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_contacts"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_applications"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_accruals"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_qualifications"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_reviews"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-
-			if ( this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_hierarchy"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_hierarchy"]' ) ).parent().hide();
-			}
-
-			if ( PermissionManager.checkTopLevelPermission( 'Wage' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_wage"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_wage"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( PermissionManager.checkTopLevelPermission( 'UserTaxDeduction' ) &&
-				this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_tax"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_tax"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( PermissionManager.checkTopLevelPermission( 'RemittanceDestinationAccount' ) &&
-				this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_payment_methods"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_payment_methods"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( PermissionManager.checkTopLevelPermission( 'UserContact' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_contacts"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_contacts"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( PermissionManager.subJobApplicationValidate( 'JobApplication' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_applications"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_applications"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-			if ( PermissionManager.checkTopLevelPermission( 'AccrualPolicy' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_accruals"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_accruals"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-			if ( PermissionManager.checkTopLevelPermission( 'Qualification' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_qualifications"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_qualifications"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-			if ( PermissionManager.checkTopLevelPermission( 'UserReviewControl' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_reviews"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_reviews"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
+		switch ( tab ) {
+			case 'tab_hierarchy':
+				if ( this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			case 'tab_wage':
+				if ( PermissionManager.checkTopLevelPermission( 'Wage' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			case 'tab_tax':
+				if ( PermissionManager.checkTopLevelPermission( 'UserTaxDeduction' ) &&
+					this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			case 'tab_payment_methods':
+				if ( PermissionManager.checkTopLevelPermission( 'RemittanceDestinationAccount' ) &&
+					this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			case 'tab_contacts':
+				if ( PermissionManager.checkTopLevelPermission( 'UserContact' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			case 'tab_applications':
+				if ( PermissionManager.subJobApplicationValidate( 'JobApplication' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			case 'tab_accruals':
+				if ( PermissionManager.checkTopLevelPermission( 'AccrualPolicy' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			case 'tab_qualifications':
+				if ( PermissionManager.checkTopLevelPermission( 'Qualification' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			case 'tab_reviews':
+				if ( PermissionManager.checkTopLevelPermission( 'UserReviewControl' ) && this.select_company_id === LocalCacheData.getCurrentCompany().id ) {
+					retval = true;
+				}
+				break;
+			default:
+				retval = this._super( 'checkTabPermissions', tab );
+				break;
 		}
 
+		return retval;
 	},
 
 	/* jshint ignore:start */
@@ -1384,29 +1329,29 @@ EmployeeViewController = BaseViewController.extend( {
 						widget.setValue( this.current_edit_record[key] );
 						break;
 					case 'country':
-						this.setCountryValue(widget, key);
+						this.setCountryValue( widget, key );
 						break;
 					case 'hierarchy_control':
 						if ( this.show_hierarchy ) {
 							for ( var h_key in this.current_edit_record.hierarchy_control ) {
 								var value = this.current_edit_record.hierarchy_control[h_key];
 								if ( this.edit_view_ui_dic[h_key] ) {
-								widget = this.edit_view_ui_dic[h_key];
-								dont_set_dic[h_key] = true;
-								widget.setValue( value );
+									widget = this.edit_view_ui_dic[h_key];
+									dont_set_dic[h_key] = true;
+									widget.setValue( value );
+								}
 							}
-						}
 						}
 						break;
 					case 'default_job_id':
 						var args = {};
-						args.filter_data = {status_id: 10, user_id: this.current_edit_record.id};
+						args.filter_data = { status_id: 10, user_id: this.current_edit_record.id };
 						widget.setDefaultArgs( args );
 						widget.setValue( this.current_edit_record[key] );
 						break;
 					case 'default_job_item_id':
 						args = {};
-						args.filter_data = {status_id: 10, job_id: this.current_edit_record.default_job_id};
+						args.filter_data = { status_id: 10, job_id: this.current_edit_record.default_job_id };
 						widget.setDefaultArgs( args );
 						widget.setValue( this.current_edit_record[key] );
 						break;
@@ -1567,7 +1512,7 @@ EmployeeViewController = BaseViewController.extend( {
 		this.mass_edit_record_ids = [];
 
 		$.each( grid_selected_id_array, function( index, value ) {
-			$this.mass_edit_record_ids.push( value )
+			$this.mass_edit_record_ids.push( value );
 		} );
 
 		filter.filter_data = {};
@@ -1621,7 +1566,7 @@ EmployeeViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		if ( Global.isSet( editId ) ) {
-			var selectedId = editId
+			var selectedId = editId;
 		} else {
 			if ( grid_selected_length > 0 ) {
 				selectedId = grid_selected_id_array[0];
@@ -1778,14 +1723,19 @@ EmployeeViewController = BaseViewController.extend( {
 		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
 		filter.filter_sort = this.select_layout.data.filter_sort;
 
-		if ( TTUUID.isUUID(this.refresh_id) ) {
-			filter.filter_data = {company_id: this.select_company_id}; // search by company_id
+		if ( TTUUID.isUUID( this.refresh_id ) ) {
+			filter.filter_data = {};
 			filter.filter_data.id = [this.refresh_id];
 
 			this.last_select_ids = filter.filter_data.id;
 
 		} else {
-			this.last_select_ids = this.getGridSelectIdArray();
+			this.last_select_ids = [];
+			var ids = this.getGridSelectIdArray();
+			//ensure detached reference to value source or lose this.last_select_ids when grid is cleared.
+			for ( var i = 0; i < ids.length; i++ ) {
+				this.last_select_ids.push( ids[i] );
+			}
 		}
 
 		this.api['get' + this.api.key_name]( filter, {
@@ -1793,7 +1743,7 @@ EmployeeViewController = BaseViewController.extend( {
 
 				var result_data = result.getResult();
 				if ( !Global.isArray( result_data ) ) {
-					$this.showNoResultCover()
+					$this.showNoResultCover();
 				} else {
 					$this.removeNoResultCover();
 					if ( Global.isSet( $this.__createRowId ) ) {
@@ -1802,9 +1752,9 @@ EmployeeViewController = BaseViewController.extend( {
 
 					result_data = Global.formatGridData( result_data, $this.api.key_name );
 				}
-				if ( TTUUID.isUUID($this.refresh_id) ) {
+				if ( TTUUID.isUUID( $this.refresh_id ) ) {
 					$this.refresh_id = null;
-					var grid_source_data = $this.grid.getGridParam( 'data' );
+					var grid_source_data = $this.grid.getData();
 					var len = grid_source_data.length;
 
 					if ( $.type( grid_source_data ) !== 'array' ) {
@@ -1825,17 +1775,15 @@ EmployeeViewController = BaseViewController.extend( {
 							// }
 
 							if ( record.id == new_record.id ) {
-								$this.grid.setRowData( new_record.id, new_record );
+								$this.grid.grid.setRowData( new_record.id, new_record );
 								found = true;
-								break
+								break;
 							}
 						}
 
 						if ( !found ) {
-//					$this.grid.addRowData( new_record.id, new_record, 0 );
-							$this.grid.clearGridData();
-							$this.grid.setGridParam( {data: grid_source_data.concat( new_record )} );
-							$this.grid.trigger( 'reloadGrid' );
+//							$this.grid.addRowData( new_record.id, new_record, 0 );
+							$this.grid.setData( grid_source_data.concat( new_record ) );
 							$this.highLightGridRowById( new_record.id );
 						}
 					}
@@ -1851,13 +1799,12 @@ EmployeeViewController = BaseViewController.extend( {
 					}
 
 					if ( LocalCacheData.paging_type === 0 && page_action === 'next' ) {
-						var current_data = $this.grid.getGridParam( 'data' );
+						var current_data = $this.grid.getData();
 						result_data = current_data.concat( result_data );
 					}
 
 					$this.grid.clearGridData();
-					$this.grid.setGridParam( {data: result_data} );
-					$this.grid.trigger( 'reloadGrid' );
+					$this.grid.setData( result_data );
 
 					$this.reSelectLastSelectItems();
 
@@ -1893,10 +1840,11 @@ EmployeeViewController = BaseViewController.extend( {
 			}
 		} );
 
+		//This seems to be the only difference from BaseViewController search() function.
 		if ( filter && filter.filter_data && filter.filter_data.company_id ) {
 			this.select_company_id = filter.filter_data.company_id;
 
-			this.user_group_api.getUserGroup( {filter_data: {company_id: this.select_company_id}}, false, false, {
+			this.user_group_api.getUserGroup( { filter_data: { company_id: this.select_company_id } }, false, false, {
 				onResult: function( res ) {
 
 					res = res.getResult();
@@ -1921,130 +1869,9 @@ EmployeeViewController = BaseViewController.extend( {
 
 	},
 
-	//Call this from setEditViewData
-	initTabData: function() {
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 3 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_wage' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubWageView();
-			} else {
-				this.edit_view_tab.find( '#tab_wage' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab_selected_index === 4 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_tax' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubCompanyTaxView();
-			} else {
-				this.edit_view_tab.find( '#tab_tax' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 5 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_payment_methods' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubPaymentMethodsView();
-			} else {
-				this.edit_view_tab.find( '#tab_payment_methods' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 6 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_contacts' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubUserContactView();
-			} else {
-				this.edit_view_tab.find( '#tab_contacts' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 7 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_applications' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubJobApplicationView();
-			} else {
-				this.edit_view_tab.find( '#tab_applications' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 8 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-
-				if ( this.current_edit_record.id ) {
-					this.edit_view_tab.find( '#tab_accruals' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-					this.initSubAccrualPolicyUserModifier();
-				} else {
-					this.edit_view_tab.find( '#tab_accruals' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-					this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-					this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-				}
-
-			} else {
-				this.edit_view_tab.find( '#tab_accruals' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-
-			}
-		} else if ( this.edit_view_tab_selected_index === 9 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_qualifications' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubQualificationView();
-			} else {
-				this.edit_view_tab.find( '#tab_qualifications' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 10 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_reviews' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubUserReviewControlView();
-			} else {
-				this.edit_view_tab.find( '#tab_reviews' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 11 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 12 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
-	onContextMenuClick: function( context_btn, menu_name ) {
-
-		this._super( 'onContextMenuClick', context_btn, menu_name );
-
-		var id;
-
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
-				ProgressBar.showOverlay();
 				this.onImportClick();
 				break;
 			case ContextMenuIconName.timesheet:
@@ -2053,23 +1880,36 @@ EmployeeViewController = BaseViewController.extend( {
 			case ContextMenuIconName.pay_stub_amendment:
 				this.onNavigationClick( id );
 				break;
-
 		}
 	},
 
 	onMapClick: function() {
 		this.is_viewing = false;
 		ProgressBar.showProgressBar();
-		var data = {filter_columns: {id:true, first_name:true, last_name:true, address1:true, address2:true, city:true, province:true, country:true, postal_code:true, latitude:true, longitude:true}};
+		var data = {
+			filter_columns: {
+				id: true,
+				first_name: true,
+				last_name: true,
+				address1: true,
+				address2: true,
+				city: true,
+				province: true,
+				country: true,
+				postal_code: true,
+				latitude: true,
+				longitude: true
+			}
+		};
 		var ids = this.getGridSelectIdArray();
 
-		data.filter_data =  Global.convertLayoutFilterToAPIFilter( this.select_layout );
+		data.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
 		if ( ids.length > 0 ) {
-			data.filter_data.id =  ids;
+			data.filter_data.id = ids;
 		}
-		var cells = this.api.getUser(data,{async:false}).getResult();
+		var cells = this.api.getUser( data, { async: false } ).getResult();
 		if ( !this.is_mass_editing ) {
-			IndexViewController.openEditView( this, "Map", cells );
+			IndexViewController.openEditView( this, 'Map', cells );
 		}
 	},
 
@@ -2114,7 +1954,7 @@ EmployeeViewController = BaseViewController.extend( {
 				break;
 			case ContextMenuIconName.schedule:
 				filter.filter_data = {};
-				var include_users = {value: user_ids};
+				var include_users = { value: user_ids };
 				filter.filter_data.include_user_ids = include_users;
 				filter.select_date = base_date;
 				Global.addViewTab( this.viewId, 'Employees', window.location.href );
@@ -2146,7 +1986,6 @@ EmployeeViewController = BaseViewController.extend( {
 		this.sub_user_contact_view_controller = null;
 		this.sub_wage_view_controller = null;
 		this.sub_company_tax_view_controller = null;
-		this.sub_document_view_controller = null;
 		this.sub_accrual_policy_user_modifier_view_controller = null;
 		this.sub_user_review_control_view_controller = null;
 		this.sub_job_application_view_controller = null;
@@ -2168,21 +2007,54 @@ EmployeeViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_employee': $.i18n._( 'Employee' ),
-			'tab_contact_info': $.i18n._( 'Contact Info' ),
-			'tab_hierarchy': $.i18n._( 'Hierarchy' ),
-			'tab_wage': $.i18n._( 'Wage' ),
-			'tab_tax': $.i18n._( 'Tax' ),
-			'tab_payment_methods': $.i18n._( 'Payment Methods' ),
-			'tab_contacts': $.i18n._( 'Contacts' ),
-			'tab_applications': $.i18n._( 'Applications' ),
-			'tab_accruals': $.i18n._( 'Accruals' ),
-			'tab_qualifications': $.i18n._( 'Qualifications' ),
-			'tab_reviews': $.i18n._( 'Reviews' ),
-			'tab_attachment': $.i18n._( 'Attachment' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_employee': { 'label': $.i18n._( 'Employee' ) },
+			'tab_contact_info': { 'label': $.i18n._( 'Contact Info' ) },
+			'tab_hierarchy': { 'label': $.i18n._( 'Hierarchy' ), 'display_on_mass_edit': false },
+			'tab_wage': {
+				'label': $.i18n._( 'Wage' ),
+				'init_callback': 'initSubWageView',
+				'display_on_mass_edit': false
+			},
+			'tab_tax': {
+				'label': $.i18n._( 'Tax' ),
+				'init_callback': 'initSubCompanyTaxView',
+				'display_on_mass_edit': false
+			},
+			'tab_payment_methods': {
+				'label': $.i18n._( 'Payment Methods' ),
+				'init_callback': 'initSubPaymentMethodsView',
+				'display_on_mass_edit': false
+			},
+			'tab_contacts': {
+				'label': $.i18n._( 'Contacts' ),
+				'init_callback': 'initSubUserContactView',
+				'display_on_mass_edit': false
+			},
+			'tab_applications': {
+				'label': $.i18n._( 'Applications' ),
+				'init_callback': 'initSubJobApplicationView',
+				'display_on_mass_edit': false
+			},
+			'tab_accruals': {
+				'label': $.i18n._( 'Accruals' ),
+				'init_callback': 'initSubAccrualPolicyUserModifier',
+				'display_on_mass_edit': false
+			},
+			'tab_qualifications': {
+				'label': $.i18n._( 'Qualifications' ),
+				'init_callback': 'initSubQualificationView',
+				'display_on_mass_edit': false
+			},
+			'tab_reviews': {
+				'label': $.i18n._( 'Reviews' ),
+				'init_callback': 'initSubUserReviewControlView',
+				'display_on_mass_edit': false
+			},
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		if ( !this.edit_only_mode ) {
 			this.navigation.AComboBox( {
@@ -2242,7 +2114,7 @@ EmployeeViewController = BaseViewController.extend( {
 		//Status
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_employee_column1 );
 
@@ -2313,28 +2185,28 @@ EmployeeViewController = BaseViewController.extend( {
 		//User Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'user_name', width: 200} );
+		form_item_input.TTextInput( { field: 'user_name', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'User Name' ), form_item_input, tab_employee_column1 );
 
 		//Password
 
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 
-		form_item_input.TTextInput( {field: 'password', width: 200} );
+		form_item_input.TTextInput( { field: 'password', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Password' ), form_item_input, tab_employee_column1 );
 
 		//Password Confirm
 
 		form_item_input = Global.loadWidgetByName( FormItemType.PASSWORD_INPUT );
 
-		form_item_input.TTextInput( {field: 'password_confirm', width: 200} );
+		form_item_input.TTextInput( { field: 'password_confirm', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Confirm Password' ), form_item_input, tab_employee_column1 );
 
 		//Employee Number
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'employee_number', width: 90} );
+		form_item_input.TTextInput( { field: 'employee_number', width: 90 } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee Number' ), form_item_input, tab_employee_column1 );
 
 		//Title
@@ -2359,28 +2231,28 @@ EmployeeViewController = BaseViewController.extend( {
 		//First Name
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'first_name', width: 200} );
+		form_item_input.TTextInput( { field: 'first_name', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'First Name' ), form_item_input, tab_employee_column2, '' );
 
 		//Last Name
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'last_name', width: 200} );
+		form_item_input.TTextInput( { field: 'last_name', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab_employee_column2 );
 
 		//Quick Punch ID
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'phone_id', width: 90} );
+		form_item_input.TTextInput( { field: 'phone_id', width: 90 } );
 		this.addEditFieldToColumn( $.i18n._( 'Quick Punch ID' ), form_item_input, tab_employee_column2 );
 
 		//Quick Punch Password
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'phone_password', width: 90} );
+		form_item_input.TTextInput( { field: 'phone_password', width: 90 } );
 		this.addEditFieldToColumn( $.i18n._( 'Quick Punch Password' ), form_item_input, tab_employee_column2 );
 
 		//Default Branch
@@ -2432,15 +2304,17 @@ EmployeeViewController = BaseViewController.extend( {
 				set_empty: true,
 				setRealValueCallBack: (function( val ) {
 
-					if ( val ) job_coder.setValue( val.manual_id );
+					if ( val ) {
+						job_coder.setValue( val.manual_id );
+					}
 				}),
 				field: 'default_job_id'
 			} );
 
-			var widgetContainer = $( "<div class='widget-h-box'></div>" );
+			var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_coder.TTextInput( {field: 'job_quick_search', disable_keyup_event: true} );
+			job_coder.TTextInput( { field: 'job_quick_search', disable_keyup_event: true } );
 			job_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_coder );
@@ -2464,15 +2338,17 @@ EmployeeViewController = BaseViewController.extend( {
 				show_search_inputs: true,
 				set_empty: true,
 				setRealValueCallBack: (function( val ) {
-					if ( val ) job_item_coder.setValue( val.manual_id );
+					if ( val ) {
+						job_item_coder.setValue( val.manual_id );
+					}
 				}),
 				field: 'default_job_item_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_item_coder.TTextInput( {field: 'job_item_quick_search', disable_keyup_event: true} );
+			job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
 			job_item_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_item_coder );
@@ -2515,19 +2391,19 @@ EmployeeViewController = BaseViewController.extend( {
 		//Hire Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'hire_date'} );
+		form_item_input.TDatePicker( { field: 'hire_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Hire Date' ), form_item_input, tab_employee_column2 );
 
 		//Termination Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'termination_date'} );
+		form_item_input.TDatePicker( { field: 'termination_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Termination Date' ), form_item_input, tab_employee_column2 );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
-		form_item_input.TTagInput( {field: 'tag', object_type_id: 200} );
+		form_item_input.TTagInput( { field: 'tag', object_type_id: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_employee_column2, '', null, null, true );
 
 		//Tab 1 start
@@ -2539,9 +2415,14 @@ EmployeeViewController = BaseViewController.extend( {
 
 		// Photo
 
-		if ( typeof FormData == "undefined" ) {
+		if ( typeof FormData == 'undefined' ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
-			this.file_browser = form_item_input.TImageBrowser( {field: '', default_width: 128, default_height: 128, enable_delete: true } );
+			this.file_browser = form_item_input.TImageBrowser( {
+				field: '',
+				default_width: 128,
+				default_height: 128,
+				enable_delete: true
+			} );
 
 			this.file_browser.bind( 'imageChange', function( e, target ) {
 				new ServiceCaller().uploadFile( target.getValue(), 'object_type=user_photo&object_id=' + $this.current_edit_record.id, {
@@ -2577,7 +2458,7 @@ EmployeeViewController = BaseViewController.extend( {
 					} );
 
 				},
-				deleteImageHandler: function(e) {
+				deleteImageHandler: function( e ) {
 					$this.onDeleteImage();
 				}
 			} );
@@ -2585,53 +2466,53 @@ EmployeeViewController = BaseViewController.extend( {
 		}
 
 		if ( this.is_edit ) {
-			this.file_browser.setEnableDelete(true);
-			this.file_browser.bind('deleteClick', function (e, target) {
-				$this.api.deleteImage($this.current_edit_record.id, {
-					onResult: function (result) {
+			this.file_browser.setEnableDelete( true );
+			this.file_browser.bind( 'deleteClick', function( e, target ) {
+				$this.api.deleteImage( $this.current_edit_record.id, {
+					onResult: function( result ) {
 						$this.onDeleteImage();
 					}
-				});
-			});
+				} );
+			} );
 		}
 
 		this.addEditFieldToColumn( $.i18n._( 'Photo' ), this.file_browser, tab_contact_info_column1, '', null, false, true );
 
 		//First Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'first_name_1', width: 200} );
+		form_item_input.TTextInput( { field: 'first_name_1', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'First Name' ), form_item_input, tab_contact_info_column1 );
 
 		//Middle Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'middle_name', width: 200} );
+		form_item_input.TTextInput( { field: 'middle_name', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Middle Name' ), form_item_input, tab_contact_info_column1 );
 
 		//Last Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'last_name_1', width: 200} );
+		form_item_input.TTextInput( { field: 'last_name_1', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Last Name' ), form_item_input, tab_contact_info_column1 );
 
 		//Sex
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'sex_id'} );
+		form_item_input.TComboBox( { field: 'sex_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.sex_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Gender' ), form_item_input, tab_contact_info_column1 );
 
 		//Home Address(Line 1)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
+		form_item_input.TTextInput( { field: 'address1', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Home Address(Line 1)' ), form_item_input, tab_contact_info_column1 );
 		form_item_input.parent().width( '45%' );
 
 		//Home Address(Line 2)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
+		form_item_input.TTextInput( { field: 'address2', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Home Address(Line 2)' ), form_item_input, tab_contact_info_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -2639,27 +2520,27 @@ EmployeeViewController = BaseViewController.extend( {
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'city', width: 200} );
+		form_item_input.TTextInput( { field: 'city', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_contact_info_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'country', set_empty: true} );
+		form_item_input.TComboBox( { field: 'country', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_contact_info_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'province'} );
+		form_item_input.TComboBox( { field: 'province' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_contact_info_column1 );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'postal_code', width: 200} );
+		form_item_input.TTextInput( { field: 'postal_code', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_contact_info_column1, '' );
 
 		//Column 2
@@ -2667,63 +2548,63 @@ EmployeeViewController = BaseViewController.extend( {
 		//Work Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'work_phone', width: 200} );
+		form_item_input.TTextInput( { field: 'work_phone', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Work Phone' ), form_item_input, tab_contact_info_column2, '' );
 
 		//Work Phone Ext
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'work_phone_ext'} );
+		form_item_input.TTextInput( { field: 'work_phone_ext' } );
 		form_item_input.css( 'width', '50' );
 		this.addEditFieldToColumn( $.i18n._( 'Work Phone Ext' ), form_item_input, tab_contact_info_column2 );
 
 		//Home Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'home_phone', width: 200} );
+		form_item_input.TTextInput( { field: 'home_phone', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Home Phone' ), form_item_input, tab_contact_info_column2 );
 
 		//Mobile Phone
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'mobile_phone', width: 200} );
+		form_item_input.TTextInput( { field: 'mobile_phone', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Mobile Phone' ), form_item_input, tab_contact_info_column2 );
 
 		//Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'fax_phone', width: 200} );
+		form_item_input.TTextInput( { field: 'fax_phone', width: 200 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_contact_info_column2 );
 
 		//Work Email
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'work_email', width: 200} );
+		form_item_input.TTextInput( { field: 'work_email', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Work Email' ), form_item_input, tab_contact_info_column2, '', null, true );
 
 		//Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'home_email', width: 200} );
+		form_item_input.TTextInput( { field: 'home_email', width: 200 } );
 		this.addEditFieldToColumn( $.i18n._( 'Home Email' ), form_item_input, tab_contact_info_column2, '', null, true );
 
 		//Birth Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'birth_date'} );
+		form_item_input.TDatePicker( { field: 'birth_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Birth Date' ), form_item_input, tab_contact_info_column2 );
 
 		//Sin
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'sin', width: 90} );
+		form_item_input.TTextInput( { field: 'sin', width: 90 } );
 		this.addEditFieldToColumn( $.i18n._( 'SIN / SSN' ), form_item_input, tab_contact_info_column2 );
 
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note', width: '100%'} );
+		form_item_input.TTextArea( { field: 'note', width: '100%' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_contact_info_column2, '', null, null, true );
 
@@ -2738,11 +2619,11 @@ EmployeeViewController = BaseViewController.extend( {
 		this.edit_view_tabs[2].push( tab_hierarchy_column1 );
 
 		if ( this.hierarchyPermissionValidate() ) {
-			var res = this.hierarchyControlAPI.getHierarchyControlOptions( {async: false} );
+			var res = this.hierarchyControlAPI.getHierarchyControlOptions( { async: false } );
 			$this.hierarchy_options_dic = {};
 			var data = res.getResult();
 			for ( var key in data ) {
-				if ( parseInt(key) === 200 &&
+				if ( parseInt( key ) === 200 &&
 						LocalCacheData.getCurrentCompany().product_edition_id != 25 ) {
 					continue;
 				}
@@ -2754,6 +2635,7 @@ EmployeeViewController = BaseViewController.extend( {
 				$this.show_hierarchy = false;
 			}
 		}
+
 		if ( this.show_hierarchy && this.hierarchy_ui_model ) {
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.first-column' ).css( 'display', 'block' );
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.hierarchy-div' ).css( 'display', 'none' );
@@ -2763,18 +2645,17 @@ EmployeeViewController = BaseViewController.extend( {
 				var options = this.hierarchy_options_dic[ui_model.id];
 				if ( options ) {
 					form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-					form_item_input.TComboBox( {field: ui_model.id} );
+					form_item_input.TComboBox( { field: ui_model.id } );
 					form_item_input.setSourceData( options );
 					this.addEditFieldToColumn( ui_model.value, form_item_input, tab_hierarchy_column1 );
 				}
 			}
-
 		} else {
-
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.first-column' ).css( 'display', 'none' );
-			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.hierarchy-div' ).NoHierarchyBox( {related_view_controller: this} );
+			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.hierarchy-div' ).NoHierarchyBox( { related_view_controller: this } );
 			this.edit_view_tab.find( '#tab_hierarchy' ).find( '.hierarchy-div' ).css( 'display', 'block' );
 		}
+		TTPromise.resolve( 'employeeEditView', 'openEditView' );
 
 	},
 
@@ -3060,11 +2941,11 @@ EmployeeViewController = BaseViewController.extend( {
 	setCompanyIdFilter: function( args ) {
 
 		if ( !args ) {
-			args = {filter_data: {company_id: this.select_company_id}};
+			args = { filter_data: { company_id: this.select_company_id } };
 
 		} else {
 			if ( !args.filter_data ) {
-				args.filter_data = {company_id: this.select_company_id};
+				args.filter_data = { company_id: this.select_company_id };
 			} else {
 				args.filter_data.company_id = this.select_company_id;
 			}
@@ -3081,53 +2962,6 @@ EmployeeViewController = BaseViewController.extend( {
 
 	},
 
-	onJobQuickSearch: function( key, value ) {
-		var args = {};
-		var $this = this;
-		if ( key === 'job_quick_search' ) {
-			args.filter_data = {manual_id: value, company_id: $this.select_company_id, user_id: this.current_edit_record.id, status_id: "10"};
-			this.job_api.getJob( args, {
-				onResult: function( result ) {
-					var result_data = result.getResult();
-					if ( result_data.length > 0 ) {
-						$this.edit_view_ui_dic['default_job_id'].setValue( result_data[0].id );
-						$this.current_edit_record.default_job_id = result_data[0].id;
-						$this.setJobItemValueWhenJobChanged( result_data[0], 'default_job_item_id', { status_id: 10, job_id: $this.current_edit_record.default_job_id, company_id: $this.select_company_id } );
-
-					} else {
-						$this.edit_view_ui_dic['default_job_id'].setValue( '' );
-						$this.current_edit_record.default_job_id = false;
-						$this.setJobItemValueWhenJobChanged( false, 'default_job_item_id', { status_id: 10, job_id: $this.current_edit_record.default_job_id, company_id: $this.select_company_id } );
-					}
-
-				}
-			} );
-			$this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
-			$this.edit_view_ui_dic['default_job_id'].setCheckBox( true );
-		} else if ( key === 'job_item_quick_search' ) {
-
-			args.filter_data = {manual_id: value, company_id: $this.select_company_id, status_id: "10"};
-
-			this.job_item_api.getJobItem( args, {
-				onResult: function( result ) {
-					var result_data = result.getResult();
-					if ( result_data.length > 0 ) {
-						$this.edit_view_ui_dic['default_job_item_id'].setValue( result_data[0].id );
-						$this.current_edit_record.default_job_item_id = result_data[0].id;
-
-					} else {
-						$this.edit_view_ui_dic['default_job_item_id'].setValue( '' );
-						$this.current_edit_record.default_job_item_id = false;
-					}
-
-				}
-			} );
-			this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
-			this.edit_view_ui_dic['default_job_item_id'].setCheckBox( true );
-		}
-
-	},
-
 	getFilterColumnsFromDisplayColumns: function() {
 		var column_filter = {};
 		column_filter.company_id = true;
@@ -3137,13 +2971,13 @@ EmployeeViewController = BaseViewController.extend( {
 	},
 
 
-	getFilterColumnsFromDisplayColumns: function(column_filter, enable_system_columns ) {
-		if ( column_filter== undefined ) {
+	getFilterColumnsFromDisplayColumns: function( column_filter, enable_system_columns ) {
+		if ( column_filter == undefined ) {
 			column_filter = {};
 		}
 		column_filter.latitude = true;
 		column_filter.longitude = true;
-		return this._getFilterColumnsFromDisplayColumns(column_filter, enable_system_columns)
+		return this._getFilterColumnsFromDisplayColumns( column_filter, enable_system_columns )
 	},
 
 } );

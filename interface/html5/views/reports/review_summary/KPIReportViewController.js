@@ -6,7 +6,7 @@ KPIReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'KPIReport';
 		this.viewId = 'KPIReport';
 		this.context_menu_name = $.i18n._( 'Review Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'KPIReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIKPIReport' ))();
 	},

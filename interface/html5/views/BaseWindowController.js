@@ -12,17 +12,17 @@ BaseWindowController = Backbone.View.extend( {
 		BaseWizardController.call_back = null;
 
 		//FIXME: pull this out when all wizards are refactored to the new way #1187
-		if( typeof this.setDefaultDataToSteps == 'function' ) {
-			this.setDefaultDataToSteps()
+		if ( typeof this.setDefaultDataToSteps == 'function' ) {
+			this.setDefaultDataToSteps();
 		}
 
 		var $this = this;
 		var required_files = this.filterRequiredFiles();
 		require( required_files, function() {
 			if ( typeof $this.init == 'function' ) {
-				$this.init(options);
+				$this.init( options );
 			}
-		});
+		} );
 	},
 
 	render: function() {
@@ -44,17 +44,17 @@ BaseWindowController = Backbone.View.extend( {
 		} else {
 			for ( var edition_id in required_files ) {
 				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
-					retval = retval.concat(required_files[edition_id])
+					retval = retval.concat( required_files[edition_id] );
 				}
 			}
 		}
 
-		Debug.Arr(retval,'RETVAL','BaseWindowController.js','BaseWindowController','filterRequiredFiles',10)
+		Debug.Arr( retval, 'RETVAL', 'BaseWindowController.js', 'BaseWindowController', 'filterRequiredFiles', 10 );
 		return retval;
 	},
 
 	preInit: function() {
 		//override in child class
-	},
+	}
 
 } );

@@ -168,11 +168,11 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		var $this = this;
 		var allow_multiple_selection = false;
 
-		this.setTabLabels( {
-			'tab_recurring_ps_amendment': $.i18n._( 'Recurring PS Amendment' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_recurring_ps_amendment': { 'label': $.i18n._( 'Recurring PS Amendment' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIRecurringPayStubAmendment' )),
@@ -198,14 +198,14 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		// Status
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.filtered_status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_recurring_ps_amendment_column1, '' );
 
 		// Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -214,7 +214,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		form_item_input.TTextInput( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -223,20 +223,20 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'frequency_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'frequency_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.frequency_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Frequency' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'start_date'} );
+		form_item_input.TDatePicker( { field: 'start_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'end_date'} );
+		form_item_input.TDatePicker( { field: 'end_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Employee(s)
@@ -256,7 +256,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		// Pay Stub Amendment
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Pay Stub Amendment' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Pay Stub Amendment' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_recurring_ps_amendment_column1 );
 
 		// Pay Stub Account
@@ -279,7 +279,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 
 		// Amount Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Amount Type' ), form_item_input, tab_recurring_ps_amendment_column1 );
 
@@ -288,20 +288,20 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		// Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'rate', width: 149, hasKeyEvent: true} );
+		form_item_input.TTextInput( { field: 'rate', width: 149, hasKeyEvent: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Rate' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true, null, null, true );
 
 		// Units
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'units', width: 149, hasKeyEvent: true} );
+		form_item_input.TTextInput( { field: 'units', width: 149, hasKeyEvent: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Units' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true, null, null, true );
 
 		// Amount
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'amount', width: 149} );
+		form_item_input.TTextInput( { field: 'amount', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Amount' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true );
 
 		// Percent
@@ -309,7 +309,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		//Percent
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'percent_amount', width: 79} );
+		form_item_input.TTextInput( { field: 'percent_amount', width: 79 } );
 		this.addEditFieldToColumn( $.i18n._( 'Percent' ), form_item_input, tab_recurring_ps_amendment_column1, '', null, true );
 
 		args = {};
@@ -334,7 +334,7 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		// Pay Stub Note (Public)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ps_amendment_description', width: 359} );
+		form_item_input.TTextInput( { field: 'ps_amendment_description', width: 359 } );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Stub Note (Public)' ), form_item_input, tab_recurring_ps_amendment_column1, '' );
 
 	},
@@ -344,50 +344,62 @@ RecurringPayStubAmendmentViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				basic_search: true,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Type' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Status' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Frequency' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Frequency' ),
 				in_column: 2,
 				field: 'frequency_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				multiple: true,
 				basic_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
 				api_class: (APIFactory.getAPIClass( 'APIUser' )),
 				multiple: true,
 				basic_search: true,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	}
 

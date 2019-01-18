@@ -59,7 +59,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 	function getOptions( $name = FALSE, $parent = NULL ) {
 		if ( $name == 'columns'
 				AND ( !$this->getPermissionObject()->Check('remittance_destination_account', 'enabled')
-					OR !( $this->getPermissionObject()->Check('remittance_destination_account', 'view') OR $this->getPermissionObject()->Check('remittance_destination_account', 'view_own') ) ) ) {
+					OR !( $this->getPermissionObject()->Check('remittance_destination_account', 'view') OR $this->getPermissionObject()->Check('remittance_destination_account', 'view_own') OR $this->getPermissionObject()->Check('remittance_destination_account', 'view_child') ) ) ) {
 			$name = 'list_columns';
 		}
 
@@ -70,15 +70,25 @@ class APIRemittanceDestinationAccount extends APIFactory {
 	 * Get default remittance destination account data for creating new remittance destination accounts.
 	 * @return array
 	 */
-	function getRemittanceDestinationAccountDefaultData() {
+	function getRemittanceDestinationAccountDefaultData( $ach_transaction_type = NULL ) {
 		$company_obj = $this->getCurrentCompanyObject();
 		Debug::Text('Getting remittance destination account default data...', __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $ach_transaction_type == '' ) {
+			$ach_transaction_type = 22; //Checking
+		}
+
+		if ( $ach_transaction_type == 32 ) { //Savings
+			$name = TTi18n::getText('Savings Account');
+		} else {
+			$name = TTi18n::getText('Checking Account');
+		}
 
 		$data = array(
 			'company_id' => $company_obj->getId(),
 //			'user_id' => $user_obj->getId(), // As the employee edit tab sub view, the user_id should be the current editing employee, rather than the login one.
 			'status_id' => 10, //enabled
-			'name' => TTi18n::getText('Checking Account'),
+			'name' => $name,
 			'priority' => 5,
 			'amount_type' => 10, //percent
 			'percent_amount' => 100,
@@ -115,14 +125,14 @@ class APIRemittanceDestinationAccount extends APIFactory {
 	 * @return array
 	 */
 	function getRemittanceDestinationAccount( $data = NULL, $disable_paging = FALSE ) {
-		if ( !$this->getPermissionObject()->Check('remittance_destination_account', 'enabled')
-				OR !( $this->getPermissionObject()->Check('remittance_destination_account', 'view') OR $this->getPermissionObject()->Check('remittance_destination_account', 'view_own') ) ) {
-			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
-		}
 		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
-		//Allow supervisor (subordinates only) to see all job titles.
-		//$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user', 'view' );
+		if ( !$this->getPermissionObject()->Check('remittance_destination_account', 'enabled')
+				OR !( $this->getPermissionObject()->Check('remittance_destination_account', 'view') OR $this->getPermissionObject()->Check('remittance_destination_account', 'view_own') OR $this->getPermissionObject()->Check('remittance_destination_account', 'view_child') ) ) {
+			return $this->getPermissionObject()->PermissionDenied();
+		}
+
+		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'remittance_destination_account', 'view' );
 
 		//Allow getting users from other companies, so we can change admin contacts when using the master company.
 		if ( isset($data['filter_data']['company_id'])
@@ -133,15 +143,15 @@ class APIRemittanceDestinationAccount extends APIFactory {
 			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
-		$utlf = TTnew( 'RemittanceDestinationAccountListFactory' );
-		$utlf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
-		Debug::Text('Record Count: '. $utlf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
-		if ( $utlf->getRecordCount() > 0 ) {
-			$this->setPagerObject( $utlf );
+		$rdalf = TTnew( 'RemittanceDestinationAccountListFactory' );
+		$rdalf->getAPISearchByCompanyIdAndArrayCriteria( $company_id, $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
+		Debug::Text('Record Count: '. $rdalf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		if ( $rdalf->getRecordCount() > 0 ) {
+			$this->setPagerObject( $rdalf );
 
 			$retarr = array();
-			foreach( $utlf as $ut_obj ) {
-				$retarr[] = $ut_obj->getObjectAsArray( $data['filter_columns'] );
+			foreach( $rdalf as $ut_obj ) {
+				$retarr[] = $ut_obj->getObjectAsArray( $data['filter_columns'], $data['filter_data']['permission_children_ids'] );
 			}
 
 			return $this->returnHandler( $retarr );
@@ -185,7 +195,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 		}
 
 		if ( !$this->getPermissionObject()->Check('remittance_destination_account', 'enabled')
-				OR !( $this->getPermissionObject()->Check('remittance_destination_account', 'edit') OR $this->getPermissionObject()->Check('remittance_destination_account', 'edit_own') OR $this->getPermissionObject()->Check('remittance_destination_account', 'add') ) ) {
+				OR !( $this->getPermissionObject()->Check('remittance_destination_account', 'edit') OR $this->getPermissionObject()->Check('remittance_destination_account', 'edit_own') OR $this->getPermissionObject()->Check('remittance_destination_account', 'edit_child') OR $this->getPermissionObject()->Check('remittance_destination_account', 'add') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -215,7 +225,8 @@ class APIRemittanceDestinationAccount extends APIFactory {
 							OR
 								(
 								$this->getPermissionObject()->Check('remittance_destination_account', 'edit')
-									OR ( $this->getPermissionObject()->Check('remittance_destination_account', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('remittance_destination_account', 'edit_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+									OR ( $this->getPermissionObject()->Check('remittance_destination_account', 'edit_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )
 								) ) {
 
 							Debug::Text('Row Exists, getting current data for ID: '. $row['id'], __FILE__, __LINE__, __METHOD__, 10);
@@ -230,7 +241,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 					}
 				} else {
 					//Adding new object, check ADD permissions.
-					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('user', 'add'), TTi18n::gettext('Add permission denied') );
+					$primary_validator->isTrue( 'permission', $this->getPermissionObject()->Check('remittance_destination_account', 'add'), TTi18n::gettext('Add permission denied') );
 				}
 				Debug::Arr($row, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
@@ -289,7 +300,7 @@ class APIRemittanceDestinationAccount extends APIFactory {
 		}
 
 		if ( !$this->getPermissionObject()->Check('remittance_destination_account', 'enabled')
-				OR !( $this->getPermissionObject()->Check('remittance_destination_account', 'delete') OR $this->getPermissionObject()->Check('remittance_destination_account', 'delete_own') ) ) {
+				OR !( $this->getPermissionObject()->Check('remittance_destination_account', 'delete') OR $this->getPermissionObject()->Check('remittance_destination_account', 'delete_own') OR $this->getPermissionObject()->Check('remittance_destination_account', 'delete_child') ) ) {
 			return	$this->getPermissionObject()->PermissionDenied();
 		}
 
@@ -311,7 +322,8 @@ class APIRemittanceDestinationAccount extends APIFactory {
 					if ( $lf->getRecordCount() == 1 ) {
 						//Object exists, check edit permissions
 						if ( $this->getPermissionObject()->Check('remittance_destination_account', 'delete')
-								OR ( $this->getPermissionObject()->Check('remittance_destination_account', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getID() ) === TRUE ) ) {
+								OR ( $this->getPermissionObject()->Check('remittance_destination_account', 'delete_own') AND $this->getPermissionObject()->isOwner( $lf->getCurrent()->getCreatedBy(), $lf->getCurrent()->getUser() ) === TRUE )
+								OR ( $this->getPermissionObject()->Check('remittance_destination_account', 'delete_child') AND $this->getPermissionObject()->isChild( $lf->getCurrent()->getUser(), $permission_children_ids ) === TRUE )) {
 							Debug::Text('Record Exists, deleting record ID: '. $id, __FILE__, __LINE__, __METHOD__, 10);
 							$lf = $lf->getCurrent();
 						} else {

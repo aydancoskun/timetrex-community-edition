@@ -81,10 +81,11 @@ class ContributingShiftPolicyFactory extends Factory {
 										200 => TTi18n::gettext('Full Shift (Must Start & End)'), //Does not split worked time to the Start/End time. Full shift must fall within filter times.
 										210 => TTi18n::gettext('Full Shift (Must Start)'), //Normal Punch In between filter Start/End Time
 										220 => TTi18n::gettext('Full Shift (Must End)'), //Normal Punch Out between filter Start/End Time
-										230 => TTi18n::gettext('Full Shift (Majority of Shift)'), //Majority of shift falls between filter Start/End time. Tie breaker (50/50%) goes to start time.
-										//232 => TTi18n::gettext('Full Shift (Majority of Shift [Start])'), //Majority of shift falls between Start/End time. Using Start time as tie breaker.
-										//234 => TTi18n::gettext('Full Shift (Majority of Shift [End])'), //Majority of shift falls between Start/End time. Using End time as tie breaker.
+										230 => TTi18n::gettext('Full Shift (Majority of Shift Worked)'), //Majority of time worked falls between filter Start/End time. Tie breaker (50/50%) goes to start time.
+										//232 => TTi18n::gettext('Full Shift (Majority of Shift Worked [Start])'), //Majority of shift worked falls between Start/End time. Using Start time as tie breaker.
+										//234 => TTi18n::gettext('Full Shift (Majority of Shift Worked [End])'), //Majority of shift worked falls between Start/End time. Using End time as tie breaker.
 
+										330 => TTi18n::gettext('Full Shift (Majority of Shift Observed)'), //Majority of shift observed (only considers shift start/end time not time worked) falls between filter Start/End time. Tie breaker (50/50%) goes to start time.
 
 										//FIXME: In future, perhaps add types to be based on the schedule time, not the worked time.
 										//Differential is paid on what they work, but determined (rate of pay) by what they were supposed to work (schedule).
@@ -1160,7 +1161,7 @@ class ContributingShiftPolicyFactory extends Factory {
 						Debug::text(' Within Active Time!', __FILE__, __LINE__, __METHOD__, 10);
 						return TRUE;
 					} elseif (  getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL
-								AND ( $this->getIncludeShiftType() == 210 OR $this->getIncludeShiftType() == 220 OR $this->getIncludeShiftType() == 230 )
+								AND ( in_array( $this->getIncludeShiftType(), array( 210, 220, 230, 330 ) ) )
 								AND ( isset($calculate_policy_obj->user_date_total[$udt_key]) AND is_object($calculate_policy_obj->user_date_total[$udt_key]) )
 								AND isset($shift_data['user_date_total_key_map'][$udt_key])
 								AND isset($shift_data[$shift_data['user_date_total_key_map'][$udt_key]]) ) {
@@ -1181,7 +1182,7 @@ class ContributingShiftPolicyFactory extends Factory {
 //							}
 						} elseif ( $this->getIncludeShiftType() == 220 ) { //220=Full Shift (Shift Must End)
 							if ( isset( $tmp_shift_data['last_out'] )
-									AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']] )
+								AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']] )
 									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']]->getEndTimeStamp() >= $tmp_start_time_stamp
 									AND $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']]->getEndTimeStamp() <= $tmp_end_time_stamp
 									AND $this->isActiveDayOfWeekOrHoliday( $tmp_end_time_stamp, $calculate_policy_obj ) ) {
@@ -1191,7 +1192,7 @@ class ContributingShiftPolicyFactory extends Factory {
 //							else {
 //								Debug::text( ' NOT Matched within Shift End Time: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
 //							}
-						} elseif( $this->getIncludeShiftType() == 230 ) { //230=Full Shift (Majority of Shift)
+						} elseif( $this->getIncludeShiftType() == 230 ) { //230=Full Shift (Majority of Shift Worked)
 							if ( isset( $tmp_shift_data['total_time_filter_overlap'] ) AND $tmp_shift_data['total_time_filter_overlap'] > ( $tmp_shift_data['total_time'] / 2 )
 									AND ( isset( $tmp_shift_data['day_with_most_time'] ) AND $this->isActiveDayOfWeekOrHoliday( $tmp_shift_data['day_with_most_time'], $calculate_policy_obj ) ) ) {
 								Debug::text( ' Matched within Majority Shift: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
@@ -1212,6 +1213,34 @@ class ContributingShiftPolicyFactory extends Factory {
 //							else {
 //								Debug::text( ' NOT Matched within Majority Shift: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
 //							}
+						} elseif( $this->getIncludeShiftType() == 330 ) { //430=Full Shift (Majority of Shift Observed) where Observed is just the shift start time and end time, regardless of how much time they worked between that.
+							Debug::text( ' Checking within Majority Shift Observed:  UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+							if ( isset( $tmp_shift_data['first_in'] ) AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']] )
+									AND isset( $tmp_shift_data['last_out'] ) AND isset( $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']] ) ) {
+								$time_overlap_arr = TTDate::getTimeOverLap( $tmp_start_time_stamp, $tmp_end_time_stamp, $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp(), $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']]->getEndTimeStamp() );
+								$total_observed_shift_time = ( $calculate_policy_obj->user_date_total[$tmp_shift_data['last_out']]->getEndTimeStamp() - $calculate_policy_obj->user_date_total[$tmp_shift_data['first_in']]->getStartTimeStamp() );
+								if ( is_array($time_overlap_arr) ) {
+									if ( ( $time_overlap_arr['end_date'] - $time_overlap_arr['start_date'] ) > ( $total_observed_shift_time / 2 )
+											AND $this->isActiveDayOfWeekOrHoliday( $tmp_shift_data['day_with_most_time'], $calculate_policy_obj ) ) {
+										Debug::text( '   Matched within Majority Shift Observed: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+										return TRUE;
+									} elseif ( ( $time_overlap_arr['end_date'] - $time_overlap_arr['start_date'] ) == ( $total_observed_shift_time / 2 ) ) {
+										Debug::text( '   Shift has 50/50 split: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+										if ( $calculate_policy_obj->user_date_total[ $tmp_shift_data['first_in'] ]->getStartTimeStamp() >= $tmp_start_time_stamp
+												AND $calculate_policy_obj->user_date_total[ $tmp_shift_data['first_in'] ]->getStartTimeStamp() <= $tmp_end_time_stamp
+												AND $this->isActiveDayOfWeekOrHoliday( $tmp_start_time_stamp, $calculate_policy_obj ) ) {
+											Debug::text( '   Matched within Majority Shift Observed, 50/50 split: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+											return TRUE;
+										} else {
+											Debug::text( '   NOT Matched within Majority Shift Observed, 50/50 split: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+										}
+									}
+								}
+//								else {
+//									Debug::text( '   No overlap within Majority Shift Observed: UDT Key: ' . $udt_key, __FILE__, __LINE__, __METHOD__, 10 );
+//								}
+								unset( $time_overlap_arr, $total_observed_shift_time );
+							}
 						}
 					} elseif ( ( $start_time_stamp == '' OR $end_time_stamp == '' OR $start_time_stamp == $end_time_stamp ) ) { //Must go AFTER the above IF statements.
 						//When IncludeHolidayType != 10 this trigger here.

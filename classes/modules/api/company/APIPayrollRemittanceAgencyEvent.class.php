@@ -98,13 +98,14 @@ class APIPayrollRemittanceAgencyEvent extends APIFactory {
 	 * @return array
 	 */
 	function getPayrollRemittanceAgencyEvent( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check( 'payroll_remittance_agency', 'enabled' )
 				OR !( $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'view' ) OR $this->getPermissionObject()->Check( 'payroll_remittance_agency', 'view_own' ) ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			//Rather then permission denied, restrict to just 'list_view' columns.
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( ( isset( $data['filter_columns'] ) ) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions( 'list_columns' ) ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$blf = TTnew( 'PayrollRemittanceAgencyEventListFactory' );
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );

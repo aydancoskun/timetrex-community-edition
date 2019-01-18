@@ -11,13 +11,13 @@
     -webkit-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    height: calc(100% - 100px);
+    height: calc(100% - 70px);
     width: calc(100% - 100px);
     max-width: 1000px;
     max-height: 700px;
     font-size: 12px;
     text-align: center;
-    z-index: 50;
+    z-index: 95;
     border-radius: 10px;
     -moz-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
@@ -453,6 +453,7 @@ progress::-moz-progress-bar {
     max-width: none;
     max-height: none;
     width: calc(100% - 25px);
+    z-index: 150;
 }
 
 /*.report-view-wizard {*/
@@ -502,9 +503,15 @@ progress::-moz-progress-bar {
 
 .report-view-wizard > .content > .iframe {
     width: 100%;
-    height: 100%;
+    height: 99%;
     border: none;
     background-color: #FFFFFF;
+}
+
+.report-view-wizard > .content {
+    overflow-y:auto;
+    -webkit-overflow-scrolling: touch; /* Allow apple devices to scroll the report iframe */
+
 }
 
 
@@ -608,7 +615,7 @@ progress::-moz-progress-bar {
     top: 0;
     width: 100%;
     height: 100%;
-    z-index: 49;
+    z-index: 149;
 }
 
 /*.wizard .edit-view-form-item-label-div-first-row {*/
@@ -823,3 +830,10 @@ progress::-moz-progress-bar {
 /*margin-right: 10px;*/
 /*line-height: 20px;*/
 /*}*/
+.wizard .progress {
+    height: 35px;
+    width: 97%;
+    background-color: #eaeaea;
+    display: block;
+    margin: 0 auto;
+}

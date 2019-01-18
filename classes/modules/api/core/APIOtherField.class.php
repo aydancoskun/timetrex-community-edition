@@ -87,13 +87,14 @@ class APIOtherField extends APIFactory {
 	 * @return array
 	 */
 	function getOtherField( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('other_field', 'enabled')
 				OR !( $this->getPermissionObject()->Check('other_field', 'view') OR $this->getPermissionObject()->Check('other_field', 'view_own') OR $this->getPermissionObject()->Check('other_field', 'view_child')	) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			//Rather then permission denied, restrict to just 'list_view' columns.
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'other_field', 'view' );
 

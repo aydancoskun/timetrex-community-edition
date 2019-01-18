@@ -29,21 +29,20 @@
 
 		this.isAdvTabVisible = function() {
 			return !hidedAdvTab;
-		}
+		};
 
 		this.isCollapsed = function() {
 			return is_collapsed;
 		};
 
 		this.hideAdvSearchPanel = function() {
-
-			$( tab ).tabs( 'remove', 1 );
+			$( tab ).find( 'li[aria-controls=adv_search]' ).remove();
 			hidedAdvTab = true;
 		};
 
 		this.setSearchFlag = function( filter ) {
-			var basic_tab = this.find( "a[href='#basic_search']" );
-			var adv_tab = this.find( "a[href='#adv_search']" );
+			var basic_tab = this.find( 'a[href=\'#basic_search\']' );
+			var adv_tab = this.find( 'a[href=\'#adv_search\']' );
 
 			basic_tab.removeClass( 'active-label' );
 			adv_tab.removeClass( 'active-label' );
@@ -61,17 +60,17 @@
 				if ( key === 'hierarchy_level' && (filter[key].value == 1 || filter[key].value.value == 1) ) {
 					continue;
 				}
-				hasFilter = true
+				hasFilter = true;
 			}
 
 			if ( hasFilter ) {
 				$( this ).find( '.search-flag' ).remove();
 				if ( select_tab_index === 0 || hidedAdvTab ) {
 					basic_tab.addClass( 'active-label' );
-					basic_tab.html( $.i18n._( "BASIC SEARCH" ) + "<img title='" + $.i18n._( 'Search is currently active' ) + "' src='" + Global.getRealImagePath( "css/global/widgets/ribbon/icons/alert-16x16.png" ) + "' class='search-flag'> </img>" )
+					basic_tab.html( $.i18n._( 'BASIC SEARCH' ) + '<img title=\'' + $.i18n._( 'Search is currently active' ) + '\' src=\'' + Global.getRealImagePath( 'css/global/widgets/ribbon/icons/alert-16x16.png' ) + '\' class=\'search-flag\'> </img>' );
 				} else {
 					adv_tab.addClass( 'active-label' );
-					adv_tab.html( $.i18n._( "ADVANCED SEARCH" ) + "<img title='" + $.i18n._( 'Search is currently active' ) + "' src='" + Global.getRealImagePath( "css/global/widgets/ribbon/icons/alert-16x16.png" ) + "' class='search-flag'> </img>" );
+					adv_tab.html( $.i18n._( 'ADVANCED SEARCH' ) + '<img title=\'' + $.i18n._( 'Search is currently active' ) + '\' src=\'' + Global.getRealImagePath( 'css/global/widgets/ribbon/icons/alert-16x16.png' ) + '\' class=\'search-flag\'> </img>' );
 				}
 			} else {
 				$( this ).find( '.search-flag' ).remove();
@@ -92,12 +91,12 @@
 				trigger_change_event = true;
 			}
 
-			$( tab ).tabs( 'select', val );
-		}
+			$( tab ).tabs( 'option', 'active', val );
+		};
 
 		this.getLastSelectTabIndex = function() {
-			return last_select_tab_index
-		}
+			return last_select_tab_index;
+		};
 
 		this.getLastSelectTabId = function() {
 
@@ -106,14 +105,25 @@
 			}
 
 			return $( last_select_tab.tab ).attr( 'ref' );
-		}
+		};
 
 		this.getSelectTabIndex = function() {
-			return select_tab_index
-		}
+			return select_tab_index;
+		};
 
 		this.getLayoutsArray = function() {
 			return layouts_array;
+		};
+
+		function setGridSize() {
+			if ( related_view_controller.grid ) {
+				related_view_controller.setGridSize();
+				related_view_controller.setGridColumnsWidth();
+
+				if ( related_view_controller.column_selector ) { //This doesn't exist on Attendance -> TimeSheet, Basic Search. JS exception: TypeError: related_view_controller.column_selector is null
+					related_view_controller.column_selector.setGridColumnsWidths(); //It seems that browser optimize out scrollBar calculations until the DOM is actually visible, so need to do this at the last moment.
+				}
+			}
 		}
 
 		//Set Select Layout combobox
@@ -127,14 +137,14 @@
 			if ( layouts_array && layouts_array.length > 0 ) {
 				var len = layouts_array.length;
 				for ( var i = 0; i < len; i++ ) {
-					var item = layouts_array[i]
-					$( layout_selector ).append( '<option value="' + item.id + '">' + item.name + '</option>' )
+					var item = layouts_array[i];
+					$( layout_selector ).append( '<option value="' + item.id + '">' + item.name + '</option>' );
 				}
 
 				$( $( layout_selector ).find( 'option' ) ).filter( function() {
 
 					//Saved layout id should always be number
-					return parseInt( $( this ).attr( 'value' ) ) === related_view_controller.select_layout.id;
+					return $( this ).attr( 'value' ) == related_view_controller.select_layout.id;
 				} ).prop( 'selected', true ).attr( 'selected', true );
 
 				$( layout_selector_div ).css( 'display', 'block' );
@@ -153,9 +163,9 @@
 		this.each( function() {
 			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
 
-			var basic_tab = $( this ).find( "a[href='#basic_search']" );
-			var adv_tab = $( this ).find( "a[href='#adv_search']" );
-			var layout_tab = $( this ).find( "a[href='#saved_layout']" );
+			var basic_tab = $( this ).find( 'a[href=\'#basic_search\']' );
+			var adv_tab = $( this ).find( 'a[href=\'#adv_search\']' );
+			var layout_tab = $( this ).find( 'a[href=\'#saved_layout\']' );
 
 			var current_view_label = $( this ).find( '.current-view-label' );
 
@@ -176,9 +186,10 @@
 
 			var column_selector = Global.loadWidget( 'global/widgets/awesomebox/ADropDown.html' );
 
+
 			var searchButtonDiv = $( this ).find( '.search-btn-div' );
 
-			var refresh_btn = $( this ).find( "#refreshBtn" );
+			var refresh_btn = $( this ).find( '#refreshBtn' );
 
 			refresh_btn.bind( 'click', function() {
 				refresh_btn.addClass( 'button-rotate' );
@@ -207,57 +218,64 @@
 
 			related_view_controller = o.viewController;
 
-			$( layout_selector ).change( $.proxy( function() {
+			$( layout_selector ).on( 'change', function() {
+				related_view_controller.layout_changed = true;
 
-				$( layout_selector ).find( 'option:selected' ).each( function() {
-					var selectId = $( this ).attr( 'value' );
-					var len = layouts_array.length;
-					for ( var i = 0; i < len; i++ ) {
-						var item = layouts_array[i];
+				var selectId = $( layout_selector ).find( 'option:selected' ).attr( 'value' );
+				var len = layouts_array.length;
+				for ( var i = 0; i < len; i++ ) {
+					var item = layouts_array[i];
 
-						if ( item.id == selectId ) {
-							related_view_controller.select_layout = item;
-							related_view_controller.setSelectLayout();
-							related_view_controller.search();
-							break;
-						}
-
+					if ( item.id == selectId ) {
+						related_view_controller.select_layout = item;
+						related_view_controller.setSelectLayout();
+						related_view_controller.search();
+						break;
 					}
-				} );
 
-			}, this ) );
+				}
 
-			$( tab ).tabs();
+			} );
 
-			$( tab ).bind( 'tabsselect', onMenuSelect );
+			// Switch and expand search panel on tab changes.
+			$( tab ).tabs( { 'activate': onMenuSelect } );
 
-			$( tab ).find( 'li' ).mousedown( function( e ) {
+			// Expand search panel on an already active tab click.
+			$( tab ).find( 'li' ).click( function( e ) {
 				if ( is_collapsed ) {
 					onCollapseBtnClick();
 				}
 			} );
 
 			function onMenuSelect( e, ui ) {
-
 				last_select_tab_index = select_tab_index;
 
 				last_select_tab = select_tab;
 
-				select_tab_index = ui.index;
+				select_tab_index = ui.newTab.index();
 
 				select_tab = ui;
 
 				if ( trigger_change_event ) {
 
-					$this.trigger( 'searchTabSelect', [e, ui] );
-				} else
+					$this.trigger( 'searchTabSelect', [e, ui.newPanel] );
+				} else {
 					trigger_change_event = true;
+				}
 
-				var delayCaller = setInterval( function() {
-					clearInterval( delayCaller );
-					related_view_controller.setGridSize();
-				}, 1 );
+				if ( is_collapsed ) {
+					onCollapseBtnClick();
+				}
 
+				setGridSize();
+
+				//delayCaller would cause "flashing" when switching between Basic/Advanced/Saved Search tabs.
+				// var delayCaller = setInterval( function() {
+				// 	if ( related_view_controller.grid ) {
+				// 		clearInterval( delayCaller );
+				// 		setGridSize();
+				// 	}
+				// }, 1 );
 			}
 
 			$( collapseBtn ).click( onCollapseBtnClick );
@@ -281,8 +299,24 @@
 					$( searchButtonDiv ).css( 'display', 'none' );
 				}
 
-				related_view_controller.setGridSize();
+				setGridSize();
 			}
+
+			// function resizeGrid() {
+			// 	if (!interval) {
+			// 		var interval = setInterval(function () {
+			// 			if ( related_view_controller.grid ) {
+			// 				clearInterval(interval);
+			// 				var offset = $('.search-panel').outerHeight() + $('.search-btn-div').outerHeight() + $('.total-number-div').outerHeight() + $('.grid-top-border').outerHeight() + $('.grid-bottom-border').outerHeight() + $('.search-panel-tab-bar').outerHeight() + $('.copyright-container').outerHeight();
+			// 				var height = parseInt($('#contentContainer').height() - offset);
+			// 				if ( height != related_view_controller.grid.getGridHeight() ) {
+			// 					related_view_controller.grid.setGridHeight(height);
+			// 					$('.grid-div').height('auto');
+			// 				}
+			// 			}
+			// 		}, 100 );
+			// 	}
+			// }
 
 		} );
 

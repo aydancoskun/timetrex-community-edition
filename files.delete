@@ -240,6 +240,7 @@
 /classes/modules/install/sql/postgresql/1032T.sql
 /classes/modules/install/sql/postgresql/1033T.sql
 /classes/modules/install/sql/postgresql/1034T.sql
+/classes/modules/import/ImportBankAccount.class.php
 
 /classes/tcpdf/fonts/old/
 /classes/tcpdf/fonts/utils/

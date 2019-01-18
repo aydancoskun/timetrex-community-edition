@@ -25,17 +25,17 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 		this.content_div.empty();
 		switch ( this.current_step ) {
 			case 1:
-				var label = this.getLabel()
+				var label = this.getLabel();
 				label.text( $.i18n._( 'Recalculating timesheets is only required when policies have been modified and need to be applied retroactively.' ) );
 
 				this.content_div.append( label );
 				break;
 			case 2:
-				label = this.getLabel()
-				label.text( $.i18n._( 'Select one or more pay periods' ) )
+				label = this.getLabel();
+				label.text( $.i18n._( 'Select one or more pay periods' ) );
 
 				var a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIPayPeriod' )), true, ALayoutIDs.PAY_PERIOD, 'pay_period_id' );
-				var div = $( "<div class='wizard-acombobox-div'></div>" );
+				var div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -50,7 +50,7 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 				label.text( $.i18n._( 'Select one or more employees' ) + ':' );
 
 				a_combobox = this.getAComboBox( (APIFactory.getAPIClass( 'APIUser' )), true, ALayoutIDs.USER, 'user_id', true );
-				div = $( "<div class='wizard-acombobox-div'></div>" );
+				div = $( '<div class=\'wizard-acombobox-div\'></div>' );
 				div.append( a_combobox );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -74,19 +74,19 @@ ReCalculateTimeSheetWizardController = BaseWizardController.extend( {
 			var pay_period_ids = this.stepsDataDic[2].pay_period_id;
 			var user_ids = this.stepsDataDic[3].user_id;
 
-			var timesheet_api = new (APIFactory.getAPIClass('APITimeSheet'))();
+			var timesheet_api = new (APIFactory.getAPIClass( 'APITimeSheet' ))();
 
 			//this is outside the callback to prevent hammer-clicking which was causing problems.
 			this.onCloseClick();
-			timesheet_api.reCalculateTimeSheet(pay_period_ids, user_ids, {
-				onResult: function (result) {
+			timesheet_api.reCalculateTimeSheet( pay_period_ids, user_ids, {
+				onResult: function( result ) {
 
-					if ($this.call_back) {
+					if ( $this.call_back ) {
 						$this.call_back();
 					}
 
 				}
-			});
+			} );
 		}
 	},
 

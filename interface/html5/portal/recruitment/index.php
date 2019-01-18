@@ -101,15 +101,16 @@ unset($authentication);
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="Description" content="Search job postings by local and international companies."/>
 	<title><?php echo TTi18n::getText('Job Search') . ' | '. APPLICATION_NAME;?></title>
-	<script async src="../../framework/stacktrace.js"></script>
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 	<!--[if lt IE 9]>
 	<script src="../../framework/html5shiv.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
 	<script src="../../framework/respond.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
 	<![endif]-->
+    <link rel="stylesheet" type="text/css" href="../../theme/default/css/jquery-ui/jquery-ui.min.css?v=<?php echo APPLICATION_BUILD?>">
+    <link rel="stylesheet" type="text/css" href="../../theme/default/css/global/widgets/datepicker/TDatePicker.css?v=<?php echo APPLICATION_BUILD?>">
 	<link title="application css" rel="stylesheet" type="text/css" href="../../theme/default/css/application.css?v=<?php echo APPLICATION_BUILD?>">
-	<link rel="stylesheet" type="text/css" href="../../theme/default/css/jquery-ui/jquery-ui.custom.css?v=<?php echo APPLICATION_BUILD?>">
+<!--	<link rel="stylesheet" type="text/css" href="../../theme/default/css/jquery-ui/jquery-ui.custom.css?v=--><?php //echo APPLICATION_BUILD?><!--">-->
 	<link rel="stylesheet" type="text/css" href="../../theme/default/css/views/login/LoginView.css?v=<?php echo APPLICATION_BUILD?>">
 
     <script>
@@ -117,6 +118,7 @@ unset($authentication);
 		DISABLE_DB = <?php if ( isset($disable_database_connection) AND $disable_database_connection == TRUE ) { echo '1'; } else { echo '0'; }?>;
     </script>
     <script src="../../global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
+    <link title="application css" rel="stylesheet" type="text/css" href="../../framework/bootstrap/css/glyphicons.css?v=<?php echo APPLICATION_BUILD?>">
 </head>
 
 <!--z-index
@@ -155,7 +157,7 @@ Login view:10
 		<!--<![endif]-->
 	</div>
 </div>
-<div id="bottomContainer" class="bottom-container need-hidden-element" ondragstart="return false;">
+<div id="bottomContainer" class="bottom-container need-hidden-element">
     <div class="footer">
         <div class="container">
             <div class="row">
@@ -173,9 +175,8 @@ Login view:10
 	<div class="modal-dialog modal-sm" aria-hidden="true" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-							aria-hidden="true">&times;</span></button>
 				<h4 class="modal-title" id="signinModalLabel"></h4>
+				<div class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></div>
 			</div>
 			<div id="signinModalBody" class="modal-body">
 				...

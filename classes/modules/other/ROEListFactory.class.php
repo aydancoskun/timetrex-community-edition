@@ -422,7 +422,7 @@ class ROEListFactory extends ROEFactory implements IteratorAggregate {
 		$query .= ( isset($filter_data['recall_date']) ) ? $this->getWhereClauseSQL( 'a.recall_date', $filter_data['recall_date'], 'date_range', $ph ) : NULL;
 
 		if ( isset($filter_data['termination_start_date']) AND (int)$filter_data['termination_start_date'] != 0 AND isset($filter_data['termination_end_date']) AND (int)$filter_data['termination_end_date'] != 0 ) {
-			$query .= ' AND ( uf.termination_date >= '. (int)$filter_data['termination_start_date'].' AND uf.termination_date <= '. (int)$filter_data['termination_end_date'].' ) ';
+			$query .= ' AND ( uf.termination_date >= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['termination_start_date'] ) ) .' AND uf.termination_date <= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['termination_end_date'] ) ) .' ) ';
 		}
 
 		$query .= ( isset($filter_data['serial']) ) ? $this->getWhereClauseSQL( 'a.serial', $filter_data['serial'], 'text', $ph ) : NULL;

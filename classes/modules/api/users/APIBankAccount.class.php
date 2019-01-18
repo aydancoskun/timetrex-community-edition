@@ -76,11 +76,12 @@ class APIBankAccount extends APIFactory {
 	 * @return array|bool
 	 */
 	function getBankAccount( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('user', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user', 'edit_bank') OR $this->getPermissionObject()->Check('user', 'edit_own_bank') OR $this->getPermissionObject()->Check('user', 'edit_child_bank')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		if ( $this->getPermissionObject()->Check('user', 'edit_bank') == TRUE ) {

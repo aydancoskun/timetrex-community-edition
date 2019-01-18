@@ -20,13 +20,13 @@
 .time-sheet-view .date-chooser-div .arrow {
     cursor: pointer;
     position: relative;
-    top: 2px;
+    top: -5px;
 }
 
 .time-sheet-view .date-chooser-div .label {
     margin-right: 5px;
     position: relative;
-    top: -2px;
+    top: -5px;
 }
 
 .time-sheet-view .date-chooser-div .date-picker-div {
@@ -35,6 +35,7 @@
     height: 24px;
     margin-right: 8px;
     margin-left: 8px;
+    overflow: hidden;
 
 }
 
@@ -51,7 +52,7 @@
 .time-sheet-view .employee-nav-div .navigation-label {
     float: left;
     margin-right: 10px;
-    margin-top: 6px;
+    margin-top: 9px;
 }
 
 .time-sheet-view .employee-nav-div .left-click {
@@ -188,6 +189,8 @@
     text-align: center;
     padding-top: 5px;
     padding-bottom: 2px;
+    position: relative;
+    top: 1px;
 }
 
 .time-sheet-view .verification-action-bar .verify-description {
@@ -248,7 +251,7 @@
     height: 25px;
     line-height: 25px;
     text-align: center;
-    border-right: 1px solid #FFFFFF;
+    text-align: center;
 }
 
 .time-sheet-view .timesheet-warning-title-bar {
@@ -283,12 +286,12 @@
 .time-sheet-view .action-chooser-div {
     float: left;
     margin-right: 10px;
-    margin-top: 5px;
+    margin-top: 7px;
 }
 
 .available-balance-info {
     position: relative;
-    top: 2px;
+    top: -2px;
     left: 5px;
 }
 
@@ -365,4 +368,8 @@
 .grid-inside-editor-render .group-column-tr {
     border-top: 1px solid rgb(221, 221, 221);
     height: 22px;
+}
+
+.timesheet-mode-div .toggle-button-div {
+    margin-top: 4px;
 }

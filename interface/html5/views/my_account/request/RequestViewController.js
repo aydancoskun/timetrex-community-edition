@@ -2,67 +2,67 @@ RequestViewController = RequestViewCommonController.extend( {
 	el: '#request_view_container',
 
 	_required_files: {
-		10:[ 'APIRequest', 'APIMessageControl', 'APIAuthorization', 'APISchedulePolicy', 'APISchedule', 'APIAbsencePolicy', 'APISchedulePolicy', 'APIBranch', 'APIDepartment'],
-		15:[ 'APIRequestSchedule'],
-		20:[ 'APIJob', 'APIJobItem']
+		10: ['APIRequest', 'APIMessageControl', 'APIAuthorization', 'APISchedulePolicy', 'APISchedule', 'APIAbsencePolicy', 'APISchedulePolicy', 'APIBranch', 'APIDepartment'],
+		15: ['APIRequestSchedule'],
+		20: ['APIJob', 'APIJobItem']
 	},
 	type_array: null,
 	status_array: null,
 
-	api_request_schedule:null,
-	authorization_api:null,
-	hierarchy_type_id:false,
+	api_request_schedule: null,
+	authorization_api: null,
+	hierarchy_type_id: false,
 	messages: null,
 
 
 	init: function( options ) {
-        //this._super('initialize', options);
-        this.edit_view_tpl = 'RequestEditView.html';
-        this.permission_id = 'request';
-        this.viewId = 'Request';
-        this.script_name = 'RequestView';
-        this.table_name_key = 'request';
-        this.context_menu_name = $.i18n._('Requests');
-        this.navigation_label = $.i18n._('Request') + ':';
-        this.api = new (APIFactory.getAPIClass('APIRequest'))();
-        this.api_absence_policy = new (APIFactory.getAPIClass('APIAbsencePolicy'))();
-        this.api_schedule = new (APIFactory.getAPIClass('APISchedule'))();
-        this.message_control_api = new (APIFactory.getAPIClass('APIMessageControl'))();
+		//this._super('initialize', options);
+		this.edit_view_tpl = 'RequestEditView.html';
+		this.permission_id = 'request';
+		this.viewId = 'Request';
+		this.script_name = 'RequestView';
+		this.table_name_key = 'request';
+		this.context_menu_name = $.i18n._( 'Requests' );
+		this.navigation_label = $.i18n._( 'Request' ) + ':';
+		this.api = new (APIFactory.getAPIClass( 'APIRequest' ))();
+		this.api_absence_policy = new (APIFactory.getAPIClass( 'APIAbsencePolicy' ))();
+		this.api_schedule = new (APIFactory.getAPIClass( 'APISchedule' ))();
+		this.message_control_api = new (APIFactory.getAPIClass( 'APIMessageControl' ))();
 
-        if (( LocalCacheData.getCurrentCompany().product_edition_id > 10 )) {
-            this.api_request_schedule = new (APIFactory.getAPIClass('APIRequestSchedule'))();
-        }
-        if (( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )) {
-            this.job_api = new (APIFactory.getAPIClass('APIJob'))();
-            this.job_item_api = new (APIFactory.getAPIClass('APIJobItem'))();
-        }
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) ) {
+			this.api_request_schedule = new (APIFactory.getAPIClass( 'APIRequestSchedule' ))();
+		}
+		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
+			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
+			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+		}
 
 		this.authorization_api = new (APIFactory.getAPIClass( 'APIAuthorization' ))();
 
-        this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
-        this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
-        this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
-        this.invisible_context_menu_dic[ContextMenuIconName.save] = true;
-        this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
-        this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
-        this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
-        this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.mass_edit] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.copy] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.copy_as_new] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.save] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.save_and_continue] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.save_and_next] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.save_and_copy] = true;
+		this.invisible_context_menu_dic[ContextMenuIconName.save_and_new] = true;
 
 
-        this.initPermission();
-        this.render();
-        this.buildContextMenu();
+		this.initPermission();
+		this.render();
+		this.buildContextMenu();
 
-        this.initData();
-        this.setSelectRibbonMenuIfNecessary();
-    },
+		this.initData();
+		this.setSelectRibbonMenuIfNecessary();
+	},
 
 	// override allows a callback after initOptions when run as sub view (from EmployeeViewController)
 	initOptions: function( callBack ) {
 
 		var options = [
-			{option_name: 'status'},
-			{option_name: 'type'},
+			{ option_name: 'status' },
+			{ option_name: 'type' }
 		];
 
 		this.initDropDownOptions( options, function( result ) {
@@ -76,57 +76,60 @@ RequestViewController = RequestViewCommonController.extend( {
 	},
 
 	buildEditViewUI: function() {
+		this._super( 'buildEditViewUI' );
 
-        this._super( 'buildEditViewUI' );
+		var tab_model = {
+			'tab_request': { 'label': $.i18n._( 'Message' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
-        this.setTabLabels( {
-            'tab_request': $.i18n._( 'Message' ),
-            'tab_audit': $.i18n._( 'Audit' )
-        } );
+		//This hides the audit tab as this view is always used for creating/replying to an existing request.
+		//For some reason removing 'tab_audit' from the model above results in a blank tab appearing.
+		var tab_audit_label = this.edit_view.find( 'a[ref=tab_audit]' );
+		tab_audit_label.css( 'display', 'none' );
 
-        var tab_audit_label = this.edit_view.find( 'a[ref=tab_audit]' );
+		//Tab 0 start
 
-        tab_audit_label.css( 'display', 'none' );
+		var tab_request = this.edit_view_tab.find( '#tab_request' );
+		var tab_request_column1 = tab_request.find( '.first-column' );
+		var tab_request_column2 = tab_request.find( '.second-column' );
 
-        //Tab 0 start
+		this.edit_view_tabs[0] = [];
+		this.edit_view_tabs[0].push( tab_request_column1 );
 
-        var tab_request = this.edit_view_tab.find( '#tab_request' );
+		// Subject
+		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-        var tab_request_column1 = tab_request.find( '.first-column' );
+		form_item_input.TTextInput( { field: 'subject', width: 359 } );
+		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column1, '' );
 
-        var tab_request_column2 = tab_request.find( '.second-column' );
+		// Body
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-        this.edit_view_tabs[0] = [];
+		form_item_input.TTextArea( { field: 'body', width: 600, height: 400 } );
 
-        this.edit_view_tabs[0].push( tab_request_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column1, '', null, null, true );
 
-        // Subject
-        var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-        form_item_input.TTextInput( {field: 'subject', width: 359} );
-        this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_request_column1, '' );
-
-        // Body
-        form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-
-        form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
-
-        this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_request_column1, '', null, null, true );
-
-        tab_request_column2.css( 'display', 'none' );
+		tab_request_column2.css( 'display', 'none' );
 	},
 
 	buildAddViewUI: function() {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_request': $.i18n._( 'Request' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_request': { 'label': $.i18n._( 'Request' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
+
+		//This hides the audit tab as this view is always used for creating/replying to an existing request.
+		//For some reason removing 'tab_audit' from the model above results in a blank tab appearing.
+		var tab_audit_label = this.edit_view.find( 'a[ref=tab_audit]' );
+		tab_audit_label.css( 'display', 'none' );
 
 		//Tab 0 start
-
 		var tab_request = this.edit_view_tab.find( '#tab_request' );
 		var tab_request_column1 = tab_request.find( '.first-column' );
 		var tab_request_column2 = tab_request.find( '.second-column' );
@@ -137,72 +140,72 @@ RequestViewController = RequestViewCommonController.extend( {
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name'} );
+		form_item_input.TText( { field: 'full_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_request_column1, '' );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_request_column1 );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'date_stamp'} );
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( '(Use the first or only date affected by this request)' ) + "</span>" );
+		form_item_input.TDatePicker( { field: 'date_stamp' } );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( '(Use the first or only date affected by this request)' ) + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_request_column1, '', widgetContainer );
 
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
 			//Working Status
-			form_item_input = Global.loadWidgetByName(FormItemType.COMBO_BOX);
-			form_item_input.TComboBox({field: 'request_schedule_status_id', set_empty: false});
-			form_item_input.setSourceData(Global.addFirstItemToArray({10: 'Working', 20: 'Absent'}));
-			this.addEditFieldToColumn($.i18n._('Status'), form_item_input, tab_request_column1);
+			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
+			form_item_input.TComboBox( { field: 'request_schedule_status_id', set_empty: false } );
+			form_item_input.setSourceData( Global.addFirstItemToArray( { 10: 'Working', 20: 'Absent' } ) );
+			this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_request_column1 );
 
 			//Start Date
-			form_item_input = Global.loadWidgetByName(FormItemType.DATE_PICKER);
-			form_item_input.TDatePicker({field: 'start_date'});
-			this.addEditFieldToColumn($.i18n._('Start Date'), form_item_input, tab_request_column1, '');
+			form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+			form_item_input.TDatePicker( { field: 'start_date' } );
+			this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_request_column1, '' );
 
 			//End  Date
-			form_item_input = Global.loadWidgetByName(FormItemType.DATE_PICKER);
-			form_item_input.TDatePicker({field: 'end_date'});
-			this.addEditFieldToColumn($.i18n._('End Date'), form_item_input, tab_request_column1, '');
+			form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
+			form_item_input.TDatePicker( { field: 'end_date' } );
+			this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_request_column1, '' );
 
 			// Effective Days
 			var form_item_sun_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_sun_checkbox.TCheckbox( {field: 'sun'} );
+			form_item_sun_checkbox.TCheckbox( { field: 'sun' } );
 
 			var form_item_mon_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_mon_checkbox.TCheckbox( {field: 'mon'} );
+			form_item_mon_checkbox.TCheckbox( { field: 'mon' } );
 
 			var form_item_tue_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_tue_checkbox.TCheckbox( {field: 'tue'} );
+			form_item_tue_checkbox.TCheckbox( { field: 'tue' } );
 
 			var form_item_wed_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_wed_checkbox.TCheckbox( {field: 'wed'} );
+			form_item_wed_checkbox.TCheckbox( { field: 'wed' } );
 
 			var form_item_thu_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_thu_checkbox.TCheckbox( {field: 'thu'} );
+			form_item_thu_checkbox.TCheckbox( { field: 'thu' } );
 
 			var form_item_fri_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_fri_checkbox.TCheckbox( {field: 'fri'} );
+			form_item_fri_checkbox.TCheckbox( { field: 'fri' } );
 
 			var form_item_sat_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_sat_checkbox.TCheckbox( {field: 'sat'} );
+			form_item_sat_checkbox.TCheckbox( { field: 'sat' } );
 
-			widgetContainer = $( "<div class=''></div>" );
+			widgetContainer = $( '<div/>' );
 
-			var sun = $( "<span class='widget-top-label'> " + $.i18n._( 'Sun' ) + " <br> " + " </span>" );
-			var mon = $( "<span class='widget-top-label'> " + $.i18n._( 'Mon' ) + " <br> " + " </span>" );
-			var tue = $( "<span class='widget-top-label'> " + $.i18n._( 'Tue' ) + " <br> " + " </span>" );
-			var wed = $( "<span class='widget-top-label'> " + $.i18n._( 'Wed' ) + " <br> " + " </span>" );
-			var thu = $( "<span class='widget-top-label'> " + $.i18n._( 'Thu' ) + " <br> " + " </span>" );
-			var fri = $( "<span class='widget-top-label'> " + $.i18n._( 'Fri' ) + " <br> " + " </span>" );
-			var sat = $( "<span class='widget-top-label'> " + $.i18n._( 'Sat' ) + " <br> " + " </span>" );
+			var sun = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Sun' ) + ' <br> ' + ' </span>' );
+			var mon = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Mon' ) + ' <br> ' + ' </span>' );
+			var tue = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Tue' ) + ' <br> ' + ' </span>' );
+			var wed = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Wed' ) + ' <br> ' + ' </span>' );
+			var thu = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Thu' ) + ' <br> ' + ' </span>' );
+			var fri = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Fri' ) + ' <br> ' + ' </span>' );
+			var sat = $( '<span class=\'widget-top-label\'> ' + $.i18n._( 'Sat' ) + ' <br> ' + ' </span>' );
 
 			sun.append( form_item_sun_checkbox );
 			mon.append( form_item_mon_checkbox );
@@ -220,86 +223,88 @@ RequestViewController = RequestViewCommonController.extend( {
 			widgetContainer.append( fri );
 			widgetContainer.append( sat );
 
+			widgetContainer.addClass('request_edit_view_effective_days');
+
 			this.addEditFieldToColumn( $.i18n._( 'Effective Days' ), [form_item_sun_checkbox, form_item_mon_checkbox, form_item_tue_checkbox, form_item_wed_checkbox, form_item_thu_checkbox, form_item_fri_checkbox, form_item_sat_checkbox], tab_request_column1, '', widgetContainer, false, true );
 
 			//Start time
-			form_item_input = Global.loadWidgetByName(FormItemType.TIME_PICKER);
-			form_item_input.TTimePicker({field: 'start_time'});
-			this.addEditFieldToColumn($.i18n._('In'), form_item_input, tab_request_column1);
+			form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+			form_item_input.TTimePicker( { field: 'start_time' } );
+			this.addEditFieldToColumn( $.i18n._( 'In' ), form_item_input, tab_request_column1 );
 
 			//End  time
-			form_item_input = Global.loadWidgetByName(FormItemType.TIME_PICKER);
-			form_item_input.TTimePicker({field: 'end_time'});
-			this.addEditFieldToColumn($.i18n._('Out'), form_item_input, tab_request_column1);
+			form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
+			form_item_input.TTimePicker( { field: 'end_time' } );
+			this.addEditFieldToColumn( $.i18n._( 'Out' ), form_item_input, tab_request_column1 );
 
 			// Total
-			form_item_input = Global.loadWidgetByName(FormItemType.TEXT);
-			form_item_input.TText({field: 'total_time'});
-			this.addEditFieldToColumn($.i18n._('Total'), form_item_input, tab_request_column1);
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+			form_item_input.TText( { field: 'total_time' } );
+			this.addEditFieldToColumn( $.i18n._( 'Total' ), form_item_input, tab_request_column1 );
 
 			//Schedule Policy
-			form_item_input = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
-			form_item_input.AComboBox({
-				api_class: (APIFactory.getAPIClass('APISchedulePolicy')),
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APISchedulePolicy' )),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.SCHEDULE_POLICY,
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'schedule_policy_id'
-			});
-			this.addEditFieldToColumn($.i18n._('Schedule Policy'), form_item_input, tab_request_column1);
+			} );
+			this.addEditFieldToColumn( $.i18n._( 'Schedule Policy' ), form_item_input, tab_request_column1 );
 
 			//Absence Policy
-			form_item_input = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
-			form_item_input.AComboBox({
-				api_class: (APIFactory.getAPIClass('APIAbsencePolicy')),
-				customSearchFilter: function(){
-					return {filter_data: {user_id: LocalCacheData.getLoginUser().id }};
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIAbsencePolicy' )),
+				customSearchFilter: function() {
+					return { filter_data: { user_id: LocalCacheData.getLoginUser().id } };
 				},
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
 				set_empty: true,
 				field: 'absence_policy_id'
-			});
-			this.addEditFieldToColumn($.i18n._('Absence Policy'), form_item_input, tab_request_column1);
+			} );
+			this.addEditFieldToColumn( $.i18n._( 'Absence Policy' ), form_item_input, tab_request_column1 );
 
 			//Available Balance
-			form_item_input = Global.loadWidgetByName(FormItemType.TEXT);
-			form_item_input.TText({field: 'available_balance'});
-			widgetContainer = $("<div class='widget-h-box'></div>");
-			this.available_balance_info = $('<img class="available-balance-info" src="' + Global.getRealImagePath('images/infox16x16.png') + '">');
-			widgetContainer.append(form_item_input);
-			widgetContainer.append(this.available_balance_info);
-			this.addEditFieldToColumn($.i18n._('Available Balance'), form_item_input, tab_request_column1, '', widgetContainer, true);
+			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
+			form_item_input.TText( { field: 'available_balance' } );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+			this.available_balance_info = $( '<img class="available-balance-info" src="' + Global.getRealImagePath( 'images/infox16x16.png' ) + '">' );
+			widgetContainer.append( form_item_input );
+			widgetContainer.append( this.available_balance_info );
+			this.addEditFieldToColumn( $.i18n._( 'Available Balance' ), form_item_input, tab_request_column1, '', widgetContainer, true );
 
 			//branch
-			form_item_input = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
-			form_item_input.AComboBox({
-				api_class: (APIFactory.getAPIClass('APIBranch')),
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.BRANCH,
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'branch_id'
-			});
-            if ( this.show_branch_ui ) {
-			    this.addEditFieldToColumn($.i18n._('Branch'), form_item_input, tab_request_column1);
-            }
+			} );
+			if ( this.show_branch_ui ) {
+				this.addEditFieldToColumn( $.i18n._( 'Branch' ), form_item_input, tab_request_column1 );
+			}
 
 			//Dept
-			form_item_input = Global.loadWidgetByName(FormItemType.AWESOME_BOX);
-			form_item_input.AComboBox({
-				api_class: (APIFactory.getAPIClass('APIDepartment')),
+			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+			form_item_input.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.DEPARTMENT,
 				show_search_inputs: true,
 				set_empty: true,
 				field: 'department_id'
-			});
+			} );
 
-            if ( this.show_department_ui ) {
-			    this.addEditFieldToColumn($.i18n._('Department'), form_item_input, tab_request_column1);
-            }
+			if ( this.show_department_ui ) {
+				this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_request_column1 );
+			}
 
 			if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 				//Job
@@ -313,19 +318,21 @@ RequestViewController = RequestViewCommonController.extend( {
 					set_empty: true,
 					setRealValueCallBack: (function( val ) {
 
-						if ( val ) job_coder.setValue( val.manual_id );
+						if ( val ) {
+							job_coder.setValue( val.manual_id );
+						}
 					}),
 					field: 'job_id',
 					added_items: [
-						{value: '-1', label: Global.default_item},
-						{value: '-2', label: Global.selected_item}
+						{ value: '-1', label: Global.default_item },
+						{ value: '-2', label: Global.selected_item }
 					]
 				} );
 
-				widgetContainer = $( "<div class='widget-h-box'></div>" );
+				widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 				var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				job_coder.TTextInput( {field: 'job_quick_search', disable_keyup_event: true} );
+				job_coder.TTextInput( { field: 'job_quick_search', disable_keyup_event: true } );
 				job_coder.addClass( 'job-coder' );
 
 				widgetContainer.append( job_coder );
@@ -333,11 +340,10 @@ RequestViewController = RequestViewCommonController.extend( {
 				this.addEditFieldToColumn( $.i18n._( 'Job' ), [form_item_input, job_coder], tab_request_column1, '', widgetContainer, true );
 
 
-
-                if ( !this.show_job_ui ) {
-                    //invalid permissions
-                    this.detachElement('job_id');
-                }
+				if ( !this.show_job_ui ) {
+					//invalid permissions
+					this.detachElement( 'job_id' );
+				}
 				//Job Item
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -349,41 +355,43 @@ RequestViewController = RequestViewCommonController.extend( {
 					set_empty: true,
 					setRealValueCallBack: (function( val ) {
 
-						if ( val ) job_item_coder.setValue( val.manual_id );
+						if ( val ) {
+							job_item_coder.setValue( val.manual_id );
+						}
 					}),
 					field: 'job_item_id',
 					added_items: [
-						{value: '-1', label: Global.default_item},
-						{value: '-2', label: Global.selected_item}
+						{ value: '-1', label: Global.default_item },
+						{ value: '-2', label: Global.selected_item }
 					]
 				} );
 
-				widgetContainer = $( "<div class='widget-h-box'></div>" );
+				widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 				var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				job_item_coder.TTextInput( {field: 'job_item_quick_search', disable_keyup_event: true} );
+				job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
 				job_item_coder.addClass( 'job-coder' );
 
 				widgetContainer.append( job_item_coder );
 				widgetContainer.append( form_item_input );
 				this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_request_column1, '', widgetContainer, true );
 
-                if ( !this.show_job_item_ui) {
-                    //invalid permissions
-                    this.detachElement('job_item_id');
-                }
+				if ( !this.show_job_item_ui ) {
+					//invalid permissions
+					this.detachElement( 'job_item_id' );
+				}
 			}
 		}
 
 		// Message
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( {field: 'message', width: 400, height: 300} );
+		form_item_input.TTextArea( { field: 'message', width: 400, height: 300 } );
 		this.addEditFieldToColumn( $.i18n._( 'Reason / Message' ), form_item_input, tab_request_column1, '', null, null, true );
 
 		//hide initially hidden fields.
 		//tab_request_column2.css( 'display', 'none' );
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
-			this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
+			this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).hide();
 			this.hideAdvancedFields();
 		}
 
@@ -595,8 +603,8 @@ RequestViewController = RequestViewCommonController.extend( {
 			permission: null
 		} );
 
-		var export_csv = new RibbonSubMenu({
-			label: $.i18n._('Export'),
+		var export_csv = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
 			id: ContextMenuIconName.export_excel,
 			group: other_group,
 			icon: Icons.export_excel,
@@ -609,14 +617,14 @@ RequestViewController = RequestViewCommonController.extend( {
 
 	},
 
-	setCurrentEditRecordData: function(current_edit_record) {
-		if (current_edit_record) {
+	setCurrentEditRecordData: function( current_edit_record ) {
+		if ( current_edit_record ) {
 			this.current_edit_record = current_edit_record;
 		}
 
-	    if (!this.current_edit_record) {
-	        this.current_edit_record = {};
-        }
+		if ( !this.current_edit_record ) {
+			this.current_edit_record = {};
+		}
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
 			if ( !this.current_edit_record.hasOwnProperty( key ) ) {
@@ -652,7 +660,7 @@ RequestViewController = RequestViewCommonController.extend( {
 
 		//a new request comes from the current user.
 		if ( this.is_add ) {
-			this.current_edit_record.user_id = LocalCacheData.loginUser.id
+			this.current_edit_record.user_id = LocalCacheData.loginUser.id;
 		}
 
 		this.setEditViewDataDone();
@@ -673,26 +681,26 @@ RequestViewController = RequestViewCommonController.extend( {
 	},
 
 	initViewingView: function() {
-		this._super('initViewingView');
-		if (this.edit_view_ui_dic.message) {
-			this.edit_view_ui_dic.message.parents('.edit-view-form-item-div').hide();
+		this._super( 'initViewingView' );
+		if ( this.edit_view_ui_dic.message ) {
+			this.edit_view_ui_dic.message.parents( '.edit-view-form-item-div' ).hide();
 		}
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && ( this.edit_view_ui_dic.type_id == 30 || this.edit_view_ui_dic.type_id == 40 ) ) {
-			var dow = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && ( this.edit_view_ui_dic.type_id == 30 || this.edit_view_ui_dic.type_id == 40 ) ) {
+			var dow = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 			var one_selected = false;
-			for (var key in this.current_edit_record) {
-				if (dow.indexOf(key) > -1) {
-					for (var i = 0; i < 7; i++) {
-						if (this.current_edit_record[key] !== 0 && this.current_edit_record[key] !== false) {
+			for ( var key in this.current_edit_record ) {
+				if ( dow.indexOf( key ) > -1 ) {
+					for ( var i = 0; i < 7; i++ ) {
+						if ( this.current_edit_record[key] !== 0 && this.current_edit_record[key] !== false ) {
 							one_selected = true;
 							break;
 						}
 					}
 
-					if (one_selected) {
-						this.edit_view_ui_dic['sun'].parents('.edit-view-form-item-div').show();
+					if ( one_selected ) {
+						this.edit_view_ui_dic['sun'].parents( '.edit-view-form-item-div' ).show();
 					} else {
-						this.edit_view_ui_dic['sun'].parents('.edit-view-form-item-div').hide();
+						this.edit_view_ui_dic['sun'].parents( '.edit-view-form-item-div' ).hide();
 					}
 				}
 			}
@@ -729,7 +737,7 @@ RequestViewController = RequestViewCommonController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'disable-image' );
@@ -782,7 +790,7 @@ RequestViewController = RequestViewCommonController.extend( {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -837,8 +845,8 @@ RequestViewController = RequestViewCommonController.extend( {
 		if ( this.edit_only_mode || this.grid == undefined ) {
 			context_btn.addClass( 'invisible-image' );
 		} else {
-			if ( this.is_viewing ||this.is_edit || this.is_add ) {
-				context_btn.addClass('disable-image');
+			if ( this.is_viewing || this.is_edit || this.is_add ) {
+				context_btn.addClass( 'disable-image' );
 			}
 		}
 	},
@@ -874,73 +882,75 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 	},
 
-	 onTypeChanged: function(arg) {
-		if ( this.current_edit_record && LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) && (this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40) ) { //schedule adjustment || absence selected
+	onTypeChanged: function( arg ) {
+		if ( this.current_edit_record && LocalCacheData.getCurrentCompany().product_edition_id >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) && (this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40) ) { //schedule adjustment || absence selected
 
 			if ( this.edit_view_ui_dic.date_stamp ) {
-				this.edit_view_ui_dic.date_stamp.parents('.edit-view-form-item-div').hide();
+				this.edit_view_ui_dic.date_stamp.parents( '.edit-view-form-item-div' ).hide();
 			}
-			if ( this.current_edit_record.date_stamp != undefined && this.current_edit_record.start_date == '') {
-				this.edit_view_ui_dic.start_date.setValue(this.current_edit_record.date_stamp);
+			if ( this.current_edit_record.date_stamp != undefined && this.current_edit_record.start_date == '' ) {
+				this.edit_view_ui_dic.start_date.setValue( this.current_edit_record.date_stamp );
 				this.current_edit_record.start_date = this.current_edit_record.date_stamp;
 			}
-			if ( this.current_edit_record.date_stamp != undefined && this.current_edit_record.end_date == '') {
-				this.edit_view_ui_dic.end_date.setValue(this.current_edit_record.date_stamp);
+			if ( this.current_edit_record.date_stamp != undefined && this.current_edit_record.end_date == '' ) {
+				this.edit_view_ui_dic.end_date.setValue( this.current_edit_record.date_stamp );
 				this.current_edit_record.end_date = this.current_edit_record.date_stamp;
 			}
 			this.showAdvancedFields();
 
-			if ( this.edit_view_ui_dic.type_id.getValue() == 30  ) {
-				this.edit_view_ui_dic.request_schedule_status_id.setValue(20);
-			} else if ( this.edit_view_ui_dic.type_id.getValue()  == 40 ) {
-				this.edit_view_ui_dic.request_schedule_status_id.setValue(10);
+			if ( this.edit_view_ui_dic.type_id.getValue() == 30 ) {
+				this.edit_view_ui_dic.request_schedule_status_id.setValue( 20 );
+			} else if ( this.edit_view_ui_dic.type_id.getValue() == 40 ) {
+				this.edit_view_ui_dic.request_schedule_status_id.setValue( 10 );
 			}
 			this.onWorkingStatusChanged();
 
 			$this = this;
 			if ( !this.sub_view_mode ) {
-				this.setRequestFormDefaultData(arg, function () {
+				this.setRequestFormDefaultData( arg, function() {
 					$this.getAvailableBalance();
-					$this.setCurrentEditRecordData(this.current_edit_record);
+					$this.setCurrentEditRecordData( this.current_edit_record );
 					$this.getScheduleTotalTime();
-				});
+				} );
 			}
 		} else {
 
 			this.hideAdvancedFields();
 			if ( this.edit_view_ui_dic.date_stamp ) {
-				this.edit_view_ui_dic.date_stamp.parents('.edit-view-form-item-div').show();
+				this.edit_view_ui_dic.date_stamp.parents( '.edit-view-form-item-div' ).show();
 			}
 			this.onWorkingStatusChanged();
 		}
-	 },
+	},
 
-	setRequestFormDefaultData: function (data, callback_function) {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) {
-			if ( data == undefined) {
+	setRequestFormDefaultData: function( data, callback_function ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) && ( this.current_edit_record.type_id == 30 || this.current_edit_record.type_id == 40 ) ) {
+			if ( data == undefined ) {
 				var $this = this;
 				this.enable_validation = false;
 				this.setUIWidgetFieldsToCurrentEditRecord();
-				var filter = this.uniformVariable(this.buildDataForAPI(this.current_edit_record));
+				var filter = this.uniformVariable( this.buildDataForAPI( this.current_edit_record ) );
 
-				this.api_request_schedule.getRequestScheduleDefaultData(filter, {onResult: function(res){
+				this.api_request_schedule.getRequestScheduleDefaultData( filter, {
+					onResult: function( res ) {
 
-					data = res.getResult();
-					data.request_schedule_status_id = data.status_id;
-					data.date_stamp = data.start_date;
+						data = res.getResult();
+						data.request_schedule_status_id = data.status_id;
+						data.date_stamp = data.start_date;
 
-					//force = true is required to set the current_edit_record and populate edit_view_ui_dic
-					$this.setDefaultData(data, true);
-					if (callback_function) {
-						callback_function();
+						//force = true is required to set the current_edit_record and populate edit_view_ui_dic
+						$this.setDefaultData( data, true );
+						if ( callback_function ) {
+							callback_function();
+						}
 					}
-				}});
-			}else{
+				} );
+			} else {
 				data.date_stamp = data.start_date;
-				data = $this.buildDataFromAPI(res.getResult());
+				data = $this.buildDataFromAPI( res.getResult() );
 				//force = true is required to set the current_edit_record and populate edit_view_ui_dic
-				this.setDefaultData(data, true);
-				if (callback_function) {
+				this.setDefaultData( data, true );
+				if ( callback_function ) {
 					callback_function();
 				}
 			}
@@ -948,11 +958,11 @@ RequestViewController = RequestViewCommonController.extend( {
 	},
 
 	onAvailableBalanceChange: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && PermissionManager.validate( 'request', 'add_advanced' ) ) {
 			if ( this.edit_view_ui_dic && this.edit_view_ui_dic.absence_policy_id && this.edit_view_ui_dic.absence_policy_id.getValue() != 0 ) {
 				this.getAvailableBalance();
 			} else if ( this.edit_view_ui_dic && this.edit_view_ui_dic.available_balance ) {
-				this.edit_view_ui_dic.available_balance.parents('.edit-view-form-item-div').hide();
+				this.edit_view_ui_dic.available_balance.parents( '.edit-view-form-item-div' ).hide();
 			}
 		}
 	},
@@ -961,7 +971,7 @@ RequestViewController = RequestViewCommonController.extend( {
 	onSaveDone: function( result ) {
 		if ( this.is_edit ) {
 			this.onViewClick( this.current_edit_record.id );
-			return false
+			return false;
 		} else {
 			return true;
 		}
@@ -975,11 +985,11 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 
 		if ( this.is_add ) {
-			records = this.buildDataForAPI(records);
+			records = this.buildDataForAPI( records );
 		} else if ( this.is_edit ) {
-			var msg = this.uniformMessageVariable(records);
+			var msg = this.uniformMessageVariable( records );
 
-			if (records && records.request_schedule) {
+			if ( records && records.request_schedule ) {
 				msg.request_schedule = records.request_schedule;
 			}
 
@@ -1017,23 +1027,23 @@ RequestViewController = RequestViewCommonController.extend( {
 			this.setCurrentEditRecordData();
 			record = this.uniformVariable( this.current_edit_record );
 			EmbeddedMessage.reply( [record], ignoreWarning, function( result ) {
-                    if ( result.isValid() ) {
-						var id = $this.current_edit_record.id;
-						//see #2224 - Unable to get property 'find' of undefined
-						$this.removeEditView();
-						$this.onViewClick( id );
-                    } else {
-                        $this.setErrorTips( result );
-                        $this.setErrorMenu();
-                    }
-				}
-			 );
+						if ( result.isValid() ) {
+							var id = $this.current_edit_record.id;
+							//see #2224 - Unable to get property 'find' of undefined
+							$this.removeEditView();
+							$this.onViewClick( id );
+						} else {
+							$this.setErrorTips( result );
+							$this.setErrorMenu();
+						}
+					}
+			);
 		}
 	},
 
 	search: function( set_default_menu, page_action, page_number, callBack ) {
 		this.refresh_id = null;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack )
+		this._super( 'search', set_default_menu, page_action, page_number, callBack );
 	},
 
 	setDefaultMenuEditIcon: function( context_btn, grid_selected_length, pId ) {
@@ -1075,54 +1085,16 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		if ( Global.isSet( menu_name ) ) {
-			var id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.add:
-				ProgressBar.showOverlay();
-				this.onAddClick();
-				break;
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.edit:
-				ProgressBar.showOverlay();
-				this.onEditClick();
-				break;
-			case ContextMenuIconName.delete_icon:
-				ProgressBar.showOverlay();
-				this.onDeleteClick();
-				break;
-			case ContextMenuIconName.delete_and_next:
-				ProgressBar.showOverlay();
-				this.onDeleteAndNextClick();
-				break;
-			case ContextMenuIconName.send:
-				ProgressBar.showOverlay();
-				this.onSaveClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
 			case ContextMenuIconName.timesheet:
 			case ContextMenuIconName.schedule:
 			case ContextMenuIconName.edit_employee:
-			case ContextMenuIconName.export_excel:
 				this.onNavigationClick( id );
 				break;
-
+			case ContextMenuIconName.send:
+				this.onSaveClick();
+				break;
 		}
 	},
 
@@ -1176,7 +1148,7 @@ RequestViewController = RequestViewCommonController.extend( {
 			case 'job_quick_search':
 			case 'job_item_quick_search':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-					this.onJobQuickSearch( key, c_value,'job_id','job_item_id' )
+					this.onJobQuickSearch( key, c_value, 'job_id', 'job_item_id' );
 				}
 				break;
 			case 'type_id':
@@ -1193,8 +1165,8 @@ RequestViewController = RequestViewCommonController.extend( {
 				this.onStartDateChanged();
 				this.onAvailableBalanceChange();
 				this.setRequestFormDefaultData( null, function() {
-					finishFormItemChange()
-				});
+					finishFormItemChange();
+				} );
 				needs_callback = true;
 				this.current_edit_record.start_date = this.edit_view_ui_dic.start_date.getValue();
 				this.current_edit_record.date_stamp = this.edit_view_ui_dic.start_date.getValue();
@@ -1202,8 +1174,8 @@ RequestViewController = RequestViewCommonController.extend( {
 			case 'end_date':
 				this.onAvailableBalanceChange();
 				this.setRequestFormDefaultData( null, function() {
-					finishFormItemChange()
-				});
+					finishFormItemChange();
+				} );
 				needs_callback = true;
 				this.current_edit_record.end_date = this.edit_view_ui_dic.end_date.getValue();
 				break;
@@ -1228,19 +1200,19 @@ RequestViewController = RequestViewCommonController.extend( {
 		}
 
 		function finishFormItemChange() {
-			if (key === 'date_stamp' ||
-				key === 'start_date_stamps' ||
-				key === 'start_date' ||
-				key === 'end_date' ||
-				key === 'start_date_stamp' ||
-				key === 'start_time' ||
-				key === 'end_time' ||
-				key === 'schedule_policy_id' ||
-				key === 'absence_policy_id') {
+			if ( key === 'date_stamp' ||
+					key === 'start_date_stamps' ||
+					key === 'start_date' ||
+					key === 'end_date' ||
+					key === 'start_date_stamp' ||
+					key === 'start_time' ||
+					key === 'end_time' ||
+					key === 'schedule_policy_id' ||
+					key === 'absence_policy_id' ) {
 
-				if ($this.current_edit_record['date_stamp'] !== '' &&
-					$this.current_edit_record['start_time'] !== '' &&
-					$this.current_edit_record['end_time'] !== '') {
+				if ( $this.current_edit_record['date_stamp'] !== '' &&
+						$this.current_edit_record['start_time'] !== '' &&
+						$this.current_edit_record['end_time'] !== '' ) {
 
 					$this.getScheduleTotalTime();
 				} else {
@@ -1261,24 +1233,24 @@ RequestViewController = RequestViewCommonController.extend( {
 		var record = this.current_edit_record;
 		record = this.uniformVariable( record );
 		var api = this.message_control_api;
-		if(this.is_add){
-			record = this.buildDataForAPI(record);
+		if ( this.is_add ) {
+			record = this.buildDataForAPI( record );
 			api = this.api;
 		}
 
-		api['validate' + api.key_name](record, {
-			onResult: function (result) {
-				$this.validateResult(result);
+		api['validate' + api.key_name]( record, {
+			onResult: function( result ) {
+				$this.validateResult( result );
 			}
-		});
+		} );
 
 	},
 
-	onAddClick: function(data) {
-		TTPromise.add('Request','add');
+	onAddClick: function( data ) {
+		TTPromise.add( 'Request', 'add' );
 		TTPromise.wait();
 		var $this = this;
-		if (this.edit_view) {
+		if ( this.edit_view ) {
 			this.removeEditView();
 		}
 		this.setCurrentEditViewState( 'new' );
@@ -1286,32 +1258,32 @@ RequestViewController = RequestViewCommonController.extend( {
 		this.buildAddViewUI();
 		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
 		if ( $this.api && typeof $this.api['get' + $this.api.key_name + 'DefaultData'] === 'function' ) {
-			$this.api['get' + $this.api.key_name + 'DefaultData']({
+			$this.api['get' + $this.api.key_name + 'DefaultData']( {
 				onResult: function( result ) {
-					if (data) {
+					if ( data ) {
 						//data passed should overwrite the default data from the API.
-						result = $.extend({}, result.getResult(), data);
+						result = $.extend( {}, result.getResult(), data );
 					}
 					$this.onAddResult( result );
 					$this.onDateStampChanged();
-					if(result.type_id) {
+					if ( result.type_id ) {
 						$this.onTypeChanged();
 					}
 					$this.getScheduleTotalTime();
-					TTPromise.resolve('Request','add');
+					TTPromise.resolve( 'Request', 'add' );
 				}
 			} );
 		}
 	},
 
 	//To be called only by external scripts creating requests (timesheet and schedule at this time)
-	openAddView: function(data_array){
+	openAddView: function( data_array ) {
 		this.sub_view_mode = true;
 		this.edit_only_mode = true;
 		var $this = this;
-		this.initOptions( function(){
-			$this.onAddClick(data_array);
-		});
+		this.initOptions( function() {
+			$this.onAddClick( data_array );
+		} );
 	},
 
 } );

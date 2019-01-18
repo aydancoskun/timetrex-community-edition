@@ -28,7 +28,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		this.user_id = this.options.user_id;
 		this.api = new (APIFactory.getAPIClass( 'APIUserGenericStatus' ))();
 		this.render();
-		this.initData()
+		this.initData();
 
 	},
 
@@ -92,9 +92,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 				var result_data = result.getResult();
 				result_data = Global.formatGridData( result_data, $this.api.key_name );
 
-				$this.grid.clearGridData();
-				$this.grid.setGridParam( {data: result_data} );
-				$this.grid.trigger( 'reloadGrid' );
+				$this.grid.setData( result_data );
 
 				$this.setGridSize();
 
@@ -117,9 +115,9 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 				var success = $( $this.el ).find( '.success' );
 
 				if ( result_data != true && result_data.status ) {
-					failed.text(result_data.status[10].total + '/' + result_data.total + '( ' + result_data.status[10].percent + '% )');
-					warning.text(result_data.status[20].total + '/' + result_data.total + '( ' + result_data.status[20].percent + '% )');
-					success.text(result_data.status[30].total + '/' + result_data.total + '( ' + result_data.status[30].percent + '% )')
+					failed.text( result_data.status[10].total + '/' + result_data.total + '( ' + result_data.status[10].percent + '% )' );
+					warning.text( result_data.status[20].total + '/' + result_data.total + '( ' + result_data.status[20].percent + '% )' );
+					success.text( result_data.status[30].total + '/' + result_data.total + '( ' + result_data.status[30].percent + '% )' );
 				}
 
 			}
@@ -134,15 +132,10 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 	setSelectLayout: function( column_start_from ) {
 
 		var $this = this;
-		var grid;
-		if ( !Global.isSet( this.grid ) ) {
-			grid = $( this.el ).find( '#user_generic_data__status_grid' );
-		}
-
 		var column_info_array = [];
 
-		this.select_layout = {id: ''};
-		this.select_layout.data = {filter_data: {}, filter_sort: {}};
+		this.select_layout = { id: '' };
+		this.select_layout.data = { filter_data: {}, filter_sort: {} };
 		this.select_layout.data.display_columns = this.default_display_columns;
 		var layout_data = this.select_layout.data;
 		var display_columns = this.buildDisplayColumns( layout_data.display_columns );
@@ -157,7 +150,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 		var start_from = 0;
 
 		if ( Global.isSet( column_start_from ) && column_start_from > 0 ) {
-			start_from = column_start_from
+			start_from = column_start_from;
 		}
 
 		for ( var i = start_from; i < len; i++ ) {
@@ -178,7 +171,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 					name: view_column_data.value, index: view_column_data.value, label: view_column_data.label,
 					width: 100, sortable: false, title: false, formatter: function( cell_value, related_data, row ) {
 
-						var span = $( "<span></span>" )
+						var span = $( '<span></span>' );
 
 						if ( cell_value === 'Failed' ) {
 							span.addClass( 'failed-label' );
@@ -188,7 +181,7 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 							span.addClass( 'success-label' );
 						}
 
-						span.text( cell_value )
+						span.text( cell_value );
 						return span.get( 0 ).outerHTML;
 					}
 				};
@@ -207,53 +200,30 @@ UserGenericStatusWindowController = BaseViewController.extend( {
 			column_info_array.push( column_info );
 		}
 
-		if ( !this.grid ) {
-			this.grid = grid;
-
-			this.grid = this.grid.jqGrid( {
-				altRows: true,
-				data: [],
-				datatype: 'local',
-				sortable: false,
-				width: 600,
-				rowNum: 10000,
-				colNames: [],
-				colModel: column_info_array,
-				viewrecords: true
-
-			} );
-
-		} else {
-
-//			 var result_data =	$(grid).getGridParam( 'data' );
-			this.grid.jqGrid( 'GridUnload' );
+		if ( this.grid ) {
+			this.grid.grid.jqGrid( 'GridUnload' );
 			this.grid = null;
-
-			grid = $( this.el ).find( '#' + this.ui_id + '_grid' );
-			this.grid = $( grid );
-
-//			  this.grid.tableDnD({scrollAmount:0});
-			this.grid = this.grid.jqGrid( {
-				altRows: true,
-				onSelectRow: $.proxy( this.onGridSelectRow, this ),
-				data: [],
-				rowNum: 10000,
-				sortable: false,
-				datatype: 'local',
-				width: 600,
-				colNames: [],
-				viewrecords: true
-			} );
-
 		}
+
+		this.grid = new TTGrid( 'user_generic_data__status_grid', {
+			altRows: true,
+			onSelectRow: $.proxy( this.onGridSelectRow, this ),
+			data: [],
+			rowNum: 10000,
+			sortable: false,
+			datatype: 'local',
+			width: 600,
+			colNames: [],
+			viewrecords: true
+		}, column_info_array );
 
 		var content_div = $( this.el ).find( '.content' );
 
-		this.grid.setGridWidth( content_div.width() - 2 );
-		this.grid.setGridHeight( content_div.height() - 25 );
+		this.grid.grid.setGridWidth( content_div.width() - 2 );
+		this.grid.grid.setGridHeight( content_div.height() - 25 );
 		$( window ).resize( function() {
-			$this.grid.setGridWidth( content_div.width() - 2 );
-			$this.grid.setGridHeight( content_div.height() - 25 );
+			$this.grid.grid.setGridWidth( content_div.width() - 2 );
+			$this.grid.grid.setGridHeight( content_div.height() - 25 );
 		} );
 
 		this.filter_data = this.select_layout.data.filter_data;
@@ -282,10 +252,10 @@ UserGenericStatusWindowController.open = function( batch_id, user_id, call_back 
 		} );
 		UserGenericStatusWindowController.instance.call_back = call_back;
 	} );
-}
+};
 
 UserGenericStatusWindowController.close = function() {
 	if ( UserGenericStatusWindowController.instance ) {
 
 	}
-}
+};

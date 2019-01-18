@@ -1,6 +1,6 @@
-QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
+QuickPunchLoginViewController = QuickPunchBaseViewController.extend( {
 	events: {
-		'change #language': 'onLanguageChange',
+		'change #language': 'onLanguageChange'
 	},
 	authentication_api: null,
 	_required_files: [
@@ -10,16 +10,16 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 		//'APICurrency',
 		'APIUserPreference',
 		'APIDate',
-		'APIPermission',
+		'APIPermission'
 	],
 	initialize: function() {
 		var row = Global.loadWidget( 'views/quick_punch/login/QuickPunchLoginView.html' );
-		this.template = _.template(row);
-		this.setElement( this.template({}) );
+		this.template = _.template( row );
+		this.setElement( this.template( {} ) );
 		Global.contentContainer().html( this.$el );
 
 		var $this = this;
-		require(this.filterRequiredFiles(), function(){
+		require( this.filterRequiredFiles(), function() {
 			$this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
 			$this.authentication_api = new (APIFactory.getAPIClass( 'APIAuthentication' ))();
 			$this.currentUser_api = new (APIFactory.getAPIClass( 'APICurrentUser' ))();
@@ -30,36 +30,36 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 			$this.edit_view_error_ui_dic = {};
 			LocalCacheData.all_url_args = {};
 			$this.render();
-		});
+		} );
 	},
 	render: function() {
 		var $this = this;
-		this.login_btn = this.$('button#punch_login');
-		this.login_btn.on('click', function ( e ) {
+		this.login_btn = this.$( 'button#punch_login' );
+		this.login_btn.on( 'click', function( e ) {
 			$this.onLogin( e );
-		})
-		this.$('input[name="user_name"]').focus();
-		this.setLanguageSourceData('language');
-		$(document).off('keydown').on("keydown", function(event) {
+		} );
+		this.$( 'input[name="user_name"]' ).focus();
+		this.setLanguageSourceData( 'language' );
+		$( document ).off( 'keydown' ).on( 'keydown', function( event ) {
 			var attrs = event.target.attributes;
 			if ( event.keyCode === 13 ) {
-				if ( $this.login_btn.attr('disabled') == 'disabled'  ) {
+				if ( $this.login_btn.attr( 'disabled' ) == 'disabled' ) {
 					return;
 				}
 				$this.onLogin();
 				event.preventDefault();
 			}
 			if ( event.keyCode === 9 && event.shiftKey ) {
-				if (attrs['tab-start']) {
-					$this.$('button[tabindex=0]', $this.$el)[0].focus();
+				if ( attrs['tab-start'] ) {
+					$this.$( 'button[tabindex=0]', $this.$el )[0].focus();
 					event.preventDefault();
 				}
 			}
 			if ( attrs['tab-end'] && event.shiftKey === false ) {
-				$this.$('input[tabindex=1]', $this.$el)[0].focus();
+				$this.$( 'input[tabindex=1]', $this.$el )[0].focus();
 				event.preventDefault();
 			}
-		});
+		} );
 		return this;
 	},
 
@@ -69,116 +69,116 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 	//     }
 	// },
 
-	onLogin: function ( e ) {
+	onLogin: function( e ) {
 		var $this = this;
 		var user_name = this.$( '#user_name' ).val();
 		var password = this.$( '#password' ).val();
-		this.login_btn.attr('disabled', 'disabled');
-		this.clearErrorTips(true, true );
+		this.login_btn.attr( 'disabled', 'disabled' );
+		this.clearErrorTips( true, true );
 		this.authentication_api.PunchLogin( user_name, password, {
 			onResult: function( raw_result ) {
 				if ( raw_result.isValid() ) {
 
 					//set up promises to complete before view change
-					TTPromise.add('QPLogin', 'Permissions');
-					TTPromise.add('QPLogin', 'CurrentStation');
-					TTPromise.add('QPLogin', 'CurrentUser');
-					TTPromise.add('QPLogin', 'CurrentCompany');
-					TTPromise.add('QPLogin', 'Locale');
+					TTPromise.add( 'QPLogin', 'Permissions' );
+					TTPromise.add( 'QPLogin', 'CurrentStation' );
+					TTPromise.add( 'QPLogin', 'CurrentUser' );
+					TTPromise.add( 'QPLogin', 'CurrentCompany' );
+					TTPromise.add( 'QPLogin', 'Locale' );
 
 					//when all QPLogin promises complete, forward to punch view
-					TTPromise.wait('QPLogin', null, function(){
+					TTPromise.wait( 'QPLogin', null, function() {
 						$this.goToView();
-					});
+					} );
 
 					var result = raw_result.getResult();
 					$this.getCurrentStation();
 					$this.getCurrentUser();
 					// LocalCacheData.setSessionID( result.SessionID );
-					$.cookie( 'SessionID-QP', result.SessionID, {expires: 30, path: LocalCacheData.cookie_path} );
-					$this.permission_api.getPermission({
-						onResult: function (permissionRes) {
-							LocalCacheData.setPermissionData(permissionRes.getResult());
-							TTPromise.resolve('QPLogin', 'Permissions');
+					setCookie( 'SessionID-QP', result.SessionID, { expires: 30, path: LocalCacheData.cookie_path } );
+					$this.permission_api.getPermission( {
+						onResult: function( permissionRes ) {
+							LocalCacheData.setPermissionData( permissionRes.getResult() );
+							TTPromise.resolve( 'QPLogin', 'Permissions' );
 						}
-					});
+					} );
 
-					$this.authentication_api.getCurrentCompany({
-						onResult: function (current_company_result) {
+					$this.authentication_api.getCurrentCompany( {
+						onResult: function( current_company_result ) {
 							var com_result = current_company_result.getResult();
-							if (com_result.is_setup_complete == 1) {
+							if ( com_result.is_setup_complete == 1 ) {
 								com_result.is_setup_complete = true;
 							} else {
 								com_result.is_setup_complete = false;
 							}
-							LocalCacheData.setCurrentCompany(com_result);
+							LocalCacheData.setCurrentCompany( com_result );
 
 
-							TTPromise.resolve('QPLogin', 'CurrentCompany');
-							Debug.Text('Version: Client: ' + APIGlobal.pre_login_data.application_build + " Server: " + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10);
-							if (APIGlobal.pre_login_data.application_build != com_result.application_build && APIGlobal.pre_login_data['PRODUCTION'] == true ) {
-								Debug.Text("Version mismatch on login: Reloading...", 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10);
-								window.location.reload(true);
+							TTPromise.resolve( 'QPLogin', 'CurrentCompany' );
+							Debug.Text( 'Version: Client: ' + APIGlobal.pre_login_data.application_build + ' Server: ' + com_result.application_build, 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+							if ( APIGlobal.pre_login_data.application_build != com_result.application_build && APIGlobal.pre_login_data['PRODUCTION'] == true ) {
+								Debug.Text( 'Version mismatch on login: Reloading...', 'LoginViewController.js', 'LoginViewController', 'onUserPreference:next', 10 );
+								window.location.reload( true );
 							}
 						}
-					});
+					} );
 					$this.getLocale();
 				} else {
 					$this.setErrorTips( raw_result );
 				}
 			}
-		});
+		} );
 	},
 
 	getLocale: function() {
 		var result = this.authentication_api.getLocale( $( 'select[name="language"]' ).val(), {
-			onResult: function(result) {
+			onResult: function( result ) {
 				var login_language = 'en_US';
 				if ( result ) {
 					login_language = result.getResult();
 				}
 				var message_id = UUID.guid();
 				if ( LocalCacheData.getLoginData().locale != null && login_language !== LocalCacheData.getLoginData().locale ) {
-					ProgressBar.showProgressBar(message_id);
+					ProgressBar.showProgressBar( message_id );
 					ProgressBar.changeProgressBarMessage( $.i18n._( 'Language changed, reloading' ) + '...' );
 
-					Global.setLanguageCookie(login_language);
+					Global.setLanguageCookie( login_language );
 					LocalCacheData.setI18nDic( null );
 					setTimeout( function() {
 						window.location.reload( true );
 					}, 5000 );
 				}
-				TTPromise.resolve('QPLogin', 'Locale');
+				TTPromise.resolve( 'QPLogin', 'Locale' );
 			}
 		} );
 	},
 
-	getCurrentUser: function () {
-		this.currentUser_api.getCurrentUser( {onResult: this.onGetCurrentUser, delegate: this} );
+	getCurrentUser: function() {
+		this.currentUser_api.getCurrentUser( { onResult: this.onGetCurrentUser, delegate: this } );
 	},
 
 	getCurrentStation: function( callBack ) {
 		var $this = this;
 
 		var station_id = Global.getStationID();
-		require(['APIStation'], function(){
+		require( ['APIStation'], function() {
 			var api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
 
 			if ( !station_id ) {
 				station_id = '';
 			}
-				api_station.getCurrentStation( station_id, '10', {
-					onResult: function( result ) {
-						TTPromise.resolve('QPLogin', 'CurrentStation');
-						//doNext( result );
-					}
-				} );
-		});
+			api_station.getCurrentStation( station_id, '10', {
+				onResult: function( result ) {
+					TTPromise.resolve( 'QPLogin', 'CurrentStation' );
+					//doNext( result );
+				}
+			} );
+		} );
 	},
 
 	onGetCurrentUser: function( e ) {
 		LocalCacheData.setPunchLoginUser( e.getResult() );
-		TTPromise.resolve('QPLogin', 'CurrentUser');
+		TTPromise.resolve( 'QPLogin', 'CurrentUser' );
 	},
 
 	goToView: function() {
@@ -189,17 +189,14 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 		// Global.topContainer().empty();
 		LocalCacheData.currentShownContextMenuName = null;
 
-		//Ensure that the language chosen at the login screen is passed in so that the user's country can be appended to create a proper locale.
-
-		IndexViewController.instance.router.removeCurrentView();
-		// var target_view = $.cookie( 'PreviousSessionType' );
-		// if ( target_view && !$.cookie( 'PreviousSessionID' ) ) {
+		//Ensure that the language chosen at the login screen is passed in so that the user's country can be appended to create a proper locale.IndexViewController.instance.router.removeCurrentView();
+		// var target_view = getCookie( 'PreviousSessionType' );
+		// if ( target_view && !getCookie( 'PreviousSessionID' ) ) {
 		//     TopMenuManager.goToView( target_view );
-		//     $.cookie( 'PreviousSessionType', null, {
-		//         expires: 30,
-		//         path: LocalCacheData.cookie_path,
-		//         domain: Global.getHost()
-		//     } );
+		//     setCookie( 'PreviousSessionType', null,  30,
+		//  LocalCacheData.cookie_path,
+		//  Global.getHost()
+		//  );
 		// } else {
 		//     if (Global.getDeepLink() != false){
 		//         TopMenuManager.goToView(Global.getDeepLink());
@@ -220,8 +217,8 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 		}
 	},
 
-	setErrorTips: function(result) {
-		this.clearErrorTips(true );
+	setErrorTips: function( result ) {
+		this.clearErrorTips( true );
 		var error_list = result.getDetails() ? result.getDetails()[0] : {};
 		if ( error_list && error_list.hasOwnProperty( 'error' ) ) {
 			error_list = error_list.error;
@@ -231,24 +228,24 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 				continue;
 			}
 			var field_obj;
-			if ( this.$('input[name="' + key + '"]')[0] ) {
-				field_obj = this.$('input[name="' + key + '"]');
-			} else if ( this.$('select[name="' + key + '"]')[0] ) {
-				field_obj = this.$('select[name="' + key + '"]');
+			if ( this.$( 'input[name="' + key + '"]' )[0] ) {
+				field_obj = this.$( 'input[name="' + key + '"]' );
+			} else if ( this.$( 'select[name="' + key + '"]' )[0] ) {
+				field_obj = this.$( 'select[name="' + key + '"]' );
 			}
 			if ( field_obj ) {
-				field_obj.addClass('error-tip');
+				field_obj.addClass( 'error-tip' );
 				var error_string;
 				if ( _.isArray( error_list[key] ) ) {
 					error_string = error_list[key][0];
 				} else {
 					error_string = error_list[key];
 				}
-				field_obj.attr('data-original-title', error_string);
+				field_obj.attr( 'data-original-title', error_string );
 				// field_obj.tooltip({
 				//     'title': error_string,
 				// })
-				field_obj.tooltip('show');
+				field_obj.tooltip( 'show' );
 				this.edit_view_error_ui_dic[key] = field_obj;
 			}
 			// if ( field_obj ) {
@@ -258,10 +255,10 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 			// }
 		}
 		if ( _.size( this.edit_view_error_ui_dic ) > 0 ) {
-			this.login_btn.removeAttr('disabled');
-			_.min( this.edit_view_error_ui_dic, function ( item ) {
-				if ( item.attr('tabindex') ) {
-					return parseInt(item.attr('tabindex'));
+			this.login_btn.removeAttr( 'disabled' );
+			_.min( this.edit_view_error_ui_dic, function( item ) {
+				if ( item.attr( 'tabindex' ) ) {
+					return parseInt( item.attr( 'tabindex' ) );
 				}
 			} ).focus();
 		}
@@ -270,11 +267,11 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 	clearErrorTips: function( clear_all, destroy ) {
 		for ( var key in this.edit_view_error_ui_dic ) {
 			if ( this.edit_view_error_ui_dic[key].val() !== '' || clear_all ) {
-				this.edit_view_error_ui_dic[key].removeClass('error-tip');
-				this.edit_view_error_ui_dic[key].attr('data-original-title', '');
+				this.edit_view_error_ui_dic[key].removeClass( 'error-tip' );
+				this.edit_view_error_ui_dic[key].attr( 'data-original-title', '' );
 			}
 			if ( destroy ) {
-				this.edit_view_error_ui_dic[key].tooltip('destroy');
+				this.edit_view_error_ui_dic[key].tooltip( 'dispose' );
 			}
 		}
 		this.edit_view_error_ui_dic = {};
@@ -290,34 +287,27 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 		}
 		if ( !source_data ) {
 			source_data = LocalCacheData.getLoginData().language_options;
-			source_data = Global.removeSortPrefixFromArray( (LocalCacheData.getLoginData().language_options) )
+			source_data = Global.removeSortPrefixFromArray( (LocalCacheData.getLoginData().language_options) );
 		}
 		if ( _.size( source_data ) == 0 ) {
 			set_empty = true;
 		}
 		if ( set_empty === true ) {
-				this.$( field_selector )
-					.append($("<option></option>")
-						.attr("value", '0')
-						.text( '-- ' + $.i18n._('None') + ' --' ))
-					.attr('selected', 'selected');
+			this.$( field_selector ).append( $( '<option></option>' ).prop( 'value', '0' ).text( '-- ' + $.i18n._( 'None' ) + ' --' ) ).attr( 'selected', 'selected' );
 		}
 		if ( _.size( source_data ) > 0 ) {
-			$.each( source_data, function ( value, label ) {
-				$this.$( field_selector )
-					.append($("<option></option>")
-						.attr("value", value)
-						.text( label ));
+			$.each( source_data, function( value, label ) {
+				$this.$( field_selector ).append( $( '<option></option>' ).attr( 'value', value ).text( label ) );
 				if ( LocalCacheData.getLoginData().language == value ) {
 					$this.$( field_selector ).val( value );
 				}
-			});
+			} );
 		}
 		// $this.$( field_selector ).selectpicker();
 	},
 
-	onLanguageChange: function ( e ) {
-		Global.setLanguageCookie( $(e.target).val() );
+	onLanguageChange: function( e ) {
+		Global.setLanguageCookie( $( e.target ).val() );
 		LocalCacheData.setI18nDic( null );
 		var message_id = UUID.guid();
 		ProgressBar.showProgressBar( message_id );
@@ -327,6 +317,6 @@ QuickPunchLoginViewController = QuickPunchBaseViewController.extend({
 			window.location.reload( true );
 		}, 2000 );
 	}
-});
+} );
 
 

@@ -1130,13 +1130,18 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						if ( $pplf->getRecordCount() > 0 ) {
 							Debug::Text( 'Looping over Pay Periods: '. $pplf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 							foreach ( $pplf as $pp_obj ) {
-								//#1187 - Pay period based event dates are all based on the relevant pay period transaction dates because that's what the subsequent reports will need to see
-								//The event starts at the beginning of the transaction date day and ends at the end of transaction date day
+								//#1187 - Pay period based event dates are all based on the relevant pay period transaction dates because that's what the subsequent reports (ie: Pay Stub Summary ) will need to see
+								//  However we need to handle cases where terminated employees may be paid earlier in the pay period. Which can be handled two ways:
+								//     1. Remit to the agency immediately after an early payroll run.
+								//     2. Wait until the end of the pay period and remit everyone together.
+								//  We will opt of #2 by default. So the start date must be the day after the preivous transaction date (so we don't overlap and double report information)
+								//  and end_date is the end day epoch of the current transaction date.
+								//
 								//The due date is the transaction date day plus the current event's due date delay days
 								if ( $pp_obj->getStartDate() <= $last_due_date AND $pp_obj->getEndDate() >= $last_due_date ) {
-									Debug::Text( 'Found: Pay Period: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ), __FILE__, __LINE__, __METHOD__, 10 );
+									Debug::Text( 'Found: Pay Period: '. $pp_obj->getId() .' Start Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getStartDate() ) .' End Date: '. TTDate::getDate('DATE+TIME', $pp_obj->getEndDate() ) .' Due Date Delay: '. $this->getDueDateDelayDays(), __FILE__, __LINE__, __METHOD__, 10 );
 									$retval = array(
-											'start_date' => TTDate::getBeginDayEpoch( $pp_obj->getTransactionDate() ),
+											'start_date' => TTDate::getBeginDayEpoch( TTDate::incrementDate( $last_due_date, 2, 'day' ) ), //$last_due_date is -86400, and we need the day after it, so add 2.
 											'end_date'   => TTDate::getEndDayEpoch( $pp_obj->getTransactionDate() ),
 											'due_date'   => TTDate::incrementDate( $pp_obj->getTransactionDate(), $this->getDueDateDelayDays() ? $this->getDueDateDelayDays() : 0, 'day' ),
 											'pay_period_id' => $pp_obj->getId(),
@@ -1191,7 +1196,6 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				);
 				break;
 			case 2200: //semi-annually
-
 				$primary_date = mktime(0, 0, 0, $this->getPrimaryMonth(), $this->getPrimaryDayOfMonth(), date('Y', $last_due_date) );
 				$secondary_date = mktime(0, 0, 0, $this->getSecondaryMonth(), $this->getSecondaryDayOfMonth(), date('Y', $last_due_date) );
 
@@ -1357,7 +1361,6 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 				);
 				break;
 			case 59000:// => TTi18n::gettext('US - Quarterly (1-3 Only)'), //Due the last day of the month following the end of the quarter. (April 30, July 31, and October 31).
-
 				if ( TTDate::getMonth( TTDate::getBeginQuarterEpoch($last_due_date) ) >= 10 ) {
 					//Jump 1 more quarter into the future if q4.
 					$last_due_date = TTDate::incrementDate($last_due_date, 1, 'quarter');
@@ -1414,8 +1417,6 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 						'start_date' => $start_date,
 						'end_date' => $end_date,
 				);
-				break;
-
 				break;
 			case 61000: //twice-monthly
 				//January liability is due on February 10th. February through November liabilities for the 1st through the 15th are due on the 25th of the same month. February through November liabilites for the 16th through the end of the month are due on the 10th of the following month. December liabilities for the 1st through the 15th are due on December 26th, and December liabilities for the 16th through the 31 are due on January 31.
@@ -1588,7 +1589,18 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 				if ( is_object( $this->getCompanyObject() ) ) {
 					$ulf = TTnew( 'UserListFactory' );
-					$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), array('hire_start_date' => $start_date, 'hire_end_date' => $end_date ), 1, NULL, NULL, array('hire_date' => 'asc') ); //Limit 1 so we get the earliest termination date first.
+
+					//As of schema version 1093A, the hire date column was changed to a date_stamp rather than epoch, which causes a SQL error during upgrade from old versions of TimeTrex.
+					// So when called through the installer, use a less optimized SQL query that won't trigger that error.
+					global $config_vars;
+					if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == TRUE ) {
+						Debug::Text( 'Installer Enabled, skipping optimized WHERE clause...', __FILE__, __LINE__, __METHOD__, 10 );
+						$filter_data = array();
+					} else {
+						$filter_data = array( 'hire_start_date' => $start_date, 'hire_end_date' => $end_date );
+					}
+
+					$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), $filter_data, 1, NULL, NULL, array('hire_date' => 'asc') ); //Limit 1 so we get the earliest termination date first.
 					Debug::Text( '  Hired users: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $ulf->getRecordCount() > 0 ) {
 						//Find the earliest termination date so we can start from there.
@@ -1599,6 +1611,12 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								Debug::Text( '    Setting earliest Hire Date: '. TTDate::getDATE('DATE+TIME', $u_obj->getHireDate() ). ' User ID: '.$u_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 							}
 						}
+
+						//This helps make sure we never use a hire_date before the start_date filters specified above, specifically when installer is enabled.
+						if ( $earliest_hire_date < $start_date ) {
+							$earliest_hire_date = $start_date;
+						}
+
 						$start_date = TTDate::getBeginDayEpoch( $earliest_hire_date );
 						$end_date = TTDate::getEndDayEpoch( TTDate::incrementDate( $start_date, ($this->getDueDateDelayDays() - 1), 'day' ) );
 
@@ -1643,7 +1661,18 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 
 				if ( is_object( $this->getCompanyObject() ) ) {
 					$ulf = TTnew( 'UserListFactory' );
-					$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), array('termination_start_date' => $start_date, 'termination_end_date' => $end_date ), 1, NULL, NULL, array('termination_date' => 'asc') ); //Limit 1 so we get the earliest termination date first.
+
+					//As of schema version 1093A, the hire date column was changed to a date_stamp rather than epoch, which causes a SQL error during upgrade from old versions of TimeTrex.
+					// So when called through the installer, use a less optimized SQL query that won't trigger that error.
+					global $config_vars;
+					if ( isset($config_vars['other']['installer_enabled']) AND $config_vars['other']['installer_enabled'] == TRUE ) {
+						Debug::Text( 'Installer Enabled, skipping optimized WHERE clause...', __FILE__, __LINE__, __METHOD__, 10 );
+						$filter_data = array();
+					} else {
+						$filter_data = array( 'termination_start_date' => $start_date, 'termination_end_date' => $end_date );
+					}
+
+					$ulf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCompanyObject()->getId(), $filter_data, 1, NULL, NULL, array('termination_date' => 'asc') ); //Limit 1 so we get the earliest termination date first.
 					Debug::Text( '  Terminated users: '. $ulf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
 					if ( $ulf->getRecordCount() > 0 ) {
 						//Find the earliest termination date so we can start from there.
@@ -1654,6 +1683,12 @@ class PayrollRemittanceAgencyEventFactory extends Factory {
 								Debug::Text( '    Setting earliest Termination Date: '. TTDate::getDATE('DATE+TIME', $u_obj->getTerminationDate() ), __FILE__, __LINE__, __METHOD__, 10 );
 							}
 						}
+
+						//This helps make sure we never use a hire_date before the start_date filters specified above, specifically when installer is enabled.
+						if ( $earliest_termination_date < $start_date ) {
+							$earliest_termination_date = $start_date;
+						}
+
 						$start_date = TTDate::getBeginDayEpoch( $earliest_termination_date );
 						$end_date = TTDate::getEndDayEpoch( TTDate::incrementDate( $start_date, ($this->getDueDateDelayDays() - 1), 'day' ) );
 

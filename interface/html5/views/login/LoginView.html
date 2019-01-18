@@ -1,6 +1,6 @@
 <div class="login-view login-view-bg" id="loginViewContainer" style="opacity: 0">
 
-    <div class="form-container">
+    <form class="form-container">
         <table id="form" class="form">
             <tr>
                 <td colspan="2" class="error-info"></td>
@@ -26,7 +26,7 @@
             <tr>
                 <td colspan="2" class="login-btn-td">
                     <span id="forgot_password" class="forgot-password"><%= forgot_your_password %>?</span>
-                    <button id="login_btn" class="login-button">
+                    <button type="button" id="login_btn" class="login-button">
                         <%= login %>
                     </button>
                 </td>
@@ -36,7 +36,7 @@
         <span id="quick_punch" class="quick-punch"><%= quick_punch %></span>
 
 
-    </div>
+    </form>
 
 
     <img class="company-logo" id="companyLogo" alt="Workforce Management Software"/>

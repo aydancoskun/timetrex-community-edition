@@ -619,12 +619,21 @@ class CalculatePayStub extends PayStubFactory {
 			Debug::text('Correction Enabled!', __FILE__, __LINE__, __METHOD__, 10);
 			$pay_stub->setTemp(TRUE);
 
+			//When generating pay stubs, we always increase the payroll run by 1.
+			// However when generating corrections, we can't do that, otherwise the calculations will be incorrect because the "previous" pay stub will the one we are actually trying to compare against.
+			// This mostly manifests itself by incorrect calculations when the employee is approaching wage base thresholds on their *next* pay stub, resulting in negative pay stub amendments being created after the comparison.
+			if ( $this->getRun() > 1 ) {
+				$this->setRun( ( $this->getRun() - 1 ) );
+			}
+
 			//Check for current pay stub ID so we can compare against it.
 			$pslf = TTnew( 'PayStubListFactory' );
 			$pslf->getByUserIdAndPayPeriodId( $this->getUser(), $this->getPayPeriod() );
 			if ( $pslf->getRecordCount() > 0 ) {
 				$old_pay_stub_id = $pslf->getCurrent()->getId();
 				Debug::text('Comparing Against Pay Stub ID: '. $old_pay_stub_id, __FILE__, __LINE__, __METHOD__, 10);
+			} else {
+				Debug::text('No pay stub to compare against...', __FILE__, __LINE__, __METHOD__, 10);
 			}
 		}
 		$pay_stub->setUser( $this->getUser() );

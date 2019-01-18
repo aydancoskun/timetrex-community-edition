@@ -93,11 +93,11 @@ class Redis_Cache_Lite extends Cache_Lite {
 				return $this->_redisHostConn[$key];
 			} else {
 				$this->_redisHostConn[$key] = FALSE; //Prevent further connections from timing out during this request...
-				Debug::Text( 'Error connecting to the Redis database! (a)', __FILE__, __LINE__, __METHOD__, 1);
+				Debug::Text( 'Error connecting to the Redis database! (a) Host: '. $this->_redisHostHost[$key], __FILE__, __LINE__, __METHOD__, 1);
 			}
 		} catch (Exception $e) {
 			$this->_redisHostConn[$key] = FALSE; //Prevent further connections from timing out during this request...
-			Debug::Text( 'Error connecting to the Redis database! (b)', __FILE__, __LINE__, __METHOD__, 1);
+			Debug::Text( 'Error connecting to the Redis database! (b) Host: '. $this->_redisHostHost[$key] .' Message: '. $e->getMessage(), __FILE__, __LINE__, __METHOD__, 1);
 			unset($e);
 			//throw new DBError($e);
 		}

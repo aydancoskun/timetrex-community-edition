@@ -187,7 +187,7 @@ class PayStubEntryFactory extends Factory {
 		$value = TTUUID::castUUID( $value );
 
 		Debug::text('User Expense ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		if ( getTTProductEdition() < TT_PRODUCT_ENTERPRISE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_CORPORATE ) {
 			$value = TTUUID::getZeroID();
 		}
 		return $this->setGenericDataValue( 'user_expense_id', $value );

@@ -63,7 +63,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -211,13 +211,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-							LocalCacheData.current_open_sub_controller.edit_view &&
-							LocalCacheData.current_open_sub_controller.is_viewing ) {
+								LocalCacheData.current_open_sub_controller.edit_view &&
+								LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-							LocalCacheData.current_open_primary_controller.edit_view &&
-							LocalCacheData.current_open_primary_controller.is_viewing ) {
+								LocalCacheData.current_open_primary_controller.edit_view &&
+								LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}
@@ -240,8 +240,6 @@
 
 	};
 
-	$.fn.TPasswordInput.defaults = {
-
-	};
+	$.fn.TPasswordInput.defaults = {};
 
 })( jQuery );

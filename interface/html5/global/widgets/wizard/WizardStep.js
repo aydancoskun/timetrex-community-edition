@@ -1,9 +1,9 @@
-WizardStep = Backbone.View.extend({
+WizardStep = Backbone.View.extend( {
 	name: null,
 	previous_step_name: null,
 	next_step_name: null,
 	buttons: null,
-	reload:null,
+	reload: null,
 	wizard_obj: null, //rename to wizard_obj
 
 	clicked_buttons: {},
@@ -13,13 +13,13 @@ WizardStep = Backbone.View.extend({
 
 	//override in children
 	name: 'undefined',
-	title:  $.i18n._('Undefined Step'),
-	instructions:  $.i18n._('Undefined step data'),
+	title: $.i18n._( 'Undefined Step' ),
+	instructions: $.i18n._( 'Undefined step data' ),
 
-	initialize: function(wizard_obj) {
+	initialize: function( wizard_obj ) {
 		this.buttons = {};
 		this.reload = false;
-		this.setWizardObject(wizard_obj);
+		this.setWizardObject( wizard_obj );
 		var $this = this;
 		this.init();
 	},
@@ -29,21 +29,21 @@ WizardStep = Backbone.View.extend({
 		this.render();
 	},
 
-	initCardsBlock: function(){
-		$(this.wizard_obj.el).find('#cards').html('');
+	initCardsBlock: function() {
+		$( this.wizard_obj.el ).find( '#cards' ).html( '' );
 	},
 
-	setTitle: function(title) {
-		$(this.wizard_obj.el).find('.title-1').html( title );
+	setTitle: function( title ) {
+		$( this.wizard_obj.el ).find( '.title-1' ).html( title );
 	},
 
 	setInstructions: function( instructions, callback ) {
 
-		if ( $(this.el).find('.instructions').length == 0 ) {
-			$(this.el).find('.progress-bar').append('<p class="instructions"/>')
+		if ( $( this.el ).find( '.instructions' ).length == 0 ) {
+			$( this.el ).find( '.progress-bar' ).append( '<p class="instructions"/>' );
 		}
 
-	  	$(this.el).find('.progress-bar .instructions').html( instructions );
+		$( this.el ).find( '.progress-bar .instructions' ).html( instructions );
 
 		if ( typeof callback == 'function' ) {
 			callback();
@@ -51,46 +51,46 @@ WizardStep = Backbone.View.extend({
 	},
 
 
-	setWizardObject: function(val){
+	setWizardObject: function( val ) {
 		this.wizard_obj = val;
 		this.el = this.wizard_obj.el;
 	},
-	getWizardObject: function(){
+	getWizardObject: function() {
 		return this.wizard_obj;
 	},
 
-	setNextStepName: function (val) {
+	setNextStepName: function( val ) {
 		this.next_step_name = val;
 	},
 
-	getNextStepName: function () {
+	getNextStepName: function() {
 		return false;
 	},
 
-	setPreviousStepName: function (val) {
+	setPreviousStepName: function( val ) {
 		this.previous_step_name = val;
 	},
 
-	getPreviousStepName: function () {
+	getPreviousStepName: function() {
 		return false;
 	},
 
-	render: function () {
+	render: function() {
 		this.initCardsBlock();
 		return this._render();
 	},
 
-	_render: function(){
+	_render: function() {
 		return;
 		//always overrirde
 	},
 
 	append: function( content ) {
-		$(this.wizard_obj.el).find('.content').append(content);
+		$( this.wizard_obj.el ).find( '.content' ).append( content );
 	},
 
 	appendButton: function( button ) {
-		$(this.wizard_obj.el).find('#cards').append(button);
+		$( this.wizard_obj.el ).find( '#cards' ).append( button );
 	},
 
 	setGrid: function( gridId, grid_div, allMultipleSelection ) {
@@ -103,11 +103,11 @@ WizardStep = Backbone.View.extend({
 
 		var grid = $( '#' + gridId );
 
-		var grid_columns = this.getGridColumns(gridId);
+		var grid_columns = this.getGridColumns( gridId );
 
 		var $this = this;
-		grid.jqGrid( {
-			altRows: true,
+
+		grid = new TTGrid( gridId, {
 			onSelectRow: function( e ) {
 				$this.onGridSelectRow( e );
 			},
@@ -119,19 +119,9 @@ WizardStep = Backbone.View.extend({
 			ondblClickRow: function() {
 				$this.onGridDblClickRow();
 			},
-			data: [],
-			datatype: 'local',
-			sortable: true,
-			sorttype: 'text',
-			height: 75,
-			rowNum: 10000,
-			colNames: [],
-			colModel: grid_columns,
-			viewrecords: true,
-			multiselect: allMultipleSelection,
-			multiboxonly: allMultipleSelection
-
-		} );
+			multiselect: false,
+			winMultiSelect: false
+		}, grid_columns );
 
 		this.setGridSize( grid );
 		this.setGridGroupColumns( gridId );
@@ -145,16 +135,16 @@ WizardStep = Backbone.View.extend({
 
 	setGridAutoHeight: function( grid, length ) {
 		if ( length > 0 && length < 10 ) {
-			grid.setGridHeight( length * 23 );
+			grid.grid.setGridHeight( length * 23 );
 		} else if ( length > 10 ) {
-			grid.setGridHeight( 400 );
+			grid.grid.setGridHeight( 400 );
 		}
 	},
 
 
 	setGridSize: function( grid ) {
-		grid.setGridWidth( $(this.wizard_obj.el).find('.content .grid-div').width() - 11 );
-		grid.setGridHeight(  $(this.wizard_obj.el).find('.content').height() - 150 ); //During merge, this wasn't in MASTER branch.
+		grid.grid.setGridWidth( $( this.wizard_obj.el ).find( '.content .grid-div' ).width() - 11 );
+		grid.grid.setGridHeight( $( this.wizard_obj.el ).find( '.content' ).height() - 150 ); //During merge, this wasn't in MASTER branch.
 	},
 
 	getRibbonButtonBox: function() {
@@ -179,24 +169,24 @@ WizardStep = Backbone.View.extend({
 	 */
 	getRibbonButton: function( id, icon, label, desc ) {
 		//prelaod imgages to reduce the appearance of phantom flashing
-		$('<img/>')[0].src = icon;
+		$( '<img/>' )[0].src = icon;
 
 		if ( typeof desc == 'undefined' ) {
 			var button = $( '<li><div class="ribbon-sub-menu-icon" id="' + id + '"><img src="' + icon + '" >' + label + '</div></li>' );
 			return button;
 		}
 
-		var container = $('<div class="wizard_icon_card" id="' + id + '"/>');
+		var container = $( '<div class="wizard_icon_card" id="' + id + '"/>' );
 
-		var img = $('<img src="' + icon + '" />');
+		var img = $( '<img src="' + icon + '" />' );
 
 
-		var right_container = $('<div class="right_container"/>');
+		var right_container = $( '<div class="right_container"/>' );
 
-		var title = $('<h3 class="button_title"/>');
+		var title = $( '<h3 class="button_title"/>' );
 		title.html( label ? label : '' );
 
-		var description = $('<div class="description"/>');
+		var description = $( '<div class="description"/>' );
 		description.html( desc ? desc : '' );
 
 		container.append( img );
@@ -211,65 +201,65 @@ WizardStep = Backbone.View.extend({
 	//stubs that should be overrideen
 	//
 
-	onGridSelectRow: function( selected_id ){
+	onGridSelectRow: function( selected_id ) {
 		//
 	},
 
-	onGridDblClickRow: function( selected_id ){
+	onGridDblClickRow: function( selected_id ) {
 		//
 	},
 
-	onNavigationClick: function(e, icon) {
+	onNavigationClick: function( e, icon ) {
 		if ( e ) {
-			this.addButtonClick(e, icon);
+			this.addButtonClick( e, icon );
 		}
-		this._onNavigationClick(icon);
+		this._onNavigationClick( icon );
 	},
 
-	_onNavigationClick: function(icon) {
+	_onNavigationClick: function( icon ) {
 		//virtual
 	},
 
 	addButtonClick: function( e, icon ) {
 		// $(e.target).addClass('clicked_wizard_icon');
 		// $(e.target).find('img').addClass('disable-image');
-		var element = $(e.target);
-		if( !element.hasClass('wizard_icon_card') ) {
-			element = $(e.target).parents('.wizard_icon_card');
+		var element = $( e.target );
+		if ( !element.hasClass( 'wizard_icon_card' ) ) {
+			element = $( e.target ).parents( '.wizard_icon_card' );
 		}
-		element.addClass('clicked_wizard_icon');
-		element.addClass('disable-image');
+		element.addClass( 'clicked_wizard_icon' );
+		element.addClass( 'disable-image' );
 
 		this.clicked_buttons[icon] = true;
 	},
 
-	isButtonClicked: function( icon) {
+	isButtonClicked: function( icon ) {
 		if ( this.clicked_buttons.hasOwnProperty( icon ) && typeof this.clicked_buttons[icon] != 'undefined' ) {
 			return true;
 		}
 		return false;
 	},
 
-	addButton: function( context_name, icon_name, title, description, button_name ){
+	addButton: function( context_name, icon_name, title, description, button_name ) {
 		if ( typeof button_name == 'undefined' ) {
 			button_name = context_name;
 		}
 
-		var button = this.getRibbonButton(context_name, Global.getRibbonIconRealPath( icon_name ), title, description);
+		var button = this.getRibbonButton( context_name, Global.getRibbonIconRealPath( icon_name ), title, description );
 
 		var $this = this;
-		button.unbind('click').bind('click', function (e) {
-			$this.onNavigationClick(e, button_name);
-		});
+		button.unbind( 'click' ).bind( 'click', function( e ) {
+			$this.onNavigationClick( e, button_name );
+		} );
 		//ribbon_button_box.find('ul').append(button);
 
-		if ( this.isButtonClicked(button_name) ) {
-			button.addClass('clicked_wizard_icon');
-			button.addClass('disable-image');
+		if ( this.isButtonClicked( button_name ) ) {
+			button.addClass( 'clicked_wizard_icon' );
+			button.addClass( 'disable-image' );
 		}
 
 		this.buttons[icon_name] = button;
-		this.appendButton(button);
+		this.appendButton( button );
 
 		return button;
 	},
@@ -279,12 +269,12 @@ WizardStep = Backbone.View.extend({
 	},
 
 	urlClick: function( action_id ) {
-		this.api.getURL(this.getWizardObject().selected_remittance_agency_event_id, action_id, {
+		this.api.getURL( this.getWizardObject().selected_remittance_agency_event_id, action_id, {
 			onResult: function( result ) {
 				var url = result.getResult();
-				window.open(url);
-			},
-		});
-	},
+				window.open( url );
+			}
+		} );
+	}
 
-});
+} );

@@ -521,11 +521,14 @@ class RemittanceDestinationAccountFactory extends Factory {
 	 * VALUE 3 is the account number. It must be stored encrypted. Use getSecureAccountNumber()
 	 * @return bool
 	 */
-	function getValue3() {
-		$value = $this->getGenericDataValue( 'value3' );
-		//We must check is_numeric to ensure that the value properly decrypted.
+	function getValue3( $value = NULL ) {
+		if ( $value == NULL ) {
+			$value = $this->getGenericDataValue( 'value3' );
+		}
 
 		$value = Misc::decrypt($value);
+
+		//We must check is_numeric to ensure that the value properly decrypted.
 		if ( isset($value) AND is_numeric( $value ) == FALSE ) {
 			Debug::Text( 'DECRYPTION FAILED: Your salt may have changed.', __FILE__, __LINE__, __METHOD__, 10 );
 		} else {
@@ -776,352 +779,355 @@ class RemittanceDestinationAccountFactory extends Factory {
 		//
 		// BELOW: Validation code moved from set*() functions.
 		//
-		// Remittance source account
-		if ( $this->getRemittanceSourceAccount() !== FALSE AND $this->getRemittanceSourceAccount() != TTUUID::getZeroID() AND !$this->getEnableBlankRemittanceSourceAccount() ) {
-			$lf = TTnew( 'RemittanceSourceAccountListFactory' );
-			$this->Validator->isResultSetWithRows(	'remittance_source_account_id',
-															$lf->getByID($this->getRemittanceSourceAccount()),
-															TTi18n::gettext('Remittance source account is invalid')
-														);
-		}
-		// User
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
-			if ( $this->getUser() == FALSE ) {
-				$this->Validator->isTrue(		'user_id',
-												FALSE,
-												TTi18n::gettext('Please specify employee')
-											);
-			}
-		}
-
-		if ( ( $this->getUser() != FALSE AND $this->Validator->isError( 'user_id' ) == FALSE ) ) {
-
-			$ulf = TTnew( 'UserListFactory' );
-			$this->Validator->isResultSetWithRows( 'user_id',
-												   $ulf->getByID( $this->getUser() ),
-												   TTi18n::gettext( 'Invalid Employee' )
-			);
-		}
-
-		// Currency
-		if ( $this->getCurrency() !== FALSE AND $this->getCurrency() != TTUUID::getZeroID() ) {
-			$culf = TTnew( 'CurrencyListFactory' );
-			$this->Validator->isResultSetWithRows( 'currency_id',
-												   $culf->getByID( $this->getCurrency() ),
-												   TTi18n::gettext( 'Invalid Currency' )
-			);
-		}
-		// Status
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
-			if ( $this->getStatus() == FALSE ) {
-				$this->Validator->isTrue( 'status_id',
-										  FALSE,
-										  TTi18n::gettext( 'Please specify status' ) );
-			}
-		}
-		if ( $this->getStatus() !== FALSE AND $this->Validator->isError( 'status_id' ) == FALSE ) {
-			$this->Validator->inArrayKey( 'status',
-										  $this->getStatus(),
-										  TTi18n::gettext( 'Incorrect Status' ),
-										  $this->getOptions( 'status' )
-			);
-		}
-		// Type
-		if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
-			if ( $this->getType() == FALSE ) {
-				$this->Validator->isTrue( 'type_id',
-										  FALSE,
-										  TTi18n::gettext( 'Please specify type' )
-				);
-			}
-		}
-		if ( $this->getType() !== FALSE AND $this->Validator->isError( 'type_id' ) == FALSE AND $this->getRemittanceSourceAccount() != TTUUID::getZeroID() ) {
-			$this->Validator->inArrayKey( 'type_id',
-										  $this->getType(),
-										  TTi18n::gettext( 'Incorrect Type' ),
-										  $this->getOptions( 'type', array('legal_entity_id' => $this->getLegalEntity()) )
-			);
-		}
-
-
-		// Name
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
-			if ( $this->getName() == '' ) {
-				$this->Validator->isTRUE( 'name',
-										  FALSE,
-										  TTi18n::gettext( 'Please specify a name' ) );
-			}
-		}
-		if ( $this->getName() != '' AND $this->Validator->isError( 'name' ) == FALSE ) {
-			$this->Validator->isLength( 'name',
-										$this->getName(),
-										TTi18n::gettext( 'Name is too short or too long' ),
-										2, 100
-			);
-		}
-		if ( $this->getName() != '' AND $this->Validator->isError( 'name' ) == FALSE AND $this->getUser() != TTUUID::getZeroID() ) {
-			$this->Validator->isTrue( 'name',
-									  $this->isUniqueName( $this->getName() ),
-									  TTi18n::gettext( 'Name already exists' )
-			);
-		}
-		// Description
-		$this->Validator->isLength( 'description',
-									$this->getDescription(),
-									TTi18n::gettext( 'Description is invalid' ),
-									0, 255
-		);
-		// Amount type
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
-			if ( $this->getAmountType() == FALSE ) {
-				$this->Validator->isTrue( 'amount_type_id',
-										  FALSE,
-										  TTi18n::gettext( 'Please specify amount type' )
-				);
-			}
-		}
-		if ( $this->getAmountType() !== FALSE AND $this->Validator->isError( 'amount_type_id' ) == FALSE ) {
-			$this->Validator->inArrayKey( 'amount_type_id',
-										  $this->getAmountType(),
-										  TTi18n::gettext( 'Incorrect amount type' ),
-										  $this->getOptions( 'amount_type' )
-			);
-		}
-		// Amount
-		if ( $this->getAmount() != '' ) {
-			$this->Validator->isNumeric( 'amount',
-										 $this->getAmount(),
-										 TTi18n::gettext( 'Incorrect Amount' )
-			);
-		}
-
-		// Percent
-		if ( $this->getAmountType() == 10 AND $this->getPercentAmount() != '' ) {
-			$this->Validator->isFloat( 'percent_amount',
-									   $this->getPercentAmount(),
-									   TTi18n::gettext( 'Invalid Percent' )
-			);
-			if ( $this->Validator->isError( 'percent_amount' ) == FALSE ) {
-				$this->Validator->isLessThan( 'percent_amount',
-											  $this->getPercentAmount(),
-											  TTi18n::gettext( 'Percent must be less than 100%' ),
-											  100
-				);
-			}
-			if ( $this->Validator->isError( 'percent_amount' ) == FALSE ) {
-				$this->Validator->isGreaterThan( 'percent_amount',
-												 $this->getPercentAmount(),
-												 TTi18n::gettext( 'Percent must be more than 1%' ),
-												 1
-				);
-			}
-		}
-
-		// Priority
-		if ( $this->Validator->getValidateOnly() == FALSE ) {
-			if ( $this->getPriority() == FALSE ) {
-				$this->Validator->isTrue( 'priority',
-										  FALSE,
-										  TTi18n::gettext( 'Please specify priority' )
-				);
-			}
-		}
-		if ( $this->getPriority() !== FALSE AND $this->Validator->isError( 'priority' ) == FALSE ) {
-			$this->Validator->isNumeric( 'priority',
-										 $this->getPriority(),
-										 TTi18n::gettext( 'Priority is invalid' )
-			);
-		}
-		// Value 4
-		if ( $this->getValue4() != '' ) {
-			$this->Validator->isLength( 'value4',
-										$this->getValue4(),
-										TTi18n::gettext( 'Value 4 is invalid' ),
-										1, 255
-			);
-		}
-		// Value 5
-		if ( $this->getValue5() != '' ) {
-			$this->Validator->isLength( 'value5',
-										$this->getValue5(),
-										TTi18n::gettext( 'Value 5 is invalid' ),
-										1, 255
-			);
-		}
-		// Value 6
-		if ( $this->getValue6() != '' ) {
-			$this->Validator->isLength( 'value6',
-										$this->getValue6(),
-										TTi18n::gettext( 'Value 6 is invalid' ),
-										1, 255
-			);
-		}
-		// Value 7
-		if ( $this->getValue7() != '' ) {
-			$this->Validator->isLength( 'value7',
-										$this->getValue7(),
-										TTi18n::gettext( 'Value 7 is invalid' ),
-										1, 255
-			);
-		}
-		// Value 8
-		if ( $this->getValue8() != '' ) {
-			$this->Validator->isLength( 'value8',
-										$this->getValue8(),
-										TTi18n::gettext( 'Value 8 is invalid' ),
-										1, 255
-			);
-		}
-		// Value 9
-		if ( $this->getValue9() != '' ) {
-			$this->Validator->isLength( 'value9',
-										$this->getValue9(),
-										TTi18n::gettext( 'Value 9 is invalid' ),
-										1, 255
-			);
-		}
-		// Value 10
-		if ( $this->getValue10() != '' ) {
-			$this->Validator->isLength( 'value10',
-										$this->getValue10(),
-										TTi18n::gettext( 'Value 10 is invalid' ),
-										1, 255
-			);
-		}
-
-		//
-		// ABOVE: Validation code moved from set*() functions.
-		//
-
-		//Make sure Source Account and Destination Account types match.
-		if ( $this->getRemittanceSourceAccount() !== FALSE AND $this->getType() !== FALSE ) {
-			if ( is_object( $this->getRemittanceSourceAccountObject() ) ) {
-				if ( $this->getRemittanceSourceAccountObject()->getType() != $this->getType() ) {
-					$this->Validator->isTrue( 'remittance_source_account_id',
-											  FALSE,
-											  TTi18n::gettext( 'Source Account is invalid, type mismatch' ) );
-
-				}
-			}
-		}
 
 		$country = is_object( $this->getRemittanceSourceAccountObject() ) ? $this->getRemittanceSourceAccountObject()->getCountry() : FALSE;
-		if ( $this->getAmountType() == 20 ) {
-			if ( (int)$this->getAmount() == 0 ) {
-				$this->Validator->isTrue( 'amount',
-										  FALSE,
-										  TTi18n::gettext( 'Amount is 0 or not specified' )
+
+		if ( $this->getDeleted() == FALSE ) {
+			// Remittance source account
+			if ( $this->getRemittanceSourceAccount() !== FALSE AND $this->getRemittanceSourceAccount() != TTUUID::getZeroID() AND !$this->getEnableBlankRemittanceSourceAccount() ) {
+				$lf = TTnew( 'RemittanceSourceAccountListFactory' );
+				$this->Validator->isResultSetWithRows( 'remittance_source_account_id',
+													   $lf->getByID( $this->getRemittanceSourceAccount() ),
+													   TTi18n::gettext( 'Remittance source account is invalid' )
 				);
 			}
-		} else {
-			if ( $this->getAmountType() == 10 ) {
-				if ( $this->getPercentAmount() == 0 OR $this->getPercentAmount() == 0.00 ) {
-					$this->Validator->isTrue( 'percent_amount',
+			// User
+			if ( $this->Validator->getValidateOnly() == FALSE ) {
+				if ( $this->getUser() == FALSE ) {
+					$this->Validator->isTrue( 'user_id',
 											  FALSE,
-											  TTi18n::gettext( 'Percent is 0 or not specified' )
+											  TTi18n::gettext( 'Please specify employee' )
 					);
-				} else {
-					if ( $this->getPercentAmount() < 0 OR (int)$this->getPercentAmount() > 100 ) {
+				}
+			}
+
+			if ( ( $this->getUser() != FALSE AND $this->Validator->isError( 'user_id' ) == FALSE ) ) {
+
+				$ulf = TTnew( 'UserListFactory' );
+				$this->Validator->isResultSetWithRows( 'user_id',
+													   $ulf->getByID( $this->getUser() ),
+													   TTi18n::gettext( 'Invalid Employee' )
+				);
+			}
+
+			// Currency
+			if ( $this->getCurrency() !== FALSE AND $this->getCurrency() != TTUUID::getZeroID() ) {
+				$culf = TTnew( 'CurrencyListFactory' );
+				$this->Validator->isResultSetWithRows( 'currency_id',
+													   $culf->getByID( $this->getCurrency() ),
+													   TTi18n::gettext( 'Invalid Currency' )
+				);
+			}
+			// Status
+			if ( $this->Validator->getValidateOnly() == FALSE ) {
+				if ( $this->getStatus() == FALSE ) {
+					$this->Validator->isTrue( 'status_id',
+											  FALSE,
+											  TTi18n::gettext( 'Please specify status' ) );
+				}
+			}
+			if ( $this->getStatus() !== FALSE AND $this->Validator->isError( 'status_id' ) == FALSE ) {
+				$this->Validator->inArrayKey( 'status',
+											  $this->getStatus(),
+											  TTi18n::gettext( 'Incorrect Status' ),
+											  $this->getOptions( 'status' )
+				);
+			}
+			// Type
+			if ( $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing.
+				if ( $this->getType() == FALSE ) {
+					$this->Validator->isTrue( 'type_id',
+											  FALSE,
+											  TTi18n::gettext( 'Please specify type' )
+					);
+				}
+			}
+			if ( $this->getType() !== FALSE AND $this->Validator->isError( 'type_id' ) == FALSE AND $this->getRemittanceSourceAccount() != TTUUID::getZeroID() ) {
+				$this->Validator->inArrayKey( 'type_id',
+											  $this->getType(),
+											  TTi18n::gettext( 'Incorrect Type' ),
+											  $this->getOptions( 'type', array('legal_entity_id' => $this->getLegalEntity()) )
+				);
+			}
+
+
+			// Name
+			if ( $this->Validator->getValidateOnly() == FALSE ) {
+				if ( $this->getName() == '' ) {
+					$this->Validator->isTRUE( 'name',
+											  FALSE,
+											  TTi18n::gettext( 'Please specify a name' ) );
+				}
+			}
+			if ( $this->getName() != '' AND $this->Validator->isError( 'name' ) == FALSE ) {
+				$this->Validator->isLength( 'name',
+											$this->getName(),
+											TTi18n::gettext( 'Name is too short or too long' ),
+											2, 100
+				);
+			}
+			if ( $this->getName() != '' AND $this->Validator->isError( 'name' ) == FALSE AND $this->getUser() != TTUUID::getZeroID() ) {
+				$this->Validator->isTrue( 'name',
+										  $this->isUniqueName( $this->getName() ),
+										  TTi18n::gettext( 'Name already exists' )
+				);
+			}
+			// Description
+			$this->Validator->isLength( 'description',
+										$this->getDescription(),
+										TTi18n::gettext( 'Description is invalid' ),
+										0, 255
+			);
+			// Amount type
+			if ( $this->Validator->getValidateOnly() == FALSE ) {
+				if ( $this->getAmountType() == FALSE ) {
+					$this->Validator->isTrue( 'amount_type_id',
+											  FALSE,
+											  TTi18n::gettext( 'Please specify amount type' )
+					);
+				}
+			}
+			if ( $this->getAmountType() !== FALSE AND $this->Validator->isError( 'amount_type_id' ) == FALSE ) {
+				$this->Validator->inArrayKey( 'amount_type_id',
+											  $this->getAmountType(),
+											  TTi18n::gettext( 'Incorrect amount type' ),
+											  $this->getOptions( 'amount_type' )
+				);
+			}
+			// Amount
+			if ( $this->getAmount() != '' ) {
+				$this->Validator->isNumeric( 'amount',
+											 $this->getAmount(),
+											 TTi18n::gettext( 'Incorrect Amount' )
+				);
+			}
+
+			// Percent
+			if ( $this->getAmountType() == 10 AND $this->getPercentAmount() != '' ) {
+				$this->Validator->isFloat( 'percent_amount',
+										   $this->getPercentAmount(),
+										   TTi18n::gettext( 'Invalid Percent' )
+				);
+				if ( $this->Validator->isError( 'percent_amount' ) == FALSE ) {
+					$this->Validator->isLessThan( 'percent_amount',
+												  $this->getPercentAmount(),
+												  TTi18n::gettext( 'Percent must be less than 100%' ),
+												  100
+					);
+				}
+				if ( $this->Validator->isError( 'percent_amount' ) == FALSE ) {
+					$this->Validator->isGreaterThan( 'percent_amount',
+													 $this->getPercentAmount(),
+													 TTi18n::gettext( 'Percent must be more than 1%' ),
+													 1
+					);
+				}
+			}
+
+			// Priority
+			if ( $this->Validator->getValidateOnly() == FALSE ) {
+				if ( $this->getPriority() == FALSE ) {
+					$this->Validator->isTrue( 'priority',
+											  FALSE,
+											  TTi18n::gettext( 'Please specify priority' )
+					);
+				}
+			}
+			if ( $this->getPriority() !== FALSE AND $this->Validator->isError( 'priority' ) == FALSE ) {
+				$this->Validator->isNumeric( 'priority',
+											 $this->getPriority(),
+											 TTi18n::gettext( 'Priority is invalid' )
+				);
+			}
+			// Value 4
+			if ( $this->getValue4() != '' ) {
+				$this->Validator->isLength( 'value4',
+											$this->getValue4(),
+											TTi18n::gettext( 'Value 4 is invalid' ),
+											1, 255
+				);
+			}
+			// Value 5
+			if ( $this->getValue5() != '' ) {
+				$this->Validator->isLength( 'value5',
+											$this->getValue5(),
+											TTi18n::gettext( 'Value 5 is invalid' ),
+											1, 255
+				);
+			}
+			// Value 6
+			if ( $this->getValue6() != '' ) {
+				$this->Validator->isLength( 'value6',
+											$this->getValue6(),
+											TTi18n::gettext( 'Value 6 is invalid' ),
+											1, 255
+				);
+			}
+			// Value 7
+			if ( $this->getValue7() != '' ) {
+				$this->Validator->isLength( 'value7',
+											$this->getValue7(),
+											TTi18n::gettext( 'Value 7 is invalid' ),
+											1, 255
+				);
+			}
+			// Value 8
+			if ( $this->getValue8() != '' ) {
+				$this->Validator->isLength( 'value8',
+											$this->getValue8(),
+											TTi18n::gettext( 'Value 8 is invalid' ),
+											1, 255
+				);
+			}
+			// Value 9
+			if ( $this->getValue9() != '' ) {
+				$this->Validator->isLength( 'value9',
+											$this->getValue9(),
+											TTi18n::gettext( 'Value 9 is invalid' ),
+											1, 255
+				);
+			}
+			// Value 10
+			if ( $this->getValue10() != '' ) {
+				$this->Validator->isLength( 'value10',
+											$this->getValue10(),
+											TTi18n::gettext( 'Value 10 is invalid' ),
+											1, 255
+				);
+			}
+
+			//
+			// ABOVE: Validation code moved from set*() functions.
+			//
+
+			//Make sure Source Account and Destination Account types match.
+			if ( $this->getRemittanceSourceAccount() !== FALSE AND $this->getType() !== FALSE ) {
+				if ( is_object( $this->getRemittanceSourceAccountObject() ) ) {
+					if ( $this->getRemittanceSourceAccountObject()->getType() != $this->getType() ) {
+						$this->Validator->isTrue( 'remittance_source_account_id',
+												  FALSE,
+												  TTi18n::gettext( 'Source Account is invalid, type mismatch' ) );
+
+					}
+				}
+			}
+
+			if ( $this->getAmountType() == 20 ) {
+				if ( (int)$this->getAmount() == 0 ) {
+					$this->Validator->isTrue( 'amount',
+											  FALSE,
+											  TTi18n::gettext( 'Amount is 0 or not specified' )
+					);
+				}
+			} else {
+				if ( $this->getAmountType() == 10 ) {
+					if ( $this->getPercentAmount() == 0 OR $this->getPercentAmount() == 0.00 ) {
 						$this->Validator->isTrue( 'percent_amount',
 												  FALSE,
-												  TTi18n::gettext( 'Percent is less than 0 or more than 100' )
+												  TTi18n::gettext( 'Percent is 0 or not specified' )
 						);
-					}
-				}
-			}
-		}
-
-		if ( $this->Validator->getValidateOnly() == FALSE ) { //Make sure we can mass edit type/source account, so validating these has to be delayed.
-			if ( $this->getStatus() == 10 ) { //10=Enabled - Only validate when status is enabled, so records that are invalid but used in the past can always be disabled.
-				if ( $this->getType() == 2000 ) {
-					/**
-					 * Currently hiding these options from the UI because we aren't printing MICR codes yet so we don't want to validate them.
-					 */
-
-					//			if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
-					//				$this->Validator->isTrue(		'value2',
-					//												FALSE,
-					//												TTi18n::gettext('Invalid routing number length'));
-					//			} else {
-					//				$this->Validator->isNumeric(	'value2',
-					//												$this->getValue2(),
-					//												TTi18n::gettext('Invalid routing number, must be digits only'));
-					//			}
-					//			if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
-					//				$this->Validator->isTrue(		'value3',
-					//												FALSE,
-					//												TTi18n::gettext('Invalid account number length'));
-					//			} else {
-					//				$this->Validator->isNumeric(	'value3',
-					//												$this->getValue3(),
-					//												TTi18n::gettext('Invalid account number, must be digits only'));
-					//			}
-				} else {
-					if ( $this->getType() == 3000 AND $country == 'US' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
-						if ( $this->getValue1() == FALSE ) {
-							$this->Validator->isTrue( 'value1_2', //JS uses value1_2 to reference this field.
+					} else {
+						if ( $this->getPercentAmount() < 0 OR (int)$this->getPercentAmount() > 100 ) {
+							$this->Validator->isTrue( 'percent_amount',
 													  FALSE,
-													  TTi18n::gettext( 'Account Type must be specified' ) );
-						}
-
-						if ( strlen( $this->getValue2() ) != 9 ) {
-							$this->Validator->isTrue( 'value2',
-													  FALSE,
-													  TTi18n::gettext( 'Invalid routing number length' ) );
-						} else {
-							$this->Validator->isNumeric( 'value2',
-														 $this->getValue2(),
-														 TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
-						}
-
-						if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 17 ) {
-							$this->Validator->isTrue( 'value3',
-													  FALSE,
-													  TTi18n::gettext( 'Invalid account number length' ) );
-						} else {
-							$this->Validator->isNumeric( 'value3',
-														 $this->getValue3(),
-														 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
-						}
-					} elseif ( $this->getType() == 3000 AND $country == 'CA' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
-						if ( strlen( $this->getValue1() ) != 3 ) {
-							$this->Validator->isTrue( 'value1',
-													  FALSE,
-													  TTi18n::gettext( 'Invalid institution number length' ) );
-						}
-						if ( strlen( $this->getValue2() ) != 5 ) {
-							$this->Validator->isTrue( 'value2',
-													  FALSE,
-													  TTi18n::gettext( 'Invalid transit number length' ) );
-						} else {
-							$this->Validator->isNumeric( 'value2',
-														 $this->getValue2(),
-														 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
-						}
-						if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 12 ) {
-							$this->Validator->isTrue( 'value3',
-													  FALSE,
-													  TTi18n::gettext( 'Invalid account number length' ) );
-						} else {
-							$this->Validator->isNumeric( 'value3',
-														 $this->getValue3(),
-														 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+													  TTi18n::gettext( 'Percent is less than 0 or more than 100' )
+							);
 						}
 					}
 				}
 			}
+
+			if ( $this->Validator->getValidateOnly() == FALSE ) { //Make sure we can mass edit type/source account, so validating these has to be delayed.
+				if ( $this->getStatus() == 10 ) { //10=Enabled - Only validate when status is enabled, so records that are invalid but used in the past can always be disabled.
+					if ( $this->getType() == 2000 ) {
+						/**
+						 * Currently hiding these options from the UI because we aren't printing MICR codes yet so we don't want to validate them.
+						 */
+
+						//			if ( strlen( $this->getValue2() ) < 2 OR strlen( $this->getValue2() ) > 15 ) {
+						//				$this->Validator->isTrue(		'value2',
+						//												FALSE,
+						//												TTi18n::gettext('Invalid routing number length'));
+						//			} else {
+						//				$this->Validator->isNumeric(	'value2',
+						//												$this->getValue2(),
+						//												TTi18n::gettext('Invalid routing number, must be digits only'));
+						//			}
+						//			if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 20 ) {
+						//				$this->Validator->isTrue(		'value3',
+						//												FALSE,
+						//												TTi18n::gettext('Invalid account number length'));
+						//			} else {
+						//				$this->Validator->isNumeric(	'value3',
+						//												$this->getValue3(),
+						//												TTi18n::gettext('Invalid account number, must be digits only'));
+						//			}
+					} else {
+						if ( $this->getType() == 3000 AND $country == 'US' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
+							if ( $this->getValue1() == FALSE ) {
+								$this->Validator->isTrue( 'value1_2', //JS uses value1_2 to reference this field.
+														  FALSE,
+														  TTi18n::gettext( 'Account Type must be specified' ) );
+							}
+
+							if ( strlen( $this->getValue2() ) != 9 ) {
+								$this->Validator->isTrue( 'value2',
+														  FALSE,
+														  TTi18n::gettext( 'Invalid routing number length' ) );
+							} else {
+								$this->Validator->isNumeric( 'value2',
+															 $this->getValue2(),
+															 TTi18n::gettext( 'Invalid routing number, must be digits only' ) );
+							}
+
+							if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 17 ) {
+								$this->Validator->isTrue( 'value3',
+														  FALSE,
+														  TTi18n::gettext( 'Invalid account number length' ) );
+							} else {
+								$this->Validator->isNumeric( 'value3',
+															 $this->getValue3(),
+															 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+							}
+						} elseif ( $this->getType() == 3000 AND $country == 'CA' AND is_object( $this->getRemittanceSourceAccountObject() ) ) {
+							if ( strlen( $this->getValue1() ) != 3 ) {
+								$this->Validator->isTrue( 'value1',
+														  FALSE,
+														  TTi18n::gettext( 'Invalid institution number length' ) );
+							}
+							if ( strlen( $this->getValue2() ) != 5 ) {
+								$this->Validator->isTrue( 'value2',
+														  FALSE,
+														  TTi18n::gettext( 'Invalid transit number length' ) );
+							} else {
+								$this->Validator->isNumeric( 'value2',
+															 $this->getValue2(),
+															 TTi18n::gettext( 'Invalid transit number, must be digits only' ) );
+							}
+							if ( strlen( $this->getValue3() ) < 3 OR strlen( $this->getValue3() ) > 12 ) {
+								$this->Validator->isTrue( 'value3',
+														  FALSE,
+														  TTi18n::gettext( 'Invalid account number length' ) );
+							} else {
+								$this->Validator->isNumeric( 'value3',
+															 $this->getValue3(),
+															 TTi18n::gettext( 'Invalid account number, must be digits only' ) );
+							}
+						}
+					}
+				}
+			}
+
+			//Make sure the name does not contain the account number for security reasons.
+			$this->Validator->isTrue( 'name',
+					( ( stripos( $this->getName(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
+									  TTi18n::gettext( 'Account number must not be a part of the Name' ) );
+
+			//Make sure the description does not contain the account number for security reasons.
+			$this->Validator->isTrue( 'description',
+					( ( stripos( $this->getDescription(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
+									  TTi18n::gettext( 'Account number must not be a part of the Description' ) );
 		}
-
-		//Make sure the name does not contain the account number for security reasons.
-		$this->Validator->isTrue(		'name',
-										( ( stripos( $this->getName(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
-										TTi18n::gettext('Account number must not be a part of the Name') );
-
-		//Make sure the description does not contain the account number for security reasons.
-		$this->Validator->isTrue(		'description',
-										( ( stripos( $this->getDescription(), $this->getValue3() ) !== FALSE ) ? FALSE : TRUE ),
-										TTi18n::gettext('Account number must not be a part of the Description') );
-
 
 		$pstlf = TTnew( 'PayStubTransactionListFactory' );
 		$pstlf->getByRemittanceDestinationAccountId($this->getId());
@@ -1201,6 +1207,9 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 					$function = 'set'.$function;
 					switch( $key ) {
+						case 'ach_transaction_type':
+							$this->setValue1( $data[$key] );
+							break;
 						default:
 							if ( method_exists( $this, $function ) ) {
 								$this->$function( $data[$key] );
@@ -1222,7 +1231,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 	 * @param null $include_columns
 	 * @return mixed
 	 */
-	function getObjectAsArray( $include_columns = NULL ) {
+	function getObjectAsArray( $include_columns = NULL, $permission_children_ids = FALSE ) {
 		$data = array();
 		$variable_function_map = $this->getVariableToFunctionMap();
 		if ( is_array( $variable_function_map ) ) {
@@ -1281,6 +1290,8 @@ class RemittanceDestinationAccountFactory extends Factory {
 
 				}
 			}
+
+			$this->getPermissionColumns( $data, $this->getColumn( 'user_id' ), $this->getCreatedBy(), $permission_children_ids, $include_columns );
 			$this->getCreatedAndUpdatedColumns( $data, $include_columns );
 		}
 
@@ -1292,7 +1303,7 @@ class RemittanceDestinationAccountFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Remittance destination account') .': '. $this->getName(), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Employee Payment Method') .': '. $this->getName(), NULL, $this->getTable(), $this );
 	}
 
 }

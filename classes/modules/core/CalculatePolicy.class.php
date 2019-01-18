@@ -7665,7 +7665,8 @@ class CalculatePolicy {
 										$accrual_balance = ( $original_balance + $original_balance_adjustment + $prev_original_balance_adjustment + $tmp_accrual_balance );
 
 										if ( $milestone_obj->getAnnualMaximumTime() > 0 ) {
-											$annual_accrued_amount = ( $tmp_accrual_balance + $alf->getSumByUserIdAndAccrualPolicyAccountAndTypeAndStartDateAndEndDate( $this->getUserObject()->getId(), $ap_obj->getAccrualPolicyAccount(), array( 76 ), $ap_obj->getCurrentMilestoneRolloverDate( $date_stamp, $this->getUserObject(), TRUE ), $date_stamp ) );
+											//Include initial balance and hour-based accrual entries in this calculation, otherwise we can never handle customers who switch mid-year and need to enter how many hours earned from another system.
+											$annual_accrued_amount = ( $tmp_accrual_balance + $alf->getSumByUserIdAndAccrualPolicyAccountAndTypeAndStartDateAndEndDate( $this->getUserObject()->getId(), $ap_obj->getAccrualPolicyAccount(), array( 70, 76 ), $ap_obj->getCurrentMilestoneRolloverDate( $date_stamp, $this->getUserObject(), TRUE ), $date_stamp ) );
 										} else {
 											$annual_accrued_amount = FALSE;
 										}

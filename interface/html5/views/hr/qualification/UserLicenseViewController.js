@@ -39,24 +39,7 @@ UserLicenseViewController = BaseViewController.extend( {
 	},
 
 	showNoResultCover: function( show_new_btn ) {
-
-		show_new_btn = this.ifContextButtonExist( ContextMenuIconName.add );
-
-		if ( this.sub_view_mode ) {
-			show_new_btn = true;
-			this.grid.setGridHeight( 150 );
-		}
-
-		this.removeNoResultCover();
-		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
-		this.no_result_box.NoResultBox( {related_view_controller: this, is_new: show_new_btn} );
-		this.no_result_box.attr( 'id', this.ui_id + '_no_result_box' );
-
-		var grid_div = $( this.el ).find( '.grid-div' );
-
-		grid_div.append( this.no_result_box );
-
-		this.initRightClickMenu( RightClickMenuType.NORESULTBOX );
+		this._super( 'showNoResultCover', ( this.sub_view_mode ) ? true : false );
 	},
 
 	onGridSelectRow: function() {
@@ -114,7 +97,7 @@ UserLicenseViewController = BaseViewController.extend( {
 		this.mass_edit_record_ids = [];
 
 		$.each( grid_selected_id_array, function( index, value ) {
-			$this.mass_edit_record_ids.push( value )
+			$this.mass_edit_record_ids.push( value );
 		} );
 
 		filter.filter_data = {};
@@ -180,44 +163,18 @@ UserLicenseViewController = BaseViewController.extend( {
 
 	},
 
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-	},
-
 	buildEditViewUI: function() {
 
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_license': $.i18n._( 'License' ),
-			'tab_attachment': $.i18n._( 'Attachments' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_license': { 'label': $.i18n._( 'License' ) },
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserLicense' )),
@@ -277,26 +234,26 @@ UserLicenseViewController = BaseViewController.extend( {
 		// Number
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'license_number', width: 200} );
+		form_item_input.TTextInput( { field: 'license_number', width: 200 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Number' ), form_item_input, tab_license_column1 );
 
 		// Issued Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'license_issued_date'} );
+		form_item_input.TDatePicker( { field: 'license_issued_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Issued Date' ), form_item_input, tab_license_column1 );
 
 		// Expiry Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'license_expiry_date'} );
+		form_item_input.TDatePicker( { field: 'license_expiry_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Expiry Date' ), form_item_input, tab_license_column1 );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
-		form_item_input.TTagInput( {field: 'tag', object_type_id: 253} );
+		form_item_input.TTagInput( { field: 'tag', object_type_id: 253 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_license_column1, '', null, null, true );
 
 	},
@@ -353,7 +310,8 @@ UserLicenseViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
 			new SearchField( {
 				label: $.i18n._( 'License Number' ),
@@ -421,66 +379,10 @@ UserLicenseViewController = BaseViewController.extend( {
 		];
 	},
 
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
-	removeEditView: function() {
-
-		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
-
-	},
-
+	searchDone: function() {
+		this._super( 'searchDone' );
+		TTPromise.resolve( 'Employee_Qualifications_Tab', 'UserLicenseViewController' );
+	}
 } );
 
 UserLicenseViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {

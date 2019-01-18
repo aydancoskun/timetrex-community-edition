@@ -1,15 +1,16 @@
-/*
- * $License$
- */
-HeaderViewController = Backbone.View.extend({
+HeaderViewController = Backbone.View.extend( {
 	initialize: function() {
-		var tpl = Global.loadWidget( 'views/quick_punch/header/HeaderView.html' )
-		this.tpl = _.template( tpl );
+		var tpl = Global.loadWidget( 'views/quick_punch/header/HeaderView.html' );
+		if ( tpl ) { //JS Exception: Uncaught TypeError: Cannot read property 'replace' of undefined
+			this.tpl = _.template( tpl );
+		}
 		this.render();
 	},
-	render: function () {
+	render: function() {
 		var url = ServiceCaller.mainCompanyLogo;
-		this.setElement( this.tpl( {company_logo: url} ) );
+		if ( this.tpl ) {
+			this.setElement( this.tpl( { company_logo: url } ) );
+		}
 	}
 
-});
+} );

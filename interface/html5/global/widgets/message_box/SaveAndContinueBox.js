@@ -27,11 +27,11 @@
 			var len = related_view_controller.context_menu_array.length;
 
 			for ( var i = 0; i < len; i++ ) {
-				var context_btn = related_view_controller.context_menu_array[i];
+				var context_btn = $( related_view_controller.context_menu_array[i] );
 				var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 				if ( id === ContextMenuIconName.save_and_continue ) {
 					if ( context_btn.hasClass( 'invisible-image' ) || context_btn.hasClass( 'disable-image' ) ) {
-						ribbon_button.addClass( 'disable-image' )
+						ribbon_button.addClass( 'disable-image' );
 					}
 				}
 
@@ -51,8 +51,6 @@
 
 	};
 
-	$.fn.SaveAndContinueBox.defaults = {
-
-	};
+	$.fn.SaveAndContinueBox.defaults = {};
 
 })( jQuery );

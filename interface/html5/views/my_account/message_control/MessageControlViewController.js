@@ -298,7 +298,7 @@ MessageControlViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -361,7 +361,7 @@ MessageControlViewController = BaseViewController.extend( {
 				break;
 			}
 
-			context_btn = this.context_menu_array[i];
+			context_btn = $( this.context_menu_array[i] );
 			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			switch ( id ) {
@@ -377,46 +377,10 @@ MessageControlViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-		/* jshint ignore:start */
-
+	onCustomContextClick: function( id, context_btn ) {
 		switch ( id ) {
-			case ContextMenuIconName.add:
-				ProgressBar.showOverlay();
-				this.onAddClick();
-				break;
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
 			case ContextMenuIconName.send:
-			case ContextMenuIconName.save:
-				ProgressBar.showOverlay();
 				this.onSaveClick();
-				break;
-			case ContextMenuIconName.edit:
-				ProgressBar.showOverlay();
-				this.onEditClick();
-				break;
-			case ContextMenuIconName.delete_icon:
-				ProgressBar.showOverlay();
-				this.onDeleteClick();
-				break;
-			case ContextMenuIconName.delete_and_next:
-				ProgressBar.showOverlay();
-				this.onDeleteAndNextClick();
 				break;
 			case ContextMenuIconName.close_misc:
 			case ContextMenuIconName.cancel:
@@ -430,13 +394,7 @@ MessageControlViewController = BaseViewController.extend( {
 				this.setCurrentSelectedIcon( context_btn );
 				this.onSentClick();
 				break;
-			case ContextMenuIconName.export_excel:
-				this.onExportClick('export' + this.api.key_name )
-				break;
-
 		}
-		/* jshint ignore:end */
-
 	},
 
 	onCancelClick: function( iconName ) {
@@ -466,7 +424,12 @@ MessageControlViewController = BaseViewController.extend( {
 				$this.removeEditView();
 				$this.isReloadViewUI = false;
 			}
-			TTPromise.resolve('base', 'onCancelClick');
+
+			Global.setUIInitComplete();
+			ProgressBar.closeOverlay();
+
+
+			TTPromise.resolve( 'base', 'onCancelClick' );
 
 		}
 
@@ -525,7 +488,7 @@ MessageControlViewController = BaseViewController.extend( {
 			pId = 'request';
 		}
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
@@ -565,7 +528,7 @@ MessageControlViewController = BaseViewController.extend( {
 					this.setEditMenuSentIcon( context_btn, pId );
 					break;
 				case ContextMenuIconName.export_excel:
-					this.setDefaultMenuExportIcon( context_btn);
+					this.setDefaultMenuExportIcon( context_btn );
 					break;
 			}
 			/* jshint ignore:end */
@@ -585,7 +548,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			$( context_btn.find( '.ribbon-sub-menu-icon' ) ).removeClass( 'selected-menu' );
 		}
 		$( icon.find( '.ribbon-sub-menu-icon' ) ).addClass( 'selected-menu' );
@@ -689,7 +652,7 @@ MessageControlViewController = BaseViewController.extend( {
 			var item = data[i];
 
 			if ( item.status_id == 10 ) {
-				$( "tr[id='" + item.id + "'] td" ).css( 'font-weight', 'bold' );
+				$( 'tr[id=\'' + item.id + '\'] td' ).css( 'font-weight', 'bold' );
 			}
 		}
 	},
@@ -737,7 +700,7 @@ MessageControlViewController = BaseViewController.extend( {
 		this.edit_view_tab.attr( 'id', this.ui_id + '_edit_view_tab' );
 		this.setTabOVisibility( false );
 		this.edit_view_tab = this.edit_view_tab.tabs( {
-			show: function( e, ui ) {
+			activate: function( e, ui ) {
 				$this.onTabShow( e, ui );
 			}
 		} );
@@ -771,7 +734,7 @@ MessageControlViewController = BaseViewController.extend( {
 	},
 
 	onViewClick: function( next_selected_item, noRefreshUI ) {
-		TTPromise.add('MessageControllViewController','onViewClick');
+		TTPromise.add( 'MessageControllViewController', 'onViewClick' );
 		TTPromise.wait();
 		var $this = this;
 		$this.is_viewing = true;
@@ -792,7 +755,7 @@ MessageControlViewController = BaseViewController.extend( {
 		} else if ( grid_selected_length > 0 ) {
 			selected_item = this.getRecordFromGridById( grid_selected_id_array[0] );
 		} else {
-			TTPromise.reject('MessageControllViewController','onViewClick');
+			TTPromise.reject( 'MessageControllViewController', 'onViewClick' );
 			return;
 		}
 
@@ -829,7 +792,7 @@ MessageControlViewController = BaseViewController.extend( {
 						if ( !$this.edit_view ) {
 							$this.onCancelClick();
 						}
-						TTPromise.reject('MessageControllViewController','onViewClick');
+						TTPromise.reject( 'MessageControllViewController', 'onViewClick' );
 						return;
 					}
 
@@ -840,8 +803,8 @@ MessageControlViewController = BaseViewController.extend( {
 
 					//if access from url, current_select_message_control_data need be get again
 					if ( !$this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
-						var filter = {filter_data: {id: $this.current_select_message_control_data.id}};
-						var message_control_data = $this.api.getMessageControl( filter, {async: false} ).getResult()[0];
+						var filter = { filter_data: { id: $this.current_select_message_control_data.id } };
+						var message_control_data = $this.api.getMessageControl( filter, { async: false } ).getResult()[0];
 
 						if ( message_control_data ) {
 							$this.current_select_message_control_data = message_control_data;
@@ -850,7 +813,7 @@ MessageControlViewController = BaseViewController.extend( {
 					}
 
 					$this.initEditView();
-					TTPromise.resolve('MessageControllViewController','onViewClick');
+					TTPromise.resolve( 'MessageControllViewController', 'onViewClick' );
 				}
 			} );
 
@@ -872,7 +835,7 @@ MessageControlViewController = BaseViewController.extend( {
 						if ( !$this.edit_view ) {
 							$this.onCancelClick();
 						}
-						TTPromise.reject('MessageControllViewController','onViewClick');
+						TTPromise.reject( 'MessageControllViewController', 'onViewClick' );
 						return;
 					}
 
@@ -882,8 +845,8 @@ MessageControlViewController = BaseViewController.extend( {
 					$this.current_edit_record = result_data;
 					//if access from url, current_select_message_control_data need be get again
 					if ( !$this.current_select_message_control_data.hasOwnProperty( 'to_user_id' ) ) {
-						var filter = {filter_data: {id: $this.current_select_message_control_data.id}};
-						var message_control_data = $this.api.getMessageControl( filter, {async: false} ).getResult()[0];
+						var filter = { filter_data: { id: $this.current_select_message_control_data.id } };
+						var message_control_data = $this.api.getMessageControl( filter, { async: false } ).getResult()[0];
 
 						if ( message_control_data ) {
 							$this.current_select_message_control_data = message_control_data;
@@ -893,7 +856,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 					$this.initEditView();
 
-					TTPromise.resolve('MessageControllViewController','onViewClick');
+					TTPromise.resolve( 'MessageControllViewController', 'onViewClick' );
 				}
 			} );
 
@@ -921,21 +884,21 @@ MessageControlViewController = BaseViewController.extend( {
 		}
 
 		if ( this.canSetURL() ) {
-			var tab_name = this.edit_view_tab ? this.edit_view_tab.find( '.edit-view-tab-bar-label' ).children().eq( this.edit_view_tab_selected_index ).text() : '';
+			var tab_name = this.edit_view_tab ? this.edit_view_tab.find( '.edit-view-tab-bar-label' ).children().eq( this.getEditViewTabIndex() ).text() : '';
 			tab_name = tab_name.replace( /\/|\s+/g, '' );
 			if ( this.current_select_message_control_data && this.current_select_message_control_data.id ) {
 				if ( a ) {
 
 					if ( this.is_request ) {
 						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId +
-						'&a=' + a + '&id=' + this.current_select_message_control_data.id +
-						'&t=request&object_id=' + this.current_select_message_control_data.object_id +
-						'&tab=' + tab_name );
+								'&a=' + a + '&id=' + this.current_select_message_control_data.id +
+								'&t=request&object_id=' + this.current_select_message_control_data.object_id +
+								'&tab=' + tab_name );
 					} else {
 						Global.setURLToBrowser( Global.getBaseURL() +
-						'#!m=' + this.viewId + '&a=' +
-						a + '&id=' + this.current_select_message_control_data.id + '&t=message' +
-						'&tab=' + tab_name );
+								'#!m=' + this.viewId + '&a=' +
+								a + '&id=' + this.current_select_message_control_data.id + '&t=message' +
+								'&tab=' + tab_name );
 					}
 
 				}
@@ -947,10 +910,10 @@ MessageControlViewController = BaseViewController.extend( {
 					//Edit a record which don't have id, schedule view Recurring Scedule
 					if ( a === 'edit' ) {
 						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&a=new&t=' + (this.is_request ? 'request' : 'message') +
-						'&tab=' + tab_name );
+								'&tab=' + tab_name );
 					} else {
 						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + this.viewId + '&a=' + a + '&t=' + (this.is_request ? 'request' : 'message') +
-						'&tab=' + tab_name );
+								'&tab=' + tab_name );
 					}
 
 				} else {
@@ -972,7 +935,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 			//because I will always get this in onViewClick, so else branch should never be in
 			if ( this.current_select_message_control_data && this.current_select_message_control_data.hasOwnProperty( 'id' ) &&
-				this.current_select_message_control_data.hasOwnProperty( 'subject' ) ) {
+					this.current_select_message_control_data.hasOwnProperty( 'subject' ) ) {
 				navigation_source_data = this.current_select_message_control_data;
 			} else {
 				navigation_source_data = Global.isArray( this.current_edit_record ) ? this.current_edit_record[0] : this.current_edit_record;
@@ -1014,7 +977,7 @@ MessageControlViewController = BaseViewController.extend( {
 		this.setCurrentEditRecordData();
 
 		//Init *Please save this record before modifying any related data* box
-		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( {related_view_controller: this} );
+		this.edit_view.find( '.save-and-continue-div' ).SaveAndContinueBox( { related_view_controller: this } );
 		this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'none' );
 	},
 
@@ -1069,7 +1032,7 @@ MessageControlViewController = BaseViewController.extend( {
 		var $this = this;
 
 		this.navigation.setPossibleDisplayColumns( this.buildDisplayColumnsByColumnModel( this.grid.getGridParam( 'colModel' ) ),
-			this.buildDisplayColumns( this.default_display_columns ) );
+				this.buildDisplayColumns( this.default_display_columns ) );
 
 		this.navigation.unbind( 'formItemChange' ).bind( 'formItemChange', function( e, target ) {
 
@@ -1124,9 +1087,10 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_message': $.i18n._( 'Message' )
-		} );
+		var tab_model = {
+			'tab_message': { 'label': $.i18n._( 'Message' ) },
+		};
+		this.setTabModel( tab_model );
 
 		//Tab 0 start
 
@@ -1144,19 +1108,19 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// Employee(s)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from_full_name'} );
+		form_item_input.TText( { field: 'from_full_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee(s)' ), form_item_input, tab_message_column1, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'subject', width: 359} );
+		form_item_input.TTextInput( { field: 'subject', width: 359 } );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
+		form_item_input.TTextArea( { field: 'body', width: 600, height: 400 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
 
@@ -1171,9 +1135,10 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_message': $.i18n._( 'Messages' )
-		} );
+		var tab_model = {
+			'tab_message': { 'label': $.i18n._( 'Message' ) },
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
@@ -1203,17 +1168,17 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// Employee
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name', selected_able: true} );
+		form_item_input.TText( { field: 'full_name', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_message_column1, '' );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'date_stamp', selected_able: true} );
+		form_item_input.TText( { field: 'date_stamp', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'type', selected_able: true} );
+		form_item_input.TText( { field: 'type', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_message_column1, '' );
 
 		// tab_message first column end
@@ -1223,7 +1188,7 @@ MessageControlViewController = BaseViewController.extend( {
 		// Messages
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Messages' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Messages' ) } );
 		this.addEditFieldToColumn( null, form_item_input, separate_box );
 
 		// Tab 0 second column start
@@ -1234,17 +1199,17 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// From
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from', selected_able: true} );
+		form_item_input.TText( { field: 'from', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_message_column2, '' );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject', selected_able: true} );
+		form_item_input.TText( { field: 'subject', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column2 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body', selected_able: true} );
+		form_item_input.TText( { field: 'body', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column2, '', null, null, true );
 
 		// Tab 0 second column end
@@ -1258,9 +1223,12 @@ MessageControlViewController = BaseViewController.extend( {
 		var source_data = this.navigation && this.navigation.getSourceData && this.navigation.getSourceData();
 		this._super( 'buildEditViewUI' );
 		var $this = this;
-		this.setTabLabels( {
-			'tab_message': $.i18n._( 'Messages' )
-		} );
+
+		var tab_model = {
+			'tab_message': { 'label': $.i18n._( 'Message' ) },
+		};
+		this.setTabModel( tab_model );
+
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIMessageControl' )),
 			id: this.script_name + '_navigation',
@@ -1290,27 +1258,27 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// From
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'from_full_name', selected_able: true} );
+		form_item_input.TText( { field: 'from_full_name', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'From' ), form_item_input, tab_message_column1, '' );
 
 		// To
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'to_full_name', selected_able: true} );
+		form_item_input.TText( { field: 'to_full_name', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'To' ), form_item_input, tab_message_column1 );
 
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'updated_date', selected_able: true} );
+		form_item_input.TText( { field: 'updated_date', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_message_column1 );
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'subject', selected_able: true} );
+		form_item_input.TText( { field: 'subject', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'body', selected_able: true} );
+		form_item_input.TText( { field: 'body', selected_able: true } );
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
 
 		tab_message_column2.css( 'display', 'none' );
@@ -1335,9 +1303,10 @@ MessageControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_message': $.i18n._( 'Message' )
-		} );
+		var tab_model = {
+			'tab_message': { 'label': $.i18n._( 'Message' ) },
+		};
+		this.setTabModel( tab_model );
 
 		//Tab 0 start
 
@@ -1371,14 +1340,14 @@ MessageControlViewController = BaseViewController.extend( {
 
 		// Subject
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'subject'} );
+		form_item_input.TTextInput( { field: 'subject' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Subject' ), form_item_input, tab_message_column1 );
 
 		// Body
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'body', width: 600, height: 400} );
+		form_item_input.TTextArea( { field: 'body', width: 600, height: 400 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Body' ), form_item_input, tab_message_column1, '', null, null, true );
 
@@ -1388,7 +1357,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 	onAddClick: function() {
 
-		TTPromise.add('Message','add');
+		TTPromise.add( 'Message', 'add' );
 		TTPromise.wait();
 		var $this = this;
 		this.is_viewing = false;
@@ -1406,7 +1375,7 @@ MessageControlViewController = BaseViewController.extend( {
 
 	initEditView: function() {
 		this._super( 'initEditView' );
-		TTPromise.resolve('Message','add');
+		TTPromise.resolve( 'Message', 'add' );
 	},
 
 	setEditMenuAddIcon: function( context_btn, pId ) {
@@ -1432,8 +1401,8 @@ MessageControlViewController = BaseViewController.extend( {
 
 	setEditMenuDeleteIcon: function( context_btn, pId ) {
 		if ( !this.current_select_message_control_data ||
-			this.is_edit ||
-			this.is_add ) {
+				this.is_edit ||
+				this.is_add ) {
 
 			context_btn.addClass( 'disable-image' );
 		}
@@ -1443,8 +1412,8 @@ MessageControlViewController = BaseViewController.extend( {
 	setEditMenuDeleteAndNextIcon: function( context_btn, pId ) {
 
 		if ( !this.current_select_message_control_data ||
-			this.is_edit ||
-			this.is_add ) {
+				this.is_edit ||
+				this.is_add ) {
 
 			context_btn.addClass( 'disable-image' );
 		}
@@ -1805,7 +1774,7 @@ MessageControlViewController = BaseViewController.extend( {
 	/* jshint ignore:start */
 	search: function( set_default_menu, page_action, page_number, callBack ) {
 		this.refresh_id = null;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack )
+		this._super( 'search', set_default_menu, page_action, page_number, callBack );
 	}
 
 	/* jshint ignore:end */

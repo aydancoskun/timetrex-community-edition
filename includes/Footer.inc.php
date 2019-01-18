@@ -1,9 +1,9 @@
-<div id="bottomContainer" class="bottom-container" ondragstart="return false;">
+<div id="bottomContainer" class="bottom-container">
 	<div class="footer">
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12 col-sm-12 col-xs-12">
-					<p class="footer-copyright"><?php echo TTi18n::getText('Copyright ©️2015 TimeTrex. All Rights Reserved') ?></p>
+					<p class="footer-copyright"><?php echo COPYRIGHT_NOTICE ?></p>
 				</div>
 			</div>
 		</div>
@@ -28,7 +28,7 @@
 					a.crossorigin = 1;
 					a.src = g;
 					m.parentNode.insertBefore(a, m);
-				})(window, document, 'script', ServiceCaller.rootURL + loginData.base_url + 'html5/framework/google/analytics/analytics.js', 'ga');
+				})(window, document, 'script', 'framework/google/analytics/analytics.js', 'ga');
 				//ga('set', 'sendHitTask', null); //disables sending hit data to Google. uncoment when debugging GA.
 
 				ga('create', APIGlobal.pre_login_data.analytics_tracking_code, 'auto');

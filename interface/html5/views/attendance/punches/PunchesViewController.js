@@ -2,7 +2,7 @@ PunchesViewController = BaseViewController.extend( {
 	el: '#punches_view_container',
 
 	_required_files: {
-		10: ['APIPunch', 'APIUser', 'APIUserGroup', 'APIStation', 'APIBranch', 'APIDepartment' , 'APIPayPeriod', 'APIUserTitle'],
+		10: ['APIPunch', 'APIUser', 'APIUserGroup', 'APIStation', 'APIBranch', 'APIDepartment', 'APIPayPeriod', 'APIUserTitle'],
 		20: ['APIJob', 'APIJobItem']
 	},
 
@@ -15,7 +15,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	is_mass_adding: false,
 
-	init: function( options ) {
+	init: function ( options ) {
 		//this._super('initialize', options );
 		this.edit_view_tpl = 'PunchesEditView.html';
 		this.permission_id = 'punch';
@@ -24,56 +24,56 @@ PunchesViewController = BaseViewController.extend( {
 		this.table_name_key = 'punch';
 		this.context_menu_name = $.i18n._( 'Punches' );
 		this.navigation_label = $.i18n._( 'Punch' ) + ':';
-		this.api = new (APIFactory.getAPIClass( 'APIPunch' ))();
-		this.user_api = new (APIFactory.getAPIClass( 'APIUser' ))();
-		this.user_group_api = new (APIFactory.getAPIClass( 'APIUserGroup' ))();
+		this.api = new ( APIFactory.getAPIClass( 'APIPunch' ) )();
+		this.user_api = new ( APIFactory.getAPIClass( 'APIUser' ) )();
+		this.user_group_api = new ( APIFactory.getAPIClass( 'APIUserGroup' ) )();
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
-			this.job_api = new (APIFactory.getAPIClass( 'APIJob' ))();
-			this.job_item_api = new (APIFactory.getAPIClass( 'APIJobItem' ))();
+			this.job_api = new ( APIFactory.getAPIClass( 'APIJob' ) )();
+			this.job_item_api = new ( APIFactory.getAPIClass( 'APIJobItem' ) )();
 		}
 
-		this.api_station = new (APIFactory.getAPIClass( 'APIStation' ))();
+		this.api_station = new ( APIFactory.getAPIClass( 'APIStation' ) )();
 
 		this.initPermission();
 		this.render();
 
 		$this = this;
-		require(['TImage'],function() {
+		require( ['TImage'], function () {
 			$this.buildContextMenu();
 			$this.initData();
 			$this.setSelectRibbonMenuIfNecessary();
-		});
+		} );
 
 	},
 
-	jobUIValidate: function( p_id ) {
+	jobUIValidate: function ( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
 		}
 
-		if ( PermissionManager.validate( "job", 'enabled' ) &&
+		if ( PermissionManager.validate( 'job', 'enabled' ) &&
 			PermissionManager.validate( p_id, 'edit_job' ) ) {
 			return true;
 		}
 		return false;
 	},
 
-	jobItemUIValidate: function( p_id ) {
+	jobItemUIValidate: function ( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
 		}
 
-		if ( PermissionManager.validate( "job_item", 'enabled' ) &&
+		if ( PermissionManager.validate( 'job_item', 'enabled' ) &&
 			PermissionManager.validate( p_id, 'edit_job_item' ) ) {
 			return true;
 		}
 		return false;
 	},
 
-	branchUIValidate: function( p_id ) {
+	branchUIValidate: function ( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -85,7 +85,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	departmentUIValidate: function( p_id ) {
+	departmentUIValidate: function ( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -97,7 +97,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	goodQuantityUIValidate: function( p_id ) {
+	goodQuantityUIValidate: function ( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -109,7 +109,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	badQuantityUIValidate: function( p_id ) {
+	badQuantityUIValidate: function ( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -122,7 +122,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	noteUIValidate: function( p_id ) {
+	noteUIValidate: function ( p_id ) {
 
 		if ( !p_id ) {
 			p_id = 'punch';
@@ -134,7 +134,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	stationValidate: function() {
+	stationValidate: function () {
 		if ( PermissionManager.validate( 'station', 'enabled' ) ) {
 			return true;
 		}
@@ -142,7 +142,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	//Speical permission check for views, need override
-	initPermission: function() {
+	initPermission: function () {
 		this._super( 'initPermission' );
 
 		if ( this.jobUIValidate() ) {
@@ -195,7 +195,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	initOptions: function() {
+	initOptions: function () {
 		var $this = this;
 
 		this.initDropDownOption( 'type' );
@@ -205,7 +205,7 @@ PunchesViewController = BaseViewController.extend( {
 		this.initDropDownOption( 'status', 'user_status_id', this.user_api, null, 'user_status_array' );
 
 		this.user_group_api.getUserGroup( '', false, false, {
-			onResult: function( res ) {
+			onResult: function ( res ) {
 				res = res.getResult();
 
 				res = Global.buildTreeRecord( res );
@@ -218,17 +218,17 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onEditStationDone: function() {
+	onEditStationDone: function () {
 		this.setStation();
 	},
 
-	setStation: function() {
+	setStation: function () {
 
 		var $this = this;
-		var arg = {filter_data: {id: this.current_edit_record.station_id}};
+		var arg = { filter_data: { id: this.current_edit_record.station_id } };
 
 		this.api_station.getStation( arg, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				$this.station = result.getResult()[0];
 				var widget = $this.edit_view_ui_dic['station_id'];
 				widget.setValue( $this.station.type + '-' + $this.station.description );
@@ -238,7 +238,7 @@ PunchesViewController = BaseViewController.extend( {
 		} );
 	},
 
-	uniformVariable: function( records ) {
+	uniformVariable: function ( records ) {
 		if ( !records.hasOwnProperty( 'time_stamp' ) ) {
 			records.time_stamp = false;
 		}
@@ -246,22 +246,23 @@ PunchesViewController = BaseViewController.extend( {
 		return records;
 	},
 
-	buildEditViewUI: function() {
+	buildEditViewUI: function () {
 
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_punch': $.i18n._( 'Punch' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_punch': { 'label': $.i18n._( 'Punch' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		var form_item_input;
 		var widgetContainer;
 
 		this.navigation.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPunch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIPunch' ) ),
 			id: this.script_name + '_navigation',
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PUNCH,
@@ -270,8 +271,6 @@ PunchesViewController = BaseViewController.extend( {
 		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -287,7 +286,7 @@ PunchesViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIUser' )),
+			api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 			allow_multiple_selection: true,
 			layout_name: ALayoutIDs.USER,
 			show_search_inputs: true,
@@ -303,36 +302,36 @@ PunchesViewController = BaseViewController.extend( {
 		// Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
 
-		form_item_input.TTimePicker( {field: 'punch_time', validation_field: 'time_stamp'} );
+		form_item_input.TTimePicker( { field: 'punch_time', validation_field: 'time_stamp' } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		this.actual_time_label = $( "<span class='widget-right-label'></span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		this.actual_time_label = $( '<span class=\'widget-right-label\'></span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( this.actual_time_label );
 		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab_punch_column1, '', widgetContainer );
 
 		//Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'punch_date', validation_field: 'date_stamp'} );
+		form_item_input.TDatePicker( { field: 'punch_date', validation_field: 'date_stamp' } );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', null, true );
 
 		//Mass Add Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TRangePicker( {field: 'punch_dates', validation_field: 'date_stamp'} );
+		form_item_input.TRangePicker( { field: 'punch_dates', validation_field: 'date_stamp' } );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_punch_column1, '', null, true );
 
 		// Punch
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 		var check_box = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		check_box.TCheckbox( {field: 'disable_rounding'} );
+		check_box.TCheckbox( { field: 'disable_rounding' } );
 
-		var label = $( "<span class='widget-right-label'>" + $.i18n._( 'Disable Rounding' ) + "</span>" );
+		var label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Disable Rounding' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -342,7 +341,7 @@ PunchesViewController = BaseViewController.extend( {
 
 		// In/Out
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'In/Out' ), form_item_input, tab_punch_column1 );
 
@@ -351,7 +350,7 @@ PunchesViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+			api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.BRANCH,
 			show_search_inputs: true,
@@ -369,7 +368,7 @@ PunchesViewController = BaseViewController.extend( {
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+			api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.DEPARTMENT,
 			show_search_inputs: true,
@@ -379,7 +378,7 @@ PunchesViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Department' ), form_item_input, tab_punch_column1, '', null, true );
 
 		if ( !this.show_department_ui ) {
-			this.detachElement( 'department_id' )
+			this.detachElement( 'department_id' );
 		}
 
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
@@ -388,22 +387,24 @@ PunchesViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJob' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJob' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
+				setRealValueCallBack: ( function ( val ) {
 
-					if ( val ) job_coder.setValue( val.manual_id );
-				}),
+					if ( val ) {
+						job_coder.setValue( val.manual_id );
+					}
+				} ),
 				field: 'job_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_coder.TTextInput( {field: 'job_quick_search', disable_keyup_event: true} );
+			job_coder.TTextInput( { field: 'job_quick_search', disable_keyup_event: true } );
 			job_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_coder );
@@ -418,30 +419,32 @@ PunchesViewController = BaseViewController.extend( {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 			form_item_input.AComboBox( {
-				api_class: (APIFactory.getAPIClass( 'APIJobItem' )),
+				api_class: ( APIFactory.getAPIClass( 'APIJobItem' ) ),
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.JOB_ITEM,
 				show_search_inputs: true,
 				set_empty: true,
-				setRealValueCallBack: (function( val ) {
-					if ( val ) job_item_coder.setValue( val.manual_id );
+				setRealValueCallBack: ( function ( val ) {
+					if ( val ) {
+						job_item_coder.setValue( val.manual_id );
+					}
 
-				}),
+				} ),
 				field: 'job_item_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_item_coder.TTextInput( {field: 'job_item_quick_search', disable_keyup_event: true} );
-			job_item_coder.addClass( 'job-coder' )
+			job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
+			job_item_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_item_coder );
 			widgetContainer.append( form_item_input );
 			this.addEditFieldToColumn( $.i18n._( 'Task' ), [form_item_input, job_item_coder], tab_punch_column1, '', widgetContainer, true );
 
 			if ( !this.show_job_item_ui ) {
-				this.detachElement( 'job_item_id' )
+				this.detachElement( 'job_item_id' );
 			}
 
 		}
@@ -449,18 +452,18 @@ PunchesViewController = BaseViewController.extend( {
 		if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 			// Quantity
 			var good = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			good.TTextInput( {field: 'quantity', width: 40} );
+			good.TTextInput( { field: 'quantity', width: 40 } );
 			good.addClass( 'quantity-input' );
 
-			var good_label = $( "<span class='widget-right-label'>" + $.i18n._( 'Good' ) + ": </span>" );
+			var good_label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Good' ) + ': </span>' );
 
 			var bad = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			bad.TTextInput( {field: 'bad_quantity', width: 40} );
+			bad.TTextInput( { field: 'bad_quantity', width: 40 } );
 			bad.addClass( 'quantity-input' );
 
-			var bad_label = $( "<span class='widget-right-label'>/ " + $.i18n._( 'Bad' ) + ": </span>" );
+			var bad_label = $( '<span class=\'widget-right-label\'>/ ' + $.i18n._( 'Bad' ) + ': </span>' );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			widgetContainer.append( good_label );
 			widgetContainer.append( good );
@@ -485,42 +488,42 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		//Location
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10  ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 
-			var latitude = Global.loadWidgetByName(FormItemType.TEXT);
-			latitude.TText({field: 'latitude'});
-			var longitude = Global.loadWidgetByName(FormItemType.TEXT);
-			longitude.TText({field: 'longitude'});
-			widgetContainer = $("<div class='widget-h-box link-widget-box'></div>");
-			var accuracy = Global.loadWidgetByName(FormItemType.TEXT);
-			accuracy.TText({field: 'position_accuracy'});
-			label = $("<span class='widget-right-label'>" + $.i18n._('Accuracy') + ":</span>");
+			var latitude = Global.loadWidgetByName( FormItemType.TEXT );
+			latitude.TText( { field: 'latitude' } );
+			var longitude = Global.loadWidgetByName( FormItemType.TEXT );
+			longitude.TText( { field: 'longitude' } );
+			widgetContainer = $( '<div class=\'widget-h-box link-widget-box\'></div>' );
+			var accuracy = Global.loadWidgetByName( FormItemType.TEXT );
+			accuracy.TText( { field: 'position_accuracy' } );
+			label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Accuracy' ) + ':</span>' );
 
-			var map_icon = $('<img class="widget-h-box-mapIcon" src="framework/leaflet/images/marker-icon-red.png" >')
+			var map_icon = $( '<img class="widget-h-box-mapIcon" src="framework/leaflet/images/marker-icon-red.png" >' );
 
-			this.location_wrapper = $('<div class="widget-h-box-mapLocationWrapper"></div>')
-			widgetContainer.append(map_icon);
-			widgetContainer.append(this.location_wrapper);
-			this.location_wrapper.append(latitude);
-			this.location_wrapper.append($('<span>, </span>'));
-			this.location_wrapper.append(longitude);
-			this.location_wrapper.append(label);
-			this.location_wrapper.append(accuracy);
-			this.location_wrapper.append($('<span>m</span>'));
-			this.addEditFieldToColumn($.i18n._('Location'), [latitude, longitude, accuracy], tab_punch_column1, '', widgetContainer, true);
-			widgetContainer.click(function () {
+			this.location_wrapper = $( '<div class="widget-h-box-mapLocationWrapper"></div>' );
+			widgetContainer.append( map_icon );
+			widgetContainer.append( this.location_wrapper );
+			this.location_wrapper.append( latitude );
+			this.location_wrapper.append( $( '<span>, </span>' ) );
+			this.location_wrapper.append( longitude );
+			this.location_wrapper.append( label );
+			this.location_wrapper.append( accuracy );
+			this.location_wrapper.append( $( '<span>m</span>' ) );
+			this.addEditFieldToColumn( $.i18n._( 'Location' ), [latitude, longitude, accuracy], tab_punch_column1, '', widgetContainer, true );
+			widgetContainer.click( function () {
 				$this.onMapClick();
-			});
+			} );
 
 			// #2117 - Manual location only supported in edit because we need a punch record to append the data to.
-			if(!this.is_edit && !this.is_viewing) {
-				widgetContainer.parents('.edit-view-form-item-div').hide();
+			if ( !this.is_edit && !this.is_viewing ) {
+				widgetContainer.parents( '.edit-view-form-item-div' ).hide();
 			}
 		}
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note', width: '100%'} );
+		form_item_input.TTextArea( { field: 'note', width: '100%' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_punch_column1, '', null, true, true );
 
@@ -532,10 +535,10 @@ PunchesViewController = BaseViewController.extend( {
 
 		// Station
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'station_id'} );
+		form_item_input.TText( { field: 'station_id' } );
 		this.addEditFieldToColumn( $.i18n._( 'Station' ), form_item_input, tab_punch_column1, '', null, true, true );
 
-		form_item_input.click( function() {
+		form_item_input.click( function () {
 			if ( $this.current_edit_record.station_id && $this.show_station_ui ) {
 				IndexViewController.openEditView( $this, 'Station', $this.current_edit_record.station_id );
 			}
@@ -544,7 +547,7 @@ PunchesViewController = BaseViewController.extend( {
 
 		//Punch Image
 		form_item_input = Global.loadWidgetByName( FormItemType.IMAGE );
-		form_item_input.TImage( {field: 'punch_image'} );
+		form_item_input.TImage( { field: 'punch_image' } );
 		this.addEditFieldToColumn( $.i18n._( 'Image' ), form_item_input, tab_punch_column1, '', null, true, true );
 
 		if ( this.is_mass_editing ) {
@@ -555,7 +558,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	//set widget disablebility if view mode or edit mode
-	setEditViewWidgetsMode: function() {
+	setEditViewWidgetsMode: function () {
 		var did_clean_dic = {};
 		for ( var key in this.edit_view_ui_dic ) {
 			if ( !this.edit_view_ui_dic.hasOwnProperty( key ) ) {
@@ -573,23 +576,23 @@ PunchesViewController = BaseViewController.extend( {
 			}
 			switch ( key ) {
 				case 'punch_dates':
-					if ( !this.is_mass_editing && (this.is_mass_adding || !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id) ) {
-						this.attachElement(key);
+					if ( !this.is_mass_editing && ( this.is_mass_adding || !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id ) ) {
+						this.attachElement( key );
 						widget.css( 'opacity', 1 ); //show
 						break;
 					} else {
-						this.detachElement(key);
+						this.detachElement( key );
 						widget.css( 'opacity', 0 ); //hide
 						break;
 					}
 					break;
 				case 'punch_date':
-					if ( !this.is_mass_editing && (this.is_mass_adding || !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id) ) {
-						this.detachElement(key);
+					if ( !this.is_mass_editing && ( this.is_mass_adding || !this.current_edit_record.id || this.current_edit_record.id == TTUUID.zero_id ) ) {
+						this.detachElement( key );
 						widget.css( 'opacity', 0 ); //hide - opposite from above
 						break;
 					} else {
-						this.attachElement(key);
+						this.attachElement( key );
 						widget.css( 'opacity', 1 ); //show
 						break;
 					}
@@ -612,7 +615,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	//Make sure this.current_edit_record is updated before validate
-	validate: function() {
+	validate: function () {
 
 		var $this = this;
 
@@ -648,14 +651,14 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		this.api['validate' + this.api.key_name]( record, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				$this.validateResult( result );
 
 			}
 		} );
 	},
 
-	setMassAddingRecord: function() {
+	setMassAddingRecord: function () {
 		var record = [];
 		var dates_array = this.current_edit_record.punch_dates;
 
@@ -686,7 +689,25 @@ PunchesViewController = BaseViewController.extend( {
 		return record;
 	},
 
-	setCurrentEditRecordData: function() {
+	parserDatesRange: function ( date ) {
+		var dates = date.split( ' - ' );
+		var resultArray = [];
+		var beginDate = Global.strToDate( dates[0] );
+		var endDate = Global.strToDate( dates[1] );
+
+		var nextDate = beginDate;
+
+		while ( nextDate.getTime() < endDate.getTime() ) {
+			resultArray.push( nextDate.format() );
+			nextDate = new Date( new Date( nextDate.getTime() ).setDate( nextDate.getDate() + 1 ) );
+		}
+
+		resultArray.push( dates[1] );
+
+		return resultArray;
+	},
+
+	setCurrentEditRecordData: function () {
 
 		//Set current edit record data to all widgets
 		for ( var key in this.current_edit_record ) {
@@ -700,16 +721,16 @@ PunchesViewController = BaseViewController.extend( {
 				switch ( key ) {
 					case 'punch_dates':
 						var date_array;
-						if(!this.current_edit_record.punch_dates){
+						if ( !this.current_edit_record.punch_dates ) {
 							date_array = [this.current_edit_record['punch_date']];
 							this.current_edit_record.punch_dates = date_array;
-						}else{
+						} else {
 							date_array = this.current_edit_record.punch_dates;
 						}
 						widget.setValue( date_array );
 						break;
 					case 'country': //popular case
-						this.setCountryValue(widget, key);
+						this.setCountryValue( widget, key );
 						break;
 					case 'enable_email_notification_message':
 						widget.setValue( this.current_edit_record[key] );
@@ -718,7 +739,7 @@ PunchesViewController = BaseViewController.extend( {
 						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
 							var args = {};
-							args.filter_data = {status_id: 10, user_id: this.current_edit_record.user_id};
+							args.filter_data = { status_id: 10, user_id: this.current_edit_record.user_id };
 							widget.setDefaultArgs( args );
 							widget.setValue( this.current_edit_record[key] );
 						}
@@ -726,7 +747,7 @@ PunchesViewController = BaseViewController.extend( {
 					case 'job_item_id':
 						if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 							args = {};
-							args.filter_data = {status_id: 10, job_id: this.current_edit_record.job_id};
+							args.filter_data = { status_id: 10, job_id: this.current_edit_record.job_id };
 							widget.setDefaultArgs( args );
 							widget.setValue( this.current_edit_record[key] );
 						}
@@ -748,7 +769,7 @@ PunchesViewController = BaseViewController.extend( {
 					case 'punch_image':
 						var station_form_item = this.edit_view_form_item_dic['station_id'];
 						if ( this.current_edit_record['has_image'] ) {
-							this.attachElement( 'punch_image' )
+							this.attachElement( 'punch_image' );
 							widget.setValue( ServiceCaller.fileDownloadURL + '?object_type=punch_image&parent_id=' + this.current_edit_record.user_id + '&object_id=' + this.current_edit_record.id );
 
 						} else {
@@ -782,13 +803,13 @@ PunchesViewController = BaseViewController.extend( {
 		this.isEditChange();
 
 	},
-	setLocationValue: function() {
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-			this.edit_view_ui_dic['latitude'].setValue(this.current_edit_record.latitude);
-			this.edit_view_ui_dic['longitude'].setValue(this.current_edit_record.longitude);
-			this.edit_view_ui_dic['position_accuracy'].setValue(this.current_edit_record.position_accuracy ? this.current_edit_record.position_accuracy : 0);
+	setLocationValue: function () {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			this.edit_view_ui_dic['latitude'].setValue( this.current_edit_record.latitude );
+			this.edit_view_ui_dic['longitude'].setValue( this.current_edit_record.longitude );
+			this.edit_view_ui_dic['position_accuracy'].setValue( this.current_edit_record.position_accuracy ? this.current_edit_record.position_accuracy : 0 );
 
-			if (!this.current_edit_record.latitude && !this.is_mass_editing) {
+			if ( !this.current_edit_record.latitude && !this.is_mass_editing ) {
 				this.location_wrapper.hide();
 			} else {
 				this.location_wrapper.show();
@@ -797,8 +818,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-
-	isEditChange: function() {
+	isEditChange: function () {
 
 		if ( this.current_edit_record.id || this.is_mass_editing ) {
 			this.edit_view_ui_dic['user_id'].setEnabled( false );
@@ -808,7 +828,7 @@ PunchesViewController = BaseViewController.extend( {
 	},
 
 	//set tab 0 visible after all data set done. This be hide when init edit view data
-	setEditViewDataDone: function() {
+	setEditViewDataDone: function () {
 		// Remove this on 14.9.14 because adding tab url support, ned set url when tab index change and
 		// need know what's current doing action. See if this cause any problem
 		//LocalCacheData.current_doing_context_action = '';
@@ -821,22 +841,29 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		if ( this.is_edit == false && ( this.current_edit_record.latitude == 0 || this.current_edit_record.longitude == 0 ) ) {
-			$('.widget-h-box-mapLocationWrapper').parents('.edit-view-form-item-div').hide();
+			$( '.widget-h-box-mapLocationWrapper' ).parents( '.edit-view-form-item-div' ).hide();
 		} else {
-			$('.widget-h-box-mapLocationWrapper').parents('.edit-view-form-item-div').show();
+			$( '.widget-h-box-mapLocationWrapper' ).parents( '.edit-view-form-item-div' ).show();
 		}
 
-		TTPromise.resolve('init','init');
+		this.navigation.setValue( this.current_edit_record.id );
+
+		$( '.edit-view-tab-bar' ).css( 'opacity', 1 );
+		TTPromise.resolve( 'init', 'init' );
 	},
 
-	initSubLogView: function( tab_id ) {
-
+	initSubLogView: function ( tab_id ) {
 		var $this = this;
+
+		if ( !this.current_edit_record.id ) {
+			return;
+		}
+
 		if ( this.sub_log_view_controller ) {
 			this.sub_log_view_controller.buildContextMenu( true );
 			this.sub_log_view_controller.setDefaultMenu();
 			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+			$this.sub_log_view_controller.getSubViewFilter = function ( filter ) {
 
 				filter['table_name_object_id'] = {
 					'punch': [this.parent_edit_record.id],
@@ -850,9 +877,18 @@ PunchesViewController = BaseViewController.extend( {
 			return;
 		}
 
-		Global.loadScript( 'views/core/log/LogViewController.js', function() {
+		Global.loadScript( 'views/core/log/LogViewController.js', function () {
 			var tab = $this.edit_view_tab.find( '#' + tab_id );
+
 			var firstColumn = tab.find( '.first-column-sub-view' );
+
+			TTPromise.add( 'initSubAudit', 'init' );
+			TTPromise.wait( 'initSubAudit', 'init', function () {
+				firstColumn.css( 'opacity', '1' );
+			} );
+
+			firstColumn.css( 'opacity', '0' ); //Hide the grid while its loading/sizing.
+
 			Global.trackView( 'Sub' + 'Log' + 'View' );
 			LogViewController.loadSubView( firstColumn, beforeLoadView, afterLoadView );
 		} );
@@ -864,7 +900,7 @@ PunchesViewController = BaseViewController.extend( {
 		function afterLoadView( subViewController ) {
 			$this.sub_log_view_controller = subViewController;
 			$this.sub_log_view_controller.parent_edit_record = $this.current_edit_record;
-			$this.sub_log_view_controller.getSubViewFilter = function( filter ) {
+			$this.sub_log_view_controller.getSubViewFilter = function ( filter ) {
 				filter['table_name_object_id'] = {
 					'punch': [this.parent_edit_record.id],
 					'punch_control': [this.parent_edit_record.punch_control_id]
@@ -873,9 +909,9 @@ PunchesViewController = BaseViewController.extend( {
 				return filter;
 			};
 			$this.sub_log_view_controller.parent_view_controller = $this;
-			$this.sub_log_view_controller.postInit = function() {
+			$this.sub_log_view_controller.postInit = function () {
 				this.initData();
-			}
+			};
 		}
 	},
 
@@ -893,7 +929,7 @@ PunchesViewController = BaseViewController.extend( {
 //		this.initRightClickMenu( RightClickMenuType.NORESULTBOX );
 //	},
 
-	buildOtherFieldUI: function( field, label ) {
+	buildOtherFieldUI: function ( field, label ) {
 
 		if ( !this.edit_view_tab ) {
 			return;
@@ -909,7 +945,7 @@ PunchesViewController = BaseViewController.extend( {
 			form_item_input.setValue( $this.current_edit_record[field] );
 		} else {
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: field} );
+			form_item_input.TTextInput( { field: field } );
 			var input_div = $this.addEditFieldToColumn( label, form_item_input, tab_punch_column1 );
 
 			input_div.insertBefore( this.edit_view_form_item_dic['note'] );
@@ -927,7 +963,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onAddResult: function( result ) {
+	onAddResult: function ( result ) {
 		var $this = this;
 		var result_data = result.getResult();
 
@@ -936,7 +972,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		result_data.company = LocalCacheData.current_company.name;
-		result_data.punch_date = (new Date()).format();
+		result_data.punch_date = ( new Date() ).format();
 
 		if ( $this.sub_view_mode && $this.parent_key ) {
 			result_data[$this.parent_key] = $this.parent_value;
@@ -946,10 +982,10 @@ PunchesViewController = BaseViewController.extend( {
 		$this.initEditView();
 	},
 
-	buildSearchFields: function() {
+	buildSearchFields: function () {
 
 		this._super( 'buildSearchFields' );
-		var default_args = {permission_section: 'punch'};
+		var default_args = { permission_section: 'punch' };
 		this.search_fields = [
 
 			new SearchField( {
@@ -968,7 +1004,7 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'pay_period_id',
 				layout_name: ALayoutIDs.PAY_PERIOD,
-				api_class: (APIFactory.getAPIClass( 'APIPayPeriod' )),
+				api_class: ( APIFactory.getAPIClass( 'APIPayPeriod' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -981,7 +1017,7 @@ PunchesViewController = BaseViewController.extend( {
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
 				default_args: default_args,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1004,7 +1040,7 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 1,
 				field: 'title_id',
 				layout_name: ALayoutIDs.USER_TITLE,
-				api_class: (APIFactory.getAPIClass( 'APIUserTitle' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUserTitle' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1039,7 +1075,7 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1051,7 +1087,7 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'default_department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: true,
 				adv_search: true,
@@ -1063,7 +1099,7 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'branch_id',
 				layout_name: ALayoutIDs.BRANCH,
-				api_class: (APIFactory.getAPIClass( 'APIBranch' )),
+				api_class: ( APIFactory.getAPIClass( 'APIBranch' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1075,7 +1111,7 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'department_id',
 				layout_name: ALayoutIDs.DEPARTMENT,
-				api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
+				api_class: ( APIFactory.getAPIClass( 'APIDepartment' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1087,10 +1123,10 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_id',
 				layout_name: ALayoutIDs.JOB,
-				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? (APIFactory.getAPIClass( 'APIJob' )) : null,
+				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJob' ) ) : null,
 				multiple: true,
 				basic_search: false,
-				adv_search: (this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
+				adv_search: ( this.show_job_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -1099,10 +1135,10 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'job_item_id',
 				layout_name: ALayoutIDs.JOB_ITEM,
-				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? (APIFactory.getAPIClass( 'APIJobItem' )) : null,
+				api_class: ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ? ( APIFactory.getAPIClass( 'APIJobItem' ) ) : null,
 				multiple: true,
 				basic_search: false,
-				adv_search: (this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 )),
+				adv_search: ( this.show_job_item_ui && ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ),
 				form_item_type: FormItemType.AWESOME_BOX
 			} ),
 
@@ -1111,7 +1147,7 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
@@ -1123,15 +1159,16 @@ PunchesViewController = BaseViewController.extend( {
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
-				api_class: (APIFactory.getAPIClass( 'APIUser' )),
+				api_class: ( APIFactory.getAPIClass( 'APIUser' ) ),
 				multiple: true,
 				basic_search: false,
 				adv_search: true,
 				form_item_type: FormItemType.AWESOME_BOX
-			} )];
+			} )
+		];
 	},
 
-	buildContextMenuModels: function() {
+	buildContextMenuModels: function () {
 
 		//Context Menu
 		var menu = new RibbonMenu( {
@@ -1299,24 +1336,26 @@ PunchesViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		var map = new RibbonSubMenu( {
-			label: $.i18n._( 'Map' ),
-			id: ContextMenuIconName.map,
-			group: other_group,
-			icon: Icons.map,
-			permission_result: true,
-			permission: null
-		} );
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			var map = new RibbonSubMenu( {
+				label: $.i18n._( 'Map' ),
+				id: ContextMenuIconName.map,
+				group: other_group,
+				icon: Icons.map,
+				permission_result: true,
+				permission: null
+			} );
 
-		var ttimport = new RibbonSubMenu( {
-			label: $.i18n._( 'Import' ),
-			id: ContextMenuIconName.import_icon,
-			group: other_group,
-			icon: Icons.import_icon,
-			permission_result: true,
-			permission: null,
-			sort_order: 8000
-		} );
+			var ttimport = new RibbonSubMenu( {
+				label: $.i18n._( 'Import' ),
+				id: ContextMenuIconName.import_icon,
+				group: other_group,
+				icon: Icons.import_icon,
+				permission_result: true,
+				permission: null,
+				sort_order: 8000
+			} );
+		}
 
 		var export_csv = new RibbonSubMenu( {
 			label: $.i18n._( 'Export' ),
@@ -1332,7 +1371,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onAddClick: function() {
+	onAddClick: function () {
 		var $this = this;
 		this.is_viewing = false;
 		this.is_edit = false;
@@ -1340,7 +1379,7 @@ PunchesViewController = BaseViewController.extend( {
 		$this.openEditView();
 
 		$this.api['get' + $this.api.key_name + 'DefaultData']( {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				$this.onAddResult( result );
 
 			}
@@ -1348,7 +1387,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onMapClick: function() {
+	onMapClick: function () {
 		ProgressBar.showProgressBar();
 
 		var data = {
@@ -1356,133 +1395,73 @@ PunchesViewController = BaseViewController.extend( {
 				id: true,
 				latitude: true,
 				longitude: true,
-				punch_date:true,
-				punch_time:true,
-				position_accuracy:true,
-				user_id:true
+				punch_date: true,
+				punch_time: true,
+				position_accuracy: true,
+				user_id: true
 			}
 		};
 
 		var ids = [];
 		var cells = {};
-		var tmp_cells ={};
+		var tmp_cells = {};
 		if ( this.is_edit ) {
 			//when editing, if the user reloads, the grid's selected id array become the whole grid.
 			//to avoid mapping every punch in that scenario we need to grab the current_edit_record.
 			//check for mass edit as well.
 
-			tmp_cells[this.current_edit_record.punch_date] = []
-			tmp_cells[this.current_edit_record.punch_date].push(this.current_edit_record);
+			tmp_cells[this.current_edit_record.punch_date] = [];
+			tmp_cells[this.current_edit_record.punch_date].push( this.current_edit_record );
 			cells = tmp_cells;
 
 		} else {
 			ids = this.getGridSelectIdArray();
-			data.filter_data =  Global.convertLayoutFilterToAPIFilter( this.select_layout );
+			data.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
 			if ( ids.length > 0 ) {
-				data.filter_data.id =  ids;
+				data.filter_data.id = ids;
 			}
 			data.filter_columns = this.getFilterColumnsFromDisplayColumns();
 			data.filter_columns.user_id = true;
 			data.filter_columns.punch_date = true;
 			data.filter_columns.punch_time = true;
-			cells = this.api.getPunch(data, {async: false}).getResult();
+			cells = this.api.getPunch( data, { async: false } ).getResult();
 			for ( var u in cells ) {
-				if ( tmp_cells[cells[u].punch_date+'-'+cells[u].user_id] == undefined ) {
-					tmp_cells[cells[u].punch_date+'-'+cells[u].user_id] = [];
+				if ( tmp_cells[cells[u].punch_date + '-' + cells[u].user_id] == undefined ) {
+					tmp_cells[cells[u].punch_date + '-' + cells[u].user_id] = [];
 				}
-				tmp_cells[cells[u].punch_date+'-'+cells[u].user_id].push(cells[u]);
+				tmp_cells[cells[u].punch_date + '-' + cells[u].user_id].push( cells[u] );
 			}
 			cells = tmp_cells;
 		}
 
 		if ( !this.is_mass_editing ) {
-			IndexViewController.openEditView( this, "Map", cells );
+			IndexViewController.openEditView( this, 'Map', cells );
 		}
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		if ( Global.isSet( menu_name ) ) {
-			var id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.add:
-				ProgressBar.showOverlay();
-				this.onAddClick();
-				break;
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.edit:
-				ProgressBar.showOverlay();
-				this.onEditClick();
-				break;
-			case ContextMenuIconName.mass_edit:
-				ProgressBar.showOverlay();
-				this.onMassEditClick();
-				break;
-			case ContextMenuIconName.delete_icon:
-				ProgressBar.showOverlay();
-				this.onDeleteClick();
-				break;
-			case ContextMenuIconName.delete_and_next:
-				ProgressBar.showOverlay();
-				this.onDeleteAndNextClick();
-				break;
-			case ContextMenuIconName.copy_as_new:
-				ProgressBar.showOverlay();
-				this.onCopyAsNewClick();
-				break;
-			case ContextMenuIconName.save:
-				ProgressBar.showOverlay();
-				this.onSaveClick();
-				break;
-			case ContextMenuIconName.save_and_continue:
-				ProgressBar.showOverlay();
-				this.onSaveAndContinue();
-				break;
-			case ContextMenuIconName.save_and_new:
-				ProgressBar.showOverlay();
-				this.onSaveAndNewClick();
-				break;
-			case ContextMenuIconName.save_and_copy:
-				ProgressBar.showOverlay();
-				this.onSaveAndCopy();
-				break;
-			case ContextMenuIconName.save_and_next:
-				ProgressBar.showOverlay();
-				this.onSaveAndNextClick();
-				break;
-			case ContextMenuIconName.copy:
-				ProgressBar.showOverlay();
-				this.onCopyClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
+			case ContextMenuIconName.timesheet:
+			case ContextMenuIconName.edit_employee:
+				this.onNavigationClick( id );
 				break;
 			case ContextMenuIconName.map:
 				this.onMapClick();
 				break;
-			case ContextMenuIconName.timesheet:
-			case ContextMenuIconName.edit_employee:
 			case ContextMenuIconName.import_icon:
-			case ContextMenuIconName.export_excel:
-				this.onNavigationClick( id );
+				this.onImportClick();
 				break;
-
 		}
 	},
 
-	setDefaultMenu: function( doNotSetFocus ) {
+	onImportClick: function() {
+		var $this = this;
+		IndexViewController.openWizard( 'ImportCSVWizard', 'punch', function() {
+			$this.search();
+		} );
+	},
+
+	setDefaultMenu: function ( doNotSetFocus ) {
 
 		//Error: Uncaught TypeError: Cannot read property 'length' of undefined in /interface/html5/#!m=Employee&a=edit&id=42411&tab=Wage line 282
 		if ( !this.context_menu_array ) {
@@ -1502,7 +1481,7 @@ PunchesViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -1561,7 +1540,7 @@ PunchesViewController = BaseViewController.extend( {
 					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
 				case ContextMenuIconName.map:
-					this.setDefaultMenuMapIcon( context_btn);
+					this.setDefaultMenuMapIcon( context_btn );
 					break;
 			}
 
@@ -1571,12 +1550,12 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	setEditMenu: function() {
+	setEditMenu: function () {
 
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -1644,7 +1623,7 @@ PunchesViewController = BaseViewController.extend( {
 					this.setEditMenuNavEditIcon( context_btn, 'user' );
 					break;
 				case ContextMenuIconName.export_excel:
-					this.setDefaultMenuExportIcon( context_btn);
+					this.setDefaultMenuExportIcon( context_btn );
 					break;
 			}
 
@@ -1654,7 +1633,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onNavigationClick: function( iconName ) {
+	onNavigationClick: function ( iconName ) {
 		var $this = this;
 		var filter;
 		var temp_filter;
@@ -1663,7 +1642,7 @@ PunchesViewController = BaseViewController.extend( {
 
 		switch ( iconName ) {
 			case ContextMenuIconName.timesheet:
-				filter = {filter_data: {}};
+				filter = { filter_data: {} };
 				if ( Global.isSet( this.current_edit_record ) ) {
 
 					filter.user_id = this.current_edit_record.user_id;
@@ -1682,7 +1661,7 @@ PunchesViewController = BaseViewController.extend( {
 						temp_filter.filter_data.id = [selectedId];
 
 						this.api['get' + this.api.key_name]( temp_filter, {
-							onResult: function( result ) {
+							onResult: function ( result ) {
 
 								var result_data = result.getResult();
 
@@ -1707,7 +1686,7 @@ PunchesViewController = BaseViewController.extend( {
 				break;
 
 			case ContextMenuIconName.edit_employee:
-				filter = {filter_data: {}};
+				filter = { filter_data: {} };
 				if ( Global.isSet( this.current_edit_record ) ) {
 					IndexViewController.openEditView( this, 'Employee', this.current_edit_record.user_id );
 				} else {
@@ -1722,7 +1701,7 @@ PunchesViewController = BaseViewController.extend( {
 						temp_filter.filter_data.id = [selectedId];
 
 						this.api['get' + this.api.key_name]( temp_filter, {
-							onResult: function( result ) {
+							onResult: function ( result ) {
 								var result_data = result.getResult();
 
 								if ( !result_data ) {
@@ -1739,18 +1718,10 @@ PunchesViewController = BaseViewController.extend( {
 
 				}
 				break;
-			case ContextMenuIconName.import_icon:
-				IndexViewController.openWizard( 'ImportCSVWizard', 'punch', function() {
-					$this.search();
-				} );
-				break;
-			case ContextMenuIconName.export_excel:
-				this.onExportClick('exportPunch');
-				break;
 		}
 	},
 
-	setEditMenuSaveAndContinueIcon: function( context_btn, pId ) {
+	setEditMenuSaveAndContinueIcon: function ( context_btn, pId ) {
 		this.saveAndContinueValidate( context_btn, pId );
 
 		if ( this.is_mass_editing || this.is_viewing || this.isMassDateOrMassUser() ) {
@@ -1758,7 +1729,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 	},
 
-	_continueDoCopyAsNew: function() {
+	_continueDoCopyAsNew: function () {
 		var $this = this;
 		this.is_add = true;
 		this.is_mass_adding = true;
@@ -1793,7 +1764,7 @@ PunchesViewController = BaseViewController.extend( {
 			filter.filter_data.id = [selectedId];
 
 			this.api['get' + this.api.key_name]( filter, {
-				onResult: function( result ) {
+				onResult: function ( result ) {
 					$this.onCopyAsNewResult( result );
 
 				}
@@ -1802,14 +1773,14 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	isMassDateOrMassUser: function() {
+	isMassDateOrMassUser: function () {
 		if ( this.is_mass_adding ) {
 			if ( this.current_edit_record.punch_dates && this.current_edit_record.punch_dates.length > 1 ) {
-				return true
+				return true;
 			}
 
 			if ( this.current_edit_record.user_id && this.current_edit_record.user_id.length > 1 ) {
-				return true
+				return true;
 			}
 
 			return false;
@@ -1818,7 +1789,7 @@ PunchesViewController = BaseViewController.extend( {
 		return false;
 	},
 
-	onSaveAndCopy: function( ignoreWarning ) {
+	onSaveAndCopy: function ( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -1835,14 +1806,14 @@ PunchesViewController = BaseViewController.extend( {
 
 		this.clearNavigationData();
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				$this.onSaveAndCopyResult( result );
 
 			}
 		} );
 	},
 
-	onSaveAndNewClick: function( ignoreWarning ) {
+	onSaveAndNewClick: function ( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -1856,14 +1827,14 @@ PunchesViewController = BaseViewController.extend( {
 			record = this.uniformVariable( record );
 		}
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				$this.onSaveAndNewResult( result );
 
 			}
 		} );
 	},
 
-	onMassEditClick: function() {
+	onMassEditClick: function () {
 
 		var $this = this;
 		$this.is_add = false;
@@ -1877,15 +1848,15 @@ PunchesViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 		this.mass_edit_record_ids = [];
 
-		$.each( grid_selected_id_array, function( index, value ) {
-			$this.mass_edit_record_ids.push( value )
+		$.each( grid_selected_id_array, function ( index, value ) {
+			$this.mass_edit_record_ids.push( value );
 		} );
 
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
 		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				var result_data = result.getResult();
 
 				if ( !result_data ) {
@@ -1893,10 +1864,10 @@ PunchesViewController = BaseViewController.extend( {
 				}
 
 				$this.api['getOptions']( 'unique_columns', {
-					onResult: function( result ) {
+					onResult: function ( result ) {
 						$this.unique_columns = result.getResult();
 						$this.api['getOptions']( 'linked_columns', {
-							onResult: function( result1 ) {
+							onResult: function ( result1 ) {
 								$this.linked_columns = result1.getResult();
 
 								if ( $this.sub_view_mode && $this.parent_key ) {
@@ -1917,7 +1888,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onEditClick: function( editId, noRefreshUI ) {
+	onEditClick: function ( editId, noRefreshUI ) {
 		var $this = this;
 		var grid_selected_id_array = this.getGridSelectIdArray();
 		var grid_selected_length = grid_selected_id_array.length;
@@ -1945,7 +1916,7 @@ PunchesViewController = BaseViewController.extend( {
 		filter.filter_data.id = [selectedId];
 
 		this.api['get' + this.api.key_name]( filter, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				var result_data = result.getResult();
 
 				if ( !result_data ) {
@@ -1973,7 +1944,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveAndContinue: function( ignoreWarning ) {
+	onSaveAndContinue: function ( ignoreWarning ) {
 		var $this = this;
 		if ( !Global.isSet( ignoreWarning ) ) {
 			ignoreWarning = false;
@@ -1996,13 +1967,13 @@ PunchesViewController = BaseViewController.extend( {
 		this.current_edit_record = this.uniformVariable( this.current_edit_record );
 
 		this.api['set' + this.api.key_name]( this.current_edit_record, false, ignoreWarning, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 				$this.onSaveAndContinueResult( result );
 			}
 		} );
 	},
 
-	onFormItemChange: function( target, doNotValidate ) {
+	onFormItemChange: function ( target, doNotValidate ) {
 
 		var $this = this;
 		this.setIsChanged( target );
@@ -2015,7 +1986,7 @@ PunchesViewController = BaseViewController.extend( {
 
 		switch ( key ) {
 			case 'user_id':
-				if( $.isArray(this.current_edit_record.user_id) ) {
+				if ( $.isArray( this.current_edit_record.user_id ) ) {
 					this.is_mass_adding = true;
 				} else {
 					this.is_mass_adding = false;
@@ -2031,13 +2002,13 @@ PunchesViewController = BaseViewController.extend( {
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
 					this.setJobItemValueWhenJobChanged( target.getValue() );
-					this.edit_view_ui_dic['job_quick_search'].setCheckBox(true);
+					this.edit_view_ui_dic['job_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_item_id':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					this.edit_view_ui_dic['job_item_quick_search'].setValue( target.getValue( true ) ? ( target.getValue( true ).manual_id ? target.getValue( true ).manual_id : '' ) : '' );
-					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox(true);
+					this.edit_view_ui_dic['job_item_quick_search'].setCheckBox( true );
 				}
 				break;
 			case 'job_quick_search':
@@ -2057,7 +2028,7 @@ PunchesViewController = BaseViewController.extend( {
 
 	},
 
-	onSaveClick: function( ignoreWarning ) {
+	onSaveClick: function ( ignoreWarning ) {
 		var $this = this;
 		var record;
 		var key;
@@ -2081,7 +2052,7 @@ PunchesViewController = BaseViewController.extend( {
 			}
 
 			record = [];
-			$.each( this.mass_edit_record_ids, function( index, value ) {
+			$.each( this.mass_edit_record_ids, function ( index, value ) {
 				var common_record = Global.clone( check_fields );
 				common_record.id = value;
 				record.push( common_record );
@@ -2096,7 +2067,7 @@ PunchesViewController = BaseViewController.extend( {
 		}
 
 		this.api['set' + this.api.key_name]( record, false, ignoreWarning, {
-			onResult: function( result ) {
+			onResult: function ( result ) {
 
 				$this.onSaveResult( result );
 
@@ -2104,7 +2075,7 @@ PunchesViewController = BaseViewController.extend( {
 		} );
 	},
 
-	getSelectEmployee: function( full_item ) {
+	getSelectEmployee: function ( full_item ) {
 		var user;
 		if ( full_item ) {
 			user = LocalCacheData.getLoginUser();
@@ -2114,12 +2085,12 @@ PunchesViewController = BaseViewController.extend( {
 		return user;
 	},
 
-	getFilterColumnsFromDisplayColumns: function(column_filter, enable_system_columns ) {
-		if ( column_filter== undefined ){
+	getFilterColumnsFromDisplayColumns: function ( column_filter, enable_system_columns ) {
+		if ( column_filter == undefined ) {
 			column_filter = {};
 		}
 		column_filter.latitude = true;
 		column_filter.longitude = true;
-		return this._getFilterColumnsFromDisplayColumns(column_filter, enable_system_columns)
+		return this._getFilterColumnsFromDisplayColumns( column_filter, enable_system_columns );
 	},
 } );

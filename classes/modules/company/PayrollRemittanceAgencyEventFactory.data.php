@@ -7770,10 +7770,35 @@ return array(
 
 	),
 	'20:US:NV:00:0020' => array( //State Government [Unemployment Insurance]
-								 'RPT3795' => array(
+								 'RPT3795' => array( //This superseded the NUCS-4072 form.
 										 'form_code'        => 'RPT3795',
 										 'form_name'        => TTi18n::getText( 'RPT3795 Filing' ),
 										 'form_description' => TTi18n::getText( 'Employer Report of Wages Paid' ),
+										 'note'             => TTi18n::getText( '' ),
+										 'tax_codes'        => array('UI'),
+										 'filing_methods'   => array('PRINT'),
+										 'payment_methods'  => array('CHECK'),
+										 'flags'            => array(
+												 'include_w2'          => FALSE,
+												 'file_zero_wage'      => TRUE,
+												 'file_zero_liability' => TRUE,
+												 'auto_file'           => FALSE,
+												 'auto_pay'            => FALSE,
+										 ),
+										 'frequency'        => array(  //Quarterly - Due the last day of the month following the end of the quarter. (April 30, July 31, October 31, and January 31)
+																	   array(
+																			   'status_id'            => 10, //Enabled
+																			   'frequency_id'         => 3000, //Quarterly
+																			   'quarter_month'        => 1,
+																			   'primary_day_of_month' => 31, //Last day
+																			   'reminder_days'        => 14,
+																	   ),
+										 ),
+								 ),
+								 'TXR-020.04' => array(
+										 'form_code'        => 'TXR-020.04',
+										 'form_name'        => TTi18n::getText( 'TXR-020.04 Filing' ),
+										 'form_description' => TTi18n::getText( 'Modified Business Tax Return' ),
 										 'note'             => TTi18n::getText( '' ),
 										 'tax_codes'        => array('UI'),
 										 'filing_methods'   => array('PRINT'),

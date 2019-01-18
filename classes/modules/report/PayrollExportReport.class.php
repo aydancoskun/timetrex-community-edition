@@ -413,7 +413,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 					$job_item_options = array();
 				}
 
-				$title_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 12, '-7000-title_', TTi18n::getText('Title').': ' );
+				$title_options = $oflf->getByCompanyIdAndTypeIdArray( $this->getUserObject()->getCompany(), 12, '-7000-user_title_', TTi18n::getText('Title').': ' );
 				if ( !is_array($title_options) ) {
 					$title_options = array();
 				}

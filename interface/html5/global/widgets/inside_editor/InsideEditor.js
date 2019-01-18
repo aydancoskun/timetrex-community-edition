@@ -63,7 +63,7 @@
 
 			var last_tr = trs.eq( trs.length - 1 );
 
-			last_tr.find( 'td' ).addClass( 'no-line' )
+			last_tr.find( 'td' ).addClass( 'no-line' );
 		};
 
 		this.removeAllRows = function( include_header ) {
@@ -73,7 +73,7 @@
 
 				table.find( 'tr' ).each( function() {
 					$( this ).remove();
-				} )
+				} );
 
 			} else {
 				table.find( 'tr.inside-editor-row' ).remove();
@@ -88,14 +88,14 @@
 			} else {
 				form_item_input.setEnabled( true );
 			}
-		}
+		};
 
 		this.addIconsEvent = function( row ) {
 			var plus_icon = row.find( '.plus-icon' );
 			var minus_icon = row.find( '.minus-icon' );
 
 			plus_icon.click( function() {
-				$this.addRow( null, $( this ).parents('tr').index(), row );
+				$this.addRow( null, $( this ).parents( 'tr' ).index(), row );
 			} );
 
 			minus_icon.click( function() {

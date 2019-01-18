@@ -70,11 +70,12 @@ class APIUserDeduction extends APIFactory {
 	 * @return array|bool
 	 */
 	function getUserDeduction( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('user_tax_deduction', 'enabled')
 				OR !( $this->getPermissionObject()->Check('user_tax_deduction', 'view') OR $this->getPermissionObject()->Check('user_tax_deduction', 'view_own') OR $this->getPermissionObject()->Check('user_tax_deduction', 'view_child')	 ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'user_tax_deduction', 'view' );
 

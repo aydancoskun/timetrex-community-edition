@@ -295,8 +295,8 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 			$ph[] = $start_date_stamp;
 			$ph[] = $end_date_stamp;
 
-			$ph[] = $end_date ;
-			$ph[] = $start_date;
+			$ph[] = $this->db->BindDate( $end_date );
+			$ph[] = $this->db->BindDate( $start_date );
 
 			$query	.=	' AND (
 								(c.start_date >= ? AND c.start_date <= ? AND c.end_date IS NULL )
@@ -328,8 +328,7 @@ class RecurringScheduleTemplateListFactory extends RecurringScheduleTemplateFact
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, ' Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-
+		//Debug::Query($query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;

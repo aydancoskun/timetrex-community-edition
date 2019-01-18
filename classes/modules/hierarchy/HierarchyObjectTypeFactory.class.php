@@ -49,7 +49,7 @@ class HierarchyObjectTypeFactory extends Factory {
 	 * @param null $parent
 	 * @return array|null
 	 */
-	function _getFactoryOptions( $name, $parent = NULL ) {
+	function _getFactoryOptions( $name, $params = NULL ) {
 		//Attempt to get the edition of the currently logged in users company, so we can better tailor the columns to them.
 		$product_edition_id = Misc::getCurrentCompanyProductEdition();
 
@@ -63,21 +63,22 @@ class HierarchyObjectTypeFactory extends Factory {
 										//40 => TTi18n::gettext('Pay Stub Amendment')
 										//50 => TTi18n::gettext('Request'),
 
+										100 => TTi18n::gettext('Permission'),
+										80 => TTi18n::gettext('Exception'),
+										90 => TTi18n::gettext('TimeSheet'),
+
 										//Add 1000 to request type_id's. Make sure no other objects pass 1000.
 										1010 => TTi18n::gettext('Request: Missed Punch'),
 										1020 => TTi18n::gettext('Request: Time Adjustment'),
 										1030 => TTi18n::gettext('Request: Absence (incl. Vacation)'),
 										1040 => TTi18n::gettext('Request: Schedule Adjustment'),
 										1100 => TTi18n::gettext('Request: Other'),
-
-										80 => TTi18n::gettext('Exception'),
-										90 => TTi18n::gettext('TimeSheet'),
-										100 => TTi18n::gettext('Permission'),
 									);
 
 				if ( $product_edition_id >= 25 ) {
 					$retval[200] = TTi18n::gettext('Expense');
 				}
+
 				break;
 			case 'short_object_type': //Defines a short form of the names.
 				$retval = array(
@@ -87,6 +88,10 @@ class HierarchyObjectTypeFactory extends Factory {
 										//40 => TTi18n::gettext('Pay Stub Amendment')
 										//50 => TTi18n::gettext('Request'),
 
+										100 => TTi18n::gettext('Permission'),
+										80 => TTi18n::gettext('Exception'),
+										90 => TTi18n::gettext('TimeSheet'),
+
 										//Add 1000 to request type_id's. Make sure no other objects pass 1000.
 										1010 => TTi18n::gettext('R:Missed Punch'),
 										1020 => TTi18n::gettext('R:Adjustment'),
@@ -94,14 +99,13 @@ class HierarchyObjectTypeFactory extends Factory {
 										1040 => TTi18n::gettext('R:Schedule'),
 										1100 => TTi18n::gettext('R:Other'),
 
-										80 => TTi18n::gettext('Exception'),
-										90 => TTi18n::gettext('TimeSheet'),
-										100 => TTi18n::gettext('Permission'),
 										200 => TTi18n::gettext('Expense'),
 									);
 				break;
 
 		}
+
+		$retval = Misc::addSortPrefix( $retval );
 
 		return $retval;
 	}
@@ -194,7 +198,7 @@ class HierarchyObjectTypeFactory extends Factory {
 		$this->Validator->inArrayKey(	'object_type',
 												$this->getObjectType(),
 												TTi18n::gettext('Object Type is invalid'),
-												$this->getOptions('object_type')
+												Misc::trimSortPrefix( $this->getOptions('object_type') )
 											);
 		if ( $this->Validator->isError('object_type') == FALSE ) {
 			$this->Validator->isTrue(		'object_type',

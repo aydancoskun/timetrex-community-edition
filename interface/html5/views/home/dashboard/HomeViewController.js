@@ -1,9 +1,8 @@
-
 HomeViewController = Backbone.View.extend( {
 
 	el: '.home-view',
-	
-	_required_files: ['jquery.masonry', 'jquery-bridget', 'interact', 'APIDashboard', 'APIRequest', 'APITimesheetSummaryReport', 'APIMessageControl', 'APIException', 'APISchedule', 'APIActiveShiftReport', ],
+
+	_required_files: ['jquery.masonry', 'jquery-bridget', 'APIDashboard', 'APIRequest', 'APITimesheetSummaryReport', 'APIMessageControl', 'APIException', 'APISchedule', 'APIActiveShiftReport'],
 	user_generic_data_api: null,
 	context_menu_array: null,
 	viewId: null,
@@ -12,6 +11,7 @@ HomeViewController = Backbone.View.extend( {
 	dashboard_container: false,
 	order_data: false,
 	current_scroll_position: false,
+	current_mouse_position: null,
 
 	/**
 	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
@@ -23,47 +23,43 @@ HomeViewController = Backbone.View.extend( {
 		var retval = [];
 		var required_files = this._required_files;
 
-		//do not load interact on mobile.
-		if ( Global.detectMobileBrowser() == true ) {
-			required_files.splice( required_files.indexOf('interact'), 1);
-		}
-
 		if ( required_files && required_files[0] ) {
 			retval = required_files;
 		} else {
 			for ( var edition_id in required_files ) {
 				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
-					retval = retval.concat(required_files[edition_id])
+					retval = retval.concat( required_files[edition_id] );
 				}
 			}
 		}
 
-		Debug.Arr(retval,'RETVAL','BaseViewController.js','BaseViewController','filterRequiredFiles',10)
+		Debug.Arr( retval, 'RETVAL', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 10 );
 		return retval;
 	},
 
 	initialize: function( options ) {
 		Global.setUINotready();
-		TTPromise.add('init','init');
+		TTPromise.add( 'init', 'init' );
 		TTPromise.wait();
 		var $this = this;
-		require( this.filterRequiredFiles() , function( Masonry, jQueryBridget, interact ) {
+		require( this.filterRequiredFiles(), function( Masonry, jQueryBridget ) {
 
 			$this.viewId = 'Home';
+			TopMenuManager.selected_menu_id = 'Home';
 			LocalCacheData.current_open_primary_controller = $this;
 			$this.user_generic_data_api = new (APIFactory.getAPIClass( 'APIUserGenericData' ))();
 			$this.api_dashboard = new (APIFactory.getAPIClass( 'APIDashboard' ))();
 
-			window.interact = interact;
 			jQueryBridget( 'masonry', Masonry, $ );
-			$this.dashboard_container = $( $this.el ).find( '.dashboard-container' );
+			$this.dashboard_container = $( '.dashboard-container:visible' );
 			$this.initMasonryDone = false;
 			$this.initContextMenu();
 			$this.initDashBoard();
 			$this.setViewHeight();
 			$this.autoOpenEditOnlyViewIfNecessary();
-			TTPromise.resolve('BaseViewController', 'initialize');
-		});
+
+			TTPromise.resolve( 'BaseViewController', 'initialize' );
+		} );
 	},
 
 	autoOpenEditOnlyViewIfNecessary: function() {
@@ -95,6 +91,8 @@ HomeViewController = Backbone.View.extend( {
 		var ribbon_menu_array = this.buildContextMenuModels();
 		var ribbon_menu_label_node = $( '.ribbonTabLabel' );
 		var ribbon_menu_root_node = $( '.ribbon' );
+
+		ribbon_menu_root_node.find( '.context-menu' ).remove();
 		var len = ribbon_menu_array.length;
 		var ribbon_menu;
 		for ( var i = 0; i < len; i++ ) {
@@ -114,8 +112,8 @@ HomeViewController = Backbone.View.extend( {
 			for ( var x = 0; x < len1; x++ ) {
 				var ribbon_menu_group = ribbon_menu_group_array[x];
 				var ribbon_sub_menu_array = ribbon_menu_group.get( 'sub_menus' );
-				var sub_menu_ui_nodes = $( "<ul></ul>" );
-				var ribbon_menu_group_ui = $( '<div class="menu top-ribbon-menu"  ondragstart="return false;" />' );
+				var sub_menu_ui_nodes = $( '<ul></ul>' );
+				var ribbon_menu_group_ui = $( '<div class="menu top-ribbon-menu" />' );
 				var len2 = ribbon_sub_menu_array.length;
 				for ( var y = 0; y < len2; y++ ) {
 					var ribbon_sub_menu = ribbon_sub_menu_array[y];
@@ -128,13 +126,13 @@ HomeViewController = Backbone.View.extend( {
 					if ( ribbon_sub_menu.get( 'type' ) === RibbonSubMenuType.NAVIGATION ) {
 						sub_menu_ui_node.children().eq( 0 ).addClass( 'ribbon-sub-menu-nav-icon' );
 						$this.subMenuNavMap[ribbon_sub_menu.get( 'id' )] = ribbon_sub_menu;
-						sub_menu_ui_node.click( function( e ) {
+						sub_menu_ui_node.click.off( 'click' ).on( 'click', function( e ) {
 							var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 							$this.onSubMenuNavClick( this, id );
 						} );
 					} else {
 						//defend empty block error when comments following codes
-						sub_menu_ui_node.click( function( e ) {
+						sub_menu_ui_node.off( 'click' ).on( 'click', function( e ) {
 							var id = $( $( this ).find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 							$this.onContextMenuClick( this );
 						} );
@@ -150,9 +148,8 @@ HomeViewController = Backbone.View.extend( {
 			ribbon_menu_label_node.append( $( '<li class="context-menu ui-state-default ui-corner-top"><a ref="' + ribbon_menu.get( 'id' ) + '" href="#' + ribbon_menu.get( 'id' ) + '">' + ribbon_menu.get( 'label' ) + '</a></li>' ) );
 			ribbon_menu_root_node.append( ribbon_menu_ui );
 		}
-		//Register ribbon menu to tab widget
-		$( '#ribbon_view_container' ).tabs( 'add', '#' + ribbon_menu.get( 'id' ) );
-		$( '#ribbon_view_container' ).tabs( 'remove', ($( '#ribbon_view_container' ).tabs( 'length' ) - 1) );
+
+		$( '#ribbon_view_container' ).tabs( 'refresh' );
 
 	},
 
@@ -178,6 +175,7 @@ HomeViewController = Backbone.View.extend( {
 				TAlertManager.showConfirmAlert( Global.auto_arrange_dashlet_confirm_message, null, function( result ) {
 					if ( result ) {
 						ProgressBar.showOverlay();
+
 						$this.initDashBoard( true );
 					} else {
 						ProgressBar.closeOverlay();
@@ -201,7 +199,7 @@ HomeViewController = Backbone.View.extend( {
 										TAlertManager.showErrorAlert( result );
 									}
 								}
-							} )
+							} );
 						} else {
 							doResetAllNext();
 						}
@@ -256,11 +254,18 @@ HomeViewController = Backbone.View.extend( {
 	selectContextMenu: function() {
 		//This code is also in BaseViewController
 		//Error: Uncaught TypeError: Cannot read property 'el' of null in /interface/html5/views/BaseViewController.js?v=8.0.0-20141230-113526 line 1880
+
 		if ( TopMenuManager.selected_menu_id !== this.viewId + 'ContextMenu' && TopMenuManager.ribbon_view_controller ) {
 			var ribbon = $( TopMenuManager.ribbon_view_controller.el );
 			// Error: Object doesn't support property or method 'tabs' in /interface/html5/views/BaseViewController.js?v=8.0.6-20150417-083849 line 2032
 			if ( ribbon ) {
-				ribbon.tabs( {selected: this.viewId + 'ContextMenu'} );
+				ribbon.tabs( 'refresh' );
+
+				//When a submenu is clicked, we need to show the correct context menu
+				ribbon.find( '.ui-tabs-panel' ).hide();
+				$( '#' + this.viewId + 'ContextMenu' ).show();
+				ribbon.tabs( 'option', 'active', $( '.ribbonTabLabel li:visible' ).length - 1 );
+				Debug.Text( '#' + this.viewId + 'ContextMenu visible', 'HomeViewController', 'HomeViewController', 'selectContextMenu', 10 );
 			}
 		}
 	},
@@ -301,7 +306,7 @@ HomeViewController = Backbone.View.extend( {
 
 		var index = $( 'li', $( '#ribbon' ) ).index( tab );
 		if ( index >= 0 ) {
-			$( '#ribbon_view_container' ).tabs( 'remove', index );
+			$( '#ribbon_view_container' ).tabs( 'refresh' );
 		}
 	},
 
@@ -417,7 +422,7 @@ HomeViewController = Backbone.View.extend( {
 
 	unLoadCurrentDashlets: function() {
 		//Error: TypeError: this.dashletControllerArray is null in interface/html5/framework/jquery.min.js?v=9.0.2-20151106-092147 line 2 > eval line 368
-		if(this.dashletControllerArray){
+		if ( this.dashletControllerArray ) {
 			for ( var i = 0; i < this.dashletControllerArray.length; i++ ) {
 				var dashletController = this.dashletControllerArray[i];
 				dashletController.cleanWhenUnloadView();
@@ -434,14 +439,22 @@ HomeViewController = Backbone.View.extend( {
 		} else {
 			this.unLoadCurrentDashlets();
 		}
+
 		if ( this.initMasonryDone ) {
+			this.dashboard_container = $( '.dashboard-container' );
+			this.dashboard_container.masonry(); //#2353 - fix js exception on auto arrange "masonry is not initialized"
 			this.dashboard_container.masonry( 'destroy' );
 			this.dashboard_container.sortable( 'destroy' );
 			this.dashboard_container.empty();
 			this.initMasonryDone = false;
 		}
 		$this.dashlet_controller_dic = {};
-		this.user_generic_data_api.getUserGenericData( {filter_data: {script: ALayoutIDs.DASHBOARD, deleted: false}}, {
+		this.user_generic_data_api.getUserGenericData( {
+			filter_data: {
+				script: ALayoutIDs.DASHBOARD,
+				deleted: false
+			}
+		}, {
 			onResult: function( result ) {
 				var dashlet_list = result.getResult();
 				if ( !Global.isArray( dashlet_list ) || dashlet_list.length < 1 ) {
@@ -509,22 +522,22 @@ HomeViewController = Backbone.View.extend( {
 			Global.loadScript( 'views/home/dashlet/DashletController.js', function() {
 				var id = 'dashlet_' + dashlet_data.id;
 				var dash_let = $( '<div class="dashlet-container" id="' + id + '">' +
-				'<div class="dashlet">' +
-				'<button class="refresh-btn"></button>' +
-				'<span class="title"></span>' +
-				'<div class="button-bar">' +
-				'<button class="view-btn button">View</button>' +
-				'<button class="modify-btn button">Edit</button>' +
-				'<button class="delete-btn button">Delete</button>' +
-				'</div>' +
-				'<div class="content">' +
-				'<table id="grid"></table>' +
-				'<iframe class="report-iframe" id="iframe"></iframe>' +
-				'</div>' +
-				'</div>' +
-				'<div class="dashlet-left-cover" ></div>' +
-				'<div class="dashlet-right-cover" ></div>' +
-				'</div>' );
+						'<div class="dashlet">' +
+						'<button class="refresh-btn"></button>' +
+						'<span class="title"></span>' +
+						'<div class="button-bar">' +
+						'<button class="view-btn button">View</button>' +
+						'<button class="modify-btn button">Edit</button>' +
+						'<button class="delete-btn button">Delete</button>' +
+						'</div>' +
+						'<div class="content">' +
+						'<table id="grid"></table>' +
+						'<iframe class="report-iframe" id="iframe"></iframe>' +
+						'</div>' +
+						'</div>' +
+						'<div class="dashlet-left-cover" ></div>' +
+						'<div class="dashlet-right-cover" ></div>' +
+						'</div>' );
 				if ( !dashlet_data.data.height || auto_arrange ) {
 					dashlet_data.data.height = 200;
 				}
@@ -580,7 +593,7 @@ HomeViewController = Backbone.View.extend( {
 
 		//BUG#2070 - Break sortable for mobile because it negatively impacts usability
 		if ( Global.detectMobileBrowser() ) {
-			this.dashboard_container.sortable({disabled:true}) ;
+			this.dashboard_container.sortable( { disabled: true } );
 		}
 	},
 
@@ -632,6 +645,7 @@ HomeViewController = Backbone.View.extend( {
 
 	updateLayout: function() {
 		var $this = this;
+
 		this.saveScrollPosition();
 		if ( this.initMasonryDone ) {
 			this.dashboard_container.masonry( 'destroy' );
@@ -640,29 +654,88 @@ HomeViewController = Backbone.View.extend( {
 			this.initMasonryDone = true;
 		}
 		this.dashboard_container.masonry( {
-			"columnWidth": 1,
+			'columnWidth': 1,
 			itemSelector: '.dashlet-container'
 		} );
-		this.dashboard_container.sortable().unbind( 'sortupdate' ).bind( 'sortupdate', function( e, draggingTarget ) {
-			$this.saveNewOrder();
-			$this.updateLayout();
-			var draggingTargetId = draggingTarget.item.attr( 'id' ).split( '_' )[1];
-			for ( var j = 0, jj = $this.dashletControllerArray.length; j < jj; j++ ) {
-				var dashlet = $this.dashletControllerArray[j];
-				if ( draggingTargetId == dashlet.data.id ) {
-					dashlet.refreshIfNecessary();
+
+		this.dashboard_container.on( 'mouseup', function() {
+			$( '.dashlet-cover--display-red' ).removeClass( 'dashlet-cover--display-red' );
+			$( '.dashlet-cover--display-green' ).removeClass( 'dashlet-cover--display-green' );
+		} );
+
+
+		this.dashboard_container.on( 'mousemove', function( e ) {
+			var x = e.pageX;
+			var y = e.pageY;
+			$this.current_mouse_position = { x: x, y: y };
+		} );
+
+		this.dashboard_container.sortable( {
+			forceHelperSize: true,
+			forcePlaceholderSize: true,
+			grid: [3, 10],
+			containment: '.container',
+			change: function( e, ui ) {
+				$( '.dashlet-cover--display-red' ).removeClass( 'dashlet-cover--display-red' );
+				$( '.dashlet-cover--display-green' ).removeClass( 'dashlet-cover--display-green' );
+				// //#2353 custom code to maintain the hover ui hint
+				var placeholder_index = $( '.ui-sortable-placeholder' ).index();
+
+				if ( placeholder_index != -1 ) {
+					var dashlets_to_loop = $( '.dashlet-container' );
+					for ( var x = 0; x < dashlets_to_loop.length; x++ ) {
+						if ( $( dashlets_to_loop[x] ).attr( 'id' ) != ui.item.attr( 'id' ) ) {
+							//ensure collision and on one side of placeholder or the other
+							if ( ($( dashlets_to_loop[x] ).index() == (placeholder_index + 1) || $( dashlets_to_loop[x] ).index() == (placeholder_index - 1)) && checkCollision( $(dashlets_to_loop[x]), $this.current_mouse_position) ) {
+								//mouseover the right half.
+								if ( $this.current_mouse_position.x >= ( $(dashlets_to_loop[x]).offset().left + ( $(dashlets_to_loop[x]).width() /2 ) ) && $this.current_mouse_position.x <= ( $(dashlets_to_loop[x]).offset().left + ( $(dashlets_to_loop[x]).width() ) ) ) {
+									direction = 'RIGHT';
+									$( dashlets_to_loop[x] ).find( '.dashlet-right-cover' ).addClass( 'dashlet-cover--display-green' );
+								} else {
+									direction = 'LEFT';
+									$( dashlets_to_loop[x] ).find( '.dashlet-left-cover' ).addClass( 'dashlet-cover--display-green' );
+								}
+
+							}
+						}
+					}
 				}
+			},
+
+			stop: function( e, ui ) {
+				$this.saveNewOrder();
+				$this.updateLayout();
+				var draggingTargetId = ui.item.attr( 'id' ).split( '_' )[1];
+				for ( var j = 0, jj = $this.dashletControllerArray.length; j < jj; j++ ) {
+					var dashlet = $this.dashletControllerArray[j];
+					if ( draggingTargetId == dashlet.data.id ) {
+						dashlet.refreshIfNecessary();
+					}
+				}
+				$this.dashboard_container.masonry( 'reloadItems' );
 			}
 		} );
 
-		this.recoverCurrentScrollPosition()
+		function checkCollision( el, mouse_coords ) {
+			el = $(el);
 
-		TTPromise.resolve('init','init');
+			if ( el.offset().left <= mouse_coords.x && (el.offset().left + el.width()) >= mouse_coords.x
+				&& el.offset().top <= mouse_coords.y && el.offset().top + el.height() >= mouse_coords.y
+			) {
+
+				return true;
+			}
+			return false;
+		}
+
+		this.recoverCurrentScrollPosition();
+
+		TTPromise.resolve( 'init', 'init' );
 	},
 
 	saveNewOrder: function( callBack ) {
 		var $this = this;
-		var dashlets = $( this.el ).find( '.dashlet-container' );
+		var dashlets = $( this.el ).find( '.dashlet-container:not(.ui-sortable-placeholder)' );
 		var new_order = [];
 		for ( var i = 0, ii = dashlets.length; i < ii; i++ ) {
 			var dashlet = $( dashlets[i] );
@@ -684,7 +757,7 @@ HomeViewController = Backbone.View.extend( {
 			onResult: function( result ) {
 				var result_data = result.getResult();
 				if ( result_data != true && TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
-					$this.order_data = {id: result_data};
+					$this.order_data = { id: result_data };
 					$this.order_data.data = new_order;
 					if ( callBack ) {
 						callBack();
@@ -704,7 +777,7 @@ HomeViewController = Backbone.View.extend( {
 
 	modifyDashlet: function( id ) {
 		var $this = this;
-		IndexViewController.openWizard( 'DashletWizard', {saved_dashlet_id: id}, function() {
+		IndexViewController.openWizard( 'DashletWizard', { saved_dashlet_id: id }, function() {
 			$this.initDashBoard();
 		} );
 	},
@@ -751,7 +824,7 @@ HomeViewController = Backbone.View.extend( {
 	},
 
 	saveScrollPosition: function() {
-		this.current_scroll_position = this.dashboard_container.parent().scrollTop()
+		this.current_scroll_position = this.dashboard_container.parent().scrollTop();
 	},
 
 	recoverCurrentScrollPosition: function() {

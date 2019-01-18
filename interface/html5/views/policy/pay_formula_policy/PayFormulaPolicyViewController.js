@@ -37,10 +37,11 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_pay_formula_policy': $.i18n._( 'Pay Formula Policy' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_pay_formula_policy': { 'label': $.i18n._( 'Pay Formula Policy' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPayFormulaPolicy' )),
@@ -48,11 +49,10 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.PAY_CODE,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -67,7 +67,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_pay_formula_policy_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -81,13 +81,13 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 
 		// Pay Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'pay_type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'pay_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.pay_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Type' ), form_item_input, tab_pay_formula_policy_column1 );
 
 		// Wage Source
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'wage_source_type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'wage_source_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.wage_source_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Wage Source' ), form_item_input, tab_pay_formula_policy_column1, '', null, true );
 
@@ -99,7 +99,8 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'wage_source_contributing_shift_policy_id'} );
+			field: 'wage_source_contributing_shift_policy_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Wage Source Contributing Shift Policy' ), form_item_input, tab_pay_formula_policy_column1, '', null, true );
 
 		//Time Source Contributing Shift
@@ -110,7 +111,8 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.CONTRIBUTING_SHIFT_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'time_source_contributing_shift_policy_id'} );
+			field: 'time_source_contributing_shift_policy_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Time Source Contributing Shift Policy' ), form_item_input, tab_pay_formula_policy_column1, '', null, true );
 
 
@@ -118,10 +120,10 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		// Hourly Rate
 		// Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'rate', width: 65} );
+		form_item_input.TTextInput( { field: 'rate', width: 65 } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> (" + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ")</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> (' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -136,8 +138,9 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.WAGE_GROUP,
 			show_search_inputs: true,
 			set_default: true,
-			field: 'wage_group_id'} );
-		this.addEditFieldToColumn( $.i18n._( 'Wage Group' ), form_item_input, tab_pay_formula_policy_column1, '', null, true  );
+			field: 'wage_group_id'
+		} );
+		this.addEditFieldToColumn( $.i18n._( 'Wage Group' ), form_item_input, tab_pay_formula_policy_column1, '', null, true );
 
 
 		// Deposit Accrual Policy Account
@@ -148,12 +151,13 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'accrual_policy_account_id'} );
+			field: 'accrual_policy_account_id'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Account' ), form_item_input, tab_pay_formula_policy_column1, '' );
 
 		// Accrual Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'accrual_rate', width: 100} );
+		form_item_input.TTextInput( { field: 'accrual_rate', width: 100 } );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Rate' ), form_item_input, tab_pay_formula_policy_column1, '', null, true );
 	},
 
@@ -195,27 +199,27 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 
 	onPayTypeChange: function() {
 		if ( this.current_edit_record['pay_type_id'] == 10 ) {
-			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ": " );
+			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Rate' ) + ': ' );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '1.5 for time and a half' ) + ')' );
 			this.attachElement( 'wage_group_id' );
 			this.attachElement( 'wage_source_type_id' );
 
 		} else if ( this.current_edit_record['pay_type_id'] == 30 || this.current_edit_record['pay_type_id'] == 34 || this.current_edit_record['pay_type_id'] == 40 ) {
-			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
+			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ': ' );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
 			this.attachElement( 'wage_group_id' );
 			this.attachElement( 'wage_source_type_id' );
 
 		} else if ( this.current_edit_record['pay_type_id'] == 50 ) {
 
-			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Premium' ) + ": " );
+			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Premium' ) + ': ' );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '0.75 for 75 cent/hr' ) + ')' );
 			this.attachElement( 'wage_group_id' );
-			this.attachElement('wage_source_type_id'  );
+			this.attachElement( 'wage_source_type_id' );
 
 		} else if ( this.current_edit_record['pay_type_id'] == 32 ) {
 
-			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
+			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ': ' );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
 			this.detachElement( 'wage_group_id' );
 			this.detachElement( 'wage_source_contributing_shift_policy_id' );
@@ -223,7 +227,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 			this.detachElement( 'wage_source_type_id' );
 		} else if ( this.current_edit_record['pay_type_id'] == 42 ) {
 
-			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ": " );
+			this.edit_view_form_item_dic['rate'].find( '.edit-view-form-item-label' ).text( $.i18n._( 'Hourly Rate' ) + ': ' );
 			this.edit_view_form_item_dic['rate'].find( '.widget-right-label' ).text( '(' + $.i18n._( 'ie' ) + ': ' + $.i18n._( '10.00/hr' ) + ')' );
 			this.attachElement( 'wage_group_id' );
 			this.attachElement( 'wage_source_type_id' );
@@ -237,7 +241,7 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		if ( this.current_edit_record['accrual_policy_account_id'] === false || typeof this.current_edit_record['accrual_policy_account_id'] == 'undefined' || this.current_edit_record['accrual_policy_account_id'] == TTUUID.zero_id ) {
 			this.detachElement( 'accrual_rate' );
 		} else {
-			this.attachElement( 'accrual_rate' )
+			this.attachElement( 'accrual_rate' );
 		}
 		this.editFieldResize();
 	},
@@ -300,24 +304,29 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Pay Type' ),
+			new SearchField( {
+				label: $.i18n._( 'Pay Type' ),
 				in_column: 1,
 				field: 'pay_type_id',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Deposit to Accrual Policy' ),
+			new SearchField( {
+				label: $.i18n._( 'Deposit to Accrual Policy' ),
 				in_column: 1,
 				field: 'accrual_policy_account_id',
 				layout_name: ALayoutIDs.ACCRUAL_POLICY_ACCOUNT,
@@ -325,7 +334,8 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 //
 //			new SearchField( {label: $.i18n._( 'Pay Stub Account' ),
 //				in_column: 1,
@@ -337,7 +347,8 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 //				adv_search: false,
 //				form_item_type: FormItemType.AWESOME_BOX} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -345,9 +356,11 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -355,7 +368,9 @@ PayFormulaPolicyViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
+		];
 	}
 
 

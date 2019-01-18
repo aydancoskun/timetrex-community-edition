@@ -102,11 +102,12 @@ class APIUserWage extends APIFactory {
 	 * @return array|bool
 	 */
 	function getUserWage( $data = NULL, $disable_paging = FALSE, $last_user_wage_only = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('wage', 'enabled')
 				OR !( $this->getPermissionObject()->Check('wage', 'view') OR $this->getPermissionObject()->Check('wage', 'view_own') OR $this->getPermissionObject()->Check('wage', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		//Get Permission Hierarchy Children first, as this can be used for viewing, or editing.
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'wage', 'view' );

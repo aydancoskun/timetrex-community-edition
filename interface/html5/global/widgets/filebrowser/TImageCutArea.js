@@ -37,7 +37,7 @@
 			var d = new Date();
 			image.attr( 'src', val );
 
-		}
+		};
 
 		this.setImage = function( val ) {
 			var image = $this.children().eq( 0 ).children().eq( 1 );
@@ -52,27 +52,34 @@
 			setAfterImage( val );
 
 			setTimeout( function() {
-				$( image ).imgAreaSelect( {handles: true, x1: 0, y1: 0, x2: $( image ).width(), y2: $( image ).height(), onSelectEnd: function( img, selection ) {
+				$( image ).imgAreaSelect( {
+					handles: true,
+					x1: 0,
+					y1: 0,
+					x2: $( image ).width(),
+					y2: $( image ).height(),
+					onSelectEnd: function( img, selection ) {
 
-					var rate = image[0].naturalWidth / image.width();
-					var sx = selection.x1 * rate;
-					var sy = selection.y1 * rate;
-					var tx = selection.x2 * rate;
-					var ty = selection.y2 * rate - 1;
-					var width = selection.width * rate;
-					var height = selection.height * rate;
+						var rate = image[0].naturalWidth / image.width();
+						var sx = selection.x1 * rate;
+						var sy = selection.y1 * rate;
+						var tx = selection.x2 * rate;
+						var ty = selection.y2 * rate - 1;
+						var width = selection.width * rate;
+						var height = selection.height * rate;
 
-					var canvas = $( '<canvas></canvas>' );
-					canvas = canvas[0];
-					canvas.width = width;
-					canvas.height = height;
-					var ctx = canvas.getContext( '2d' );
+						var canvas = $( '<canvas></canvas>' );
+						canvas = canvas[0];
+						canvas.width = width;
+						canvas.height = height;
+						var ctx = canvas.getContext( '2d' );
 
-					ctx.drawImage( image[0], sx, sy, width - 1, height - 1, 0, 0, width, height );
-					setAfterImage( '' );
-					setAfterImage( canvas.toDataURL() );
+						ctx.drawImage( image[0], sx, sy, width - 1, height - 1, 0, 0, width, height );
+						setAfterImage( '' );
+						setAfterImage( canvas.toDataURL() );
 
-				}} );
+					}
+				} );
 			}, 100 );
 
 		};
@@ -81,14 +88,14 @@
 			var image = $this.children().eq( 1 ).children().eq( 1 );
 
 			return image.attr( 'src' );
-		}
+		};
 
 		this.clearSelect = function() {
 			var image = $this.children().eq( 0 ).children().eq( 1 );
 
-			$( image ).imgAreaSelect( {remove: true} );
+			$( image ).imgAreaSelect( { remove: true } );
 
-		}
+		};
 
 		onImageLoad = function( image ) {
 
@@ -132,9 +139,10 @@
 
 		};
 
-		this.each( function() {
+		for ( var i = 0; i < this.length; i++ ) {
+			var $item = this[i];
 
-			var o = $.meta ? $.extend( {}, opts, $( this ).data() ) : opts;
+			var o = $.meta ? $.extend( {}, opts, $( $item ).data() ) : opts;
 
 			field = o.field;
 
@@ -150,26 +158,24 @@
 				name = o.name;
 			}
 
-			var image = $( this ).children().eq( 0 ).children().eq( 1 );
-			image.load( function() {
+			var image = $( $item ).children().eq( 0 ).children().eq( 1 );
+			image.on( 'load', function() {
 				onImageLoad( this );
 
 			} );
 
-			var after_image = $( this ).children().eq( 1 ).children().eq( 1 );
-			after_image.load( function() {
+			var after_image = $( $item ).children().eq( 1 ).children().eq( 1 );
+			after_image.on( 'load', function() {
 				onAfterImageLoad( this );
 
 			} );
 
-		} );
+		}
 
 		return this;
 
 	};
 
-	$.fn.TImageCutArea.defaults = {
-
-	};
+	$.fn.TImageCutArea.defaults = {};
 
 })( jQuery );

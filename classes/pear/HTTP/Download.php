@@ -1085,7 +1085,7 @@ class HTTP_Download
      */
     function isRangeRequest()
     {
-        if (!isset($_SERVER['HTTP_RANGE']) || !count($this->getRanges())) {
+        if (!isset($_SERVER['HTTP_RANGE']) || $this->getRanges() == '' ) {
             return false;
         }
         return $this->isValidRange();
@@ -1100,7 +1100,7 @@ class HTTP_Download
     function getRanges()
     {
         return preg_match('/^bytes=((\d+-|\d+-\d+|-\d+)(, ?(\d+-|\d+-\d+|-\d+))*)$/',
-            @$_SERVER['HTTP_RANGE'], $matches) ? $matches[1] : array();
+            @$_SERVER['HTTP_RANGE'], $matches) ? $matches[1] : NULL;
     }
 
     /**

@@ -114,12 +114,13 @@ class APIRequest extends APIFactory {
 	 * @return array|bool
 	 */
 	function getRequest( $data = NULL, $disable_paging = FALSE ) {
+
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('request', 'enabled')
 				OR !( $this->getPermissionObject()->Check('request', 'view') OR $this->getPermissionObject()->Check('request', 'view_own') OR $this->getPermissionObject()->Check('request', 'view_child') ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$blf = TTnew( 'RequestListFactory' );
 
@@ -298,7 +299,7 @@ class APIRequest extends APIFactory {
 
 					$lf->setObjectFromArray( $row );
 					//Save request_schedule here...
-					if ( $this->getCurrentCompanyObject()->getProductEdition() > 10 ) {
+					if ( $this->getCurrentCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 						if ( isset( $row['request_schedule'] ) AND is_array( $row['request_schedule'] ) AND count( $row['request_schedule'] ) > 0 ) {
 							$rs_obj = TTnew( 'APIRequestSchedule' );
 							foreach ( $row['request_schedule'] as $request_schedule_row ) {

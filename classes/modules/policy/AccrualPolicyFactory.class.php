@@ -961,7 +961,7 @@ class AccrualPolicyFactory extends Factory {
 			return FALSE;
 		}
 
-		if ( getTTProductEdition() > 10 ) {
+		if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			if ( isset($this->user_modifier_obj) AND is_object($this->user_modifier_obj) AND $this->user_modifier_obj->getUser() == $u_obj->getID() AND $this->user_modifier_obj->getAccrualPolicy() == $this->getID() ) {
 				return $this->user_modifier_obj;
 			} else {

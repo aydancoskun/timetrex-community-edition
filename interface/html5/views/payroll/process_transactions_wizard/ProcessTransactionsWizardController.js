@@ -1,4 +1,4 @@
-ProcessTransactionsWizardController = BaseWindowController.extend({
+ProcessTransactionsWizardController = BaseWindowController.extend( {
 
 	el: '.process_transactions_wizard',
 
@@ -9,7 +9,8 @@ ProcessTransactionsWizardController = BaseWindowController.extend({
 			'APIRemittanceSourceAccount',
 			'Wizard',
 			'WizardStep',
-			'views/payroll/process_transactions_wizard/ProcessTransactionsWizard'];
+			'views/payroll/process_transactions_wizard/ProcessTransactionsWizard'
+		];
 	},
 
 	init: function( external_data ) {
@@ -21,8 +22,11 @@ ProcessTransactionsWizardController = BaseWindowController.extend({
 				this.wizard_obj = LocalCacheData[wizard_id];
 				delete LocalCacheData[wizard_id];
 			} else {
-				this.wizard_obj = new ProcessTransactionsWizard({el: $(".process_transactions_wizard"), external_data: external_data});
+				this.wizard_obj = new ProcessTransactionsWizard( {
+					el: $( '.process_transactions_wizard' ),
+					external_data: external_data
+				} );
 			}
-		});
-	},
-});
+		} );
+	}
+} );

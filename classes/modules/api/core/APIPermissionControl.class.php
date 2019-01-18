@@ -123,13 +123,14 @@ class APIPermissionControl extends APIFactory {
 	 * @return array
 	 */
 	function getPermissionControl( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('permission', 'enabled')
 				OR !( $this->getPermissionObject()->Check('permission', 'view') OR $this->getPermissionObject()->Check('permission', 'view_own') OR $this->getPermissionObject()->Check('permission', 'view_child')	 ) ) {
 			//Rather then permission denied, restrict to just 'list_view' columns.
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'permission', 'view' );
 

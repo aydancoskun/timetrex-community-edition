@@ -1446,7 +1446,7 @@ class RemittanceSourceAccountFactory extends Factory {
 			if ( $rdalf->getRecordCount() > 0 ) {
 				$this->Validator->isTRUE(	'in_use',
 											FALSE,
-											TTi18n::gettext('This remittance source account is currently in use') .' '. TTi18n::gettext('by remittance destination accounts') );
+											TTi18n::gettext('This remittance source account is currently in use') .' '. TTi18n::gettext('by employee payment methods') );
 			}
 
 			$pralf = TTnew( 'PayrollRemittanceAgencyListFactory' );

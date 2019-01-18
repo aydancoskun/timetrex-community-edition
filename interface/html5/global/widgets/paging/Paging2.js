@@ -31,18 +31,18 @@
 			var len = pager_data.last_page_number;
 
 			if ( len === -1 ) {
-				$( paging_selector ).append( '<option value="' + 1 + '">' + 1 + '</option>' )
+				$( paging_selector ).append( '<option value="' + 1 + '">' + 1 + '</option>' );
 			} else {
 				for ( var i = 1; i <= len; i++ ) {
-					$( paging_selector ).append( '<option value="' + i + '">' + i + '</option>' )
+					$( paging_selector ).append( '<option value="' + i + '">' + i + '</option>' );
 				}
 			}
 
-			$( $( paging_selector ).find( 'option' ) ).filter(function() {
+			$( $( paging_selector ).find( 'option' ) ).filter( function() {
 				var current_value = parseInt( $( this ).attr( 'value' ) );
 
 				return current_value === pager_data.current_page;
-			} ).prop( 'selected', true ).attr( 'selected', true );
+			} ).prop( 'selected', true ).prop( 'selected', true );
 
 			if ( pager_data.is_last_page === true ) {
 				right_buttons_div.addClass( 'disabled' );
@@ -79,7 +79,7 @@
 				$this.show();
 			}
 
-		}
+		};
 
 		this.each( function() {
 
@@ -145,9 +145,7 @@
 
 	};
 
-	$.fn.Paging2.defaults = {
-
-	};
+	$.fn.Paging2.defaults = {};
 
 })
-	( jQuery );
+( jQuery );

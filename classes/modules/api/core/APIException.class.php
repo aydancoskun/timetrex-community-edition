@@ -89,12 +89,13 @@ class APIException extends APIFactory {
 	 * @return array
 	 */
 	function getException( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('punch', 'enabled')
 				OR !( $this->getPermissionObject()->Check('punch', 'view') OR $this->getPermissionObject()->Check('punch', 'view_own') OR $this->getPermissionObject()->Check('punch', 'view_child') ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'punch', 'view' );
 
@@ -104,6 +105,14 @@ class APIException extends APIFactory {
 		}
 
 		$blf = TTnew( 'ExceptionListFactory' );
+
+		$type_ids = Misc::trimSortPrefix( $blf->getOptions('type') );
+		if ( !isset($data['filter_data']['show_pre_mature']) OR ( isset($data['filter_data']['show_pre_mature']) AND $data['filter_data']['show_pre_mature'] == FALSE ) ) {
+			unset( $type_ids[5]);
+		}
+		$data['filter_data']['type_id'] = array_keys( $type_ids );
+
+
 		if ( DEPLOYMENT_ON_DEMAND == TRUE ) { $blf->setQueryStatementTimeout( 60000 ); }
 		$blf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $data['filter_data'], $data['filter_items_per_page'], $data['filter_page'], NULL, $data['filter_sort'] );
 		Debug::Text('Record Count: '. $blf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);

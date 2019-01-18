@@ -42,11 +42,11 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_hierarchy': $.i18n._( 'Hierarchy' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_hierarchy': { 'label': $.i18n._( 'Hierarchy' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIHierarchyControl' )),
@@ -72,7 +72,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_hierarchy_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -81,7 +81,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		form_item_input.TTextInput( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_hierarchy_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -118,13 +118,15 @@ HierarchyControlViewController = BaseViewController.extend( {
 		//Inside editor
 
 		var inside_editor_div = tab_hierarchy.find( '.inside-editor-div' );
-		var args = { level: $.i18n._( 'Level' ),
+		var args = {
+			level: $.i18n._( 'Level' ),
 			superiors: $.i18n._( 'Superiors' )
 		};
 
 		this.editor = Global.loadWidgetByName( FormItemType.INSIDE_EDITOR );
 
-		this.editor.InsideEditor( {title: $.i18n._( 'NOTE: Level one denotes the top or last level of the hierarchy and employees at the same level share responsibilities.' ),
+		this.editor.InsideEditor( {
+			title: $.i18n._( 'NOTE: Level one denotes the top or last level of the hierarchy and employees at the same level share responsibilities.' ),
 			addRow: this.insideEditorAddRow,
 			getValue: this.insideEditorGetValue,
 			setValue: this.insideEditorSetValue,
@@ -174,15 +176,17 @@ HierarchyControlViewController = BaseViewController.extend( {
 		if ( ( !this.current_edit_record || !this.current_edit_record.id ) && !this.copied_record_id ) {
 			this.editor.addRow();
 		} else {
-			this.hierarchy_level_api.getHierarchyLevel( args, true, {onResult: function( res ) {
-				if ( !$this.edit_view ) {
-					return;
+			this.hierarchy_level_api.getHierarchyLevel( args, true, {
+				onResult: function( res ) {
+					if ( !$this.edit_view ) {
+						return;
+					}
+					var data = res.getResult();
+
+					$this.editor.setValue( data );
+
 				}
-				var data = res.getResult();
-
-				$this.editor.setValue( data );
-
-			}} );
+			} );
 		}
 
 	},
@@ -190,7 +194,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 	insideEditorRemoveRow: function( row ) {
 		var index = row[0].rowIndex - 1;
 		var remove_id = this.rows_widgets_array[index].current_edit_item.id;
-        if ( TTUUID.isUUID( remove_id ) && remove_id != TTUUID.zero_id && remove_id != TTUUID.not_exist_id ) {
+		if ( TTUUID.isUUID( remove_id ) && remove_id != TTUUID.zero_id && remove_id != TTUUID.not_exist_id ) {
 			this.delete_ids.push( remove_id );
 		}
 		row.remove();
@@ -211,7 +215,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 		//Level
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'level', width: 50} );
+		form_item_input.TTextInput( { field: 'level', width: 50 } );
 		form_item_input.setValue( data.level ? data.level : 1 );
 		widgets[form_item_input.getField()] = form_item_input;
 		row.children().eq( 0 ).append( form_item_input );
@@ -266,7 +270,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 
 		for ( var i = 0; i < len; i++ ) {
 			var row = this.rows_widgets_array[i];
-			var data = {level: row.level.getValue(), user_id: row.user_id.getValue()};
+			var data = { level: row.level.getValue(), user_id: row.user_id.getValue() };
 			data.hierarchy_control_id = current_edit_item_id;
 			data.id = row.current_edit_item.id ? row.current_edit_item.id : '';
 			result.push( data );
@@ -282,7 +286,7 @@ HierarchyControlViewController = BaseViewController.extend( {
 			var result_data = result.getResult();
 			if ( result_data === true ) {
 				$this.refresh_id = $this.current_edit_record.id;
-			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id&& result_data != TTUUID.not_exist_id ) {
+			} else if ( TTUUID.isUUID( result_data ) && result_data != TTUUID.zero_id && result_data != TTUUID.not_exist_id ) {
 				$this.refresh_id = result_data;
 			}
 			$this.saveInsideEditorData( result, function() {
@@ -380,19 +384,25 @@ HierarchyControlViewController = BaseViewController.extend( {
 		var remove_ids = this.editor.delete_ids;
 
 		if ( remove_ids.length > 0 ) {
-			this.hierarchy_level_api.deleteHierarchyLevel( remove_ids, {onResult: function( res ) {
-				$this.editor.delete_ids = [];
-			}} );
+			this.hierarchy_level_api.deleteHierarchyLevel( remove_ids, {
+				onResult: function( res ) {
+					$this.editor.delete_ids = [];
+				}
+			} );
 		}
 
-		this.hierarchy_level_api.ReMapHierarchyLevels( data, {onResult: function( res ) {
+		this.hierarchy_level_api.ReMapHierarchyLevels( data, {
+			onResult: function( res ) {
 
-			var res_data = res.getResult();
-			$this.hierarchy_level_api.setHierarchyLevel( res_data, {onResult: function( re ) {
+				var res_data = res.getResult();
+				$this.hierarchy_level_api.setHierarchyLevel( res_data, {
+					onResult: function( re ) {
 
-				callBack( result );
-			}} );
-		}} );
+						callBack( result );
+					}
+				} );
+			}
+		} );
 
 	},
 
@@ -401,21 +411,26 @@ HierarchyControlViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Description' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Description' ),
 				in_column: 1,
 				field: 'description',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Superior' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Superior' ),
 				in_column: 1,
 				field: 'superior_user_id',
 				layout_name: ALayoutIDs.USER,
@@ -423,8 +438,10 @@ HierarchyControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Subordinate' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Subordinate' ),
 				in_column: 1,
 				field: 'user_id',
 				layout_name: ALayoutIDs.USER,
@@ -432,16 +449,20 @@ HierarchyControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Object Type' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Object Type' ),
 				in_column: 2,
 				field: 'object_type',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 			//
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -449,9 +470,11 @@ HierarchyControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -459,7 +482,8 @@ HierarchyControlViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 

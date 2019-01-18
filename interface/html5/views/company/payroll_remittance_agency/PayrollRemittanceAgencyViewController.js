@@ -57,7 +57,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 //		this.initDropDownOption( 'frequency_week', 'report_frequency_week' );
 		this.initDropDownOption( 'country', 'country', this.company_api );
 		this.api.getOptions( 'always_week_day', {
-			onResult: function(res) {
+			onResult: function( res ) {
 				res = res.getResult();
 				$this.always_week_day_array = Global.buildRecordArray( res );
 				if ( typeof callback == 'function' ) {
@@ -73,19 +73,19 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		if ( this.edit_only_mode ) {
 
 			this.initOptions( function( result ) {
-				if (!$this.edit_view) {
-					$this.initEditViewUI($this.viewId, $this.edit_view_tpl);
+				if ( !$this.edit_view ) {
+					$this.initEditViewUI( $this.viewId, $this.edit_view_tpl );
 				}
 
-				var filter = {}
-				filter.filter_data = {id: record_id}
+				var filter = {};
+				filter.filter_data = { id: record_id };
 
-				$this.api.getPayrollRemittanceAgency(filter, {
-					onResult: function (result) {
+				$this.api.getPayrollRemittanceAgency( filter, {
+					onResult: function( result ) {
 						result = result.getResult()[0];
 						//Error: Uncaught TypeError: Cannot read property 'user_id' of null in interface/html5/#!m=TimeSheet&date=20150915&user_id=42175&show_wage=0 line 79
-						if (!result) {
-							TAlertManager.showAlert($.i18n._('Invalid agency id'));
+						if ( !result ) {
+							TAlertManager.showAlert( $.i18n._( 'Invalid agency id' ) );
 							$this.onCancelClick();
 						} else {
 							// Waiting for the (APIFactory.getAPIClass( 'API' )) returns data to set the current edit record.
@@ -95,10 +95,10 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 						}
 
 					}
-				});
-			});
+				} );
+			} );
 		} else {
-			this._super('openEditView');
+			this._super( 'openEditView' );
 		}
 	},
 
@@ -298,33 +298,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-//		var import_csv = new RibbonSubMenu( {
-//			label: $.i18n._( 'Import' ),
-//			id: ContextMenuIconName.import_icon,
-//			group: other_group,
-//			icon: Icons.import_icon,
-//			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVBranch' ),
-//			permission: null
-//		} );
-
 		return [menu];
-
-	},
-
-
-
-	onContextMenuClick: function( context_btn, menu_name ) {
-		this._super( 'onContextMenuClick', context_btn, menu_name );
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
 	},
 
 	onBuildAdvUIFinished: function() {
@@ -381,12 +355,12 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		if ( key === 'country' || key === 'type_id' || key === 'province' || key === 'district' ) {
 			this.getAgencyOptions();
 			if ( key != 'province' ) {
-				this.detachElement('province');
-				this.eSetProvince(this.current_edit_record['country']);
+				this.detachElement( 'province' );
+				this.eSetProvince( this.current_edit_record['country'] );
 			}
 			if ( key != 'district' ) {
-				this.detachElement('district');
-				this.setDistrict(this.current_edit_record['country'], this.current_edit_record['province']);
+				this.detachElement( 'district' );
+				this.setDistrict( this.current_edit_record['country'], this.current_edit_record['province'] );
 			}
 
 			this.current_edit_record['type_id'] = this.edit_view_ui_dic['type_id'].getValue();
@@ -408,16 +382,16 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 	},
 
 	onAgencyIdChange: function() {
-		var id_field_array_api_params = {'agency_id': this.edit_view_ui_dic.agency_id.getValue()};
-		var id_field_array = this.api.getOptions('agency_id_field_labels', id_field_array_api_params, {async: false}).getResult();
+		var id_field_array_api_params = { 'agency_id': this.edit_view_ui_dic.agency_id.getValue() };
+		var id_field_array = this.api.getOptions( 'agency_id_field_labels', id_field_array_api_params, { async: false } ).getResult();
 
 		this.edit_view_ui_dic.primary_identification.parent().parent().hide();
 		this.edit_view_ui_dic.secondary_identification.parent().parent().hide();
 		this.edit_view_ui_dic.tertiary_identification.parent().parent().hide();
 
 		for ( var key in id_field_array ) {
-			var span_tag = "<span class='edit-view-form-item-label'>"+id_field_array[key]+":</span>";
-			this.edit_view_ui_dic[key].parent().parent().find('.edit-view-form-item-label-div').html(span_tag);
+			var span_tag = '<span class=\'edit-view-form-item-label\'>' + id_field_array[key] + ':</span>';
+			this.edit_view_ui_dic[key].parent().parent().find( '.edit-view-form-item-label-div' ).html( span_tag );
 			this.edit_view_ui_dic[key].parent().parent().show();
 		}
 		this.editFieldResize();
@@ -431,7 +405,8 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			'district': this.current_edit_record['district']
 		};
 		var $this = this;
-		this.api.getOptions( 'agency', params,  { async:false,
+		this.api.getOptions( 'agency', params, {
+			async: false,
 			onResult: function( res ) {
 				var result = res.getResult();
 				if ( !result ) {
@@ -448,7 +423,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 				}
 
 				$this.edit_view_ui_dic['agency_id'].setSourceData( $this.agency_array );
-				if ( $this.current_edit_record['agency_id'] && res[$this.current_edit_record['agency_id'] ]  ) {
+				if ( $this.current_edit_record['agency_id'] && res[$this.current_edit_record['agency_id']] ) {
 					$this.edit_view_ui_dic['agency_id'].setValue( $this.current_edit_record['agency_id'] );
 				} else {
 					$this.current_edit_record['agency_id'] = $this.edit_view_ui_dic['agency_id'].getValue();
@@ -469,7 +444,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		}
 
 
-		if ( TTUUID.isUUID(legal_entity_id) ) {
+		if ( TTUUID.isUUID( legal_entity_id ) ) {
 			var source_account_args = {};
 			source_account_args.filter_data = {};
 			source_account_args.filter_data.legal_entity_id = legal_entity_id;
@@ -477,13 +452,13 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			source_account_args.filter_columns.id = true;
 			source_account_args.filter_columns.name = true;
 
-			$this.remittance_source_account_api.getRemittanceSourceAccount(source_account_args, {
-				onResult: function (result) {
+			$this.remittance_source_account_api.getRemittanceSourceAccount( source_account_args, {
+				onResult: function( result ) {
 					result = result.getResult();
-					$this.remittance_source_account_array = result ;
-					$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( Global.addFirstItemToArray(result ) );
+					$this.remittance_source_account_array = result;
+					$this.edit_view_ui_dic['remittance_source_account_id'].setSourceData( Global.addFirstItemToArray( result ) );
 				}
-			});
+			} );
 		}
 	},
 
@@ -505,45 +480,51 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		var $this = this;
 
 		if ( this.edit_view_ui_dic.type_id.getValue() == 30 ) {
-			this.api.getDistrictOptions(c, p, {
-				async: false, onResult: function (res) {
+			this.api.getDistrictOptions( c, p, {
+				async: false, onResult: function( res ) {
 					res = res.getResult();
 					//#2486 When there are no provinces for 3rd party agencies in countries outside those with scripted agencies, we must hide the field
-					if ( Object.keys(res).length == 0 || Object.keys(res).length == 1 && res['00'] ) {
+					if ( Object.keys( res ).length == 0 || Object.keys( res ).length == 1 && res['00'] ) {
 						$this.current_edit_record['district'] = '00';
 						return;
 					}
 
-					if (!res) {
+					if ( !res ) {
 						res = [];
 					}
-					$this.attachElement('district');
+					$this.attachElement( 'district' );
 
 
 					var first_element = null;
-					if (res.length <= 1) {
-						first_element = { label: '-- '+$.i18n._('Other')+' --', value: '00', fullValue: '00', orderValue: -1, id: '00' }
+					if ( res.length <= 1 ) {
+						first_element = {
+							label: '-- ' + $.i18n._( 'Other' ) + ' --',
+							value: '00',
+							fullValue: '00',
+							orderValue: -1,
+							id: '00'
+						};
 					}
-					$this.district_array = Global.buildRecordArray(res, first_element);
+					$this.district_array = Global.buildRecordArray( res, first_element );
 
-					$this.edit_view_ui_dic['district'].setSourceData($this.district_array);
+					$this.edit_view_ui_dic['district'].setSourceData( $this.district_array );
 
-					if ($this.current_edit_record['district'] && res[$this.current_edit_record['district']]) {
-						$this.edit_view_ui_dic['district'].setValue($this.current_edit_record['district']);
+					if ( $this.current_edit_record['district'] && res[$this.current_edit_record['district']] ) {
+						$this.edit_view_ui_dic['district'].setValue( $this.current_edit_record['district'] );
 					} else {
 
 						var district = $this.edit_view_ui_dic['district'].getValue();
-						if (district == TTUUID.not_exist_id || district == TTUUID.zero_id || district == false || district == null) {
+						if ( district == TTUUID.not_exist_id || district == TTUUID.zero_id || district == false || district == null ) {
 							district = '00';
-							$this.edit_view_ui_dic['district'].setValue(district);
+							$this.edit_view_ui_dic['district'].setValue( district );
 						}
 						$this.current_edit_record['district'] = district;
 					}
 				}
-			});
+			} );
 		} else {
 			$this.current_edit_record['province'] = '00';
-			$this.edit_view_ui_dic['district'].setValue( '00 ');
+			$this.edit_view_ui_dic['district'].setValue( '00 ' );
 		}
 	},
 
@@ -575,35 +556,41 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		var $this = this;
 
 		if ( this.edit_view_ui_dic.type_id.getValue() > 10 ) {
-			this.api.getProvinceOptions(val, {
-				async: false, onResult: function (result) {
+			this.api.getProvinceOptions( val, {
+				async: false, onResult: function( result ) {
 					result = result.getResult();
 
-					if (!result) {
+					if ( !result ) {
 						result = [];
 					}
 
 					//#2486 When there are no provinces for 3rd party agencies in countries outside those with scripted agencies, we must hide the field
-					if ($this.edit_view_ui_dic.type_id.getValue() < 20 || ( Object.keys(result).length == 0 || Object.keys(result).length == 1 && result['00'] )) {
+					if ( $this.edit_view_ui_dic.type_id.getValue() < 20 || ( Object.keys( result ).length == 0 || Object.keys( result ).length == 1 && result['00'] ) ) {
 						$this.current_edit_record['province'] = '00';
 						//Field stays hidden. value is set to '00'
 						return;
 					}
 
-					$this.attachElement('province');
+					$this.attachElement( 'province' );
 
 					var first_element = null;
-					if (result.length <= 1) {
-						first_element = { label: '-- '+$.i18n._('Other')+' --', value: '00', fullValue: '00', orderValue: -1, id: '00' }
+					if ( result.length <= 1 ) {
+						first_element = {
+							label: '-- ' + $.i18n._( 'Other' ) + ' --',
+							value: '00',
+							fullValue: '00',
+							orderValue: -1,
+							id: '00'
+						};
 					}
 					$this.province_array = Global.buildRecordArray( result, first_element );
 					$this.edit_view_ui_dic['province'].setSourceData( $this.province_array );
 
-					if ($this.current_edit_record['province'] && Global.isSet(result[$this.current_edit_record['province']])) {
-						$this.edit_view_ui_dic['province'].setValue($this.current_edit_record['province']);
+					if ( $this.current_edit_record['province'] && Global.isSet( result[$this.current_edit_record['province']] ) ) {
+						$this.edit_view_ui_dic['province'].setValue( $this.current_edit_record['province'] );
 					} else {
 						var province = $this.edit_view_ui_dic['province'].getValue();
-						if (province == TTUUID.not_exist_id || province == TTUUID.zero_id || province == false || province == null) {
+						if ( province == TTUUID.not_exist_id || province == TTUUID.zero_id || province == false || province == null ) {
 							province = '00';
 						}
 						$this.current_edit_record['province'] = province;
@@ -611,10 +598,10 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 					}
 
 				}
-			});
+			} );
 		} else {
 			$this.current_edit_record['province'] = '00';
-			$this.edit_view_ui_dic['province'].setValue( '00 ');
+			$this.edit_view_ui_dic['province'].setValue( '00 ' );
 		}
 	},
 
@@ -622,13 +609,13 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		this._super( 'setEditViewDataDone' );
 		this.onTypeChange();
 		this.getAgencyOptions();
-		var $this = this
-		TTPromise.wait( null, null, function(){
-			$this.detachElement('province');
-			$this.detachElement('district');
-			$this.eSetProvince($this.current_edit_record['country']);
+		var $this = this;
+		TTPromise.wait( null, null, function() {
+			$this.detachElement( 'province' );
+			$this.detachElement( 'district' );
+			$this.eSetProvince( $this.current_edit_record['country'] );
 			$this.setDistrict( $this.current_edit_record['country'], $this.current_edit_record['province'] );
-		})
+		} );
 	},
 
 	buildEditViewUI: function() {
@@ -636,21 +623,26 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_payroll_remittance_agency': $.i18n._( 'Remittance Agency' ),
-			'tab_payroll_remittance_agency_event': $.i18n._( 'Events' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_payroll_remittance_agency': { 'label': $.i18n._( 'Remittance Agency' ) },
+			'tab_payroll_remittance_agency_event': {
+				'label': $.i18n._( 'Events' ),
+				'init_callback': 'initSubEventView',
+				'display_on_mass_edit': false
+			},
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		if ( this.navigation ) {
-			this.navigation.AComboBox({
-				api_class: (APIFactory.getAPIClass('APIPayrollRemittanceAgency')),
+			this.navigation.AComboBox( {
+				api_class: (APIFactory.getAPIClass( 'APIPayrollRemittanceAgency' )),
 				id: this.script_name + '_navigation',
 				allow_multiple_selection: false,
 				layout_name: ALayoutIDs.PAYROLL_REMITTANCE_AGENCY,
 				navigation_mode: true,
 				show_search_inputs: true
-			});
+			} );
 			this.setNavigation();
 		}
 
@@ -749,17 +741,17 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Agency' ), form_item_input, tab_payroll_remittance_agency_column1 );
 
 
-		form_item_input = Global.loadWidgetByName(FormItemType.TEXT_INPUT);
-		form_item_input.TTextInput({field: 'primary_identification', width: 200});
-		this.addEditFieldToColumn($.i18n._('Primary Identification'), form_item_input, tab_payroll_remittance_agency_column1);
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'primary_identification', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'Primary Identification' ), form_item_input, tab_payroll_remittance_agency_column1 );
 
-		form_item_input = Global.loadWidgetByName(FormItemType.TEXT_INPUT);
-		form_item_input.TTextInput({field: 'secondary_identification', width: 200});
-		this.addEditFieldToColumn($.i18n._('Secondary Identification'), form_item_input, tab_payroll_remittance_agency_column1);
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'secondary_identification', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'Secondary Identification' ), form_item_input, tab_payroll_remittance_agency_column1 );
 
-		form_item_input = Global.loadWidgetByName(FormItemType.TEXT_INPUT);
-		form_item_input.TTextInput({field: 'tertiary_identification', width: 200});
-		this.addEditFieldToColumn($.i18n._('Tertiary Identification'), form_item_input, tab_payroll_remittance_agency_column1);
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'tertiary_identification', width: 200 } );
+		this.addEditFieldToColumn( $.i18n._( 'Tertiary Identification' ), form_item_input, tab_payroll_remittance_agency_column1 );
 
 		// column2
 
@@ -806,7 +798,7 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 
 		// Always On Business Day
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'always_week_day_id'} );
+		form_item_input.TComboBox( { field: 'always_week_day_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( this.always_week_day_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Events Always On Business Day' ), form_item_input, tab_payroll_remittance_agency_column2 );
 
@@ -822,8 +814,8 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Recurring Holidays' ), form_item_input, tab_payroll_remittance_agency_column2 );
 
 		//prevent flashing province and district on addclick.
-		this.detachElement('province');
-		this.detachElement('district');
+		this.detachElement( 'province' );
+		this.detachElement( 'district' );
 
 	},
 
@@ -836,14 +828,21 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			this.basic_search_field_ui_dic['province'].setSourceData( [] );
 
 		} else {
-			this.company_api.getOptions( 'province', val, { async: false,
+			this.company_api.getOptions( 'province', val, {
+				async: false,
 				onResult: function( res ) {
 					res = res.getResult();
 					if ( !res ) {
 						res = [];
 					}
 
-					$this.province_array = Global.buildRecordArray( res,{label: '-- '+$.i18n._('Other')+' --', value: '00', fullValue: '00', orderValue: -1, id: '00'} );
+					$this.province_array = Global.buildRecordArray( res, {
+						label: '-- ' + $.i18n._( 'Other' ) + ' --',
+						value: '00',
+						fullValue: '00',
+						orderValue: -1,
+						id: '00'
+					} );
 					$this.adv_search_field_ui_dic['province'].setSourceData( $this.province_array );
 					$this.basic_search_field_ui_dic['province'].setSourceData( $this.province_array );
 
@@ -851,7 +850,6 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			} );
 		}
 	},
-
 
 
 	buildSearchFields: function() {
@@ -938,62 +936,12 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 		];
 	},
 
+	initSubEventView: function() {
+		var $this = this;
 
-	onTabShow: function( e, ui ) {
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize(key);
-
-		if (!this.current_edit_record) {
+		if ( !this.current_edit_record.id ) {
 			return;
 		}
-
-		if ( this.edit_view_tab_selected_index === 1 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find('#tab_payroll_remittance_agency_event').find('.first-column-sub-view').css('display', 'block');
-				this.initSubEventView();
-			} else {
-				this.edit_view_tab.find('#tab_payroll_remittance_agency_event').find('.first-column-sub-view').css('display', 'none');
-				this.edit_view.find('.save-and-continue-div').css('display', 'block');
-			}
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	initTabData: function() {
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if (this.current_edit_record.id) {
-				this.edit_view_tab.find('#tab_payroll_remittance_agency_event').find('.first-column-sub-view').css('display', 'block');
-				this.initSubEventView();
-			} else {
-				this.edit_view_tab.find('#tab_payroll_remittance_agency_event').find('.first-column-sub-view').css('display', 'none');
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
-	initSubEventView: function() {
-
-		var $this = this;
 
 		if ( this.sub_event_view_controller ) {
 			this.sub_event_view_controller.buildContextMenu( true );
@@ -1029,44 +977,44 @@ PayrollRemittanceAgencyViewController = BaseViewController.extend( {
 			$this.sub_event_view_controller.parent_view_controller = $this;
 			$this.sub_event_view_controller.postInit = function() {
 				this.initData();
-			}
+			};
 		}
 	},
 
-	onCancelClick: function () {
+	onCancelClick: function() {
 		this._super( 'onCancelClick' );
 		this.sub_event_view_controller = null;
 	},
 
-	uniformVariable: function(data) {
-		if  ( data ) {
-			this._super('collectUIDataToCurrentEditRecord');
+	uniformVariable: function( data ) {
+		if ( data ) {
+			this._super( 'collectUIDataToCurrentEditRecord' );
 
-			if (this.is_add) {
+			if ( this.is_add ) {
 				data.id = false;
 			}
 
 			if ( this.is_mass_editing != true ) {
 				data.payroll_remittance_agency_id = this.parent_value;
 
-				if (data.type_id != 30 || data.district == TTUUID.not_exist_id || data.district == TTUUID.zero_id || data.district == false || data.district == null) {
+				if ( data.type_id != 30 || data.district == TTUUID.not_exist_id || data.district == TTUUID.zero_id || data.district == false || data.district == null ) {
 					data.district = '00';
 				}
 
-				if (data.type_id <= 10 || data.province == TTUUID.not_exist_id || data.province == TTUUID.zero_id || data.province == false || data.province == null) {
+				if ( data.type_id <= 10 || data.province == TTUUID.not_exist_id || data.province == TTUUID.zero_id || data.province == false || data.province == null ) {
 					data.province = '00';
 				}
 
 
 				var agency_identifier = '0000';
-				if(data.agency_id) {
-					agency_identifier = data.agency_id.slice(-4);
+				if ( data.agency_id ) {
+					agency_identifier = data.agency_id.slice( -4 );
 				}
-				data.agency_id = data.type_id +':'+ data.country +':'+ data.province +':'+ data.district +':'+ agency_identifier;
+				data.agency_id = data.type_id + ':' + data.country + ':' + data.province + ':' + data.district + ':' + agency_identifier;
 			}
 		}
 
-		return data
-	},
+		return data;
+	}
 
 } );

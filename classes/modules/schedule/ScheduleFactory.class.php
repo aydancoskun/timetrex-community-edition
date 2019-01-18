@@ -722,7 +722,7 @@ class ScheduleFactory extends Factory {
 		if ( $value == TTUUID::getNotExistID() ) {
 			$value = TTUUID::getZeroID();
 		}
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		return $this->setGenericDataValue( 'job_id', $value );
@@ -749,7 +749,7 @@ class ScheduleFactory extends Factory {
 		if ( $value == TTUUID::getNotExistID() ) {
 			$value = TTUUID::getZeroID();
 		}
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		return $this->setGenericDataValue( 'job_item_id', $value );
@@ -1776,6 +1776,28 @@ class ScheduleFactory extends Factory {
 			Debug::text('Not checking for conflicts... DateStamp: '. (int)$this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
 		}
 
+		if ( getTTProductEdition() >= TT_PRODUCT_CORPORATE ) {
+			if ( $this->getUser() != TTUUID::getZeroID() AND TTUUID::isUUID( $this->getJob() ) AND $this->getJob() != TTUUID::getZeroID() AND $this->getJob() != TTUUID::getNotExistID() AND $this->getJob() != -2 ) {
+				$jlf = TTnew( 'JobListFactory' );
+				$jlf->getById( $this->getJob() );
+				if ( $jlf->getRecordCount() > 0 ) {
+					$j_obj = $jlf->getCurrent();
+
+					if ( $this->getDateStamp() != FALSE AND $j_obj->isAllowedUser( $this->getUser() ) == FALSE ) {
+						$this->Validator->isTRUE(	'job',
+													 FALSE,
+													 TTi18n::gettext('Employee is not assigned to this job') );
+					}
+
+					if ( $j_obj->isAllowedItem( $this->getJobItem() ) == FALSE ) {
+						$this->Validator->isTRUE(	'job_item',
+													 FALSE,
+													 TTi18n::gettext('Task is not assigned to this job') );
+					}
+				}
+			}
+		}
+
 		if ( $ignore_warning == FALSE ) {
 			//Warn users if they are trying to insert schedules too far in the future.
 			if ( $this->getDateStamp() != FALSE AND $this->getDateStamp() > (time() + (86400 * 366 ) ) ) {
@@ -2180,7 +2202,13 @@ class ScheduleFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Schedule - Employee').': '. UserListFactory::getFullNameById( $this->getUser() ) .' '. TTi18n::getText('Start Time').': '. TTDate::getDate('DATE+TIME', $this->getStartTime() ) .' '. TTi18n::getText('End Time').': '. TTDate::getDate('DATE+TIME', $this->getEndTime() ), NULL, $this->getTable(), $this );
+		if ( $this->getUser() == TTUUID::getZeroID() ) {
+			$employee_name = TTi18n::getText('OPEN');
+		} else {
+			$employee_name = UserListFactory::getFullNameById( $this->getUser() );
+		}
+
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Schedule - Employee').': '. $employee_name .' '. TTi18n::getText('Start Time').': '. TTDate::getDate('DATE+TIME', $this->getStartTime() ) .' '. TTi18n::getText('End Time').': '. TTDate::getDate('DATE+TIME', $this->getEndTime() ), NULL, $this->getTable(), $this );
 	}
 
 }

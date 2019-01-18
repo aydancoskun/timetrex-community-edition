@@ -6,7 +6,7 @@ GeneralLedgerSummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'GeneralLedgerSummaryReport';
 		this.viewId = 'GeneralLedgerSummaryReport';
 		this.context_menu_name = $.i18n._( 'General Ledger Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'GeneralLedgerSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIGeneralLedgerSummaryReport' ))();
 	},
@@ -102,22 +102,25 @@ GeneralLedgerSummaryReportViewController = ReportBaseViewController.extend( {
 			permission: null
 		} );
 
-		var exports = new RibbonSubMenu( {label: $.i18n._( 'Export' ),
+		var exports = new RibbonSubMenu( {
+			label: $.i18n._( 'Export' ),
 			id: ContextMenuIconName.print_checks,
 			group: export_group,
 			icon: 'export-35x35.png',
 			type: RibbonSubMenuType.NAVIGATION,
 			items: [],
 			permission_result: true,
-			permission: true} );
+			permission: true
+		} );
 
-		var export_general_ledger_result = new (APIFactory.getAPIClass( 'APIPayStub' ))().getOptions( 'export_general_ledger', {async: false} ).getResult();
+		var export_general_ledger_result = new (APIFactory.getAPIClass( 'APIPayStub' ))().getOptions( 'export_general_ledger', { async: false } ).getResult();
 
 		export_general_ledger_result = Global.buildRecordArray( export_general_ledger_result );
 
 		for ( var i = 0; i < export_general_ledger_result.length; i++ ) {
 			var item = export_general_ledger_result[i];
-			var btn = new RibbonSubMenuNavItem( {label: item.label,
+			var btn = new RibbonSubMenuNavItem( {
+				label: item.label,
 				id: item.value,
 				nav: exports
 			} );
@@ -126,7 +129,6 @@ GeneralLedgerSummaryReportViewController = ReportBaseViewController.extend( {
 		return [menu];
 
 	}
-
 
 
 } );

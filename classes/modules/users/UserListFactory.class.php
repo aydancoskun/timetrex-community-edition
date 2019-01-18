@@ -1806,29 +1806,29 @@ class UserListFactory extends UserFactory implements IteratorAggregate {
 		//Use employed_start/end_date rather than just start/end_date to prevents other reports that use start/end_date from conflicting with this.
 		//As a time period selection of "all years" will always return no results.
 		if ( isset($filter_data['employed_start_date']) AND (int)$filter_data['employed_start_date'] != 0 ) {
-			$query .= ' AND ( a.hire_date IS NULL OR a.hire_date <= '. (int)$filter_data['employed_start_date'].' ) ';
+			$query .= ' AND ( a.hire_date IS NULL OR a.hire_date <= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['employed_start_date'] ) ) .' ) ';
 		}
 		if ( isset($filter_data['employed_end_date']) AND (int)$filter_data['employed_end_date'] != 0 ) {
-			$query .= ' AND ( a.termination_date IS NULL OR a.termination_date >= '. (int)$filter_data['employed_end_date'].' ) ';
+			$query .= ' AND ( a.termination_date IS NULL OR a.termination_date >= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['employed_end_date'] ) ) .' ) ';
 		}
 
 		//employed_[start|end]_date requires the employee to be employed the entire time. This just requires them to be employed for any part of the range.
 		if ( isset($filter_data['partial_employed_end_date']) AND (int)$filter_data['partial_employed_end_date'] != 0 ) {
-			$query .= ' AND ( a.hire_date IS NULL OR a.hire_date <= '. (int)$filter_data['partial_employed_end_date'].' ) ';
+			$query .= ' AND ( a.hire_date IS NULL OR a.hire_date <= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['partial_employed_end_date'] ) ) .' ) ';
 		}
 		if ( isset($filter_data['partial_employed_start_date']) AND (int)$filter_data['partial_employed_start_date'] != 0 ) {
-			$query .= ' AND ( a.termination_date IS NULL OR a.termination_date >= '. (int)$filter_data['partial_employed_start_date'].' ) ';
+			$query .= ' AND ( a.termination_date IS NULL OR a.termination_date >= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['partial_employed_start_date'] ) ) .' ) ';
 		}
 
 		if ( isset($filter_data['hire_start_date']) AND (int)$filter_data['hire_start_date'] != 0 AND isset($filter_data['hire_end_date']) AND (int)$filter_data['hire_end_date'] != 0 ) {
-			$query .= ' AND ( a.hire_date >= '. (int)$filter_data['hire_start_date'].' AND a.hire_date <= '. (int)$filter_data['hire_end_date'].' ) ';
+			$query .= ' AND ( a.hire_date >= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['hire_start_date'] ) ) .' AND a.hire_date <= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['hire_end_date'] ) ) .' ) ';
 		}
 		if ( isset($filter_data['termination_start_date']) AND (int)$filter_data['termination_start_date'] != 0 AND isset($filter_data['termination_end_date']) AND (int)$filter_data['termination_end_date'] != 0 ) {
-			$query .= ' AND ( a.termination_date >= '. (int)$filter_data['termination_start_date'].' AND a.termination_date <= '. (int)$filter_data['termination_end_date'].' ) ';
+			$query .= ' AND ( a.termination_date >= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['termination_start_date'] ) ) .' AND a.termination_date <= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['termination_end_date'] ) ) .' ) ';
 		}
 
 		if ( isset($filter_data['birth_start_date']) AND (int)$filter_data['birth_start_date'] != 0 AND isset($filter_data['birth_end_date']) AND (int)$filter_data['birth_end_date'] != 0 ) {
-			$query .= ' AND ( a.birth_date >= '. (int)$filter_data['birth_start_date'].' AND a.birth_date <= '. (int)$filter_data['birth_end_date'].' ) ';
+			$query .= ' AND ( a.birth_date >= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['birth_start_date'] ) ) .' AND a.birth_date <= '. $this->db->qstr( $this->db->BindDate( (int)$filter_data['birth_end_date'] ) ) .' ) ';
 		}
 		if ( isset($filter_data['last_login_start_date']) AND (int)$filter_data['last_login_start_date'] != 0 AND isset($filter_data['last_login_end_date']) AND (int)$filter_data['last_login_end_date'] != 0 ) {
 			$query .= ' AND ( a.last_login_date >= '. (int)$filter_data['last_login_start_date'].' AND a.last_login_date <= '. (int)$filter_data['last_login_end_date'].' ) ';

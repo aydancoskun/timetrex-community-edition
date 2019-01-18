@@ -71,11 +71,12 @@ class APIExceptionPolicy extends APIFactory {
 	 * @return array|bool
 	 */
 	function getExceptionPolicy( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('exception_policy', 'enabled')
 				OR !( $this->getPermissionObject()->Check('exception_policy', 'view') OR $this->getPermissionObject()->Check('exception_policy', 'view_own') OR $this->getPermissionObject()->Check('exception_policy', 'view_child')  ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'exception_policy', 'view' );
 

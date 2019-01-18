@@ -1,4 +1,4 @@
-QuickPunchBaseViewController = Backbone.View.extend({
+QuickPunchBaseViewController = Backbone.View.extend( {
 	/**
 	 * When changing this function, you need to look for all occurences of this function because it was needed in several bases
 	 * BaseViewController, HomeViewController, BaseWizardController, QuickPunchBaseViewControler
@@ -20,12 +20,12 @@ QuickPunchBaseViewController = Backbone.View.extend({
 		} else {
 			for ( var edition_id in required_files ) {
 				if ( LocalCacheData.getCurrentCompany().product_edition_id >= edition_id ) {
-					retval = retval.concat(required_files[edition_id])
+					retval = retval.concat( required_files[edition_id] );
 				}
 			}
 		}
 
-		Debug.Arr(retval,'RETVAL','BaseViewController.js','BaseViewController','filterRequiredFiles',10)
+		Debug.Arr( retval, 'RETVAL', 'BaseViewController.js', 'BaseViewController', 'filterRequiredFiles', 10 );
 		return retval;
-	},
-});
+	}
+} );

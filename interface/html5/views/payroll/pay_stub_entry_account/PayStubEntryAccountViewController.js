@@ -77,19 +77,19 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		if ( TTUUID.isUUID( this.current_edit_record.accrual_pay_stub_entry_account_id ) && this.current_edit_record.accrual_pay_stub_entry_account_id != TTUUID.zero_id ) {
 			this.attachElement( 'accrual_type_id' );
 		} else {
-			this.detachElement( 'accrual_type_id' )
+			this.detachElement( 'accrual_type_id' );
 		}
 
 		this.editFieldResize();
 	},
 
 	buildContextMenuModels: function() {
-		var menu = this._super('buildContextMenuModels')[0];
+		var menu = this._super( 'buildContextMenuModels' )[0];
 
 		var wizard = new RibbonSubMenu( {
 			label: $.i18n._( 'Migrate<br>PS Accounts ' ),
 			id: ContextMenuIconName.migrate_pay_stub_account,
-			group: this.getContextMenuGroupByName(menu, 'other'),
+			group: this.getContextMenuGroupByName( menu, 'other' ),
 			icon: Icons.wizard,
 			permission_result: true,
 			permission: null
@@ -119,10 +119,11 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_pay_stub_account': $.i18n._( 'Pay Stub Account' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_pay_stub_account': { 'label': $.i18n._( 'Pay Stub Account' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
@@ -149,21 +150,21 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		//Status
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'status_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_pay_stub_account_column1, '' );
 
 		//Type
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id', set_empty: false} );
+		form_item_input.TComboBox( { field: 'type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_pay_stub_account_column1 );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_pay_stub_account_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -172,7 +173,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'ps_order', width: 359} );
+		form_item_input.TTextInput( { field: 'ps_order', width: 359 } );
 		this.addEditFieldToColumn( $.i18n._( 'Order' ), form_item_input, tab_pay_stub_account_column1 );
 
 		//Accrual
@@ -198,7 +199,7 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		// Accrual Type
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'accrual_type_id', set_empty: false } );
+		form_item_input.TComboBox( { field: 'accrual_type_id', set_empty: false } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.accrual_type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Accrual Type' ), form_item_input, tab_pay_stub_account_column1, '', null, true );
 
@@ -206,13 +207,13 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'debit_account', width: 359} );
+		form_item_input.TTextInput( { field: 'debit_account', width: 359 } );
 		this.addEditFieldToColumn( $.i18n._( 'Debit Account' ), form_item_input, tab_pay_stub_account_column1 );
 
 		// Credit Account
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'credit_account', width: 359} );
+		form_item_input.TTextInput( { field: 'credit_account', width: 359 } );
 		this.addEditFieldToColumn( $.i18n._( 'Credit Account' ), form_item_input, tab_pay_stub_account_column1, '' );
 
 	},
@@ -222,35 +223,44 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Type' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Type' ),
 				in_column: 1,
 				field: 'type_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Debit Account' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Debit Account' ),
 				in_column: 1,
 				field: 'debit_account',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Credit Account' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Credit Account' ),
 				in_column: 1,
 				field: 'credit_account',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -258,8 +268,10 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -267,7 +279,8 @@ PayStubEntryAccountViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	}
 

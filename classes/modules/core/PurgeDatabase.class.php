@@ -1138,7 +1138,7 @@ class PurgeDatabase {
 			//
 			//Purge saved punch images.
 			//
-			if ( getTTProductEdition() > 10 ) {
+			if ( getTTProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 				Debug::Text('Purging Punch Images...', __FILE__, __LINE__, __METHOD__, 10);
 
 				$plf = new PunchListFactory();

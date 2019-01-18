@@ -106,6 +106,67 @@ LocalCacheData.fullUrlParameterStr = '';
 
 LocalCacheData.PayrollRemittanceAgencyEventWizard = null;
 
+LocalCacheData.resizeable_grids = [];
+
+LocalCacheData.isStorageAvailable = function() {
+	//Turn off sessionStorage as its not required and just slows things down anyways. We can store things in memory instead.
+	// It also has space limitations which can be hit like: QuotaExceededError: DOM Exception 22: An attempt was made to add something to storage that exceeded the quota
+	LocalCacheData.isSupportHTML5LocalCache = false;
+
+	// if ( window.sessionStorage ) {
+	// 	try {
+	// 		//Test to make sure we can actually store some data. This should help avoid JS exceptions such as: QuotaExceededError: DOM Exception 22: An attempt was made to add something to storage that exceeded the quota
+	// 		var storage = window['sessionStorage'];
+	// 		var x = '__storage_test__';
+	// 		storage.setItem(x, x);
+	// 		storage.removeItem(x);
+	//
+	// 		LocalCacheData.isSupportHTML5LocalCache = true;
+	// 	} catch(e) {
+	// 		LocalCacheData.isSupportHTML5LocalCache = false;
+	// 	}
+	// } else {
+	// 	LocalCacheData.isSupportHTML5LocalCache = false;
+	// }
+	//Debug.Text( 'Is sessionStorage available: '+ LocalCacheData.isSupportHTML5LocalCache, 'LocalCacheData.js', 'LocalCacheData', 'isStorageAvailable', 10 );
+
+	return LocalCacheData.isSupportHTML5LocalCache;
+};
+
+LocalCacheData.isLocalCacheExists = function( key ) {
+	if ( LocalCacheData.getLocalCache( key ) !== null ) {
+		return true;
+	}
+
+	return false;
+};
+
+LocalCacheData.getLocalCache = function( key, format ) {
+	//BUG#2066 - For testing bad cache. See getrequiredlocalcache
+	//if(key == 'current_company'){return null}
+	if ( LocalCacheData[key] ) {
+		return LocalCacheData[key];
+	} else if ( !LocalCacheData[key] && sessionStorage[key] ) {
+		var result = sessionStorage.getItem( key );
+
+		if ( result !== 'undefined' && format === 'JSON' ) {
+			result = JSON.parse( result );
+		}
+
+		if ( result === 'true' ) {
+			result = true;
+		} else if ( result === 'false' ) {
+			result = false;
+		}
+
+		LocalCacheData[key] = result;
+
+		return LocalCacheData[key];
+	}
+
+	return null;
+};
+
 LocalCacheData.setLocalCache = function( key, val, format ) {
 	if ( LocalCacheData.isSupportHTML5LocalCache ) {
 		if ( format === 'JSON' ) {
@@ -137,17 +198,17 @@ LocalCacheData.getRequiredLocalCache = function( key, format ) {
 			//This code is duplicated in RibbonViewController.doLogout() but that class can't be called here or reloads will throw a bunch of extra errors.
 			Global.clearSessionCookie();
 			LocalCacheData.current_open_view_id = ''; //#1528  -  Logout icon not working.
-			LocalCacheData.setLoginUser(null);
-			LocalCacheData.setCurrentCompany(null);
+			LocalCacheData.setLoginUser( null );
+			LocalCacheData.setCurrentCompany( null );
 			sessionStorage.clear();
-			Global.sendErrorReport( 'ERROR: Unable to get required local cache data: '+ key );
+			Global.sendErrorReport( 'ERROR: Unable to get required local cache data: ' + key );
 			window.location.reload();
 		} catch ( e ) {
 			// Early page loads won't have Global or TAlertManager
-			console.debug('ERROR: Unable to get required local cache data: '+ key);
-			console.debug('ERROR: Unable to report error to server: '+ key);
-			console.debug(e.stack);
-			if ( confirm('Local cache has expired. Click OK to reload.') ) {
+			console.debug( 'ERROR: Unable to get required local cache data: ' + key );
+			console.debug( 'ERROR: Unable to report error to server: ' + key );
+			console.debug( e.stack );
+			if ( confirm( 'Local cache has expired. Click OK to reload.' ) ) {
 				window.location.reload();
 			}
 		}
@@ -173,32 +234,6 @@ LocalCacheData.getRequiredLocalCache = function( key, format ) {
 	}
 
 	return result;
-};
-
-LocalCacheData.getLocalCache = function( key, format ) {
-	//BUG#2066 - For testing bad cache. See getrequiredlocalcache
-	//if(key == 'current_company'){return null}
-	if ( LocalCacheData[key] ) {
-		return LocalCacheData[key];
-	} else if ( !LocalCacheData[key] && sessionStorage[key] ) {
-		var result = sessionStorage.getItem( key );
-
-		if ( result !== 'undefined' && format === 'JSON' ) {
-			result = JSON.parse( result )
-		}
-
-		if ( result === 'true' ) {
-			result = true;
-		} else if ( result === 'false' ) {
-			result = false;
-		}
-
-		LocalCacheData[key] = result;
-
-		return LocalCacheData[key];
-	}
-
-	return null;
 };
 
 LocalCacheData.getI18nDic = function() {
@@ -311,7 +346,7 @@ LocalCacheData.getSessionID = function() {
 
 	var result = LocalCacheData.getLocalCache( Global.getSessionIDKey() );
 	if ( !result ) {
-		result = ''
+		result = '';
 	}
 
 	return result;
@@ -349,15 +384,15 @@ LocalCacheData.setCurrentSelectSubMenuId = function( val ) {
 	LocalCacheData.setLocalCache( 'currentSelectSubMenuId', val );
 };
 
-LocalCacheData.cleanNecessaryCache =  function() {
-	Debug.Text('Clearing Cache', 'LoginViewController.js', 'LoginViewController', 'cleanNecessaryCache', 10)
+LocalCacheData.cleanNecessaryCache = function() {
+	Debug.Text( 'Clearing Cache', 'LocalCacheData.js', 'LocalCacheData', 'cleanNecessaryCache', 10 );
 	LocalCacheData.last_timesheet_selected_user = null;
 	LocalCacheData.last_timesheet_selected_date = null;
 	//JS load Optimize
 	if ( LocalCacheData.loadViewRequiredJSReady ) {
 		if ( typeof ALayoutCache !== 'undefined' ) {
-		ALayoutCache.layout_dic = {};
-	}
+			ALayoutCache.layout_dic = {};
+		}
 	}
 	LocalCacheData.view_layout_cache = {};
 	LocalCacheData.result_cache = {};
@@ -367,3 +402,6 @@ LocalCacheData.cleanNecessaryCache =  function() {
 	}
 	Global.cleanViewTab();
 };
+
+//Check to see if local storage is actually available.
+LocalCacheData.isStorageAvailable();

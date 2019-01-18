@@ -6,7 +6,7 @@ AboutViewController = BaseViewController.extend( {
 
 	employeeActive: [],
 
-	_required_files: ['TImage','TImageBrowser','APIAbout', 'APIDate' ],
+	_required_files: ['TImage', 'TImageBrowser', 'APIAbout', 'APIDate'],
 
 	init: function( options ) {
 
@@ -20,19 +20,6 @@ AboutViewController = BaseViewController.extend( {
 		this.render();
 
 		this.initData();
-
-	},
-
-	onTabShow: function( e, ui ) {
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		this.buildContextMenu( true );
-		this.setEditMenu();
 
 	},
 
@@ -75,54 +62,36 @@ AboutViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		var id;
-
-		var $this = this;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
-
 			case ContextMenuIconName.check_updates:
-				ProgressBar.showOverlay();
 				this.onCheckClick();
 				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
-
 		}
-
 	},
 
 	onCheckClick: function() {
 		var $this = this;
-		this.api['isNewVersionAvailable']( {onResult: function( result ) {
-			$this.current_edit_record = result.getResult();
+		this.api['isNewVersionAvailable']( {
+			onResult: function( result ) {
+				$this.current_edit_record = result.getResult();
 
-			$this.initEditView();
-		}} );
+				$this.initEditView();
+			}
+		} );
 	},
 
 	getAboutData: function( callBack ) {
 		var $this = this;
-		$this.api['get' + $this.api.key_name]( {onResult: function( result ) {
-			var result_data = result.getResult();
-			if ( Global.isSet( result_data ) ) {
-				callBack( result_data );
-			}
+		$this.api['get' + $this.api.key_name]( {
+			onResult: function( result ) {
+				var result_data = result.getResult();
+				if ( Global.isSet( result_data ) ) {
+					callBack( result_data );
+				}
 
-		}} );
+			}
+		} );
 	},
 
 	openEditView: function() {
@@ -177,10 +146,10 @@ AboutViewController = BaseViewController.extend( {
 						var html = '<br><b>' + $.i18n._( 'NOTICE' ) + ':' + '</b> ' + $.i18n._( 'There is a new version of' ) + ' ';
 						html += '<b>' + $.i18n._( this.current_edit_record['application_name'] ) + '</b> ' + $.i18n._( 'available' ) + '.';
 						html += '<br>' + $.i18n._( 'This version may contain tax table updates necessary for accurate payroll calculation, we recommend that you upgrade as soon as possible.' ) + '<br>';
-						html += "" + $.i18n._( 'The latest version can be downloaded from' ) + ":" + " <a href='https://" + this.current_edit_record['organization_url'] + "/?upgrade=1' target='_blank'>";
-						html += "<b>" + this.current_edit_record['organization_url'] + "</b></a><br><br>";
+						html += '' + $.i18n._( 'The latest version can be downloaded from' ) + ':' + ' <a href=\'https://' + this.current_edit_record['organization_url'] + '/?upgrade=1\' target=\'_blank\'>';
+						html += '<b>' + this.current_edit_record['organization_url'] + '</b></a><br><br>';
 
-						$( this.edit_view_form_item_dic['notice'].find( ".tblDataWarning" ) ).html( html );
+						$( this.edit_view_form_item_dic['notice'].find( '.tblDataWarning' ) ).html( html );
 
 					}
 					break;
@@ -220,9 +189,17 @@ AboutViewController = BaseViewController.extend( {
 						var separated_box = $( this.edit_view_form_item_dic['license_info'].find( '.separated-box' ) );
 
 						if ( this.current_edit_record[key]['message'] ) {
-							separated_box.css( {'font-weight': 'bold', 'background-color': 'red', 'height': 'auto', 'color': '#000000'} );
+							separated_box.css( {
+								'font-weight': 'bold',
+								'background-color': 'red',
+								'height': 'auto',
+								'color': '#000000'
+							} );
 							separated_box.html( $.i18n._( 'License Information' ) + '<br>' + $.i18n._( 'WARNING' ) + ': ' + this.current_edit_record[key]['message'] );
-							$( separated_box.find( 'span' ) ).removeClass( 'label' ).css( {'font-size': 'normal', 'font-weight': 'bold'} );
+							$( separated_box.find( 'span' ) ).removeClass( 'label' ).css( {
+								'font-size': 'normal',
+								'font-weight': 'bold'
+							} );
 						} else {
 							separated_box.html( '<span class="label">' + $.i18n._( 'License Information' ) + '</span>' );
 						}
@@ -267,7 +244,7 @@ AboutViewController = BaseViewController.extend( {
 			}
 
 			if ( Global.isSet( widget ) && this.current_edit_record[key] == false ) {
-				widget.parents('.edit-view-form-item-div').detach();
+				widget.parents( '.edit-view-form-item-div' ).detach();
 			}
 
 		}
@@ -305,14 +282,14 @@ AboutViewController = BaseViewController.extend( {
 				var item = this.current_edit_record['user_counts'][key];
 
 				var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-				form_item_input.TText( {field: 'active_' + key  } );
+				form_item_input.TText( { field: 'active_' + key } );
 				form_item_input.setValue( item['max_active_users'] + ' / ' + item['max_inactive_users'] );
 
 				this.addEditFieldToColumn( $.i18n._( item['label'] ), form_item_input, tab_about_column1, '', null, true );
 
 				this.employeeActive.push( form_item_input );
 
-				this.edit_view_ui_dic['active_' + key ].css( 'opacity', 1 );
+				this.edit_view_ui_dic['active_' + key].css( 'opacity', 1 );
 			}
 
 			this.editFieldResize( 0 );
@@ -323,9 +300,10 @@ AboutViewController = BaseViewController.extend( {
 		var $this = this;
 		this._super( 'buildEditViewUI' );
 
-		this.setTabLabels( {
-			'tab_about': $.i18n._( 'About' )
-		} );
+		var tab_model = {
+			'tab_about': { 'label': $.i18n._( 'About' ) },
+		};
+		this.setTabModel( tab_model );
 
 		//Tab 0 start
 
@@ -337,22 +315,22 @@ AboutViewController = BaseViewController.extend( {
 
 		this.edit_view_tabs[0].push( tab_about_column1 );
 
-		var form_item_input = $( "<div class='tblDataWarning'></div>" );
+		var form_item_input = $( '<div class=\'tblDataWarning\'></div>' );
 		this.addEditFieldToColumn( null, form_item_input, tab_about_column1, '', null, true, false, 'notice' );
 
 		// separate box
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'System Information' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'System Information' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_about_column1 );
 
 		// Product Edition
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'product_edition' } );
+		form_item_input.TText( { field: 'product_edition' } );
 		this.addEditFieldToColumn( $.i18n._( 'Product Edition' ), form_item_input, tab_about_column1 );
 
 		// Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'system_version' } );
+		form_item_input.TText( { field: 'system_version' } );
 		this.addEditFieldToColumn( $.i18n._( 'Version' ), form_item_input, tab_about_column1 );
 
 		// Operating System
@@ -372,39 +350,40 @@ AboutViewController = BaseViewController.extend( {
 
 		// Tax Engine Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'tax_engine_version' } );
+		form_item_input.TText( { field: 'tax_engine_version' } );
 		this.addEditFieldToColumn( $.i18n._( 'Tax Engine Version' ), form_item_input, tab_about_column1 );
 
 		// Tax Data Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'tax_data_version' } );
+		form_item_input.TText( { field: 'tax_data_version' } );
 		this.addEditFieldToColumn( $.i18n._( 'Tax Data Version' ), form_item_input, tab_about_column1 );
 
 		// Registration Key
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'registration_key' } );
+		form_item_input.TText( { field: 'registration_key' } );
 		this.addEditFieldToColumn( $.i18n._( 'Registration Key' ), form_item_input, tab_about_column1 );
 
 		// Hardware ID
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'hardware_id' } );
+		form_item_input.TText( { field: 'hardware_id' } );
 		this.addEditFieldToColumn( $.i18n._( 'Hardware ID' ), form_item_input, tab_about_column1 );
 
 		// Maintenance Jobs Last Ran
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'cron' } );
+		form_item_input.TText( { field: 'cron' } );
 		this.addEditFieldToColumn( $.i18n._( 'Maintenance Jobs Last Ran' ), form_item_input, tab_about_column1 );
 
 		// separate box
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'License Information' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'License Information' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_about_column1, '', null, true, false, 'license_info' );
 
 		if ( LocalCacheData.productEditionId > 10 && APIGlobal.pre_login_data.primary_company_id == LocalCacheData.getCurrentCompany().id ) {
 			// Upload License
-			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER);
+			form_item_input = Global.loadWidgetByName( FormItemType.IMAGE_BROWSER );
 			this.file_browser = form_item_input.TImageBrowser( {
 				field: 'license_browser',
+				id: 'license_browser',
 				name: 'filedata',
 				accept_filter: '*',
 				changeHandler: function( a ) {
@@ -416,64 +395,64 @@ AboutViewController = BaseViewController.extend( {
 
 		// Product
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'product_name' } );
+		form_item_input.TText( { field: 'product_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Product' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Company
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'organization_name' } );
+		form_item_input.TText( { field: 'organization_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Company' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Version
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: '_version' } );
+		form_item_input.TText( { field: '_version' } );
 		this.addEditFieldToColumn( $.i18n._( 'Version' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Active Employee Licenses
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'active_employee_licenses' } );
+		form_item_input.TText( { field: 'active_employee_licenses' } );
 		this.addEditFieldToColumn( $.i18n._( 'Active Employee Licenses' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Issue Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'issue_date' } );
+		form_item_input.TText( { field: 'issue_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Issue Date' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Expire Date
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'expire_date_display' } );
+		form_item_input.TText( { field: 'expire_date_display' } );
 		this.addEditFieldToColumn( $.i18n._( 'Expire Date' ), form_item_input, tab_about_column1, '', null, true );
 
 		// Schema Version
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Schema Version' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Schema Version' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_about_column1 );
 
 		// Group A
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'schema_version_group_A' } );
+		form_item_input.TText( { field: 'schema_version_group_A' } );
 		this.addEditFieldToColumn( $.i18n._( 'Group A' ), form_item_input, tab_about_column1 );
 
 		// Group B
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'schema_version_group_B' } );
+		form_item_input.TText( { field: 'schema_version_group_B' } );
 		this.addEditFieldToColumn( $.i18n._( 'Group B' ), form_item_input, tab_about_column1 );
 
 		// Group C
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'schema_version_group_C' } );
+		form_item_input.TText( { field: 'schema_version_group_C' } );
 		this.addEditFieldToColumn( $.i18n._( 'Group C' ), form_item_input, tab_about_column1 );
 
 
 		// Group D
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'schema_version_group_D' } );
+		form_item_input.TText( { field: 'schema_version_group_D' } );
 		this.addEditFieldToColumn( $.i18n._( 'Group D' ), form_item_input, tab_about_column1 );
 
 
 		// Separated Box
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Employees (Active / InActive)' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Employees (Active / InActive)' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_about_column1, '', null, true, false, 'user_active_inactive' );
 
 	},
@@ -481,23 +460,25 @@ AboutViewController = BaseViewController.extend( {
 	uploadLicense: function( obj ) {
 		var $this = this;
 		var file = this.edit_view_ui_dic['license_browser'].getValue();
-		$this.api.uploadFile( file, 'object_type=license&object_id=', {onResult: function( res ) {
-			//file upload returns a "TRUE" string on success
-			if ( res == "TRUE" ) {
-				//$this.openEditView();
+		$this.api.uploadFile( file, 'object_type=license&object_id=', {
+			onResult: function( res ) {
+				//file upload returns a "TRUE" string on success
+				if ( res == 'TRUE' ) {
+					//$this.openEditView();
 
-				ProgressBar.showProgressBar();
-				IndexViewController.setNotificationBar( 'login' );
-				window.setTimeout(function(){
-					window.location.reload();
-				},3000);
-			} else {
-				//TAlertManager.showAlert( $.i18n._( 'Invalid license file' ) )
-				TAlertManager.showAlert( res );
-				$this.edit_view_ui_dic.license_browser.clearForm();
+					ProgressBar.showProgressBar();
+					IndexViewController.setNotificationBar( 'login' );
+					window.setTimeout( function() {
+						window.location.reload();
+					}, 3000 );
+				} else {
+					//TAlertManager.showAlert( $.i18n._( 'Invalid license file' ) )
+					TAlertManager.showAlert( res );
+					$( '#file_browser').val(''); //Clear the file name from beside the "Choose File" button.
+				}
+
 			}
-
-		}} );
+		} );
 	}
 
 

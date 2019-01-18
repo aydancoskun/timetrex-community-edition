@@ -48,46 +48,17 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 	},
 
-	setTabStatus: function() {
-
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-
-	},
-
 	buildEditViewUI: function() {
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_recurring_template': $.i18n._( 'Recurring Template' ),
-			'tab_attachment': $.i18n._( 'Attachments' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_recurring_template': { 'label': $.i18n._( 'Recurring Template' ) },
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		var form_item_input;
 
@@ -106,7 +77,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
 			this.edit_view_tab.css( 'min-width', '1250px' );
-		} else if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+		} else if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 			this.edit_view_tab.css( 'min-width', '1050px' );
 		} else {
 			this.edit_view_tab.css( 'min-width', '950px' );
@@ -125,7 +96,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_recurring_template_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -133,7 +104,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'description', width: '100%'} );
+		form_item_input.TTextInput( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_recurring_template_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -187,7 +158,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			var render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRender_1.html';
 			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
 				render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRender.html';
-			} else if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+			} else if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 				render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRender_2.html';
 			}
 
@@ -198,7 +169,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			var render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRow_1.html';
 			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
 				render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRow.html';
-			} else if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+			} else if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 				render = 'views/attendance/recurring_schedule_template_control/RecurringScheduleTemplateControlViewInsideEditorRow_2.html';
 			}
 
@@ -206,13 +177,6 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		}
 
 		inside_editor_div.append( this.editor );
-
-	},
-
-	removeEditView: function() {
-
-		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
 
 	},
 
@@ -273,7 +237,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			// Week
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			form_item_input.TTextInput( {field: 'week', width: 40} );
+			form_item_input.TTextInput( { field: 'week', width: 40 } );
 			form_item_input.setValue( data.week ? data.week : 1 );
 			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 0 ).append( form_item_input );
@@ -283,10 +247,10 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			// Status
 
-			var widgetContainer = $( "<div class='recurring-template-status-div'></div>" );
+			var widgetContainer = $( '<div class=\'recurring-template-status-div\'></div>' );
 
 			form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-			form_item_input.TComboBox( {field: 'status_id'} );
+			form_item_input.TComboBox( { field: 'status_id' } );
 			form_item_input.setSourceData( Global.addFirstItemToArray( this.parent_controller.recurring_schedule_status_array ) );
 			form_item_input.setValue( data.status_id ? data.status_id : 10 );
 			widgets[form_item_input.getField()] = form_item_input;
@@ -297,7 +261,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				} else if ( target.getValue() == 20 ) {
 					widgets['absence_policy_id'].show();
 				}
-			} )
+			} );
 
 			widgetContainer.append( form_item_input );
 
@@ -318,6 +282,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			form_item_input.css( 'position', 'absolute' );
 			form_item_input.css( 'left', '0' );
 			form_item_input.css( 'top', '30px' );
+			form_item_input.css( 'z-index', '1' ); //For some reason if this overlaps with the "checkboxes", it goes behind that div and makes the down arrow unclickable.
 			form_item_input.setValue( data.absence_policy_id ? data.absence_policy_id : '' );
 			widgets[form_item_input.getField()] = form_item_input;
 			this.setWidgetEnableBaseOnParentController( form_item_input );
@@ -326,10 +291,10 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			row.children().eq( 1 ).append( widgetContainer );
 
 			// sun mon tue wed thu fri sat
-			var widgetContainer2 = $( "<div class='widget-h-box'></div>" );
+			var widgetContainer2 = $( '<div class=\'widget-h-box\'></div>' );
 			// Sun
 			var form_item_sun_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_sun_checkbox.TCheckbox( {field: 'sun'} );
+			form_item_sun_checkbox.TCheckbox( { field: 'sun' } );
 			form_item_sun_checkbox.setValue( data.sun ? data.sun : false );
 			widgets[form_item_sun_checkbox.getField()] = form_item_sun_checkbox;
 			widgetContainer2.append( form_item_sun_checkbox );
@@ -337,7 +302,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			this.setWidgetEnableBaseOnParentController( form_item_sun_checkbox );
 			// Mon
 			var form_item_mon_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_mon_checkbox.TCheckbox( {field: 'mon'} );
+			form_item_mon_checkbox.TCheckbox( { field: 'mon' } );
 			form_item_mon_checkbox.setValue( data.mon ? data.mon : false );
 			widgets[form_item_mon_checkbox.getField()] = form_item_mon_checkbox;
 			widgetContainer2.append( form_item_mon_checkbox );
@@ -345,35 +310,35 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			this.setWidgetEnableBaseOnParentController( form_item_mon_checkbox );
 			// Tue
 			var form_item_tue_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_tue_checkbox.TCheckbox( {field: 'tue'} );
+			form_item_tue_checkbox.TCheckbox( { field: 'tue' } );
 			form_item_tue_checkbox.setValue( data.tue ? data.tue : false );
 			widgets[form_item_tue_checkbox.getField()] = form_item_tue_checkbox;
 			widgetContainer2.append( form_item_tue_checkbox );
 			this.setWidgetEnableBaseOnParentController( form_item_tue_checkbox );
 			// Wed
 			var form_item_wed_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_wed_checkbox.TCheckbox( {field: 'wed'} );
+			form_item_wed_checkbox.TCheckbox( { field: 'wed' } );
 			form_item_wed_checkbox.setValue( data.wed ? data.wed : false );
 			widgets[form_item_wed_checkbox.getField()] = form_item_wed_checkbox;
 			widgetContainer2.append( form_item_wed_checkbox );
 			this.setWidgetEnableBaseOnParentController( form_item_wed_checkbox );
 			// Thu
 			var form_item_thu_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_thu_checkbox.TCheckbox( {field: 'thu'} );
+			form_item_thu_checkbox.TCheckbox( { field: 'thu' } );
 			form_item_thu_checkbox.setValue( data.thu ? data.thu : false );
 			widgets[form_item_thu_checkbox.getField()] = form_item_thu_checkbox;
 			widgetContainer2.append( form_item_thu_checkbox );
 			this.setWidgetEnableBaseOnParentController( form_item_thu_checkbox );
 			// Fri
 			var form_item_fri_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_fri_checkbox.TCheckbox( {field: 'fri'} );
+			form_item_fri_checkbox.TCheckbox( { field: 'fri' } );
 			form_item_fri_checkbox.setValue( data.fri ? data.fri : false );
 			widgets[form_item_fri_checkbox.getField()] = form_item_fri_checkbox;
 			widgetContainer2.append( form_item_fri_checkbox );
 			this.setWidgetEnableBaseOnParentController( form_item_fri_checkbox );
 			// Sat
 			var form_item_sat_checkbox = Global.loadWidgetByName( FormItemType.CHECKBOX );
-			form_item_sat_checkbox.TCheckbox( {field: 'sat'} );
+			form_item_sat_checkbox.TCheckbox( { field: 'sat' } );
 			form_item_sat_checkbox.setValue( data.sat ? data.sat : false );
 			widgets[form_item_sat_checkbox.getField()] = form_item_sat_checkbox;
 			widgetContainer2.append( form_item_sat_checkbox );
@@ -382,24 +347,24 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			row.children().eq( 2 ).append( widgetContainer2 );
 
 			// Shift Time
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
-			var divContainer1 = $( "<div style='text-align: left; '></div>" );
+			var divContainer1 = $( '<div style=\'text-align: left; \'></div>' );
 
-			var label_1 = $( "<span class='widget-right-label recurring-template-widget-right-label' style='display: inline-block; width: 28px; vertical-align: middle;'> " + $.i18n._( 'In' ) + ': ' + " </span>" );
+			var label_1 = $( '<span class=\'widget-right-label recurring-template-widget-right-label\' style=\'display: inline-block; width: 28px; vertical-align: middle;\'> ' + $.i18n._( 'In' ) + ': ' + ' </span>' );
 			form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
-			form_item_input.TTimePicker( {field: 'start_time'} );
+			form_item_input.TTimePicker( { field: 'start_time' } );
 			form_item_input.setValue( data.start_time ? data.start_time : '' );
 
 			form_item_input.bind( 'formItemChange', function( e, target ) {
 
 				var rows_widgets = $this.rows_widgets_array[target.parent().parent().parent().parent().index() - 1];
 
-				$this.parent_controller.onRowChanges( rows_widgets )
-			} )
+				$this.parent_controller.onRowChanges( rows_widgets );
+			} );
 
-			widgets[form_item_input.getField()+row_id] = form_item_input;
-			this.parent_controller.edit_view_ui_validation_field_dic[form_item_input.getField()+row_id] = form_item_input;
+			widgets[form_item_input.getField() + row_id] = form_item_input;
+			this.parent_controller.edit_view_ui_validation_field_dic[form_item_input.getField() + row_id] = form_item_input;
 
 			divContainer1.append( label_1 );
 			divContainer1.append( form_item_input );
@@ -407,21 +372,21 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			widgetContainer.append( divContainer1 );
 			this.setWidgetEnableBaseOnParentController( form_item_input );
 
-			var divContainer2 = $( "<div style='text-align: left; margin-top: 5px;'></div>" );
+			var divContainer2 = $( '<div style=\'text-align: left; margin-top: 5px;\'></div>' );
 
-			var label_2 = $( "<span class='widget-right-label recurring-template-widget-right-label' style='display: inline-block; width: 28px; vertical-align: middle;' > " + $.i18n._( 'Out' ) + ': ' + " </span>" );
+			var label_2 = $( '<span class=\'widget-right-label recurring-template-widget-right-label\' style=\'display: inline-block; width: 28px; vertical-align: middle;\' > ' + $.i18n._( 'Out' ) + ': ' + ' </span>' );
 			form_item_input = Global.loadWidgetByName( FormItemType.TIME_PICKER );
-			form_item_input.TTimePicker( {field: 'end_time'} );
+			form_item_input.TTimePicker( { field: 'end_time' } );
 			form_item_input.setValue( data.end_time ? data.end_time : '' );
 
 			form_item_input.bind( 'formItemChange', function( e, target ) {
 				var rows_widgets = $this.rows_widgets_array[target.parent().parent().parent().parent().index() - 1];
 
-				$this.parent_controller.onRowChanges( rows_widgets )
+				$this.parent_controller.onRowChanges( rows_widgets );
 			} );
 
-			widgets[form_item_input.getField()+row_id] = form_item_input;
-			this.parent_controller.edit_view_ui_validation_field_dic[form_item_input.getField()+row_id] = form_item_input;
+			widgets[form_item_input.getField() + row_id] = form_item_input;
+			this.parent_controller.edit_view_ui_validation_field_dic[form_item_input.getField() + row_id] = form_item_input;
 
 			divContainer2.append( label_2 );
 			divContainer2.append( form_item_input );
@@ -433,7 +398,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			// Total
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-			form_item_input.TText( {field: 'total_time'} );
+			form_item_input.TText( { field: 'total_time' } );
 			form_item_input.setValue( data.total_time ? Global.secondToHHMMSS( data.total_time ) : '' ); //
 			widgets[form_item_input.getField()] = form_item_input;
 
@@ -461,17 +426,17 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			form_item_input.bind( 'formItemChange', function( e, target ) {
 				var rows_widgets = $this.rows_widgets_array[target.parent().parent().index() - 1];
 
-				$this.parent_controller.onRowChanges( rows_widgets )
+				$this.parent_controller.onRowChanges( rows_widgets );
 			} );
 			this.setWidgetEnableBaseOnParentController( form_item_input );
 
 			// Branch / Department
 
-			widgetContainer = $( "<div class='widget-h-box recurring-template-widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box recurring-template-widget-h-box\'></div>' );
 
-			divContainer1 = $( "<div></div>" );
+			divContainer1 = $( '<div></div>' );
 
-			label_1 = $( "<span class='widget-right-label' style='float: left; height: 24px; line-height: 24px; min-width: 74px;'> " + $.i18n._( 'Branch' ) + ': ' + " </span>" );
+			label_1 = $( '<span class=\'widget-right-label\' style=\'float: left; height: 24px; line-height: 24px; min-width: 74px;\'> ' + $.i18n._( 'Branch' ) + ': ' + ' </span>' );
 
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -489,7 +454,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			if ( data.branch_id.toUpperCase() === TTUUID.not_exist_id.toUpperCase() ) {
 				form_item_input.set_default_value = true;
 			} else {
-				form_item_input.setValue(data.branch_id ? data.branch_id : '');
+				form_item_input.setValue( data.branch_id ? data.branch_id : '' );
 			}
 			widgets[form_item_input.getField()] = form_item_input;
 
@@ -498,9 +463,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			widgetContainer.append( divContainer1 );
 
-			divContainer2 = $( "<div style='margin-top: 5px; float: left'></div>" );
+			divContainer2 = $( '<div style=\'margin-top: 5px; float: left\'></div>' );
 
-			label_2 = $( "<span class='widget-right-label' style='float: left; height: 24px; line-height: 24px; min-width: 74px;'> " + $.i18n._( 'Department' ) + ': ' + " </span>" );
+			label_2 = $( '<span class=\'widget-right-label\' style=\'float: left; height: 24px; line-height: 24px; min-width: 74px;\'> ' + $.i18n._( 'Department' ) + ': ' + ' </span>' );
 
 			this.setWidgetEnableBaseOnParentController( form_item_input );
 
@@ -531,11 +496,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 
-				widgetContainer = $( "<div class='widget-h-box recurring-template-widget-h-box'></div>" );
+				widgetContainer = $( '<div class=\'widget-h-box recurring-template-widget-h-box\'></div>' );
 
-				divContainer1 = $( "<div></div>" );
+				divContainer1 = $( '<div></div>' );
 
-				label_1 = $( "<span class='widget-right-label' style='float: left; height: 24px; line-height: 24px; min-width: 32px;'> " + $.i18n._( 'Job' ) + ': ' + " </span>" );
+				label_1 = $( '<span class=\'widget-right-label\' style=\'float: left; height: 24px; line-height: 24px; min-width: 32px;\'> ' + $.i18n._( 'Job' ) + ': ' + ' </span>' );
 
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
@@ -557,9 +522,9 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 				widgetContainer.append( divContainer1 );
 
-				divContainer2 = $( "<div style='margin-top: 5px; float: left'></div>" );
+				divContainer2 = $( '<div style=\'margin-top: 5px; float: left\'></div>' );
 
-				label_2 = $( "<span class='widget-right-label' style='float: left; height: 24px; line-height: 24px; min-width: 32px;'> " + $.i18n._( 'Task' ) + ': ' + " </span>" );
+				label_2 = $( '<span class=\'widget-right-label\' style=\'float: left; height: 24px; line-height: 24px; min-width: 32px;\'> ' + $.i18n._( 'Task' ) + ': ' + ' </span>' );
 				this.setWidgetEnableBaseOnParentController( form_item_input );
 
 				form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -587,14 +552,14 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 			}
 
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+			if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 				// Open Shift Multiplier
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				form_item_input.TTextInput( {field: 'open_shift_multiplier', width: 20} );
+				form_item_input.TTextInput( { field: 'open_shift_multiplier', width: 20 } );
 				form_item_input.setValue( data.open_shift_multiplier ? data.open_shift_multiplier : 1 );
 				widgets[form_item_input.getField()] = form_item_input;
 
-				if ( LocalCacheData.getCurrentCompany().product_edition_id < 20 ) {
+				if ( LocalCacheData.getCurrentCompany().product_edition_id <= 15 ) {
 					row.children().eq( 7 ).append( form_item_input );
 				} else {
 					row.children().eq( 8 ).append( form_item_input );
@@ -639,7 +604,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 			var schedulePolicyId = row_widgets.schedule_policy_id.getValue();
 
 			if (startTime !== '' && endTime !== '' && schedulePolicyId !== '') {
-				var total_time = this.schedule_api.getScheduleTotalTime(startTime, endTime, schedulePolicyId, {async: false}).getResult();
+				var total_time = this.schedule_api.getScheduleTotalTime(startTime, endTime, schedulePolicyId, { async: false }).getResult();
 				row_widgets.total_time.setValue(Global.secondToHHMMSS(total_time));
 			}
 			this.validate();
@@ -677,7 +642,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 					id: recurring_schedule_template_id
 				};
 
-				if (LocalCacheData.getCurrentCompany().product_edition_id > 10) {
+				if (LocalCacheData.getCurrentCompany().product_edition_id >= 15) {
 					data.open_shift_multiplier = row.open_shift_multiplier.getValue();
 				}
 
@@ -716,7 +681,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 	insideEditorRemoveRow: function( row ) {
 		var index = row[0].rowIndex - 1;
 		var remove_id = this.rows_widgets_array[index].week.attr( 'recurring_schedule_template_id' );
-        if ( TTUUID.isUUID( remove_id ) && remove_id != TTUUID.zero_id && remove_id != TTUUID.not_exist_id ) {
+		if ( TTUUID.isUUID( remove_id ) && remove_id != TTUUID.zero_id && remove_id != TTUUID.not_exist_id ) {
 			this.delete_ids.push( remove_id );
 		}
 		row.remove();
@@ -873,60 +838,8 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: false,
 				form_item_type: FormItemType.AWESOME_BOX
-			} )];
-	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
+			} )
+		];
 	},
 
 	buildContextMenuModels: function() {
@@ -1111,80 +1024,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		if ( Global.isSet( menu_name ) ) {
-			var id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.add:
-				ProgressBar.showOverlay();
-				this.onAddClick();
-				break;
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.edit:
-				ProgressBar.showOverlay();
-				this.onEditClick();
-				break;
-			case ContextMenuIconName.mass_edit:
-				ProgressBar.showOverlay();
-				this.onMassEditClick();
-				break;
-			case ContextMenuIconName.delete_icon:
-				ProgressBar.showOverlay();
-				this.onDeleteClick();
-				break;
-			case ContextMenuIconName.delete_and_next:
-				ProgressBar.showOverlay();
-				this.onDeleteAndNextClick();
-				break;
-			case ContextMenuIconName.copy:
-				ProgressBar.showOverlay();
-				this.onCopyClick();
-				break;
-			case ContextMenuIconName.copy_as_new:
-				ProgressBar.showOverlay();
-				this.onCopyAsNewClick();
-				break;
-			case ContextMenuIconName.save:
-				ProgressBar.showOverlay();
-				this.onSaveClick();
-				break;
-			case ContextMenuIconName.save_and_continue:
-				ProgressBar.showOverlay();
-				this.onSaveAndContinue();
-				break;
-			case ContextMenuIconName.save_and_next:
-				ProgressBar.showOverlay();
-				this.onSaveAndNextClick();
-				break;
-			case ContextMenuIconName.save_and_new:
-				ProgressBar.showOverlay();
-				this.onSaveAndNewClick();
-				break;
-			case ContextMenuIconName.save_and_copy:
-				ProgressBar.showOverlay();
-				this.onSaveAndCopy();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
-			case ContextMenuIconName.export_excel:
 			case ContextMenuIconName.recurring_schedule:
 				this.onNavigationClick( id );
 				break;
-
 		}
 	},
 
@@ -1194,7 +1038,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 
 		var grid_selected_id_array;
 
-		var filter = {filter_data: {}};
+		var filter = { filter_data: {} };
 
 		var recurring_schedule_template_control_ids = [];
 
@@ -1211,19 +1055,11 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		filter.filter_data.recurring_schedule_template_control_id = recurring_schedule_template_control_ids;
 
 		switch ( iconName ) {
-
 			case ContextMenuIconName.recurring_schedule:
-
 				Global.addViewTab( this.viewId, 'Recurring Templates', window.location.href );
 				IndexViewController.goToView( 'RecurringScheduleControl', filter );
-
 				break;
-			case ContextMenuIconName.export_excel:
-				this.onExportClick('exportRecurringScheduleTemplateControl');
-				break;
-
 		}
-
 	},
 
 	setDefaultMenu: function( doNotSetFocus ) {
@@ -1246,7 +1082,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -1299,7 +1135,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 					this.setDefaultMenuRecurringScheduleIcon( context_btn, grid_selected_length );
 					break;
 				case ContextMenuIconName.export_excel:
-					this.setDefaultMenuExportIcon( context_btn, grid_selected_length )
+					this.setDefaultMenuExportIcon( context_btn, grid_selected_length );
 					break;
 
 			}
@@ -1327,7 +1163,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -1392,7 +1228,7 @@ RecurringScheduleTemplateControlViewController = BaseViewController.extend( {
 					this.setEditMenuRecurringScheduleIcon( context_btn );
 					break;
 				case ContextMenuIconName.export_excel:
-					this.setDefaultMenuExportIcon( context_btn);
+					this.setDefaultMenuExportIcon( context_btn );
 					break;
 			}
 

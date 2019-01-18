@@ -877,10 +877,10 @@ class CurrencyFactory extends Factory {
 
 					if ( ( TTDate::getMiddleDayEpoch( time() ) - TTDate::getMiddleDayEpoch( $latest_currency_rate_date ) ) > 86400 ) {
 						$currency_rates = $ttsc->getCurrencyExchangeRatesByDate( $company_id, array( $active_currency_iso_code ), $base_currency, $latest_currency_rate_date, ( TTDate::getMiddleDayEpoch( time() ) - 86400 ) );
-						Debug::Text('Currency Rates for: '. $active_currency_iso_code .' Total: '. count($currency_rates), __FILE__, __LINE__, __METHOD__, 10);
 						//Debug::Arr($currency_rates, 'Currency Rates for: '. $active_currency_iso_code, __FILE__, __LINE__, __METHOD__, 10);
 
 						if ( is_array($currency_rates[$active_currency_iso_code]) ) {
+							Debug::Text('Currency Rates for: '. $active_currency_iso_code .' Total: '. count( $currency_rates ), __FILE__, __LINE__, __METHOD__, 10);
 							foreach( $currency_rates[$active_currency_iso_code] as $date_stamp => $conversion_rate ) {
 								$crf = TTnew('CurrencyRateFactory');
 								$crf->setCurrency( $active_currency_id );

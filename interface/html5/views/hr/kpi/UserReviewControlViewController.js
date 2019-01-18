@@ -1,7 +1,7 @@
 UserReviewControlViewController = BaseViewController.extend( {
 	el: '#user_review_control_view_container',
 
-	_required_files:['APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI', 'APICompanyGenericTag'],
+	_required_files: ['APIUserReviewControl', 'APIKPIGroup', 'APIUserReview', 'APIKPI', 'APICompanyGenericTag'],
 
 	type_array: null,
 	status_array: null,
@@ -75,11 +75,11 @@ UserReviewControlViewController = BaseViewController.extend( {
 				all.level = 1;
 				all.id = -1;
 
-				if ( res.hasOwnProperty("0") && res[0].hasOwnProperty( 'children' ) ) {
+				if ( res.hasOwnProperty( '0' ) && res[0].hasOwnProperty( 'children' ) ) {
 					res[0].children.unshift( all );
 				} else {
 					res = [
-						{children: [all], id: 0, level: 0, name: '-- ' + $.i18n._( 'Add KPIs' ) + ' --'}
+						{ children: [all], id: 0, level: 0, name: '-- ' + $.i18n._( 'Add KPIs' ) + ' --' }
 					];
 				}
 
@@ -92,44 +92,18 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 	},
 
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-	},
-
 	buildEditViewUI: function() {
 
 		this._super( 'buildEditViewUI' );
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_review': $.i18n._( 'Review' ),
-			'tab_attachment': $.i18n._( 'Attachments' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_review': { 'label': $.i18n._( 'Review' ) },
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserReviewControl' )),
@@ -187,60 +161,60 @@ UserReviewControlViewController = BaseViewController.extend( {
 		// Status
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_review_column1 );
 
 		// Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_review_column1 );
 
 		// Terms
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'term_id'} );
+		form_item_input.TComboBox( { field: 'term_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.term_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Terms' ), form_item_input, tab_review_column1 );
 
 		// Rating
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'rating', width: 50} );
+		form_item_input.TTextInput( { field: 'rating', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Rating' ), form_item_input, tab_review_column1, '' );
 
 		// Severity
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'severity_id'} );
+		form_item_input.TComboBox( { field: 'severity_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.severity_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Severity' ), form_item_input, tab_review_column2, '' );
 
 		// Start Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'start_date'} );
+		form_item_input.TDatePicker( { field: 'start_date' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Start Date' ), form_item_input, tab_review_column2, '', null );
 
 		// End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'end_date'} );
+		form_item_input.TDatePicker( { field: 'end_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'End Date' ), form_item_input, tab_review_column2, '', null );
 
 		// Due Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'due_date'} );
+		form_item_input.TDatePicker( { field: 'due_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Due Date' ), form_item_input, tab_review_column2, '', null );
 
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
-		form_item_input.TTagInput( {field: 'tag', object_type_id: 320} );
+		form_item_input.TTagInput( { field: 'tag', object_type_id: 320 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_review_column2, '', null, null, true );
 
 		// Add KPIs from Groups
@@ -266,7 +240,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 			'margin-right': '10px',
 			'margin-top': '5px'
 		} ).text( $.i18n._( 'Add KPIs from Groups' ) );
-		tab_review_column3.find( '.column-form-item-input' ).css( {'float': 'left'} ).append( form_item_input );
+		tab_review_column3.find( '.column-form-item-input' ).css( { 'float': 'left' } ).append( form_item_input );
 
 		this.edit_view_ui_dic[form_item_input.getField()] = form_item_input;
 
@@ -277,7 +251,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 		// Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
 
-		form_item_input.TTextArea( {field: 'note', width: '100%', height: 66} );
+		form_item_input.TTextArea( { field: 'note', width: '100%', height: 66 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_review_column4, 'first_last', null, null, true );
 
@@ -391,7 +365,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 				form_item_input_div.css( 'width', '80%' );
 				form_item_label_div.css( 'height', '80' );
-				widget.css( {'width': '100%', 'resize': 'none'} );
+				widget.css( { 'width': '100%', 'resize': 'none' } );
 
 			} else {
 
@@ -581,63 +555,8 @@ UserReviewControlViewController = BaseViewController.extend( {
 	},
 
 	removeEditView: function() {
-
 		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
 		this.editor = null;
-	},
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
 	},
 
 	setEditViewDataDone: function() {
@@ -814,14 +733,14 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 			// #
 			var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-			form_item_input.TText( {field: 'serial', width: 50} );
+			form_item_input.TText( { field: 'serial', width: 50 } );
 			form_item_input.setValue( data.serial ? data.serial : null );
 //			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 0 ).append( form_item_input );
 
 			// Key Performance Indicator
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-			form_item_input.TText( {field: 'name', width: 600} );
+			form_item_input.TText( { field: 'name', width: 600 } );
 			form_item_input.setValue( data.name ? data.name : null );
 			form_item_input.attr( 'title', data.description ? data.description : '' );
 
@@ -830,9 +749,9 @@ UserReviewControlViewController = BaseViewController.extend( {
 			// Rating
 			if ( data.type_id == 10 ) {
 				form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-				form_item_input.TTextInput( {field: 'rating', width: 40} );
+				form_item_input.TTextInput( { field: 'rating', width: 40 } );
 				form_item_input.setValue( data.rating ? data.rating : null );
-				form_item_input.attr( {'minimum_rate': data.minimum_rate, 'maximum_rate': data.maximum_rate} );
+				form_item_input.attr( { 'minimum_rate': data.minimum_rate, 'maximum_rate': data.maximum_rate } );
 				form_item_input.bind( 'formItemChange', function( e, target, doNotValidate ) {
 					$this.onFormItemChange( target, doNotValidate );
 				} );
@@ -843,7 +762,7 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 			} else if ( data.type_id == 20 ) {
 				form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-				form_item_input.TCheckbox( {field: 'rating'} );
+				form_item_input.TCheckbox( { field: 'rating' } );
 				form_item_input.setValue( data.rating ? ( data.rating >= 1 ? true : false ) : null ); //Rating is numeric, so make sure we pass true/false to TCheckbox.
 				widgets[form_item_input.getField()] = form_item_input;
 				row.children().eq( 2 ).append( form_item_input );
@@ -853,7 +772,10 @@ UserReviewControlViewController = BaseViewController.extend( {
 
 			// Note
 			form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-			form_item_input.TTextArea( {field: 'note', style: {width: '300px', height: '20px', 'min-height': '10px'}} );
+			form_item_input.TTextArea( {
+				field: 'note',
+				style: { width: '300px', height: '20px', 'min-height': '10px' }
+			} );
 			form_item_input.setValue( data.note ? data.note : null );
 			widgets[form_item_input.getField()] = form_item_input;
 			row.children().eq( 3 ).css( 'text-align', 'right' ).append( form_item_input );
@@ -1081,6 +1003,10 @@ UserReviewControlViewController = BaseViewController.extend( {
 			this.editor = null;
 		}
 		this._super( 'onLeftArrowClick' );
+	},
+	searchDone: function(){
+		this._super('searchDone');
+		TTPromise.resolve( 'ReviewView', 'init' );
 	}
 
 } );
@@ -1096,9 +1022,9 @@ UserReviewControlViewController.loadSubView = function( container, beforeViewLoa
 		if ( Global.isSet( container ) ) {
 			container.html( template( args ) );
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				TTPromise.wait('BaseViewController', 'initialize',function() {
-					afterViewLoadedFun(sub_user_review_control_view_controller);
-				});
+				TTPromise.wait( 'BaseViewController', 'initialize', function() {
+					afterViewLoadedFun( sub_user_review_control_view_controller );
+				} );
 			}
 		}
 	} );

@@ -36,12 +36,12 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_policy_group': $.i18n._( 'Policy Group' ),
-			'tab_attachment': $.i18n._( 'Attachments' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_policy_group': { 'label': $.i18n._( 'Policy Group' ) },
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIPolicyGroup' )),
@@ -67,7 +67,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 		//Name
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_policy_group_column1, '' );
 
 		form_item_input.parent().width( '45%' );
@@ -92,7 +92,7 @@ PolicyGroupViewController = BaseViewController.extend( {
 		var default_args = {};
 		default_args.permission_section = 'policy_group';
 		form_item_input.setDefaultArgs( default_args );
-		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_policy_group_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Employees' ), form_item_input, tab_policy_group_column1 );
 
 		// Regular Time Policies
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -102,7 +102,8 @@ PolicyGroupViewController = BaseViewController.extend( {
 			layout_name: ALayoutIDs.REGULAR_TIME_POLICY,
 			show_search_inputs: true,
 			set_empty: true,
-			field: 'regular_time_policy'} );
+			field: 'regular_time_policy'
+		} );
 		this.addEditFieldToColumn( $.i18n._( 'Regular Time Policies' ), form_item_input, tab_policy_group_column1 );
 
 		// Overtime Policies
@@ -232,65 +233,6 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 	},
 
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-	},
-
-
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-		if ( this.edit_view_tab_selected_index === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
 	setCurrentEditRecordData: function() {
 		//Set current edit record data to all widgets
 		var $this = this;
@@ -304,18 +246,6 @@ PolicyGroupViewController = BaseViewController.extend( {
 			if ( Global.isSet( widget ) ) {
 				switch ( key ) {
 					case 'exception_policy_control_id':
-//						if ( !Global.isFalseOrNull( this.current_edit_record[key] ) ) {
-//							var filter = {};
-//							filter.filter_data = {};
-//							filter.filter_data.id = [this.current_edit_record[key]];
-//							this.exception_policy_control_api['get' + this.exception_policy_control_api.key_name]( filter, {onResult: function(res) {
-//								var result = res.getResult();
-//								$this.edit_view_ui_dic['exception_policy_control_id'].setSourceData( result );
-//								$this.edit_view_ui_dic['exception_policy_control_id'].setValue( $this.current_edit_record['exception_policy_control_id'] );
-//							}} );
-//						} else {
-//							widget.setValue( $this.current_edit_record[key] );
-//						}
 						widget.setValue( $this.current_edit_record[key] );
 						break;
 					default:
@@ -331,34 +261,6 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 	},
 
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
-	removeEditView: function() {
-
-		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
-
-	},
-
 	buildSearchFields: function() {
 
 		this._super( 'buildSearchFields' );
@@ -368,15 +270,18 @@ PolicyGroupViewController = BaseViewController.extend( {
 
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Name' ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Employees' ),
+			new SearchField( {
+				label: $.i18n._( 'Employees' ),
 				in_column: 1,
 				field: 'user',
 				default_args: default_args,
@@ -385,9 +290,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Overtime Policy' ),
+			new SearchField( {
+				label: $.i18n._( 'Overtime Policy' ),
 				in_column: 1,
 				field: 'over_time_policy',
 				layout_name: ALayoutIDs.OVER_TIME_POLICY,
@@ -395,9 +302,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Rounding Policies' ),
+			new SearchField( {
+				label: $.i18n._( 'Rounding Policies' ),
 				in_column: 1,
 				field: 'round_interval_policy',
 				layout_name: ALayoutIDs.ROUND_INTERVAL_POLICY,
@@ -405,9 +314,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Absence Policies' ),
+			new SearchField( {
+				label: $.i18n._( 'Absence Policies' ),
 				in_column: 1,
 				field: 'absence_policy',
 				layout_name: ALayoutIDs.ABSENCES_POLICY,
@@ -415,9 +326,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Accrual Policies' ),
+			new SearchField( {
+				label: $.i18n._( 'Accrual Policies' ),
 				in_column: 2,
 				field: 'accrual_policy',
 				layout_name: ALayoutIDs.ACCRUAL_POLICY,
@@ -425,9 +338,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Premium Policies' ),
+			new SearchField( {
+				label: $.i18n._( 'Premium Policies' ),
 				in_column: 2,
 				field: 'premium_policy',
 				layout_name: ALayoutIDs.PREMIUM_POLICY,
@@ -435,9 +350,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Holiday Policies' ),
+			new SearchField( {
+				label: $.i18n._( 'Holiday Policies' ),
 				in_column: 2,
 				field: 'holiday_policy',
 				layout_name: ALayoutIDs.HOLIDAY_POLICY,
@@ -445,9 +362,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Exception Policy' ),
+			new SearchField( {
+				label: $.i18n._( 'Exception Policy' ),
 				in_column: 2,
 				field: 'exception_policy_control',
 				layout_name: ALayoutIDs.EXCEPTION_POLICY_CONTROL,
@@ -455,9 +374,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -465,9 +386,11 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -475,7 +398,8 @@ PolicyGroupViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	}
 

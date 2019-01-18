@@ -6,6 +6,7 @@
 
 		var $this = this;
 		var field;
+		var id = 'file_browser';
 		var name = 'filedata';
 		var browser;
 
@@ -28,7 +29,7 @@
 				btn.removeClass( 'disable-element' );
 			}
 
-		}
+		};
 
 		this.clearErrorStyle = function() {
 
@@ -37,19 +38,19 @@
 		this.getFileName = function() {
 
 			return browser.val();
-		}
+		};
 
 		this.getField = function() {
 			return field;
 		};
 
-		this.setEnableDelete = function(val) {
+		this.setEnableDelete = function( val ) {
 			var image = $this.find( '.image' );
 			if ( !val ) {
 				image.removeAttr( 'enable-delete' );
 				return;
 			} else {
-				image.attr('enable-delete', 1);
+				image.attr( 'enable-delete', 1 );
 			}
 		};
 
@@ -57,7 +58,7 @@
 			var form_data;
 			if ( browser && browser.val() ) {
 
-				if ( typeof FormData == "undefined" ) {
+				if ( typeof FormData == 'undefined' ) {
 					form_data = $this.find( '.browser-form' );
 				} else {
 					form_data = new FormData( $( $this.find( '.browser-form' ) )[0] );
@@ -151,7 +152,7 @@
 			browser = $( this ).find( '.browser' );
 			var image = $( this ).find( '.image' );
 			image.hide();
-			image.load( function() {
+			image.on( 'load', function() {
 				onImageLoad( this );
 
 			} );
@@ -163,6 +164,7 @@
 				browser.attr( 'accept', 'image/*' );
 			}
 
+			browser.attr( 'id', id );
 			browser.attr( 'name', name );
 
 			if ( Global.isSet( o.changeHandler ) ) {
@@ -170,21 +172,23 @@
 				$this.bind( 'imageChange', o.changeHandler );
 			}
 			if ( Global.isSet( o.deleteImageHandler ) ) {
-				this.find( '.file-browser' ).on('deleteClick', function(){
+				this.find( '.file-browser' ).on( 'deleteClick', function() {
 					o.deleteImageHandler();
-				});
+				} );
 
 			}
 
 			browser.bind( 'change', function() {
 				image.hide();
 
-				if ( typeof FileReader != "undefined" ) {
+				if ( typeof FileReader != 'undefined' ) {
 
 					var files = !!this.files ? this.files : [];
 
 					// If no files were selected, or no FileReader support, return
-					if ( !files.length || !window.FileReader ) return;
+					if ( !files.length || !window.FileReader ) {
+						return;
+					}
 
 					if ( accept_filter === 'image/*' ) {
 						// Create a new instance of the FileReader
@@ -196,16 +200,16 @@
 						// When loaded, set image data as background of div
 						reader.onloadend = function() {
 							var url = this.result;
-							image.attr( 'src', url )
+							image.attr( 'src', url );
 
-						}
+						};
 					}
 
 				}
 
 				$this.trigger( 'imageChange', [$this] );
 
-			} )
+			} );
 
 		} );
 

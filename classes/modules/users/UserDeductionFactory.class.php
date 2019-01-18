@@ -791,6 +791,7 @@ class UserDeductionFactory extends Factory {
 						//*NOTE: If the first pay stub in TimeTrex is near the end of the year, and the employee has already exceeded the wage base amount
 						//the payroll admin needs to make sure they add a YTD Adjustment for each Include PS Accounts that this calculation is based on,
 						//NOT the total amount they have paid for the resulting calculation, as that has no effect whatsoever.
+						// The above is no longer the case since we switched to use opening balance pay stubs instead.
 
 						//getCalculationYTDAmount is the previous pay stub YTD amount, but it includes any YTD Adjustments in the current pay stub too.
 						$ytd_amount = $cd_obj->getCalculationYTDAmount( $pay_stub_obj );

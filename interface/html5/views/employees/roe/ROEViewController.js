@@ -53,7 +53,7 @@ ROEViewController = BaseViewController.extend( {
 		var column_filter = {};
 		column_filter.user_id = true;
 
-		return this._getFilterColumnsFromDisplayColumns(column_filter,  true);
+		return this._getFilterColumnsFromDisplayColumns( column_filter, true );
 	},
 
 	buildContextMenuModels: function() {
@@ -211,23 +211,14 @@ ROEViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
-		var view = new RibbonSubMenu( {
+		var view_roe = new RibbonSubMenu( {
 			label: $.i18n._( 'View' ),
-			id: ContextMenuIconName.view,
+			id: 'view_roe', //Don't bother with constant here, as its only used once.
 			group: form_group,
 			icon: Icons.view,
 			permission_result: true,
 			permission: null
 		} );
-
-		// var print = new RibbonSubMenu( {
-		// 	label: $.i18n._( 'Print' ),
-		// 	id: ContextMenuIconName.print,
-		// 	group: form_group,
-		// 	icon: Icons.print,
-		// 	permission_result: true,
-		// 	permission: null
-		// } );
 
 		var efile = new RibbonSubMenu( {
 			label: $.i18n._( 'eFile' ),
@@ -308,7 +299,7 @@ ROEViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -360,7 +351,7 @@ ROEViewController = BaseViewController.extend( {
 				case ContextMenuIconName.import_icon:
 					this.setDefaultMenuImportIcon( context_btn, grid_selected_length );
 					break;
-				case ContextMenuIconName.view:
+				case 'view_roe':
 					this.setDefaultMenuViewIcon( context_btn, grid_selected_length );
 					break;
 				case ContextMenuIconName.print:
@@ -464,7 +455,7 @@ ROEViewController = BaseViewController.extend( {
 		this.selectContextMenu();
 		var len = this.context_menu_array.length;
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -525,7 +516,7 @@ ROEViewController = BaseViewController.extend( {
 				case ContextMenuIconName.import_icon:
 					this.setEditMenuImportIcon( context_btn );
 					break;
-				case ContextMenuIconName.view:
+				case 'view_roe':
 					this.setEditMenuViewIcon( context_btn );
 					break;
 				case ContextMenuIconName.print:
@@ -547,7 +538,7 @@ ROEViewController = BaseViewController.extend( {
 					this.setEditMenuTimeSheetIcon( context_btn );
 					break;
 				case ContextMenuIconName.export_excel:
-					this.setDefaultMenuExportIcon( context_btn);
+					this.setDefaultMenuExportIcon( context_btn );
 					break;
 			}
 
@@ -608,7 +599,7 @@ ROEViewController = BaseViewController.extend( {
 	buildSearchFields: function() {
 
 		this._super( 'buildSearchFields' );
-		var default_args = {permission_section: 'roe'};
+		var default_args = { permission_section: 'roe' };
 		this.search_fields = [
 
 			new SearchField( {
@@ -739,11 +730,12 @@ ROEViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_roe': $.i18n._( 'ROE' ),
-			'tab_form_setup': $.i18n._( 'Form Setup' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_roe': { 'label': $.i18n._( 'ROE' ) },
+			'tab_form_setup': { 'label': $.i18n._( 'Form Setup' ), 'on_exit_callback': 'checkFormSetupSaved' },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIROE' )),
@@ -789,84 +781,84 @@ ROEViewController = BaseViewController.extend( {
 
 		// Reason
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'code_id'} );
+		form_item_input.TComboBox( { field: 'code_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.code_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Reason' ), form_item_input, tab_roe_column1 );
 
 		// Pay Period Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'pay_period_type_id'} );
+		form_item_input.TComboBox( { field: 'pay_period_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Period Type' ), form_item_input, tab_roe_column1 );
 
 		// First Day Worked
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'first_date'} );
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Or first day since last ROE' ) + ')' + "</span>" );
+		form_item_input.TDatePicker( { field: 'first_date' } );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Or first day since last ROE' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'First Day Worked' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		// Last Day For Which Paid
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'last_date'} );
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Last day worked or received insurable earnings' ) + ')' + "</span>" );
+		form_item_input.TDatePicker( { field: 'last_date' } );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Last day worked or received insurable earnings' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Last Day For Which Paid' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		//Final Pay Period Ending Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'pay_period_end_date'} );
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Pay period end date after Last Day For Which Paid' ) + ')' + "</span>" );
+		form_item_input.TDatePicker( { field: 'pay_period_end_date' } );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Pay period end date after Last Day For Which Paid' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Final Pay Period Ending Date' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		// Expected Date of Recall
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'recall_date'} );
-		this.addEditFieldToColumn( $.i18n._( 'Expected Date of Recall' ), form_item_input, tab_roe_column1 )
+		form_item_input.TDatePicker( { field: 'recall_date' } );
+		this.addEditFieldToColumn( $.i18n._( 'Expected Date of Recall' ), form_item_input, tab_roe_column1 );
 
 		// Serial No
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'serial', width: 100} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'Optional' ) + ')' + "</span>" );
+		form_item_input.TTextInput( { field: 'serial', width: 100 } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'Optional' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Serial No' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		// Comments
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'comments', width: 400} );
+		form_item_input.TTextInput( { field: 'comments', width: 400 } );
 		this.addEditFieldToColumn( $.i18n._( 'Comments' ), form_item_input, tab_roe_column1 );
 
 		// Release All Accruals
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'release_accruals'} );
+		form_item_input.TCheckbox( { field: 'release_accruals' } );
 		this.addEditFieldToColumn( $.i18n._( 'Release All Accruals' ), form_item_input, tab_roe_column1 );
 
 		// Generate Final Pay Stub
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'generate_pay_stub'} );
+		form_item_input.TCheckbox( { field: 'generate_pay_stub' } );
 		this.addEditFieldToColumn( $.i18n._( 'Generate Final Pay Stub' ), form_item_input, tab_roe_column1, '' );
 
 		//Final Pay Stub End Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'final_pay_stub_end_date'} );
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'> " + '(' + $.i18n._( 'May be after Final Pay Period Ending Date if vacation/severence is paid separately' ) + ')' + "</span>" );
+		form_item_input.TDatePicker( { field: 'final_pay_stub_end_date' } );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'> ' + '(' + $.i18n._( 'May be after Final Pay Period Ending Date if vacation/severence is paid separately' ) + ')' + '</span>' );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 		this.addEditFieldToColumn( $.i18n._( 'Final Pay Stub End Date' ), form_item_input, tab_roe_column1, '', widgetContainer );
 
 		//Final Pay Stub Transaction Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'final_pay_stub_transaction_date'} );
+		form_item_input.TDatePicker( { field: 'final_pay_stub_transaction_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Final Pay Stub Transaction Date' ), form_item_input, tab_roe_column1 );
 
 		// Insurable Absence Policies
@@ -918,80 +910,15 @@ ROEViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
-			case ContextMenuIconName.add:
-				ProgressBar.showOverlay();
-				this.onAddClick();
-				break;
-			case ContextMenuIconName.save:
-				ProgressBar.showOverlay();
-				this.onSaveClick();
-				break;
-			case ContextMenuIconName.save_and_next:
-				ProgressBar.showOverlay();
-				this.onSaveAndNextClick();
-				break;
-			case ContextMenuIconName.save_and_continue:
-				ProgressBar.showOverlay();
-				this.onSaveAndContinue();
-				break;
-			case ContextMenuIconName.save_and_new:
-				ProgressBar.showOverlay();
-				this.onSaveAndNewClick();
-				break;
-			case ContextMenuIconName.save_and_copy:
-				ProgressBar.showOverlay();
-				this.onSaveAndCopy();
-				break;
-			case ContextMenuIconName.edit:
-				ProgressBar.showOverlay();
-				this.onEditClick();
-				break;
-			case ContextMenuIconName.mass_edit:
-				ProgressBar.showOverlay();
-				this.onMassEditClick();
-				break;
-			case ContextMenuIconName.delete_icon:
-				ProgressBar.showOverlay();
-				this.onDeleteClick();
-				break;
-			case ContextMenuIconName.delete_and_next:
-				ProgressBar.showOverlay();
-				this.onDeleteAndNextClick();
-				break;
-
-			case ContextMenuIconName.copy:
-				ProgressBar.showOverlay();
-				this.onCopyClick();
-				break;
-			case ContextMenuIconName.copy_as_new:
-				ProgressBar.showOverlay();
-				this.onCopyAsNewClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
 			case ContextMenuIconName.download:
 				this.onDownloadClick();
 				break;
 			case ContextMenuIconName.pay_stub:
 			case ContextMenuIconName.edit_employee:
 			case ContextMenuIconName.timesheet:
-			case ContextMenuIconName.view:
+			case 'view_roe':
 			case ContextMenuIconName.print:
 			case ContextMenuIconName.e_file:
 			case ContextMenuIconName.export_excel:
@@ -999,16 +926,14 @@ ROEViewController = BaseViewController.extend( {
 				break;
 			case ContextMenuIconName.save_setup:
 				this.onSaveSetup();
-
 		}
-
 	},
 
 	initFormSetup: function( callBack ) {
 		var args = {};
 		var $this = this;
 		args.filter_data = {};
-		args.filter_data.script = "roe";
+		args.filter_data.script = 'roe';
 		args.filter_data.user_id = TTUUID.zero_id;
 		args.filter_data.is_default = true;
 
@@ -1074,7 +999,7 @@ ROEViewController = BaseViewController.extend( {
 			onResult: function( result ) {
 
 				if ( result.isValid() ) {
-					if ( typeof $this.form_setup_item.id =='undefined' && TTUUID.isUUID( result.getResult() ) ) {
+					if ( typeof $this.form_setup_item.id == 'undefined' && TTUUID.isUUID( result.getResult() ) ) {
 						$this.form_setup_item.id = result.getResult();
 					}
 					TAlertManager.showAlert( $.i18n._( 'Form Setup has been saved successfully' ) );
@@ -1115,7 +1040,7 @@ ROEViewController = BaseViewController.extend( {
 			} );
 		}
 
-		var args = {roe_id: ids};
+		var args = { roe_id: ids };
 
 		if ( !$this.edit_view ) {
 			if ( this.form_setup_item.data ) {
@@ -1151,20 +1076,20 @@ ROEViewController = BaseViewController.extend( {
 
 				}
 				break;
-			case ContextMenuIconName.view:
-				post_data = {0: args, 1: 'pdf_form'};
+			case 'view_roe':
+				post_data = { 0: args, 1: 'pdf_form' };
 				this.doFormIFrameCall( post_data );
 				break;
 			case ContextMenuIconName.print:
-				post_data = {0: args, 1: 'pdf_form_print'};
+				post_data = { 0: args, 1: 'pdf_form_print' };
 				this.doFormIFrameCall( post_data );
 				break;
 			case ContextMenuIconName.e_file:
-				post_data = {0: args, 1: 'efile_xml'};
+				post_data = { 0: args, 1: 'efile_xml' };
 				this.doFormIFrameCall( post_data );
 				break;
 			case ContextMenuIconName.export_excel:
-				this.onExportClick('export' + this.api.key_name )
+				this.onExportClick( 'export' + this.api.key_name );
 				break;
 
 		}
@@ -1179,14 +1104,14 @@ ROEViewController = BaseViewController.extend( {
 		this._super( 'onSaveResult', result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
-				}
+		}
 	},
 
 	onSaveAndNewResult: function( result ) {
 		this._super( 'onSaveAndNewResult', result );
 		if ( result.isValid() ) {
 			this.showStatusReport( result, this.refresh_id );
-			}
+		}
 	},
 
 	onSaveAndContinueResult: function( result ) {
@@ -1213,68 +1138,24 @@ ROEViewController = BaseViewController.extend( {
 	showStatusReport: function( result, id ) {
 		var user_ids = id;
 		var user_generic_status_batch_id = result.getAttributeInAPIDetails( 'user_generic_status_batch_id' );
-		if ( user_generic_status_batch_id && TTUUID.isUUID( user_generic_status_batch_id ) && user_generic_status_batch_id != TTUUID.zero_id&& user_generic_status_batch_id != TTUUID.not_exist_id ) {
+		if ( user_generic_status_batch_id && TTUUID.isUUID( user_generic_status_batch_id ) && user_generic_status_batch_id != TTUUID.zero_id && user_generic_status_batch_id != TTUUID.not_exist_id ) {
 			UserGenericStatusWindowController.open( user_generic_status_batch_id, user_ids );
 		}
-	},
-
-	initTabData: function() {
-
-		//Handle most case that one tab and one audit tab
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
-	onTabShow: function( e, ui ) {
-		var last_index = ui.index;
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-		//Handle most cases that one tab and on audit tab
-
-		if ( last_index != 1 ) { //1 is the form setup tab
-			this.checkFormSetupSaved();
-		}
-		if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find('#tab_audit').find('.first-column-sub-view').css('display', 'block');
-				this.initSubLogView('tab_audit');
-			} else {
-				this.edit_view_tab.find('#tab_audit').find('.first-column-sub-view').css('display', 'none');
-				this.edit_view.find('.save-and-continue-div').css('display', 'block');
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-
 	},
 
 	/**
 	 * Originally copied from same function name in ReportBaseViewController
 	 * FIXME: refactor to base class when needed in other children
 	 * @param label
-     */
-	checkFormSetupSaved: function ( label ) {
+	 */
+	checkFormSetupSaved: function( label ) {
 		var $this = this;
 
-		if ( label == undefined ) {
-			label = $.i18n._( 'Form Setup' );
-		}
+		label = $.i18n._( 'Form Setup' );
 
 		if ( this.form_setup_changed ) {
 			$this.form_setup_changed = false;
-			TAlertManager.showConfirmAlert( $.i18n._( 'You have modified') + ' ' + label + ' ' + $.i18n._('data without saving, would you like to save your data now?' ), '', function ( flag ) {
+			TAlertManager.showConfirmAlert( $.i18n._( 'You have modified' ) + ' ' + label + ' ' + $.i18n._( 'data without saving, would you like to save your data now?' ), '', function( flag ) {
 				if ( flag ) {
 					$this.onSaveSetup( label );
 				}
@@ -1283,7 +1164,7 @@ ROEViewController = BaseViewController.extend( {
 	},
 
 	onFormItemChange: function( target, doNotValidate ) {
-		if ( this.edit_view_tab_selected_index == 1 ) {
+		if ( this.getEditViewTabIndex() == 1 ) {
 			this.form_setup_changed = true;
 		}
 

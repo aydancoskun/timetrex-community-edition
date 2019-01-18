@@ -78,11 +78,12 @@ class APIPayStubAmendment extends APIFactory {
 	 * @return array|bool
 	 */
 	function getPayStubAmendment( $data = NULL, $disable_paging = FALSE, $format = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('pay_stub_amendment', 'enabled')
 				OR !( $this->getPermissionObject()->Check('pay_stub_amendment', 'view') OR $this->getPermissionObject()->Check('pay_stub_amendment', 'view_own') OR $this->getPermissionObject()->Check('pay_stub_amendment', 'view_child')	 ) ) {
 			return $this->getPermissionObject()->PermissionDenied();
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'pay_stub_amendment', 'view' );
 

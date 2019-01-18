@@ -14,6 +14,7 @@ ContextMenuIconName.refresh_all = 'refressAllIcon';
 
 ContextMenuIconName.reset_all = 'resetAllIcon';
 
+ContextMenuIconName.add_punch = 'addPunchIcon';
 ContextMenuIconName.add_absence = 'addAbsenceIcon';
 
 ContextMenuIconName.add_company = 'addCompanyIcon';

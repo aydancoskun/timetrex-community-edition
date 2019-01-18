@@ -2019,12 +2019,14 @@ class EFT_File_Format_ACH Extends EFT {
 		foreach ( $this->data as $key => $record ) {
 			if ( $record->getType() == 'D' ) {
 				$d_record_total += $record->getAmount();
-				$hash_total += substr($record->getTransit(), 0, 8);
 				$d_record_count++;
 			} elseif ( $record->getType() == 'C' ) {
 				$c_record_total += $record->getAmount();
-				$hash_total += substr($record->getTransit(), 0, 8);
 				$c_record_count++;
+			}
+
+			if ( $record->getTransit() != '' ) {
+				$hash_total += substr( $record->getTransit(), 0, 8 );
 			}
 		}
 		$hash_total = substr( str_pad( $hash_total, 10, 0, STR_PAD_LEFT), -10); //Last 10 chars.

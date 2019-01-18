@@ -19,7 +19,7 @@ var PermissionManager = (function() {
 		if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 			return false;
 		} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-			PermissionManager.validate( permission_section, 'edit' ) || PermissionManager.validate( permission_section, 'edit_child' ) ) {
+				PermissionManager.validate( permission_section, 'edit' ) || PermissionManager.validate( permission_section, 'edit_child' ) ) {
 //			return true; // hide the tab until the API complete.
 			return false;
 		}
@@ -31,11 +31,11 @@ var PermissionManager = (function() {
 	var helpMenuValidate = function() {
 
 		if ( PermissionManager.validate( 'user', 'edit' ) ||
-			PermissionManager.validate( 'user', 'edit_child' ) ||
-			PermissionManager.validate( 'recurring_schedule', 'enabled' ) ||
-			PermissionManager.validate( 'recurring_schedule_template', 'enabled' )
+				PermissionManager.validate( 'user', 'edit_child' ) ||
+				PermissionManager.validate( 'recurring_schedule', 'enabled' ) ||
+				PermissionManager.validate( 'recurring_schedule_template', 'enabled' )
 		) {
-				return true;
+			return true;
 		}
 
 		return false;
@@ -53,19 +53,26 @@ var PermissionManager = (function() {
 
 		//TypeError: Cannot read property 'product_edition_id' of null
 		//BUG#2066 - fail gracefully
-		if ( Global.isSet(LocalCacheData) == false || Global.isSet(LocalCacheData.getCurrentCompany()) == false) {
+		// Since LocalCacheData.getCurrentCompany() is require data, if the user was logged out or in the process of logging out, it could trigger sendErrorReport()
+		//   so first check that 'current_company' exists in the LocalCacheData to avoid calling getCurrentCompany() if it doesn't exist.
+		if ( Global.isSet( LocalCacheData ) == false || LocalCacheData.isLocalCacheExists( 'current_company' ) == false || Global.isSet( LocalCacheData.getCurrentCompany() ) == false ) {
 			return false;
 		}
 
 		switch ( viewId ) {
+			case 'GridTest':
+			case 'WidgetTest':
+			case 'AwesomeboxTest':
+				result = true;
+				break;
 			case 'JobInvoice':
 				if ( !( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) ) {
 					result = false;
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
-				} else if (  PermissionManager.validate( permission_section, 'add' ) ||
-					PermissionManager.validate( permission_section, 'edit' ) ||
-					PermissionManager.validate( permission_section, 'edit_own' ) ) {
+				} else if ( PermissionManager.validate( permission_section, 'add' ) ||
+						PermissionManager.validate( permission_section, 'edit' ) ||
+						PermissionManager.validate( permission_section, 'edit_own' ) ) {
 					result = true;
 				}
 				break;
@@ -75,7 +82,7 @@ var PermissionManager = (function() {
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'edit' ) ||
-					PermissionManager.validate( permission_section, 'edit_own' ) ) {
+						PermissionManager.validate( permission_section, 'edit_own' ) ) {
 					result = true;
 				}
 				break;
@@ -85,7 +92,7 @@ var PermissionManager = (function() {
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'edit' ) ||
-					PermissionManager.validate( permission_section, 'edit_own' ) ) {
+						PermissionManager.validate( permission_section, 'edit_own' ) ) {
 					result = true;
 				}
 				break;
@@ -93,7 +100,7 @@ var PermissionManager = (function() {
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) &&
-					PermissionManager.validate( permission_section, 'edit' ) ) {
+						PermissionManager.validate( permission_section, 'edit' ) ) {
 					result = true;
 				}
 				break;
@@ -108,22 +115,14 @@ var PermissionManager = (function() {
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_child' ) ) {
-					result = true;
-				}
-				break;
-			case 'EmployeeBankAccount':
-				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
-					result = false;
-				} else if ( PermissionManager.validate( permission_section, 'edit_bank' ) ||
-					PermissionManager.validate( permission_section, 'edit_child_bank' ) ) {
+						PermissionManager.validate( permission_section, 'view_child' ) ) {
 					result = true;
 				}
 				break;
 			case 'LegalEntity':
 			case 'PayrollRemittanceAgency':
 			case 'RemittanceSourceAccount':
-			case 'RemittanceDestinationAccount':
+			case 'RemittanceDestinationAccount': //Uncomment this to enable Employee -> Payment Methods for regular employees.
 			case 'UserTitle':
 			case 'UserGroup':
 			case 'UserDefault':
@@ -145,7 +144,7 @@ var PermissionManager = (function() {
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'edit' ) || PermissionManager.validate( permission_section, 'edit_child' ) ) {
+						PermissionManager.validate( permission_section, 'edit' ) || PermissionManager.validate( permission_section, 'edit_child' ) ) {
 					result = true;
 				}
 				break;
@@ -168,7 +167,7 @@ var PermissionManager = (function() {
 				break;
 			case 'Companies':
 				if ( ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) &&
-					PermissionManager.validate( permission_section, 'enabled' ) && PermissionManager.validate( permission_section, 'view' ) ) {
+						PermissionManager.validate( permission_section, 'enabled' ) && PermissionManager.validate( permission_section, 'view' ) ) {
 					result = true;
 				}
 				break;
@@ -270,7 +269,7 @@ var PermissionManager = (function() {
 				break;
 			case 'PayrollProcessWizard':
 				if ( PermissionManager.validate( 'pay_stub', 'add' ) &&
-					PermissionManager.validate( 'pay_stub', 'edit' ) ) {
+						PermissionManager.validate( 'pay_stub', 'edit' ) ) {
 					result = true;
 				} else {
 					result = false;
@@ -278,8 +277,8 @@ var PermissionManager = (function() {
 				break;
 			case 'QuickStartWizard':
 				if ( PermissionManager.validate( 'pay_period_schedule', 'add' ) &&
-					PermissionManager.validate( 'user_preference', 'edit' ) &&
-					PermissionManager.validate( 'policy_group', 'edit' ) ) {
+						PermissionManager.validate( 'user_preference', 'edit' ) &&
+						PermissionManager.validate( 'policy_group', 'edit' ) ) {
 					result = true;
 				} else {
 					result = false;
@@ -291,7 +290,7 @@ var PermissionManager = (function() {
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_own' ) ) {
+						PermissionManager.validate( permission_section, 'view_own' ) ) {
 					result = true;
 				}
 				break;
@@ -299,7 +298,7 @@ var PermissionManager = (function() {
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'edit' ) ||
-					PermissionManager.validate( permission_section, 'edit_child' ) ) {
+						PermissionManager.validate( permission_section, 'edit_child' ) ) {
 					result = true;
 				}
 				break;
@@ -316,7 +315,7 @@ var PermissionManager = (function() {
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'edit' ) ||
-					PermissionManager.validate( permission_section, 'edit_child' ) ) {
+						PermissionManager.validate( permission_section, 'edit_child' ) ) {
 					result = true;
 				}
 				break;
@@ -326,7 +325,7 @@ var PermissionManager = (function() {
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) &&
-					PermissionManager.validate( 'user_expense', 'authorize' ) ) {
+						PermissionManager.validate( 'user_expense', 'authorize' ) ) {
 					result = true;
 				}
 				break;
@@ -336,14 +335,14 @@ var PermissionManager = (function() {
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_own' ) ||
-					PermissionManager.validate( permission_section, 'view_private' ) ) {
+						PermissionManager.validate( permission_section, 'view_own' ) ||
+						PermissionManager.validate( permission_section, 'view_private' ) ) {
 					result = true;
 				}
 				break;
 			case 'ChangePassword':
 				if ( PermissionManager.validate( permission_section, 'edit_own_password' ) ||
-					PermissionManager.validate( permission_section, 'edit_own_phone_password' ) ) {
+						PermissionManager.validate( permission_section, 'edit_own_phone_password' ) ) {
 					result = true;
 				}
 				break;
@@ -467,7 +466,7 @@ var PermissionManager = (function() {
 				break;
 			case 'RemittanceSummaryReport':
 				if ( PermissionManager.validate( 'report', 'view_remittance_summary' ) &&
-					countryPermissionValidate( 'CA' )
+						countryPermissionValidate( 'CA' )
 				) {
 					result = true;
 				} else {
@@ -477,7 +476,7 @@ var PermissionManager = (function() {
 			case 'T4SummaryReport':
 			case 'T4ASummaryReport':
 				if ( PermissionManager.validate( 'report', 'view_t4_summary' ) &&
-					countryPermissionValidate( 'CA' )
+						countryPermissionValidate( 'CA' )
 				) {
 					result = true;
 				} else {
@@ -493,7 +492,7 @@ var PermissionManager = (function() {
 				break;
 			case 'Form940Report':
 				if ( PermissionManager.validate( 'report', 'view_form940' ) &&
-					countryPermissionValidate( 'US' )
+						countryPermissionValidate( 'US' )
 				) {
 					result = true;
 				} else {
@@ -502,7 +501,7 @@ var PermissionManager = (function() {
 				break;
 			case 'Form941Report':
 				if ( PermissionManager.validate( 'report', 'view_form941' ) &&
-					countryPermissionValidate( 'US' )
+						countryPermissionValidate( 'US' )
 				) {
 					result = true;
 				} else {
@@ -511,7 +510,7 @@ var PermissionManager = (function() {
 				break;
 			case 'Form1099MiscReport':
 				if ( PermissionManager.validate( 'report', 'view_form1099misc' ) &&
-					countryPermissionValidate( 'US' )
+						countryPermissionValidate( 'US' )
 				) {
 					result = true;
 				} else {
@@ -520,7 +519,7 @@ var PermissionManager = (function() {
 				break;
 			case 'FormW2Report':
 				if ( PermissionManager.validate( 'report', 'view_formW2' ) &&
-					countryPermissionValidate( 'US' )
+						countryPermissionValidate( 'US' )
 				) {
 					result = true;
 				} else {
@@ -529,8 +528,8 @@ var PermissionManager = (function() {
 				break;
 			case 'AffordableCareReport':
 				if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 &&
-					PermissionManager.validate( 'report', 'view_affordable_care' ) &&
-					countryPermissionValidate( 'US' )
+						PermissionManager.validate( 'report', 'view_affordable_care' ) &&
+						countryPermissionValidate( 'US' )
 				) {
 					result = true;
 				} else {
@@ -578,8 +577,8 @@ var PermissionManager = (function() {
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_own' ) ||
-					PermissionManager.validate( permission_section, 'view_child' ) ) {
+						PermissionManager.validate( permission_section, 'view_own' ) ||
+						PermissionManager.validate( permission_section, 'view_child' ) ) {
 					result = true;
 				}
 				break;
@@ -592,8 +591,8 @@ var PermissionManager = (function() {
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_own' ) ||
-					PermissionManager.validate( permission_section, 'view_child' ) ) {
+						PermissionManager.validate( permission_section, 'view_own' ) ||
+						PermissionManager.validate( permission_section, 'view_child' ) ) {
 					result = true;
 				}
 				break;
@@ -603,7 +602,7 @@ var PermissionManager = (function() {
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_own' ) ) {
+						PermissionManager.validate( permission_section, 'view_own' ) ) {
 					result = true;
 				}
 				break;
@@ -618,8 +617,8 @@ var PermissionManager = (function() {
 				} else if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_own' ) ||
-					PermissionManager.validate( permission_section, 'view_child' ) ) {
+						PermissionManager.validate( permission_section, 'view_own' ) ||
+						PermissionManager.validate( permission_section, 'view_child' ) ) {
 					result = true;
 				}
 				break;
@@ -627,16 +626,16 @@ var PermissionManager = (function() {
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_own' ) ||
-					PermissionManager.validate( permission_section, 'view_child' ) ) &&
-					countryPermissionValidate( 'CA' ) ) {
+								PermissionManager.validate( permission_section, 'view_own' ) ||
+								PermissionManager.validate( permission_section, 'view_child' ) ) &&
+						countryPermissionValidate( 'CA' ) ) {
 					result = true;
 				}
 				break;
 			case 'GeneratePayStubs':
 				if ( PermissionManager.validate( 'pay_period_schedule', 'enabled' )
-					&& ( PermissionManager.validate( 'pay_period_schedule', 'edit' ) || PermissionManager.validate( 'pay_period_schedule', 'edit_own' ) )
-					&& ( PermissionManager.validate( 'pay_stub', 'view' ) || PermissionManager.validate( 'pay_stub', 'view_child' ) ) ) {
+						&& ( PermissionManager.validate( 'pay_period_schedule', 'edit' ) || PermissionManager.validate( 'pay_period_schedule', 'edit_own' ) )
+						&& ( PermissionManager.validate( 'pay_stub', 'view' ) || PermissionManager.validate( 'pay_stub', 'view_child' ) ) ) {
 					result = true;
 				} else {
 					result = false;
@@ -650,12 +649,12 @@ var PermissionManager = (function() {
 					result = false;
 				}
 				break;
-			default :
+			default:
 				if ( !PermissionManager.validate( permission_section, 'enabled' ) ) {
 					result = false;
 				} else if ( PermissionManager.validate( permission_section, 'view' ) ||
-					PermissionManager.validate( permission_section, 'view_own' ) ||
-					PermissionManager.validate( permission_section, 'view_child' ) ) {
+						PermissionManager.validate( permission_section, 'view_own' ) ||
+						PermissionManager.validate( permission_section, 'view_child' ) ) {
 					result = true;
 				}
 				break;
@@ -677,39 +676,39 @@ var PermissionManager = (function() {
 
 		return false;
 
-	}
+	};
 
 	var importValidate = function() {
 
 		var result = false;
 
 		if ( importValidateFor( 'branch' ) ||
-			importValidateFor( 'payperiod' ) ||
-			importValidateFor( 'schedule' ) ||
-			importValidateFor( 'user' ) ||
-			importValidateFor( 'department' ) ||
-			importValidateFor( 'client' ) ||
-			importValidateFor( 'job' ) ||
-			importValidateFor( 'jobitem' ) ||
-			importValidateFor( 'wage' ) ||
-			importValidateFor( 'punch' ) ||
-			importValidateFor( 'paystubamendment' ) ||
-			importValidateFor( 'accrual' ) ) {
+				importValidateFor( 'payperiod' ) ||
+				importValidateFor( 'schedule' ) ||
+				importValidateFor( 'user' ) ||
+				importValidateFor( 'department' ) ||
+				importValidateFor( 'client' ) ||
+				importValidateFor( 'job' ) ||
+				importValidateFor( 'jobitem' ) ||
+				importValidateFor( 'wage' ) ||
+				importValidateFor( 'punch' ) ||
+				importValidateFor( 'paystubamendment' ) ||
+				importValidateFor( 'accrual' ) ) {
 
 			result = true;
 		}
 
 		return result;
-	}
+	};
 
 	var importValidateFor = function( key ) {
 		if ( PermissionManager.validate( key, 'add' ) &&
-			(PermissionManager.validate( key, 'edit' ) || PermissionManager.validate( key, 'edit_child' ) ) ) {
+				(PermissionManager.validate( key, 'edit' ) || PermissionManager.validate( key, 'edit_child' ) ) ) {
 			return true;
 		}
 
 		return false;
-	}
+	};
 
 	var getPermissionSectionByViewId = function( viewId ) {
 
@@ -812,7 +811,6 @@ var PermissionManager = (function() {
 				permission_section = 'round_policy';
 				break;
 			case 'Employee':
-			case 'EmployeeBankAccount':
 			case 'UserDefault':
 			case 'UserTitle':
 			case 'UserGroup':

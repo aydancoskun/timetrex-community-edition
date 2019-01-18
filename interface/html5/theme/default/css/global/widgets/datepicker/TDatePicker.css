@@ -35,6 +35,9 @@
     cursor: pointer;
     right: 3px;
     height: 18px;
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
 .ui-timepicker-div .ui-widget-header {
@@ -87,15 +90,15 @@
 }
 
 .t-range-picker-div {
-    background: none;
-    width: auto;
-    height: auto;
+    background: none !important;
+    width: auto !important;
+    height: auto !important;
 }
 
 .t-range-picker-div .t-range-picker-tab-bar {
-    width: 500px;
-    height: 300px;
-    min-width: 500px;
+    width: 500px !important;
+    height: 300px !important;
+    min-width: 500px !important;
 }
 
 .t-range-picker-div .col-section {
@@ -104,4 +107,32 @@
 
 .t-range-picker-div .col-section .label {
 
+}
+
+.ui-datepicker .ui-state-default {
+     border: 1px solid #aed0ea;
+     background: #d7ebf9 url(../../../jquery-ui/images/ui-bg_glass_80_d7ebf9_1x400.png) 50% 50% repeat-x;
+     font-weight: bold;
+     color: #2779aa;
+     user-drag: none;
+     -moz-user-select: none;
+     -webkit-user-drag: none;
+ }
+
+.ui-datepicker .ui-state-active {
+    border: 1px solid #2694e8;
+    background: #3baae3 50% 50% repeat-x;
+    font-weight: bold;
+    /*color: #ffffff;*/
+    user-drag: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+}
+
+.ui-datepicker .ui-state-hover {
+    background: #ccf2ff !important;
+}
+
+.ui-datepicker .ui-datepicker-buttonpane button {
+    padding: .6em;
 }

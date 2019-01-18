@@ -788,6 +788,7 @@ class UserFactory extends Factory {
 		$password_version = TTPassword::getPasswordVersion( $this->getPassword() );
 		$encrypted_password = TTPassword::encryptPassword( $password, $this->getCompany(), $this->getID(), $password_version );
 
+
 		//Don't check local TT passwords if LDAP Only authentication is enabled. Still accept override passwords though.
 		if ( $ldap_authentication_type_id != 2 AND TTPassword::checkPassword( $encrypted_password, $this->getPassword() ) ) {
 			//If the passwords match, confirm that the password hasn't exceeded its maximum age.
@@ -953,7 +954,7 @@ class UserFactory extends Factory {
 	 */
 	function isPasswordPolicyEnabled() {
 		$c_obj = $this->getCompanyObject();
-		if ( DEMO_MODE == FALSE AND PRODUCTION == TRUE AND is_object( $c_obj ) AND $c_obj->getPasswordPolicyType() == 1 AND $this->getPermissionLevel() >= $c_obj->getPasswordMinimumPermissionLevel() AND $c_obj->getProductEdition() > 10 ) {
+		if ( DEMO_MODE == FALSE AND PRODUCTION == TRUE AND is_object( $c_obj ) AND $c_obj->getPasswordPolicyType() == 1 AND $this->getPermissionLevel() >= $c_obj->getPasswordMinimumPermissionLevel() AND $c_obj->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			Debug::Text('Password Policy Enabled: Type: '. $c_obj->getPasswordPolicyType() .'('.$c_obj->getProductEdition().') Maximum Age: '. $c_obj->getPasswordMaximumAge() .' days Permission Level: '. $this->getPermissionLevel(), __FILE__, __LINE__, __METHOD__, 10);
 			return TRUE;
 		}
@@ -1273,7 +1274,7 @@ class UserFactory extends Factory {
 	function setDefaultJob( $value ) {
 		$value = TTUUID::castUUID( $value );
 		Debug::Text('Default Job ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		return $this->setGenericDataValue( 'default_job_id', $value );
@@ -1293,7 +1294,7 @@ class UserFactory extends Factory {
 	function setDefaultJobItem( $value ) {
 		$value = TTUUID::castUUID( $value );
 		Debug::Text('Default Job Item ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		return $this->setGenericDataValue( 'default_job_item_id', $value );
@@ -1875,8 +1876,17 @@ class UserFactory extends Factory {
 	/**
 	 * @return bool|mixed
 	 */
-	function getBirthDate() {
-		return $this->getGenericDataValue( 'birth_date' );
+	function getBirthDate( $raw = FALSE ) {
+		$value = $this->getGenericDataValue( 'birth_date' );
+		if ( $value !== FALSE ) {
+			if ( $raw === TRUE ) {
+				return $value;
+			} else {
+				return TTDate::strtotime( $value );
+			}
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -1888,7 +1898,7 @@ class UserFactory extends Factory {
 		if ( $value == '' ) {
 			$value = NULL; //Force to NULL if no birth date is set, this prevents "0" from being entered and causing problems with "is NULL" SQL queries.
 		}
-		return $this->setGenericDataValue( 'birth_date', ( $value != 0 AND $value != '' ) ? TTDate::getMiddleDayEpoch( $value ) : NULL );
+		return $this->setGenericDataValue( 'birth_date', ( $value != 0 AND $value != '' ) ? TTDate::getBeginDayEpoch( $value ) : NULL );
 	}
 
 	/**
@@ -1903,23 +1913,7 @@ class UserFactory extends Factory {
 			$uwlf->getLastWageByUserId( $this->getID() );
 			if ( $uwlf->getRecordCount() >= 1 ) {
 				Debug::Text('Wage entries exist...', __FILE__, __LINE__, __METHOD__, 10);
-
-				//Work around the fact that hire_date is a epoch and user_wage.effective_date is a 'date' datatype.
-				// So if a user was just hired and has hire_date of 02-Oct-2017 (MST) and they are trying to reset their password with the system timezone to PST
-				// Validation will fail due to the below select statement returning 0 records.
-				if ( is_object( $this->getUserPreferenceObject() ) ) {
-					$original_time_zone = TTDate::getTimeZone();
-					$this->getUserPreferenceObject()->setTimeZonePreferences();
-				}
-
-				$epoch = TTDate::getEndDayEpoch( $epoch ); //*must be done after timezone is changed* Use the middle day epoch only when checking valid wages, to better avoid off-by-one-hour issues.
-
 				$uwlf->getByUserIdAndGroupIDAndBeforeDate( $this->getID(), TTUUID::getZeroID(), $epoch, 1 );
-
-				if ( isset($original_time_zone) ) {
-					TTDate::setTimeZone( $original_time_zone );
-				}
-
 				if ( $uwlf->getRecordCount() == 0 ) {
 					Debug::Text('No wage entry on or before: '. TTDate::getDate('DATE+TIME', $epoch ), __FILE__, __LINE__, __METHOD__, 10);
 					return FALSE;
@@ -1935,8 +1929,17 @@ class UserFactory extends Factory {
 	/**
 	 * @return bool|mixed
 	 */
-	function getHireDate() {
-		return $this->getGenericDataValue( 'hire_date' );
+	function getHireDate( $raw = FALSE ) {
+		$value = $this->getGenericDataValue( 'hire_date' );
+		if ( $value !== FALSE ) {
+			if ( $raw === TRUE ) {
+				return $value;
+			} else {
+				return TTDate::strtotime( $value );
+			}
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -1947,20 +1950,23 @@ class UserFactory extends Factory {
 		//Hire Date should be assumed to be the beginning of the day. (inclusive)
 		//Termination Date should be assumed to be the end of the day. (inclusive)
 		//So if an employee is hired and terminated on the same day, and is salary, they should get one day pay.
-		//FIXME: Save hire date as getMiddleDayEpoch(), but change all use cases to force it to beginning of the day when comparisons are made on it.
-		//       Save termination date as getMiddleDayEpoch(), but change all use cases to force it to use the end of the day when comparisons are made on it.
-		//		 Alternatively, switch it to use date_stamp datatype, and use >= or <= operators.
-
-		//( $epoch !== FALSE AND $epoch == '' ) //Check for strict FALSE causes data from UserDefault to fail if its not set.
-		//Use the beginning of the day epoch, so accrual policies that apply on the hired date still work.
 		return $this->setGenericDataValue( 'hire_date', TTDate::getBeginDayEpoch( $value ) );
 	}
 
 	/**
 	 * @return bool|mixed
 	 */
-	function getTerminationDate() {
-		return $this->getGenericDataValue( 'termination_date' );
+	function getTerminationDate( $raw = FALSE ) {
+		$value = $this->getGenericDataValue( 'termination_date' );
+		if ( $value !== FALSE ) {
+			if ( $raw === TRUE ) {
+				return $value;
+			} else {
+				return TTDate::strtotime( $value );
+			}
+		}
+
+		return FALSE;
 	}
 
 	/**
@@ -2642,8 +2648,9 @@ class UserFactory extends Factory {
 															TTi18n::gettext('Policy Group is invalid')
 														);
 		}
+
 		// Hierarchy
-		if ( $this->getHierarchyControl() !== FALSE AND is_array($this->getHierarchyControl()) ) {
+		if ( $this->getHierarchyControl() !== FALSE AND is_array( $this->getHierarchyControl() ) ) {
 			$hclf = TTnew( 'HierarchyControlListFactory' );
 			foreach( $this->getHierarchyControl() as $hierarchy_control_id ) {
 				$hierarchy_control_id = Misc::trimSortPrefix( $hierarchy_control_id );
@@ -2656,6 +2663,38 @@ class UserFactory extends Factory {
 				}
 			}
 		}
+
+		//Prevent supervisor (subordinates only) from creating employee records without a hierarchy, as its likely they won't be able to view them anyways.
+		if ( $this->getDeleted() == FALSE ) {
+			global $current_user;
+			// Ignore this check if the supervisor is modifying their own record.
+			if ( isset($current_user) AND is_object($current_user) AND $this->getId() != $current_user->getId() ) {
+				$permission = new Permission();
+				if ( $permission->Check( 'user', 'view_child', $current_user->getId(), $current_user->getCompany() ) == TRUE AND $permission->Check( 'user', 'view', $current_user->getId(), $current_user->getCompany() ) == FALSE ) {
+					Debug::text('Detected Supervisor (Subordinates Only), ensure a proper hierarchy is specified...', __FILE__, __LINE__, __METHOD__, 10);
+					if ( $this->getHierarchyControl() === FALSE ) {
+						$this->Validator->isTrue(		'100',
+														 FALSE,
+														 TTi18n::gettext('Hierarchy not specified')
+						);
+					} else {
+						//TODO: Loop through each specified hierarchy and ensure the current user is a superior in it. See APIHierarchyControl->getHierarchyControlOptions() for code on how to get the valid hierarchies.
+						$hierarchy_control_arr = $this->getHierarchyControl();
+						if ( !isset($hierarchy_control_arr[100]) OR ( isset($hierarchy_control_arr[100]) AND $hierarchy_control_arr[100] == TTUUID::getZeroID() ) ) {
+							$this->Validator->isTrue(		'100',
+															 FALSE,
+															 TTi18n::gettext('Permission Hierarchy not specified')
+							);
+						}
+
+						unset( $hierarchy_control_arr, $hierarchy_object_type_id, $hierarchy_control_id );
+					}
+				}
+				unset($permission);
+			}
+		}
+
+
 		// User name
 		//When doing a mass edit of employees, user name is never specified, so we need to avoid this validation issue.
 		if ( $this->getUserName() == '' ) {
@@ -3612,7 +3651,7 @@ class UserFactory extends Factory {
 									$udf->Save();
 								}
 							} else {
-								Debug::text('  Skipping UserDefault Company Deduction due to mismatched Legal Entity: '. $cd_obj->getName() .' Legal Entity: '. $cd_obj0>getLegalEntity(), __FILE__, __LINE__, __METHOD__, 10);
+								Debug::text('  Skipping UserDefault Company Deduction due to mismatched Legal Entity: '. $cd_obj->getName() .' Legal Entity: '. $cd_obj->getLegalEntity(), __FILE__, __LINE__, __METHOD__, 10);
 							}
 						}
 					}

@@ -637,7 +637,7 @@ class Debug {
 	 */
 	static function getOutput() {
 		$output = NULL;
-		if ( count(self::$debug_buffer) > 0 ) {
+		if ( is_array(self::$debug_buffer) AND count(self::$debug_buffer ) > 0 ) {
 			foreach (self::$debug_buffer as $arr) {
 				$verbosity = $arr[0];
 				$text = $arr[1];

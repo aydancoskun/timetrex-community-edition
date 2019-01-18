@@ -14,7 +14,7 @@
 
 		this.getIsMouseOver = function() {
 			return is_mouse_over;
-		}
+		};
 
 		this.each( function() {
 
@@ -34,8 +34,6 @@
 
 	};
 
-	$.fn.RibbonSubMenuNavWidget.defaults = {
-
-	};
+	$.fn.RibbonSubMenuNavWidget.defaults = {};
 
 })( jQuery );

@@ -15,7 +15,7 @@ module.exports = function(grunt) {
                 '../../interface/html5/framework/jquery.i18n.js',
                 '../../interface/html5/framework/backbone/underscore-min.js',
                 '../../interface/html5/framework/backbone/backbone-min.js',
-                '../../interface/html5/framework/jquery.masonry.min.js',
+                '../../interface/html5/framework/masonry.min.js',
                 '../../interface/html5/framework/interact.min.js',
                 '../../interface/html5/framework/jquery.sortable.js',
                 '../../interface/html5/global/Global.js',
@@ -30,13 +30,11 @@ module.exports = function(grunt) {
       base: { //Files downloaded async while user sits on Login screen.
         src: [
                 //Primary Require.js files
-                '../../interface/html5/framework/jquery.cookie.js',
                 '../../interface/html5/framework/jquery.json.js',
                 '../../interface/html5/framework/jquery.tablednd.js',
                 '../../interface/html5/framework/jquery.ba-resize.js',
                 '../../interface/html5/framework/fastclick.js',
                 '../../interface/html5/framework/html2canvas.js',
-                '../../interface/html5/framework/date.js',
                 '../../interface/html5/model/Base.js',
                 '../../interface/html5/services/ServiceCaller.js',
                 '../../interface/html5/views/BaseViewController.js',
@@ -99,7 +97,7 @@ module.exports = function(grunt) {
                 '!../../interface/html5/framework/jquery.i18n.js',
                 '!../../interface/html5/framework/backbone/underscore-min.js',
                 '!../../interface/html5/framework/backbone/backbone-min.js',
-                '!../../interface/html5/framework/jquery.masonry.min.js',
+                '!../../interface/html5/framework/masonry.min.js',
                 '!../../interface/html5/framework/interact.min.js',
                 '!../../interface/html5/framework/jquery.sortable.js',
                 '!../../interface/html5/global/Global.js',

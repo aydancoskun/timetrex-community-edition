@@ -601,7 +601,7 @@ class StationFactory extends Factory {
 	function setDefaultJob( $value) {
 		$value = TTUUID::castUUID( $value );
 		Debug::Text('Default Job ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		return $this->setGenericDataValue( 'job_id', $value );
@@ -621,7 +621,7 @@ class StationFactory extends Factory {
 	function setDefaultJobItem( $value) {
 		$value = TTUUID::castUUID( $value );
 		Debug::Text('Default Job Item ID: '. $value, __FILE__, __LINE__, __METHOD__, 10);
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		return $this->setGenericDataValue( 'job_item_id', $value );
@@ -1998,7 +1998,7 @@ class StationFactory extends Factory {
 					$sf->setDepartmentSelectionType( 10 ); //All allowed
 
 					$sf->setModeFlag( array( 2, 4, 16, 4096, 8192 ) ); //By default enable all punch modes, Capture Images in KIOSK mode, Disable Screensaver.
-					$sf->setDefaultModeFlag( 4 ); //Facial Recognition.
+					$sf->setDefaultModeFlag( 16 ); //Facial Recognition.
 
 					if ( is_object( $sf->getCompanyObject() ) AND is_object( $sf->getCompanyObject()->getUserDefaultObject() ) ) {
 						$sf->setTimeZone( $sf->getCompanyObject()->getUserDefaultObject()->getTimeZone() );

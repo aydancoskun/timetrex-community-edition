@@ -89,12 +89,13 @@ class APIHierarchyControl extends APIFactory {
 	 * @return array
 	 */
 	function getHierarchyControl( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('hierarchy', 'enabled')
 				OR !( $this->getPermissionObject()->Check('hierarchy', 'view') OR $this->getPermissionObject()->Check('hierarchy', 'view_own') OR $this->getPermissionObject()->Check('hierarchy', 'view_child')  ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 
 		$data['filter_data']['permission_children_ids'] = $this->getPermissionObject()->getPermissionChildren( 'hierarchy', 'view' );
 
@@ -438,10 +439,17 @@ class APIHierarchyControl extends APIFactory {
 	 * Get hierarchy control options sorted by object_type_id
 	 * @return array
 	 */
-	function getHierarchyControlOptions() {
+	function getHierarchyControlOptions( $include_blank = TRUE ) {
 		$hclf = TTnew( 'HierarchyControlListFactory' );
-		$hclf->getObjectTypeAppendedListByCompanyID( $this->getCurrentCompanyObject()->getId() );
-		$hierarchy_control_options = $hclf->getArrayByListFactory( $hclf, TRUE, TRUE );
+
+		//If the currently logged in user is supervisor (subordinates only), then only show hierarchies they are a superior in.
+		if ( $this->getPermissionObject()->Check('user', 'view') == TRUE ) {
+			$hclf->getObjectTypeAppendedListByCompanyID( $this->getCurrentCompanyObject()->getId() );
+		} else {
+			$hclf->getObjectTypeAppendedListByCompanyIDAndSuperiorUserID( $this->getCurrentCompanyObject()->getId(), $this->getCurrentUserObject()->getId() );
+		}
+
+		$hierarchy_control_options = $hclf->getArrayByListFactory( $hclf, $include_blank, TRUE );
 		if ( is_array($hierarchy_control_options) ) {
 			$retarr = array();
 			foreach( $hierarchy_control_options as $hierarchy_control_object_type_id => $hierarchy_control_option ) {

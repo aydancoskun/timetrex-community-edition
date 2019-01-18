@@ -359,7 +359,7 @@ class RequestFactory extends Factory {
 	 * @return bool
 	 */
 	function getRequestSchedule() {
-		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() > 10 ) {
+		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			$rslf = TTNew( 'RequestScheduleListFactory' );
 			$rslf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), array('request_id' => $this->getId()) );
 			if ( $rslf->getRecordCount() == 1 ) {
@@ -580,7 +580,7 @@ class RequestFactory extends Factory {
 			AuthorizationFactory::emailAuthorizationOnInitialObjectSave( $this->getUser(), $this->getHierarchyTypeId(), $this->getId() );
 		}
 
-		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() > 10 ) {
+		if ( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 			if ( $this->getDeleted() == FALSE AND $this->getAuthorized() == TRUE ) {
 				$rsf = TTNew('RequestScheduleFactory');
 				$add_related_schedules_retval = $rsf->addRelatedSchedules( $this );
@@ -693,7 +693,7 @@ class RequestFactory extends Factory {
 							$data[$variable] = TTDate::getAPIDate( 'DATE', $this->getDateStamp() );
 							break;
 						case 'request_schedule':
-							if( $this->getUserObject()->getCompanyObject()->getProductEdition() > 10 ) {
+							if( $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) {
 								if ( $this->getType() == 30 OR $this->getType() == 40 ) {
 									$request_schedule = $this->getRequestSchedule();
 									if ( $request_schedule != FALSE AND count( $request_schedule ) > 0 ) {

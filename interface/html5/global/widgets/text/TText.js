@@ -54,7 +54,7 @@
 			field = o.field;
 
 			if ( o.selected_able ) {
-				$( this ).addClass( 't-text-selected-able' )
+				$( this ).addClass( 't-text-selected-able' );
 			}
 
 		} );

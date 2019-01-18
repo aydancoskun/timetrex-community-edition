@@ -1679,6 +1679,17 @@ class PayStubCalculationTest extends PHPUnit_Framework_TestCase {
 		//	}
 		//}
 
+		//Test with no birth date defaulting to having CPP deducted.
+		$this->assertEquals( $cdf->isCPPAgeEligible( strtotime('01-Sep-1990'), strtotime('01-Sep-2014') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( '', strtotime('01-Sep-2014') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( FALSE, strtotime('01-Sep-2014') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( NULL, strtotime('01-Sep-2014') ), TRUE );
+		$this->assertEquals( $cdf->isCPPAgeEligible( strtotime('01-Sep-2000'), '' ), FALSE ); //No transaction date specified, always false.
+		$this->assertEquals( $cdf->isCPPAgeEligible( strtotime('01-Sep-2000'), FALSE ), FALSE ); //No transaction date specified, always false.
+		$this->assertEquals( $cdf->isCPPAgeEligible( strtotime('01-Sep-2000'), NULL ), FALSE ); //No transaction date specified, always false.
+
+
+
 		$birth_date = strtotime('16-Oct-1997'); //18yrs old
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Sep-2014') ), FALSE );
 		$this->assertEquals( $cdf->isCPPAgeEligible( $birth_date, strtotime('01-Sep-2015') ), FALSE );

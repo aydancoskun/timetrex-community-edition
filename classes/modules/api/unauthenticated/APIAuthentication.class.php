@@ -83,7 +83,7 @@ class APIAuthentication extends APIFactory {
 		//Checks user_name/password
 		$password_result = FALSE;
 		$user_name = trim($user_name);
-		if ( $user_name != '' AND $password != '' AND ( is_object($c_obj) AND $c_obj->getStatus() == 10 AND $c_obj->getProductEdition() > 10 ) ) {
+		if ( $user_name != '' AND $password != '' AND ( is_object($c_obj) AND $c_obj->getStatus() == 10 AND $c_obj->getProductEdition() >= TT_PRODUCT_PROFESSIONAL ) ) {
 			$password_result = $authentication->Login($user_name, $password, 'QUICK_PUNCH_ID');
 		}
 		if ( $password_result === TRUE ) {
@@ -836,16 +836,17 @@ class APIAuthentication extends APIFactory {
 				}
 			}
 
+			//This should force the updated_by field to match the user changing their password,
+			//  so we know not to ask the user to change their password again, since they were the last ones to do so.
+			//$current_user must be set above $u_obj->isValid() so it can properly validate things like hierarchy and such in UserFactory.
+			global $current_user;
+			$current_user = $u_obj;
+
 			if ( $u_obj->isValid() ) {
 				if ( DEMO_MODE == TRUE ) {
 					//Return TRUE even in demo mode, but nothing happens.
 					return $this->returnHandler( TRUE );
 				} else {
-					//This should force the updated_by field to match the user changing their password,
-					//  so we know now to ask the user to change their password again, since they were the last ones to do so.
-					global $current_user;
-					$current_user = $u_obj;
-
 					TTLog::addEntry( $u_obj->getID(), 20, TTi18n::getText( 'Password - Web (Password Policy)' ), NULL, $u_obj->getTable() );
 					$rl->delete(); //Clear failed password rate limit upon successful login.
 

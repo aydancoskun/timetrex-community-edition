@@ -20,6 +20,20 @@ DepartmentViewController = BaseViewController.extend( {
 		this.api = new (APIFactory.getAPIClass( 'APIDepartment' ))();
 
 		this.render();
+
+		var context_menu_model = {
+			'include': [
+				{
+					label: $.i18n._( 'Import' ),
+					id: ContextMenuIconName.import_icon,
+					group: 'other',
+					icon: Icons.import_icon,
+					permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVDepartment' ),
+					sort_order: 8000
+				},
+			],
+		};
+		this.setContextMenuModel( context_menu_model );
 		this.buildContextMenu();
 
 		this.initData();
@@ -39,11 +53,11 @@ DepartmentViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_department': $.i18n._( 'Department' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_department': { 'label': $.i18n._( 'Department' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIDepartment' )),
@@ -69,14 +83,14 @@ DepartmentViewController = BaseViewController.extend( {
 		//Status
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_department_column1, '' );
 
 		//Name
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_department_column1 );
 		form_item_input.parent().width( '45%' );
 
@@ -85,11 +99,11 @@ DepartmentViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'manual_id', width: 65} );
+		form_item_input.TTextInput( { field: 'manual_id', width: 65 } );
 		this.addEditFieldToColumn( $.i18n._( 'Code' ), form_item_input, tab_department_column1 );
 
 		//Allowed GEO Fences
-		if (  LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIGEOFence' )),
@@ -105,7 +119,7 @@ DepartmentViewController = BaseViewController.extend( {
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
-		form_item_input.TTagInput( {field: 'tag', object_type_id: 120} );
+		form_item_input.TTagInput( { field: 'tag', object_type_id: 120 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_department_column1, '', null, null, true );
 
 	},
@@ -115,32 +129,41 @@ DepartmentViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Status' ),
+			new SearchField( {
+				label: $.i18n._( 'Status' ),
 				in_column: 1,
 				field: 'status_id',
 				multiple: true,
 				basic_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
-			new SearchField( {label: $.i18n._( 'Name' ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Name' ),
 				in_column: 1,
 				field: 'name',
 				multiple: true,
 				basic_search: true,
-				form_item_type: FormItemType.TEXT_INPUT} ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Tags' ),
+			new SearchField( {
+				label: $.i18n._( 'Tags' ),
 				field: 'tag',
 				basic_search: true,
 				in_column: 1,
-				form_item_type: FormItemType.TAG_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Code' ),
+				form_item_type: FormItemType.TAG_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Code' ),
 				field: 'manual_id',
 				basic_search: true,
 				in_column: 2,
 				object_type_id: 120,
-				form_item_type: FormItemType.TEXT_INPUT} ),
-			new SearchField( {label: $.i18n._( 'Created By' ),
+				form_item_type: FormItemType.TEXT_INPUT
+			} ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 2,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -148,9 +171,11 @@ DepartmentViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 2,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -158,60 +183,40 @@ DepartmentViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
 		];
 	},
 
-	buildContextMenuModels: function() {
-		var menu = this._super('buildContextMenuModels')[0];
+	// buildContextMenuModels: function() {
+	// 	var menu = this._super( 'buildContextMenuModels' )[0];
+	//
+	// 	var import_csv = new RibbonSubMenu( {
+	// 		label: $.i18n._( 'Import' ),
+	// 		id: ContextMenuIconName.import_icon,
+	// 		group: this.getContextMenuGroupByName( menu, 'other' ),
+	// 		icon: Icons.import_icon,
+	// 		permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVDepartment' ),
+	// 		permission: null,
+	// 		sort_order: 8000
+	// 	} );
+	//
+	// 	return [menu];
+	// },
 
-		var import_csv = new RibbonSubMenu( {
-			label: $.i18n._( 'Import' ),
-			id: ContextMenuIconName.import_icon,
-			group: this.getContextMenuGroupByName(menu,'other'),
-			icon: Icons.import_icon,
-			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVDepartment' ),
-			permission: null,
-			sort_order: 8000
-		} );
-
-		return [menu];
-	},
-
-	onContextMenuClick: function( context_btn, menu_name ) {
-
-		this._super( 'onContextMenuClick', context_btn, menu_name );
-
-		var id;
-
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
-				ProgressBar.showOverlay();
 				this.onImportClick();
 				break;
-
 		}
 	},
 
 	onImportClick: function() {
 		var $this = this;
 
-		IndexViewController.openWizard( 'ImportCSVWizard', 'department', function(){
+		IndexViewController.openWizard( 'ImportCSVWizard', 'department', function() {
 			$this.search();
 		} );
 	}
-
-
 } );

@@ -537,7 +537,7 @@ class PayStubTransactionFactory extends Factory {
 			$lf = TTnew( 'RemittanceDestinationAccountListFactory' );
 			$this->Validator->isResultSetWithRows(	'remittance_destination_account_id',
 													  $lf->getByID($this->getRemittanceDestinationAccount()),
-													  TTi18n::gettext('Remittance destination account is invalid')
+													  TTi18n::gettext('Employee payment method is invalid')
 			);
 		}
 

@@ -25,7 +25,7 @@
 
 		this.getEnabled = function() {
 			return enabled;
-		}
+		};
 
 		this.setEnabled = function( val ) {
 			enabled = val;
@@ -61,7 +61,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 
 				check_box.change( function() {
@@ -74,7 +74,7 @@
 				}
 			}
 
-		}
+		};
 
 		this.setErrorStyle = function( errStr, show, isWarning ) {
 			if ( isWarning ) {
@@ -92,12 +92,12 @@
 		this.showErrorTip = function( sec ) {
 
 			if ( !Global.isSet( sec ) ) {
-				sec = 2
+				sec = 2;
 			}
 
 			if ( !error_tip_box ) {
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
-				error_tip_box = error_tip_box.ErrorTipBox()
+				error_tip_box = error_tip_box.ErrorTipBox();
 			}
 			if ( $( this ).hasClass( 'warning-tip' ) ) {
 				error_tip_box.show( this, error_string, sec, true );
@@ -112,18 +112,18 @@
 				error_tip_box.remove();
 			}
 
-		}
+		};
 
 		this.clearErrorStyle = function() {
 			$( this ).removeClass( 'error-tip' );
 			$( this ).removeClass( 'warning-tip' );
 			this.hideErrorTip();
 			error_string = '';
-		}
+		};
 
 		this.getField = function() {
 			return field;
-		}
+		};
 
 		this.getValue = function() {
 
@@ -132,13 +132,13 @@
 			var len = select_items.length;
 			if ( len > 0 ) {
 				for ( var i = 0; i < len; i++ ) {
-					var item = select_items.eq( i )
-					result.push( item.attr( 'value' ) )
+					var item = select_items.eq( i );
+					result.push( item.attr( 'value' ) );
 				}
 			}
 
 			return result;
-		}
+		};
 
 		this.setValue = function( val ) {
 
@@ -162,7 +162,7 @@
 			$( $( this ).find( 'option' ) ).filter( function() {
 
 				if ( val === null || val === undefined ) {
-					return false
+					return false;
 				}
 
 				var result = false;
@@ -191,7 +191,7 @@
 
 			if ( !Global.isSet( val ) || val.length < 1 ) {
 				if ( set_empty ) {
-					val = Global.addFirstItemToArray( val, 'empty' )
+					val = Global.addFirstItemToArray( val, 'empty' );
 				} else if ( set_any ) {
 					val = Global.addFirstItemToArray( val, 'any' );
 				}
@@ -199,7 +199,7 @@
 				if ( set_empty ) {
 
 					if ( val[0].value !== '0' ) {
-						val = Global.addFirstItemToArray( val, 'empty' )
+						val = Global.addFirstItemToArray( val, 'empty' );
 					}
 
 				} else if ( set_any ) {
@@ -214,15 +214,15 @@
 
 			var len = val.length;
 			for ( var i = 0; i < len; i++ ) {
-				var item = val[i]
-				$( this ).append( '<option value="' + item.value + '">' + item.label + '</option>' )
+				var item = val[i];
+				$( this ).append( '<option value="' + item.value + '">' + item.label + '</option>' );
 			}
 
 			if ( set_select_item_when_set_source_data ) {
 				this.setValue( select_value );
 			}
 
-		}
+		};
 
 		this.each( function() {
 
@@ -259,13 +259,13 @@
 				if ( !enabled ) {
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-							LocalCacheData.current_open_sub_controller.edit_view &&
-							LocalCacheData.current_open_sub_controller.is_viewing ) {
+								LocalCacheData.current_open_sub_controller.edit_view &&
+								LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-							LocalCacheData.current_open_primary_controller.edit_view &&
-							LocalCacheData.current_open_primary_controller.is_viewing ) {
+								LocalCacheData.current_open_primary_controller.edit_view &&
+								LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}

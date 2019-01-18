@@ -479,7 +479,7 @@ class PunchControlFactory extends Factory {
 	 */
 	function setJob( $value) {
 		$value = TTUUID::castUUID( $value );
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default
@@ -502,7 +502,7 @@ class PunchControlFactory extends Factory {
 	 */
 	function setJobItem( $value) {
 		$value = TTUUID::castUUID( $value );
-		if ( getTTProductEdition() < TT_PRODUCT_CORPORATE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_PROFESSIONAL ) {
 			$value = TTUUID::getZeroID();
 		}
 		if ( $this->getUser() != '' AND is_object( $this->getUserObject() ) AND $value == TTUUID::getNotExistID() ) { //Find default

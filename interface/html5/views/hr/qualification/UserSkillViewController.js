@@ -1,7 +1,7 @@
 UserSkillViewController = BaseViewController.extend( {
 	el: '#user_skill_view_container',
 
-	_required_files:['APIUserSkill', 'APIQualification', 'APIQualificationGroup', 'APICompanyGenericTag'],
+	_required_files: ['APIUserSkill', 'APIQualification', 'APIQualificationGroup', 'APICompanyGenericTag'],
 
 	proficiency_array: null,
 	document_object_type_id: null,
@@ -38,24 +38,7 @@ UserSkillViewController = BaseViewController.extend( {
 	},
 
 	showNoResultCover: function( show_new_btn ) {
-
-		show_new_btn = this.ifContextButtonExist( ContextMenuIconName.add );
-
-		if ( this.sub_view_mode ) {
-			show_new_btn = true;
-			this.grid.setGridHeight( 150 );
-		}
-
-		this.removeNoResultCover();
-		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
-		this.no_result_box.NoResultBox( {related_view_controller: this, is_new: show_new_btn} );
-		this.no_result_box.attr( 'id', this.ui_id + '_no_result_box' );
-
-		var grid_div = $( this.el ).find( '.grid-div' );
-
-		grid_div.append( this.no_result_box );
-
-		this.initRightClickMenu( RightClickMenuType.NORESULTBOX );
+		this._super( 'showNoResultCover', ( this.sub_view_mode ) ? true : false );
 	},
 
 	onGridSelectRow: function() {
@@ -99,16 +82,9 @@ UserSkillViewController = BaseViewController.extend( {
 		this._super( 'onAddClick' );
 	},
 
-	removeEditView: function() {
-
-		this._super( 'removeEditView' );
-		this.sub_document_view_controller = null;
-
-	},
-
 	initOptions: function() {
 		var $this = this;
-		
+
 		this.initDropDownOption( 'proficiency' );
 		this.initDropDownOption( 'source_type' );
 
@@ -145,33 +121,6 @@ UserSkillViewController = BaseViewController.extend( {
 
 	},
 
-	setTabStatus: function() {
-		//Handle most cases that one tab and on audit tab
-		if ( this.is_mass_editing ) {
-
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-			$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-			this.edit_view_tab.tabs( 'select', 0 );
-
-		} else {
-			if ( this.subDocumentValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_attachment"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-			if ( this.subAuditValidate() ) {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().show();
-			} else {
-				$( this.edit_view_tab.find( 'ul li a[ref="tab_audit"]' ) ).parent().hide();
-				this.edit_view_tab.tabs( 'select', 0 );
-			}
-
-		}
-
-		this.editFieldResize( 0 );
-	},
-
 	onMassEditClick: function() {
 
 		var $this = this;
@@ -186,7 +135,7 @@ UserSkillViewController = BaseViewController.extend( {
 		this.mass_edit_record_ids = [];
 
 		$.each( grid_selected_id_array, function( index, value ) {
-			$this.mass_edit_record_ids.push( value )
+			$this.mass_edit_record_ids.push( value );
 		} );
 
 		filter.filter_data = {};
@@ -222,11 +171,12 @@ UserSkillViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_skill': $.i18n._( 'Skill' ),
-			'tab_attachment': $.i18n._( 'Attachments' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_skill': { 'label': $.i18n._( 'Skill' ) },
+			'tab_attachment': true,
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserSkill' )),
@@ -285,20 +235,20 @@ UserSkillViewController = BaseViewController.extend( {
 
 		// Proficiency
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'proficiency_id', set_empty: true} );
+		form_item_input.TComboBox( { field: 'proficiency_id', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.proficiency_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Proficiency' ), form_item_input, tab_skill_column1 );
 
 		// First Used Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'first_used_date'} );
+		form_item_input.TDatePicker( { field: 'first_used_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'First Used Date' ), form_item_input, tab_skill_column1 );
 
 		// Last Used Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'last_used_date'} );
+		form_item_input.TDatePicker( { field: 'last_used_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Last Used Date' ), form_item_input, tab_skill_column1 );
 
 		// Years Experience
@@ -306,18 +256,18 @@ UserSkillViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'experience', width: 50} );
+		form_item_input.TTextInput( { field: 'experience', width: 50 } );
 
 		widgets.push( form_item_input );
 
 		var widgetContainer = $( '<div class="widget-h-box"></div>' );
-		var label = $( "<span class='widget-right-label'> " + $.i18n._( 'Automatic' ) + "</span>" );
+		var label = $( '<span class=\'widget-right-label\'> ' + $.i18n._( 'Automatic' ) + '</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_calc_experience'} );
+		form_item_input.TCheckbox( { field: 'enable_calc_experience' } );
 
 		widgets.push( form_item_input );
 
@@ -327,12 +277,12 @@ UserSkillViewController = BaseViewController.extend( {
 		// Expiry Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'expiry_date'} );
+		form_item_input.TDatePicker( { field: 'expiry_date' } );
 		this.addEditFieldToColumn( $.i18n._( 'Expiry Date' ), form_item_input, tab_skill_column1, '', null );
 
 		// Description
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( {field: 'description', width: '100%'} );
+		form_item_input.TTextArea( { field: 'description', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Description' ), form_item_input, tab_skill_column1, '', null, null, true );
 
 		form_item_input.parent().width( '45%' );
@@ -340,7 +290,7 @@ UserSkillViewController = BaseViewController.extend( {
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
-		form_item_input.TTagInput( {field: 'tag', object_type_id: 251} );
+		form_item_input.TTagInput( { field: 'tag', object_type_id: 251 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_skill_column1, '', null, null, true );
 
 	},
@@ -410,7 +360,8 @@ UserSkillViewController = BaseViewController.extend( {
 				basic_search: true,
 				adv_search: true,
 				layout_name: ALayoutIDs.OPTION_COLUMN,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
 			new SearchField( {
 				label: $.i18n._( 'Expiry Date' ),
@@ -478,62 +429,9 @@ UserSkillViewController = BaseViewController.extend( {
 		];
 	},
 
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index === 2 ) {
-
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
-	initTabData: function() {
-
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 1 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubDocumentView();
-			} else {
-				this.edit_view_tab.find( '#tab_attachment' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		} else if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-		}
-	},
-
 	setEditViewDataDone: function() {
 		this._super( 'setEditViewDataDone' );
-		if ( this.current_edit_record["enable_calc_experience"] ) {
+		if ( this.current_edit_record['enable_calc_experience'] ) {
 			this.edit_view_ui_dic['experience'].setEnabled( false );
 		} else {
 			this.edit_view_ui_dic['experience'].setEnabled( true );
@@ -556,7 +454,7 @@ UserSkillViewController = BaseViewController.extend( {
 				break;
 			case 'last_used_date':
 			case 'first_used_date':
-				if ( this.current_edit_record["enable_calc_experience"] ) {
+				if ( this.current_edit_record['enable_calc_experience'] ) {
 					this.calcExperience();
 				}
 				break;
@@ -578,26 +476,18 @@ UserSkillViewController = BaseViewController.extend( {
 		last_used_date = last_used_date ? last_used_date : new Date().format();
 
 		if ( first_used_date !== '' && last_used_date !== '' ) {
-			var experience = this.api.calcExperience( first_used_date, last_used_date, {async: false} ).getResult();
+			var experience = this.api.calcExperience( first_used_date, last_used_date, { async: false } ).getResult();
 			this.edit_view_ui_dic['experience'].setValue( experience );
 		} else {
 			this.edit_view_ui_dic['experience'].setValue( 0 );
 		}
+	},
+
+	searchDone: function(){
+		this._super( 'searchDone' );
+		TTPromise.resolve( 'Employee_Qualifications_Tab', 'UserSkillViewController' );
 	}
-
 } );
-
-//UserSkillViewController.loadView = function() {
-//
-//	Global.loadViewSource( 'UserSkill', 'UserSkillView.html', function( result ) {
-//
-//		var args = {};
-//		var template = _.template( result, args );
-//
-//		Global.contentContainer().html( template );
-//	} );
-//
-//};
 
 UserSkillViewController.loadSubView = function( container, beforeViewLoadedFun, afterViewLoadedFun ) {
 	Global.loadViewSource( 'UserSkill', 'SubUserSkillView.html', function( result ) {

@@ -30,7 +30,7 @@ CurrencyRateViewController = BaseViewController.extend( {
 			this.initData();
 		}
 
-		this.setSelectRibbonMenuIfNecessary('CurrencyRate');
+		this.setSelectRibbonMenuIfNecessary( 'CurrencyRate' );
 
 	},
 
@@ -50,11 +50,11 @@ CurrencyRateViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_currency_rate': $.i18n._( 'Currency Rate' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
+		var tab_model = {
+			'tab_currency_rate': { 'label': $.i18n._( 'Currency Rate' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		var form_item_input;
 
@@ -95,17 +95,17 @@ CurrencyRateViewController = BaseViewController.extend( {
 		// Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
 
-		form_item_input.TDatePicker( {field: 'date_stamp'} );
+		form_item_input.TDatePicker( { field: 'date_stamp' } );
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_currency_rate_column1 );
 
 		// Conversion Rate
-		form_item_input = Global.loadWidgetByName(FormItemType.TEXT_INPUT);
-		form_item_input.TTextInput({field: 'conversion_rate', width: 114});
-		var widgetContainer = $("<div class=''></div>");
-		var conversion_rate_clarification_box = $("<span id='rate_conversion_rate_clarification_box'></span>");
-		widgetContainer.append(form_item_input);
-		widgetContainer.append(conversion_rate_clarification_box);
-		this.addEditFieldToColumn($.i18n._('Conversion Rate'), [form_item_input], tab_currency_rate_column1, '', widgetContainer, false, true);
+		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		form_item_input.TTextInput( { field: 'conversion_rate', width: 114 } );
+		var widgetContainer = $( '<div class=\'\'></div>' );
+		var conversion_rate_clarification_box = $( '<span id=\'rate_conversion_rate_clarification_box\'></span>' );
+		widgetContainer.append( form_item_input );
+		widgetContainer.append( conversion_rate_clarification_box );
+		this.addEditFieldToColumn( $.i18n._( 'Conversion Rate' ), [form_item_input], tab_currency_rate_column1, '', widgetContainer, false, true );
 
 
 	},
@@ -124,50 +124,52 @@ CurrencyRateViewController = BaseViewController.extend( {
 		this.mass_edit_record_ids = [];
 
 		$.each( grid_selected_id_array, function( index, value ) {
-			$this.mass_edit_record_ids.push( value )
+			$this.mass_edit_record_ids.push( value );
 		} );
 
 		filter.filter_data = {};
 		filter.filter_data.id = this.mass_edit_record_ids;
 
-		this.api['getCommon' + this.api.key_name + 'Data']( filter, {onResult: function( result ) {
-			var result_data = result.getResult();
+		this.api['getCommon' + this.api.key_name + 'Data']( filter, {
+			onResult: function( result ) {
+				var result_data = result.getResult();
 
-			if ( !result_data ) {
-				result_data = [];
-			}
-
-			$this.api['getOptions']( 'unique_columns', {onResult: function( result ) {
-				$this.unique_columns = result.getResult();
-
-				$this.linked_columns = {};
-				if ( $this.sub_view_mode && $this.parent_key ) {
-					result_data[$this.parent_key] = $this.parent_value;
+				if ( !result_data ) {
+					result_data = [];
 				}
 
-				$this.current_edit_record = result_data;
-				$this.initEditView();
+				$this.api['getOptions']( 'unique_columns', {
+					onResult: function( result ) {
+						$this.unique_columns = result.getResult();
 
-			}} );
+						$this.linked_columns = {};
+						if ( $this.sub_view_mode && $this.parent_key ) {
+							result_data[$this.parent_key] = $this.parent_value;
+						}
 
-		}} );
+						$this.current_edit_record = result_data;
+						$this.initEditView();
+
+					}
+				} );
+
+			}
+		} );
 
 	},
 
-	onFormItemChange: function (target, doNotValidate) {
+	onFormItemChange: function( target, doNotValidate ) {
 		if ( target.getField() == 'conversion_rate' ) {
-			this.setConversionRateExampleText(target.getValue(), null, this.edit_view_ui_dic.currency_id.getValue());
+			this.setConversionRateExampleText( target.getValue(), null, this.edit_view_ui_dic.currency_id.getValue() );
 		}
-		this._super('onFormItemChange', target, doNotValidate);
+		this._super( 'onFormItemChange', target, doNotValidate );
 	},
 
 
 	initEditView: function( editId, noRefreshUI ) {
-		this._super('initEditView');
-		this.setConversionRateExampleText(this.edit_view_ui_dic.conversion_rate.getValue(), null, this.edit_view_ui_dic.currency_id.getValue());
-	},
-
-
+		this._super( 'initEditView' );
+		this.setConversionRateExampleText( this.edit_view_ui_dic.conversion_rate.getValue(), null, this.edit_view_ui_dic.currency_id.getValue() );
+	}
 
 
 } );
@@ -176,7 +178,7 @@ CurrencyRateViewController.loadSubView = function( container, beforeViewLoadedFu
 
 	Global.loadViewSource( 'CurrencyRate', 'SubCurrencyRateView.html', function( result ) {
 
-		var args = { };
+		var args = {};
 		var template = _.template( result );
 
 		if ( Global.isSet( beforeViewLoadedFun ) ) {
@@ -184,12 +186,12 @@ CurrencyRateViewController.loadSubView = function( container, beforeViewLoadedFu
 		}
 
 		if ( Global.isSet( container ) ) {
-			container.html( template(args) );
+			container.html( template( args ) );
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
-				TTPromise.wait('BaseViewController', 'initialize',function() {
-					afterViewLoadedFun(sub_currency_rate_view_controller);
-				});
+				TTPromise.wait( 'BaseViewController', 'initialize', function() {
+					afterViewLoadedFun( sub_currency_rate_view_controller );
+				} );
 			}
 
 		}

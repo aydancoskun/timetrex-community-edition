@@ -77,18 +77,18 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		Debug::text('Login to: '. $this->selenium_config['default_url'], __FILE__, __LINE__, __METHOD__, 10);
 		$this->url( $this->selenium_config['default_url'] );
 
-		$this->waitUntilById('user_name');
-
-		$this->setUnitTestMode();
-		$this->byId('user_name')->click();
+		sleep(2.5); //have to be sure that Global.js is loaded before we start trying to use it.
+		$this->setUnitTestMode( $user );
+		$this->waitThenClick('#user_name');
 		$this->keys($user);
 		//$this->keys('demoadmin2');
 
-		$this->byId('password')->click();
+		$this->waitThenClick('#password');
 		$this->keys($pass);
 
-		$this->byId('login_btn')->click();
+		$this->waitThenClick('#login_btn');
 
+		sleep(1); //wait for login
 		$this->waitForUIInitComplete();
 		$this->waitUntilByCssSelector('#leftLogo:not(.login)'); //the css not() selector is there to differentiate the various calls in the server log.
 
@@ -123,7 +123,8 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		}
 
 		$this->waitUntil( function () use ($id) {
-			if ($this->byId($id)) {
+			$javascript = array('script' => "$('#overlay.overlay:visible').length", 'args' => array());
+			if ( $this->execute($javascript) == 0 AND $this->byId( $id ) ) {
 				return TRUE;
 			}
 			return NULL;
@@ -139,7 +140,8 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		}
 
 		$this->waitUntil( function () use ($selector) {
-			if ( $this->byCssSelector( $selector ) ) {
+			$javascript = array('script' => "$('#overlay.overlay:visible').length", 'args' => array());
+			if ( $this->execute($javascript) == 0 AND $this->byCssSelector( $selector ) ) {
 				return TRUE;
 			}
 			return NULL;
@@ -157,9 +159,9 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		$this->waitForUIInitComplete();
 		// get the mousepointer and focus away from hover effects and flashing cursors
 		// these cause significant differences in the screenshots.
-		$this->waitUntilById('rightLogo');
-		$this->moveto($this->byId('rightLogo'));
-		$this->waitUntilById('rightLogo');
+		$this->waitUntilByCssSelector('#powered_by,#copy_right_logo');
+		$this->moveto($this->byCssSelector('#powered_by,#copy_right_logo'));
+		$this->waitUntilByCssSelector('#powered_by,#copy_right_logo');
 
 		return file_put_contents( $screenshot_file_name, $this->currentScreenshot() );
 	}
@@ -181,33 +183,56 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 	}
 
 	function waitForUIInitComplete() {
-		$this->waitUntil(function (){
+		$this->waitForUIInitCompleteLoops = 0;
+		$this->waitUntil(function ( $_self_) {
 			//Global.getUIReadyStatus will be == 2 when the screens are finished loading.
-			$javascript = array('script' => 'return Global.getUIReadyStatus();', 'args' => array());
+
+			$javascript = array('script' => 'if ( typeof Global != "undefined") { return Global.getUIReadyStatus(); } else { return false }', 'args' => array());
 			$var = $this->execute($javascript);
 			Debug::Text( 'waitForUI result: '. print_r($var, TRUE), __FILE__, __LINE__, __METHOD__, 10 );
+
 			if ( isset($var) AND $var == 2) {
 				return TRUE;
 			}
+
+			$_self_->waitForUIInitCompleteLoops++;
+			if ( $_self_->waitForUIInitCompleteLoops > 10 ) {
+				//trigger checking promises again to workaround selenium bug where they resolve without firing function
+				$javascript = array('script' => 'TTPromise.wait()', 'args' => array());
+				$this->execute($javascript);
+			}
 			return NULL;
-		}, 100000, 50);
+		}, 100000, 500);
 	}
 
-	function setUnitTestMode() {
+	function setUnitTestMode($username) {
+		/** @var StationFactory $sf */
 		$sf = TTnew('StationFactory');
 		$slf = TTnew('StationListFactory');
 
 		$slf->getByStationId('UNITTEST');
 		if ( $slf->getRecordCount() == 0 ) {
-			$sf->setCompany( 2 ); //************************************************* make this dynamic when we programatically cycle through several users. this needs to be based off username.
-			$sf->setStatus( 20 );
-			$sf->setType( 10 );
-			$sf->setDescription( 'Unit Testing Rig' );
-			$sf->setStation( 'UNITTEST' );
-			$sf->setSource( 'ANY' );
-			if ( $sf->isValid() ) {
-				$sf->Save();
+			/** @var UserListFactory $ulf */
+			$ulf = TTNew('UserListFactory');
+			$ulf->getByUserName($username);
+			if ( $ulf->getRecordCount() > 0 ) {
+				$sf->setCompany( $ulf->getCurrent()->getCompany() );
+				$sf->setStatus( 20 );
+				$sf->setType( 10 );
+				$sf->setDescription( 'Unit Testing Rig' );
+				$sf->setStation( 'UNITTEST' );
+				$sf->setSource( 'ANY' );
+				$sf->setBranchSelectionType(10); //enabled all
+				$sf->setDepartmentSelectionType(10); //enabled all
+				$sf->setGroupSelectionType(10); //enabled all
+				if ( $sf->isValid() ) {
+					$sf->Save();
+				}
+			} else {
+				Debug::Text( 'username not found in db', __FILE__, __LINE__, __METHOD__, 10 );
 			}
+		} else {
+			Debug::Text( 'station exists', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		//run necessary js for unit tests
@@ -242,19 +267,35 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 //			$selector .= ':visible';
 //		}
 
-		if ( substr( $selector, 0, 1 ) == '#' AND strstr( $selector, ' ' ) == FALSE ) {
-			//need to do this because of malformed ids in the top menu causing wating by selector to fail.
-			$id = substr( $selector, 1, strlen($selector) );
-			Debug::Text( 'Waiting on id: '.$id, __FILE__, __LINE__, __METHOD__, 10 );
-			$this->waitUntilById( $id, 10000 );
-			Debug::Text( 'Clicking id: '.$id, __FILE__, __LINE__, __METHOD__, 10 );
-			$this->byId($id)->click();
-		} else {
-			Debug::Text( 'Waiting on selector: '.$selector, __FILE__, __LINE__, __METHOD__, 10 );
-			$this->waitUntilByCssSelector( $selector, 10000 );
-			Debug::Text( 'Clicking selector: '.$selector, __FILE__, __LINE__, __METHOD__, 10 );
-			$this->byCssSelector($selector)->click();
-			Debug::Text( 'Done: '.$selector, __FILE__, __LINE__, __METHOD__, 10 );
+		$javascript = array('script' => "return $('#overlay.overlay').length", 'args' => array());
+		$overlay_shown = $this->execute($javascript);
+		Debug::Text( 'Overlay status check: ' . $overlay_shown, __FILE__, __LINE__, __METHOD__, 10 );
+		if ( $overlay_shown > 0 ) {
+			sleep(1);
+			$this->waitThenClick($selector);
+			return;
+		}
+		
+		try {
+			if ( ( substr( $selector, 0, 1 ) == '#' AND strstr( $selector, ' ' ) == FALSE ) OR strstr( $selector, 'menu:' ) == TRUE ) {
+				//need to do this because of malformed ids in the top menu causing wating by selector to fail.
+				$id = substr( $selector, 1, strlen( $selector ) );
+				Debug::Text( 'Waiting on id: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+				$this->waitUntilById( $id, 10000 );
+				Debug::Text( 'Clicking id: ' . $id, __FILE__, __LINE__, __METHOD__, 10 );
+				$this->byId( $id )->click();
+			} else {
+				Debug::Text( 'Waiting on selector: ' . $selector, __FILE__, __LINE__, __METHOD__, 10 );
+				$this->waitUntilByCssSelector( $selector, 10000 );
+				Debug::Text( 'Clicking selector: ' . $selector, __FILE__, __LINE__, __METHOD__, 10 );
+				$this->byCssSelector( $selector )->click();
+				Debug::Text( 'Done: ' . $selector, __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		} catch ( Exception $e) {
+			Debug::Text( 'Click Failed, failover into javascript for click on: ' . $selector, __FILE__, __LINE__, __METHOD__, 10 );
+			$javascript = array('script' => "$('".$selector."').click()", 'args' => array());
+			$this->execute($javascript);
+			throw new Exception($selector.' - '.$e->getMessage());
 		}
 	}
 
@@ -273,5 +314,18 @@ class TTSeleniumGlobal extends PHPUnit_Extensions_Selenium2TestCase {
 		}
 		return array();
 
+	}
+
+	function clickCancel( $menu_id = FALSE ) {
+
+		if ( $menu_id !== FALSE ) {
+			$selector = '#'. $menu_id .' #cancelIcon';
+			$this->waitThenClick( $selector );
+			Debug::Text( 'Clicking ['.$selector.']', __FILE__, __LINE__, __METHOD__, 10 );
+		} else {
+			$javascript = array('script' => "$('#topContainer .ribbon .ribbon-tab-out-side:visible #cancelIcon').click()", 'args' => array());
+			$this->execute($javascript);
+			Debug::Arr( $javascript, 'executing  cancelclick with js', __FILE__, __LINE__, __METHOD__, 10 );
+		}
 	}
 }

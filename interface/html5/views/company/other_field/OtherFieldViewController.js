@@ -40,10 +40,11 @@ OtherFieldViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_custom_field': $.i18n._( 'Custom Field' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_custom_field': { 'label': $.i18n._( 'Custom Field' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIOtherField' )),
@@ -51,11 +52,10 @@ OtherFieldViewController = BaseViewController.extend( {
 			allow_multiple_selection: false,
 			layout_name: ALayoutIDs.OTHER_FIELD,
 			navigation_mode: true,
-			show_search_inputs: true} );
+			show_search_inputs: true
+		} );
 
 		this.setNavigation();
-
-//		  this.edit_view_tab.css( 'width', '700' );
 
 		//Tab 0 start
 
@@ -69,38 +69,38 @@ OtherFieldViewController = BaseViewController.extend( {
 
 		// Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'type_id'} );
+		form_item_input.TComboBox( { field: 'type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.type_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_custom_field_column1, '' );
 
 		// Other ID1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id1', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id1', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID1' ), form_item_input, tab_custom_field_column1 );
 
 		// Other ID2
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id2', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id2', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID2' ), form_item_input, tab_custom_field_column1 );
 
 		// Other ID3
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id3', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id3', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID3' ), form_item_input, tab_custom_field_column1 );
 
 		// Other ID4
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id4', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id4', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID4' ), form_item_input, tab_custom_field_column1 );
 
 		// Other ID5
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id5', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id5', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID5' ), form_item_input, tab_custom_field_column1, '' );
 
 		// the below are all non-display
@@ -108,31 +108,31 @@ OtherFieldViewController = BaseViewController.extend( {
 		// Other ID6
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id6', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id6', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID6' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 		// Other ID7
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id7', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id7', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID7' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 		// Other ID8
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id8', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id8', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID8' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 		// Other ID9
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id9', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id9', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID9' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 		// Other ID10
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'other_id10', width: 149} );
+		form_item_input.TTextInput( { field: 'other_id10', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Other ID10' ), form_item_input, tab_custom_field_column1, '', null, true );
 
 	},
@@ -143,11 +143,11 @@ OtherFieldViewController = BaseViewController.extend( {
 	},
 
 	hiddenOtherField: function() {
-		this.detachElement('other_id6');
-		this.detachElement('other_id7');
-		this.detachElement('other_id8');
-		this.detachElement('other_id9');
-		this.detachElement('other_id10');
+		this.detachElement( 'other_id6' );
+		this.detachElement( 'other_id7' );
+		this.detachElement( 'other_id8' );
+		this.detachElement( 'other_id9' );
+		this.detachElement( 'other_id10' );
 	},
 
 	buildSearchFields: function() {
@@ -155,7 +155,8 @@ OtherFieldViewController = BaseViewController.extend( {
 		this._super( 'buildSearchFields' );
 		this.search_fields = [
 
-			new SearchField( {label: $.i18n._( 'Created By' ),
+			new SearchField( {
+				label: $.i18n._( 'Created By' ),
 				in_column: 1,
 				field: 'created_by',
 				layout_name: ALayoutIDs.USER,
@@ -163,9 +164,11 @@ OtherFieldViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} ),
+				form_item_type: FormItemType.AWESOME_BOX
+			} ),
 
-			new SearchField( {label: $.i18n._( 'Updated By' ),
+			new SearchField( {
+				label: $.i18n._( 'Updated By' ),
 				in_column: 1,
 				field: 'updated_by',
 				layout_name: ALayoutIDs.USER,
@@ -173,7 +176,9 @@ OtherFieldViewController = BaseViewController.extend( {
 				multiple: true,
 				basic_search: true,
 				adv_search: false,
-				form_item_type: FormItemType.AWESOME_BOX} )];
+				form_item_type: FormItemType.AWESOME_BOX
+			} )
+		];
 	}
 
 

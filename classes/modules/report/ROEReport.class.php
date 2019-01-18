@@ -599,6 +599,8 @@ class ROEReport extends Report {
 		//$last_row = count($this->form_data)-1;
 		//$total_row = $last_row+1;
 
+		$file_arr = array();
+
 		$current_company = $this->getUserObject()->getCompanyObject();
 		if ( !is_object($current_company) ) {
 			Debug::Text('Invalid company object...', __FILE__, __LINE__, __METHOD__, 10);

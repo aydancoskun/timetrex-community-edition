@@ -17,9 +17,9 @@ UserDateTotalViewController = BaseViewController.extend( {
 		this.currency_api = new (APIFactory.getAPIClass( 'APICurrency' ))();
 
 		if ( PermissionManager.validate( this.permission_id, 'add' ) || PermissionManager.validate( this.permission_id, 'edit' ) ) {
-			$(this.el).find('.warning-message').text($.i18n._('WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative.'));
+			$( this.el ).find( '.warning-message' ).text( $.i18n._( 'WARNING: Manually modifying Accumulated Time records may prevent policies from being calculated properly and should only be done as a last resort when instructed to do so by a support representative.' ) );
 		} else {
-			$(this.el).find('.warning-message').hide();
+			$( this.el ).find( '.warning-message' ).hide();
 		}
 
 		this.initPermission();
@@ -41,11 +41,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 	},
 
 	setGridSize: function() {
-		if ( (!this.grid || !this.grid.is( ':visible' )) ) {
+		if ( (!this.grid || !this.grid.grid.is( ':visible' )) ) {
 			return;
 		}
-		this.grid.setGridWidth( $( this.el ).parent().width() - 2 );
-		this.grid.setGridHeight( $( this.el ).parents('#tab_user_date_total_parent').height() -55 );
+		this.grid.grid.setGridWidth( $( this.el ).parent().width() - 2 );
+		this.grid.grid.setGridHeight( $( this.el ).parents( '#tab_user_date_total_parent' ).height() - 55 );
 	},
 
 	setGridCellBackGround: function() {
@@ -63,7 +63,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			var item = data[i];
 
 			if ( item.is_override === true ) {
-				$( "tr[id='" + item.id + "']" ).addClass( 'user-data-total-override' );
+				$( 'tr[id=\'' + item.id + '\']' ).addClass( 'user-data-total-override' );
 			}
 		}
 	},
@@ -284,12 +284,12 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Error: Uncaught TypeError: undefined is not a function in /interface/html5/views/BaseViewController.js?v=8.0.0-20141117-111140 line 897
 		if ( $this.api ) {
 			$this.api['get' + $this.api.key_name + 'DefaultData'](
-				this.parent_edit_record.user_id,
-				this.parent_edit_record.date_stamp, {
-					onResult: function( result ) {
-						$this.onAddResult( result );
-					}
-				} );
+					this.parent_edit_record.user_id,
+					this.parent_edit_record.date_stamp, {
+						onResult: function( result ) {
+							$this.onAddResult( result );
+						}
+					} );
 		}
 
 	},
@@ -338,7 +338,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'invisible-image' );
 			context_btn.removeClass( 'disable-image' );
@@ -485,8 +485,8 @@ UserDateTotalViewController = BaseViewController.extend( {
 			p_id = 'punch';
 		}
 
-		if ( PermissionManager.validate( "job", 'enabled' ) &&
-			PermissionManager.validate( p_id, 'edit_job' ) ) {
+		if ( PermissionManager.validate( 'job', 'enabled' ) &&
+				PermissionManager.validate( p_id, 'edit_job' ) ) {
 			return true;
 		}
 		return false;
@@ -523,7 +523,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		}
 
 		if ( PermissionManager.validate( p_id, 'edit_quantity' ) &&
-			PermissionManager.validate( p_id, 'edit_bad_quantity' ) ) {
+				PermissionManager.validate( p_id, 'edit_bad_quantity' ) ) {
 			return true;
 		}
 		return false;
@@ -533,7 +533,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		var $this = this;
 		if ( Global.isSet( this.current_edit_record.user_id ) ) {
 			var filter = {};
-			filter.filter_data = {user_id: this.current_edit_record.user_id};
+			filter.filter_data = { user_id: this.current_edit_record.user_id };
 			this.currency_api.getCurrency( filter, false, false, {
 				onResult: function( res ) {
 					res = res.getResult();
@@ -561,7 +561,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 			switch ( key ) {
 				case 'user_id':
 					var current_widget = this.edit_view_ui_dic['first_last_name'];
-					new (APIFactory.getAPIClass( 'APIUser' ))().getUser( {filter_data: {id: this.current_edit_record[key]}}, {
+					new (APIFactory.getAPIClass( 'APIUser' ))().getUser( { filter_data: { id: this.current_edit_record[key] } }, {
 						onResult: function( result ) {
 
 							if ( result.isValid() ) {
@@ -662,7 +662,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 	search: function( set_default_menu, page_action, page_number, callBack ) {
 		this.refresh_id = null;
-		this._super( 'search', set_default_menu, page_action, page_number, callBack )
+		this._super( 'search', set_default_menu, page_action, page_number, callBack );
 	},
 
 	getProperObjectType: function() {
@@ -672,11 +672,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 			var item = this.object_type_array[i];
 
 			if ( item.value == 20 ||
-				item.value == 25 ||
-				item.value == 30 ||
-				item.value == 40 ||
-				item.value == 100 ||
-				item.value == 110 ) {
+					item.value == 25 ||
+					item.value == 30 ||
+					item.value == 40 ||
+					item.value == 100 ||
+					item.value == 110 ) {
 				array.push( item );
 			}
 
@@ -691,10 +691,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_user_date_total': $.i18n._( 'Accumulated Time' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_user_date_total': { 'label': $.i18n._( 'Accumulated Time' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APIUserDateTotal' )),
@@ -717,25 +718,25 @@ UserDateTotalViewController = BaseViewController.extend( {
 		//Employee
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'first_last_name'} );
+		form_item_input.TText( { field: 'first_last_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_user_date_total_column1, '' );
 
 		//Date
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'date_stamp'} );
+		form_item_input.TDatePicker( { field: 'date_stamp' } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Date' ), form_item_input, tab_user_date_total_column1 );
 
 		//Time
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'total_time', mode: 'time_unit', need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'total_time', mode: 'time_unit', need_parser_sec: true } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Time' ), form_item_input, tab_user_date_total_column1, '', null, true );
 
 		//Type
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'object_type_id'} );
+		form_item_input.TComboBox( { field: 'object_type_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( this.getProperObjectType() ) );
 		this.addEditFieldToColumn( $.i18n._( 'Type' ), form_item_input, tab_user_date_total_column1 );
 
@@ -876,15 +877,17 @@ UserDateTotalViewController = BaseViewController.extend( {
 				set_empty: true,
 				setRealValueCallBack: (function( val ) {
 
-					if ( val ) job_coder.setValue( val.manual_id );
+					if ( val ) {
+						job_coder.setValue( val.manual_id );
+					}
 				}),
 				field: 'job_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_coder.TTextInput( {field: 'job_quick_search', disable_keyup_event: true} );
+			job_coder.TTextInput( { field: 'job_quick_search', disable_keyup_event: true } );
 			job_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_coder );
@@ -906,15 +909,17 @@ UserDateTotalViewController = BaseViewController.extend( {
 				set_empty: true,
 				setRealValueCallBack: (function( val ) {
 
-					if ( val ) job_item_coder.setValue( val.manual_id );
+					if ( val ) {
+						job_item_coder.setValue( val.manual_id );
+					}
 				}),
 				field: 'job_item_id'
 			} );
 
-			widgetContainer = $( "<div class='widget-h-box'></div>" );
+			widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			var job_item_coder = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			job_item_coder.TTextInput( {field: 'job_item_quick_search', disable_keyup_event: true} );
+			job_item_coder.TTextInput( { field: 'job_item_quick_search', disable_keyup_event: true } );
 			job_item_coder.addClass( 'job-coder' );
 
 			widgetContainer.append( job_item_coder );
@@ -929,12 +934,12 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		//Start Date Time
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'start_time_stamp', mode: 'date_time'} );
+		form_item_input.TDatePicker( { field: 'start_time_stamp', mode: 'date_time' } );
 		this.addEditFieldToColumn( $.i18n._( 'Start Date/Time' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
 
 		//End Date Time
 		form_item_input = Global.loadWidgetByName( FormItemType.DATE_PICKER );
-		form_item_input.TDatePicker( {field: 'end_time_stamp', mode: 'date_time'} );
+		form_item_input.TDatePicker( { field: 'end_time_stamp', mode: 'date_time' } );
 		this.addEditFieldToColumn( $.i18n._( 'End Date/Time' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
 
 		//Currency
@@ -951,11 +956,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		//Base Hourly Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'base_hourly_rate', width: 90} );
+		form_item_input.TTextInput( { field: 'base_hourly_rate', width: 90 } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var currency = $( "<span class='userDateTotal-currency widget-left-label'></span>" );
-		var code = $( "<span class='userDateTotal-code widget-right-label'></span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var currency = $( '<span class=\'userDateTotal-currency widget-left-label\'></span>' );
+		var code = $( '<span class=\'userDateTotal-code widget-right-label\'></span>' );
 		widgetContainer.append( currency );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( code );
@@ -964,11 +969,11 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		//Hourly Rate
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'hourly_rate', width: 90} );
+		form_item_input.TTextInput( { field: 'hourly_rate', width: 90 } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		currency = $( "<span class='userDateTotal-currency widget-left-label'></span>" );
-		code = $( "<span class='userDateTotal-code widget-right-label'></span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		currency = $( '<span class=\'userDateTotal-currency widget-left-label\'></span>' );
+		code = $( '<span class=\'userDateTotal-code widget-right-label\'></span>' );
 		widgetContainer.append( currency );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( code );
@@ -977,10 +982,10 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		//Total Amount
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'total_time_amount'} );
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		currency = $( "<span class='userDateTotal-currency widget-left-label'></span>" );
-		code = $( "<span class='userDateTotal-code widget-right-label'></span>" );
+		form_item_input.TText( { field: 'total_time_amount' } );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		currency = $( '<span class=\'userDateTotal-currency widget-left-label\'></span>' );
+		code = $( '<span class=\'userDateTotal-code widget-right-label\'></span>' );
 		widgetContainer.append( currency );
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( code );
@@ -990,18 +995,18 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 			//Quanitity
 			var good = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			good.TTextInput( {field: 'quantity', width: 50} );
+			good.TTextInput( { field: 'quantity', width: 50 } );
 			good.addClass( 'quantity-input' );
 
-			var good_label = $( "<span class='widget-right-label'>" + $.i18n._( 'Good' ) + ": </span>" );
+			var good_label = $( '<span class=\'widget-right-label\'>' + $.i18n._( 'Good' ) + ': </span>' );
 
 			var bad = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-			bad.TTextInput( {field: 'bad_quantity', width: 50} );
+			bad.TTextInput( { field: 'bad_quantity', width: 50 } );
 			bad.addClass( 'quantity-input' );
 
-			var bad_label = $( "<span class='widget-right-label'>/ " + $.i18n._( 'Bad' ) + ": </span>" );
+			var bad_label = $( '<span class=\'widget-right-label\'>/ ' + $.i18n._( 'Bad' ) + ': </span>' );
 
-			var widgetContainer = $( "<div class='widget-h-box'></div>" );
+			var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
 
 			widgetContainer.append( good_label );
 			widgetContainer.append( good );
@@ -1026,7 +1031,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 		}
 		//Note
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_AREA );
-		form_item_input.TTextArea( {field: 'note', width: '100%'} );
+		form_item_input.TTextArea( { field: 'note', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Note' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
 		form_item_input.parent().width( '45%' );
 
@@ -1036,7 +1041,7 @@ UserDateTotalViewController = BaseViewController.extend( {
 
 		//Override
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'override'} );
+		form_item_input.TCheckbox( { field: 'override' } );
 		this.addEditFieldToColumn( $.i18n._( 'Override' ), form_item_input, tab_user_date_total_column2, '', null, true, true );
 
 	},
@@ -1083,9 +1088,9 @@ UserDateTotalViewController.loadSubView = function( container, beforeViewLoadedF
 
 			if ( Global.isSet( afterViewLoadedFun ) ) {
 
-				TTPromise.wait('BaseViewController', 'initialize', function() {
-					afterViewLoadedFun(sub_user_date_total_view_controller);
-				});
+				TTPromise.wait( 'BaseViewController', 'initialize', function() {
+					afterViewLoadedFun( sub_user_date_total_view_controller );
+				} );
 			}
 
 		}

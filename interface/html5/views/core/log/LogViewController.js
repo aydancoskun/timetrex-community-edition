@@ -137,9 +137,10 @@ LogViewController = BaseViewController.extend( {
 	buildEditViewUI: function() {
 		this._super( 'buildEditViewUI' );
 
-		this.setTabLabels( {
-			'tab_audit_details': $.i18n._( 'Audit Details' )
-		} );
+		var tab_model = {
+			'tab_audit_details': { 'label': $.i18n._( 'Audit Details' ) },
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			api_class: (APIFactory.getAPIClass( 'APILog' )),
@@ -255,7 +256,7 @@ LogViewController = BaseViewController.extend( {
 		filter.filter_data = Global.convertLayoutFilterToAPIFilter( this.select_layout );
 		filter.filter_sort = this.select_layout.data.filter_sort;
 
-		if ( TTUUID.isUUID(this.refresh_id) ) {
+		if ( TTUUID.isUUID( this.refresh_id ) ) {
 			filter.filter_data = {};
 			filter.filter_data.id = [this.refresh_id];
 
@@ -271,7 +272,7 @@ LogViewController = BaseViewController.extend( {
 				var len;
 
 				if ( !Global.isArray( result_data ) ) {
-					$this.showNoResultCover()
+					$this.showNoResultCover();
 				} else {
 					$this.removeNoResultCover();
 					if ( Global.isSet( $this.__createRowId ) ) {
@@ -283,9 +284,9 @@ LogViewController = BaseViewController.extend( {
 					len = result_data.length;
 				}
 				$this.setAuditInfo();
-				if ( TTUUID.isUUID($this.refresh_id) ) {
+				if ( TTUUID.isUUID( $this.refresh_id ) ) {
 					$this.refresh_id = null;
-					var grid_source_data = $this.grid.getGridParam( 'data' );
+					var grid_source_data = $this.grid.grid.getGridParam( 'data' );
 					len = grid_source_data.length;
 
 					if ( $.type( grid_source_data ) !== 'array' ) {
@@ -306,23 +307,25 @@ LogViewController = BaseViewController.extend( {
 							// }
 
 							if ( record.id == new_record.id ) {
-								$this.grid.setRowData( new_record.id, new_record );
+								$this.grid.grid.setRowData( new_record.id, new_record );
 								found = true;
-								break
+								break;
 							}
 						}
 
 						if ( !found ) {
 //						$this.grid.addRowData( new_record.id, new_record, 0 );
 							$this.grid.clearGridData();
-							$this.grid.setGridParam( {data: grid_source_data.concat( new_record )} );
 
-							if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGridHeight ) ) {
+							grid_source_data.push( new_record );
+							$this.grid.setData( grid_source_data );
+
+							if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
 								len = Global.isSet( len ) ? len : 0;
-								$this.resizeSubGridHeight( len + 1 );
+								$this.resizeSubGrid( len + 1 );
 							}
 
-							$this.grid.trigger( 'reloadGrid' );
+							$this.grid.reloadGrid();
 						}
 					}
 
@@ -340,16 +343,17 @@ LogViewController = BaseViewController.extend( {
 						var current_data = $this.grid.getGridParam( 'data' );
 						result_data = current_data.concat( result_data );
 					}
-					$this.grid.clearGridData();
-					$this.grid.setGridParam( {data: result_data} );
 
-					if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGridHeight ) ) {
-						$this.resizeSubGridHeight( len );
+					// Process result_data if necessary, this always needs override.
+					result_data = $this.processResultData( result_data );
+					$this.grid.clearGridData();
+					$this.grid.setData( result_data );
+					$this.setGridColumnsWidth();
+					if ( $this.sub_view_mode && Global.isSet( $this.resizeSubGrid ) ) {
+						$this.resizeSubGrid( len );
 					}
 
-					$this.grid.trigger( 'reloadGrid' );
 					$this.reSelectLastSelectItems();
-
 				}
 
 				$this.setGridCellBackGround(); //Set cell background for some views
@@ -384,17 +388,50 @@ LogViewController = BaseViewController.extend( {
 
 	},
 
+	getGridSetup: function(){
+		var $this = this;
+		return {
+			container_selector: this.sub_view_mode ? '.edit-view-tab-bar' : 'body',
+			sub_grid_mode: this.sub_view_mode,
+			onResizeGrid: true,
+			multiselect: false,
+			onSelectRow: function() {
+				$this.onGridSelectRow();
+			},
+			onCellSelect: function() {
+				$this.onGridSelectRow();
+			},
+			onSelectAll: function() {
+				$this.onGridSelectAll();
+			},
+			ondblClickRow: function( e ) {
+				$this.onGridDblClickRow( e );
+			},
+			onRightClickRow: function( rowId ) {
+				var id_array = $this.getGridSelectIdArray();
+				if ( id_array.indexOf( rowId ) < 0 ) {
+					$this.grid.grid.resetSelection();
+					$this.grid.grid.setSelection( rowId );
+					$this.onGridSelectRow();
+				}
+			},
+			setGridSize: function() {
+				$this.baseViewSubTabGridResize( 'tab_audit' ); //Works for Edit Employee -> Audit tab
+			}
+		};
+	},
+
 	_setGridSizeGridHeight: function( header_size ) {
-		if ( !this.sub_view_mode ) {
-			this.grid.setGridHeight( ($( this.el ).height() - (this.search_panel && this.search_panel.is( ':visible' ) ? this.search_panel.height() : 0) - 68 - header_size) );
-		} else if ( !Global.isSet( this.resizeSubGridHeight ) ) {
+		// if ( !this.sub_view_mode ) {
+		// 	this.grid.setGridHeight( ($( this.el ).height() - (this.search_panel && this.search_panel.is( ':visible' ) ? this.search_panel.height() : 0) - 68 - header_size) );
+		// } else if ( !Global.isSet( this.resizeSubGrid ) ) {
 			if ( this.pager_data && this.pager_data.last_page_number > 1 ) {
 				this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 101 - header_size );
 			} else {
 				this.grid.setGridHeight( $( this.el ).parent().parent().parent().height() - 78 - header_size );
 			}
 
-		}
+		// }
 	},
 
 	setAuditInfo: function() {
@@ -423,15 +460,17 @@ LogViewController = BaseViewController.extend( {
 
 		var grid = this.edit_view.find( '#grid' );
 
-		grid.attr( 'id', this.log_detail_script_name + '_grid' );  //Grid's id is ScriptName + _grid
+		if ( grid ) {
+			grid.attr( 'id', this.log_detail_script_name + '_grid' );  //Grid's id is ScriptName + _grid
+		}
 
-		grid = this.edit_view.find( '#' + this.log_detail_script_name + '_grid' );
+		//grid = this.edit_view.find( '#' + this.log_detail_script_name + '_grid' );
 
 		var column_info_array = [];
 		var display_columns = [
-			{label: $.i18n._( 'Field' ), value: 'display_field'},
-			{label: $.i18n._( 'Before' ), value: 'old_value'},
-			{label: $.i18n._( 'After' ), value: 'new_value'}
+			{ label: $.i18n._( 'Field' ), value: 'display_field' },
+			{ label: $.i18n._( 'Before' ), value: 'old_value' },
+			{ label: $.i18n._( 'After' ), value: 'new_value' }
 		];
 
 		//Set Data Grid on List view
@@ -457,26 +496,19 @@ LogViewController = BaseViewController.extend( {
 			column_info_array.push( column_info );
 		}
 
-		this.log_detail_grid = grid;
+		grid_setup = {
+			container_selector: this.sub_view_mode ? '.edit-view-tab-bar' : 'body',
+			sub_grid_mode: this.sub_view_mode,
+			onResizeGrid: true,
+			multiselect: false,
+		};
 
-		this.log_detail_grid.jqGrid( {
-			altRows: true,
-			data: [],
-			datatype: 'local',
-			sortable: false,
-			width: Global.bodyWidth() - 14,
-			rowNum: 10000,
-			colNames: [],
-			colModel: column_info_array,
-			viewrecords: true
-
-		} );
-
+		this.log_detail_grid = new TTGrid( this.log_detail_script_name + '_grid', grid_setup, column_info_array );
 	},
 
 	initEditViewData: function() {
 		this._super( 'initEditViewData' );
-		if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
 			this.edit_view_tab.find( '#tab_audit_details' ).find( '.detail-grid-row' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
 		} else {
@@ -484,6 +516,8 @@ LogViewController = BaseViewController.extend( {
 			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
 			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
+
+		this.log_detail_grid.setGridColumnsWidth();
 	},
 
 	onGridDblClickRow: function() {
@@ -531,30 +565,28 @@ LogViewController = BaseViewController.extend( {
 		log_detail_data = Global.formatGridData( log_detail_data );
 
 		$this.log_detail_grid.clearGridData();
-		$this.log_detail_grid.setGridParam( {data: log_detail_data} );
-		$this.log_detail_grid.trigger( 'reloadGrid' );
+		$this.log_detail_grid.setData( log_detail_data );
 
 		$this.setLogDetailGridSize();
-
 	},
 
 	setLogDetailGridSize: function() {
 
-		if ( !this.log_detail_grid || !this.log_detail_grid.is( ':visible' ) ) {
+		if ( !this.log_detail_grid || !$( this.log_detail_grid.grid ).is( ':visible' ) ) {
 			return;
 		}
 
 		var tab_audit_details = this.edit_view.find( '#tab_audit_details_content_div' );
 		var first_row = this.edit_view.find( '.first-row' );
-		this.log_detail_grid.setGridWidth( tab_audit_details.width() );
-		this.log_detail_grid.setGridHeight( tab_audit_details.height() - first_row.height() );
+		this.log_detail_grid.grid.setGridWidth( tab_audit_details.width() );
+		this.log_detail_grid.grid.setGridHeight( tab_audit_details.height() - first_row.height() );
 
 	},
 
 	showDetailNoResultCover: function() {
 		this.removeNoResultCover();
 		this.no_result_box = Global.loadWidgetByName( WidgetNamesDic.NO_RESULT_BOX );
-		this.no_result_box.NoResultBox( {related_view_controller: this, is_new: false} );
+		this.no_result_box.NoResultBox( { related_view_controller: this, is_new: false } );
 
 		var grid_div = this.edit_view.find( '.grid-div' );
 
@@ -562,7 +594,6 @@ LogViewController = BaseViewController.extend( {
 	},
 
 	showNoResultCover: function() {
-
 		this._super( 'showNoResultCover', false );
 	},
 
@@ -622,7 +653,6 @@ LogViewController = BaseViewController.extend( {
 				$this.current_edit_record = result_data;
 
 				$this.initEditView();
-
 			}
 		} );
 	},
@@ -685,7 +715,7 @@ LogViewController = BaseViewController.extend( {
 		var grid_selected_length = grid_selected_id_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 
 			context_btn.removeClass( 'invisible-image' );
@@ -705,27 +735,10 @@ LogViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.view_detail:
 				this.onViewDetailClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
 				break;
 		}
 	},
@@ -736,7 +749,7 @@ LogViewController = BaseViewController.extend( {
 		var len = this.context_menu_array.length;
 
 		for ( var i = 0; i < len; i++ ) {
-			var context_btn = this.context_menu_array[i];
+			var context_btn = $( this.context_menu_array[i] );
 			var id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
 			context_btn.removeClass( 'disable-image' );
 
@@ -793,6 +806,13 @@ LogViewController = BaseViewController.extend( {
 		}
 
 		return filter;
+	},
+
+	searchDone: function(){
+		$('window').trigger('resize');
+		TTPromise.resolve( 'initSubAudit', 'init' );
+		this._super('searchDone');
+
 	}
 
 } );

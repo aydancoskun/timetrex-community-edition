@@ -22,10 +22,12 @@ TopMenuManager.goToView = function( subMenuId, force_refresh ) {
 	} else {
 		//#2157 - needed for selenium screenshot test to prevent hanging on
 		//various combinations of ribbon and topmenu clicks that are not a change to the hash
-		if ( location.hash == ('#!m=' + subMenuId) ) {
-			TTPromise.wait()
+		//  Check that we aren't trying to redirect back to the login screen, causing an infinite loop on logout in some cases.
+		if ( subMenuId != 'Login' && location.hash == ('#!m=' + subMenuId) ) {
+			TTPromise.wait();
+			$( '#refreshBtn:visible' ).click();
 		}
-		window.location = Global.getBaseURL() + '#!m=' + subMenuId;
+		Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + subMenuId );
 	}
 
 };
@@ -34,7 +36,7 @@ TopMenuManager.goToPortalView = function( subMenuId, force_refresh ) {
 	if ( window.location.href === Global.getBaseURL() + '#!m=' + subMenuId && force_refresh ) {
 		IndexViewController.instance.router.reloadView( subMenuId );
 	} else {
-		window.location = Global.getBaseURL() + '#!m=' + subMenuId;
+		Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + subMenuId );
 		//see issue #2193
 		// var location =  Global.getBaseURL() + '#!m=' + subMenuId;
 		// if ( LocalCacheData.all_url_args ) {
@@ -153,7 +155,7 @@ TopMenuManager.buildPortalRibbonMenuModels = function() {
 
 	TopMenuManager.ribbon_menus = [hr_menu, my_account_menu];
 
-}
+};
 
 TopMenuManager.buildRibbonMenuModels = function() {
 
@@ -311,7 +313,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		group: jobTrackingSubMenuGroup,
 		icon: 'map-35x35.png',
 		permission_result: PermissionManager.checkTopLevelPermission( 'GEOFence' ),
-		permission: permission.geo_fence,
+		permission: permission.geo_fence
 	} );
 
 	var job_group = new RibbonSubMenu( {
@@ -482,7 +484,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var legal_entity = new RibbonSubMenu( {
-		label: (LocalCacheData.getCurrentCompany().product_edition_id > 10) ? $.i18n._( 'Legal<br>Entities' ) : $.i18n._( 'Legal<br>Entity' ),
+		label: (LocalCacheData.getCurrentCompany().product_edition_id >= 15) ? $.i18n._( 'Legal<br>Entities' ) : $.i18n._( 'Legal<br>Entity' ),
 		id: 'LegalEntity',
 		group: companySubMenuGroup,
 		icon: 'legal_entity-35x35.png',
@@ -677,15 +679,15 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	/* //Removed as of v9.0
-	var recurring_pay_stub_amendment = new RibbonSubMenu( {
-		label: $.i18n._( 'Recurring PS<br>Amendments' ),
-		id: 'RecurringPayStubAmendment',
-		group: payrollSubMenuGroup,
-		icon: 'recurring_pay_stub_amendments-35x35.png',
-		permission_result: PermissionManager.checkTopLevelPermission( 'RecurringPayStubAmendment' ),
-		permission: permission.pay_stub_amendment
-	} );
-	*/
+	 var recurring_pay_stub_amendment = new RibbonSubMenu( {
+	 label: $.i18n._( 'Recurring PS<br>Amendments' ),
+	 id: 'RecurringPayStubAmendment',
+	 group: payrollSubMenuGroup,
+	 icon: 'recurring_pay_stub_amendments-35x35.png',
+	 permission_result: PermissionManager.checkTopLevelPermission( 'RecurringPayStubAmendment' ),
+	 permission: permission.pay_stub_amendment
+	 } );
+	 */
 
 	var pay_period_schedule_1 = new RibbonSubMenu( {
 		label: $.i18n._( 'Pay Period<br>Schedules' ),
@@ -1436,7 +1438,7 @@ TopMenuManager.buildRibbonMenuModels = function() {
 	} );
 
 	var email_help = new RibbonSubMenu( {
-		label: (LocalCacheData.getCurrentCompany().product_edition_id > 10) ? $.i18n._( 'Email Help' ) : $.i18n._( 'Community<br>Forums' ),
+		label: (LocalCacheData.getCurrentCompany().product_edition_id >= 15) ? $.i18n._( 'Email Help' ) : $.i18n._( 'Community<br>Forums' ),
 		id: 'EmailHelp',
 		group: help_group,
 		icon: 'emailhelp-35x35.png',
@@ -1444,19 +1446,19 @@ TopMenuManager.buildRibbonMenuModels = function() {
 		permission: true
 	} );
 
-	if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 && APIGlobal.pre_login_data['sandbox_url'] &&  APIGlobal.pre_login_data['sandbox_url'] != false && APIGlobal.pre_login_data['sandbox_url'].length > 0 && !APIGlobal.pre_login_data['sandbox']) {
-		var sandbox = new RibbonSubMenu({
-			label: $.i18n._('Testing<br>Sandbox'),
+	if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 && APIGlobal.pre_login_data['sandbox_url'] && APIGlobal.pre_login_data['sandbox_url'] != false && APIGlobal.pre_login_data['sandbox_url'].length > 0 && !APIGlobal.pre_login_data['sandbox'] ) {
+		var sandbox = new RibbonSubMenu( {
+			label: $.i18n._( 'Testing<br>Sandbox' ),
 			id: 'Sandbox',
 			group: help_group,
 			icon: Icons.login,
 			permission_result: true,
 			permission: true
-		});
+		} );
 	}
 
 	var whats_new = new RibbonSubMenu( {
-		label: $.i18n._( "What's New" ),
+		label: $.i18n._( 'What\'s New' ),
 		id: 'WhatsNew',
 		group: help_group,
 		icon: 'whats_new-35x35.png',

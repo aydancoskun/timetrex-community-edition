@@ -55,8 +55,6 @@
 
 	};
 
-	$.fn.SeparatedBox.defaults = {
-
-	};
+	$.fn.SeparatedBox.defaults = {};
 
 })( jQuery );

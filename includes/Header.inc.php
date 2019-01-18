@@ -9,7 +9,6 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<meta name="Description" content="Workforce Management Software for tracking employee time and attendance, employee time clock software, employee scheduling software and payroll software all in a single package. Also calculate complex over time and premium time business policies and can identify labor costs attributed to branches and departments. Managers can now track and monitor their workforce easily."/>
 
-	<script async src="./framework/stacktrace.js"></script>
 	<script src="global/Debug.js?v=<?php echo APPLICATION_BUILD?>"></script>
 	<script src="global/CookieSetting.js?v=<?php echo APPLICATION_BUILD?>"></script>
 	<script src="global/APIGlobal.js.php?disable_db=1&v=<?php echo APPLICATION_BUILD?>"></script>
@@ -23,7 +22,7 @@
 	<script src="./framework/html5shiv.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
 	<script src="./framework/respond.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
 	<![endif]-->
-    <script src="./framework/bootstrap/js/bootstrap.min.js?v=<?php echo APPLICATION_BUILD?>"></script>
+    <script src="./framework/bootstrap/js/bootstrap.bundle.js?v=<?php echo APPLICATION_BUILD?>"></script>
 	<link rel="stylesheet" type="text/css" href="./framework/bootstrap/css/bootstrap.min.css?v=<?php echo APPLICATION_BUILD?>">
 	<style rel="stylesheet" type="text/css">
 		body {

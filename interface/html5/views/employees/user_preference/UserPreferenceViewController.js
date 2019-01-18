@@ -147,40 +147,6 @@ UserPreferenceViewController = BaseViewController.extend( {
 		}
 	},
 
-	onTabShow: function( e, ui ) {
-
-		var key = this.edit_view_tab_selected_index;
-		this.editFieldResize( key );
-		if ( !this.current_edit_record ) {
-			return;
-		}
-
-		if ( this.edit_view_tab_selected_index === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
-
-		} else if ( this.edit_view_tab_selected_index == 1 ) {
-			if ( LocalCacheData.getCurrentCompany().product_edition_id > 10 ) {
-				this.edit_view_tab.find( '#tab_schedule_sync' ).find( '.first-column' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
-				this.buildContextMenu( true );
-				this.setEditMenu();
-			} else {
-				this.edit_view_tab.find( '#tab_schedule_sync' ).find( '.first-column' ).css( 'display', 'none' );
-				this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
-				this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
-			}
-		} else {
-			this.buildContextMenu( true );
-			this.setEditMenu();
-		}
-	},
-
 	onSetSearchFilterFinished: function() {
 
 		if ( this.search_panel.getSelectTabIndex() === 1 ) {
@@ -343,11 +309,12 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_preference': $.i18n._( 'Preference' ),
-			'tab_schedule_sync': $.i18n._( 'Schedule Synchronization' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
+		var tab_model = {
+			'tab_preference': { 'label': $.i18n._( 'Preference' ) },
+			'tab_schedule_sync': { 'label': $.i18n._( 'Schedule Synchronization' ), 'init_callback': 'initSubScheduleSyncView' },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		this.navigation.AComboBox( {
 			id: this.script_name + '_navigation',
@@ -375,100 +342,100 @@ UserPreferenceViewController = BaseViewController.extend( {
 		// Employee
 
 		var form_item_input = Global.loadWidgetByName( FormItemType.TEXT );
-		form_item_input.TText( {field: 'full_name'} );
+		form_item_input.TText( { field: 'full_name' } );
 		this.addEditFieldToColumn( $.i18n._( 'Employee' ), form_item_input, tab_preference_column1, '' );
 
 		// Language
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'language', set_empty: true} );
+		form_item_input.TComboBox( { field: 'language', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.language_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Language' ), form_item_input, tab_preference_column1 );
 
 		// Date Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'date_format', set_empty: true} );
+		form_item_input.TComboBox( { field: 'date_format', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.date_format_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Date Format' ), form_item_input, tab_preference_column1 );
 
 		// Time Format
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'time_format', set_empty: true} );
+		form_item_input.TComboBox( { field: 'time_format', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_format_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Time Format' ), form_item_input, tab_preference_column1 );
 
 		// Time Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'time_unit_format', set_empty: true} );
+		form_item_input.TComboBox( { field: 'time_unit_format', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_unit_format_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Time Units' ), form_item_input, tab_preference_column1 );
 
 
 		// Distance Units
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'distance_format', set_empty: true} );
+		form_item_input.TComboBox( { field: 'distance_format', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.distance_format_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Distance Units' ), form_item_input, tab_preference_column1 );
 
 		// Time Zone
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'time_zone', set_empty: true} );
+		form_item_input.TComboBox( { field: 'time_zone', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.time_zone_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Time Zone' ), form_item_input, tab_preference_column1 );
 
 		// Start Weeks on
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'start_week_day'} );
+		form_item_input.TComboBox( { field: 'start_week_day' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.start_week_day_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Calendar Starts On' ), form_item_input, tab_preference_column1 );
 
 		// Rows per page
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'items_per_page', width: 50} );
+		form_item_input.TTextInput( { field: 'items_per_page', width: 50 } );
 		this.addEditFieldToColumn( $.i18n._( 'Rows per page' ), form_item_input, tab_preference_column1 );
 
 		// Default Login Screen
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'default_login_screen'} );
+		form_item_input.TComboBox( { field: 'default_login_screen' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.default_login_screen_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Default Screen' ), form_item_input, tab_preference_column1 );
 
 		// Save TimeSheet State
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_save_timesheet_state'} );
+		form_item_input.TCheckbox( { field: 'enable_save_timesheet_state' } );
 		this.addEditFieldToColumn( $.i18n._( 'Save TimeSheet State' ), form_item_input, tab_preference_column1 );
 
 		// Automatically Show Context Menu
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_auto_context_menu'} );
+		form_item_input.TCheckbox( { field: 'enable_auto_context_menu' } );
 		this.addEditFieldToColumn( $.i18n._( 'Automatically Show Context Menu' ), form_item_input, tab_preference_column1, '' );
 
 		// Email Notifications
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Email Notifications' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Email Notifications' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_preference_column2 );
 
 		// Exceptions
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_email_notification_exception'} );
+		form_item_input.TCheckbox( { field: 'enable_email_notification_exception' } );
 		this.addEditFieldToColumn( $.i18n._( 'Exceptions' ), form_item_input, tab_preference_column2 );
 
 		// Messages
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_email_notification_message'} );
+		form_item_input.TCheckbox( { field: 'enable_email_notification_message' } );
 		this.addEditFieldToColumn( $.i18n._( 'Messages' ), form_item_input, tab_preference_column2 );
 
 		// Pay Stubs
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_email_notification_pay_stub'} );
+		form_item_input.TCheckbox( { field: 'enable_email_notification_pay_stub' } );
 		this.addEditFieldToColumn( $.i18n._( 'Pay Stubs' ), form_item_input, tab_preference_column2, '' );
 
 		// Send Notifications to Home Email
 
 		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
-		form_item_input.TCheckbox( {field: 'enable_email_notification_home'} );
+		form_item_input.TCheckbox( { field: 'enable_email_notification_home' } );
 		this.addEditFieldToColumn( $.i18n._( 'Send Notifications to Home Email' ), form_item_input, tab_preference_column2, '' );
 
 		//Tab 1 start
@@ -495,15 +462,15 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 		// Shifts Scheduled to Work
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Shifts Scheduled to Work' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Shifts Scheduled to Work' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_schedule_sync_column1, '', null, true, false, 'shifts_scheduled_to_work' );
 
 		// Alarm 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'schedule_icalendar_alarm1_working', width: 90, need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'schedule_icalendar_alarm1_working', width: 90, need_parser_sec: true } );
 
-		var widgetContainer = $( "<div class='widget-h-box'></div>" );
-		var label = $( "<span class='widget-right-label'>( " + $.i18n._( 'before schedule start time' ) + " )</span>" );
+		var widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		var label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -513,10 +480,10 @@ UserPreferenceViewController = BaseViewController.extend( {
 		// Alarm 2
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'schedule_icalendar_alarm2_working', width: 90, need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'schedule_icalendar_alarm2_working', width: 90, need_parser_sec: true } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>( " + $.i18n._( 'before schedule start time' ) + " )</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -526,15 +493,15 @@ UserPreferenceViewController = BaseViewController.extend( {
 		// Shifts Scheduled Absent
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Shifts Scheduled Absent' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Shifts Scheduled Absent' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_schedule_sync_column1, '', null, true, false, 'shifts_scheduled_absent' );
 
 		// Alarm 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'schedule_icalendar_alarm1_absence', width: 90, need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'schedule_icalendar_alarm1_absence', width: 90, need_parser_sec: true } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>( " + $.i18n._( 'before schedule start time' ) + " )</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -544,10 +511,10 @@ UserPreferenceViewController = BaseViewController.extend( {
 		// Alarm 2
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'schedule_icalendar_alarm2_absence', width: 90, need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'schedule_icalendar_alarm2_absence', width: 90, need_parser_sec: true } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>( " + $.i18n._( 'before schedule start time' ) + " )</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -557,15 +524,15 @@ UserPreferenceViewController = BaseViewController.extend( {
 		// Modified Shifts
 
 		form_item_input = Global.loadWidgetByName( FormItemType.SEPARATED_BOX );
-		form_item_input.SeparatedBox( {label: $.i18n._( 'Modified Shifts' )} );
+		form_item_input.SeparatedBox( { label: $.i18n._( 'Modified Shifts' ) } );
 		this.addEditFieldToColumn( null, form_item_input, tab_schedule_sync_column1, '', null, true, false, 'modified_shifts' );
 
 		// Alarm 1
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'schedule_icalendar_alarm1_modified', width: 90, need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'schedule_icalendar_alarm1_modified', width: 90, need_parser_sec: true } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>( " + $.i18n._( 'before schedule start time' ) + " )</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -575,10 +542,10 @@ UserPreferenceViewController = BaseViewController.extend( {
 		// Alarm 2
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-		form_item_input.TTextInput( {field: 'schedule_icalendar_alarm2_modified', width: 90, need_parser_sec: true} );
+		form_item_input.TTextInput( { field: 'schedule_icalendar_alarm2_modified', width: 90, need_parser_sec: true } );
 
-		widgetContainer = $( "<div class='widget-h-box'></div>" );
-		label = $( "<span class='widget-right-label'>( " + $.i18n._( 'before schedule start time' ) + " )</span>" );
+		widgetContainer = $( '<div class=\'widget-h-box\'></div>' );
+		label = $( '<span class=\'widget-right-label\'>( ' + $.i18n._( 'before schedule start time' ) + ' )</span>' );
 
 		widgetContainer.append( form_item_input );
 		widgetContainer.append( label );
@@ -601,7 +568,7 @@ UserPreferenceViewController = BaseViewController.extend( {
 		this.mass_edit_record_ids = [];
 
 		$.each( grid_selected_id_array, function( index, value ) {
-			$this.mass_edit_record_ids.push( value )
+			$this.mass_edit_record_ids.push( value );
 		} );
 
 		filter.filter_data = {};
@@ -722,15 +689,16 @@ UserPreferenceViewController = BaseViewController.extend( {
 
 	},
 
-	initTabData: function() {
-		if ( this.edit_view_tab.tabs( 'option', 'selected' ) === 2 ) {
-			if ( this.current_edit_record.id ) {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'block' );
-				this.initSubLogView( 'tab_audit' );
-			} else {
-				this.edit_view_tab.find( '#tab_audit' ).find( '.first-column-sub-view' ).css( 'display', 'none' );
-				this.edit_view.find( '.save-and-continue-div' ).css( 'display', 'block' );
-			}
+	initSubScheduleSyncView: function() {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 15 ) {
+			this.edit_view_tab.find( '#tab_schedule_sync' ).find( '.first-column' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'none' );
+			this.buildContextMenu( true );
+			this.setEditMenu();
+		} else {
+			this.edit_view_tab.find( '#tab_schedule_sync' ).find( '.first-column' ).css( 'display', 'none' );
+			this.edit_view.find( '.permission-defined-div' ).css( 'display', 'block' );
+			this.edit_view.find( '.permission-message' ).html( Global.getUpgradeMessage() );
 		}
 	},
 

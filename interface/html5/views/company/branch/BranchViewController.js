@@ -2,7 +2,7 @@ BranchViewController = BaseViewController.extend( {
 	el: '#branch_view_container',
 
 	_required_files: {
-		10:["APIBranch", "APICompanyGenericTag"],
+		10: ['APIBranch', 'APICompanyGenericTag'],
 		20: ['APIGEOFence']
 	},
 
@@ -43,12 +43,12 @@ BranchViewController = BaseViewController.extend( {
 	},
 
 	buildContextMenuModels: function() {
-		var menu = this._super('buildContextMenuModels')[0];
+		var menu = this._super( 'buildContextMenuModels' )[0];
 
 		var import_csv = new RibbonSubMenu( {
 			label: $.i18n._( 'Import' ),
 			id: ContextMenuIconName.import_icon,
-			group: this.getContextMenuGroupByName(menu,'other'),
+			group: this.getContextMenuGroupByName( menu, 'other' ),
 			icon: Icons.import_icon,
 			permission_result: PermissionManager.checkTopLevelPermission( 'ImportCSVBranch' ),
 			permission: null,
@@ -73,29 +73,11 @@ BranchViewController = BaseViewController.extend( {
 
 	},
 
-	onContextMenuClick: function( context_btn, menu_name ) {
-
-		this._super( 'onContextMenuClick', context_btn, menu_name );
-		var id;
-
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
+	onCustomContextClick: function( id ) {
 		switch ( id ) {
 			case ContextMenuIconName.import_icon:
-				ProgressBar.showOverlay();
 				this.onImportClick();
 				break;
-
 		}
 	},
 
@@ -162,15 +144,11 @@ BranchViewController = BaseViewController.extend( {
 		this._super( 'buildEditViewUI' );
 		var $this = this;
 
-		this.setTabLabels( {
-			'tab_branch': $.i18n._( 'Branch' ),
-			'tab_audit': $.i18n._( 'Audit' )
-		} );
-
-		var tab_0_label = this.edit_view.find( 'a[ref=tab_branch]' );
-		var tab_1_label = this.edit_view.find( 'a[ref=tab_audit]' );
-		tab_0_label.text( $.i18n._( 'Branch' ) );
-		tab_1_label.text( $.i18n._( 'Audit' ) );
+		var tab_model = {
+			'tab_branch': { 'label': $.i18n._( 'Branch' ) },
+			'tab_audit': true,
+		};
+		this.setTabModel( tab_model );
 
 		var form_item_input;
 
@@ -198,7 +176,7 @@ BranchViewController = BaseViewController.extend( {
 		//Status
 
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
-		form_item_input.TComboBox( {field: 'status_id'} );
+		form_item_input.TComboBox( { field: 'status_id' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.status_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Status' ), form_item_input, tab_branch_column1, '' );
 
@@ -206,7 +184,7 @@ BranchViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'name', width: '100%'} );
+		form_item_input.TTextInput( { field: 'name', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Name' ), form_item_input, tab_branch_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -215,14 +193,14 @@ BranchViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'manual_id', width: 65} );
+		form_item_input.TTextInput( { field: 'manual_id', width: 65 } );
 		this.addEditFieldToColumn( $.i18n._( 'Code' ), form_item_input, tab_branch_column1 );
 
 		// Address1
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address1', width: '100%'} );
+		form_item_input.TTextInput( { field: 'address1', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 1)' ), form_item_input, tab_branch_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -231,7 +209,7 @@ BranchViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'address2', width: '100%'} );
+		form_item_input.TTextInput( { field: 'address2', width: '100%' } );
 		this.addEditFieldToColumn( $.i18n._( 'Address (Line 2)' ), form_item_input, tab_branch_column1 );
 
 		form_item_input.parent().width( '45%' );
@@ -240,45 +218,45 @@ BranchViewController = BaseViewController.extend( {
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'city', width: 149} );
+		form_item_input.TTextInput( { field: 'city', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'City' ), form_item_input, tab_branch_column1 );
 
 		//Country
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'country', set_empty: true} );
+		form_item_input.TComboBox( { field: 'country', set_empty: true } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.country_array ) );
 		this.addEditFieldToColumn( $.i18n._( 'Country' ), form_item_input, tab_branch_column1 );
 
 		//Province / State
 		form_item_input = Global.loadWidgetByName( FormItemType.COMBO_BOX );
 
-		form_item_input.TComboBox( {field: 'province'} );
+		form_item_input.TComboBox( { field: 'province' } );
 		form_item_input.setSourceData( Global.addFirstItemToArray( [] ) );
 		this.addEditFieldToColumn( $.i18n._( 'Province/State' ), form_item_input, tab_branch_column1 );
 
 		//City
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'postal_code', width: 149} );
+		form_item_input.TTextInput( { field: 'postal_code', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Postal/ZIP Code' ), form_item_input, tab_branch_column1 );
 
 		// Phone
 
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'work_phone', width: 149} );
+		form_item_input.TTextInput( { field: 'work_phone', width: 149 } );
 		this.addEditFieldToColumn( $.i18n._( 'Phone' ), form_item_input, tab_branch_column1 );
 
 		// Fax
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
-		form_item_input.TTextInput( {field: 'fax_phone', width: 149} );
+		form_item_input.TTextInput( { field: 'fax_phone', width: 149 } );
 
 		this.addEditFieldToColumn( $.i18n._( 'Fax' ), form_item_input, tab_branch_column1 );
 
 		//Allowed GEO Fences
-		if (  LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
+		if ( LocalCacheData.getCurrentCompany().product_edition_id >= 20 ) {
 			form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 			form_item_input.AComboBox( {
 				api_class: (APIFactory.getAPIClass( 'APIGEOFence' )),
@@ -294,7 +272,7 @@ BranchViewController = BaseViewController.extend( {
 		//Tags
 		form_item_input = Global.loadWidgetByName( FormItemType.TAG_INPUT );
 
-		form_item_input.TTagInput( {field: 'tag', object_type_id: 110} );
+		form_item_input.TTagInput( { field: 'tag', object_type_id: 110 } );
 		this.addEditFieldToColumn( $.i18n._( 'Tags' ), form_item_input, tab_branch_column1, '', null, null, true );
 	},
 

@@ -24,7 +24,7 @@ PayStubAccountWizardController = BaseWizardController.extend( {
 
 		switch ( this.current_step ) {
 			case 1:
-				var label = this.getLabel()
+				var label = this.getLabel();
 				label.html( $.i18n._( 'This wizard will automatically create Pay Stub Amendments to migrate Year-To-Date amounts from one Pay Stub Account to another as of a specific effective date.' ) + '<br><br>' );
 				this.content_div.append( label );
 				break;

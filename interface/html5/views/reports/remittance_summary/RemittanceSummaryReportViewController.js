@@ -6,7 +6,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'RemittanceSummaryReport';
 		this.viewId = 'RemittanceSummaryReport';
 		this.context_menu_name = $.i18n._( 'Remittance Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'RemittanceSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIRemittanceSummaryReport' ))();
 		this.include_form_setup = true;
@@ -111,63 +111,12 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		return [menu];
 
 	},
-	/* jshint ignore:start */
-	onContextMenuClick: function( context_btn, menu_name ) {
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
 
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
-		switch ( id ) {
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.view_html:
-				ProgressBar.showOverlay();
-				this.onViewClick('html');
-				break;
-			case ContextMenuIconName.view_html_new_window:
-				ProgressBar.showOverlay();
-				this.onViewClick('html', true);
-				break;
-			case ContextMenuIconName.export_excel:
-				this.onViewExcelClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
-			case ContextMenuIconName.save_existed_report: //All report view
-				this.onSaveExistedReportClick();
-				break;
-			case ContextMenuIconName.save_new_report: //All report view
-				this.onSaveNewReportClick();
-				break;
-			case ContextMenuIconName.timesheet_view: //All report view
-				this.onViewClick( 'pdf_timesheet' );
-				break;
-			case ContextMenuIconName.timesheet_view_detail: //All report view
-				this.onViewClick( 'pdf_timesheet_detail' );
-				break;
-			case ContextMenuIconName.save_setup: //All report view
-				this.onSaveSetup();
-				break;
-		}
-	},
-	/* jshint ignore:end */
 	buildFormSetupUI: function() {
 
 		var $this = this;
 
-		var tab3 = this.edit_view_tab.find( '#tab3' );
+		var tab3 = this.edit_view_tab.find( '#tab_form_setup' );
 
 		var tab3_column1 = tab3.find( '.first-column' );
 
@@ -176,7 +125,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.edit_view_tabs[3].push( tab3_column1 );
 
 		//Gross Payroll
-		var v_box = $( "<div class='v-box'></div>" );
+		var v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -192,7 +141,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -213,7 +162,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Gross Payroll' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Employee/Employer EI Accounts
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -229,7 +178,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -250,7 +199,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Employee/Employer EI' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Employee/Employer CPP Accounts
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -266,7 +215,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -287,7 +236,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Employee/Employer CPP' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Income Tax Accounts
-		v_box = $( "<div class='v-box'></div>" );
+		v_box = $( '<div class=\'v-box\'></div>' );
 
 		//Selection Type
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -303,7 +252,7 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 		form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
 
 		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
+		v_box.append( '<div class=\'clear-both-div\'></div>' );
 
 		//Selection
 		form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
@@ -328,14 +277,22 @@ RemittanceSummaryReportViewController = ReportBaseViewController.extend( {
 	getFormSetupData: function() {
 		var other = {};
 
-		other.gross_payroll = {include_pay_stub_entry_account: this.current_edit_record.gross_payroll_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.gross_payroll_exclude_pay_stub_entry_account};
-		other.cpp = {include_pay_stub_entry_account: this.current_edit_record.cpp_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.cpp_exclude_pay_stub_entry_account};
-		other.ei = {include_pay_stub_entry_account: this.current_edit_record.ei_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.ei_exclude_pay_stub_entry_account};
-		other.tax = {include_pay_stub_entry_account: this.current_edit_record.tax_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.tax_exclude_pay_stub_entry_account};
+		other.gross_payroll = {
+			include_pay_stub_entry_account: this.current_edit_record.gross_payroll_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.gross_payroll_exclude_pay_stub_entry_account
+		};
+		other.cpp = {
+			include_pay_stub_entry_account: this.current_edit_record.cpp_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.cpp_exclude_pay_stub_entry_account
+		};
+		other.ei = {
+			include_pay_stub_entry_account: this.current_edit_record.ei_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.ei_exclude_pay_stub_entry_account
+		};
+		other.tax = {
+			include_pay_stub_entry_account: this.current_edit_record.tax_include_pay_stub_entry_account,
+			exclude_pay_stub_entry_account: this.current_edit_record.tax_exclude_pay_stub_entry_account
+		};
 
 		return other;
 	},

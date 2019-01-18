@@ -1,7 +1,7 @@
 ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 
 	_required_files: {
-		10: ['APIScheduleSummaryReport', 'APISchedule' ,'APIAbsencePolicy'],
+		10: ['APIScheduleSummaryReport', 'APISchedule', 'APIAbsencePolicy'],
 		20: ['APIJob', 'APIJobGroup', 'APIJobItemGroup', 'APIJobItem']
 	},
 
@@ -9,7 +9,7 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 		this.script_name = 'ScheduleSummaryReport';
 		this.viewId = 'ScheduleSummaryReport';
 		this.context_menu_name = $.i18n._( 'Schedule Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'ScheduleSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APIScheduleSummaryReport' ))();
 	},
@@ -42,7 +42,7 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 						}
 					}
 					LocalCacheData.default_edit_id_for_next_open_edit_view = null;
-				}else{
+				} else {
 					edit_item = $this.getDefaultReport( result );
 				}
 
@@ -204,7 +204,7 @@ ScheduleSummaryReportViewController = ReportBaseViewController.extend( {
 
 	onFormItemChangeProcessFilterField: function( target, key ) {
 		var filter = target.getValue();
-		this.visible_report_values[key] = {status_id: filter};
+		this.visible_report_values[key] = { status_id: filter };
 	}
 
 } );

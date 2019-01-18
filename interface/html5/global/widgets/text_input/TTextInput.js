@@ -53,7 +53,9 @@
 			}
 			api_date.parseTimeUnit( $this.val(), {
 				onResult: function( result ) {
-					if ( cancel_date_parse ) return;
+					if ( cancel_date_parse ) {
+						return;
+					}
 					parsed_value = result.getResult();
 					if ( callBack ) {
 						callBack();
@@ -64,7 +66,7 @@
 		};
 
 		this.setPlaceHolder = function( val ) {
-			$this.attr( 'placeholder', val )
+			$this.attr( 'placeholder', val );
 		};
 
 		this.setNeedParsDate = function( val ) {
@@ -101,7 +103,7 @@
 					check_box.show();
 				}
 				if ( this.val() === $.i18n._( 'N/A' ) ) {
-					this.val( '' )
+					this.val( '' );
 				}
 			}
 
@@ -139,7 +141,7 @@
 
 			if ( mass_edit_mode ) {
 				check_box = $( ' <div class="mass-edit-checkbox-wrapper"><input type="checkbox" class="mass-edit-checkbox" />' +
-				'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
+						'<label for="checkbox-input-1" class="input-helper input-helper--checkbox"></label></div>' );
 				check_box.insertBefore( $( this ) );
 				check_box.change( function() {
 					if ( need_parser_date || need_parser_sec ) {
@@ -188,7 +190,7 @@
 			if ( need_parser_sec || need_parser_date || parsed_value ) {
 				if ( parsed_value === -1 ) {
 					cancel_date_parse = true; // cancel orginal date parse process
-					parsed_value = api_date.parseTimeUnit( val, {async: false} ).getResult();
+					parsed_value = api_date.parseTimeUnit( val, { async: false } ).getResult();
 				}
 				return parsed_value;
 			} else {
@@ -236,12 +238,12 @@
 		this.showErrorTip = function( sec ) {
 
 			if ( !Global.isSet( sec ) ) {
-				sec = 2
+				sec = 2;
 			}
 
 			if ( !error_tip_box ) {
 				error_tip_box = Global.loadWidgetByName( WidgetNamesDic.ERROR_TOOLTIP );
-				error_tip_box = error_tip_box.ErrorTipBox()
+				error_tip_box = error_tip_box.ErrorTipBox();
 			}
 			error_tip_box.cancelRemove();
 
@@ -272,20 +274,20 @@
 			var content_width, example_width;
 			if ( !is_static_width ) {
 				if ( mode === 'time' ) {
-					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().time_format_display, 12 );
+					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().time_format_display );
 				} else if ( mode == 'time_unit' ) {
-					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().time_unit_format_display, 12 );
+					example_width = Global.calculateTextWidth( LocalCacheData.getLoginUserPreference().time_unit_format_display );
 				} else {
 					example_width = 156;
 				}
-				content_width = Global.calculateTextWidth( $this.getValue(), 12, example_width, 200 );
+				content_width = Global.calculateTextWidth( $this.getValue(), { min_width: example_width, max_width: 200 } );
 
 			} else {
 				if ( static_width.toString().indexOf( '%' ) > 0 ) {
 					return;
 				}
 				example_width = static_width;
-				content_width = Global.calculateTextWidth( $this.getValue(), 12, example_width, static_width > 200 ? static_width : 200 );
+				content_width = Global.calculateTextWidth( $this.getValue(), {min_width: example_width, max_width: static_width > 200 ? static_width : 200 } );
 			}
 			$this.width( content_width + 'px' );
 		};
@@ -441,13 +443,13 @@
 
 					if ( !check_box ) {
 						if ( LocalCacheData.current_open_sub_controller &&
-							LocalCacheData.current_open_sub_controller.edit_view &&
-							LocalCacheData.current_open_sub_controller.is_viewing ) {
+								LocalCacheData.current_open_sub_controller.edit_view &&
+								LocalCacheData.current_open_sub_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						} else if ( LocalCacheData.current_open_primary_controller &&
-							LocalCacheData.current_open_primary_controller.edit_view &&
-							LocalCacheData.current_open_primary_controller.is_viewing ) {
+								LocalCacheData.current_open_primary_controller.edit_view &&
+								LocalCacheData.current_open_primary_controller.is_viewing ) {
 							error_string = Global.view_mode_message;
 							$this.showErrorTip( 10 );
 						}

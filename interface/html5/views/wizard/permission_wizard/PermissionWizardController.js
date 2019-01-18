@@ -130,14 +130,16 @@ PermissionWizardController = BaseWizardController.extend( {
 	setSection: function( section_group_id, select_all ) {
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
 
-		this.api_permission.getSectionBySectionGroup( section_group_id, {onResult: function( result ) {
-			var data = Global.buildRecordArray( result.getResult() );
-			current_step_ui.section.setSourceData( data );
-			if ( select_all ) {
-				current_step_ui.section.setValue( data );
-			}
+		this.api_permission.getSectionBySectionGroup( section_group_id, {
+			onResult: function( result ) {
+				var data = Global.buildRecordArray( result.getResult() );
+				current_step_ui.section.setSourceData( data );
+				if ( select_all ) {
+					current_step_ui.section.setValue( data );
+				}
 
-		}} );
+			}
+		} );
 	},
 
 	buildCurrentStepData: function() {
@@ -148,76 +150,82 @@ PermissionWizardController = BaseWizardController.extend( {
 		switch ( this.current_step ) {
 			case 1:
 
-				this.api_permission.getOptions( 'preset', {onResult: function( result ) {
-					var data = Global.buildRecordArray( result.getResult() );
+				this.api_permission.getOptions( 'preset', {
+					onResult: function( result ) {
+						var data = Global.buildRecordArray( result.getResult() );
 
-					data.unshift( {value: 0, label: $.i18n._( 'CUSTOM' )} );
+						data.unshift( { value: 0, label: $.i18n._( 'CUSTOM' ) } );
 
-					current_step_ui.role.setSourceData( data );
+						current_step_ui.role.setSourceData( data );
 
-					if ( current_step_data ) {
-						current_step_ui.role.setValue( current_step_data.role );
-					}
+						if ( current_step_data ) {
+							current_step_ui.role.setValue( current_step_data.role );
+						}
 
-					if ( LocalCacheData.current_open_primary_controller.current_edit_record && LocalCacheData.current_open_primary_controller.current_edit_record.name ) {
-						var selected_control_name = LocalCacheData.current_open_primary_controller.current_edit_record.name.toLowerCase();
-						for ( var n in data ) {
-							if ( data[n].label.toLowerCase() == selected_control_name ) {
-								current_step_ui.role.setSelectedIndex( n );
-								break;
+						if ( LocalCacheData.current_open_primary_controller.current_edit_record && LocalCacheData.current_open_primary_controller.current_edit_record.name ) {
+							var selected_control_name = LocalCacheData.current_open_primary_controller.current_edit_record.name.toLowerCase();
+							for ( var n in data ) {
+								if ( data[n].label.toLowerCase() == selected_control_name ) {
+									current_step_ui.role.setSelectedIndex( n );
+									break;
+								}
 							}
 						}
+
 					}
+				} );
 
-				}} );
+				this.api_permission.getOptions( 'common_permissions', {
+					onResult: function( result ) {
+						var data = Global.buildRecordArray( result.getResult() );
 
-				this.api_permission.getOptions( 'common_permissions', {onResult: function( result ) {
-					var data = Global.buildRecordArray( result.getResult() );
+						current_step_ui.permission.setSourceData( data );
 
-					current_step_ui.permission.setSourceData( data );
+						if ( current_step_data ) {
+							current_step_ui.permission.setValue( current_step_data.permission );
+						} else {
+							current_step_ui.permission.setValue( data );
+						}
 
-					if ( current_step_data ) {
-						current_step_ui.permission.setValue( current_step_data.permission );
-					} else {
-						current_step_ui.permission.setValue( data );
 					}
-
-				}} );
+				} );
 
 				break;
 
 			case 2:
 
-				this.api_permission.getOptions( 'section_group', {onResult: function( result ) {
+				this.api_permission.getOptions( 'section_group', {
+					onResult: function( result ) {
 
-					var data = Global.buildRecordArray( result.getResult() );
+						var data = Global.buildRecordArray( result.getResult() );
 
-					current_step_ui.section_group.setSourceData( data );
+						current_step_ui.section_group.setSourceData( data );
 
-					if ( current_step_data ) {
+						if ( current_step_data ) {
 
-						if ( current_step_data.section_group && current_step_data.section_group.length > 0 ) {
-							current_step_ui.section_group.setValue( current_step_data.section_group );
-							$this.setSection( current_step_data.section_group );
-							current_step_ui.section.setValue( current_step_data.section );
+							if ( current_step_data.section_group && current_step_data.section_group.length > 0 ) {
+								current_step_ui.section_group.setValue( current_step_data.section_group );
+								$this.setSection( current_step_data.section_group );
+								current_step_ui.section.setValue( current_step_data.section );
+							}
+
+						} else {
+							current_step_ui.section_group.setValue( data[0].value );
+							$this.setSection( data[0].value, true );
+
 						}
 
-					} else {
-						current_step_ui.section_group.setValue( data[0].value );
-						$this.setSection( data[0].value, true );
-
 					}
-
-				}} );
+				} );
 
 				break;
 
 			case 3:
 
 				if ( current_step_data ) {
-					current_step_ui[current_step_data.action].attr( 'checked', 'checked' );
+					current_step_ui[current_step_data.action].prop( 'checked', 'checked' );
 				} else {
-					current_step_ui['allow'].attr( 'checked', 'checked' );
+					current_step_ui['allow'].prop( 'checked', 'checked' );
 
 				}
 				break;
@@ -236,19 +244,21 @@ PermissionWizardController = BaseWizardController.extend( {
 		var permission = this.stepsDataDic[1].permission;
 		var permission_status = this.stepsDataDic[3].action;
 
-		this.api_permission.filterPresetPermissions( preset, sections, permission, {onResult: function( result ) {
+		this.api_permission.filterPresetPermissions( preset, sections, permission, {
+			onResult: function( result ) {
 
-			if ( !result.isValid ) {
-				TAlertManager.showErrorAlert( result );
-				$this.onCloseClick();
-			} else {
+				if ( !result.isValid ) {
+					TAlertManager.showErrorAlert( result );
+					$this.onCloseClick();
+				} else {
 
-				$this.onCloseClick();
-				if ( $this.call_back ) {
-					$this.call_back( result.getResult(), permission_status );
+					$this.onCloseClick();
+					if ( $this.call_back ) {
+						$this.call_back( result.getResult(), permission_status );
+					}
 				}
 			}
-		}} );
+		} );
 
 	},
 
@@ -259,9 +269,11 @@ PermissionWizardController = BaseWizardController.extend( {
 		switch ( this.current_step ) {
 			case 3:
 				for ( key in current_step_ui ) {
-					if ( !current_step_ui.hasOwnProperty( key ) ) continue;
+					if ( !current_step_ui.hasOwnProperty( key ) ) {
+						continue;
+					}
 
-					if ( current_step_ui[key].attr( 'checked' ) || current_step_ui[key][0].checked === true ) {
+					if ( current_step_ui[key].prop( 'checked' ) || current_step_ui[key][0].checked === true ) {
 						current_step_data.action = key;
 					}
 
@@ -271,7 +283,9 @@ PermissionWizardController = BaseWizardController.extend( {
 			default:
 
 				for ( var key in current_step_ui ) {
-					if ( !current_step_ui.hasOwnProperty( key ) ) continue;
+					if ( !current_step_ui.hasOwnProperty( key ) ) {
+						continue;
+					}
 
 					current_step_data[key] = current_step_ui[key].getValue();
 				}

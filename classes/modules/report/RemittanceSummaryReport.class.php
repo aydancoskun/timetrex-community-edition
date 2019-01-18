@@ -602,7 +602,7 @@ class RemittanceSummaryReport extends Report {
 				if ( !isset($this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]) ) {
 					$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp] = array(
 																'date_stamp' => strtotime( $pse_obj->getColumn('pay_stub_transaction_date') ),
-																'birth_date' => $pse_obj->getColumn('birth_date'), //Its a epoch value, no need to strtotime.
+																'birth_date' => strtotime( $pse_obj->getColumn('birth_date') ),
 																'pay_period_start_date' => strtotime( $pse_obj->getColumn('pay_period_start_date') ),
 																'pay_period_end_date' => strtotime( $pse_obj->getColumn('pay_period_end_date') ),
 

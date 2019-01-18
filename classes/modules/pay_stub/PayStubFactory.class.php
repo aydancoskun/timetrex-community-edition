@@ -1603,7 +1603,7 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function handleUserExpenseStatuses() {
-		if ( getTTProductEdition() < TT_PRODUCT_ENTERPRISE ) {
+		if ( getTTProductEdition() <= TT_PRODUCT_CORPORATE ) {
 			return TRUE;
 		}
 
@@ -4135,7 +4135,7 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function addLog( $log_action ) {
-		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub') .' - '. TTi18n::getText('Employee') .': '. $this->getUserObject()->getFullName() .' '. TTi18n::getText('Status').': '. Option::getByKey($this->getStatus(), $this->getOptions('status') ) .' '. TTi18n::getText('Start').': '. TTDate::getDate('DATE', $this->getStartDate() ) .' '. TTi18n::getText('End').': '. TTDate::getDate('DATE', $this->getEndDate() ) .' '. TTi18n::getText('Transaction').': '. TTDate::getDate('DATE', $this->getTransactionDate() ), NULL, $this->getTable(), $this );
+		return TTLog::addEntry( $this->getId(), $log_action, TTi18n::getText('Pay Stub') .' - '. TTi18n::getText('Employee') .': '. $this->getUserObject()->getFullName() .' '. TTi18n::getText('Status').': '. Option::getByKey($this->getStatus(), $this->getOptions('status') ) .' '. TTi18n::getText('Type').': '. Option::getByKey($this->getType(), $this->getOptions('type') ) .' '. TTi18n::getText('Start').': '. TTDate::getDate('DATE', $this->getStartDate() ) .' '. TTi18n::getText('End').': '. TTDate::getDate('DATE', $this->getEndDate() ) .' '. TTi18n::getText('Transaction').': '. TTDate::getDate('DATE', $this->getTransactionDate() ) .' '. TTi18n::getText('Run').': '. $this->getRun(), NULL, $this->getTable(), $this );
 	}
 }
 ?>

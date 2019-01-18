@@ -96,9 +96,12 @@ class APISchedule extends APIFactory {
 				}
 			}
 
+			if ( isset($user_ids[0]) ) {
+				$retarr['user_id'] = $user_ids[0];
+			}
+
 			Debug::Arr( $user_ids, 'First Date Stamp: '. $first_date_stamp .' Last: '. $last_date_stamp .' User Ids: ', __FILE__, __LINE__, __METHOD__, 10);
 		} else {
-			$retarr['user_id'] = $this->getCurrentUserObject()->getID();
 			$retarr['date_stamp'] = TTDate::getDate('DATE', time() );
 
 			Debug::Text( 'No input data to base defaults on...', __FILE__, __LINE__, __METHOD__, 10);
@@ -213,7 +216,6 @@ class APISchedule extends APIFactory {
 	 * @return array|bool
 	 */
 	function getCombinedSchedule( $data = NULL, $base_date = NULL, $type = NULL, $strict = NULL ) {
-
 		if ( !$this->getPermissionObject()->Check('schedule', 'enabled')
 				OR !( $this->getPermissionObject()->Check('schedule', 'view') OR $this->getPermissionObject()->Check('schedule', 'view_own') OR $this->getPermissionObject()->Check('schedule', 'view_child') ) ) {
 			Debug::Text('aPermission Denied!...', __FILE__, __LINE__, __METHOD__, 10);

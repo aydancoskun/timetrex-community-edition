@@ -253,7 +253,7 @@ var ServiceCaller = Backbone.Model.extend( {
 				break;
 		}
 
-			message_id = UUID.guid();
+		message_id = UUID.guid();
 		TTPromise.add('ServiceCaller', message_id);
 		if ( className !== 'APIProgressBar' && function_name !== 'Logout' ) {
 			url = url + '&MessageID=' + message_id;
@@ -343,15 +343,15 @@ var ServiceCaller = Backbone.Model.extend( {
 						} else {
 							var paths = Global.getBaseURL().replace(ServiceCaller.rootURL, '').split( '/' );
 							if ( paths.indexOf('quick_punch') > 0 ) {
-								window.location = Global.getBaseURL() + '#!m=' + 'QuickPunchLogin';
+								Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + 'QuickPunchLogin' );
 							} else if ( paths.indexOf('portal') > 0 ) {
 								if ( LocalCacheData.all_url_args.company_id ) {
 									LocalCacheData.setPortalLoginUser( null );
-									window.location = Global.getBaseURL() + '#!m=PortalJobVacancy&company_id=' + LocalCacheData.all_url_args.company_id;
+									Global.setURLToBrowser( Global.getBaseURL() + '#!m=PortalJobVacancy&company_id=' + LocalCacheData.all_url_args.company_id );
 								}
 							} else {
 								if ( !LocalCacheData.all_url_args.company_id ) {
-									window.location = Global.getBaseURL() + '#!m=' + 'Login';
+									Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + 'Login' );
 								}
 							}
 						}
@@ -409,7 +409,7 @@ var ServiceCaller = Backbone.Model.extend( {
 
 						Global.clearSessionCookie();
 						//$.cookie( 'SessionID', null, {expires: 30, path: LocalCacheData.cookie_path} );
-						window.location = Global.getBaseURL() + '#!m=' + 'Login';
+						Global.setURLToBrowser( Global.getBaseURL() + '#!m=' + 'Login' );
 
 						return;
 
@@ -449,19 +449,16 @@ var ServiceCaller = Backbone.Model.extend( {
 } );
 
 ServiceCaller.getURLWithSessionId = function( rest_url ) {
-
-
 	//Error: Object doesn't support property or method 'cookie' in /interface/html5/services/ServiceCaller.js?v=8.0.0-20150126-192230 line 326
-	if ( $ && $.cookie && !$.cookie( Global.getSessionIDKey() ) ) {
+	if ( getCookie( Global.getSessionIDKey() ) ) {
 		LocalCacheData.setSessionID( '' );
 	}
 
-	if ( $ && $.cookie && $.cookie( 'js_debug' ) ) {
+	if ( getCookie( 'js_debug' ) ) {
 		return ServiceCaller.baseUrl + '?' + Global.getSessionIDKey() + '=' + LocalCacheData.getSessionID() + '&' + rest_url;
 	} else {
 		return ServiceCaller.baseUrl + '?' + rest_url;
 	}
-
 };
 
 ServiceCaller.hosts = null;

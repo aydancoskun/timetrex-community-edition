@@ -91,12 +91,13 @@ class APIAbsencePolicy extends APIFactory {
 	 * @return array
 	 */
 	function getAbsencePolicy( $data = NULL, $disable_paging = FALSE ) {
+		$data = $this->initializeFilterAndPager( $data, $disable_paging );
+
 		if ( !$this->getPermissionObject()->Check('absence_policy', 'enabled')
 				OR !( $this->getPermissionObject()->Check('absence_policy', 'view') OR $this->getPermissionObject()->Check('absence_policy', 'view_own') OR $this->getPermissionObject()->Check('absence_policy', 'view_child')	 ) ) {
 			//return $this->getPermissionObject()->PermissionDenied();
 			$data['filter_columns'] = $this->handlePermissionFilterColumns( (isset($data['filter_columns'])) ? $data['filter_columns'] : NULL, Misc::trimSortPrefix( $this->getOptions('list_columns') ) );
 		}
-		$data = $this->initializeFilterAndPager( $data, $disable_paging );
 		/*
 		//Handle this in the SQL query directly with the user_id filter.
 		//Make sure we filter absence policies to just those assigned to the policy group when user_id filter is passed.

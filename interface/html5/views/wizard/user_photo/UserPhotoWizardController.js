@@ -7,7 +7,7 @@ UserPhotoWizardController = BaseWizardController.extend( {
 		'CameraBrowser', //only in the upload wizard
 		'TImageAdvBrowser',//only in the upload wizard
 		'TImage',//only in the upload wizard
-		'TImageCutArea',//only in the upload wizard
+		'TImageCutArea'//only in the upload wizard
 	],
 
 	init: function( options ) {
@@ -34,15 +34,15 @@ UserPhotoWizardController = BaseWizardController.extend( {
 		this.content_div.empty();
 		switch ( this.current_step ) {
 			case 1:
-				$this.next_btn.removeClass('disable-image');
+				$this.next_btn.removeClass( 'disable-image' );
 				var label = this.getLabel();
 				label.text( $.i18n._( 'Please choose the image source' ) );
 
 				var combo_box = this.getComboBox( 'image_type' );
 
 				combo_box.setSourceData( [
-					{value: 'file', label: $.i18n._( 'File' )},
-					{value: 'camera', label: $.i18n._( 'Camera' )}
+					{ value: 'file', label: $.i18n._( 'File' ) },
+					{ value: 'camera', label: $.i18n._( 'Camera' ) }
 				] );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -64,12 +64,12 @@ UserPhotoWizardController = BaseWizardController.extend( {
 					img = this.getCameraBrowser( 'image_data' );
 
 					img.unbind( 'NoImageChange' ).bind( 'NoImageChange', function() {
-						$this.next_btn.addClass('disable-image');
+						$this.next_btn.addClass( 'disable-image' );
 					} );
 				}
 
 				img.unbind( 'change' ).bind( 'change', function() {
-					$this.next_btn.removeClass('disable-image');
+					$this.next_btn.removeClass( 'disable-image' );
 				} );
 
 				this.stepsWidgetDic[this.current_step] = {};
@@ -77,11 +77,11 @@ UserPhotoWizardController = BaseWizardController.extend( {
 
 				this.content_div.append( label );
 				this.content_div.append( img );
-				$this.next_btn.addClass('disable-image');
+				$this.next_btn.addClass( 'disable-image' );
 
 				break;
 			case 3:
-				$this.next_btn.removeClass('disable-image');
+				$this.next_btn.removeClass( 'disable-image' );
 
 				label = this.getLabel();
 				label.text( $.i18n._( 'Crop and resize image' ) );
@@ -172,7 +172,7 @@ UserPhotoWizardController = BaseWizardController.extend( {
 	},
 
 	onNextClick: function() {
-		if (this.next_btn.hasClass('disable-image')){
+		if ( this.next_btn.hasClass( 'disable-image' ) ) {
 			return;
 		}
 		var current_step_ui = this.stepsWidgetDic[this.current_step];
@@ -188,7 +188,7 @@ UserPhotoWizardController = BaseWizardController.extend( {
 	},
 
 	onBackClick: function() {
-		if (this.back_btn.hasClass('disable-image')){
+		if ( this.back_btn.hasClass( 'disable-image' ) ) {
 			return;
 		}
 		var current_step_ui = this.stepsWidgetDic[this.current_step];

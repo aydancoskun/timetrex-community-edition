@@ -308,7 +308,7 @@ class PermissionFactory extends Factory {
 										'user_preference' => TTi18n::gettext('Employee Preferences'),
 										'user_tax_deduction' => TTi18n::gettext('Employee Tax / Deductions'),
 										'user_contact' => TTi18n::gettext('Employee Contact'),
-										'remittance_destination_account' => TTi18n::gettext('Remittance Destination Account'),
+										'remittance_destination_account' => TTi18n::gettext('Employee Payment Methods'),
 
 										'schedule' => TTi18n::gettext('Schedule'),
 										'recurring_schedule' => TTi18n::gettext('Recurring Schedule'),

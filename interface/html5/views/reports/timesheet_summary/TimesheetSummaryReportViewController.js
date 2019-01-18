@@ -1,12 +1,12 @@
 TimesheetSummaryReportViewController = ReportBaseViewController.extend( {
 
-	_required_files: [ 'APITimesheetSummaryReport', 'APICurrency', 'APITimeSheetVerify'],
+	_required_files: ['APITimesheetSummaryReport', 'APICurrency', 'APITimeSheetVerify'],
 
-	initReport: function ( options ) {
+	initReport: function( options ) {
 		this.script_name = 'TimesheetSummaryReport';
 		this.viewId = 'TimesheetSummaryReport';
 		this.context_menu_name = $.i18n._( 'TimeSheet Summary' );
-		this.navigation_label = $.i18n._( 'Saved Report' ) +':';
+		this.navigation_label = $.i18n._( 'Saved Report' ) + ':';
 		this.view_file = 'TimesheetSummaryReportView.html';
 		this.api = new (APIFactory.getAPIClass( 'APITimesheetSummaryReport' ))();
 	},
@@ -92,51 +92,5 @@ TimesheetSummaryReportViewController = ReportBaseViewController.extend( {
 
 		return [menu];
 
-	},
-
-	onContextMenuClick: function( context_btn, menu_name ) {
-		var id;
-		if ( Global.isSet( menu_name ) ) {
-			id = menu_name;
-		} else {
-			context_btn = $( context_btn );
-
-			id = $( context_btn.find( '.ribbon-sub-menu-icon' ) ).attr( 'id' );
-
-			if ( context_btn.hasClass( 'disable-image' ) ) {
-				return;
-			}
-		}
-
-		switch ( id ) {
-			case ContextMenuIconName.view:
-				ProgressBar.showOverlay();
-				this.onViewClick();
-				break;
-			case ContextMenuIconName.view_html:
-				ProgressBar.showOverlay();
-				this.onViewClick('html');
-				break;
-			case ContextMenuIconName.view_html_new_window:
-				ProgressBar.showOverlay();
-				this.onViewClick('html', true);
-				break;
-			case ContextMenuIconName.export_excel:
-				this.onViewExcelClick();
-				break;
-			case ContextMenuIconName.cancel:
-				this.onCancelClick();
-				break;
-			case ContextMenuIconName.save_existed_report: //All report view
-				this.onSaveExistedReportClick();
-				break;
-			case ContextMenuIconName.save_new_report: //All report view
-				this.onSaveNewReportClick();
-				break;
-			case ContextMenuIconName.save_setup: //All report view
-				this.onSaveSetup();
-				break;
-		}
 	}
-
 } );

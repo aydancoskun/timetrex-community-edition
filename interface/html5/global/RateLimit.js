@@ -18,7 +18,8 @@
  *    }
  *
  */
-var RateLimit = function(){};
+var RateLimit = function() {
+};
 
 //attributes
 RateLimit.memory = {};
@@ -40,7 +41,7 @@ RateLimit.setID = function( value ) {
 RateLimit.getAllowedCalls = function() {
 	return this.allowed_calls;
 };
-RateLimit.setAllowedCalls = function(value) {
+RateLimit.setAllowedCalls = function( value ) {
 	if ( value != '' ) {
 		this.allowed_calls = value;
 		return true;
@@ -51,7 +52,7 @@ RateLimit.setAllowedCalls = function(value) {
 RateLimit.getTimeFrame = function() {
 	return this.time_frame;
 };
-RateLimit.setTimeFrame = function(value) {
+RateLimit.setTimeFrame = function( value ) {
 	if ( value != '' ) {
 		this.time_frame = value;
 		return true;
@@ -60,14 +61,14 @@ RateLimit.setTimeFrame = function(value) {
 };
 
 RateLimit.getRateData = function() {
-	if ( typeof(this.memory[this.id]) == "undefined" ) {
+	if ( typeof(this.memory[this.id]) == 'undefined' ) {
 		return null;
 	}
 	return this.memory[this.id];
 };
-RateLimit.setRateData = function(value) {
-	if ( typeof(this.memory[this.id]) == "undefined" ) {
-		this.memory[this.id] ={};
+RateLimit.setRateData = function( value ) {
+	if ( typeof(this.memory[this.id]) == 'undefined' ) {
+		this.memory[this.id] = {};
 	}
 	if ( value != '' ) {
 		this.memory[this.id] = value;
@@ -78,48 +79,48 @@ RateLimit.setRateData = function(value) {
 
 RateLimit.getAttempts = function() {
 	var rate_data = this.getRateData();
-	if ( Global.isSet(rate_data['attempts']) ) {
+	if ( Global.isSet( rate_data['attempts'] ) ) {
 		return rate_data['attempts'];
 	}
 
 	return false;
-}
+};
 
 /**
  * @returns {boolean}
  */
-RateLimit.check = function( ) {
+RateLimit.check = function() {
 	if ( this.getID() != '' ) {
 		var rate_data = this.getRateData();
 		var new_time = (new Date()).getTime();
 
-		if ( Global.isSet(rate_data) == false ) {
+		if ( Global.isSet( rate_data ) == false ) {
 			rate_data = {
 				first_date: new_time,
 				attempts: 0
-			}
-		} else if ( Global.isSet(rate_data) ) {
+			};
+		} else if ( Global.isSet( rate_data ) ) {
 
 			var time_frame_milliseconds = this.getTimeFrame() * 1000;
 			if ( rate_data.attempts > this.getAllowedCalls() && rate_data.first_date >= (new_time - time_frame_milliseconds) ) {
-				Debug.Text('RateLimit limiting [' + rate_data.attempts +'/'+ this.getAllowedCalls() +'] in '+ (Math.floor((new_time - rate_data.first_date)/1000)) +'/'+ this.getTimeFrame() +'sec', 'RateLimit.js', 'RateLimit', 'check', 10);
+				Debug.Text( 'RateLimit limiting [' + rate_data.attempts + '/' + this.getAllowedCalls() + '] in ' + (Math.floor( (new_time - rate_data.first_date) / 1000 )) + '/' + this.getTimeFrame() + 'sec', 'RateLimit.js', 'RateLimit', 'check', 10 );
 				return false;
 			} else if ( rate_data.first_date < new_time - time_frame_milliseconds ) {
 				rate_data = {
 					first_date: new_time,
 					attempts: 0
-				}
+				};
 			}
 		}
 
 		rate_data.attempts++;
-		this.setRateData(rate_data);
+		this.setRateData( rate_data );
 	}
 	return true;
 };
 
-RateLimit.delete = function(id) {
-	if( id != null ) {
+RateLimit.delete = function( id ) {
+	if ( id != null ) {
 		this.id = id;
 	}
 	delete this.memory[this.id];

@@ -5,25 +5,19 @@ require.config( {
 
 	paths: {
 		'CookieSetting': 'global/CookieSetting',
-		'APIGlobal': 'global/APIGlobal.js.php?disable_db='+ DISABLE_DB,
+		'APIGlobal': 'global/APIGlobal.js.php?disable_db=' + DISABLE_DB,
 		'async': 'framework/require_async_plugin',
-		'jquery_cookie': 'framework/jquery.cookie',
 		'jquery_json': 'framework/jquery.json',
 		'jquery_tablednd': 'framework/jquery.tablednd',
 		'jquery_ba_resize': 'framework/jquery.ba-resize',
 		'fastclick': 'framework/fastclick',
-		'stacktrace': 'framework/stacktrace',
 		'html2canvas': 'framework/html2canvas',
-		'datejs': 'framework/date',
-		'moment': 'framework/moment.min',
+		'moment': 'framework/moment',
 		'timepicker_addon': 'framework/widgets/datepicker/jquery-ui-timepicker-addon',
-		'grid_locale': 'framework/widgets/jqgrid/grid.locale-en',
-		'jqGrid': 'framework/widgets/jqgrid/jquery.jqGrid.src',
+		'jqGrid': 'framework/widgets/jqgrid/jquery.jqgrid.min',
+		'jqgrid.winmultiselect': 'framework/widgets/jqgrid/jquery.jqgrid.winmultiselect',
 		'ImageAreaSelect': 'framework/jquery.imgareaselect',
-
 		'live-chat': 'global/widgets/live-chat/live-chat',
-
-		'jqGrid_extend': 'framework/widgets/jqgrid/jquery.jqGrid.extend',
 		'SearchPanel': 'global/widgets/search_panel/SearchPanel',
 		'FormItemType': 'global/widgets/search_panel/FormItemType',
 		'TGridHeader': 'global/widgets/jqgrid/TGridHeader',
@@ -90,31 +84,30 @@ require.config( {
 		'UserGenericStatusWindowController': 'views/wizard/user_generic_data_status/UserGenericStatusWindowController',
 		'ReportBaseViewController': 'views/reports/ReportBaseViewController',
 		'sonic': 'framework/sonic',
-		'qtip': 'framework/jquery.qtip.min',
+		'qtip': 'framework/widgets/jquery.qtip/jquery.qtip.min',
 		'rightclickmenu': 'framework/rightclickmenu/rightclickmenu',
-		'jquery.ui.position': 'framework/rightclickmenu/jquery.ui.position',
 
 		'jquery': 'framework/jquery.min',
 		'jquery.form': 'framework/jquery.form.min',
-		'jquery-ui': 'framework/jqueryui/js/jquery-ui.custom.min',
+		'jquery-ui': 'framework/jqueryui/jquery-ui.min',
 		'jquery.i18n': 'framework/jquery.i18n',
 		'underscore': 'framework/backbone/underscore-min',
 		'backbone': 'framework/backbone/backbone-min',
-		'jquery.masonry': 'framework/jquery.masonry.min',
+		'jquery.masonry': 'framework/masonry.min',
 		'interact': 'framework/interact.min',
 		'tinymce': 'framework/tinymce/tinymce.min',
-		'jquery.sortable': 'framework/jquery.sortable',
 		'Global': 'global/Global',
-		'RateLimiter': 'global/RateLimiter',
 		'LocalCacheData': 'global/LocalCacheData',
 		'nanobar': 'framework/nanobar.min',
 
 		'leaflet': 'framework/leaflet/leaflet',
 		'leaflet-timetrex': 'framework/leaflet/leaflet-timetrex',
 		'leaflet-providers': 'framework/leaflet/leaflet-providers/leaflet-providers',
-		'leaflet-routing': 'framework/leaflet/leaflet-routing-machine/leaflet-routing-machine.min',
+		'leaflet-routing': 'framework/leaflet/leaflet-routing-machine/leaflet-routing-machine',
 		'leaflet-draw': 'framework/leaflet/leaflet-draw/leaflet.draw',
-		'pdfjs': 'framework/pdfjs',
+		'pdfjs': 'framework/pdfjs', //Need to use pdfjs-dist/build below instead, as thats what defined in the pdf.js file.
+		'pdfjs-dist/build/pdf': 'framework/pdfjs/pdf',
+		'pdfjs-dist/build/pdf.worker': 'framework/pdfjs/pdf.worker',
 		'autolinker': 'framework/autolinker',
 		'measurement': 'framework/measurement',
 		'TTPromise': 'global/TTPromise',
@@ -126,6 +119,7 @@ require.config( {
 		'RateLimit': 'global/RateLimit',
 		'jquery-bridget': 'framework/jquery.bridget',
 
+		'TTGrid': 'global/widgets/ttgrid/TTGrid',
 
 		/**
 		 * API paths
@@ -320,17 +314,24 @@ require.config( {
 		'APICurrencyPortal': 'services/core/APICurrencyPortal',
 		'APIDocumentPortal': 'services/document/APIDocumentPortal',
 
-		'RequestViewCommonController':'views/common/RequestViewCommonController',
-		'EmbeddedMessageCommon':'views/common/EmbeddedMessageCommon',
-		'AuthorizationHistoryCommon':'views/common/AuthorizationHistoryCommon',
+		'RequestViewCommonController': 'views/common/RequestViewCommonController',
+		'EmbeddedMessageCommon': 'views/common/EmbeddedMessageCommon',
+		'AuthorizationHistoryCommon': 'views/common/AuthorizationHistoryCommon',
+		'BaseTreeViewController': 'views/common/BaseTreeViewController',
 	},
 	shim: {
+		'TTGrid': {
+			deps: ['jqGrid']
+		},
+		'jqGrid': {
+			deps: ['jquery']
+		},
 		'APIGlobal': {
-			deps: ['CookieSetting'],
+			deps: ['CookieSetting']
 		},
 		'LocalCacheData': {
 			deps: ['APIGlobal'],
-			exports: 'LocalCacheData',
+			exports: 'LocalCacheData'
 		},
 		'Global': {
 			exports: 'Global',
@@ -338,14 +339,14 @@ require.config( {
 				'backbone',
 				'LocalCacheData',
 				'jquery.masonry',
-				'APIGlobal',
-				]
+				'APIGlobal'
+			]
 		},
 		'underscore': {
 			exports: '_'
 		},
 		'interact': {
-			exports: 'interact',
+			exports: 'interact'
 		},
 		'backbone': {
 			deps: [
@@ -364,7 +365,7 @@ require.config( {
 				'ContextMenuConstant',
 				'ServiceCaller',
 				'APIGlobal'
-				]
+			]
 		},
 		'jquery.i18n': {
 			deps: ['jquery']
@@ -381,12 +382,6 @@ require.config( {
 		'jquery_json': {
 			deps: ['jquery']
 		},
-		'jquery_cookie': {
-			deps: ['jquery']
-		},
-		'jquery.ui.position': {
-			deps: ['jquery']
-		},
 		'jquery.form': {
 			deps: ['jquery']
 		},
@@ -394,19 +389,16 @@ require.config( {
 			deps: ['jquery', 'jquery-ui', 'jquery-bridget'],
 			exports: 'jQuery.masonry'
 		},
-		'jquery.sortable': {
-			deps: ['jquery']
-		},
 		//long dep chain
 		'colors': {
-			deps: ['jquery'],
+			deps: ['jquery']
 		},
 		'colorpicker': {
-			deps: ['colors'],
+			deps: ['colors']
 		},
 		'TColorPicker': {
 			deps: ['colorpicker'],
-			exports: 'jQuery.fn.TColorPicker',
+			exports: 'jQuery.fn.TColorPicker'
 		},
 
 		'TImageCutArea': {
@@ -457,15 +449,7 @@ require.config( {
 		'TComboBox': {
 			deps: ['jquery']
 		},
-		'jquery.sortable': {
-			deps: ['jquery']
-		},
-		'jquery.sortable': {
-			deps: ['jquery']
-		},
-
-		//Make sure jqGrid_extend load after jgGrid
-		'jqGrid_extend': {
+		'jqgrid.winmultiselect': {
 			deps: ['jqGrid']
 		},
 		'APIReturnHandler': {
@@ -502,22 +486,22 @@ require.config( {
 			deps: ['leaflet']
 		},
 		'leaflet-timetrex': {
-			deps: ['leaflet','leaflet-draw','leaflet-routing','leaflet-providers','measurement'],
+			deps: ['leaflet', 'leaflet-draw', 'leaflet-routing', 'leaflet-providers', 'measurement'],
 			exports: 'L',
 			init: function() {
 				window.L = L;
 			}
 		},
 		'tinymce': {
-            exports: 'tinyMCE',
-            init: function () {
-                this.tinyMCE.DOM.events.domLoaded = true;
-                return this.tinyMCE;
-            }
-        },
+			exports: 'tinyMCE',
+			init: function() {
+				this.tinyMCE.DOM.events.domLoaded = true;
+				return this.tinyMCE;
+			}
+		},
 
 		'APIAuthentication': {
-			deps:[ 'ServiceCaller', 'APIFactory' ]
+			deps: ['ServiceCaller', 'APIFactory']
 		},
 
 
@@ -527,7 +511,7 @@ require.config( {
 
 		'Wizard': {
 			deps: ['backbone']
-		},
+		}
 	}
 } );
 
@@ -536,13 +520,13 @@ require( [
 	'LocalCacheData',
 	'backbone',
 	'Global',
+	'html2canvas',
+	'moment',
 	'async',
 	'jquery-ui',
 	'jquery.i18n',
 	'jquery_ba_resize',
-	'jquery_cookie',
 	'fastclick',
-	'moment',
 	'IndexController',
 	'BaseViewController',
 	'APIFactory',
@@ -558,39 +542,40 @@ require( [
 	'TTUUID',
 	'APIAuthentication',
 	'Wizard',
-	'WizardStep',
-], function() {
-
+	'WizardStep'
+], function( r, lcd, bb, G, html2canvas, moment ) {
+	window.moment = moment;
+	window.html2canvas = html2canvas;
 	//Hide elements that show hidden link for search friendly
 	hideElements();
 
 	//Don't not show loading bar if refresh
 	if ( Global.isSet( LocalCacheData.getLoginUser() ) ) {
-		$( ".loading-view" ).hide();
+		$( '.loading-view' ).hide();
 	} else {
-		setProgress()
+		setProgress();
 	}
 
 	function setProgress() {
 		loading_bar_time = setInterval( function() {
-			var progress_bar = $( ".progress-bar" );
-			var c_value = progress_bar.attr( "value" );
+			var progress_bar = $( '.progress-bar' );
+			var c_value = progress_bar.prop( 'value' );
 
 			if ( c_value < 90 ) {
-				progress_bar.attr( "value", c_value + 10 );
+				progress_bar.prop( 'value', c_value + 10 );
 			}
 		}, 1000 );
 	}
 
 	function cleanProgress() {
-		if ( $( ".loading-view" ).is( ":visible" ) ) {
+		if ( $( '.loading-view' ).is( ':visible' ) ) {
 
-			var progress_bar = $( ".progress-bar" );
-			progress_bar.attr( "value", 100 );
+			var progress_bar = $( '.progress-bar' );
+			progress_bar.prop( 'value', 100 );
 			clearInterval( loading_bar_time );
 
 			loading_bar_time = setInterval( function() {
-				$( ".progress-bar-div" ).hide();
+				$( '.progress-bar-div' ).hide();
 				clearInterval( loading_bar_time );
 			}, 50 );
 		}
@@ -604,29 +589,22 @@ require( [
 		}
 	}
 
-	if ( window.sessionStorage ) {
-		LocalCacheData.isSupportHTML5LocalCache = true;
-	} else {
-		LocalCacheData.isSupportHTML5LocalCache = false;
-	}
-
 	is_browser_iOS = ( navigator.userAgent.match( /(iPad|iPhone|iPod)/g ) ? true : false );
-
-	ie = (function() {
-
+	ie = ( function () {
 		var undef,
 			v = 3,
 			div = document.createElement( 'div' ),
 			all = div.getElementsByTagName( 'i' );
 
 		while (
-			div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
+			div.innerHTML = '<!--[if gt IE ' + ( ++v ) + ']><i></i><![endif]-->',
 				all[0]
-			);
+			) {
+			;
+		}
 
 		return v > 4 ? v : 11;
-
-	}());
+	}() );
 
 	$( function() {
 		Global.styleSandbox();
@@ -634,7 +612,7 @@ require( [
 		$.support.cors = true; // For IE
 		cleanProgress();
 
-		currentMousePos = {x: -1, y: -1};
+		currentMousePos = { x: -1, y: -1 };
 		$( document ).mousemove( function( event ) {
 			currentMousePos.x = event.pageX;
 			currentMousePos.y = event.pageY;
@@ -657,8 +635,8 @@ require( [
 		FastClick.attach( $( 'body' )[0] );
 		//Load need API class
 
-		$( document ).on( "keydown", function( e ) {
-			if ( e.which === 8 && !$( e.target ).is( "input, textarea" ) ) {
+		$( document ).on( 'keydown', function( e ) {
+			if ( e.which === 8 && !$( e.target ).is( 'input, textarea' ) ) {
 				e.preventDefault();
 			}
 		} );
@@ -682,9 +660,9 @@ require( [
 					LocalCacheData.openAwesomeBox.selectNextItem( e );
 				}
 			} else if ( LocalCacheData.current_open_primary_controller &&
-				LocalCacheData.current_open_primary_controller.column_selector &&
-				LocalCacheData.current_open_primary_controller.column_selector.is( ':visible' ) &&
-				LocalCacheData.current_open_primary_controller.column_selector.has( $( ':focus' ) ).length > 0 ) {
+					LocalCacheData.current_open_primary_controller.column_selector &&
+					LocalCacheData.current_open_primary_controller.column_selector.is( ':visible' ) &&
+					LocalCacheData.current_open_primary_controller.column_selector.has( $( ':focus' ) ).length > 0 ) {
 				if ( Global.isValidInputCodes( e.keyCode ) ) {
 					LocalCacheData.current_open_primary_controller.column_selector.selectNextItem( e );
 				}
@@ -692,7 +670,7 @@ require( [
 
 			if ( LocalCacheData.current_open_wizard_controller && e.keyCode === 13 ) {
 				if ( LocalCacheData.current_open_wizard_controller.$el.hasClass( 'change-password-wizard' ) ) {
-					!LocalCacheData.current_open_wizard_controller.done_btn.attr( "disabled" ) &&
+					!LocalCacheData.current_open_wizard_controller.done_btn.attr( 'disabled' ) &&
 					e.target &&
 					e.target.type !== 'textarea' && LocalCacheData.current_open_wizard_controller.onDoneClick();
 				}
@@ -713,8 +691,8 @@ require( [
 
 			// keyboard event to quick search permission adropdown
 			if ( LocalCacheData.current_open_primary_controller &&
-				LocalCacheData.current_open_primary_controller.viewId === 'PermissionControl' &&
-				LocalCacheData.current_open_primary_controller.edit_view ) {
+					LocalCacheData.current_open_primary_controller.viewId === 'PermissionControl' &&
+					LocalCacheData.current_open_primary_controller.edit_view ) {
 				LocalCacheData.current_open_primary_controller.onKeyDown( e );
 
 			}
@@ -728,9 +706,9 @@ require( [
 				target_class: $( e.target ).attr( 'class' ) ? $( e.target ).attr( 'class' ) : '',
 				target_id: $( e.target ).attr( 'id' ) ? $( e.target ).attr( 'id' ) : '',
 				html: e.target.outerHTML,
-				ui_clicked_date: ui_clicked_date.toISOString(),
+				ui_clicked_date: ui_clicked_date.toISOString()
 			};
-			if ( LocalCacheData.ui_click_stack.length === 8 ) {
+			if ( LocalCacheData.ui_click_stack.length === 16 ) {
 				LocalCacheData.ui_click_stack.pop();
 			}
 
@@ -739,11 +717,9 @@ require( [
 		} );
 
 		$( 'body' ).unbind( 'mousedown' ).bind( 'mousedown', function( e ) {
-
-
 			// MUST COLLECT DATA WHEN MOUSE down, otherwise when do save in edit view when awesomebox open, the data can't be saved.
 			// Mouse down to collect data so for some actions like search can read select data in its click event
-			if ( LocalCacheData.openAwesomeBox && LocalCacheData.openAwesomeBox.getADropDown().has( e.target ).length < 1 ) {
+			if ( LocalCacheData.openAwesomeBox && LocalCacheData.openAwesomeBox.getADropDown() && LocalCacheData.openAwesomeBox.getADropDown().has( e.target ).length < 1 ) {
 				if ( $( e.target ).hasClass( 'a-combobox' ) ) {
 					var target = LocalCacheData.openAwesomeBox;
 					$( e.target ).unbind( 'mouseup' ).bind( 'mouseup', function( e ) {
@@ -754,6 +730,7 @@ require( [
 				LocalCacheData.openAwesomeBox.onClose();
 			}
 
+			//This closes pickers and dropdown boxes when clicking off them.
 			if ( LocalCacheData.openRangerPicker && !LocalCacheData.openRangerPicker.getIsMouseOver() ) {
 				LocalCacheData.openRangerPicker.close();
 			}
@@ -770,7 +747,7 @@ require( [
 
 		var cUrl = window.location.href;
 
-		if ( $.cookie( 'js_debug' ) ) {
+		if ( getCookie( 'js_debug' ) ) {
 			var script = Global.loadScript( 'local_testing/LocalURL.js' );
 			if ( script === true ) {
 				cUrl = LocalURL.url();
@@ -815,7 +792,9 @@ require( [
 
 		function initAnalytics() {
 			/* jshint ignore:start */
-			if ( APIGlobal.pre_login_data.analytics_enabled === true ) {
+			if ( APIGlobal.pre_login_data.analytics_enabled === true
+				&& ServiceCaller && ServiceCaller.rootURL
+				&& loginData && loginData.base_url ) {
 				try {
 					(function (i, s, o, g, r, a, m) {
 						i['GoogleAnalyticsObject'] = r;
@@ -851,7 +830,9 @@ require( [
 			if ( ie <= 10 ) {
 				TAlertManager.showBrowserTopBanner();
 			}
+
 			loadViewRequiredJS();
+
 			//Optimization: Only change locale if its *not* en_US or enable_default_language_translation = TRUE
 			if ( loginData.locale !== 'en_US' || loginData.enable_default_language_translation == true ) {
 				Global.loadLanguage( loginData.locale );
@@ -859,6 +840,7 @@ require( [
 			} else {
 				LocalCacheData.setI18nDic( {} );
 			}
+
 			$.i18n.load( LocalCacheData.getI18nDic() );
 			Global.initStaticStrings();
 			ServiceCaller.import_csv_emample = ServiceCaller.rootURL + loginData.base_url + 'html5/views/wizard/import_csv/';
@@ -874,32 +856,36 @@ require( [
 			LocalCacheData.productEditionId = loginData.product_edition;
 			var controller = new IndexViewController();
 
-			var alternate_session_data = $.cookie( 'AlternateSessionData' );
+			var alternate_session_data = getCookie( 'AlternateSessionData' );
 			if ( alternate_session_data ) {
-				alternate_session_data = JSON.parse( alternate_session_data )
-				if ( alternate_session_data.previous_session_id ) {
-					TAlertManager.showPreSessionAlert();
+				try { //Prevent JS exception if we can't parse alternate_session_data for some reason.
+					alternate_session_data = JSON.parse( alternate_session_data );
+					if ( alternate_session_data && alternate_session_data.previous_session_id ) {
+						TAlertManager.showPreSessionAlert();
+					}
+				} catch ( e ) {
+					Debug.Text( e.message, 'main.js', 'require', 'initApps', 10 );
 				}
 			}
 		}
 
 		function gridScrollDown() {
 			if ( LocalCacheData.openAwesomeBox &&
-				_.isFunction( LocalCacheData.openAwesomeBox.gridScrollDown ) ) {
+					_.isFunction( LocalCacheData.openAwesomeBox.gridScrollDown ) ) {
 				LocalCacheData.openAwesomeBox.gridScrollDown();
 				return;
 			}
 
 			if ( LocalCacheData.current_open_sub_controller ) {
 				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
-					_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollDown ) ) {
+						_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollDown ) ) {
 					LocalCacheData.current_open_sub_controller.gridScrollDown();
 				}
 				return;
 			}
 			if ( LocalCacheData.current_open_primary_controller ) {
 				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
-					_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollDown ) ) {
+						_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollDown ) ) {
 					LocalCacheData.current_open_primary_controller.gridScrollDown();
 				}
 				return;
@@ -908,13 +894,13 @@ require( [
 
 		function gridScrollTop() {
 			if ( LocalCacheData.openAwesomeBox &&
-				_.isFunction( LocalCacheData.openAwesomeBox.gridScrollTop ) ) {
+					_.isFunction( LocalCacheData.openAwesomeBox.gridScrollTop ) ) {
 				LocalCacheData.openAwesomeBox.gridScrollTop();
 				return;
 			}
 			if ( LocalCacheData.current_open_sub_controller ) {
 				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
-					_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollTop ) ) {
+						_.isFunction( LocalCacheData.current_open_sub_controller.gridScrollTop ) ) {
 					LocalCacheData.current_open_sub_controller.gridScrollTop();
 				}
 				return;
@@ -922,7 +908,7 @@ require( [
 			//Error: Uncaught TypeError: LocalCacheData.current_open_primary_controller.gridScrollTop is not a function in interface/html5/main.js?v=9.0.2-20151106-092147 line 434
 			if ( LocalCacheData.current_open_primary_controller ) {
 				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
-					_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollTop ) ) {
+						_.isFunction( LocalCacheData.current_open_primary_controller.gridScrollTop ) ) {
 					LocalCacheData.current_open_primary_controller.gridScrollTop();
 				}
 				return;
@@ -933,7 +919,7 @@ require( [
 
 			//Error: Uncaught TypeError: LocalCacheData.current_open_primary_controller.selectAll is not a function in interface/html5/main.js?v=9.0.4-20151123-121757 line 457
 			if ( LocalCacheData.openAwesomeBox &&
-				_.isFunction( LocalCacheData.openAwesomeBox.selectAll ) ) {
+					_.isFunction( LocalCacheData.openAwesomeBox.selectAll ) ) {
 				LocalCacheData.openAwesomeBox.selectAll();
 				return;
 			}
@@ -941,7 +927,7 @@ require( [
 			if ( LocalCacheData.current_open_sub_controller ) {
 
 				if ( !LocalCacheData.current_open_sub_controller.edit_view &&
-					_.isFunction( LocalCacheData.current_open_sub_controller.selectAll ) ) {
+						_.isFunction( LocalCacheData.current_open_sub_controller.selectAll ) ) {
 					LocalCacheData.current_open_sub_controller.selectAll();
 				}
 
@@ -950,7 +936,7 @@ require( [
 
 			if ( LocalCacheData.current_open_primary_controller ) {
 				if ( !LocalCacheData.current_open_primary_controller.edit_view &&
-					_.isFunction( LocalCacheData.current_open_primary_controller.selectAll ) ) {
+						_.isFunction( LocalCacheData.current_open_primary_controller.selectAll ) ) {
 					LocalCacheData.current_open_primary_controller.selectAll();
 				}
 				return;
@@ -968,14 +954,7 @@ require( [
 			'Global',
 			'nanobar', //only in timesheet
 			'jquery_json',
-			'stacktrace',
-			'html2canvas',
-			'datejs',
-			'jquery.sortable',
-			'jquery.ui.position',
 			'rightclickmenu',
-			'html2canvas',
-			'datejs',
 			'jquery_tablednd',
 			'TTagInput',
 			'timepicker_addon',
@@ -999,8 +978,8 @@ require( [
 			'RibbonSubMenuNavItem',
 			'RibbonSubMenuNavWidget',
 			'SearchPanel',
-			'grid_locale',
-			'jqGrid_extend',
+			'jqGrid',
+			'jqgrid.winmultiselect',
 			'ImageAreaSelect',
 			'qtip',
 			'SearchField',
@@ -1022,6 +1001,7 @@ require( [
 			'ReportBaseViewController',
 			'Paging2',
 			'jquery-ui',
+			'TTGrid',
 
 			//API's required to loads views. This is a preemtive move before removing loadScript() from Global
 			'APILog',
@@ -1036,27 +1016,28 @@ require( [
 			'AuthorizationHistoryCommon',
 			'RequestViewCommonController',
 			'EmbeddedMessageCommon',
+			'BaseTreeViewController',
 
 		];
 
 		//do not load interact on mobile.
 		if ( Global.detectMobileBrowser() == true ) {
-			require_array.splice( require_array.indexOf('interact'), 1);
-			require(require_array, function (Backbone, Global, Nanobar) {
+			require_array.splice( require_array.indexOf( 'interact' ), 1 );
+			require( require_array, function( Backbone, Global, Nanobar ) {
 				window.Nanobar = Nanobar;
 				LocalCacheData.loadViewRequiredJSReady = true;
-			})
+			} );
 		} else {
-			require(require_array, function (Backbone, Global, Nanobar, interact) {
+			require( require_array, function( Backbone, Global, Nanobar, interact ) {
 				window.interact = interact;
 				window.Nanobar = Nanobar;
 				LocalCacheData.loadViewRequiredJSReady = true;
-			})
+			} );
 		}
 	}
 
 	function stripDuplicateSlashes( url ) {
-		return url.replace( /([^:]\/)\/+/g, '$1' )
+		return url.replace( /([^:]\/)\/+/g, '$1' );
 	}
 
 	function getRelatedURL( url ) {
@@ -1102,18 +1083,18 @@ require( [
  * FIXES: BUG-2065 "Uncaught Error: Script error for ..."
  *
  * REASON FOR BUG: The internet going out momentarily
- * 	after the initial scripts have loaded and have begun
- * 	loading the chain of javascript-loaded scripts causes
- * 	requirejs to throw the Script Errors because it's unable
- * 	to reach the files it's being told to load.
+ *    after the initial scripts have loaded and have begun
+ *    loading the chain of javascript-loaded scripts causes
+ *    requirejs to throw the Script Errors because it's unable
+ *    to reach the files it's being told to load.
  *
  * TO REPRODUCE: in chrome, throttle the internet down then
- * 	turn off the internet once the reload button shows on
- * 	the login screen (and the stop button hides). This ensures
- * 	that requirejs has been loaded and is loading other scripts.
+ *    turn off the internet once the reload button shows on
+ *    the login screen (and the stop button hides). This ensures
+ *    that requirejs has been loaded and is loading other scripts.
  */
 require.onError = function( err ) {
-	console.error(err);
+	console.error( err );
 	if ( err.message.indexOf( 'Script error for' ) != -1 ) {
 		if ( require.script_error_shown == undefined ) {
 			require.script_error_shown = 1;
@@ -1125,7 +1106,7 @@ require.onError = function( err ) {
 				//This can also happen if the user manually modifies the URL to be a bogus ViewId (ie: #!m=homeABC)
 				//So try to redirect back to the home page first, otherwise try to do a browser reload.
 				if ( ServiceCaller.rootURL && APIGlobal.pre_login_data.base_url ) {
-					window.location.href = ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url;
+					Global.setURLToBrowser( ServiceCaller.rootURL + APIGlobal.pre_login_data.base_url );
 				} else {
 					window.location.reload();
 				}
