@@ -516,14 +516,7 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 										'x'      => 385,
 										'y'      => 591,
 										'h'      => 13,
-										'w'      => 20,
-										'halign' => 'C',
-								),
-								array(
-										'x'      => 440,
-										'y'      => 591,
-										'h'      => 13,
-										'w'      => 20,
+										'w'      => 40,
 										'halign' => 'C',
 								),
 						),
@@ -551,7 +544,7 @@ class GovernmentForms_CA_T4ASum extends GovernmentForms_CA {
 		//Strip non-digits.
 		$value = $this->stripNonNumeric( $value );
 
-		return array(substr( $value, 0, 3 ), substr( $value, 3, 3 ), substr( $value, 6, 4 ));
+		return array(substr( $value, 0, 3 ), substr( $value, 3, 3 ) .' - '. substr( $value, 6, 4 ));
 	}
 
 	function calcL82Diff( $value, $schema ) {

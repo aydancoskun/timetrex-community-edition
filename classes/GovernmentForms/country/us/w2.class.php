@@ -955,38 +955,39 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		$line[] = $this->padRecord( '', 23, 'AN' ); //Foreign State/Province
 		$line[] = $this->padRecord( '', 15, 'AN' ); //Foreign Postal Code
 		$line[] = $this->padRecord( '', 2, 'AN' ); //Country, fill with blanks if its the US
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l1 ), 11, 'N' ); //Wages, Tips and Other Compensation
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l2 ), 11, 'N' ); //Federal Income Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l3 ), 11, 'N' ); //Social Security Wages
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l4 ), 11, 'N' ); //Social Security Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l5 ), 11, 'N' ); //Medicare Wages and Tips
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l6 ), 11, 'N' ); //Medicare Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l7 ), 11, 'N' ); //Social Security Tips
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l1 ), 11, 'N' ); //(188-198) Wages, Tips and Other Compensation
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l2 ), 11, 'N' ); //(199-209) Federal Income Tax
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l3 ), 11, 'N' ); //(210-220) Social Security Wages
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l4 ), 11, 'N' ); //(221-231) Social Security Tax
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l5 ), 11, 'N' ); //(232-242) Medicare Wages and Tips
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l6 ), 11, 'N' ); //(243-253) Medicare Tax
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l7 ), 11, 'N' ); //(254-264) Social Security Tips
 		$line[] = $this->padRecord( '', 11, 'N' ); //Advanced EIC
-		$line[] = $this->padRecord( $this->removeDecimal( $this->l10 ), 11, 'N' ); //Dependant Care Benefits
+		$line[] = $this->padRecord( $this->removeDecimal( $this->l10 ), 11, 'N' ); //(276-286) Dependant Care Benefits
 		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'D' ) ), 11, 'N' ); //Deferred Compensation Contributions to 401K //Code D in any of the Box 12(a throug d).
 		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'E' ) ), 11, 'N' ); //Deferred Compensation Contributions to 403(b) //Code E in any of the Box 12(a throug d).
 		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'F' ) ), 11, 'N' ); //Deferred Compensation Contributions to 408(k)(6) //Code F in any of the Box 12(a throug d).
 		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'G' ) ), 11, 'N' ); //Deferred Compensation Contributions to 457(b) //Code G in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'H' ) ), 11, 'N' ); //Deferred Compensation Contributions to 501(c)(18)(D) //Code H in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( '', 11, 'AN' ); //Blank
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'H' ) ), 11, 'N' ); //(331-341) Deferred Compensation Contributions to 501(c)(18)(D) //Code H in any of the Box 12(a throug d).
+		$line[] = $this->padRecord( '', 11, 'AN' ); //(342-352) Blank
 		$line[] = $this->padRecord( '', 11, 'N' ); //Non-qualified Plan Section 457
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'W' ) ), 11, 'N' ); //Employer Contributions to Health Savings Account //Code W in any of the Box 12(a throug d).
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'W' ) ), 11, 'N' ); //(364-374) Employer Contributions to Health Savings Account //Code W in any of the Box 12(a throug d).
 		$line[] = $this->padRecord( '', 11, 'N' ); //Non-qualified NOT Plan Section 457
 		$line[] = $this->padRecord( '', 11, 'N' ); //Non taxable combat pay
 		$line[] = $this->padRecord( '', 11, 'AN' ); //Blank
 		$line[] = $this->padRecord( '', 11, 'N' ); //Employer Cost of Premiums for Group Term Life Insurance over $50K
 		$line[] = $this->padRecord( '', 11, 'N' ); //Income from the Exercise of Nonstatutory Stock Options
 		$line[] = $this->padRecord( '', 11, 'N' ); //Deferrals Under a Section 409A non-qualified plan
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'AA' ) ), 11, 'N' ); //Desiginated Roth Contributions under a section 401K //Code AA in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'BB' ) ), 11, 'N' ); //Desiginated Roth Contributions under a section 403B //Code BB in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'DD' ) ), 11, 'N' ); //Cost of Employer Sponsored Health Coverage //Code DD in any of the Box 12(a throug d).
-		$line[] = $this->padRecord( '', 12, 'AN' ); //Blank
-		$line[] = $this->padRecord( '0', 1, 'N' ); //Statutory Employee
-		$line[] = $this->padRecord( '', 1, 'AN' ); //Blank
-		$line[] = $this->padRecord( '0', 1, 'N' ); //Retirement Plan Indicator
-		$line[] = $this->padRecord( ( $this->l13c == '' ) ? 0 : 1, 1, 'N' ); //3rd Party Sick Pay Indicator
-		$line[] = $this->padRecord( '', 23, 'AN' ); //Blank
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'AA' ) ), 11, 'N' ); //(441-451) Desiginated Roth Contributions under a section 401K //Code AA in any of the Box 12(a throug d).
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'BB' ) ), 11, 'N' ); //(452-462) Desiginated Roth Contributions under a section 403B //Code BB in any of the Box 12(a throug d).
+		$line[] = $this->padRecord( $this->removeDecimal( $this->_getL12AmountByCode( 'DD' ) ), 11, 'N' ); //(463-473) Cost of Employer Sponsored Health Coverage //Code DD in any of the Box 12(a throug d).
+		$line[] = $this->padRecord( '', 11, 'N' ); //(474-484) Blank
+		$line[] = $this->padRecord( '', 1, 'AN' ); //(485) Blank
+		$line[] = $this->padRecord( '0', 1, 'N' ); //(486) Statutory Employee
+		$line[] = $this->padRecord( '', 1, 'AN' ); //(487) Blank
+		$line[] = $this->padRecord( '0', 1, 'N' ); //(488) Retirement Plan Indicator
+		$line[] = $this->padRecord( ( $this->l13c == '' ) ? 0 : 1, 1, 'N' ); //(489) 3rd Party Sick Pay Indicator
+		$line[] = $this->padRecord( '', 23, 'AN' ); //(490-512) Blank
 
 		$retval = implode( ( $this->debug == TRUE ) ? ',' : '', $line );
 		Debug::Text( 'RW Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );
@@ -1197,27 +1198,28 @@ class GovernmentForms_US_W2 extends GovernmentForms_US {
 		$line[] = $this->padRecord( $this->removeDecimal( $total->l4 ), 15, 'N' ); //Social Security Tax
 		$line[] = $this->padRecord( $this->removeDecimal( $total->l5 ), 15, 'N' ); //Medicare Wages and Tips
 		$line[] = $this->padRecord( $this->removeDecimal( $total->l6 ), 15, 'N' ); //Medicare Tax
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l7 ), 15, 'N' ); //Social Security Tips
+		$line[] = $this->padRecord( $this->removeDecimal( $total->l7 ), 15, 'N' ); //(100-114) Social Security Tips
 		$line[] = $this->padRecord( '', 15, 'N' ); //Advanced EIC
 		$line[] = $this->padRecord( $this->removeDecimal( $total->l10 ), 15, 'N' ); //Dependant Care Benefits
 		$line[] = $this->padRecord( $this->removeDecimal( $total->l12d ), 15, 'N' ); //Deferred Compensation Contributions to 401K
 		$line[] = $this->padRecord( $this->removeDecimal( $total->l12e ), 15, 'N' ); //Deferred Compensation Contributions to 403(b)
 		$line[] = $this->padRecord( $this->removeDecimal( $total->l12f ), 15, 'N' ); //Deferred Compensation Contributions to 408(k)(6)
 		$line[] = $this->padRecord( $this->removeDecimal( $total->l12g ), 15, 'N' ); //Deferred Compensation Contributions to 457(b)
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12h ), 15, 'N' ); //Deferred Compensation Contributions to 501(c)(18)(D)
+		$line[] = $this->padRecord( $this->removeDecimal( $total->l12h ), 15, 'N' ); //(205-219) Deferred Compensation Contributions to 501(c)(18)(D)
 		$line[] = $this->padRecord( '', 15, 'AN' ); //Blank
 		$line[] = $this->padRecord( '', 15, 'N' ); //Non-qualified Plan Section 457
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12w ), 15, 'N' ); //Employer Contributions to Health Savings Account
+		$line[] = $this->padRecord( $this->removeDecimal( $total->l12w ), 15, 'N' ); //(250-264) Employer Contributions to Health Savings Account (Code W)
 		$line[] = $this->padRecord( '', 15, 'N' ); //Non-qualified NOT Plan Section 457
 		$line[] = $this->padRecord( '', 15, 'N' ); //Non taxable combat pay
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12dd ), 15, 'N' ); //Cost of Employer Sponsored Health Coverage
+		$line[] = $this->padRecord( $this->removeDecimal( $total->l12dd ), 15, 'N' ); //(295-309) Cost of Employer Sponsored Health Coverage (Code DD)
 		$line[] = $this->padRecord( '', 15, 'N' ); //Employer Cost of Premiums for Group Term Life Insurance over $50K
 		$line[] = $this->padRecord( '', 15, 'N' ); //3rd party sick pay.
 		$line[] = $this->padRecord( '', 15, 'N' ); //Income from the Exercise of Nonstatutory Stock Options
 		$line[] = $this->padRecord( '', 15, 'N' ); //Deferrals Under a Section 409A non-qualified plan
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12aa ), 15, 'N' ); //Desiginated Roth Contributions under a section 401K
-		$line[] = $this->padRecord( $this->removeDecimal( $total->l12bb ), 15, 'N' ); //Desiginated Roth Contributions under a section 403B
-		$line[] = $this->padRecord( '', 113, 'AN' ); //Blank
+		$line[] = $this->padRecord( $this->removeDecimal( $total->l12aa ), 15, 'N' ); //(370-384) Desiginated Roth Contributions under a section 401K (Code AA)
+		$line[] = $this->padRecord( $this->removeDecimal( $total->l12bb ), 15, 'N' ); //(385-399) Desiginated Roth Contributions under a section 403B (Code BB)
+		$line[] = $this->padRecord( '', 15, 'N' ); //(400-414) Permitted Benefits Under a Qualified Small Employer Health Reimbursement (Code FF)
+		$line[] = $this->padRecord( '', 98, 'AN' ); //Blank
 
 		$retval = implode( ( $this->debug == TRUE ) ? ',' : '', $line );
 		Debug::Text( 'RT Record:' . $retval, __FILE__, __LINE__, __METHOD__, 10 );

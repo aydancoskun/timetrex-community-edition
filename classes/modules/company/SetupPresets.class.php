@@ -145,6 +145,9 @@ class SetupPresets extends Factory {
 			$psealf->setCompany( $this->getCompany() );
 		}
 
+		$gl_account_expense_suffix = ' [Expense]';
+		$gl_account_payable_suffix = ' [Payable]';
+
 		Debug::text( 'Country: ' . $country, __FILE__, __LINE__, __METHOD__, 10 );
 		if ( $country != '' AND $province == '' ) {
 			switch ( $country ) {
@@ -157,7 +160,7 @@ class SetupPresets extends Factory {
 									'name'           => 'CA - Federal Income Tax',
 									'ps_order'       => 200,
 									'debit_account'  => '',
-									'credit_account' => 2190,
+									'credit_account' => 'Federal Tax'. $gl_account_payable_suffix, //2190
 							)
 					);
 					/* //Don't separate this into its own pay stub account, as for US at least we can't rejoin it when multiple states are involved.
@@ -179,7 +182,7 @@ class SetupPresets extends Factory {
 									'name'           => 'CPP',
 									'ps_order'       => 203,
 									'debit_account'  => '',
-									'credit_account' => 2185,
+									'credit_account' => 'CPP'. $gl_account_payable_suffix, //2185
 							)
 					);
 					if ( TTUUID::isUUID( $cpp_employee_psea_id ) AND $cpp_employee_psea_id != TTUUID::getZeroID() AND $cpp_employee_psea_id != TTUUID::getNotExistID() ) {
@@ -193,7 +196,7 @@ class SetupPresets extends Factory {
 									'name'           => 'EI',
 									'ps_order'       => 204,
 									'debit_account'  => '',
-									'credit_account' => 2180,
+									'credit_account' => 'EI'. $gl_account_payable_suffix, //2180
 							)
 					);
 					if ( TTUUID::isUUID( $ei_employee_psea_id ) AND $ei_employee_psea_id != TTUUID::getZeroID() AND $ei_employee_psea_id != TTUUID::getNotExistID() ) {
@@ -208,8 +211,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => 'CPP - Employer',
 									'ps_order'       => 303,
-									'debit_account'  => 5430,
-									'credit_account' => 2185,
+									'debit_account'  => 'CPP'. $gl_account_expense_suffix, //5430
+									'credit_account' => 'CPP'. $gl_account_payable_suffix, //2185
 							)
 					);
 					$this->createPayStubAccount(
@@ -219,8 +222,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => 'EI - Employer',
 									'ps_order'       => 304,
-									'debit_account'  => 5420,
-									'credit_account' => 2180,
+									'debit_account'  => 'EI'. $gl_account_expense_suffix, //5420
+									'credit_account' => 'EI'. $gl_account_payable_suffix, //2180
 							)
 					);
 
@@ -231,7 +234,7 @@ class SetupPresets extends Factory {
 									'type_id'        => 10,
 									'name'           => 'Vacation - No Accrual',
 									'ps_order'       => 180,
-									'debit_account'  => 5410,
+									'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 									'credit_account' => '',
 							)
 					);
@@ -242,8 +245,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 50,
 									'name'           => 'Vacation Accrual',
 									'ps_order'       => 400,
-									'debit_account'  => 5410,
-									'credit_account' => 2170,
+									'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410 - Expense the vacation payable when its accrued.
+									'credit_account' => 'Vacation Accrual'. $gl_account_payable_suffix, //2170
 							)
 					);
 					if ( TTUUID::isUUID( $vacation_accrual_psea_id ) AND $vacation_accrual_psea_id != TTUUID::getZeroID() AND $vacation_accrual_psea_id != TTUUID::getNotExistID() ) {
@@ -255,7 +258,7 @@ class SetupPresets extends Factory {
 										'name'                              => 'Vacation - Accrual Release',
 										'ps_order'                          => 181,
 										'accrual_pay_stub_entry_account_id' => $vacation_accrual_psea_id,
-										'debit_account'                     => 5410,
+										'debit_account'                     => 'Wages'. $gl_account_expense_suffix, //Needs to just debit the Wages account, as the Vacation (Accrual) account handles debit/credit of the payable based on +/- amounts.
 										'credit_account'                    => '',
 								)
 						);
@@ -269,7 +272,7 @@ class SetupPresets extends Factory {
 									'name'           => 'RRSP',
 									'ps_order'       => 206,
 									'debit_account'  => '',
-									'credit_account' => '2360',
+									'credit_account' => 'RRSP'. $gl_account_payable_suffix, //2360
 							)
 					);
 					$this->createPayStubAccount(
@@ -279,8 +282,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => 'RRSP - Employer',
 									'ps_order'       => 306,
-									'debit_account'  => '5462',
-									'credit_account' => '2362',
+									'debit_account'  => 'RRSP'. $gl_account_expense_suffix, //5462
+									'credit_account' => 'RRSP'. $gl_account_payable_suffix, //2362
 							)
 					);
 					break;
@@ -293,7 +296,7 @@ class SetupPresets extends Factory {
 									'name'           => 'US - Federal Income Tax',
 									'ps_order'       => 200,
 									'debit_account'  => '',
-									'credit_account' => 2190,
+									'credit_account' => 'Federal Withholding'. $gl_account_payable_suffix, //2190
 							)
 					);
 					/*
@@ -315,7 +318,7 @@ class SetupPresets extends Factory {
 									'name'           => 'Social Security (FICA)',
 									'ps_order'       => 202,
 									'debit_account'  => '',
-									'credit_account' => 2185,
+									'credit_account' => 'Social Security (FICA)'. $gl_account_payable_suffix, //2185
 							)
 					);
 					$this->createPayStubAccount(
@@ -325,8 +328,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => 'Social Security (FICA)',
 									'ps_order'       => 302,
-									'debit_account'  => 5430,
-									'credit_account' => 2185,
+									'debit_account'  => 'Social Security (FICA)'. $gl_account_expense_suffix, //5430
+									'credit_account' => 'Social Security (FICA)'. $gl_account_payable_suffix, //2185
 							)
 					);
 
@@ -337,8 +340,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => 'US - Federal Unemployment Insurance',
 									'ps_order'       => 303,
-									'debit_account'  => 5420,
-									'credit_account' => 2180,
+									'debit_account'  => 'Federal UI'. $gl_account_expense_suffix, //5420
+									'credit_account' => 'Federal UI'. $gl_account_payable_suffix, //2180
 							)
 					);
 
@@ -350,7 +353,7 @@ class SetupPresets extends Factory {
 									'name'           => 'Medicare',
 									'ps_order'       => 203,
 									'debit_account'  => '',
-									'credit_account' => 2187,
+									'credit_account' => 'Medicare'. $gl_account_payable_suffix, //2187
 							)
 					);
 					$this->createPayStubAccount(
@@ -360,8 +363,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => 'Medicare',
 									'ps_order'       => 303,
-									'debit_account'  => 5440,
-									'credit_account' => 2187,
+									'debit_account'  => 'Medicare'. $gl_account_expense_suffix, //5440
+									'credit_account' => 'Medicare'. $gl_account_payable_suffix, //2187
 							)
 					);
 
@@ -373,7 +376,7 @@ class SetupPresets extends Factory {
 									'name'           => '401(k)',
 									'ps_order'       => 230,
 									'debit_account'  => '',
-									'credit_account' => '2360',
+									'credit_account' => '401(k)'. $gl_account_payable_suffix, //2360
 							)
 					);
 					$this->createPayStubAccount(
@@ -383,8 +386,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => '401(k)',
 									'ps_order'       => 330,
-									'debit_account'  => '5462',
-									'credit_account' => '2362',
+									'debit_account'  => '401(k)'. $gl_account_expense_suffix, //5462
+									'credit_account' => '401(k)'. $gl_account_payable_suffix, //2362, 2360
 							)
 					);
 					$this->createPayStubAccount(
@@ -394,7 +397,7 @@ class SetupPresets extends Factory {
 									'type_id'        => 10,
 									'name'           => 'Vacation',
 									'ps_order'       => 181,
-									'debit_account'  => 5410,
+									'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 									'credit_account' => '',
 							)
 					);
@@ -405,7 +408,7 @@ class SetupPresets extends Factory {
 									'type_id'        => 10,
 									'name'           => 'Paid Time Off (PTO)',
 									'ps_order'       => 181,
-									'debit_account'  => 5410,
+									'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 									'credit_account' => '',
 							)
 					);
@@ -419,7 +422,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $country ) . ' - Federal Income Tax',
 									'ps_order'       => 200,
 									'debit_account'  => '',
-									'credit_account' => 2190,
+									'credit_account' => 'Federal Tax'. $gl_account_payable_suffix, //2190
 							)
 					);
 					/*
@@ -440,7 +443,7 @@ class SetupPresets extends Factory {
 									'type_id'        => 10,
 									'name'           => 'Vacation',
 									'ps_order'       => 181,
-									'debit_account'  => 5410,
+									'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 									'credit_account' => '',
 							)
 					);
@@ -458,7 +461,7 @@ class SetupPresets extends Factory {
 							'name'           => strtoupper( $province ) . ' - Provincial Income Tax',
 							'ps_order'       => 202,
 							'debit_account'  => '',
-							'credit_account' => 2190,
+							'credit_account' => 'Provincial Tax'. $gl_account_payable_suffix, //2190
 					)
 			);
 
@@ -469,8 +472,8 @@ class SetupPresets extends Factory {
 							'type_id'        => 30,
 							'name'           => strtoupper( $province ) . ' - Workers Compensation',
 							'ps_order'       => 305,
-							'debit_account'  => 5440,
-							'credit_account' => 2230,
+							'debit_account'  => 'Workers Comp.'. $gl_account_expense_suffix, //5440
+							'credit_account' => 'Workers Comp.'. $gl_account_payable_suffix, //2230
 					)
 			);
 		}
@@ -491,7 +494,7 @@ class SetupPresets extends Factory {
 								'name'           => strtoupper( $province ) . ' - State Income Tax',
 								'ps_order'       => 204,
 								'debit_account'  => '',
-								'credit_account' => 2190,
+								'credit_account' => 'State Withholding'. $gl_account_payable_suffix, //2190
 						)
 				);
 				/*
@@ -521,7 +524,7 @@ class SetupPresets extends Factory {
 								'name'           => strtoupper( $province ) . ' - District Income Tax',
 								'ps_order'       => 206,
 								'debit_account'  => '',
-								'credit_account' => 2192,
+								'credit_account' => 'District Withholding'. $gl_account_payable_suffix, //2192
 						)
 				);
 			}
@@ -536,7 +539,7 @@ class SetupPresets extends Factory {
 								'name'           => strtoupper( $province ) . ' - Unemployment Insurance',
 								'ps_order'       => 207,
 								'debit_account'  => '',
-								'credit_account' => 2182,
+								'credit_account' => 'State UI'. $gl_account_payable_suffix, //2182
 						)
 				);
 			}
@@ -555,8 +558,8 @@ class SetupPresets extends Factory {
 								'type_id'        => 30,
 								'name'           => strtoupper( $province ) . ' - Unemployment Insurance',
 								'ps_order'       => 306,
-								'debit_account'  => 5422,
-								'credit_account' => 2182,
+								'debit_account'  => 'State UI'. $gl_account_expense_suffix, //5422
+								'credit_account' => 'State UI'. $gl_account_payable_suffix, //2182
 						)
 				);
 			}
@@ -568,8 +571,8 @@ class SetupPresets extends Factory {
 							'type_id'        => 30,
 							'name'           => strtoupper( $province ) . ' - Workers Compensation - Employer',
 							'ps_order'       => 305,
-							'debit_account'  => 5440,
-							'credit_account' => 2230,
+							'debit_account'  => 'Workers Comp.'. $gl_account_expense_suffix, //5440
+							'credit_account' => 'Workers Comp.'. $gl_account_payable_suffix, //2230
 					)
 			);
 
@@ -586,8 +589,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Employment Security Assessment',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Employment Security'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Employment Security'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -605,8 +608,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Job Training Surcharge',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Job Training'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Job Training'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -625,7 +628,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Disability Insurance',
 									'ps_order'       => 210,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Disability Insurance'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -635,8 +638,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Employment Training Tax',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Employment Training'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Employment Training'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -659,8 +662,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Administrative Assessment',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Administrative Assessment'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Administrative Assessment'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -677,8 +680,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Administrative Assessment',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Administrative Assessment'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Administrative Assessment'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -694,8 +697,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - E&T Assessment',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'E&T Assessment'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'E&T Assessment'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -705,8 +708,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Health Insurance',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Health Insurance'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Health Insurance'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -717,7 +720,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Disability Insurance',
 									'ps_order'       => 210,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Disability Insurance'. $gl_account_payable_suffix, //2186
 							)
 					);
 					break;
@@ -732,8 +735,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Administrative Reserve',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Administrative Reserve'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Administrative Reserve'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -743,8 +746,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Workforce Development',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Workforce Development'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Workforce Development'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -762,7 +765,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - County Income Tax',
 									'ps_order'       => 210,
 									'debit_account'  => '',
-									'credit_account' => 2194,
+									'credit_account' => 'County Tax'. $gl_account_payable_suffix, //2194
 							)
 					);
 					break;
@@ -777,8 +780,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Reserve Fund',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Reserve Fund'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Reserve Fund'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -788,8 +791,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Surcharge',
 									'ps_order'       => 311,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Surcharge'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Surcharge'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -812,8 +815,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Competitive Skills',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Competitive Skills'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Competitive Skills'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -831,8 +834,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Health Insurance',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Health Insurance'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Health Insurance'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -842,8 +845,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Workforce Training Fund',
 									'ps_order'       => 311,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Workforce Training Fund'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Workforce Training Fund'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -860,8 +863,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Workforce Enhancement Fee',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Workforce Enhancement Fee'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Workforce Enhancement Fee'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -875,8 +878,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Training Contribution',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Training Contribution'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Training Contribution'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -893,8 +896,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Administrative Fund',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Administrative Fund'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Administrative Fund'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -908,8 +911,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - SUIT',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'SUIT'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'SUIT'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -923,8 +926,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Career Enhancement',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Career Enhancement'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Career Enhancement'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -938,8 +941,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Administrative Contribution',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Administrative Contribution'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Administrative Contribution'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -953,8 +956,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - State Trust Fund',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'State Trust Fund'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'State Trust Fund'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -976,7 +979,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Disability Insurance',
 									'ps_order'       => 210,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Disability Insurance'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -986,8 +989,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Disability Insurance',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Disability Insurance'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Disability Insurance'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -998,7 +1001,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Workforce Development',
 									'ps_order'       => 211,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Workforce Development'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -1008,8 +1011,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Workforce Development',
 									'ps_order'       => 311,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Workforce Development'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Workforce Development'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1020,7 +1023,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Healthcare Subsidy',
 									'ps_order'       => 212,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Healthcare Subsidy'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -1030,8 +1033,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Healthcare Subsidy',
 									'ps_order'       => 312,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Healthcare Subsidy'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Healthcare Subsidy'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1042,7 +1045,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Family Leave Insurance',
 									'ps_order'       => 213,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Family Leave Insurance'. $gl_account_payable_suffix, //2186
 							)
 					);
 					break;
@@ -1060,8 +1063,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Reemployment Service Fund',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Reemployment Service Fund'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Reemployment Service Fund'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1072,7 +1075,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Disability Insurance',
 									'ps_order'       => 210,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Disability Insurance'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -1083,7 +1086,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Disability Insurance - Male',
 									'ps_order'       => 211,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Disability Insurance'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -1094,7 +1097,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Disability Insurance - Female',
 									'ps_order'       => 212,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Disability Insurance'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -1105,7 +1108,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Metropolitan Commuter Tax',
 									'ps_order'       => 213,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Metropolitan Commuter Tax'. $gl_account_payable_suffix, //2186
 							)
 					);
 					break;
@@ -1136,7 +1139,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Workers Benefit',
 									'ps_order'       => 210,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Workers Benefit'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -1146,8 +1149,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Workers Benefit',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Workers Benefit'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Workers Benefit'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1157,8 +1160,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Tri-Met Transit District',
 									'ps_order'       => 311,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Tri-Met Transit District'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Tri-Met Transit District'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1168,8 +1171,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Lane Transit District',
 									'ps_order'       => 312,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Lane Transit District'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Lane Transit District'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1179,8 +1182,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Special Payroll Tax Offset',
 									'ps_order'       => 313,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Special Payroll Tax Offset'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Special Payroll Tax Offset'. $gl_account_payable_suffix, //2184
 							)
 					);
 
@@ -1200,8 +1203,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Employment Security',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Employment Security'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Employment Security'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1211,8 +1214,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Job Development Fund',
 									'ps_order'       => 311,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Job Development Fund'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Job Development Fund'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1223,7 +1226,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Temporary Disability Ins.',
 									'ps_order'       => 212,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Temporary Disability Ins.'. $gl_account_payable_suffix, //2186
 							)
 					);
 					break;
@@ -1237,8 +1240,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Contingency Assessment',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Contingency Assessment'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Contingency Assessment'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -1253,8 +1256,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Investment Fee',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Investment Fee'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Investment Fee'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1264,8 +1267,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - UI Surcharge',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'UI Surcharge'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'UI Surcharge'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -1279,8 +1282,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Job Skills Fee',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Job Skills Fee'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Job Skills Fee'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -1295,8 +1298,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Employment & Training',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Employment & Training'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Employment & Training'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1306,8 +1309,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - UI Obligation Assessment',
 									'ps_order'       => 311,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'UI Obligation Assessment'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'UI Obligation Assessment'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -1333,7 +1336,7 @@ class SetupPresets extends Factory {
 									'name'           => strtoupper( $province ) . ' - Industrial Insurance',
 									'ps_order'       => 210,
 									'debit_account'  => '',
-									'credit_account' => 2186,
+									'credit_account' => 'Industrial Insurance'. $gl_account_payable_suffix, //2186
 							)
 					);
 					$this->createPayStubAccount(
@@ -1343,8 +1346,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Industrial Insurance',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Industrial Insurance'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Industrial Insurance'. $gl_account_payable_suffix, //2184
 							)
 					);
 					$this->createPayStubAccount(
@@ -1354,8 +1357,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Employment Admin Fund',
 									'ps_order'       => 311,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Employment Admin Fund'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Employment Admin Fund'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -1375,8 +1378,8 @@ class SetupPresets extends Factory {
 									'type_id'        => 30,
 									'name'           => strtoupper( $province ) . ' - Employment Support Fund',
 									'ps_order'       => 310,
-									'debit_account'  => 5424,
-									'credit_account' => 2184,
+									'debit_account'  => 'Employment Support Fund'. $gl_account_expense_suffix, //5424
+									'credit_account' => 'Employment Support Fund'. $gl_account_payable_suffix, //2184
 							)
 					);
 					break;
@@ -1392,7 +1395,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Regular Time',
 							'ps_order'       => 100,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1407,7 +1410,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Over Time 1',
 							'ps_order'       => 120,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1418,7 +1421,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Over Time 2',
 							'ps_order'       => 121,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1431,7 +1434,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Premium 1',
 							'ps_order'       => 130,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1442,7 +1445,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Premium 2',
 							'ps_order'       => 131,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1454,7 +1457,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Statutory Holiday',
 							'ps_order'       => 140,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1465,7 +1468,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Sick',
 							'ps_order'       => 142,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1476,7 +1479,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Bereavement',
 							'ps_order'       => 145,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1487,7 +1490,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Jury Duty',
 							'ps_order'       => 146,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1499,7 +1502,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Tips',
 							'ps_order'       => 150,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wage Tips'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1510,7 +1513,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Commission',
 							'ps_order'       => 152,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wage Commission'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1521,7 +1524,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Retro Pay',
 							'ps_order'       => 153,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1532,7 +1535,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Expense Reimbursement',
 							'ps_order'       => 154,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Expense Reimbursement', //5410
 							'credit_account' => '',
 					)
 			);
@@ -1543,7 +1546,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Bonus',
 							'ps_order'       => 156,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wage Bonuses'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1554,7 +1557,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Severance',
 							'ps_order'       => 160,
-							'debit_account'  => 5410,
+							'debit_account'  => 'Wages'. $gl_account_expense_suffix, //5410
 							'credit_account' => '',
 					)
 			);
@@ -1565,7 +1568,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 10,
 							'name'           => 'Advance',
 							'ps_order'       => 170,
-							'debit_account'  => 5510,
+							'debit_account'  => 'Advance', //5510
 							'credit_account' => '',
 					)
 			);
@@ -1579,7 +1582,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Health Benefits Plan',
 							'ps_order'       => 250,
 							'debit_account'  => '',
-							'credit_account' => '2160',
+							'credit_account' => 'Health Benefits'. $gl_account_payable_suffix, //2160
 					)
 			);
 			$this->createPayStubAccount(
@@ -1590,7 +1593,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Dental Benefits Plan',
 							'ps_order'       => 255,
 							'debit_account'  => '',
-							'credit_account' => '2162',
+							'credit_account' => 'Dental Benefits'. $gl_account_payable_suffix, //2162
 					)
 			);
 			$this->createPayStubAccount(
@@ -1601,7 +1604,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Life Insurance',
 							'ps_order'       => 256,
 							'debit_account'  => '',
-							'credit_account' => '2164',
+							'credit_account' => 'Life Insurance'. $gl_account_payable_suffix, //2164
 					)
 			);
 			$this->createPayStubAccount(
@@ -1612,7 +1615,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Long Term Disability',
 							'ps_order'       => 257,
 							'debit_account'  => '',
-							'credit_account' => '2166',
+							'credit_account' => 'Long Term Disability'. $gl_account_payable_suffix, //2166
 					)
 			);
 			$this->createPayStubAccount(
@@ -1623,7 +1626,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Accidental Death & Dismemberment',
 							'ps_order'       => 258,
 							'debit_account'  => '',
-							'credit_account' => '2168',
+							'credit_account' => 'Accidental D&D'. $gl_account_payable_suffix, //2168
 					)
 			);
 
@@ -1635,7 +1638,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Advance Paid',
 							'ps_order'       => 280,
 							'debit_account'  => '',
-							'credit_account' => '5510',
+							'credit_account' => 'Advance', //5510
 					)
 			);
 			$this->createPayStubAccount(
@@ -1646,7 +1649,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Union Dues',
 							'ps_order'       => 282,
 							'debit_account'  => '',
-							'credit_account' => '2170',
+							'credit_account' => 'Union Dues'. $gl_account_payable_suffix, //2170
 					)
 			);
 
@@ -1658,7 +1661,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Child Support',
 							'ps_order'       => 288,
 							'debit_account'  => '',
-							'credit_account' => '2172',
+							'credit_account' => 'Child Support'. $gl_account_payable_suffix, //2172
 					)
 			);
 
@@ -1670,7 +1673,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Garnishment',
 							'ps_order'       => 289,
 							'debit_account'  => '',
-							'credit_account' => '2172',
+							'credit_account' => 'Garnishment'. $gl_account_payable_suffix, //2172
 					)
 			);
 
@@ -1682,8 +1685,8 @@ class SetupPresets extends Factory {
 							'type_id'        => 30,
 							'name'           => 'Health Benefits Plan',
 							'ps_order'       => 340,
-							'debit_account'  => '5410',
-							'credit_account' => '2160',
+							'debit_account'  => 'Health Benefits'. $gl_account_expense_suffix, //5410
+							'credit_account' => 'Health Benefits'. $gl_account_payable_suffix, //2160
 					)
 			);
 			$this->createPayStubAccount(
@@ -1693,8 +1696,8 @@ class SetupPresets extends Factory {
 							'type_id'        => 30,
 							'name'           => 'Dental Benefits Plan',
 							'ps_order'       => 341,
-							'debit_account'  => '5410',
-							'credit_account' => '2162',
+							'debit_account'  => 'Dental Benefits'. $gl_account_expense_suffix, //5410
+							'credit_account' => 'Dental Benefits'. $gl_account_payable_suffix, //2162
 					)
 			);
 			$this->createPayStubAccount(
@@ -1704,8 +1707,8 @@ class SetupPresets extends Factory {
 							'type_id'        => 30,
 							'name'           => 'Life Insurance',
 							'ps_order'       => 346,
-							'debit_account'  => '5410',
-							'credit_account' => '2164',
+							'debit_account'  => 'Life Insurance'. $gl_account_expense_suffix, //5410
+							'credit_account' => 'Life Insurance'. $gl_account_payable_suffix, //2164
 					)
 			);
 			$this->createPayStubAccount(
@@ -1715,8 +1718,8 @@ class SetupPresets extends Factory {
 							'type_id'        => 30,
 							'name'           => 'Long Term Disability',
 							'ps_order'       => 347,
-							'debit_account'  => '5410',
-							'credit_account' => '2166',
+							'debit_account'  => 'Long Term Disability'. $gl_account_expense_suffix, //5410
+							'credit_account' => 'Long Term Disability'. $gl_account_payable_suffix, //2166
 					)
 			);
 			$this->createPayStubAccount(
@@ -1726,8 +1729,8 @@ class SetupPresets extends Factory {
 							'type_id'        => 30,
 							'name'           => 'Accidental Death & Dismemberment',
 							'ps_order'       => 348,
-							'debit_account'  => '5410',
-							'credit_account' => '2168',
+							'debit_account'  => 'Accidental D&D'. $gl_account_expense_suffix, //5410
+							'credit_account' => 'Accidental D&D'. $gl_account_payable_suffix, //2168
 					)
 			);
 
@@ -1751,8 +1754,8 @@ class SetupPresets extends Factory {
 								'name'                              => 'Loan',
 								'ps_order'                          => 197,
 								'accrual_pay_stub_entry_account_id' => $loan_accrual_psea_id,
-								'debit_account'                     => '',
-								'credit_account'                    => '1200',
+								'debit_account'                     => 'Loan', //1200
+								'credit_account'                    => '',
 						)
 				);
 				$this->createPayStubAccount(
@@ -1763,8 +1766,8 @@ class SetupPresets extends Factory {
 								'name'                              => 'Loan Repayment',
 								'ps_order'                          => 297,
 								'accrual_pay_stub_entry_account_id' => $loan_accrual_psea_id,
-								'debit_account'                     => '1200',
-								'credit_account'                    => '',
+								'debit_account'                     => '',
+								'credit_account'                    => 'Loan', //1200
 						)
 				);
 			}
@@ -1777,7 +1780,7 @@ class SetupPresets extends Factory {
 							'type_id'        => 40,
 							'name'           => 'Total Gross',
 							'ps_order'       => 199,
-							'debit_account'  => ( ( isset($config_vars['other']['demo_mode']) AND $config_vars['other']['demo_mode'] == TRUE ) ) ? '5400' : '',
+							'debit_account'  => '', //5400
 							'credit_account' => '',
 					)
 			);
@@ -1809,7 +1812,7 @@ class SetupPresets extends Factory {
 							'name'           => 'Net Pay',
 							'ps_order'       => 299,
 							'debit_account'  => '',
-							'credit_account' => 1060,
+							'credit_account' => 'Net Pay (Bank Account)', //1060
 					)
 			);
 			if ( TTUUID::isUUID( $net_pay_psea_id ) AND $net_pay_psea_id != TTUUID::getZeroID() AND $net_pay_psea_id != TTUUID::getNotExistID() ) {

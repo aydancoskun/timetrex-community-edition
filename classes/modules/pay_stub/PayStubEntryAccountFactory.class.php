@@ -117,6 +117,8 @@ class PayStubEntryAccountFactory extends Factory {
 								'type',
 								'name',
 								'ps_order',
+								'debit_account',
+								'credit_account'
 								);
 				break;
 			case 'unique_columns': //Columns that are unique, and disabled for mass editing.

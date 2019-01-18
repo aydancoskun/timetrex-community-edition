@@ -433,7 +433,7 @@ class GovernmentForms_Base {
                 }
             }
         }
-		
+
         return TRUE;
     }
 
@@ -551,7 +551,6 @@ class GovernmentForms_Base {
                         'y' => $y,
                         'h' => $h,
                         'w' => $w,
-
                     );
 
                     $schema['coordinates'] = array_merge( $schema['coordinates'], $coordinates );

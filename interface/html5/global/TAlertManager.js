@@ -5,13 +5,13 @@ var TAlertManager = (function() {
 	var isShownNetworkAlert = false;
 
 	var showNetworkErrorAlert = function( jqXHR, textStatus, errorThrown ) {
-		if ( textStatus == "parsererror" ) {
-			Global.sendErrorReport(textStatus + ': ' + errorThrown + " ~FROM TAlertManager::showNetworkErrorAlert()~", false, false, jqXHR);
+		if ( textStatus == "parsererror" || jqXHR.status == 0 ) {
+			Global.sendErrorReport(textStatus + ' ('+ jqXHR.status +'): ' + errorThrown + " ~FROM TAlertManager::showNetworkErrorAlert()~", false, false, jqXHR);
 			return;
 		}
 
 		if ( !isShownNetworkAlert ) {
-			TAlertManager.showAlert( Global.network_lost_msg + "<br><br>" + "Error: " + textStatus + ': <br>"'+ errorThrown +'"' + '<br><hr>' + (jqXHR.responseText ? jqXHR.responseText : 'N/A') + " (" + jqXHR.status + ")", 'Error', function() {
+			TAlertManager.showAlert( Global.network_lost_msg + "<br><br>" + "Error: " + textStatus + ' ('+ jqXHR.status +'): <br>"'+ errorThrown +'"' + '<br><hr>' + (jqXHR.responseText ? jqXHR.responseText : 'N/A') + " (" + jqXHR.status + ")", 'Error', function() {
 				isShownNetworkAlert = false;
 			} );
 			isShownNetworkAlert = true;

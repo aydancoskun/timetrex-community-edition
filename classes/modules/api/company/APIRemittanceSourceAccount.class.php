@@ -382,5 +382,72 @@ class APIRemittanceSourceAccount extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
+
+	/**
+	 * Download a test file for $0.01 post dated for 2 days in the future for each provided source account ID.
+	 * @param $ids
+	 */
+	function testExport( $ids ) {
+		require_once( Environment::getBasePath() . '/classes/ChequeForms/ChequeForms.class.php' );
+
+		$output = array();
+		$filter_data = array(
+				'id' => $ids,
+		);
+		/** @var RemittanceSourceAccountListFactory $rsalf */
+		$rsalf = TTnew('RemittanceSourceAccountListFactory');
+		$rsalf->getAPISearchByCompanyIdAndArrayCriteria( $this->getCurrentCompanyObject()->getId(), $filter_data );
+
+		/** @var RemittanceSourceAccountFactory $rsaf */
+		foreach ( $rsalf as $rs_obj ) {
+			/** @var PayStubTransactionFactory $pstf */
+			$pstf = TTnew('PayStubTransactionFactory');
+			$pstf->setAmount( 0.01 );
+			$pstf->setCurrency( $rs_obj->getCurrency() );
+			$pstf->setType( $rs_obj->getType() );
+			$pstf->setRemittanceSourceAccount( $rs_obj->getId() );
+
+			/** @var PayStubFactory $ps_obj */
+			$ps_obj = TTnew('PayStubFactory');
+			$ps_obj->setTransactionDate ( TTDate::getBeginDayEpoch(time()) );
+			$ps_obj->setStartDate( mktime(0,0,0, TTDate::getMonth(time()), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -14, 'day'), TTDate::getYear(time())) ) );
+			$ps_obj->setEndDate( mktime(0,0,0, TTDate::getMonth(time()), TTDate::getDayOfMonth( TTDate::incrementDate( time(), -1, 'day'), TTDate::getYear(time())) ) );
+			$ps_obj->setCurrency( $rs_obj->getCurrency() );
+
+			//This mirrors PayStubTransaction::exportPayStubTransaction()
+			if ( $rs_obj->getType() == 3000 ) {
+				$next_transaction_number = $rs_obj->getNextTransactionNumber();
+				$eft = $pstf->startEFTFile( $rs_obj );
+				$confirmation_number = strtoupper( substr( sha1( TTUUID::generateUUID() ), -8 ) );
+				$record = $pstf->getEFTRecord( $eft, $pstf, $ps_obj, $rs_obj, $this->getCurrentUserObject(), $confirmation_number );
+				$eft->setRecord( $record );
+				$output = $pstf->endEFTFile( $eft, $rs_obj, $this->getCurrentUserObject(), $ps_obj, $this->getCurrentCompanyObject()->getId(),  $pstf->getAmount(), $next_transaction_number, $output );
+
+			}
+
+			if ( $rs_obj->getType() == 2000 ) {
+				$data_format_types = $rs_obj->getOptions('data_format_check_form');
+
+				$data_format_type_id = $rs_obj->getDataFormat();
+				$check_file_obj = new ChequeForms();
+				$check_obj = $check_file_obj->getFormObject( strtoupper( $data_format_types[$data_format_type_id] ) );
+				$transaction_number = $rs_obj->getNextTransactionNumber();
+				$ps_data = $pstf->getChequeData( $ps_obj, $pstf, $this->getCurrentUserObject(), $transaction_number );
+				$check_obj->addRecord( $ps_data );
+				$check_file_obj->addForm( $check_obj );
+				$transaction_number++;
+				$output = $pstf->endChequeFile( $rs_obj, $ps_obj, $transaction_number, $output, $check_file_obj );
+			}
+
+		}
+
+		if ( is_array($output) AND count($output) > 0 ) {
+			$filename = 'pay_stub_transactions_test_'.TTDate::getDate( 'DATE', time() ).'.zip';
+			$zip_file = Misc::zip($output, $filename, TRUE);
+			return Misc::APIFileDownload($zip_file['file_name'], $zip_file['mime_type'], $zip_file['data'] );
+		} else {
+			return $this->returnHandler( FALSE, 'VALIDATION', TTi18n::getText('ERROR: No data to export...') );
+		}
+	}
 }
 ?>

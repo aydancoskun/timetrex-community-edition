@@ -831,7 +831,7 @@ class PunchControlFactory extends Factory {
 								$pcf->setEnableCalcWeeklySystemTotalTime( TRUE );
 								$pcf->setEnableCalcUserDateTotal( TRUE );
 								if ( $pcf->isValid() == TRUE ) {
-									Debug::Text(' Punch Control is valid, saving...: ', __FILE__, __LINE__, __METHOD__, 10);
+									Debug::Text(' Punch Control is valid, saving...', __FILE__, __LINE__, __METHOD__, 10);
 									if ( $pcf->Save( TRUE, TRUE ) == TRUE ) { //Force isNew() lookup.\
 										Debug::text(' Returning TRUE!', __FILE__, __LINE__, __METHOD__, 10);
 										return TRUE;
@@ -872,7 +872,7 @@ class PunchControlFactory extends Factory {
 								$pcf->setEnableCalcWeeklySystemTotalTime( TRUE );
 								$pcf->setEnableCalcUserDateTotal( TRUE );
 								if ( $pcf->isValid() == TRUE ) {
-									Debug::Text(' Punch Control is valid, saving...: ', __FILE__, __LINE__, __METHOD__, 10);
+									Debug::Text(' Punch Control is valid, saving...', __FILE__, __LINE__, __METHOD__, 10);
 									if ( $pcf->Save( TRUE, TRUE ) == TRUE ) { //Force isNew() lookup.\
 										Debug::text(' Returning TRUE!', __FILE__, __LINE__, __METHOD__, 10);
 										return TRUE;
@@ -1224,12 +1224,6 @@ class PunchControlFactory extends Factory {
 			$this->findUserDate();
 		}
 		Debug::text('DateStamp: '. $this->getDateStamp(), __FILE__, __LINE__, __METHOD__, 10);
-
-		if ( $this->getUser() == FALSE ) {
-			$this->Validator->isTRUE(	'user_id',
-										FALSE,
-										TTi18n::gettext('Employee is invalid') );
-		}
 
 		//Don't check for a valid pay period here, do that in PunchFactory->Validate(), as we need to allow users to delete punches that were created outside pay periods in legacy versions.
 		if ( $this->getDeleted() == FALSE AND $this->getDateStamp() == FALSE ) {

@@ -976,6 +976,9 @@ BaseViewController = Backbone.View.extend( {
 				ProgressBar.closeOverlay();
 				this.onDownloadClick();
 				break;
+			case ContextMenuIconName.export_export:
+				this.onExportClick();
+				break;
 			case ContextMenuIconName.export_excel:
 				ProgressBar.closeOverlay();
 				this.onExportClick('export' + this.api.key_name );

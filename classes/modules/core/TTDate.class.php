@@ -617,45 +617,46 @@ class TTDate {
 		if ( !is_numeric($str) AND in_array( self::$date_format, $custom_parse_formats) ) {
 			//Debug::text('	 Custom Parse Format detected!', __FILE__, __LINE__, __METHOD__, 10);
 			//Match to: Year, Month, Day
+			// Make sure we regex match starting at the beginning of the string (^), otherwise the "m-d-y" format will match ISO format: 2018-12-31 as "18-12-31" and cause a failure.
 			$textual_month = FALSE;
 			switch (self::$date_format) {
 				case 'd-M-y':
 					//Two digit year, custom parsing for it to have more control over 1900 or 2000 years.
 					//PHP handles it like this: values between 00-69 are mapped to 2000-2069 and 70-99 to 1970-1999
 					//Debug::text('	 Parsing format: M-d-y', __FILE__, __LINE__, __METHOD__, 10);
-					$date_pattern = '/([0-9]{1,2})\-([A-Za-z]{3})\-([0-9]{2,4})/';
+					$date_pattern = '/^([0-9]{1,2})\-([A-Za-z]{3})\-([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 2, 'day' => 1 );
 					$textual_month = TRUE;
 					break;
 				case 'M-d-y':
 				case 'M-d-Y':
 					//Debug::text('	 Parsing format: M-d-y', __FILE__, __LINE__, __METHOD__, 10);
-					$date_pattern = '/([A-Za-z]{3})\-([0-9]{1,2})\-([0-9]{2,4})/';
+					$date_pattern = '/^([A-Za-z]{3})\-([0-9]{1,2})\-([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 1, 'day' => 2 );
 					$textual_month = TRUE;
 					break;
 				case 'm-d-y':
 				case 'm-d-Y':
 					//Debug::text('	 Parsing format: m-d-y', __FILE__, __LINE__, __METHOD__, 10);
-					$date_pattern = '/([0-9]{1,2})\-([0-9]{1,2})\-([0-9]{2,4})/';
+					$date_pattern = '/^([0-9]{1,2})\-([0-9]{1,2})\-([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 1, 'day' => 2 );
 					break;
 				case 'm/d/y':
 				case 'm/d/Y':
 					//Debug::text('	 Parsing format: m/d/y', __FILE__, __LINE__, __METHOD__, 10);
-					$date_pattern = '/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2,4})/';
+					$date_pattern = '/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 1, 'day' => 2 );
 					break;
 				case 'd/m/y':
 				case 'd/m/Y':
 					//Debug::text('	 Parsing format: d/m/y', __FILE__, __LINE__, __METHOD__, 10);
-					$date_pattern = '/([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2,4})/';
+					$date_pattern = '/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 2, 'day' => 1 );
 					break;
 				case 'd-m-y':
 				case 'd-m-Y':
 					//Debug::text('	 Parsing format: d-m-y', __FILE__, __LINE__, __METHOD__, 10);
-					$date_pattern = '/([0-9]{1,2})\-([0-9]{1,2})\-([0-9]{2,4})/';
+					$date_pattern = '/^([0-9]{1,2})\-([0-9]{1,2})\-([0-9]{2,4})/';
 					$match_arr = array( 'year' => 3, 'month' => 2, 'day' => 1 );
 					break;
 				default:

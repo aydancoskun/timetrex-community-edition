@@ -994,6 +994,16 @@ class PayrollRemittanceAgencyFactory extends Factory {
 	}
 
 	/**
+	 * @return object|bool
+	 */
+	function getCompanyDeductionListFactory() {
+		$cdlf = TTnew('CompanyDeductionListFactory');
+		$cdlf->getByCompanyIdAndPayrollRemittanceAgencyId( $this->getCompanyObject()->getId(), $this->getId() );
+		return $cdlf;
+	}
+
+
+	/**
 	 * @return bool|mixed
 	 */
 	function getLegalEntity() {

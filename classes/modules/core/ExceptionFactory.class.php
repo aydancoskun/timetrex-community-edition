@@ -719,12 +719,6 @@ class ExceptionFactory extends Factory {
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
-		if ( $this->getUser() == FALSE ) {
-			$this->Validator->isTRUE(	'user_id',
-										FALSE,
-										TTi18n::gettext('Employee is invalid') );
-		}
-
 		if ( $this->getDeleted() == FALSE AND $this->getDateStamp() == FALSE ) {
 			$this->Validator->isTRUE(	'date_stamp',
 										FALSE,

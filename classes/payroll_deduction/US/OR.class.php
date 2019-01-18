@@ -48,6 +48,20 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	var $original_filing_status = NULL;
 
 	var $state_income_tax_rate_options = array(
+			20180101 => array(
+					10 => array(
+							array('income' => 3450, 'rate' => 5, 'constant' => 0),
+							array('income' => 8700, 'rate' => 7, 'constant' => 172.5),
+							array('income' => 125000, 'rate' => 9, 'constant' => 540),
+							array('income' => 125000, 'rate' => 9.9, 'constant' => 11007),
+					),
+					20 => array(
+							array('income' => 6900, 'rate' => 5, 'constant' => 0),
+							array('income' => 17400, 'rate' => 7, 'constant' => 345),
+							array('income' => 250000, 'rate' => 9, 'constant' => 1080),
+							array('income' => 250000, 'rate' => 9.9, 'constant' => 22014),
+					),
+			),
 			20170101 => array(
 					10 => array(
 							array('income' => 3400, 'rate' => 5, 'constant' => 0),
@@ -161,6 +175,34 @@ class PayrollDeduction_US_OR extends PayrollDeduction_US {
 	);
 
 	var $state_options = array(
+			2010101 => array( //01-Jan-18
+							   'standard_deduction'  => array(
+									   '10' => 2215,
+									   '20' => 4435,
+							   ),
+							   'allowance'           => 201,
+							   'federal_tax_maximum' => 6650,
+							   'phase_out'           => array(
+									   '10' => array(
+											   50000  => 6650,
+											   125000 => 6650,
+											   130000 => 5300,
+											   135000 => 4000,
+											   140000 => 2650,
+											   145000 => 1300,
+											   145000 => 0,
+									   ),
+									   '20' => array(
+											   50000  => 6650,
+											   250000 => 6650,
+											   260000 => 5300,
+											   270000 => 4000,
+											   280000 => 2650,
+											   290000 => 1300,
+											   290000 => 0,
+									   ),
+							   ),
+			),
 			20170101 => array( //01-Jan-17
 							   'standard_deduction'  => array(
 									   '10' => 2175,

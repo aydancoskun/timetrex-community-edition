@@ -171,16 +171,6 @@ class LogDetailFactory extends Factory {
 
 					$tmp_class = new $class;
 
-					//Since RecurringScheduleTemplates can change created_by,
-					//we need to make sure it doesn't appear in audit logs for classes that don't allow it to be changed.
-					if ( isset($new_data['created_by']) AND method_exists( $tmp_class, '_getVariableToFunctionMap' ) ) {
-						$variable_to_function_map = $tmp_class->getVariableToFunctionMap();
-						if ( !isset($variable_to_function_map['created_by']) ) {
-							$object->old_data['created_by'] = $new_data['created_by'];
-						}
-						unset($variable_to_function_map);
-					}
-
 					//Run the old data back through the objects own setObjectFromArray(), so any necessary values can be parsed.
 					//  However this can cause problems, specifically with PP Schedule TimeSheet Verification settings, as they are calculated going into the DB and coming out.
 					//  Shouldn't the diff just be strictly on the data changed in the DB itself, and not passed through setObjectFromArray()?
@@ -193,6 +183,10 @@ class LogDetailFactory extends Factory {
 				} else {
 					$old_data = $object->old_data;
 				}
+
+				//Strip any data that does not have getter/setter functions, since some data can be coming in from SQL joins that we don't want to include in the audit trailer as it belongs to other objects.
+				$old_data = $object->clearNonMappedData( $old_data );
+				$new_data = $object->clearNonMappedData( $new_data );
 
 				//We don't want to include any sub-arrays, as those classes should take care of their own logging, even though it may be slower in some cases.
 				$diff_arr = array_diff_assoc( (array)$new_data, (array)$old_data );
@@ -237,7 +231,13 @@ class LogDetailFactory extends Factory {
 							$diff_arr['finger_print_1_updated_date'],
 							$diff_arr['finger_print_2_updated_date'],
 							$diff_arr['finger_print_3_updated_date'],
-							$diff_arr['finger_print_4_updated_date']
+							$diff_arr['finger_print_4_updated_date'],
+							$diff_arr['work_email_is_valid'],
+							$diff_arr['work_email_is_valid_key'],
+							$diff_arr['work_email_is_valid_date'],
+							$diff_arr['home_email_is_valid'],
+							$diff_arr['home_email_is_valid_key'],
+							$diff_arr['home_email_is_valid_date']
 							);
 					break;
 				case 'UserPreferenceFactory':
@@ -447,6 +447,8 @@ class LogDetailFactory extends Factory {
 						$new_value = NULL;
 					} elseif ( is_array($new_value) ) {
 						$new_value = serialize($new_value);
+					} elseif ( isset($old_data[$field]) == FALSE AND $new_value == TTUUID::getZeroID() ) { //Don't log cases where old value doesn't exist but new value is a zero UUID.
+						$new_value = NULL;
 					}
 
 					//Debug::Text('Old Value: '. $old_value .' New Value: '. $new_value, __FILE__, __LINE__, __METHOD__, 10);

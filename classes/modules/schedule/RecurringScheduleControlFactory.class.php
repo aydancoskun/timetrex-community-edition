@@ -493,7 +493,7 @@ class RecurringScheduleControlFactory extends Factory {
 												);
 		}
 		// Display Weeks
-		if ( $this->getDisplayWeeks() !== FALSE ) {
+		if ( $this->Validator->getValidateOnly() == FALSE OR $this->getDisplayWeeks() !== FALSE ) {
 			$this->Validator->isGreaterThan(	'display_weeks',
 														$this->getDisplayWeeks(),
 														TTi18n::gettext('Display Weeks must be at least 1'),
@@ -525,6 +525,10 @@ class RecurringScheduleControlFactory extends Factory {
 	function preSave() {
 		if ( $this->getStartWeek() < 1 ) {
 			$this->setStartWeek( 1 );
+		}
+
+		if ( $this->getDisplayWeeks() < 1 ) {
+			$this->setDisplayWeeks(1);
 		}
 
 		return TRUE;

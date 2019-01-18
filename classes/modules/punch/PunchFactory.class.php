@@ -1833,9 +1833,10 @@ class PunchFactory extends Factory {
 		return $data;
 	}
 
-	//Determine if the punch was manually created (without punching in/out) or modified by someone other than the person who punched in/out.
-	//Allow for employees manually entering in their own punches (and editing) without that being marked as tainted.
 	/**
+	 * Determine if the punch was manually created (without punching in/out) or modified by someone other than the person who punched in/out.
+	 * Allow for employees manually entering in their own punches (and editing) without that being marked as tainted.
+	 *
 	 * @return bool
 	 */
 	function getTainted() {

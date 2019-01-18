@@ -873,6 +873,12 @@ class T4SummaryReport extends Report {
 				$le_obj = $this->form_data['legal_entity'][ $legal_entity_id ];
 				$company_name = $le_obj->getTradeName();
 
+				if ( is_object($this->form_data['remittance_agency'][ $legal_entity_id ]) ) {
+					$contact_user_obj = $this->form_data['remittance_agency'][ $legal_entity_id ]->getContactUserObject();
+				} else {
+					$contact_user_obj = $this->getUserObject();
+				}
+
 				if ( $format == 'efile_xml' ) {
 					$t619 = $this->getT619Object();
 					$t619->setStatus( $setup_data['status_id'] );
@@ -885,9 +891,9 @@ class T4SummaryReport extends Report {
 					$t619->transmitter_province = $le_obj->getProvince();
 					$t619->transmitter_postal_code = $le_obj->getPostalCode();
 
-					$t619->contact_name = $this->getUserObject()->getFullName();
-					$t619->contact_phone = $current_company->getWorkPhone();
-					$t619->contact_email = ( $this->getUserObject()->getWorkEmail() != '' ) ? $this->getUserObject()->getWorkEmail() : ( ( $this->getUserObject()->getHomeEmail() != '' ) ? $this->getUserObject()->getHomeEmail() : NULL );
+					$t619->contact_name = $contact_user_obj->getFullName();
+					$t619->contact_phone = $contact_user_obj->getWorkPhone();
+					$t619->contact_email = ( $contact_user_obj->getWorkEmail() != '' ) ? $contact_user_obj->getWorkEmail() : ( ( $contact_user_obj->getHomeEmail() != '' ) ? $contact_user_obj->getHomeEmail() : NULL );
 					$t619->company_name = $company_name;
 					$this->getFormObject()->addForm( $t619 );
 				}
@@ -1102,8 +1108,8 @@ class T4SummaryReport extends Report {
 					$t4s->company_province = $le_obj->getProvince();
 					$t4s->company_postal_code = $le_obj->getPostalCode();
 
-					$t4s->l76 = $this->getUserObject()->getFullName(); //Contact name.
-					$t4s->l78 = $le_obj->getWorkPhone();
+					$t4s->l76 = $contact_user_obj->getFullName(); //Contact name.
+					$t4s->l78 = $contact_user_obj->getWorkPhone();
 
 					$t4->sumRecords();
 					$total_row = $t4->getRecordsTotal();

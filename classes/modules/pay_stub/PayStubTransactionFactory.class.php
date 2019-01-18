@@ -771,13 +771,7 @@ class PayStubTransactionFactory extends Factory {
 	 */
 	function startEFTFile($rs_obj) {
 		$data_format_type_id = $rs_obj->getDataFormat();
-		$data_format_types = array(
-				10 => 'ACH',
-				20 => '1464',
-				30 => '1464', //CIBC
-				50 => '105',
-				70 => 'BEANSTREAM'
-		);
+		$data_format_types = $rs_obj->getOptions('data_format_eft_form');
 
 		$eft = new EFT();
 		$eft->setFileFormat( $data_format_types[$data_format_type_id] );
@@ -1005,6 +999,7 @@ class PayStubTransactionFactory extends Factory {
 	}
 
 	/**
+	 * The export portion of this function is mirrored in APIRemittanceSourceAccount::testExport()
 	 * @param null $pstlf
 	 * @param null $export_type
 	 * @param object $company_obj
@@ -1042,13 +1037,6 @@ class PayStubTransactionFactory extends Factory {
 				$pstlf_sorted_array[TTUUID::castUUID($tmp_pst_obj->getRemittanceSourceAccount())][] = $tmp_pst_obj;
 			}
 			unset( $tmp_pst_obj );
-
-			$data_format_types = array(
-					10 => '9085', //cheque_9085
-					20 => '9209P', //cheque_9209p
-					30 => 'DLT103', //cheque_dlt103
-					40 => 'DLT104', //cheque_dlt104
-			);
 
 			$i = 0;
 
@@ -1113,6 +1101,8 @@ class PayStubTransactionFactory extends Factory {
 							/** @var RemittanceSourceAccountFactory $rs_obj */
 							$rs_obj = $pst_obj->getRemittanceSourceAccountObject();
 							Debug::Text( 'Starting New Batch! Name: [' . $rs_obj->getName() . '] ID: ' . $rs_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
+
+							$data_format_types = $rs_obj->getOptions('data_format_check_form');
 						}
 						Debug::Text( 'RSA: name: [' . $rs_obj->getName() . '] Type: '. $rs_obj->getType() .' ID: ' . $rs_obj->getId(), __FILE__, __LINE__, __METHOD__, 10 );
 

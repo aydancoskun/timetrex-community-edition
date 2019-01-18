@@ -233,7 +233,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		this.edit_view_tabs[3].push( tab3_column1 );
 
 		//Type of Return
-
 		var form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input = form_item_input.AComboBox( {
@@ -248,7 +247,6 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		this.addEditFieldToColumn( $.i18n._( 'Type of Return' ), form_item_input, tab3_column1, '' );
 
 		//Exempt Payments
-
 		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
 
 		form_item_input = form_item_input.AComboBox( {
@@ -260,44 +258,44 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		} );
 
 		form_item_input.setSourceData( Global.addFirstItemToArray( $this.exempt_payment_array ) );
-		this.addEditFieldToColumn( $.i18n._( 'Exempt Payments' ), form_item_input, tab3_column1 );
+		this.addEditFieldToColumn( $.i18n._( 'Exempt Payment Types' ), form_item_input, tab3_column1 );
 
 		//Total Payments (Line 3)
-		var v_box = $( "<div class='v-box'></div>" );
-
-		//Selection Type
-		form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-		form_item_input.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
-			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'total_payments_include_pay_stub_entry_account'
-		} );
-
-		var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
-
-		v_box.append( form_item );
-		v_box.append( "<div class='clear-both-div'></div>" );
-
-		//Selection
-		var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
-
-		form_item_input_1.AComboBox( {
-			api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
-			allow_multiple_selection: true,
-			layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
-			show_search_inputs: true,
-			set_empty: true,
-			field: 'total_payments_exclude_pay_stub_entry_account'
-		} );
-
-		form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Exclude' ) );
-
-		v_box.append( form_item );
-
-		this.addEditFieldToColumn( $.i18n._( 'Total Payments (Line 3)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
+		// var v_box = $( "<div class='v-box'></div>" );
+		//
+		// //Selection Type
+		// form_item_input = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		// form_item_input.AComboBox( {
+		// 	api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+		// 	allow_multiple_selection: true,
+		// 	layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+		// 	show_search_inputs: true,
+		// 	set_empty: true,
+		// 	field: 'total_payments_include_pay_stub_entry_account'
+		// } );
+		//
+		// var form_item = this.putInputToInsideFormItem( form_item_input, $.i18n._( 'Include' ) );
+		//
+		// v_box.append( form_item );
+		// v_box.append( "<div class='clear-both-div'></div>" );
+		//
+		// //Selection
+		// var form_item_input_1 = Global.loadWidgetByName( FormItemType.AWESOME_BOX );
+		//
+		// form_item_input_1.AComboBox( {
+		// 	api_class: (APIFactory.getAPIClass( 'APIPayStubEntryAccount' )),
+		// 	allow_multiple_selection: true,
+		// 	layout_name: ALayoutIDs.PAY_STUB_ACCOUNT,
+		// 	show_search_inputs: true,
+		// 	set_empty: true,
+		// 	field: 'total_payments_exclude_pay_stub_entry_account'
+		// } );
+		//
+		// form_item = this.putInputToInsideFormItem( form_item_input_1, $.i18n._( 'Exclude' ) );
+		//
+		// v_box.append( form_item );
+		//
+		// this.addEditFieldToColumn( $.i18n._( 'Total Payments (Line 3)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
 		//Exempt Payments (Line 4)
 		v_box = $( "<div class='v-box'></div>" );
@@ -336,17 +334,24 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 		this.addEditFieldToColumn( $.i18n._( 'Exempt Payments (Line 4)' ), [form_item_input, form_item_input_1], tab3_column1, '', v_box, false, true );
 
+		//Credit Reduction (Line 9)
+		form_item_input = Global.loadWidgetByName( FormItemType.CHECKBOX );
+
+		form_item_input.TCheckbox( {field: 'line_9'} );
+		this.addEditFieldToColumn( $.i18n._( 'Were ALL taxable FUTA wages excluded from State UI? (Line 9)' ), form_item_input, tab3_column1 );
+
+
 		//Wages Excluded From State Unemployement Tax (Line 10)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
 
 		form_item_input.TTextInput( {field: 'line_10'} );
 		this.addEditFieldToColumn( $.i18n._( 'Wages Excluded From State Unemployement Tax (Line 10)' ), form_item_input, tab3_column1 );
 
-		//Credit Reduction (Line 11)
-		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
-
-		form_item_input.TTextInput( {field: 'line_11'} );
-		this.addEditFieldToColumn( $.i18n._( 'Credit Reduction (Line 11)' ), form_item_input, tab3_column1 );
+		// //Credit Reduction (Line 11)
+		// form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
+		//
+		// form_item_input.TTextInput( {field: 'line_11'} );
+		// this.addEditFieldToColumn( $.i18n._( 'Credit Reduction (Line 11)' ), form_item_input, tab3_column1 );
 
 		//FUTA Tax Deposited For The Year (Line 13)
 		form_item_input = Global.loadWidgetByName( FormItemType.TEXT_INPUT );
@@ -357,15 +362,15 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 
 	getFormSetupData: function() {
 		var other = {};
-		other.exempt_payments = {include_pay_stub_entry_account: this.current_edit_record.exempt_payments_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.exempt_payments_exclude_pay_stub_entry_account};
-		other.total_payments = {include_pay_stub_entry_account: this.current_edit_record.total_payments_include_pay_stub_entry_account,
-			exclude_pay_stub_entry_account: this.current_edit_record.total_payments_exclude_pay_stub_entry_account};
+
+		//other.total_payments = {include_pay_stub_entry_account: this.current_edit_record.total_payments_include_pay_stub_entry_account, exclude_pay_stub_entry_account: this.current_edit_record.total_payments_exclude_pay_stub_entry_account};
+		other.exempt_payments = {include_pay_stub_entry_account: this.current_edit_record.exempt_payments_include_pay_stub_entry_account, exclude_pay_stub_entry_account: this.current_edit_record.exempt_payments_exclude_pay_stub_entry_account};
 
 		other.return_type = this.current_edit_record.return_type;
 		other.exempt_payment = this.current_edit_record.exempt_payment;
+		other.line_9 = this.current_edit_record.line_9;
 		other.line_10 = this.current_edit_record.line_10;
-		other.line_11 = this.current_edit_record.line_11;
+		//other.line_11 = this.current_edit_record.line_11;
 		other.tax_deposited = this.current_edit_record.tax_deposited;
 
 		return other;
@@ -378,21 +383,20 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 		}
 
 		if ( res_Data ) {
+			// if ( res_Data.total_payments ) {
+			//     this.edit_view_ui_dic.total_payments_exclude_pay_stub_entry_account.setValue( res_Data.total_payments.exclude_pay_stub_entry_account );
+			//     this.edit_view_ui_dic.total_payments_include_pay_stub_entry_account.setValue( res_Data.total_payments.include_pay_stub_entry_account );
+			//
+			//     this.current_edit_record.total_payments_include_pay_stub_entry_account = res_Data.total_payments.include_pay_stub_entry_account;
+			//     this.current_edit_record.total_payments_exclude_pay_stub_entry_account = res_Data.total_payments.exclude_pay_stub_entry_account;
+			// }
+
 			if ( res_Data.exempt_payments ) {
 				this.edit_view_ui_dic.exempt_payments_exclude_pay_stub_entry_account.setValue( res_Data.exempt_payments.exclude_pay_stub_entry_account );
 				this.edit_view_ui_dic.exempt_payments_include_pay_stub_entry_account.setValue( res_Data.exempt_payments.include_pay_stub_entry_account );
 
 				this.current_edit_record.exempt_payments_include_pay_stub_entry_account = res_Data.exempt_payments.include_pay_stub_entry_account;
 				this.current_edit_record.exempt_payments_exclude_pay_stub_entry_account = res_Data.exempt_payments.exclude_pay_stub_entry_account;
-
-			}
-
-			if ( res_Data.total_payments ) {
-				this.edit_view_ui_dic.total_payments_exclude_pay_stub_entry_account.setValue( res_Data.total_payments.exclude_pay_stub_entry_account );
-				this.edit_view_ui_dic.total_payments_include_pay_stub_entry_account.setValue( res_Data.total_payments.include_pay_stub_entry_account );
-
-				this.current_edit_record.total_payments_include_pay_stub_entry_account = res_Data.total_payments.include_pay_stub_entry_account;
-				this.current_edit_record.total_payments_exclude_pay_stub_entry_account = res_Data.total_payments.exclude_pay_stub_entry_account;
 			}
 
 			if ( res_Data.return_type ) {
@@ -405,6 +409,12 @@ Form940ReportViewController = ReportBaseViewController.extend( {
 				this.edit_view_ui_dic.exempt_payment.setValue( res_Data.exempt_payment );
 
 				this.current_edit_record.exempt_payment = res_Data.exempt_payment;
+			}
+
+			if ( res_Data.line_9 ) {
+				this.edit_view_ui_dic.line_9.setValue( res_Data.line_9 );
+
+				this.current_edit_record.line_9 = res_Data.line_9;
 			}
 
 			if ( res_Data.line_10 ) {

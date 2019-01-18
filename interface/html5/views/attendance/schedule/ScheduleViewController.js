@@ -7670,13 +7670,13 @@ ScheduleViewController = BaseViewController.extend( {
 
 						total_row_key_data.total_time_wage = parseFloat( parseFloat( row_data.total_time_wage ) + parseFloat( total_row_key_data.total_time_wage ) ).toFixed( 2 );
 						if ( row_data.status_id == 10 ) {
-							total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
+							total_row_key_data.total_time = parseFloat(row_data.total_time) + parseFloat(total_row_key_data.total_time);
 							total_row_key_data.shifts = total_row_key_data.shifts + 1;
 							if ( this.getMode() === ScheduleViewControllerMode.DAY ) {
 								this.buildTotalShiftsValues( total_row_key_data.total_shifts_dic, row[key] );
 							}
 						} else if ( row_data.status_id == 20 && row_data.absence_policy_id != TTUUID.zero_id && row_data.absence_policy_id != TTUUID.not_exist_id ) { //&& row_data.total_time_wage != 0
-							total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
+							total_row_key_data.total_time = parseFloat(row_data.total_time) + parseFloat(total_row_key_data.total_time);
 							total_row_key_data.absences = total_row_key_data.absences + 1;
 						}
 
@@ -7715,13 +7715,13 @@ ScheduleViewController = BaseViewController.extend( {
 
 					total_row_key_data.total_time_wage = parseFloat( parseFloat( row_data.total_time_wage ) + parseFloat( total_row_key_data.total_time_wage ) ).toFixed( 2 );
 					if ( row_data.status_id == 10 ) {
-						total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
+						total_row_key_data.total_time = parseFloat(row_data.total_time) + parseFloat(total_row_key_data.total_time);
 						total_row_key_data.shifts = total_row_key_data.shifts + 1;
 						if ( this.getMode() === ScheduleViewControllerMode.DAY ) {
 							this.buildTotalShiftsValues( total_row_key_data.total_shifts_dic, row[key] );
 						}
 					} else if ( row_data.status_id == 20 && row_data.absence_policy_id != TTUUID.zero_id && row_data.absence_policy_id != TTUUID.not_exist_id ) { //&& row_data.total_time_wage != 0
-						total_row_key_data.total_time = row_data.total_time + total_row_key_data.total_time;
+						total_row_key_data.total_time = parseFloat(row_data.total_time) + parseFloat(total_row_key_data.total_time);
 						total_row_key_data.absences = total_row_key_data.absences + 1;
 					}
 

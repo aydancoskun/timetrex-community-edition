@@ -97,6 +97,14 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 			sub_menus: []
 		} );
 
+		//export menu group
+		var export_group = new RibbonSubMenuGroup( {
+			label: $.i18n._( 'Export' ),
+			id: this.viewId + 'Export',
+			ribbon_menu: menu,
+			sub_menus: []
+		} );
+
 		var other_group = new RibbonSubMenuGroup( {
 			label: $.i18n._( 'Other' ),
 			id: this.viewId + 'other',
@@ -230,11 +238,78 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 			permission: null
 		} );
 
+		var export_menu_item = new RibbonSubMenu( {
+			label: $.i18n._( 'Sample<br>File' ),
+			id: ContextMenuIconName.export_export,
+			group: export_group,
+			icon: Icons.export_export,
+			permission_result: true,
+			permission: null
+		} );
+
 
 		return [menu];
 
 	},
 
+
+	setDefaultMenu: function( doNotSetFocus ) {
+		this._super('setDefaultMenu');
+		var len = this.context_menu_array.length;
+		var grid_selected_id_array = this.getGridSelectIdArray();
+		var grid_selected_length = grid_selected_id_array.length;
+
+		for ( var i = 0; i < len; i++ ) {
+			var context_btn = this.context_menu_array[i];
+			var id = $(context_btn.find('.ribbon-sub-menu-icon')).attr('id');
+
+			context_btn.removeClass('invisible-image');
+			context_btn.removeClass('disable-image');
+
+			switch (id) {
+				case ContextMenuIconName.export_export:
+					this.setMenuExportIcon( context_btn, grid_selected_length );
+					break;
+			}
+		}
+	},
+	setEditMenu: function( doNotSetFocus ) {
+		this._super('setEditMenu');
+		var len = this.context_menu_array.length;
+		var grid_selected_id_array = this.getGridSelectIdArray();
+		var grid_selected_length = grid_selected_id_array.length;
+
+		for ( var i = 0; i < len; i++ ) {
+			var context_btn = this.context_menu_array[i];
+			var id = $(context_btn.find('.ribbon-sub-menu-icon')).attr('id');
+
+			context_btn.removeClass('invisible-image');
+			context_btn.removeClass('disable-image');
+
+			switch (id) {
+				case ContextMenuIconName.export_export:
+					this.setMenuExportIcon( context_btn, grid_selected_length );
+					break;
+			}
+		}
+	},
+
+	setMenuExportIcon: function( context_btn, grid_selected_length ) {
+		//do not show for edit screens or non-grid screens.
+		if ( this.getSelectedItems().length > 0 ) {
+			context_btn.removeClass('disable-image');
+	   	} else if( this.edit_only_mode || this.grid == undefined || this.sub_view_mode ){
+			context_btn.addClass( 'invisible-image' );
+		} else {
+			context_btn.addClass('disable-image');
+		}
+	},
+
+	onExportClick: function() {
+		var post_data = {0:this.getGridSelectIdArray()};
+		debugger
+		Global.APIFileDownload( this.api.className, 'testExport' , post_data );
+	},
 
 	onFormItemChange: function( target, doNotValidate ) {
 		this.setIsChanged( target );
@@ -648,5 +723,4 @@ RemittanceSourceAccountViewController = BaseViewController.extend( {
 
 		];
 	}
-
 } );

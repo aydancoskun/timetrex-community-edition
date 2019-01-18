@@ -1666,12 +1666,6 @@ class UserDateTotalFactory extends Factory {
 		// ABOVE: Validation code moved from set*() functions.
 		//
 
-		if ( $this->getUser() == FALSE ) {
-			$this->Validator->isTRUE(	'user_id',
-										FALSE,
-										TTi18n::gettext('Employee is invalid') );
-		}
-
 		if ( $this->getObjectType() == FALSE ) {
 			$this->Validator->isTRUE(	'object_type_id',
 										FALSE,

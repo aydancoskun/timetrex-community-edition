@@ -74,6 +74,23 @@ class RemittanceSourceAccountFactory extends Factory {
 					//9000 => TTi18n::gettext('Bitcoin'),
 				);
 				break;
+			case 'data_format_eft_form': //data_format ID to EFT class name mapping.
+				$retval = array(
+						10 => 'ACH',
+						20 => '1464',
+						30 => '1464', //CIBC
+						50 => '105',
+						70 => 'BEANSTREAM'
+				);
+				break;
+			case 'data_format_check_form': //data_format ID to CHECK class name mapping.
+				$retval = array(
+						10 => '9085', //cheque_9085
+						20 => '9209P', //cheque_9209p
+						30 => 'DLT103', //cheque_dlt103
+						40 => 'DLT104', //cheque_dlt104
+				);
+				break;
 			case 'data_format':
 				$retval = array(
 					0 => TTi18n::gettext('-- None --'),

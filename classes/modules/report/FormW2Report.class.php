@@ -977,6 +977,12 @@ class FormW2Report extends Report {
 				/** @var LegalEntityFactory $le_obj */
 				$legal_entity_obj = $this->form_data['legal_entity'][$legal_entity_id];
 
+				if ( is_object($this->form_data['remittance_agency'][$legal_entity_id]['00']) ) {
+					$contact_user_obj = $this->form_data['remittance_agency'][$legal_entity_id]['00']->getContactUserObject();
+				} else {
+					$contact_user_obj = $this->getUserObject();
+				}
+
 				if ( $format == 'efile_xml' ) {
 					$return1040 = $this->getRETURN1040Object();
 					// Ceate the all needed data for Return1040.xsd at here.
@@ -994,7 +1000,6 @@ class FormW2Report extends Report {
 					$return1040->return_type = '';
 					$return1040->ssn = '';
 					$return1040->name = $legal_entity_obj->getTradeName();
-					$return1040->name_control = '';
 					$return1040->address1 = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
 					$return1040->city = $legal_entity_obj->getCity();
 					$return1040->state = $legal_entity_obj->getProvince();
@@ -1020,7 +1025,7 @@ class FormW2Report extends Report {
 				$fw2->year = TTDate::getYear( $filter_data['end_date'] );
 				$fw2->kind_of_employer = ( isset( $setup_data['kind_of_employer'] ) AND $setup_data['kind_of_employer'] != '' ) ? Misc::trimSortPrefix( $setup_data['kind_of_employer'] ) : 'N';
 
-				$fw2->name = $this->getUserObject()->getFullName();
+				$fw2->name = $legal_entity_obj->getLegalName();
 				$fw2->trade_name = $legal_entity_obj->getTradeName();
 				$fw2->company_address1 = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
 				$fw2->company_city = $legal_entity_obj->getCity();
@@ -1046,10 +1051,10 @@ class FormW2Report extends Report {
 					Debug::Text( '    WARNING: Unable to determine remittance agency to obtain efile_user_id from...', __FILE__, __LINE__, __METHOD__, 10 );
 				}
 
-				$fw2->contact_name = $current_user->getFullName();
-				$fw2->contact_phone = $current_user->getWorkPhone();
-				$fw2->contact_phone_ext = $current_user->getWorkPhoneExt();
-				$fw2->contact_email = ( $this->getUserObject()->getWorkEmail() != '' ) ? $this->getUserObject()->getWorkEmail() : ( ( $this->getUserObject()->getHomeEmail() != '' ) ? $this->getUserObject()->getHomeEmail() : NULL );
+				$fw2->contact_name = $contact_user_obj->getFullName();
+				$fw2->contact_phone = $contact_user_obj->getWorkPhone();
+				$fw2->contact_phone_ext = $contact_user_obj->getWorkPhoneExt();
+				$fw2->contact_email = ( $contact_user_obj->getWorkEmail() != '' ) ? $contact_user_obj->getWorkEmail() : ( ( $contact_user_obj->getHomeEmail() != '' ) ? $contact_user_obj->getHomeEmail() : NULL );
 
 				if ( isset( $this->form_data ) AND count( $this->form_data ) > 0 ) {
 					$i = 0;
@@ -1208,9 +1213,9 @@ class FormW2Report extends Report {
 					$fw3->company_state = $fw2->company_state;
 					$fw3->company_zip_code = $fw2->company_zip_code;
 
-					$fw3->contact_name = $current_user->getFullName();
-					$fw3->contact_phone = ( $current_user->getWorkPhoneExt() != '' ) ? $current_user->getWorkPhone() . 'x' . $current_user->getWorkPhoneExt() : $current_user->getWorkPhone();
-					$fw3->contact_email = $current_user->getWorkEmail();
+					$fw3->contact_name = $contact_user_obj->getFullName();
+					$fw3->contact_phone = ( $contact_user_obj->getWorkPhoneExt() != '' ) ? $contact_user_obj->getWorkPhone() . ' x' . $contact_user_obj->getWorkPhoneExt() : $contact_user_obj->getWorkPhone();
+					$fw3->contact_email = $contact_user_obj->getWorkEmail();
 
 					$fw3->kind_of_payer = '941';
 					$fw3->kind_of_employer = $fw2->kind_of_employer;

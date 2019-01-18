@@ -630,7 +630,13 @@ class Import {
 					//Debug::Arr($parsed_data[$x][$import_column], 'Import Column: '. $import_column .' Value: ', __FILE__, __LINE__, __METHOD__, 10);
 				}
 
-				$parsed_data[$x] = $this->postParseRow( $x, $parsed_data[$x] ); //This needs to run for each row so things like manual_ids can get updated automatically.
+				$post_parsed_row = $this->postParseRow( $x, $parsed_data[$x] );
+				if ( is_array( $post_parsed_row ) ) {
+					$parsed_data[$x] = $post_parsed_row; //This needs to run for each row so things like manual_ids can get updated automatically.
+				} else {
+					Debug::Text('  Skipping blank or row that failed postParseRow(): '. $x, __FILE__, __LINE__, __METHOD__, 10);
+					unset($parsed_data[$x]);
+				}
 			}
 
 			$this->getProgressBarObject()->set( $this->getAMFMessageID(), $x );
@@ -920,7 +926,12 @@ class Import {
 		$filter_data = NULL;
 		foreach( $this->search_column_priority as $search_column ) {
 			if ( isset($raw_row[$search_column]) AND $raw_row[$search_column] != '' ) {
-				$filter_data = array( $search_column => $raw_row[$search_column] );
+				$value = $raw_row[$search_column];
+				if ( $search_column == 'user_name' ) {
+					$value = '"'. $value .'"'; //When matching username, make sure its an exact match rather than a fuzzy match, otherwise its easy to match multiple records, causing the import to fail. ie: "john.doe" matches "john.does"
+				}
+
+				$filter_data = array( $search_column => $value );
 				Debug::Text('Searching for existing record based on Column: '. $search_column .' Value: '. $raw_row[$search_column], __FILE__, __LINE__, __METHOD__, 10);
 				break;
 			}
@@ -946,8 +957,9 @@ class Import {
 					//return $tmp_user_obj->getID();
 					$this->user_id_cache[$cache_id] = $tmp_user_obj->getID();
 					return $this->user_id_cache[$cache_id];
+				} elseif ( $ulf->getRecordCount() > 0 ) {
+					Debug::Text('Found more than one record, unable to match...', __FILE__, __LINE__, __METHOD__, 10);
 				}
-
 			}
 		}
 

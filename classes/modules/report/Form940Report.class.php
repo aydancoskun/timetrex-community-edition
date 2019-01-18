@@ -553,11 +553,68 @@ class Form940Report extends Report {
 		$form_data = $this->formatFormConfig();
 		$setup_data = $this->getFormConfig();
 
+		if ( isset($setup_data['total_payments']) ) {
+			unset($setup_data['total_payments'], $form_data['total_payments']); //Ignore any total_payment include/exclude coming from the UI. As its determined from remittance agency data below.
+		}
+
 		if ( !isset($setup_data['line_10']) ) {
 			$setup_data['line_10'] = NULL;
 		}
 		if ( !isset($setup_data['line_11']) ) {
 			$setup_data['line_11'] = NULL;
+		}
+
+		//Get remittance agency for joining. Also use this to find the Tax/Deduction records to determine the include/exclude pay stub accounts.
+		$filter_data['type_id'] = array(10, 20); //Federal/State (Need State here to determine if they are a multi-state employer or not.
+		$filter_data['country'] = array('US'); //US Federal
+		/** @var PayrollRemittanceAgencyListFactory $ralf */
+		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
+		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
+		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
+		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $ralf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
+		if ( $ralf->getRecordCount() > 0 ) {
+			foreach( $ralf as $key => $ra_obj ) {
+				/** @var PayrollRemittanceAgencyFactory $ra_obj */
+				if ( $ra_obj->getStatus() == 10 AND
+						( ( $ra_obj->getType() == 10 AND $ra_obj->parseAgencyID( NULL, 'id') == 10 ) //IRS
+								OR ( $ra_obj->getType() == 20 AND $ra_obj->parseAgencyID( NULL, 'id') == 20 ) //State Unemployment Agency.
+								OR ( $ra_obj->parseAgencyID( NULL, 'id') == 10 AND in_array( $ra_obj->getProvince(), array('NY', 'CA', 'NM', 'OR' ) ) ) ) ) { //States that combine UI with Income Tax.
+					$province_id = ( $ra_obj->getType() == 20 ) ? $ra_obj->getProvince() : '00';
+					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$province_id] = $ra_obj;
+
+					if ( $province_id != '00' ) {
+						$this->form_data['remittance_agency_states'][$ra_obj->getLegalEntity()][$province_id] = TRUE; //Track which states have remittance agencies to determine multi-state employer or not.
+					}
+
+					//Get associated CompanyDeduction record to determine include/exclude PSE accounts for Total payments to all employees.
+					$cdlf = $ra_obj->getCompanyDeductionListFactory();
+					if ( $cdlf->getRecordCount() > 0 ) {
+						$form_data['total_payments']['include_pay_stub_entry_account'] = array();
+						$form_data['total_payments']['exclude_pay_stub_entry_account'] = array();
+						$form_data['total_payments']['pay_stub_entry_account'] = array();
+						foreach( $cdlf as $cd_obj ) {
+							if ( $cd_obj->getCalculation() == 15 AND stripos( $cd_obj->getName(), 'unemployment' ) !== FALSE ) { //15=Advanced Percent
+								Debug::Text( ' Found Company Deduction record: '. $cd_obj->getName() .' linked to Agency: ' . $ra_obj->getName(), __FILE__, __LINE__, __METHOD__, 10 );
+
+								if ( $province_id == '00' ) {
+									$form_data['total_payments']['include_pay_stub_entry_account'] = array_merge( $form_data['total_payments']['include_pay_stub_entry_account'], (array)$cd_obj->getIncludePayStubEntryAccount() );
+									$form_data['total_payments']['exclude_pay_stub_entry_account'] = array_merge( $form_data['total_payments']['exclude_pay_stub_entry_account'], (array)$cd_obj->getExcludePayStubEntryAccount() );
+								} else {
+									$form_data['state_total_payments'][$province_id]['include_pay_stub_entry_account'] = array_merge( $form_data['total_payments']['include_pay_stub_entry_account'], (array)$cd_obj->getIncludePayStubEntryAccount() );
+									$form_data['state_total_payments'][$province_id]['exclude_pay_stub_entry_account'] = array_merge( $form_data['total_payments']['exclude_pay_stub_entry_account'], (array)$cd_obj->getExcludePayStubEntryAccount() );
+									$form_data['state_total_payments'][$province_id]['pay_stub_entry_account'] = array_merge( $form_data['total_payments']['pay_stub_entry_account'], (array)$cd_obj->getPayStubEntryAccount() );
+								}
+							}
+						}
+					}
+
+				}
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+			}
+			unset($province_id);
+
+			Debug::Arr( $form_data['total_payments'], ' PSE Accounts for Federal Total Payments: ', __FILE__, __LINE__, __METHOD__, 10 );
+			Debug::Arr( $form_data['state_total_payments'], ' PSE Accounts for State Total Payments: ', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		$pself = TTnew( 'PayStubEntryListFactory' );
@@ -629,8 +686,9 @@ class Form940Report extends Report {
 							$this->tmp_data['user_total'][$user_id]['excess_payments'] = 0;
 						}
 
-						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['total_payments']['include_pay_stub_entry_account'], $form_data['total_payments']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['exempt_payments']['include_pay_stub_entry_account'],	$form_data['exempt_payments']['exclude_pay_stub_entry_account'] );
+
+						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['total_payments']['include_pay_stub_entry_account'], $form_data['total_payments']['exclude_pay_stub_entry_account'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'] );
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments']	= $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = 0;
 
@@ -647,8 +705,45 @@ class Form940Report extends Report {
 							//Debug::Text(' Next time over cutoff for User: '. $user_id .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['net_payments'] );
 						}
-
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['total_payments'], bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['exempt_payments'], $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['excess_payments'] ) );
+
+
+						//State UI taxable wages - Just need taxable wages up to the federal maximum amount for each state.
+						if ( isset($form_data['state_total_payments']) ) {
+							foreach( $form_data['state_total_payments'] as $state => $state_psen_ids ) {
+
+								//Make sure some state UI was deducted to include the amounts in the stat calculation.
+								$state_deducted_amount = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['state_total_payments'][$state]['pay_stub_entry_account'] );
+								if ( $state_deducted_amount > 0 ) {
+									if ( !isset($this->tmp_data['user_total'][$user_id]['state'][$state]) ) {
+										$this->tmp_data['user_total'][$user_id]['state'][$state]['net_payments'] = 0;
+										$this->tmp_data['user_total'][$user_id]['state'][$state]['excess_payments'] = 0;
+									}
+
+									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'] = Misc::calculateMultipleColumns( $data_b['psen_ids'], $form_data['state_total_payments'][ $state ]['include_pay_stub_entry_account'], $form_data['state_total_payments'][ $state ]['exclude_pay_stub_entry_account'] );
+									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] = bcsub( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'] );
+									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['adjustment_tax'] = 0;
+
+									//Need to total up payments for each employee so we know when we exceed the limit.
+									$this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['net_payments'] = bcadd( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['net_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] );
+
+									if ( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['excess_payments'] == 0 ) {
+										if ( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['net_payments'] > $payments_over_cutoff ) {
+											//Debug::Text(' First time over cutoff for User: '. $user_id, __FILE__, __LINE__, __METHOD__, 10);
+											$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = ( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['net_payments'] - $payments_over_cutoff );
+											$this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['excess_payments'] = bcadd( $this->tmp_data['user_total'][ $user_id ]['state'][ $state ]['excess_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] );
+										}
+									} else {
+										//Debug::Text(' Next time over cutoff for User: '. $user_id .' Date Stamp: '. $date_stamp, __FILE__, __LINE__, __METHOD__, 10);
+										$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] = bcadd( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['net_payments'] );
+									}
+
+									$this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['taxable_wages'] = bcsub( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['total_payments'], bcadd( $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['exempt_payments'], $this->tmp_data['pay_stub_entry'][ $user_id ][ $date_stamp ]['state'][ $state ]['excess_payments'] ) );
+								}
+							}
+							unset( $state, $state_psen_ids );
+						}
+
 						$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['before_adjustment_tax'] = bcmul( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['taxable_wages'], $before_adjustment_tax_rate );
 						if (  isset($setup_data['line_10']) AND $setup_data['line_10'] > 0 ) {
 							$this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'] = bcadd( $this->tmp_data['pay_stub_entry'][$user_id][$date_stamp]['adjustment_tax'], $excluded_wage_avg );
@@ -676,6 +771,27 @@ class Form940Report extends Report {
 				}
 				unset( $legal_entity_id, $quarter_month, $date_stamp, $user_id, $data_a, $data_b );
 
+				//Total all state amounts
+				if ( isset($this->tmp_data['user_total']) ) {
+					foreach( $this->tmp_data['user_total'] as $user_id => $tmp_state_data ) {
+						if ( isset($tmp_state_data['state']) AND is_array( $tmp_state_data['state'] ) ) {
+							foreach( $tmp_state_data['state'] as $state => $state_data ) {
+								if (  !isset($this->form_data['state'][$state]['excess_payments']) ) {
+									$this->form_data['state'][$state]['excess_payments'] = 0;
+								}
+
+								if (  !isset($this->form_data['state'][$state]['net_payments']) ) {
+									$this->form_data['state'][$state]['net_payments'] = 0;
+								}
+
+								$this->form_data['state'][$state]['excess_payments'] = bcadd( $this->form_data['state'][$state]['excess_payments'], $state_data['excess_payments'] );
+								$this->form_data['state'][$state]['net_payments'] = bcadd( $this->form_data['state'][$state]['net_payments'], $state_data['net_payments'] );
+							}
+						}
+					}
+					unset( $user_id, $tmp_state_data, $state, $state_data );
+				}
+
 				//Total all pay periods by quarter
 				if ( isset($this->form_data['pay_period']) ) {
 					foreach( $this->form_data['pay_period'] as $legal_entity_id => $legal_entity_data ) {
@@ -694,6 +810,7 @@ class Form940Report extends Report {
 		}
 
 		//Debug::Arr($this->form_data, 'Form Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
+		//Debug::Arr($this->tmp_data['user_total'], 'Tmp User Total Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::Arr($this->tmp_data, 'Tmp Raw Data: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//Get user data for joining.
@@ -725,31 +842,6 @@ class Form940Report extends Report {
 				}
 				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
 			}
-		}
-
-		//Get remittance agency for joining.
-		$filter_data['type_id'] = array(10, 20); //Federal/State (Need State here to determine if they are a multi-state employer or not.
-		$filter_data['country'] = array('US'); //US Federal
-		/** @var PayrollRemittanceAgencyListFactory $ralf */
-		$ralf = TTnew( 'PayrollRemittanceAgencyListFactory' );
-		$ralf->getAPISearchByCompanyIdAndArrayCriteria( $this->getUserObject()->getCompany(), $filter_data );
-		Debug::Text( ' Remittance Agency Total Rows: ' . $ralf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10 );
-		$this->getProgressBarObject()->start( $this->getAMFMessageID(), $lelf->getRecordCount(), NULL, TTi18n::getText( 'Retrieving Remittance Agency Data...' ) );
-		if ( $ralf->getRecordCount() > 0 ) {
-			foreach( $ralf as $key => $ra_obj ) {
-				/** @var PayrollRemittanceAgencyFactory $ra_obj */
-				if ( $ra_obj->parseAgencyID( NULL, 'id') == 20  //Unemployment Agency.
-						OR ( $ra_obj->parseAgencyID( NULL, 'id') == 10 AND in_array( $ra_obj->getProvince(), array('NY', 'CA', 'NM', 'OR' ) ) ) ) { //States that combine UI with Income Tax.
-					$province_id = ( $ra_obj->getType() == 20 ) ? $ra_obj->getProvince() : '00';
-					$this->form_data['remittance_agency'][$ra_obj->getLegalEntity()][$province_id] = $ra_obj;
-
-					if ( $province_id != '00' ) {
-						$this->form_data['remittance_agency_states'][$ra_obj->getLegalEntity()][$province_id] = TRUE; //Track which states have remittance agencies to determine multi-state employer or not.
-					}
-				}
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
-			}
-			unset($province_id);
 		}
 
 		return TRUE;
@@ -887,6 +979,44 @@ class Form940Report extends Report {
 					$f940->l1a = key($this->form_data['remittance_agency_states'][$legal_entity_id]);
 				}
 
+				if ( isset( $this->form_data['remittance_agency_states'][$legal_entity_id] ) ) {
+					//Determine which states have FUTA withholdings.
+					if ( isset($this->form_data['state']) AND count($this->form_data['state']) > 1) {
+						foreach( $this->form_data['state'] as $state => $tmp_state_data ) {
+							$state_amounts[$state] = bcsub( $tmp_state_data['net_payments'], $tmp_state_data['excess_payments'] );
+						}
+
+						if ( isset($state_amounts) ) {
+							$f940sa = $this->getFormObject()->getFormObject( '940sa', 'US' );
+							$f940sa->setDebug(FALSE);
+							$f940sa->setShowBackground( $show_background );
+
+							$f940sa->year = $f940->year;
+							$f940sa->ein = $f940->ein;
+							$f940sa->name = $f940->name;
+
+							Debug::Arr($state_amounts, 'State amounts: ', __FILE__, __LINE__, __METHOD__, 10);
+							$f940sa->state_amounts = $state_amounts;
+
+							$f940->l11 = $f940sa->calcTotal(); //Pass the Schedule A total back to the Form 940 on line 11.
+						}
+					}
+					unset( $state, $tmp_state_data );
+
+//					//Test Amounts for each state.
+//					$states = $this->getUserObject()->getCompanyObject()->getOptions('province', 'US' );
+//					foreach( $states as $state_code => $name ) {
+//						if ( !isset($state_amounts[$state_code]) ) {
+//							$state_amounts[$state_code] = rand(100,1000);
+//						}
+//					}
+//					$state_amounts['VI'] = rand(100,1000);
+//					$state_amounts['PR'] = rand(100,1000);
+//					Debug::Arr($state_amounts, 'State amounts: ', __FILE__, __LINE__, __METHOD__, 10);
+//					$f940sa->state_amounts = $state_amounts;
+//					$f940->l11 = $f940sa->calcTotal();
+				}
+
 				//Exempt payment check boxes
 				if ( isset( $setup_data['exempt_payment'] ) AND is_array( $setup_data['exempt_payment'] ) ) {
 					foreach( $setup_data['exempt_payment'] as $return_type ) {
@@ -911,13 +1041,14 @@ class Form940Report extends Report {
 				}
 
 				//Debug::Arr($this->form_data['quarter'], 'Final Data for Form: ', __FILE__, __LINE__, __METHOD__, 10);
-				if ( isset($this->form_data) AND count($this->form_data) == 6 ) {
+				if ( isset($this->form_data) AND count($this->form_data) >= 6 ) {
 					$f940->l3 = $this->form_data['total'][$legal_entity_id]['total_payments'];
 					$f940->l4 = $this->form_data['total'][$legal_entity_id]['exempt_payments'];
 					$f940->l5 = $this->form_data['total'][$legal_entity_id]['excess_payments'];
 
+					$f940->l9 = ( isset( $setup_data['line_9'] ) AND $setup_data['line_9'] == TRUE ) ? TRUE : FALSE;
 					$f940->l10 = ( isset( $setup_data['line_10'] ) ) ? $setup_data['line_10'] : NULL;
-					$f940->l11 = ( isset( $setup_data['line_11'] ) ) ? $setup_data['line_11'] : NULL;
+					//$f940->l11 = ( isset( $setup_data['line_11'] ) ) ? $setup_data['line_11'] : NULL; //Calculated from Schedule A now.
 
 					$f940->l13 = ( isset( $setup_data['tax_deposited'] ) ) ? $setup_data['tax_deposited'] : NULL;
 
@@ -940,6 +1071,10 @@ class Form940Report extends Report {
 				}
 
 				$this->getFormObject()->addForm( $f940 );
+
+				if ( isset($f940sa) AND is_object( $f940sa ) ) {
+					$this->getFormObject()->addForm( $f940sa );
+				}
 
 				if ( $format == 'efile_xml' ) {
 					$output_format = 'XML';

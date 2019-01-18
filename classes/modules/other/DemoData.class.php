@@ -6616,6 +6616,7 @@ class DemoData {
 		$rscf->setCompany( $company_id );
 		$rscf->setRecurringScheduleTemplateControl( $template_id );
 		$rscf->setStartWeek( 1 );
+		$rscf->setDisplayWeeks( 4 );
 		$rscf->setStartDate( $start_date );
 		$rscf->setEndDate( $end_date );
 		$rscf->setAutoFill( FALSE );
@@ -8850,11 +8851,11 @@ class DemoData {
 
 								if ( $punch_date >= $exception_cutoff_date
 										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-										AND ( $i % 20 ) == 0
+										AND ( $i % 200 ) == 0
 								) {
 									//Create request
-									$request_id = $this->createRequest( 40, $user_id, $date_stamp );
-									if ( rand( 0, 99 ) < 50 ) { //50% chance
+									$request_id = $this->createRequest( 40, $user_id, $date_stamp ); //These change the schedule and add a lot of absences, so keep them to a minimum.
+									if ( rand( 0, 99 ) < 25 ) { //25% chance
 										$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
 										$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
 										$this->createAuthorization( 1020, $request_id, $superior_user_ids[0], TRUE );
@@ -8862,11 +8863,11 @@ class DemoData {
 								}
 								if ( $punch_date >= $exception_cutoff_date
 										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-										AND ( $i % 16 ) == 0
+										AND ( $i % 160 ) == 0
 								) {
 									//Create request
-									$request_id = $this->createRequest( 30, $user_id, $date_stamp, $policy_ids['absence'][0] );
-									if ( rand( 0, 99 ) < 50 ) { //50% chance
+									$request_id = $this->createRequest( 30, $user_id, $date_stamp, $policy_ids['absence'][0] ); //These change the schedule and add a lot of absences, so keep them to a minimum.
+									if ( rand( 0, 99 ) < 25 ) { //25% chance
 										$this->createAuthorization( 1020, $request_id, $superior_user_ids[2], TRUE );
 										$this->createAuthorization( 1020, $request_id, $superior_user_ids[1], TRUE );
 									}
@@ -8875,7 +8876,7 @@ class DemoData {
 								$first_punch_in = '08:00AM';
 								if ( $punch_date >= $exception_cutoff_date
 										AND in_array( $user_id, $hierarchy_user_ids ) //Make sure requests are only created when supervisors exist.
-										AND ( $i % 10 ) == 0
+										AND ( $i % 20 ) == 0
 								) {
 									//Don't punch out to generate exception.
 									$last_punch_out = NULL;

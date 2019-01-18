@@ -2784,6 +2784,27 @@ abstract class Factory {
 		return FALSE;
 	}
 
+
+	/**
+	 * Removes array elements from $data that are not in the function map.
+	 * @param array|null $data
+	 * @return array|null
+	 */
+	function clearNonMappedData( $data = NULL ) {
+		if ( is_array($data) AND method_exists( $this, '_getVariableToFunctionMap' ) ) {
+			$function_map = $this->getVariableToFunctionMap();
+			if ( is_array( $function_map ) ) {
+				foreach ( $data as $column => $value ) {
+					if ( !isset( $function_map[$column] ) OR ( $function_map[$column] == '' ) ) {
+						unset( $data[ $column ] );
+					}
+				}
+			}
+		}
+
+		return $data;
+	}
+
 	/**
 	 * @return bool
 	 */

@@ -224,28 +224,29 @@ class RoundIntervalPolicyFactory extends Factory {
 			$punch_type = 95; //Transfer
 		} else {
 			switch ( $type ) {
-			case 10: //Normal
-				if ( $status == 10 ) { //In
-					$punch_type = 40;
-				} else {
-					$punch_type = 50;
-				}
+				default:
+				case 10: //Normal
+					if ( $status == 10 ) { //In
+						$punch_type = 40;
+					} else {
+						$punch_type = 50;
+					}
+					break;
+				case 20: //Lunch
+					if ( $status == 10 ) { //In
+						$punch_type = 60;
+					} else {
+						$punch_type = 70;
+					}
+					break;
+				case 30: //Break
+					if ( $status == 10 ) { //In
+						$punch_type = 80;
+					} else {
+						$punch_type = 90;
+					}
 				break;
-			case 20: //Lunch
-				if ( $status == 10 ) { //In
-					$punch_type = 60;
-				} else {
-					$punch_type = 70;
-				}
-				break;
-			case 30: //Break
-				if ( $status == 10 ) { //In
-					$punch_type = 80;
-				} else {
-					$punch_type = 90;
-				}
-				break;
-		}
+			}
 		}
 
 		return $punch_type;

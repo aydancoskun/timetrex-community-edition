@@ -831,7 +831,7 @@ class Form1099MiscReport extends Report {
 				$f1099m->setType( $form_type );
 				$f1099m->year = TTDate::getYear( $filter_data['end_date'] );
 
-				$f1099m->name = $this->getUserObject()->getFullName();
+				$f1099m->name = $legal_entity_obj->getLegalName();
 				$f1099m->trade_name = $legal_entity_obj->getTradeName();
 				$f1099m->company_address1 = $legal_entity_obj->getAddress1() . ' ' . $legal_entity_obj->getAddress2();
 				$f1099m->company_city = $legal_entity_obj->getCity();

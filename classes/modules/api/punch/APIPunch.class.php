@@ -655,7 +655,12 @@ class APIPunch extends APIFactory {
 							if ( $save_result[$key] == TRUE ) {
 								unset($row['id']); //ID must be removed so it doesn't get confused with PunchControlID
 								Debug::Text('Saving PCF data... Punch Control ID: '. $lf->getPunchControlID(), __FILE__, __LINE__, __METHOD__, 10);
-								$pcf = TTnew( 'PunchControlFactory' );
+								if ( is_object( $lf ) AND is_object( $lf->getPunchControlObject() ) ) {
+									$pcf = $lf->getPunchControlObject(); //Use getPunchControlObject() so we get the "old_data" and audit log can properly be handled. It should already be cached anyways, so there is no SQL query.
+								} else {
+									$pcf = TTnew( 'PunchControlFactory' );
+								}
+
 								$pcf->setId( $lf->getPunchControlID() );
 								$pcf->setPunchObject( $lf );
 

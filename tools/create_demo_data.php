@@ -89,12 +89,14 @@ if ( $argc < 2 OR in_array ($argv[1], array('--help', '-help', '-h', '-?') ) ) {
 
 	$config_vars['other']['demo_mode'] = TRUE;
 	$config_vars['other']['enable_plugins'] = FALSE; //Disable plugins as they shouldn't be needed and likely just cause problems.
+	$config_vars['other']['disable_audit_log'] = TRUE; //Disable audit logging during initial creation of data to help speed things up.
+	$config_vars['other']['disable_audit_log_detail'] = TRUE; //Disable audit logging during initial creation of data to help speed things up.
 
 	if ( DEMO_MODE == TRUE OR $data['force'] === TRUE ) {
 		SystemSettingListFactory::setSystemSetting( 'system_version', APPLICATION_VERSION );
 		SystemSettingListFactory::setSystemSetting( 'tax_engine_version', '1.1.0' );
 		SystemSettingListFactory::setSystemSetting( 'tax_data_version', date('Ymd') );
-		
+
 		Debug::Text('Generating DEMO Data...', __FILE__, __LINE__, __METHOD__, 10);
 		echo "UserName suffix: ". $data['suffix'] ." Max Random Users: ". $data['random_users'] ."<br>\n";
 		sleep(1);

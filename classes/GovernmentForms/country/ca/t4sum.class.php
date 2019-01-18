@@ -449,7 +449,7 @@ class GovernmentForms_CA_T4Sum extends GovernmentForms_CA {
 										'x'      => 440,
 										'y'      => 655,
 										'h'      => 18,
-										'w'      => 20,
+										'w'      => 30,
 										'halign' => 'C',
 								),
 						),

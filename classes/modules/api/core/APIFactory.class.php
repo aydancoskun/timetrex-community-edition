@@ -292,7 +292,10 @@ abstract class APIFactory {
 	 * @return array
 	 */
 	function convertToMultipleRecords( $data ) {
-		if ( isset($data[0]) AND is_array($data[0]) ) {
+		//if ( isset($data[0]) AND is_array($data[0]) ) {
+		//Better way to detect if $data has numeric or string keys, which works across sparse arrays that could come from importing. ie: 3 => array(), 6 => array(), ...
+		//  Array indexes can only be integer or string, so  (string)"8" can never happen as it would always be (int)8
+		if ( count( array_filter( array_keys($data), 'is_string') ) == 0 ) {
 			$retarr = array(
 							//'data' => $data,
 							//'total_records' => count($data)
