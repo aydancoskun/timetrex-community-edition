@@ -1579,6 +1579,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 																		from '. $uwf->getTable() .' as z
 																		where z.user_id = b.user_id
 																			and z.effective_date <= b.date_stamp
+																			and z.wage_group_id = \''. TTUUID::getZeroID() .'\'
 																			and z.deleted = 0
 																			order by z.effective_date desc LiMiT 1)
 					';
@@ -1716,6 +1717,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$uf = new UserFactory();
 		$bf = new BranchFactory();
 		$df = new DepartmentFactory();
+		$ugf = new UserGroupFactory();
 		$ppf_b = new PayPeriodFactory();
 		$uwf = new UserWageFactory();
 		$pcf = new PunchControlFactory();
@@ -1780,6 +1782,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 
 							bf.name as branch,
 							df.name as department,
+							ugf.name as group,
 							a.status_id as status_id,
 							a.type_id as type_id,
 
@@ -1828,6 +1831,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 
 					LEFT JOIN '. $bf->getTable() .' as bf ON pcf.branch_id = bf.id
 					LEFT JOIN '. $df->getTable() .' as df ON pcf.department_id = df.id
+					LEFT JOIN '. $ugf->getTable() .' as ugf ON ( uf.company_id = ugf.company_id AND uf.group_id = ugf.id AND ugf.deleted = 0 )
 
 					LEFT JOIN '. $sf->getTable() .' as sf ON a.station_id = sf.id
 
@@ -2091,7 +2095,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 									$query	.=	' AND tmp2_b.date_stamp <= ?';
 								}
 
-								$query .= '
+								$query .= ' AND ( tmp2_a.deleted = 0 AND tmp2_b.deleted = 0 )
 								ORDER BY tmp2_a.time_stamp desc, tmp2_a.status_id asc LIMIT 1
 								)
 							)
@@ -2110,6 +2114,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 																		from '. $uwf->getTable() .' as w
 																		where w.user_id = b.user_id
 																			and w.effective_date <= b.date_stamp
+																			and w.wage_group_id = \''. TTUUID::getZeroID() .'\'
 																			and w.deleted = 0
 																			order by w.effective_date desc LiMiT 1)
 
@@ -2213,8 +2218,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 		$query .= $this->getWhereSQL( $where );
 		$query .= $this->getSortSQL( $order, $strict, $additional_order_fields );
 
-		//Debug::Arr($ph, 'Query: '. $query, __FILE__, __LINE__, __METHOD__, 10);
-
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 		$this->ExecuteSQL( $query, $ph, $limit, $page );
 
 		return $this;
@@ -2442,6 +2446,7 @@ class PunchListFactory extends PunchFactory implements IteratorAggregate {
 																		from '. $uwf->getTable() .' as w
 																		where w.user_id = b.user_id
 																			and w.effective_date <= b.date_stamp
+																			and w.wage_group_id = \''. TTUUID::getZeroID() .'\'
 																			and w.deleted = 0
 																			order by w.effective_date desc LiMiT 1)
 

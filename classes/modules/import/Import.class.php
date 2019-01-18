@@ -1234,6 +1234,14 @@ class Import {
 		$country = $this->callInputParseFunction( 'country', $map_data, $raw_row );
 		Debug::Text('Input: '. $input .' Country: '. $country, __FILE__, __LINE__, __METHOD__, 10);
 
+		//If country is not mapped during the import process (which it often isn't), try to use the user default data country instead to help avoid majority of Invalid Province/State errors.
+		//  UserDefaults can't be passed through to here in the preParseRow() unless the country field is actually mapped (otherwise it would always cause an update of fields the user wasn't expect),
+		//  in which case it would avoid this issue to begin with too.
+		if ( $country == '' AND is_object( $this->getCompanyObject() ) AND is_object( $this->getCompanyObject()->getUserDefaultObject() ) ) {
+			$country = $this->getCompanyObject()->getUserDefaultObject()->getCountry();
+			Debug::Text(' Country not mapped or defined, defaulting to Company Country: '. $country, __FILE__, __LINE__, __METHOD__, 10);
+		}
+
 		$options = array();
 		if ( $country != '' ) {
 			$cf = TTnew('CompanyFactory');

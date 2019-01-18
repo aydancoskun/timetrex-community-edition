@@ -1322,7 +1322,7 @@ class EFT_File_Format_1464 Extends EFT {
 		$line[] = 'A'; //A Record
 		$line[] = '000000001'; //A Record number
 		$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'AN');
-		$line[] = $this->padRecord( $this->getFileCreationNumber(), 4, 'N');
+		$line[] = $this->padRecord( substr( $this->getFileCreationNumber(), -4 ), 4, 'N');
 		$line[] = $this->padRecord( $this->toJulian( $this->getFileCreationDate() ), 6, 'N');
 		$line[] = $this->padRecord( $this->getDataCenter(), 5, 'N');
 
@@ -1385,7 +1385,7 @@ class EFT_File_Format_1464 Extends EFT {
 			$line[] = $this->padRecord($i, 9, 'N'); //Position: 2-10
 
 			$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'AN'); //Position: 11-24
-			$line[] = $this->padRecord( $this->getFileCreationNumber(), 4, 'N'); //Includes above
+			$line[] = $this->padRecord( substr( $this->getFileCreationNumber(), -4 ), 4, 'N'); //Includes above
 
 			$line[] = $this->padRecord( $record->getCPACode(), 3, 'N'); //Position: 25-27
 			$line[] = $this->padRecord( $this->removeDecimal( $record->getAmount() ), 10, 'N'); //Position: 28-37
@@ -1474,7 +1474,7 @@ class EFT_File_Format_1464 Extends EFT {
 		$line[] = $this->padRecord( (count($this->data) + 2), 9, 'N'); //add 2, 1 for the A record, and 1 for the Z record.
 
 		$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'AN');
-		$line[] = $this->padRecord( $this->getFileCreationNumber(), 4, 'N');
+		$line[] = $this->padRecord( substr( $this->getFileCreationNumber(), -4 ), 4, 'N');
 
 		//Loop and get total value and number of records.
 		$d_record_total = 0;
@@ -1564,7 +1564,7 @@ class EFT_File_Format_105 Extends EFT {
 
 		//This should be the scotia bank "Customer Number"
 		$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'AN');
-		$line[] = $this->padRecord( $this->getFileCreationNumber(), 4, 'N');
+		$line[] = $this->padRecord( substr( $this->getFileCreationNumber(), -4 ), 4, 'N');
 		$line[] = $this->padRecord( $this->toJulian( $this->getFileCreationDate() ), 6, 'N');
 		$line[] = $this->padRecord( $this->getDataCenter(), 5, 'N');
 		$line[] = 'D';
@@ -1672,7 +1672,7 @@ class EFT_File_Format_105 Extends EFT {
 		$line[] = $this->padRecord( NULL, 9, 'AN');
 
 		$line[] = $this->padRecord( $this->getOriginatorID(), 10, 'AN');
-		$line[] = $this->padRecord( $this->getFileCreationNumber(), 4, 'N');
+		$line[] = $this->padRecord( substr( $this->getFileCreationNumber(), -4 ), 4, 'N');
 
 		//Loop and get total value and number of records.
 		$d_record_total = 0;

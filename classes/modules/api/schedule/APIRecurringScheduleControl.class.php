@@ -99,7 +99,7 @@ class APIRecurringScheduleControl extends APIFactory {
 		//FIXME: Make separate permissions for viewing OPEN recurring schedules?
 		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
 			$data['filter_data']['exclude_id'] = array( TTUUID::getZeroID() );
-		} elseif ( count($data['filter_data']['permission_children_ids']) > 0 ) {
+		} elseif ( is_array($data['filter_data']['permission_children_ids']) AND count($data['filter_data']['permission_children_ids']) > 0 ) {
 			//If schedule, view_open is allowed but they are also only allowed to see their subordinates (which they have some of), add "open" employee as if they are a subordinate.
 			$data['filter_data']['permission_children_ids'][] = TTUUID::getZeroID();
 		}
@@ -317,6 +317,7 @@ class APIRecurringScheduleControl extends APIFactory {
 		if ( is_array($data) AND $total_records > 0 ) {
 			$this->getProgressBarObject()->start( $this->getAMFMessageID(), $total_records );
 
+			$i = 0;
 			foreach( $data as $key => $tmp_id ) {
 				$primary_validator = new Validator();
 				$lf = TTnew( 'RecurringScheduleControlListFactory' );
@@ -395,7 +396,9 @@ class APIRecurringScheduleControl extends APIFactory {
 
 				$lf->CommitTransaction();
 
-				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $key );
+				$this->getProgressBarObject()->set( $this->getAMFMessageID(), $i );
+
+				$i++;
 			}
 
 			$this->getProgressBarObject()->stop( $this->getAMFMessageID() );

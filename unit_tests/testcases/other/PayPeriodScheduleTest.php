@@ -121,6 +121,447 @@ class PayPeriodScheduleTest extends PHPUnit_Framework_TestCase {
 		return FALSE;
 	}
 
+	//Test adjusted pay period numbers based on the employees hire date. So if they are hired on pay period 40 of the year,
+	//it is now 1/13 for that employee, but restarts to 1/52 for the following year.
+	function testHireAdjustedPayPeriodNumberA() {
+		//	Anchor: 01-Nov-04
+		//	Primary: 08-Nov-04
+		//	Primary Trans: 12-Nov-04
+		//	Secondary: 15-Nov-04
+		//	Secondary Trans: 19-Nov-04
+
+		$ret_obj = $this->createPayPeriodSchedule(			  100, //Weekly (53)
+															  1, //Start DOW - Monday
+															  5, //Transaction DOW - Friday
+															  NULL, //Primary DOM
+															  NULL, //Secondary DOM
+															  NULL, //Primary Trans DOM
+															  NULL, //Secondary Trans DOM
+															  TRUE //Transaction Business Day
+		);
+
+		Debug::text('Pay Period Schedule ID: '. $ret_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+
+		TTDate::setTimeFormat('g:i:s A T');
+
+		$hire_date = strtotime('23-Sep-04');
+
+		$ret_obj->getNextPayPeriod( strtotime('23-Sep-04') );
+		$next_end_date = $ret_obj->getNextEndDate();
+
+		$hired_pay_period_number = $ret_obj->getHiredPayPeriodNumberAdjustment($ret_obj->getNextTransactionDate(), $hire_date );
+		$hire_adjusted_annual_pay_periods = $ret_obj->getHireAdjustedAnnualPayPeriods($ret_obj->getNextTransactionDate(), $hire_date );
+		$this->assertEquals( $hired_pay_period_number, 40, 'Hired Pay Period Number');
+		$this->assertEquals( $hire_adjusted_annual_pay_periods, 13, 'Hire Adjusted Annual Pay Periods');
+		$this->assertEquals( ( $hired_pay_period_number + $hire_adjusted_annual_pay_periods), $ret_obj->getAnnualPayPeriods(), 'Compare Hire Adjusted to Annual PPs');
+
+
+		//var_dump($ret_obj->getNextStartDate());
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '27-Sep-04 12:00:00 AM PDT', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '03-Oct-04 11:59:59 PM PDT', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'08-Oct-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	1, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '04-Oct-04 12:00:00 AM PDT', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '10-Oct-04 11:59:59 PM PDT', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'15-Oct-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	2, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '11-Oct-04 12:00:00 AM PDT', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '17-Oct-04 11:59:59 PM PDT', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'22-Oct-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	3, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '18-Oct-04 12:00:00 AM PDT', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '24-Oct-04 11:59:59 PM PDT', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'29-Oct-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	4, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '25-Oct-04 12:00:00 AM PDT', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '31-Oct-04 11:59:59 PM PST', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'05-Nov-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	5, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '01-Nov-04 12:00:00 AM PST', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '07-Nov-04 11:59:59 PM PST', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'12-Nov-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	6, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '08-Nov-04 12:00:00 AM PST', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '14-Nov-04 11:59:59 PM PST', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'19-Nov-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	7, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '15-Nov-04 12:00:00 AM PST', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '21-Nov-04 11:59:59 PM PST', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'26-Nov-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	8, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '22-Nov-04 12:00:00 AM PST', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '28-Nov-04 11:59:59 PM PST', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'03-Dec-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	9, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '29-Nov-04 12:00:00 AM PST', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '05-Dec-04 11:59:59 PM PST', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'10-Dec-04', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	10, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '06-Dec-04 12:00:00 AM PST', '2- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $next_end_date ), '12-Dec-04 11:59:59 PM PST', '2- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'17-Dec-04', '2- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	11, '2- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '13-Dec-04 12:00:00 AM PST', '3- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextEndDate() ), '19-Dec-04 11:59:59 PM PST', '3- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'24-Dec-04', '3- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	12, '3- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '20-Dec-04 12:00:00 AM PST', '4- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextEndDate() ), '26-Dec-04 11:59:59 PM PST', '4- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Dec-04', '4- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	13, '4- Pay Period Number');
+
+
+		$ret_obj->setType( 10 ); //Switch back to Weekly (52)
+		$ret_obj->setAnnualPayPeriods( $ret_obj->calcAnnualPayPeriods() );
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '27-Dec-04 12:00:00 AM PST', '5- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextEndDate() ), '02-Jan-05 11:59:59 PM PST', '5- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'07-Jan-05', '5- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	1, '5- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '03-Jan-05 12:00:00 AM PST', '6- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextEndDate() ), '09-Jan-05 11:59:59 PM PST', '6- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'14-Jan-05', '6- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	2, '6- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '10-Jan-05 12:00:00 AM PST', '7- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextEndDate() ), '16-Jan-05 11:59:59 PM PST', '7- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'21-Jan-05', '7- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	3, '7- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '17-Jan-05 12:00:00 AM PST', '8- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextEndDate() ), '23-Jan-05 11:59:59 PM PST', '8- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'28-Jan-05', '8- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	4, '8- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextStartDate() ), '24-Jan-05 12:00:00 AM PST', '9- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE+TIME', $ret_obj->getNextEndDate() ), '30-Jan-05 11:59:59 PM PST', '9- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'04-Feb-05', '9- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	5, '9- Pay Period Number');
+
+		TTDate::setTimeFormat('g:i A T');
+	}
+
+	function testHireAdjustedPayPeriodNumberB() {
+		//	Anchor: 01-May-04
+		//	Primary: 27-May-04 w/LDOM
+		//	Primary Trans: 27-May-04 w/LDOM & BD
+		//	Secondary: 27-Jun-04
+		//	Secondary Trans: 27-Jun-04 w/LDOM BD
+		$ret_obj = $this->createPayPeriodSchedule(			50,
+															  NULL, //Start DOW
+															  NULL, //Transaction DOW
+															  1, //Primary DOM
+															  NULL, //Secondary DOM
+															  31, //Primary Trans DOM
+															  NULL, //Secondary Trans DOM
+															  TRUE //Transaction Business Day
+		);
+
+		Debug::text('Pay Period Schedule ID: '. $ret_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+
+		$hire_date = strtotime('01-Jul-05');
+
+		$ret_obj->getNextPayPeriod( strtotime('01-Jul-05') );
+		$next_end_date = $ret_obj->getNextEndDate();
+
+		$hired_pay_period_number = $ret_obj->getHiredPayPeriodNumberAdjustment($ret_obj->getNextTransactionDate(), $hire_date );
+		$hire_adjusted_annual_pay_periods = $ret_obj->getHireAdjustedAnnualPayPeriods($ret_obj->getNextTransactionDate(), $hire_date );
+		$this->assertEquals( $hired_pay_period_number, 6, 'Hired Pay Period Number');
+		$this->assertEquals( $hire_adjusted_annual_pay_periods, 6, 'Hire Adjusted Annual Pay Periods');
+		$this->assertEquals( ( $hired_pay_period_number + $hire_adjusted_annual_pay_periods), $ret_obj->getAnnualPayPeriods(), 'Compare Hire Adjusted to Annual PPs');
+
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jul-05', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Jul-05', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Jul-05', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	1, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Aug-05', '2- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Aug-05', '2- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Aug-05', '2- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	2, '2- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Sep-05', '3- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Sep-05', '3- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Sep-05', '3- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	3, '3- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Oct-05', '4- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Oct-05', '4- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Oct-05', '4- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	4, '4- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Nov-05', '5- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Nov-05', '5- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Nov-05', '5- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	5, '5- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Dec-05', '6- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Dec-05', '6- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Dec-05', '6- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	6, '6- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jan-06', '7- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Jan-06', '7- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Jan-06', '7- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	1, '7- Pay Period Number'); //Restarts here for new year
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Feb-06', '8- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '28-Feb-06', '8- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'28-Feb-06', '8- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	2, '8- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Mar-06', '9- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Mar-06', '9- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Mar-06', '9- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	3, '9- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Apr-06', '10- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Apr-06', '10- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Apr-06', '10- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	4, '10- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-May-06', '11- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-May-06', '11- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-May-06', '11- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	5, '11- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jun-06', '12- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Jun-06', '12- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Jun-06', '12- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	6, '12- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jul-06', '13- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Jul-06', '13- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Jul-06', '13- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	7, '13- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Aug-06', '14- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Aug-06', '14- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Aug-06', '14- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	8, '14- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Sep-06', '15- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Sep-06', '15- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Sep-06', '15- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	9, '15- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Oct-06', '16- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Oct-06', '16- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Oct-06', '16- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	10, '16- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Nov-06', '17- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Nov-06', '17- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Nov-06', '17- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	11, '17- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Dec-06', '18- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Dec-06', '18- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Dec-06', '18- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	12, '18- Pay Period Number');
+	}
+
+	function testHireAdjustedPayPeriodNumberC() {
+		//	Anchor: 01-May-04
+		//	Primary: 27-May-04 w/LDOM
+		//	Primary Trans: 27-May-04 w/LDOM & BD
+		//	Secondary: 27-Jun-04
+		//	Secondary Trans: 27-Jun-04 w/LDOM BD
+		$ret_obj = $this->createPayPeriodSchedule(			50,
+															  NULL, //Start DOW
+															  NULL, //Transaction DOW
+															  1, //Primary DOM
+															  NULL, //Secondary DOM
+															  31, //Primary Trans DOM
+															  NULL, //Secondary Trans DOM
+															  TRUE //Transaction Business Day
+		);
+
+		Debug::text('Pay Period Schedule ID: '. $ret_obj->getId(), __FILE__, __LINE__, __METHOD__, 10);
+
+		$hire_date = strtotime('01-Jan-06');
+
+		$ret_obj->getNextPayPeriod( strtotime('01-Jan-06') );
+		$next_end_date = $ret_obj->getNextEndDate();
+
+		$hired_pay_period_number = $ret_obj->getHiredPayPeriodNumberAdjustment($ret_obj->getNextTransactionDate(), $hire_date );
+		$hire_adjusted_annual_pay_periods = $ret_obj->getHireAdjustedAnnualPayPeriods($ret_obj->getNextTransactionDate(), $hire_date );
+		$this->assertEquals( $hired_pay_period_number, 0, 'Hired Pay Period Number');
+		$this->assertEquals( $hire_adjusted_annual_pay_periods, 12, 'Hire Adjusted Annual Pay Periods');
+		$this->assertEquals( ( $hired_pay_period_number + $hire_adjusted_annual_pay_periods), $ret_obj->getAnnualPayPeriods(), 'Compare Hire Adjusted to Annual PPs');
+
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jan-06', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Jan-06', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Jan-06', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	1, '1- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Feb-06', '2- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '28-Feb-06', '2- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'28-Feb-06', '2- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	2, '2- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Mar-06', '3- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Mar-06', '3- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Mar-06', '3- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	3, '3- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Apr-06', '4- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Apr-06', '4- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Apr-06', '4- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	4, '4- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-May-06', '5- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-May-06', '5- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-May-06', '5- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	5, '5- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jun-06', '6- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Jun-06', '6- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Jun-06', '6- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	6, '6- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jul-06', '7- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Jul-06', '7- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Jul-06', '7- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	7, '7- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Aug-06', '8- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Aug-06', '8- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Aug-06', '8- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	8, '8- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Sep-06', '9- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Sep-06', '9- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Sep-06', '9- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	9, '9- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Oct-06', '10- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Oct-06', '10- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Oct-06', '10- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	10, '10- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Nov-06', '11- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '30-Nov-06', '11- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'30-Nov-06', '11- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	11, '11- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Dec-06', '12- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Dec-06', '12- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Dec-06', '12- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	12, '12- Pay Period Number');
+
+		$ret_obj->getNextPayPeriod( $next_end_date );
+		$next_end_date = $ret_obj->getNextEndDate();
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextStartDate() ), '01-Jan-07', '1- Start Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextEndDate() ), '31-Jan-07', '1- End Date');
+		$this->assertEquals( TTDate::getDate('DATE', $ret_obj->getNextTransactionDate()),	'31-Jan-07', '1- Transaction Date');
+		$this->assertEquals( $ret_obj->getHireAdjustedCurrentPayPeriodNumber($ret_obj->getNextTransactionDate(), $ret_obj->getNextEndDate(), $hire_date ),	1, '1- Pay Period Number'); //Restarts here for new year
+
+	}
+
 	//Weekly
 	function testWeekly() {
 

@@ -1326,7 +1326,7 @@ class PayrollExportReport extends TimesheetSummaryReport {
 				foreach($rows as $row) {
 					if ( $i == 0 ) {
 						//Include header.
-						$tmp_row['employee_number'] = 'Employee Number';
+						$tmp_row['employee_number'] = 'Employee ID';
 						foreach($earnings as $value) {
 							$tmp_row[$value] = $value . ' Hours';
 						}

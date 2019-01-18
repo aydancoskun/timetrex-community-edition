@@ -1288,13 +1288,7 @@ class TimesheetDetailReport extends Report {
 										$termination_date_columns = array();
 									}
 
-									$processed_data	 = array(
-															//'branch' => $branch,
-															//'department' => $department,
-															//'pay_period' => array('sort' => $row['pay_period_start_date'], 'display' => TTDate::getDate('DATE', $row['pay_period_start_date'] ).' -> '. TTDate::getDate('DATE', $row['pay_period_end_date'] ) ),
-															//'min_punch_time_stamp' => TTDate::getDate('TIME', $row['min_punch_time_stamp']),
-															//'max_punch_time_stamp' => TTDate::getDate('TIME', $row['max_punch_time_stamp'])
-															);
+									$processed_data	 = array();
 
 									if ( isset( $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]) ) {
 										$processed_data['verified_time_sheet_id'] = $this->tmp_data['verified_timesheet'][$user_id][$row['pay_period_id']]['id'];
@@ -1373,7 +1367,6 @@ class TimesheetDetailReport extends Report {
 										$this->data[] = array_merge( $this->tmp_data['user'][$user_id], $tmp_default_branch, $tmp_default_department, $tmp_branch, $tmp_department, $tmp_user_title, $row, $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
 									} else {
 										$this->form_data['user_date_total'][$user_id]['data'][$date_stamp] = array_merge( $this->form_data['user_date_total'][$user_id]['data'][$date_stamp], $date_columns, $hire_date_columns, $termination_date_columns, $processed_data );
-										//$this->form_data[$user_id]['data'][] = array_merge( $row, $date_columns, $processed_data );
 									}
 								}
 
@@ -1431,15 +1424,14 @@ class TimesheetDetailReport extends Report {
 
 		$this->pdf->SetFont('', '', $this->_pdf_fontSize(12) );
 		$this->pdf->Cell(40, $this->_pdf_scaleSize(5), TTi18n::gettext('Title').':', $border, 0, 'R');
-		$this->pdf->SetFont('', 'B', $this->_pdf_fontSize(12) );
-		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['title'], $border, 0, 'L', 0, '', 1);
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), ( $user_data['title'] != '' ) ? $user_data['title'] : '--', $border, 0, 'L', 0, '', 1);
 		$this->pdf->Ln( $this->_pdf_scaleSize(5) );
 
 		$this->pdf->SetFont('', '', $this->_pdf_fontSize(12) );
 		$this->pdf->Cell(30, $this->_pdf_scaleSize(5), TTi18n::gettext('Branch').':', $border, 0, 'R');
-		$this->pdf->Cell( (70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['default_branch'], $border, 0, 'L', 0, '', 1);
+		$this->pdf->Cell( (70 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), ( $user_data['default_branch'] != '' ) ? $user_data['default_branch'] : '--', $border, 0, 'L', 0, '', 1);
 		$this->pdf->Cell(40, $this->_pdf_scaleSize(5), TTi18n::gettext('Department').':', $border, 0, 'R');
-		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), $user_data['default_department'], $border, 0, 'L', 0, '', 1);
+		$this->pdf->Cell( ( 60 + ( ( $total_width - 200 ) / 2 ) ), $this->_pdf_scaleSize(5), ( $user_data['default_department'] != '' ) ? $user_data['default_department'] : '--', $border, 0, 'L', 0, '', 1);
 		$this->pdf->Ln( $this->_pdf_scaleSize(5) );
 
 		$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(10) );
@@ -1462,8 +1454,8 @@ class TimesheetDetailReport extends Report {
 		$this->pdf->SetFont($this->config['other']['default_font'], 'B', $this->_pdf_fontSize(10) );
 		$this->pdf->setFillColor(220, 220, 220);
 		if ( isset($data['verified_time_sheet']) AND $data['verified_time_sheet_user_verified'] == TRUE AND $data['verified_time_sheet_user_verified_date'] != '' ) {
-			$this->pdf->Cell( 77.9, $line_h, TTi18n::gettext('Pay Period').': '. $data['pay_period']['display'], 1, 0, 'L', 1);
-			$this->pdf->Cell( ($total_width - 77.9), $line_h, TTi18n::gettext('Electronically signed by') .' '. $user_data['first_name'] .' '. $user_data['last_name'] .' '. TTi18n::gettext('on') .' '. TTDate::getDate('DATE+TIME', $data['verified_time_sheet_user_verified_date']  ), 1, 0, 'R', 1);
+			$this->pdf->Cell( 77.9, $line_h, TTi18n::gettext('Pay Period').': '. $data['pay_period']['display'], 1, 0, 'L', 1, '', 1);
+			$this->pdf->Cell( ($total_width - 77.9), $line_h, TTi18n::gettext('Electronically signed by') .' '. $user_data['first_name'] .' '. $user_data['last_name'] .' '. TTi18n::gettext('on') .' '. TTDate::getDate('DATE+TIME', $data['verified_time_sheet_user_verified_date']  ), 1, 0, 'R', 1, '', 1);
 		} else {
 			$this->pdf->Cell( $total_width, $line_h, TTi18n::gettext('Pay Period').': '. $data['pay_period']['display'], 1, 0, 'L', 1);
 		}
@@ -1617,8 +1609,8 @@ class TimesheetDetailReport extends Report {
 						$this->pdf->setXY( $pre_punch_x, ($punch_y + $default_line_h) );
 					}
 
-					$this->pdf->Cell( $column_widths['in_punch_time_stamp'], ($line_h / $total_punch_rows), TTDate::getDate('TIME', $punch_data[10]['time_stamp'] ) .' '. $punch_data[10]['type_code'], 1, 0, 'C', 1);
-					$this->pdf->Cell( $column_widths['out_punch_time_stamp'], ($line_h / $total_punch_rows), TTDate::getDate('TIME', $punch_data[20]['time_stamp'] ) .' '. $punch_data[20]['type_code'], 1, 0, 'C', 1);
+					$this->pdf->Cell( $column_widths['in_punch_time_stamp'], ($line_h / $total_punch_rows), TTDate::getDate('TIME', $punch_data[10]['time_stamp'] ) .' '. $punch_data[10]['type_code'], 1, 0, 'C', 1, '', 1);
+					$this->pdf->Cell( $column_widths['out_punch_time_stamp'], ($line_h / $total_punch_rows), TTDate::getDate('TIME', $punch_data[20]['time_stamp'] ) .' '. $punch_data[20]['type_code'], 1, 0, 'C', 1, '', 1);
 
 					$punch_x = $this->pdf->getX();
 					$punch_y = $this->pdf->getY();
@@ -1630,8 +1622,8 @@ class TimesheetDetailReport extends Report {
 
 				$this->pdf->SetFont($this->config['other']['default_font'], '', $this->_pdf_fontSize(9) );
 			} else {
-				$this->pdf->Cell( $column_widths['in_punch_time_stamp'], $line_h, ( ( isset($data['min_punch_time_stamp']) ) ? TTDate::getDate('TIME', $data['min_punch_time_stamp'] ) : NULL ), 1, 0, 'C', 1);
-				$this->pdf->Cell( $column_widths['out_punch_time_stamp'], $line_h, ( ( isset($data['max_punch_time_stamp']) ) ? TTDate::getDate('TIME', $data['max_punch_time_stamp'] ) : NULL ), 1, 0, 'C', 1);
+				$this->pdf->Cell( $column_widths['in_punch_time_stamp'], $line_h, ( ( isset($data['min_punch_time_stamp']) ) ? TTDate::getDate('TIME', $data['min_punch_time_stamp'] ) : NULL ), 1, 0, 'C', 1, '', 1);
+				$this->pdf->Cell( $column_widths['out_punch_time_stamp'], $line_h, ( ( isset($data['max_punch_time_stamp']) ) ? TTDate::getDate('TIME', $data['max_punch_time_stamp'] ) : NULL ), 1, 0, 'C', 1, '', 1);
 			}
 
 			$this->pdf->Cell( $column_widths['worked_time'], $line_h, TTDate::getTimeUnit( $data['worked_time'] ), 1, 0, 'C', 1);
@@ -1935,23 +1927,22 @@ class TimesheetDetailReport extends Report {
 			//Debug::Text('Blank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
 			if ( $blank_row_time_stamp >= $prev_data['pay_period_end_date'] ) {
 				//Debug::Text('aBlank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
-				$pay_period_id = $data['pay_period_id'];
-				$pay_period_start_date = $data['pay_period_start_date'];
-				$pay_period_end_date = $data['pay_period_end_date'];
-				$pay_period = $data['pay_period'];
+				$tmp_data = $data;
 			} else {
 				//Debug::Text('bBlank row timestamp: '. TTDate::getDate('DATE+TIME', $blank_row_time_stamp ) .' Pay Period End Date: '. TTDate::getDate('DATE+TIME', $prev_data['pay_period_end_date'] ), __FILE__, __LINE__, __METHOD__, 10);
-				$pay_period_id = $prev_data['pay_period_id'];
-				$pay_period_start_date = $prev_data['pay_period_start_date'];
-				$pay_period_end_date = $prev_data['pay_period_end_date'];
-				$pay_period = $prev_data['pay_period'];
+				$tmp_data = $prev_data;
 			}
 
 			$blank_row_data = array(
-										'pay_period_id' => $pay_period_id,
-										'pay_period_start_date' => $pay_period_start_date,
-										'pay_period_end_date' => $pay_period_end_date,
-										'pay_period' => $pay_period,
+										'pay_period_id' => $tmp_data['pay_period_id'],
+										'pay_period_start_date' => $tmp_data['pay_period_start_date'],
+										'pay_period_end_date' => $tmp_data['pay_period_end_date'],
+										'pay_period' => $tmp_data['pay_period'],
+
+										'verified_time_sheet' => $tmp_data['verified_time_sheet'],
+										'verified_time_sheet_user_verified' => $tmp_data['verified_time_sheet_user_verified'],
+										'verified_time_sheet_user_verified_date' => $tmp_data['verified_time_sheet_user_verified_date'],
+
 										'start_week_day' => ( isset( $data['start_week_day'] ) ) ? $data['start_week_day'] : 0,
 										'time_stamp' => $blank_row_time_stamp,
 										'min_punch_time_stamp' => NULL,
@@ -1963,6 +1954,7 @@ class TimesheetDetailReport extends Report {
 										'overtime_time' => NULL,
 										'absence_time' => NULL
 									);
+			unset($tmp_data);
 
 			//Don't increase max_i if the last day is a gap. However if there are gaps in the middle of the pay period will cause a problem?
 			if ( $d != TTDate::getMiddleDayEpoch($end_date) ) {
@@ -2098,7 +2090,7 @@ class TimesheetDetailReport extends Report {
 
 							if ( isset($this->form_data['pay_period'][$data['pay_period_id']]) ) {
 								//Debug::Arr( $data, 'Data: i: '. $this->counter_i .' x: '. $this->counter_x .' Max I: '. $this->max_i, __FILE__, __LINE__, __METHOD__, 10);
-								$data = Misc::preSetArrayValues( $data, array('time_stamp', 'in_punch_time_stamp', 'out_punch_time_stamp', 'worked_time', 'absence_time', 'regular_time', 'overtime_time' ), '--' );
+								$data = Misc::preSetArrayValues( $data, array('time_stamp', 'in_punch_time_stamp', 'out_punch_time_stamp', 'worked_time', 'absence_time', 'regular_time', 'overtime_time' ), NULL );
 
 								$data['start_week_day'] = $this->form_data['pay_period'][$data['pay_period_id']]['start_week_day'];
 

@@ -584,6 +584,13 @@ class Debug {
 		}
 
 		if ( self::$email_log == TRUE ) {
+			//If the error log is too long, make sure we add important data to help trace it are included at the end of the log.
+			global $config_vars, $current_user, $current_company;
+			Debug::Text('URI: '. ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'N/A' ) .' IP Address: '. Misc::getRemoteIPAddress(), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('USER-AGENT: '. ( isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'N/A' ), __FILE__, __LINE__, __METHOD__, 10);
+			Debug::Text('Version: '. APPLICATION_VERSION .' (PHP: v'. phpversion() .') Edition: '. getTTProductEdition() .' Production: '. (int)PRODUCTION .' Server: '. ( isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'N/A' ) .' OS: '. OPERATING_SYSTEM .' Database: Type: '. ( isset($config_vars['database']['type']) ? $config_vars['database']['type'] : 'N/A' ) .' Name: '. ( isset($config_vars['database']['database_name']) ? $config_vars['database']['database_name'] : 'N/A' ) .' Config: '. CONFIG_FILE .' Demo Mode: '. (int)DEMO_MODE, __FILE__, __LINE__, __METHOD__, 10);
+			Debug::text('Current User: '. ( ( isset($current_user) AND is_object($current_user) ) ? $current_user->getUserName() : 'N/A' ) .' (User ID: '. ( ( isset($current_user) AND is_object($current_user) ) ? $current_user->getID() : 'N/A' ) .') Company: '. ( ( isset($current_company) AND is_object($current_company) ) ? $current_company->getName() : 'N/A' ) .' (Company ID: '. ( ( isset($current_company) AND is_object($current_company) ) ? $current_company->getId() : 'N/A' ) .')', __FILE__, __LINE__, __METHOD__, 10);
+
 			self::Text('Detected PHP errors ('. self::$php_errors .'), emailing log...', __FILE__, __LINE__, __METHOD__, 0);
 			self::Text('---------------[ '. @date('d-M-Y G:i:s O') .' ['. microtime(TRUE) .'] (PID: '. getmypid() .') ]---------------', __FILE__, __LINE__, __METHOD__, 0);
 
@@ -689,14 +696,14 @@ class Debug {
 					syslog( self::getSyslogPriority( 0 ), $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
 					closelog();
 				} else {
-					if ( is_writable( $config_vars['path']['log'] ) ) {
+					if ( isset($config_vars['path']['log']) AND is_writable( $config_vars['path']['log'] ) ) {
 						$file_name = $config_vars['path']['log'] . DIRECTORY_SEPARATOR .'timetrex.log';
 						$fp = @fopen( $file_name, 'a' );
 						@fwrite($fp, $output ); //Used to strip_tags output, but that was likely causing problems with SQL queries with >= and <= in them.
 						@fclose($fp);
 						unset($output);
 					} else {
-						echo "ERROR: Unable to write to log file in directory: ". $config_vars['path']['log'] .'/'. PHP_EOL;
+						echo "ERROR: Unable to write to log file in directory: ". ( isset($config_vars['path']['log']) ? $config_vars['path']['log'] .'/' : 'N/A' ) . PHP_EOL;
 					}
 				}
 

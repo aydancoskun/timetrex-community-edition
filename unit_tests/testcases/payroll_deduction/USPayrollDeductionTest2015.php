@@ -1456,5 +1456,89 @@ class USPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '60000' );
 		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '2697.00' );
 	}
+
+
+	function testUS_2015_State_Periodic_Match_NonPeriodic_FormulaA() {
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('US', 'MO');
+		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
+		$pd_obj->setFormulaType( 10 ); //NonPeriodic
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 0 );
+		$pd_obj->setStateTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		//PP1
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '225.00' );
+
+		//
+		//NonPeriodic
+		//
+		$pd_obj = new PayrollDeduction('US', 'MO');
+		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
+		$pd_obj->setFormulaType( 20 ); //NonPeriodic
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 0 );
+		$pd_obj->setStateTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		//PP1
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '225.00' );
+
+	}
+
+	function testUS_2015_State_Periodic_Match_NonPeriodic_FormulaB() {
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('US', 'MO');
+		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
+		$pd_obj->setFormulaType( 10 ); //NonPeriodic
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 1 );
+		$pd_obj->setStateTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		//PP1
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '214.00' );
+
+		//
+		//NonPeriodic
+		//
+		$pd_obj = new PayrollDeduction('US', 'MO');
+		$pd_obj->setAnnualPayPeriods( 12 ); //Monthly
+		$pd_obj->setFormulaType( 20 ); //NonPeriodic
+		$pd_obj->setStateFilingStatus( 10 ); //Single
+		$pd_obj->setStateAllowance( 1 );
+		$pd_obj->setStateTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+
+		//PP1
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getStatePayPeriodDeductions() ), '214.00' );
+	}
 }
 ?>

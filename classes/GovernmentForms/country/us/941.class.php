@@ -779,6 +779,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'function'      => array('filterL13', 'drawSplitDecimalFloat'),
+					'draw_zero_value' => TRUE,
 					'coordinates'   => array(
 							array(
 									'x'      => 446,
@@ -800,6 +801,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 					'page'          => 1,
 					'template_page' => 1,
 					'function'      => array('calcL14', 'drawSplitDecimalFloat'),
+					'draw_zero_value' => TRUE,
 					'coordinates'   => array(
 							array(
 									'x'      => 446,
@@ -1200,7 +1202,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function filterL13( $value, $schema ) {
-		if ( $this->l13 > 0 ) {
+		if ( $this->l13 != '' ) {
 			return $value;
 		} else {
 			return $this->l10; //If no deposit amount is specified, assume they deposit the amount calculated.
@@ -1335,7 +1337,7 @@ class GovernmentForms_US_941 extends GovernmentForms_US {
 	}
 
 	function calcL14( $value, $schema ) {
-		if ( $this->l13 > 0 AND $this->l12 > $this->l13 ) {
+		if ( $this->l13 != '' AND $this->l12 > $this->l13 ) {
 			$this->l14 = ( $this->l12 - $this->l13 );
 
 			return $this->l14;

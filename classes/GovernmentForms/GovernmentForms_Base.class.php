@@ -401,8 +401,8 @@ class GovernmentForms_Base {
 	}
 
 	//Draw all digits before the decimal in the first location, and after the decimal in the second location.
-	function drawSplitDecimalFloat( $value, $schema) {
-		if ( $value != 0 ) {
+	function drawSplitDecimalFloat( $value, $schema ) {
+		if ( $value != 0 OR isset($schema['draw_zero_value']) AND $schema['draw_zero_value'] == TRUE ) {
 			$this->Draw( $this->getBeforeDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, 0 ) );
 			$this->Draw( $this->getAfterDecimal( $value ), $this->getSchemaSpecificCoordinates( $schema, 1 ) );
 		}

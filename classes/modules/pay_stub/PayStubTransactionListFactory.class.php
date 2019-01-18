@@ -730,7 +730,7 @@ class PayStubTransactionListFactory extends PayStubTransactionFactory implements
 		$query .= ( isset($filter_data['user_tag']) ) ? $this->getWhereClauseSQL( 'uf.id', array( 'company_id' => TTUUID::castUUID($company_id), 'object_type_id' => 200, 'tag' => $filter_data['user_tag'] ), 'tag', $ph ) : NULL;
 
 		//$query .= ( isset($filter_data['transaction_date']) ) ? $this->getWhereClauseSQL( 'psf.transaction_date', $filter_data['transaction_date'], 'numeric_list', $ph ) : NULL;
-		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'ppf.id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
+		$query .= ( isset($filter_data['pay_period_id']) ) ? $this->getWhereClauseSQL( 'psf.pay_period_id', $filter_data['pay_period_id'], 'uuid_list', $ph ) : NULL;
 
 		$query .= ( isset($filter_data['pay_stub_status_id']) ) ? $this->getWhereClauseSQL( 'psf.status_id', $filter_data['pay_stub_status_id'], 'numeric_list', $ph ) : NULL;
 		$query .= ( isset($filter_data['pay_stub_type_id']) ) ? $this->getWhereClauseSQL( 'psf.type_id', $filter_data['pay_stub_type_id'], 'numeric_list', $ph ) : NULL;

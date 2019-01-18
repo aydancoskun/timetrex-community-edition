@@ -495,49 +495,61 @@ class AuthorizationFactory extends Factory {
 	}
 
 	/**
-	 * @return null
+	 * @return object
 	 */
 	function getObjectHandlerObject() {
 		if ( is_object($this->obj_handler_obj) ) {
 			return $this->obj_handler_obj;
 		} else {
-			$is_final_authorization = $this->isFinalAuthorization();
-
 			//Get user_id of object.
 			$this->getObjectHandler()->getByID( $this->getObject() );
 			$this->obj_handler_obj = $this->getObjectHandler()->getCurrent();
-			if ( $this->getAuthorized() === TRUE ) {
-				if ( $is_final_authorization === TRUE ) {
-					if ( $this->getCurrentUser() != $this->obj_handler_obj->getUser() ) {
-						Debug::Text('  Approving Authorization... Final Authorizing Object: '. $this->getObject() .' - Type: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
-						$this->obj_handler_obj->setAuthorizationLevel( 1 );
-						$this->obj_handler_obj->setStatus(50); //Active/Authorized
-						$this->obj_handler_obj->setAuthorized(TRUE);
-					} else {
-						Debug::Text('  Currently logged in user is authorizing (or submitting as new) their own request, not authorizing...', __FILE__, __LINE__, __METHOD__, 10);
-					}
-				} else {
-					Debug::text('  Approving Authorization, moving to next level up...', __FILE__, __LINE__, __METHOD__, 10);
-					$current_level = $this->obj_handler_obj->getAuthorizationLevel();
-					if ( $current_level > 1 ) { //Highest level is 1, so no point in making it less than that.
-
-						//Get the next level above the current user doing the authorization, in case they have dropped down a level or two.
-						$next_level = $this->getNextHierarchyLevel();
-						if ( $next_level !== FALSE AND $next_level < $current_level ) {
-							Debug::text('  Current Level: '. $current_level .' Moving Up To Level: '. $next_level, __FILE__, __LINE__, __METHOD__, 10);
-							$this->obj_handler_obj->setAuthorizationLevel( $next_level );
-						}
-					}
-					unset( $current_level, $next_level );
-				}
-			} else {
-				Debug::text('  Declining Authorization...', __FILE__, __LINE__, __METHOD__, 10);
-				$this->obj_handler_obj->setStatus(55); //'AUTHORIZATION DECLINED'
-				$this->obj_handler_obj->setAuthorized(FALSE);
+			if ( method_exists( $this->obj_handler_obj, 'setCurrentUser' ) AND $this->obj_handler_obj->getCurrentUser() != $this->getCurrentUser() ) { //Required for authorizing TimeSheets from MyAccount -> TimeSheet Authorization.
+				//$this->obj_handler_obj->setCurrentUser( $this->getCurrentUser() );
 			}
 
 			return $this->obj_handler_obj;
 		}
+	}
+
+	/**
+	 * @return boolean
+	 */
+	function setObjectHandlerStatus() {
+		$is_final_authorization = $this->isFinalAuthorization();
+
+		$this->obj_handler_obj = $this->getObjectHandlerObject();
+		if ( $this->getAuthorized() === TRUE ) {
+			if ( $is_final_authorization === TRUE ) {
+				if ( $this->getCurrentUser() != $this->obj_handler_obj->getUser() ) {
+					Debug::Text('  Approving Authorization... Final Authorizing Object: '. $this->getObject() .' - Type: '. $this->getObjectType(), __FILE__, __LINE__, __METHOD__, 10);
+					$this->obj_handler_obj->setAuthorizationLevel( 1 );
+					$this->obj_handler_obj->setStatus(50); //Active/Authorized
+					$this->obj_handler_obj->setAuthorized(TRUE);
+				} else {
+					Debug::Text('  Currently logged in user is authorizing (or submitting as new) their own request, not authorizing...', __FILE__, __LINE__, __METHOD__, 10);
+				}
+			} else {
+				Debug::text('  Approving Authorization, moving to next level up...', __FILE__, __LINE__, __METHOD__, 10);
+				$current_level = $this->obj_handler_obj->getAuthorizationLevel();
+				if ( $current_level > 1 ) { //Highest level is 1, so no point in making it less than that.
+
+					//Get the next level above the current user doing the authorization, in case they have dropped down a level or two.
+					$next_level = $this->getNextHierarchyLevel();
+					if ( $next_level !== FALSE AND $next_level < $current_level ) {
+						Debug::text('  Current Level: '. $current_level .' Moving Up To Level: '. $next_level, __FILE__, __LINE__, __METHOD__, 10);
+						$this->obj_handler_obj->setAuthorizationLevel( $next_level );
+					}
+				}
+				unset( $current_level, $next_level );
+			}
+		} else {
+			Debug::text('  Declining Authorization...', __FILE__, __LINE__, __METHOD__, 10);
+			$this->obj_handler_obj->setStatus(55); //'AUTHORIZATION DECLINED'
+			$this->obj_handler_obj->setAuthorized(FALSE);
+		}
+
+		return TRUE;
 	}
 
 	/**
@@ -802,6 +814,8 @@ class AuthorizationFactory extends Factory {
 
 			return FALSE;
 		}
+
+		$this->setObjectHandlerStatus();
 
 		if ( $this->getDeleted() == FALSE AND is_object( $this->getObjectHandlerObject() ) AND $this->getObjectHandlerObject()->isValid() == FALSE ) {
 			Debug::text('  ObjectHandler Validation Failed, pass validation errors up the chain...', __FILE__, __LINE__, __METHOD__, 10);

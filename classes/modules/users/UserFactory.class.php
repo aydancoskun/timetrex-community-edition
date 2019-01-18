@@ -2984,13 +2984,12 @@ class UserFactory extends Factory {
 			}
 
 			$error_threshold = 7; //No DNS checks.
-			//if ( PRODUCTION === TRUE AND DEPLOYMENT_ON_DEMAND === TRUE AND DEMO_MODE === FALSE ) {
 			if ( PRODUCTION === TRUE AND DEMO_MODE === FALSE ) {
 				$error_threshold = 0; //DNS checks on email address.
 			}
 			$this->Validator->isEmailAdvanced(	'home_email',
 														$this->getHomeEmail(),
-														TTi18n::gettext('Home Email address is invalid'),
+														( ( DEPLOYMENT_ON_DEMAND == TRUE ) ? TTi18n::gettext('Home Email address is invalid') : array( 0 => TTi18n::gettext('Home Email address is invalid'), 5 => TTi18n::gettext('Home Email address does not have a valid DNS MX record'), 6 => TTi18n::gettext('Home Email address does not have a valid DNS record') ) ),
 														$error_threshold
 													);
 			if ( $this->Validator->isError('home_email') == FALSE ) {
@@ -3025,14 +3024,13 @@ class UserFactory extends Factory {
 			}
 
 			$error_threshold = 7; //No DNS checks.
-			//if ( PRODUCTION === TRUE AND DEPLOYMENT_ON_DEMAND === TRUE AND DEMO_MODE === FALSE ) {
 			if ( PRODUCTION === TRUE AND DEMO_MODE === FALSE ) {
 				$error_threshold = 0; //DNS checks on email address.
 			}
 
 			$this->Validator->isEmailAdvanced(	'work_email',
 														$this->getWorkEmail(),
-														TTi18n::gettext('Work Email address is invalid'),
+														( ( DEPLOYMENT_ON_DEMAND == TRUE ) ? TTi18n::gettext('Home Email address is invalid') : array( 0 => TTi18n::gettext('Home Email address is invalid'), 5 => TTi18n::gettext('Home Email address does not have a valid DNS MX record'), 6 => TTi18n::gettext('Home Email address does not have a valid DNS record') ) ),
 														$error_threshold
 													);
 			if ( $this->Validator->isError('work_email') == FALSE ) {
@@ -3287,7 +3285,7 @@ class UserFactory extends Factory {
 
 					//Check to see if Pay Stub Amendments exists after termination date
 					$psalf = TTnew('PayStubAmendmentListFactory');
-					$psalf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getID(), TRUE, ( $this->getTerminationDate() + 86400 ), ( time() + ( 86400 * 365 ) ) );
+					$psalf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $this->getID(), TRUE, array( 50 ),  ( $this->getTerminationDate() + 86400 ), ( time() + ( 86400 * 365 ) ) );
 					if ( $psalf->getRecordCount() > 0 ) {
 						$this->Validator->Warning( 'termination_date', TTi18n::gettext('Employee has pay stub amendments effective after their termination date that may be ignored (%1)', array( TTDate::getDate('DATE', $psalf->getCurrent()->getEffectiveDate() ) ) ) );
 					}

@@ -550,7 +550,7 @@ class PayPeriodFactory extends Factory {
 				foreach ( $psalf as $psa_obj ) {
 					//Make sure the pay stub amendment isn't in use by a pay stub.
 					if ( is_object( $psa_obj->getPayStubObject() ) AND $psa_obj->getPayStubObject()->getStatus() == 40 ) {
-						//Help fix PSA that didn't get marked PAID previously for whatever reason. 
+						//Help fix PSA that didn't get marked PAID previously for whatever reason.
 						$psa_obj->setEnablePayStubStatusChange( TRUE ); //Tell PSA that its the pay stub changing the status, so we can ignore some validation checks.
 						$psa_obj->setStatus( 55 );
 						if ( $psa_obj->isValid() == TRUE ) {
@@ -932,6 +932,7 @@ class PayPeriodFactory extends Factory {
 						);
 			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
+			$this->removeCache( NULL, $f->getTable() );
 			Debug::Arr($ph, 'UserDateTotal Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 
@@ -943,6 +944,7 @@ class PayPeriodFactory extends Factory {
 						);
 			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
+			$this->removeCache( NULL, $f->getTable() );
 			Debug::Arr($ph, 'PunchControl Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 
@@ -954,6 +956,7 @@ class PayPeriodFactory extends Factory {
 						);
 			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
+			$this->removeCache( NULL, $f->getTable() );
 			Debug::Arr($ph, 'Schedule Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 
@@ -965,6 +968,7 @@ class PayPeriodFactory extends Factory {
 						);
 			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
+			$this->removeCache( NULL, $f->getTable() );
 			Debug::Arr($ph, 'Request Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 
@@ -976,6 +980,7 @@ class PayPeriodFactory extends Factory {
 						);
 			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE pay_period_id != \''. TTUUID::castUUID($this->getID()) .'\' AND date_stamp >= ? AND date_stamp <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .') AND pay_period_id in ('. $this->getListSQL( $pay_period_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
+			$this->removeCache( NULL, $f->getTable() );
 			Debug::Arr($ph, 'Exception Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 			//PayStubs
@@ -986,6 +991,7 @@ class PayPeriodFactory extends Factory {
 						);
 			$query = 'UPDATE '. $f->getTable() .' SET pay_period_id = \''. TTUUID::castUUID($this->getID()) .'\' WHERE ( pay_period_id = \''. TTUUID::getZeroID() .'\' OR pay_period_id IS NULL ) AND start_date >= ? AND end_date <= ? AND user_id in ('. $this->getListSQL( $user_ids, $ph, 'uuid') .')';
 			$f->db->Execute( $query, $ph );
+			$this->removeCache( NULL, $f->getTable() );
 			Debug::Arr($ph, 'PayStub Query: '. $query .' Affected Rows: '. $f->db->Affected_Rows(), __FILE__, __LINE__, __METHOD__, 10);
 
 			TTLog::addEntry( $this->getId(), 500, TTi18n::getText('Import Data: Pay Period') .' - '. TTi18n::getText('Start Date') .': '. TTDate::getDate('DATE+TIME', $this->getStartDate() ) .' '. TTi18n::getText('End Date') .': '. TTDate::getDate('DATE+TIME', $this->getEndDate() ) .' '. TTi18n::getText('Transaction Date') .': '. TTDate::getDate('DATE+TIME', $this->getTransactionDate() ), NULL, $this->getTable(), $this );
@@ -1390,7 +1396,7 @@ class PayPeriodFactory extends Factory {
 			if ( $this->setPayStubStatus(40, TRUE ) == FALSE ) { //Dry-run only to ensure that they can be closed.
 				$this->Validator->isTrue(		'status_id',
 												 FALSE,
-												 TTi18n::gettext('Unable to set pay stubs to PAID. Please ensure all pay stubs have transactions and that they have been processed (PAID).') );
+												 TTi18n::gettext('Unable to set pay stubs to PAID. Please ensure all pay stubs have transactions and that they have been processed (PAID)') );
 			}
 		}
 
@@ -1434,22 +1440,27 @@ class PayPeriodFactory extends Factory {
 			$udtf = TTnew( 'UserDateTotalFactory' );
 			$query = 'update '. $udtf->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
+			$this->removeCache( NULL, $udtf->getTable() );
 
 			$pcf = TTnew( 'PunchControlFactory' );
 			$query = 'update '. $pcf->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
+			$this->removeCache( NULL, $pcf->getTable() );
 
 			$sf = TTnew( 'ScheduleFactory' );
 			$query = 'update '. $sf->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
+			$this->removeCache( NULL, $sf->getTable() );
 
 			$rf = TTnew( 'RequestFactory' );
 			$query = 'update '. $rf->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
+			$this->removeCache( NULL, $rf->getTable() );
 
 			$ef = TTnew( 'ExceptionFactory' );
 			$query = 'update '. $ef->getTable() .' set pay_period_id = \''. TTUUID::getZeroID() .'\' where pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\'';
 			$this->db->Execute($query);
+			$this->removeCache( NULL, $ef->getTable() );
 
 			//Now that v9 has multiple payroll runs, if the user tries deleting multiple pay periods that have pay stubs assigned to them, this will fail due to unique constraint.
 			//May need to try and get the latest payroll run_id for the pay_period_id = 0 case, and increment that instead...
@@ -1465,6 +1476,7 @@ class PayPeriodFactory extends Factory {
 			//  update run_id to always add the maximum run number and that should avoid the unique constraint issue.
 			$query = 'UPDATE '. $psf->getTable() .' SET pay_period_id = \''. TTUUID::getZeroID() .'\', run_id = ( run_id + '. (int)$run_id .' ) WHERE pay_period_id = \''. TTUUID::castUUID($this->getId()) .'\' AND deleted = 0';
 			$this->db->Execute($query);
+			$this->removeCache( NULL, $psf->getTable() );
 		} else {
 			if ( $this->getStatus() == 20 ) { //Closed
 				//Mark pay stubs as PAID once the pay period is closed?

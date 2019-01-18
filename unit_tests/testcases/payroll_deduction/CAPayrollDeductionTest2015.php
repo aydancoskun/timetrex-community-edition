@@ -1241,6 +1241,10 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//
+		// Has mostly periodic pay periods, then a few out-of-cycle ones.
+		//
+
+		//
 		// Full test with EI/CPP YTD amounts.
 		//
 
@@ -1762,6 +1766,10 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
 
 		//
+		// Has mostly periodic pay periods, then a few out-of-cycle ones.
+		//
+
+		//
 		// Full test with EI/CPP YTD amounts.
 		//
 
@@ -2281,6 +2289,404 @@ class CAPayrollDeductionTest2015 extends PHPUnit_Framework_TestCase {
 		$pd_obj->setGrossPayPeriodIncome( 33431.04 );
 		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '33431.04' );
 		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '2801.20' );
+	}
+
+	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaA() {
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		//
+		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
+		//
+
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( TRUE ); //CPP Exempt, to eliminate the CPP exemption amount as cause for differences.
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		//First PP
+		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$federal_pp_deductions = $pd_obj->getFederalPayPeriodDeductions();
+		$this->assertEquals( $this->mf( $federal_pp_deductions ), '116.44' );
+
+		//
+		//Leave all $pd_obj settings the same, just switch to non-periodic
+		//
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setFormulaType( 20 ); //Non-Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( TRUE ); //CPP Exempt, to eliminate the CPP exemption amount as cause for differences.
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		//First PP
+		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '116.44' ); //Should be exactly or very close to the above periodic result.
+
+	}
+
+	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaB() {
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		//
+		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
+		//
+
+		//
+		// Full test with EI/CPP YTD amounts with dynamically calculated CPP amounts.
+		//
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		//First PP
+		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '56.70' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '107.93' );
+
+		//
+		//Leave all $pd_obj settings the same, just switch to non-periodic
+		//
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
+		$pd_obj->setFormulaType( 20 ); //Non-Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		//First PP
+		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getEmployeeCPP() ), '63.36' ); //Higher CPP amount because we have to exclude the CPP Exemption on a out-of-cycle pay period.
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '106.93' ); //Should be exactly or very close to the above periodic result.
+	}
+
+	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaC() {
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		//
+		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
+		//
+
+		//
+		// Full test with EI/CPP YTD amounts. However use static CPP amounts rather than calculated ones, as they can differ due to the CPP exemption of $3500.
+		//
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		//First PP
+		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setEmployeeCPPForPayPeriod( 63.36 );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '106.93' );
+
+		//
+		//Leave all $pd_obj settings the same, just switch to non-periodic
+		//
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setHireAdjustedAnnualPayPeriods( 26 );
+		$pd_obj->setFormulaType( 20 ); //Non-Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		//First PP
+		$pd_obj->setDate(strtotime('08-Jan-2015'));
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setEmployeeCPPForPayPeriod( 63.36 );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '106.93' ); //Should be exactly or very close to the above periodic result.
+	}
+
+	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaD() {
+		Debug::text('CA - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		//
+		// Make sure that a NonPeriodic formula for the first pay period after hire matches the period one.
+		//
+
+		//
+		// Full test with EI/CPP YTD amounts. However use static CPP amounts rather than calculated ones, as they can differ due to the CPP exemption of $3500.
+		//
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setHireAdjustedAnnualPayPeriods( 13 );
+		$pd_obj->setFormulaType( 10 ); //Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		//First PP
+		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setCurrentPayPeriod( 13 );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setEmployeeCPPForPayPeriod( 63.36 );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '106.93' );
+
+		//
+		//Leave all $pd_obj settings the same, just switch to non-periodic
+		//
+		$pd_obj = new PayrollDeduction('CA', 'PE');
+		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 26 );
+		$pd_obj->setHireAdjustedAnnualPayPeriods( 13 );
+		$pd_obj->setFormulaType( 20 ); //Non-Periodic
+		$pd_obj->setFederalTotalClaimAmount( 11327 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( FALSE );
+		$pd_obj->setCPPExempt( FALSE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		//First PP
+		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setCurrentPayPeriod( 13 );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
+		$pd_obj->setCurrentPayrollRunId( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+		$pd_obj->setEmployeeCPPForPayPeriod( 63.36 );
+		$pd_obj->setGrossPayPeriodIncome( 1280.04 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '1280.04' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '33.96' ); //Should be exactly or very close to the above periodic result.
+	}
+
+	function testCA_2015_Federal_Periodic_Match_NonPeriodic_FormulaE() {
+		Debug::text('US - SemiMonthly - Beginning of 2015 01-Jan-2015: ', __FILE__, __LINE__, __METHOD__, 10);
+
+		$pd_obj = new PayrollDeduction('CA', 'BC');
+		$pd_obj->setDate(strtotime('01-Jan-2015'));
+		$pd_obj->setEnableCPPAndEIDeduction(TRUE); //Deduct CPP/EI.
+		$pd_obj->setAnnualPayPeriods( 12 );
+		$pd_obj->setHireAdjustedAnnualPayPeriods( 6 );
+		$pd_obj->setFormulaType( 20 ); //NonPeriodic
+		$pd_obj->setFederalTotalClaimAmount( 11038 );
+		$pd_obj->setProvincialTotalClaimAmount( 0 );
+		$pd_obj->setEIExempt( TRUE ); //EI/CPP exempt so we don't have to track YTD amounts.
+		$pd_obj->setCPPExempt( TRUE );
+		$pd_obj->setFederalTaxExempt( FALSE );
+		$pd_obj->setProvincialTaxExempt( FALSE );
+		$pd_obj->setYearToDateCPPContribution( 0 );
+		$pd_obj->setYearToDateEIContribution( 0 );
+
+		$current_pay_period = 6;
+		$ytd_gross_income = 0;
+		$ytd_deduction = 0;
+
+
+		//Test starting in the middle of the year.
+
+		//PP7
+		$pd_obj->setDate(strtotime('01-Jul-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 1 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '438.17' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+
+		//PP8
+		$pd_obj->setDate(strtotime('01-Aug-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 2 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '438.18' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+
+		//PP9
+		$pd_obj->setDate(strtotime('01-Sep-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 3 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '438.18' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+
+		//PP10
+		$pd_obj->setDate(strtotime('01-Oct-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 4 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '438.17' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+
+		//PP11
+		$pd_obj->setDate(strtotime('01-Nov-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 5 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '438.18' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+
+		//PP12
+		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setCurrentPayPeriod( $current_pay_period );
+		$pd_obj->setHireAdjustedCurrentPayPeriod( 6 );
+		$pd_obj->setYearToDateGrossIncome( $ytd_gross_income );
+		$pd_obj->setYearToDateDeduction( $ytd_deduction );
+		$pd_obj->setGrossPayPeriodIncome( 5000.00 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '5000.00' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '438.18' );
+		$current_pay_period++;
+		$ytd_gross_income += $pd_obj->getGrossPayPeriodIncome();
+		$ytd_deduction += $pd_obj->getFederalPayPeriodDeductions();
+
+		$this->assertEquals( $ytd_gross_income, 30000 );
+		$this->assertEquals( $ytd_deduction, 2629.05 );
+
+		//Actual Income/Deductions for the year.
+		$pd_obj->setDate(strtotime('01-Dec-2015'));
+		$pd_obj->setAnnualPayPeriods( 1 );
+		$pd_obj->setCurrentPayPeriod( 1 );
+		$pd_obj->setYearToDateGrossIncome( 0 );
+		$pd_obj->setYearToDateDeduction( 0 );
+		$pd_obj->setGrossPayPeriodIncome( 30000 );
+		$this->assertEquals( $this->mf( $pd_obj->getGrossPayPeriodIncome() ), '30000' );
+		$this->assertEquals( $this->mf( $pd_obj->getFederalPayPeriodDeductions() ), '2629.05' );
 	}
 
 	function testCA_2015_Province_Periodic_FormulaB() {

@@ -95,15 +95,16 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 			Debug::text( 'Checking Class: ' . $factory_name . ' File: ' . $class_file_name, __FILE__, __LINE__, __METHOD__, 10 );
 
 			$filter_data_types = array(
-					'not_set', //passes
-					'true', //passes
-					'false', //passes
-					'null', //passes
-					'negative_small_int', //passes
-					'small_int', //passes
+					'not_set',
+					'true',
+					'false',
+					'null',
+					'empty_string',
+					'negative_small_int',
+					'small_int',
 					'large_int',
-					'string', //passes
-					'array', //passes
+					'string',
+					'array',
 			);
 
 			//Parse filter array keys from class file so we can populate them with dummy data.
@@ -136,6 +137,9 @@ class SQLTest extends PHPUnit_Framework_TestCase {
 								break;
 							case 'null':
 								$filter_data[$filter_data_key] = NULL;
+								break;
+							case 'empty_string':
+								$filter_data[$filter_data_key] = '';
 								break;
 							case 'negative_small_int':
 								$filter_data[$filter_data_key] = ( rand( 0, 128 ) * -1 );

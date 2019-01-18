@@ -733,7 +733,14 @@ class CalculatePayStub extends PayStubFactory {
 
 		//Get all PS amendments and Tax / Deductions so we can determine the proper order to calculate them in.
 		$psalf = TTnew( 'PayStubAmendmentListFactory' );
-		$psalf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+		//$psalf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+		if ( $this->getEnableCorrection() == TRUE ) { //When doing post-adjustment carry-forward, we need to take into account already paid amendments, otherwise the differeces will always be incorrect.
+			$pay_stub_amendment_status_ids = array(50, 52, 55); //50=Active, 52=In Use, 55=Paid
+		} else {
+			$pay_stub_amendment_status_ids = array(50); //Active
+		}
+		$psalf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $this->getUser(), TRUE, $pay_stub_amendment_status_ids, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+		unset($pay_stub_amendment_status_ids);
 
 		$udlf = TTnew( 'UserDeductionListFactory' );
 		$udlf->getByCompanyIdAndUserId( $this->getUserObject()->getCompany(), $this->getUserObject()->getId() );
@@ -741,7 +748,15 @@ class CalculatePayStub extends PayStubFactory {
 		//Only include expenses when calculating in-cycle payroll runs, as we currently can't tell if they have already been included on a pay stub or not.
 		if ( getTTProductEdition() >= TT_PRODUCT_ENTERPRISE AND $this->getType() == 10 AND $this->getUserObject()->getCompanyObject()->getProductEdition() >= TT_PRODUCT_ENTERPRISE ) {
 			$uelf = TTnew( 'UserExpenseListFactory' );
-			$uelf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+			//$uelf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+			if ( $this->getEnableCorrection() == TRUE ) { //When doing post-adjustment carry-forward, we need to take into account already paid expenses, otherwise the differeces will always be incorrect.
+				$user_expense_status_ids = array(30, 35, 40, 50); //30=Active, 35=In Use, 40=Paid/Reimbursed, 50=Authorized
+			} else {
+				$user_expense_status_ids = array(30, 50); //30=Active, 50=Authorized
+			}
+			$uelf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $this->getUser(), TRUE, $user_expense_status_ids, $this->getPayPeriodObject()->getStartDate(), $this->getPayPeriodObject()->getEndDate() );
+			unset($user_expense_status_ids);
+
 			Debug::text('Total User Expenses: '. $uelf->getRecordCount(), __FILE__, __LINE__, __METHOD__, 10);
 		} else {
 			$uelf = FALSE;
@@ -852,7 +867,9 @@ class CalculatePayStub extends PayStubFactory {
 				$pay_stub->CommitTransaction();
 
 				//Check for PSAs that are ACTIVE before the pay period start date.
-				$psalf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, strtotime('01-Jan-2000'), ( $this->getPayPeriodObject()->getStartDate() - 86400 ) );
+				//$psalf->getByUserIdAndAuthorizedAndStartDateAndEndDate( $this->getUser(), TRUE, strtotime('01-Jan-2000'), ( $this->getPayPeriodObject()->getStartDate() - 86400 ) );
+				$psalf->getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $this->getUser(), TRUE, 50, strtotime('01-Jan-2000'), ( $this->getPayPeriodObject()->getStartDate() - 86400 ) ); //50=Active
+
 
 				if ( $this->getEnableCorrection() == FALSE AND ( $is_termination_pay_period == TRUE OR $is_post_termination_pay_period == TRUE ) AND $pay_stub->isAccrualBalanceOutstanding() == TRUE ) {
 					UserGenericStatusFactory::queueGenericStatus( $generic_queue_status_label, 20, TTi18n::gettext('Employee is terminated, but accrual balances haven\'t been released'), NULL );

@@ -954,7 +954,7 @@ class UserContactFactory extends Factory {
 		// Home Email address
 		if ( $this->getHomeEmail() != '' ) {
 			$error_threshold = 7; //No DNS checks.
-			if ( DEPLOYMENT_ON_DEMAND === TRUE ) {
+			if ( PRODUCTION === TRUE AND DEMO_MODE === FALSE ) {
 				$error_threshold = 0; //DNS checks on email address.
 			}
 			$this->Validator->isEmailAdvanced(	'home_email',
@@ -966,7 +966,7 @@ class UserContactFactory extends Factory {
 		// Work Email address
 		if ( $this->getWorkEmail() != '' ) {
 			$error_threshold = 7; //No DNS checks.
-			if ( DEPLOYMENT_ON_DEMAND === TRUE ) {
+			if ( PRODUCTION === TRUE AND DEMO_MODE === FALSE ) {
 				$error_threshold = 0; //DNS checks on email address.
 			}
 			$this->Validator->isEmailAdvanced(	'work_email',

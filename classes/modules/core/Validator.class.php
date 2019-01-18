@@ -729,8 +729,17 @@ class Validator {
 	function isEmailAdvanced( $label, $value, $msg = NULL, $error_level = TRUE ) {
 		//Debug::text('Raw Email: '. $value, __FILE__, __LINE__, __METHOD__, $this->verbosity);
 
-		if ( Misc::isEmail( $value, TRUE, $error_level ) === TRUE ) {
+		$retval = Misc::isEmail( $value, TRUE, $error_level, TRUE );
+		if ( $retval === ISEMAIL_VALID ) {
 			return TRUE;
+		}
+
+		if ( is_array($msg) ) {
+			if ( isset($msg[$retval]) ) {
+				$msg = $msg[$retval];
+			} else {
+				$msg = $msg[0];
+			}
 		}
 
 		$this->Error($label, $msg, $value );

@@ -190,9 +190,8 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $this->setGenericDataValue( 'pay_period_id', $value );
 	}
 
-	//Stores the current user in memory, so we can determine if its the employee verifying, or a superior.
-
 	/**
+	 * Stores the current user in memory, so we can determine if its the employee verifying, or a superior.
 	 * @return mixed
 	 */
 	function getCurrentUser() {
@@ -240,9 +239,8 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return $this->setGenericDataValue( 'status_id', $value );
 	}
 
-	//Set this to TRUE when the user has actually verified their own timesheets.
-
 	/**
+	 * Set this to TRUE when the user has actually verified their own timesheets.
 	 * @return bool|null
 	 */
 	function getUserVerified() {
@@ -339,9 +337,8 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Returns the start and end date of the verification window.
-
 	/**
+	 * Returns the start and end date of the verification window.
 	 * @return array|bool
 	 */
 	function getVerificationWindowDates() {
@@ -352,9 +349,8 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Determines the color of the verification box.
-
 	/**
+	 * Determines the color of the verification box.
 	 * @return bool|string
 	 */
 	function getVerificationBoxColor() {
@@ -520,15 +516,17 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		$is_previous_time_sheet_verified = $this->isPreviousPayPeriodVerified( $user_id );
 		Debug::text('Previous Pay Period Verified: '. (int)$is_previous_time_sheet_verified, __FILE__, __LINE__, __METHOD__, 10);
 
+
 		$pay_period_verify_type_id = $this->getVerificationType();
 		$is_timesheet_superior = $this->isHierarchySuperior( $current_user_id, $user_id );
+		$superior_hierarchy_level = $this->getHierarchyLevelForSuperior( $current_user_id );
 		if (
 				(
 					( $pay_period_verify_type_id == 20 AND $current_user_id == $user_id )
 					OR
 					( $pay_period_verify_type_id == 30 AND $is_timesheet_superior == TRUE )
 					OR
-					( $pay_period_verify_type_id == 40 AND ( ( $current_user_id == $user_id ) OR ( $is_timesheet_superior == TRUE AND !in_array($current_user_id, (array)$this->getAuthorizedUsers() )	) ) )
+					( $pay_period_verify_type_id == 40 AND ( ( $current_user_id == $user_id ) OR ( $is_timesheet_superior == TRUE AND ( $this->getAuthorizationLevel() === FALSE OR $this->getAuthorizationLevel() >= $superior_hierarchy_level ) ) ) )
 				)
 				AND
 				( $is_previous_time_sheet_verified == FALSE AND TTDate::getTime() <= $previous_pay_period_obj->getTimeSheetVerifyWindowEndDate() )
@@ -539,9 +537,9 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 
 	}
-	//Determine if we need to display the verification button or not.
 
 	/**
+	 * Determine if we need to display the verification button or not.
 	 * @param string $current_user_id UUID
 	 * @param string $user_id UUID
 	 * @return bool
@@ -560,6 +558,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 		$pay_period_verify_type_id = $this->getVerificationType();
 		$is_timesheet_superior = $this->isHierarchySuperior( $current_user_id, $user_id );
+		$superior_hierarchy_level = $this->getHierarchyLevelForSuperior( $current_user_id );
 		Debug::text('Current User ID: '. $current_user_id .' User ID: '. $user_id .' Verification Type ID: '. $pay_period_verify_type_id .' TimeSheet Superior: '. (int)$is_timesheet_superior .' Status: '. (int)$this->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
 		//Debug::text('Hire Date: '. TTDate::getDATE('DATE+TIME', $this->getUserObject()->getHireDate() ) .' Termination Date: '. TTDate::getDATE('DATE+TIME', $this->getUserObject()->getTerminationDate() ), __FILE__, __LINE__, __METHOD__, 10);
 
@@ -567,9 +566,10 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 				(
 					( $pay_period_verify_type_id == 20 AND $current_user_id == $user_id )
 					OR
-					( $pay_period_verify_type_id == 30 AND $this->getStatus() != 50 AND ( $is_timesheet_superior == TRUE AND $current_user_id != $user_id AND !in_array($current_user_id, (array)$this->getAuthorizedUsers() ) ) )
+					( $pay_period_verify_type_id == 30 AND $this->getStatus() != 50 AND ( $is_timesheet_superior == TRUE AND $current_user_id != $user_id AND ( $this->getAuthorizationLevel() === FALSE OR $this->getAuthorizationLevel() >= $superior_hierarchy_level ) ) )
 					OR
-					( $pay_period_verify_type_id == 40 AND ( $this->getStatus() == 55 OR ( $current_user_id == $user_id AND $this->getUserVerified() == 0 ) OR ( $is_timesheet_superior == TRUE AND !in_array($current_user_id, (array)$this->getAuthorizedUsers() )  ) ) )
+					//If two superiors at the same level exist, and one verify's the timesheet, but the employee hasn't verified it yet, make sure the "Verify" button does not appear for both superiors. So we need to base this on the authorization level rather than if the superior themselves has authorized it or not.
+					( $pay_period_verify_type_id == 40 AND ( $this->getStatus() == 55 OR ( $current_user_id == $user_id AND $this->getUserVerified() == 0 ) OR ( $is_timesheet_superior == TRUE AND ( $this->getAuthorizationLevel() === FALSE OR $this->getAuthorizationLevel() >= $superior_hierarchy_level ) ) ) )
 				)
 				AND
 				(
@@ -631,25 +631,23 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 		return FALSE;
 	}
 
-	//Returns all superiors that have authorized this timesheet so far.
-
-	/**
-	 * @return array
-	 */
-	function getAuthorizedUsers() {
-		$retarr = array();
-
-		$alf = TTnew( 'AuthorizationListFactory' );
-		$alf->getByObjectTypeAndObjectId(90, $this->getId() );
-		if ( $alf->getRecordCount() > 0 ) {
-			foreach( $alf as $a_obj ) {
-				if ( $a_obj->getAuthorized() == TRUE ) {
-					$retarr[] = $a_obj->getCreatedBy();
-				}
-			}
+	function getHierarchyLevelForSuperior( $current_user_id ) {
+		if ( $current_user_id == '' ) {
+			$current_user_id = $this->getCurrentUser();
+		}
+		if ( $current_user_id == '' ) {
+			return FALSE;
 		}
 
-		return $retarr;
+		$retval = FALSE;
+
+		$hllf = TTnew('HierarchyLevelListFactory');
+		$hllf->getByUserIdAndObjectTypeID( $current_user_id, 90 );
+		if ( $hllf->getRecordCount() > 0 ) {
+			$retval = $hllf->getCurrent()->getLevel();
+		}
+
+		return $retval;
 	}
 
 
@@ -682,7 +680,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 				} elseif( $this->getCurrentUser() == $this->getUser() ) {
 					Debug::Text('ERROR: Superior is trying to verifiy their own timesheet...', __FILE__, __LINE__, __METHOD__, 10);
 				} else {
-					Debug::Text('ERROR: Superior is not in the hierarchy?', __FILE__, __LINE__, __METHOD__, 10);
+					Debug::Text('ERROR: Superior is not in the hierarchy? Is Superior: '. (int)$is_timesheet_superior .' Current User: '. $this->getCurrentUser() .' User: '. $this->getUser(), __FILE__, __LINE__, __METHOD__, 10);
 				}
 			} elseif ( $time_sheet_verification_type_id == 40 ) { //Superior & Employee
 				if ( $this->isNew() == TRUE ) {
@@ -691,7 +689,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 				if ( $this->getCurrentUser() == $this->getUser() ) {
 					Debug::Text('bEmployee is verifiying their own timesheet...', __FILE__, __LINE__, __METHOD__, 10);
-					//Employee is verifiying their own timesheet.
+					//Employee is verifying their own timesheet.
 					$this->setUserVerified( TRUE );
 
 					if (  $this->getAuthorized() == TRUE ) { //If this has already been verified by superiors, and the employee is the last step, make sure mark this as verified.
@@ -709,7 +707,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 
 			//If this is a new verification, find the current authorization level to assign to it.
 			if ( ( $this->isNew() == TRUE OR $this->getStatus() == 55 ) AND ( $time_sheet_verification_type_id == 30 OR $time_sheet_verification_type_id == 40 ) ) {
-				$hierarchy_highest_level = AuthorizationFactory::getInitialHierarchyLevel( ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getCompany() : 0 ), ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getID() : 0 ), 90 );
+				$hierarchy_highest_level = AuthorizationFactory::getInitialHierarchyLevel( ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getCompany() : TTUUID::getZeroID() ), ( is_object( $this->getUserObject() ) ? $this->getUserObject()->getID() : TTUUID::getZeroID() ), 90 );
 				$this->setAuthorizationLevel( $hierarchy_highest_level );
 			}
 		}
@@ -822,11 +820,12 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 			}
 		}
 
+		$authorize_timesheet = FALSE;
+
 		if ( $this->getCurrentUser() != FALSE ) {
 			$time_sheet_verification_type_id = $this->getVerificationType();
 			if ( $time_sheet_verification_type_id > 10 ) { //10 = Disabled
 
-				$authorize_timesheet = FALSE;
 				if ( $time_sheet_verification_type_id == 20 ) { //Employee Only
 					$authorize_timesheet = TRUE;
 				} elseif ( $time_sheet_verification_type_id == 30 ) { //Superior Only
@@ -841,7 +840,7 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 					}
 				}
 
-				if ( $authorize_timesheet == TRUE ) {
+				if ( $authorize_timesheet == TRUE AND TTUUID::isUUID( $this->getCurrentUser() ) ) {
 					$af = TTnew( 'AuthorizationFactory' );
 					$af->setCurrentUser( $this->getCurrentUser() );
 					$af->setObjectType( 90 ); //TimeSheet
@@ -857,48 +856,49 @@ class PayPeriodTimeSheetVerifyFactory extends Factory {
 					AuthorizationFactory::emailAuthorizationOnInitialObjectSave( $this->getCurrentUser(), 90, $this->getId() );
 				}
 
-				if ( $authorize_timesheet == TRUE OR $this->getAuthorized() == TRUE ) {
-					//Recalculate exceptions on the last day of pay period to remove any TimeSheet Not Verified exceptions.
-					//Get user_date_id.
-					if ( is_object( $this->getPayPeriodObject() ) ) {
-						$flags = array(
-								'meal'              => FALSE,
-								'undertime_absence' => FALSE,
-								'break'             => FALSE,
-								'holiday'           => FALSE,
-								'schedule_absence'  => FALSE,
-								'absence'           => FALSE,
-								'regular'           => FALSE,
-								'overtime'          => FALSE,
-								'premium'           => FALSE,
-								'accrual'           => FALSE,
 
-								'exception'           => TRUE,
-								//Exception options
-								'exception_premature' => FALSE, //Calculates premature exceptions
-								'exception_future'    => TRUE, //Calculates exceptions in the future. This is needed if the timesheet is authorized several days before the end of the pay period so the V1 exception goes away.
-
-								//Calculate policies for future dates.
-								'future_dates'        => FALSE, //Calculates dates in the future.
-								'past_dates'          => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
-						);
-
-						$cp = TTNew( 'CalculatePolicy' );
-						$cp->setFlag( $flags );
-						$cp->setUserObject( $this->getUserObject() );
-						$cp->calculate( $this->getPayPeriodObject()->getEndDate() ); //This sets timezone itself.
-						$cp->Save();
-					} else {
-						Debug::Text( 'No Pay Period found...', __FILE__, __LINE__, __METHOD__, 10 );
-					}
-				} else {
-					Debug::Text( 'Not recalculating last day of pay period...', __FILE__, __LINE__, __METHOD__, 10 );
-				}
 			} else {
 				Debug::Text( 'TimeSheet Verification is disabled...', __FILE__, __LINE__, __METHOD__, 10 );
 			}
 		} else {
 			Debug::Text( 'CurrentUser() is not set, perhaps its being called a 2nd time from AuthorizationFactory postSave()?', __FILE__, __LINE__, __METHOD__, 10 );
+		}
+
+		if ( $authorize_timesheet == TRUE OR $this->getAuthorized() == TRUE ) {
+			//Recalculate exceptions on the last day of pay period to remove any TimeSheet Not Verified exceptions.
+			if ( is_object( $this->getPayPeriodObject() ) ) {
+				$flags = array(
+						'meal'              => FALSE,
+						'undertime_absence' => FALSE,
+						'break'             => FALSE,
+						'holiday'           => FALSE,
+						'schedule_absence'  => FALSE,
+						'absence'           => FALSE,
+						'regular'           => FALSE,
+						'overtime'          => FALSE,
+						'premium'           => FALSE,
+						'accrual'           => FALSE,
+
+						'exception'           => TRUE,
+						//Exception options
+						'exception_premature' => FALSE, //Calculates premature exceptions
+						'exception_future'    => TRUE, //Calculates exceptions in the future. This is needed if the timesheet is authorized several days before the end of the pay period so the V1 exception goes away.
+
+						//Calculate policies for future dates.
+						'future_dates'        => FALSE, //Calculates dates in the future.
+						'past_dates'          => FALSE, //Calculates dates in the past. This is only needed when Pay Formulas that use averaging are enabled?*
+				);
+
+				$cp = TTNew( 'CalculatePolicy' );
+				$cp->setFlag( $flags );
+				$cp->setUserObject( $this->getUserObject() );
+				$cp->calculate( $this->getPayPeriodObject()->getEndDate() ); //This sets timezone itself.
+				$cp->Save();
+			} else {
+				Debug::Text( 'No Pay Period found...', __FILE__, __LINE__, __METHOD__, 10 );
+			}
+		} else {
+			Debug::Text( 'Not recalculating last day of pay period...', __FILE__, __LINE__, __METHOD__, 10 );
 		}
 
 		return TRUE;

@@ -319,14 +319,12 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 
 	}
 
-	// 50 = Requests
-
 	/**
 	 * @param string $user_id UUID
 	 * @param int $object_type_id
 	 * @return array|bool
 	 */
-	function getLevelsByUserIdAndObjectTypeID( $user_id, $object_type_id = 50 ) {
+	function getByUserIdAndObjectTypeID( $user_id, $object_type_id = 50 ) { //50 = Requests
 
 		if ( $user_id == '' ) {
 			return FALSE;
@@ -337,49 +335,24 @@ class HierarchyLevelListFactory extends HierarchyLevelFactory implements Iterato
 		}
 
 		$hotf = new HierarchyObjectTypeFactory();
-		$hcf = new HierarchyControlFactory();
 
 		$ph = array(
 					'user_id' => TTUUID::castUUID($user_id),
 					);
 
 		$query = '
-				select	distinct (x.level) as level
-				from	'. $this->getTable() .' as x,
-						'. $hcf->getTable() .' as y,
-					(
-								select	a.hierarchy_control_id, a.level
-								from	'. $this->getTable() .' as a
-									LEFT JOIN '. $hotf->getTable() .' as b ON a.hierarchy_control_id = b.hierarchy_control_id
-								where a.user_id = ?
-									AND b.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
-									AND a.deleted = 0
-					) as z
-				where
-					x.hierarchy_control_id = y.id
-					AND x.hierarchy_control_id = z.hierarchy_control_id
-					AND x.level >= z.level
-					AND ( x.deleted = 0 AND y.deleted = 0 )
-				ORDER BY x.level asc
+				select	a.*
+				from	'. $this->getTable() .' as a
+					LEFT JOIN '. $hotf->getTable() .' as b ON a.hierarchy_control_id = b.hierarchy_control_id
+				where a.user_id = ?
+					AND b.object_type_id in ('. $this->getListSQL( $object_type_id, $ph, 'int' ) .')
+					AND ( a.deleted = 0 )
 				';
 
-		$rs = $this->db->Execute($query, $ph);
-		//Debug::Text(' Rows: '. $rs->RecordCount(), __FILE__, __LINE__, __METHOD__, 10);
+		$this->ExecuteSQL( $query, $ph );
+		//Debug::Query( $query, $ph, __FILE__, __LINE__, __METHOD__, 10);
 
-		if ( $rs->RecordCount() > 0 ) {
-			//The retarr key is the value that will be displayed to the user when switching levels on the authorization page,
-			//so we need to start that from 1 and increasing sequentially, regardless of what the actual hierarchy level is.
-			$i = 1;
-			$retarr = array();
-			foreach( $rs as $row ) {
-				$retarr[$i] = $row['level'];
-				$i++;
-			}
-
-			return $retarr;
-		}
-
-		return FALSE;
+		return $this;
 	}
 
 	/**

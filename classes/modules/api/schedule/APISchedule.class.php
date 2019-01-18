@@ -333,7 +333,7 @@ class APISchedule extends APIFactory {
 		//If we don't have permissions to view open shifts, exclude user_id = 0;
 		if ( $this->getPermissionObject()->Check('schedule', 'view_open') == FALSE ) {
 			$data['filter_data']['exclude_id'] = array( TTUUID::getZeroID() );
-		} elseif ( count($data['filter_data']['permission_children_ids']) > 0 ) {
+		} elseif ( is_array($data['filter_data']['permission_children_ids']) AND count($data['filter_data']['permission_children_ids']) > 0 ) {
 			//If schedule, view_open is allowed but they are also only allowed to see their subordinates (which they have some of), add "open" employee as if they are a subordinate.
 			$data['filter_data']['permission_children_ids'][] = TTUUID::getZeroID();
 		}

@@ -617,7 +617,8 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 					),
 			),
 			'l13'  => array(
-					'function'    => 'drawSplitDecimalFloat',
+					'function'    => array('filterL13', 'drawSplitDecimalFloat'),
+					'draw_zero_value' => TRUE,
 					'coordinates' => array(
 							array(
 									'x'      => 454,
@@ -1007,6 +1008,16 @@ class GovernmentForms_US_940 extends GovernmentForms_US {
 		}
 
 		return $value;
+	}
+
+	function filterL13( $value, $schema ) {
+		if ( $this->l13 != '' ) {
+			return $value;
+		} else {
+			return 0; //If no deposit amount is specified, assume they deposit the amount calculated.
+		}
+
+		return FALSE;
 	}
 
 	function filterL15( $value ) {

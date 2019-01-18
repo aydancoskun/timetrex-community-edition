@@ -30,7 +30,7 @@ if [ "$#" -eq 0 ] ; then
 	parsed=$(echo $groups | sed "s/-/\t/g")
 	#Pipe through "shuf" with a consistent random-source to randomize order in which tests are run by keep it consistent from one run to another. This can help avoid many of the same tests from running at the same time and avoid deadlocks
 	#results=$(echo $parsed | awk '{for(i=9;i<=NF;i++) {print $i}}' | shuf --random-source config.xml)
-	results=$(echo $parsed | awk '{for(i=9;i<=NF;i++) {print $i}}')
+	results=$(echo $parsed | awk '{for(i=1;i<=NF;i++) {print $i}}')
 
 	# Loop on each group name and run parallel. Run 2 more jobs than CPU cores, but don't go above a load of 8.
 	echo "Start: `date`"

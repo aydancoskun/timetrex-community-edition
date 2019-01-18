@@ -328,7 +328,7 @@ abstract class Factory {
 				$data = $this->serializeRS( $data );
 			}
 			$retval = $this->cache->save( $data, $cache_id, $group_id );
-			if ( $retval === FALSE ) {
+			if ( $this->cache->_caching == TRUE AND $retval === FALSE ) { //If caching is disabled, save() will always return FALSE.
 				//Due to locking, its common that cache files may fail writing once in a while.
 				Debug::text('WARNING: Unable to write cache file, likely due to permissions or locking! Cache ID: '. $cache_id .' Table: '. $this->getTable(TRUE) .' File: '. $this->cache->_file, __FILE__, __LINE__, __METHOD__, 10);
 			}

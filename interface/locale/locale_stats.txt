@@ -1,14 +1,14 @@
-fr_FR|28|French <fr@li.org>
-de_DE|60|German <de@li.org>
-pt_PT|26|Portuguese <pt@li.org>
-zh_ZH|38|
-es_ES|39|Spanish <es@li.org>
-it_IT|29|Italian <it@li.org>
+fr_FR|25|French <fr@li.org>
+de_DE|53|German <de@li.org>
+pt_PT|23|Portuguese <pt@li.org>
+zh_ZH|34|
+es_ES|35|Spanish <es@li.org>
+it_IT|26|Italian <it@li.org>
 yi_US|0|
 en_US|0|
-pt_BR|26|Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>
-ar_EG|53|Arabic <ar@li.org>
-da_DK|31|Danish <da@li.org>
-zh_CN|38|
-id_ID|59|Indonesian <id@li.org>
-fr_CA|25|French (Canada) <fr_CA@li.org>
+pt_BR|23|Brazilian Portuguese <franciscoferreiraluz@yahoo.com.au>
+ar_EG|47|Arabic <ar@li.org>
+da_DK|27|Danish <da@li.org>
+zh_CN|34|
+id_ID|52|Indonesian <id@li.org>
+fr_CA|86|CodyCode Team

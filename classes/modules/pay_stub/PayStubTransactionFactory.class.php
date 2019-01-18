@@ -587,6 +587,13 @@ class PayStubTransactionFactory extends Factory {
 										  TTi18n::gettext( 'Amount cannot be zero' )
 				);
 			}
+			if ( $this->getAmount() < 0 ) {
+				$this->Validator->isTrue( 'amount',
+										  FALSE,
+										  TTi18n::gettext( 'Amount cannot be negative' )
+				);
+			}
+
 		}
 
 		// Currency Rate

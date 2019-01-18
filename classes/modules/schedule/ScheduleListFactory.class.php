@@ -626,9 +626,8 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		return $result;
 	}
 
-	//Find all *committed* open shifts that conflict, so they can be entered in the replaced_id field.
-
 	/**
+	 * Find all *committed* open shifts that conflict, so they can be entered in the replaced_id field.
 	 * @param string $company_id UUID
 	 * @param $start_time
 	 * @param $end_time
@@ -798,6 +797,9 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$ph = array();
 
 		//Check for committed OPEN schedules that override open recurring schedules.
+		//  Check against replaced_id to ensure we ignore cases where 1 of 2 recurring OPEN shifts are overridden by a committed OPEN shift (basically an edit/save without any changes),
+		//  then the remaining recurring OPEN shift is filled by an employee by editing the OPEN shift, changing the employee, and saving.
+		//  Essentially we are two levels deep of overrides here, so there should still be one OPEN shift displayed in this case.
 		$query = '
 					SELECT
 							a.id as id,
@@ -823,7 +825,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 										rsf_b.deleted as deleted,
 										sf_c.id as recurring_schedule_id
 								FROM '. $rsf->getTable() .' as rsf_b
-								LEFT JOIN '. $rscf->getTable() .' as rscf_b ON rsf_b.recurring_schedule_control_id = rscf_b.id
+								LEFT JOIN '. $rscf->getTable() .' as rscf_b ON ( rsf_b.recurring_schedule_control_id = rscf_b.id )
 								LEFT JOIN schedule as sf_c ON 			(
 																			rsf_b.company_id = sf_c.company_id
 																			AND rsf_b.user_id = \''. TTUUID::getZeroID() .'\'
@@ -844,9 +846,11 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 		$query .= '
 																			AND sf_c.deleted = 0
 																		)
+								LEFT JOIN schedule as sf_d ON ( sf_d.id = sf_c.replaced_id AND sf_c.replaced_id != \''. TTUUID::getZeroID() .'\' AND sf_d.deleted = 0 )
 								WHERE rsf_b.company_id = ?
 									AND rsf_b.user_id = \''. TTUUID::getZeroID() .'\'
-									AND sf_c.id IS NOT NULL
+									AND sf_c.id IS NOT NULL 
+									AND sf_d.id IS NULL
 									AND ( rsf_b.deleted = 0 AND rscf_b.deleted = 0 )
 
 							UNION ALL
@@ -869,7 +873,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 										rsf_b.deleted as deleted,
 										rsf_c.id as recurring_schedule_id
 								FROM '. $rsf->getTable() .' as rsf_b
-								LEFT JOIN '. $rscf->getTable() .' as rscf_b ON rsf_b.recurring_schedule_control_id = rscf_b.id
+								LEFT JOIN '. $rscf->getTable() .' as rscf_b ON ( rsf_b.recurring_schedule_control_id = rscf_b.id )
 								LEFT JOIN 	( 
 												SELECT  rsf_d.*, 
 														uf_c.default_branch_id as default_branch_id,
@@ -1311,7 +1315,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 							)
 					) as a
 
-					LEFT JOIN '. $sf->getTable() .' as sf ON ( a.id = sf.replaced_id AND sf.deleted = 0 )
+					LEFT JOIN '. $sf->getTable() .' as sf ON ( a.id = sf.replaced_id AND sf.replaced_id != \''. TTUUID::getZeroID() .'\' AND sf.deleted = 0 )
 					LEFT JOIN '. $uf->getTable() .' as uf ON ( a.user_id = uf.id )
 					LEFT JOIN '. $bf->getTable() .' as bf ON ( uf.default_branch_id = bf.id AND bf.deleted = 0)
 					LEFT JOIN '. $bf->getTable() .' as bfb ON ( a.branch_id = bfb.id AND bfb.deleted = 0)
@@ -1594,7 +1598,7 @@ class ScheduleListFactory extends ScheduleFactory implements IteratorAggregate {
 
 		$query .= '
 					from	'. $this->getTable() .' as a
-							LEFT JOIN '. $sf->getTable() .' as sf ON ( a.id = sf.replaced_id AND sf.deleted = 0 )
+							LEFT JOIN '. $sf->getTable() .' as sf ON ( a.id = sf.replaced_id AND sf.replaced_id != \''. TTUUID::getZeroID() .'\' AND sf.deleted = 0 )
 							LEFT JOIN '. $spf->getTable() .' as i ON a.schedule_policy_id = i.id
 							LEFT JOIN '. $uf->getTable() .' as d ON ( a.user_id = d.id AND d.deleted = 0 )
 

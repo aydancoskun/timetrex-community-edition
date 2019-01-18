@@ -11,7 +11,6 @@
 * Technical choices are described in the 'docs/technical' file
 *
 * @package Cache_Lite
-* @version $Id: Function.php,v 1.11 2006/12/14 12:59:43 cweiske Exp $
 * @author Sebastian BERGMANN <sb@sebastian-bergmann.de>
 * @author Fabien MARTY <fab@php.net>
 */
@@ -85,14 +84,24 @@ class Cache_Lite_Function extends Cache_Lite
     function __construct($options = array(NULL))
     {
         $availableOptions = array('debugCacheLiteFunction', 'defaultGroup', 'dontCacheWhenTheOutputContainsNOCACHE', 'dontCacheWhenTheResultIsFalse', 'dontCacheWhenTheResultIsNull');
-        while (list($name, $value) = each($options)) {
+        foreach ($options as $name => $value) {
             if (in_array($name, $availableOptions)) {
                 $property = '_'.$name;
                 $this->$property = $value;
             }
         }
         reset($options);
-        $this->Cache_Lite($options);
+        parent::__construct($options);
+    }
+
+    /**
+     * PHP4 constructor for backwards compatibility with older code
+     *
+     * @param array $options Options
+     */
+    function Cache_Lite_Function($options = array(NULL))
+    {
+        self::__construct($options);
     }
 
     /**
@@ -207,5 +216,3 @@ class Cache_Lite_Function extends Cache_Lite
     }
 
 }
-
-?>

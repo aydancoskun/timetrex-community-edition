@@ -52,11 +52,6 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 	 * @group testEncryptionA
 	 */
 	function testEncryptionA() {
-		//PHP v7.2+ no longer has MCRYPT extension.
-		if ( version_compare( PHP_VERSION, '7.1', '>' ) ) {
-			return TRUE;
-		}
-
 		//Make sure we force the salt so its consistent even when the timetrex.ini.php is not.
 		global $config_vars;
 		$config_vars['other']['salt'] = 'f0328b0863222ff98b848537fe1038b2';
@@ -64,31 +59,33 @@ class MiscTest extends PHPUnit_Framework_TestCase {
 		$str = 'This is a sample string to be encrypted and decrytped.';
 		$encrypted_str = Misc::encrypt( $str );
 		$decrypted_str = Misc::decrypt( $encrypted_str );
-
 		$this->assertEquals( $str, $decrypted_str );
 
-		//can we still decrypt version 1?
-		$mastercard_unencrypted = 5454545454545454;
-		$mastercard_old_encrypted = 'oqp5HtmFgYCiqnke2YWBgA==';
-		$decrypted_str = Misc::decrypt( $mastercard_old_encrypted );
-		$this->assertEquals( $mastercard_unencrypted, $decrypted_str );
+		if ( version_compare( PHP_VERSION, '7.1', '<=' ) ) { //PHP v7.2+ no longer has MCRYPT extension.
+			//can we still decrypt version 1?
+			$mastercard_unencrypted = 5454545454545454;
+			$mastercard_old_encrypted = 'oqp5HtmFgYCiqnke2YWBgA==';
+			$decrypted_str = Misc::decrypt( $mastercard_old_encrypted );
+			$this->assertEquals( $mastercard_unencrypted, $decrypted_str );
 
-		$visa_unencrypted = 4111111111111111;
-		$visa_old_encrypted = '4G30xI80TEZf8RFMRPE56w==';
+			$visa_unencrypted = 4111111111111111;
+			$visa_old_encrypted = '4G30xI80TEZf8RFMRPE56w==';
 
-		//testing upgrading encryption from version1 to version2
-		$decrypted_str = Misc::decrypt( $visa_old_encrypted );
+			//testing upgrading encryption from version1 to version2
+			$decrypted_str = Misc::decrypt( $visa_old_encrypted );
 
-		//does v1 decryption work?
-		$this->assertEquals( $visa_unencrypted, $decrypted_str );
+			//does v1 decryption work?
+			$this->assertEquals( $visa_unencrypted, $decrypted_str );
 
-		//does v1 upgrade cleanly to v2 encrypt?
-		$new_encrypted_value = Misc::encrypt($decrypted_str);
-		$decrypted_str = Misc::decrypt( $new_encrypted_value );
-		$this->assertEquals( $visa_unencrypted, $decrypted_str );
+			//does v1 upgrade cleanly to v2 encrypt?
+			$new_encrypted_value = Misc::encrypt( $decrypted_str );
+			$decrypted_str = Misc::decrypt( $new_encrypted_value );
+			$this->assertEquals( $visa_unencrypted, $decrypted_str );
 
-		//decrypt unencrypted data
-		$this->assertEquals( $visa_unencrypted,  Misc::decrypt( $visa_unencrypted ) );
+			//decrypt unencrypted data
+			$this->assertEquals( $visa_unencrypted,  Misc::decrypt( $visa_unencrypted ) );
+		}
+
 		//check the case for the colon.
 		$x = 'x:z';
 		$this->assertEquals( $x,  Misc::decrypt( $x ) );

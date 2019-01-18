@@ -1205,23 +1205,80 @@ class PayPeriodScheduleFactory extends Factory {
 		return FALSE;
 	}
 
-	//Pay period number functionality is deprecated, it causes too many problems for little or no benefit.
-	//Its also impossible to properly handle in custom situations where pay periods may be adjusted.
-	//However its used in FormulaType=20 situations.
+
 	/**
-	 * @param int $epoch EPOCH
-	 * @param int $end_date_epoch EPOCH
+	 * Get the annual pay periods adjusted for the employees hire date.
+	 * This is *required* in CompanyDeduction FormulaType=20 situations.
+	 * @param int $epoch EPOCH Must be a TRANSACTION DATE of a Pay Period
+	 * @param int $hire_date EPOCH Hire date of employee
 	 * @return bool|float|int|mixed
 	 */
-	function getCurrentPayPeriodNumber( $epoch = NULL, $end_date_epoch = NULL) {
+	function getHireAdjustedAnnualPayPeriods( $epoch = NULL, $hire_date = NULL ) {
+		$hired_pay_period_number = $this->getHiredPayPeriodNumberAdjustment( $epoch, $hire_date );
+		$retval = ( $this->getAnnualPayPeriods() - $hired_pay_period_number );
+		if ( $retval < 1 ) {
+			$retval = 1;
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * Get the current pay period number adjusted for the employees hire date.
+	 * This is *required* in CompanyDeduction FormulaType=20 situations.
+	 * @param int $epoch EPOCH Must be a TRANSACTION DATE of a Pay Period
+	 * @param int $end_date_epoch EPOCH Must be a END DATE of a Pay Period
+	 * @param int $hire_date EPOCH Hire date of employee
+	 * @return bool|float|int|mixed
+	 */
+	function getHireAdjustedCurrentPayPeriodNumber( $epoch = NULL, $end_date_epoch = NULL, $hire_date = NULL ) {
+		$hired_pay_period_number = $this->getHiredPayPeriodNumberAdjustment( $epoch, $hire_date );
+		$current_pay_period_number = $this->getCurrentPayPeriodNumber( $epoch, $end_date_epoch );
+        $retval = ( $current_pay_period_number - $hired_pay_period_number );
+		if ( $retval < 1 ) {
+			$retval = 1;
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * Get the pay period number that the employee was hired on. This starts at 0 so it can be added to getHireAdjustedCurrentPayPeriodNumber() to get the total annual pay periods.
+	 * This is *required* in CompanyDeduction FormulaType=20 situations.
+	 * @param int $epoch EPOCH Must be a TRANSACTION DATE of a Pay Period
+	 * @param int $hire_date EPOCH Hire date of employee
+	 * @return bool|float|int|mixed
+	 */
+	function getHiredPayPeriodNumberAdjustment( $epoch = NULL, $hire_date = NULL ) {
+		//Determine if they were hired in this year as we will need to adjust the pay period counter so its specific to this employee.
+		// For example, it might be 12 of 24 pay periods in the year, but if the employee was hired near the beginning of the year, for them it might be 1 of 20.
+		// This is required to properly calculate FormulaType=20 situations, specifically for new hires.
+		$retval = 0;
+		if ( $hire_date != '' AND $hire_date > TTDate::getBeginYearEpoch( $epoch ) ) { //Use ">", because we only care if they will only work a partial year, not exactly one year.
+			$retval = $this->getCurrentPayPeriodNumber( $epoch, $hire_date );
+			Debug::text('  Hire Date: '. TTDate::getDate('DATE', $hire_date ) .' Hired Pay Period Number: '. $retval, __FILE__, __LINE__, __METHOD__, 10);
+		} else {
+			Debug::text('  Hire Date is not in this year, returning: '. $retval .' Epoch: '. TTDate::getDate('DATE', $epoch), __FILE__, __LINE__, __METHOD__, 10);
+		}
+
+		return $retval;
+	}
+
+	/**
+	 * Pay period number functionality is deprecated, it causes too many problems for little or no benefit.
+	 * Its also impossible to properly handle in custom situations where pay periods may be adjusted.
+	 * However it is *required* in CompanyDeduction FormulaType=20 situations.
+	 * @param int $epoch EPOCH Must be a TRANSACTION DATE of a Pay Period
+	 * @param int $end_date_epoch EPOCH Must be a END DATE of a Pay Period
+	 * @return bool|float|int|mixed
+	 */
+	function getCurrentPayPeriodNumber( $epoch = NULL, $end_date_epoch = NULL ) {
 		//EPOCH MUST BE TRANSACTION DATE!!!
 		//End Date Epoch must be END DATE of pay period
 
-		//If its a manual pay period schedule, just guess based no percentage through the year so far.
+		//If its a manual pay period schedule, just guess based on percentage through the year so far.
 		if ( $this->getType() == 5 ) {
-			$day_of_year = TTDate::getDayOfYear( $epoch );
-			$days_in_year = TTDate::getDaysInYear( $epoch );
-			$retval = round( ( $day_of_year / $days_in_year ) * $this->getAnnualPayPeriods() );
+			$retval = round( ( TTDate::getDayOfYear( $epoch ) / TTDate::getDaysInYear( $epoch ) ) * $this->getAnnualPayPeriods() );
 
 			return $retval;
 		}
@@ -1235,9 +1292,9 @@ class PayPeriodScheduleFactory extends Factory {
 		//Half Fixed method here. We cache the results so to speed it up, but there still might be a faster way to do this.
 		//FIXME: Perhaps some type of hybrid system like the above unless they have less then a years worth of
 		//pay periods, then use this method below?
-		$id = $this->getId().$epoch.$end_date_epoch;
+		$cache_id = $this->getId().$epoch.$end_date_epoch;
 
-		$retval = $this->getCache($id);
+		$retval = $this->getCache($cache_id);
 		if ( $retval === FALSE ) {
 			//FIXME: I'm sure there is a quicker way to do this.
 			$next_transaction_date = 0;
@@ -1245,23 +1302,25 @@ class PayPeriodScheduleFactory extends Factory {
 			$end_year_epoch = TTDate::getEndYearEpoch( $epoch );
 			$i = 0;
 
+			$pp_schedule_obj = clone $this; //Clone the PP schedule object as getNextPayPeriod() changes data in-place and could affect things outside this function.
+
 			while ( $next_transaction_date <= $end_year_epoch AND $i < 60 ) {
 				Debug::text('I: '. $i .' Looping: Transaction Date: '. TTDate::getDate('DATE+TIME', $next_transaction_date) .' - End Year Epoch: '. TTDate::getDate('DATE+TIME', $end_year_epoch), __FILE__, __LINE__, __METHOD__, 10);
-				$this->getNextPayPeriod( $next_end_date );
+				$pp_schedule_obj->getNextPayPeriod( $next_end_date );
 
-				$next_transaction_date = $this->getNextTransactionDate();
-				$next_end_date = $this->getNextEndDate();
+				$next_transaction_date = $pp_schedule_obj->getNextTransactionDate();
+				$next_end_date = $pp_schedule_obj->getNextEndDate();
 
 				if ( $next_transaction_date <= $end_year_epoch ) {
 					$i++;
 				}
 			}
 
-			$retval = ( $this->getAnnualPayPeriods() - $i );
-			Debug::text('Current Pay Period: '. $retval .' Annual PPs: '. $this->getAnnualPayPeriods() .' I: '. $i, __FILE__, __LINE__, __METHOD__, 10);
+			$retval = ( $pp_schedule_obj->getAnnualPayPeriods() - $i );
+			Debug::text('Current Pay Period: '. $retval .' Annual PPs: '. $pp_schedule_obj->getAnnualPayPeriods() .' I: '. $i, __FILE__, __LINE__, __METHOD__, 10);
 
 			//Cache results
-			$this->saveCache($retval, $id);
+			$this->saveCache($retval, $cache_id);
 		}
 
 		return $retval;

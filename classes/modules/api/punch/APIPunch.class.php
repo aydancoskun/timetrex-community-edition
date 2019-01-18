@@ -65,17 +65,13 @@ class APIPunch extends APIFactory {
 	 * @param string $company_id UUID
 	 * @return array|bool
 	 */
-	function getUserPunch( $user_id = NULL, $epoch = NULL, $station_id = NULL, $company_id = NULL ) {
+	function getUserPunch( $user_id = NULL, $epoch = NULL, $station_id = NULL ) {
 		if ( $epoch == '' ) {
 			$epoch = TTDate::getTime();
 		}
 
 		if ( TTUUID::isUUID( $user_id ) == FALSE ) {
 			$user_id = $this->getCurrentUserObject()->getId();
-		}
-
-		if ( TTUUID::isUUID( $company_id ) == FALSE ) {
-			$company_id = $this->getCurrentCompanyObject()->getId();
 		}
 
 		if ( $station_id == NULL ) { //This is not a UUID, but the public station_id typically from the browser cookie.
@@ -86,7 +82,7 @@ class APIPunch extends APIFactory {
 		//Check if station is allowed.
 		$current_station = FALSE;
 		$slf = new StationListFactory();
-		$slf->getByStationIdandCompanyId( $station_id, $company_id );
+		$slf->getByStationIdandCompanyId( $station_id, $this->getCurrentCompanyObject()->getId() );
 		if ( $slf->getRecordCount() == 1 ) {
 			$current_station = $slf->getCurrent();
 			$station_type = $current_station->getType();
@@ -98,7 +94,7 @@ class APIPunch extends APIFactory {
 			Debug::Text('Station Allowed! ID: '. $current_station->getId() .' ('. $station_id .') User ID: '. $user_id .' Epoch: '. $epoch, __FILE__, __LINE__, __METHOD__, 10);
 			//Get user object from ID.
 			$ulf = TTNew('UserListFactory');
-			$ulf->getByIdAndCompanyId( $user_id, $company_id );
+			$ulf->getByIdAndCompanyId( $user_id, $this->getCurrentCompanyObject()->getId() );
 			if ( $ulf->getRecordCount() == 1 ) {
 				$user_obj = $ulf->getCurrent();
 

@@ -500,6 +500,12 @@ class PayCodeFactory extends Factory {
 												TTi18n::gettext('Break Policy: %1 requires this Pay Formula Policy to be defined', array( $bplf->getCurrent()->getName() ) ));
 				}
 			}
+
+			if ( $ignore_warning == FALSE AND $this->Validator->getValidateOnly() == FALSE ) { //Don't check the below when mass editing, but must check when adding a new record..
+				if ( $this->getType() != 20 AND $this->getPayStubEntryAccountId() == TTUUID::getZeroID()  ) {
+					$this->Validator->Warning( 'pay_stub_entry_account_id', TTi18n::gettext('Pay Stub Account must be specified for amounts to appear on pay stubs') );
+				}
+			}
 		}
 
 		return TRUE;

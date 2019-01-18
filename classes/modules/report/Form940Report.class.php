@@ -1052,7 +1052,7 @@ class Form940Report extends Report {
 					$f940->l10 = ( isset( $setup_data['line_10'] ) ) ? $setup_data['line_10'] : NULL;
 					//$f940->l11 = ( isset( $setup_data['line_11'] ) ) ? $setup_data['line_11'] : NULL; //Calculated from Schedule A now.
 
-					$f940->l13 = ( isset( $setup_data['tax_deposited'] ) ) ? $setup_data['tax_deposited'] : NULL;
+					$f940->l13 = ( isset( $setup_data['tax_deposited'] ) AND $setup_data['tax_deposited'] != '' ) ? $setup_data['tax_deposited'] : NULL;
 
 					$f940->l15b = TRUE;
 

@@ -676,10 +676,18 @@ class UserDeductionFactory extends Factory {
 
 		//Need to use pay stub dates rather than pay period dates for this, because if you are in the first pay period of 2016 (Transaction: 01-Jan) and
 		//you need to run a out-of-cycle bonus to be paid by 24-Dec, it will think its the 1st pay stub of the year when its really the last. This causes taxes to be incorrect.
-		//$current_pay_period = $pay_period_obj->getPayPeriodScheduleObject()->getCurrentPayPeriodNumber( $pay_period_obj->getTransactionDate(), $pay_period_obj->getEndDate() );
 		$current_pay_period = $pay_period_obj->getPayPeriodScheduleObject()->getCurrentPayPeriodNumber( $pay_stub_obj->getTransactionDate(), $pay_stub_obj->getEndDate() );
 		if ( $current_pay_period <= 0 ) {
 			$current_pay_period = 1;
+		}
+
+		$hire_adjusted_annual_pay_periods = $pay_period_obj->getPayPeriodScheduleObject()->getHireAdjustedAnnualPayPeriods( $pay_stub_obj->getTransactionDate(), $this->getUserObject()->getHireDate() );
+		if ( $hire_adjusted_annual_pay_periods <= 0 ) {
+			$hire_adjusted_annual_pay_periods = 1;
+		}
+		$hire_adjusted_current_pay_period = $pay_period_obj->getPayPeriodScheduleObject()->getHireAdjustedCurrentPayPeriodNumber( $pay_stub_obj->getTransactionDate(), $pay_stub_obj->getEndDate(), $this->getUserObject()->getHireDate() );
+		if ( $hire_adjusted_current_pay_period <= 0 ) {
+			$hire_adjusted_current_pay_period = 1;
 		}
 
 		if ( !is_object($cd_obj) ) {
@@ -1565,6 +1573,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setHireAdjustedAnnualPayPeriods( $hire_adjusted_annual_pay_periods );
+				$pd_obj->setHireAdjustedCurrentPayPeriod( $hire_adjusted_current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
 				$pd_obj->setFormulaType( $formula_type_id );
 
@@ -1608,6 +1618,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setHireAdjustedAnnualPayPeriods( $hire_adjusted_annual_pay_periods );
+				$pd_obj->setHireAdjustedCurrentPayPeriod( $hire_adjusted_current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
 				$pd_obj->setFormulaType( $formula_type_id );
 
@@ -1637,6 +1649,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setHireAdjustedAnnualPayPeriods( $hire_adjusted_annual_pay_periods );
+				$pd_obj->setHireAdjustedCurrentPayPeriod( $hire_adjusted_current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
 				$pd_obj->setFormulaType( $formula_type_id );
 
@@ -1681,6 +1695,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setHireAdjustedAnnualPayPeriods( $hire_adjusted_annual_pay_periods );
+				$pd_obj->setHireAdjustedCurrentPayPeriod( $hire_adjusted_current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
 				$pd_obj->setFormulaType( $formula_type_id );
 
@@ -1802,6 +1818,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setHireAdjustedAnnualPayPeriods( $hire_adjusted_annual_pay_periods );
+				$pd_obj->setHireAdjustedCurrentPayPeriod( $hire_adjusted_current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
 				$pd_obj->setFormulaType( $formula_type_id );
 
@@ -1958,6 +1976,8 @@ class UserDeductionFactory extends Factory {
 				$pd_obj->setDate( $pay_stub_obj->getTransactionDate() );
 				$pd_obj->setAnnualPayPeriods( $annual_pay_periods );
 				$pd_obj->setCurrentPayPeriod( $current_pay_period );
+				$pd_obj->setHireAdjustedAnnualPayPeriods( $hire_adjusted_annual_pay_periods );
+				$pd_obj->setHireAdjustedCurrentPayPeriod( $hire_adjusted_current_pay_period );
 				$pd_obj->setCurrentPayrollRunID( $payroll_run_id );
 				$pd_obj->setFormulaType( $formula_type_id );
 

@@ -1004,7 +1004,7 @@ class Form941Report extends Report {
 					}
 					//Debug::Text('L13: '. $f941->l13 .' L6: '. $f941->calcL6() .' - '. $this->form_data['total']['l10'], __FILE__, __LINE__, __METHOD__, 10);
 
-					$f941->l13b = TRUE;
+					$f941->l15b = TRUE;
 
 					if ( isset($setup_data['deposit_schedule']) AND $setup_data['deposit_schedule'] == 10 ) {
 						if ( isset($this->form_data['quarter'][$legal_entity_id][1]['l10']) ) {

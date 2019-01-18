@@ -504,7 +504,6 @@ class APITimeSheet extends APIFactory {
 									'pay_period_id' => $pptsv_obj->getPayPeriod(),
 									'user_id' => $pptsv_obj->getUser(),
 									'authorized' => $pptsv_obj->getAuthorized(),
-									'authorized_users' => $pptsv_obj->getAuthorizedUsers(),
 									'is_hierarchy_superior' => $pptsv_obj->isHierarchySuperior(),
 									'display_verify_button' => $pptsv_obj->displayVerifyButton(),
 									'verification_box_color' => $pptsv_obj->getVerificationBoxColor(),
@@ -751,7 +750,6 @@ class APITimeSheet extends APIFactory {
 			if ( $pptsvf->isValid() ) {
 				$pptsvf->Save( FALSE );
 
-				//return $this->returnHandler( TRUE );
 				$retval = $this->returnHandler( $pptsvf->getId() );
 			} else {
 				$pptsvlf->FailTransaction();

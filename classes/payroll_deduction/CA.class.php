@@ -708,7 +708,9 @@ class PayrollDeduction_CA extends PayrollDeduction_CA_Data {
 		//We used to just check if its payroll_run_id > 1 and remove the exemption in that case, but that fails when the first in-cycle run is ID=4 or something.
 		//  So switch this to just checking the formula type, and only remove the exemption if its a out-of-cycle run.
 		//     That won't handle the case of the last pay stub being a out-of-cycle run and no in-cycle run is done for that employee though, but not sure we can do much about that.
+		//  NOTE: If they always use the out-of-cycle formula, then their tax deductions will always be off by the CPP exemption amount.
 		if ( $this->getFormulaType() == 20 ) {
+			Debug::text( 'Out-of-Cycle formula, ignoring CPP exemption...', __FILE__, __LINE__, __METHOD__, 10 );
 			$exemption = 0;
 		}
 

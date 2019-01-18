@@ -373,37 +373,5 @@ class APIPayPeriodTimeSheetVerify extends APIFactory {
 
 		return $this->returnHandler( FALSE );
 	}
-
-	/**
-	 * Copy one or more pay_period_timesheet_verifyes.
-	 * @param array $data pay_period_timesheet_verify IDs
-	 * @return array
-	 */
-	function copyPayPeriodTimeSheetVerify( $data ) {
-		if ( !is_array($data) ) {
-			$data = array($data);
-		}
-
-		if ( !is_array($data) ) {
-			return $this->returnHandler( FALSE );
-		}
-
-		Debug::Text('Received data for: '. count($data) .' PayPeriodTimeSheetVerifys', __FILE__, __LINE__, __METHOD__, 10);
-		Debug::Arr($data, 'Data: ', __FILE__, __LINE__, __METHOD__, 10);
-
-		$src_rows = $this->stripReturnHandler( $this->getPayPeriodTimeSheetVerify( array('filter_data' => array('id' => $data) ), TRUE ) );
-		if ( is_array( $src_rows ) AND count($src_rows) > 0 ) {
-			Debug::Arr($src_rows, 'SRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-			foreach( $src_rows as $key => $row ) {
-				unset($src_rows[$key]['id'], $src_rows[$key]['manual_id'] ); //Clear fields that can't be copied
-				$src_rows[$key]['name'] = Misc::generateCopyName( $row['name'] ); //Generate unique name
-			}
-			//Debug::Arr($src_rows, 'bSRC Rows: ', __FILE__, __LINE__, __METHOD__, 10);
-
-			return $this->setPayPeriodTimeSheetVerify( $src_rows ); //Save copied rows
-		}
-
-		return $this->returnHandler( FALSE );
-	}
 }
 ?>

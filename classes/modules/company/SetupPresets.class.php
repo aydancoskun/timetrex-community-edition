@@ -2777,6 +2777,7 @@ class SetupPresets extends Factory {
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
 											),
 									)
 							);
@@ -2813,6 +2814,7 @@ class SetupPresets extends Factory {
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Loan' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Expense Reimbursement' ),
 													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Advance' ),
+													$this->getPayStubEntryAccountByCompanyIDAndTypeAndFuzzyName( 10, 'Severance' ),
 											),
 									)
 							);

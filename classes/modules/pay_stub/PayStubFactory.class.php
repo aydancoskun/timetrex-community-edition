@@ -1414,8 +1414,15 @@ class PayStubFactory extends Factory {
 											$this->checkDeductions(),
 											TTi18n::gettext('Deductions don\'t match total deductions') );
 
+			Debug::Text('Validate: checkNegativeNetPay...', __FILE__, __LINE__, __METHOD__, 10);
+			if ( $this->Validator->isError('earnings') == FALSE AND $this->Validator->isError('deductions') == FALSE AND $this->Validator->isError('net_pay') == FALSE ) {
+				$this->Validator->isTrue( 'net_pay',
+										  $this->checkNegativeNetPay(),
+										  TTi18n::gettext( 'Net Pay is a negative amount, deductions exceed earnings' ) );
+			}
+
 			Debug::Text('Validate: checkNetPay...', __FILE__, __LINE__, __METHOD__, 10);
-			if ( $this->Validator->isError('earnings') == FALSE AND $this->Validator->isError('deductions') == FALSE ) {
+			if ( $this->Validator->isError('earnings') == FALSE AND $this->Validator->isError('deductions') == FALSE AND $this->Validator->isError('net_pay') == FALSE ) {
 				$this->Validator->isTrue( 'net_pay',
 										  $this->checkNetPay(),
 										  TTi18n::gettext( 'Net Pay doesn\'t match earnings or deductions' ) );
@@ -1459,7 +1466,7 @@ class PayStubFactory extends Factory {
 										  	TTi18n::gettext( 'This pay stub can\'t be marked paid as it has pending transactions' ) );
 			}
 
-			if ( $this->Validator->isError( 'transactions' ) == FALSE AND $this->Validator->isError( 'status_id' ) == FALSE ) {
+			if ( $this->Validator->isError( 'transactions' ) == FALSE AND $this->Validator->isError( 'status_id' ) == FALSE AND $this->Validator->isError('earnings') == FALSE AND $this->Validator->isError('deductions') == FALSE AND $this->Validator->isError('net_pay') == FALSE ) {
 				$this->Validator->isTrue( 'status_id',
 										  $this->checkTransactions(),
 										  TTi18n::gettext( 'Net pay doesn\'t match total of all pending or paid transactions' ) );
@@ -1488,22 +1495,24 @@ class PayStubFactory extends Factory {
 			}
 		}
 
-		//This needs to be run even if entries aren't being processed,
-		//for things like marking the pay stub paid or not.
-		$this->handlePayStubAmendmentStatuses();
-		$this->handleUserExpenseStatuses();
+		if ( $this->getTemp() == FALSE ) { //Disable YTD calculations with temporary pay stubs.
+			//This needs to be run even if entries aren't being processed,
+			//for things like marking the pay stub paid or not.
+			$this->handlePayStubAmendmentStatuses();
+			$this->handleUserExpenseStatuses();
 
-		if ( $this->getDeleted() == TRUE ) {
-			Debug::Text('Deleting Pay Stub, re-calculating YTD ', __FILE__, __LINE__, __METHOD__, 10);
-			$this->setEnableCalcYTD( TRUE );
-		}
+			if ( $this->getDeleted() == TRUE ) {
+				Debug::Text( 'Deleting Pay Stub, re-calculating YTD ', __FILE__, __LINE__, __METHOD__, 10 );
+				$this->setEnableCalcYTD( TRUE );
+			}
 
-		if ( $this->getEnableCalcCurrentYTD() == TRUE ) {
-			$this->reCalculateCurrentYTD(); //Recalculate the current pay stub as well, in case they changed the transaction date into the next year without modifying entries.
-		}
+			if ( $this->getEnableCalcCurrentYTD() == TRUE ) {
+				$this->reCalculateCurrentYTD(); //Recalculate the current pay stub as well, in case they changed the transaction date into the next year without modifying entries.
+			}
 
-		if ( $this->getTemp() == FALSE AND $this->getEnableCalcYTD() == TRUE ) { //Don't recalculate YTD amounts on a temporary pay stub that is likely just used for creating carry-forward pay stub amendment records.
-			$this->reCalculateYTD();
+			if ( $this->getEnableCalcYTD() == TRUE ) { //Don't recalculate YTD amounts on a temporary pay stub that is likely just used for creating carry-forward pay stub amendment records.
+				$this->reCalculateYTD();
+			}
 		}
 
 		//Make sure we only email pay stubs that are marked PAID.
@@ -1521,6 +1530,10 @@ class PayStubFactory extends Factory {
 	 * @return bool
 	 */
 	function handlePayStubAmendmentStatuses() {
+		if ( $this->getTemp() == TRUE ) { //Don't change pay stub amendment statuses for temporary pay stubs (just calculating correcitons)
+			return TRUE;
+		}
+
 		//Mark all PS amendments as 'PAID' if this status is paid.
 		//Mark as NEW if the PS is deleted?
 		if ( $this->getStatus() == 40 ) {
@@ -1594,6 +1607,10 @@ class PayStubFactory extends Factory {
 			return TRUE;
 		}
 
+		if ( $this->getTemp() == TRUE ) { //Don't change pay stub amendment statuses for temporary pay stubs (just calculating corrections)
+			return TRUE;
+		}
+
 		Debug::Text('Change Expense Statuses: Pay Stub Status: '. $this->getStatus(), __FILE__, __LINE__, __METHOD__, 10);
 
 		//Mark all expenses as 'PAID' if this status is paid.
@@ -1607,7 +1624,7 @@ class PayStubFactory extends Factory {
 		}
 
 		//Loop through each entry in current pay stub, if they have
-		//a PS amendment ID assigned to them, change the status.
+		//a User Expense ID assigned to them, change the status.
 		if ( is_array( $this->tmp_data['current_pay_stub']['entries'] ) ) {
 			foreach( $this->tmp_data['current_pay_stub']['entries'] as $entry_arr ) {
 				if ( isset($entry_arr['user_expense_id']) AND TTUUID::isUUID( $entry_arr['user_expense_id'] ) AND $entry_arr['user_expense_id'] != TTUUID::getZeroID() ) {
@@ -1916,6 +1933,7 @@ class PayStubFactory extends Factory {
 							'pay_stub_entry_type_id' => $type_id,
 							'pay_stub_entry_account_id' => $pse_obj->getPayStubEntryNameId(),
 							'pay_stub_amendment_id' => $pse_obj->getPayStubAmendment(),
+							'user_expense_id' => $pse_obj->getUserExpense(),
 							'rate' => $pse_obj->getRate(),
 							'units' => $pse_obj->getUnits(),
 							'amount' => $pse_obj->getAmount(),
@@ -2003,6 +2021,7 @@ class PayStubFactory extends Factory {
 							'pay_stub_entry_type_id' => $type_id,
 							'pay_stub_entry_account_id' => $pse_obj->getPayStubEntryNameId(),
 							'pay_stub_amendment_id' => $pse_obj->getPayStubAmendment(),
+							'user_expense_id' => $pse_obj->getUserExpense(),
 							'rate' => $pse_obj->getRate(),
 							'units' => $pse_obj->getUnits(),
 							'amount' => $pse_obj->getAmount(),
@@ -2625,6 +2644,21 @@ class PayStubFactory extends Factory {
 		}
 
 		Debug::Text('Check Net Pay: Returning false', __FILE__, __LINE__, __METHOD__, 10);
+		return FALSE;
+	}
+
+	/**
+	 * @return bool
+	 */
+	function checkNegativeNetPay() {
+		$net_pay = $this->getNetPay();
+		Debug::Text('Check Negative Net Pay: Net Pay: '. $net_pay, __FILE__, __LINE__, __METHOD__, 10);
+
+		if ( $net_pay >= 0 ) {
+			return TRUE;
+		}
+
+		Debug::Text('Check Negative Net Pay: Returning false', __FILE__, __LINE__, __METHOD__, 10);
 		return FALSE;
 	}
 

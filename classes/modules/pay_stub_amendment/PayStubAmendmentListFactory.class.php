@@ -571,12 +571,16 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 	 * @param array $order Sort order passed to SQL in format of array( $column => 'asc', 'name' => 'desc', ... ). ie: array( 'id' => 'asc', 'name' => 'desc', ... )
 	 * @return bool|PayStubAmendmentListFactory
 	 */
-	function getByUserIdAndAuthorizedAndStartDateAndEndDate( $user_id, $authorized, $start_date, $end_date, $where = NULL, $order = NULL) {
+	function getByUserIdAndAuthorizedAndStatusIDAndStartDateAndEndDate( $user_id, $authorized, $status_id, $start_date, $end_date, $where = NULL, $order = NULL) {
 		if ( $user_id == '') {
 			return FALSE;
 		}
 
 		if ( $authorized == '') {
+			return FALSE;
+		}
+
+		if ( $status_id == '') {
 			return FALSE;
 		}
 
@@ -591,7 +595,7 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 		$psealf = new PayStubEntryAccountListFactory();
 
 		$ph = array(
-					'status_id' => (int)50, //ACTIVE
+					//'status_id' => (int)$status_id, //Normally only 50=ACTIVE, unless correction pay stubs are being generated, then it needs to be an array.
 					'authorized' => $this->toBool($authorized),
 					'start_date' => $start_date,
 					'end_date' => $end_date,
@@ -613,10 +617,10 @@ class PayStubAmendmentListFactory extends PayStubAmendmentFactory implements Ite
 							'. $psealf->getTable() .' as psea
 					where
 						a.pay_stub_entry_name_id = psea.id
-						AND a.status_id = ?
 						AND a.authorized = ?
 						AND a.effective_date >= ?
 						AND a.effective_date <= ?
+						AND a.status_id in ('.$this->getListSQL( $status_id, $ph, 'int' ) .')
 						AND a.user_id in ('.$this->getListSQL( $user_id, $ph, 'uuid' ) .')
 						AND ( a.deleted = 0 AND psea.deleted = 0 )
 					ORDER BY a.effective_date asc, a.type_id asc, psea.ps_order asc, a.id asc

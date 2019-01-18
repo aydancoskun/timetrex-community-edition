@@ -3112,19 +3112,23 @@ class Misc {
 	 * @param bool $error_level
 	 * @return bool
 	 */
-	static function isEmail( $email, $check_dns = TRUE, $error_level = TRUE ) {
+	static function isEmail( $email, $check_dns = TRUE, $error_level = TRUE, $return_raw_result = FALSE ) {
 		if ( !function_exists('is_email') ) {
 			require_once(Environment::getBasePath().'/classes/misc/is_email.php');
 		}
 
 		$result = is_email( $email, $check_dns, $error_level );
-		if ( $result === ISEMAIL_VALID ) {
-			return TRUE;
+		if ( $return_raw_result === TRUE ) {
+			return $result;
 		} else {
-			Debug::Text('Result Code: '. $result, __FILE__, __LINE__, __METHOD__, 10);
-		}
+			if ( $result === ISEMAIL_VALID ) {
+				return TRUE;
+			} else {
+				Debug::Text( 'Result Code: ' . $result, __FILE__, __LINE__, __METHOD__, 10 );
+			}
 
-		return FALSE;
+			return FALSE;
+		}
 	}
 
 	/**
@@ -3699,6 +3703,7 @@ class Misc {
 		}
 
 		if ( $condensed == TRUE ) { //Try to reduce the number of lines the address appears on for tight spaces like checks or windowed envelopes.
+			$address = '';
 			if ( $address1 != '' ) {
 				$address = $address1;
 			}
@@ -3706,7 +3711,7 @@ class Misc {
 				$address .= '  '. $address2;
 			}
 
-			if ( isset($address) ) {
+			if ( $address != '' ) {
 				$retarr[] = $address;
 			}
 		} else {
